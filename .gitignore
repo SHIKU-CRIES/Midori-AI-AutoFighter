@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Game files
+Player.dat
+past_lives/
