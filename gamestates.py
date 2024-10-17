@@ -304,9 +304,11 @@ def main(level):
             # Draw the player's HP bar
             player_hp_percent = player.HP / player.MHP * 100
             player_hp_bar = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, player_hp_percent * 4, 5)
+            player_hp_bar_full = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, 100 * 4, 5)
             player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
             player_hp_percent_rect = player_hp_percent_text.get_rect(center=((SCREEN_WIDTH // 6) - player_offset, (SCREEN_HEIGHT // 2) + 60))
-            pygame.draw.rect(screen, (255, 0, 0), player_hp_bar)
+            pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
+            pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
             hp_stat = font.render(f"Max HP: {player.MHP}", True, (255, 255, 255))
