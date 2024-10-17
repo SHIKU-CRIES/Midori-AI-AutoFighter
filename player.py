@@ -479,15 +479,16 @@ class Player:
         from gamestates import display_stats_menu
         self.level += 1
 
-        int_mod = int(mod)
+        mod_fixed = (mod * 0.001) + 1
+        int_mod = int(mod_fixed)
 
         hp_up: int = random.randint(100 * self.level, 25240 * self.level) * int_mod
         def_up: int = random.randint(5 * self.level, 20 * self.level) * int_mod
         atk_up: int = random.randint(25 * self.level, 125 * self.level) * int_mod
-        regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod
-        critrate_up: float = min(random.uniform(0.01 * self.level, 0.015 * self.level), 0.02 * self.level) * mod
-        critdamage_up: float = min(random.uniform(0.01 * self.level, 0.02 * self.level), 0.0025 * self.level) * mod
-        dodgeodds_up: float = random.uniform(0.0001 * self.level, 0.0002 * self.level) * mod
+        regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
+        critrate_up: float = min(random.uniform(0.01 * self.level, 0.015 * self.level), 0.02 * self.level) * mod_fixed
+        critdamage_up: float = min(random.uniform(0.01 * self.level, 0.02 * self.level), 0.0025 * self.level) * mod_fixed
+        dodgeodds_up: float = random.uniform(0.0001 * self.level, 0.0002 * self.level) * mod_fixed
 
         # Autopick logic
         if os.path.exists("auto.pick"):
