@@ -551,6 +551,7 @@ class Player:
             bonus_levels = (level - 50) // 10
             self.MHP *= int(2 ** bonus_levels) 
             self.Def *= int(2 ** bonus_levels) 
+            self.Regain += int(2 ** bonus_levels) 
 
         if level > 100:
             self.Atk = self.Atk + (180 * level)
