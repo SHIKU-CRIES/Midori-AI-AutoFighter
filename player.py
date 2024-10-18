@@ -111,10 +111,14 @@ class Player:
 
     def check_name_mod(self):
         if themed_names[0] in self.PlayerName.lower():
-            self.MHP = int(self.MHP / 2)
+            dodge_buff = 0.055
+            while self.MHP > 200:
+                dodge_buff = dodge_buff + 0.00001
+                self.MHP = self.MHP - 1
+
             self.Atk = int(self.Atk * 4)
             self.Def = int(self.Def * 2)
-            self.DodgeOdds = 0.055 * self.level
+            self.DodgeOdds = dodge_buff * self.level
 
         if themed_names[1] in self.PlayerName.lower():
             self.MHP = int(self.MHP * self.level)
@@ -486,8 +490,8 @@ class Player:
         def_up: int = random.randint(5 * self.level, 20 * self.level) * int_mod
         atk_up: int = random.randint(25 * self.level, 125 * self.level) * int_mod
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
-        critrate_up: float = min(random.uniform(0.01 * self.level, 0.015 * self.level), 0.02 * self.level) * mod_fixed
-        critdamage_up: float = min(random.uniform(0.01 * self.level, 0.02 * self.level), 0.0025 * self.level) * mod_fixed
+        critrate_up: float = random.uniform(0.001 * self.level, 0.0015 * self.level) * mod_fixed
+        critdamage_up: float = random.uniform(0.01 * self.level, 0.02 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.0001 * self.level, 0.0002 * self.level) * mod_fixed
 
         # Autopick logic
@@ -527,7 +531,7 @@ class Player:
         self.level = level
         self.MHP: int = random.randint(2 * self.level, 250 * self.level) + 1000
         self.HP: int = self.MHP
-        self.Def: int = self.Def + int((self.MHP * (0.00005 * self.level)) * self.level) + 200
+        self.Def: int = self.Def + int((self.MHP * (0.0005 * self.level)) * self.level) + 200
         self.Atk: int = random.randint(115 * self.level, 250 * self.level) + (self.level * 125)
         self.Regain: float = random.uniform(0.001 * self.level, (self.level * 0.02)) + (self.level * 0.04)
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
@@ -546,12 +550,6 @@ class Player:
             self.Atk = self.Atk + (90 * level)
             self.Def = self.Def + (15 * level)
             self.CritRate = self.CritRate + 0.05
-            
-            # Apply bonus every 10 levels past 50
-            bonus_levels = (level - 50) // 10
-            self.MHP *= int(2 ** bonus_levels) 
-            self.Def *= int(2 ** bonus_levels) 
-            self.Regain += int(2 ** bonus_levels) 
 
         if level > 100:
             self.Atk = self.Atk + (180 * level)
@@ -562,6 +560,12 @@ class Player:
             self.Atk = self.Atk + (3600 * level)
             self.Def = self.Def + (600 * level) * level
             self.CritRate = self.CritRate + 0.5
+            
+            # Apply bonus every 10 levels past 200
+            bonus_levels = (level - 200) // 10
+            self.MHP *= int(2 ** bonus_levels) 
+            self.Def *= int(2 ** bonus_levels) 
+            self.Regain += int(2 ** bonus_levels) 
 
         self.check_name_mod()
         self.check_stats()
