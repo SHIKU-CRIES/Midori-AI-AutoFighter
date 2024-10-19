@@ -251,7 +251,7 @@ def main(level):
                 player.HP = player.MHP
 
             if foe.HP < 1:
-                log(white, "saving players data")
+                log(white, "Saving Data")
                 level = level + 1
                 log(white, "The foe has leveled up")
                 player.level_up(mod=bleed_mod)
@@ -359,10 +359,15 @@ def main(level):
             font_size = max(16, 44 - 2 * num_stats) 
             stats_font = pygame.font.SysFont('Arial', font_size)
 
-            for i, (stat_name, stat_value) in enumerate(stat_data):
-                stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                stat_rect = stat_text.get_rect(center=(x_offset, y_offset + i * 50))  # Adjust 50 for spacing
-                screen.blit(stat_text, stat_rect)
+            try:
+
+                for i, (stat_name, stat_value) in enumerate(stat_data):
+                    stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+                    stat_rect = stat_text.get_rect(center=(x_offset, y_offset + i * 50))  # Adjust 50 for spacing
+                    screen.blit(stat_text, stat_rect)
+            
+            except Exception as error:
+                print(f"Could not render stats due to {str(error)}")
                 
             fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
             fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 6) + 1200, (SCREEN_HEIGHT // 2) - 400))
