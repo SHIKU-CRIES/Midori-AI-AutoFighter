@@ -349,7 +349,7 @@ def main(level):
             ]
 
             if enrage_timer.timed_out:
-                temp_stat_data = [("Enrage Buff:", f"{(bleed_mod):.2f}x")]
+                temp_stat_data = [("Enrage Buff:", f"{(bleed_mod):.2f}x"),]
                 stat_data.append(temp_stat_data)
 
             x_offset = (SCREEN_WIDTH // 6) + 25
