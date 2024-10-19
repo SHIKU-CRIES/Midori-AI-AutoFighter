@@ -356,7 +356,7 @@ def main(level):
             y_offset = (SCREEN_HEIGHT // 2) - 400
             
             num_stats = len(stat_data)
-            font_size = max(16, 44 - 4 * num_stats) 
+            font_size = max(16, 44 - 2 * num_stats) 
             stats_font = pygame.font.SysFont('Arial', font_size)
 
             for i, (stat_name, stat_value) in enumerate(stat_data):
