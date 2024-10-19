@@ -66,8 +66,8 @@ class Player:
                     self.Def: int = self.Def + int(past_life_data['Def'] / 500) + 100
                     self.Atk: int = self.Atk + int(past_life_data['Atk'] / 500) + 200
                     self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.01) + 0.001
-                    self.CritRate: float = self.CritRate + float(past_life_data['CritRate'] * 0.01) + 0.001
-                    self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.001) + 0.0001
+                    self.CritRate: float = self.CritRate + float(past_life_data['CritRate'] * 0.01) + 0.01
+                    self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.0003) + 0.0001
                     self.DodgeOdds: float = self.DodgeOdds + float(past_life_data['DodgeOdds'] * 0.025) + 0.001
 
                     print(f"Loaded past life from {filename}: {past_life_data}")
