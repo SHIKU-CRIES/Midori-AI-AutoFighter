@@ -344,7 +344,7 @@ def main(level):
                 ("Def:", player.Def),
                 ("Atk:", player.Atk),
                 ("Crit Rate:", f"{(player.CritRate * 100):.1f}%"),
-                ("Crit Damage Mod:", f"{(player.CritDamageMod * 100):.2f}%"),
+                ("Crit Damage Mod:", f"{(player.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
                 ("Dodge Odds:", f"{(player.DodgeOdds * 100):.2f}%"),
             ]
@@ -378,7 +378,7 @@ def main(level):
                 ("Def:", foe.Def),
                 ("Atk:", foe.Atk),
                 ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
-                ("Crit Damage Mod:", f"{(foe.CritDamageMod * 100):.2f}%"),
+                ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
                 ("Dodge Odds:", f"{(foe.DodgeOdds * 100):.2f}%"),
             ]
