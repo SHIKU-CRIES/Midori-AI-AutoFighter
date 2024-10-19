@@ -337,39 +337,31 @@ def main(level):
             pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
             pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
-
-            hp_stat = font.render(f"Max HP: {player.MHP}", True, (255, 255, 255))
-            def_stat = font.render(f"Def: {player.Def}", True, (255, 255, 255))
-            atk_stat = font.render(f"Atk: {player.Atk}", True, (255, 255, 255))
-            regain_stat = font.render(f"HP Regain: {(player.Regain * 100):.2f}", True, (255, 255, 255))
-            critrate_stat = font.render(f"Crit Rate: {(player.CritRate * 100):.2f}%", True, (255, 255, 255))
-            critdamage_stat = font.render(f"Crit Damage Mod: {(player.CritDamageMod * 100):.2f}%", True, (255, 255, 255))
-            dodge_stat = font.render(f"Dodge Odds: {(player.DodgeOdds * 100):.2f}%", True, (255, 255, 255))
-
-            hp_rect = hp_stat.get_rect(center=((SCREEN_WIDTH // 6), (SCREEN_HEIGHT // 2) - 400))
-            def_rect = def_stat.get_rect(center=((SCREEN_WIDTH // 6), (SCREEN_HEIGHT // 2) - 350))
-            atk_rect = atk_stat.get_rect(center=((SCREEN_WIDTH // 6), (SCREEN_HEIGHT // 2) - 300))
-            critrate_rect = critrate_stat.get_rect(center=((SCREEN_WIDTH // 6), (SCREEN_HEIGHT // 2) - 250))
-            critdamage_rect = critdamage_stat.get_rect(center=((SCREEN_WIDTH // 6) + 600, (SCREEN_HEIGHT // 2) - 400))
-            regain_rect = regain_stat.get_rect(center=((SCREEN_WIDTH // 6) + 600, (SCREEN_HEIGHT // 2) - 350))
-            dodge_rect = dodge_stat.get_rect(center=((SCREEN_WIDTH // 6) + 600, (SCREEN_HEIGHT // 2) - 300))
+            
+            stat_data = [
+                ("Max HP:", player.MHP),
+                ("Def:", player.Def),
+                ("Atk:", player.Atk),
+                ("Crit Rate:", f"{(player.CritRate * 100):.1f}%"),
+                ("Crit Damage Mod:", f"{(player.CritDamageMod * 100):.2f}%"),
+                ("HP Regain:", f"{(player.Regain * 100):.0f}"),
+                ("Dodge Odds:", f"{(player.DodgeOdds * 100):.2f}%"),
+            ]
 
             if enrage_timer.timed_out:
-                enrage_stat = font.render(f"Enrage Buff: {(bleed_mod):.2f}x", True, (255, 255, 255))
-                enrage_rect = enrage_stat.get_rect(center=((SCREEN_WIDTH // 6) + 600, (SCREEN_HEIGHT // 2) - 250))
-                screen.blit(enrage_stat, enrage_rect)
+                temp_stat_data = [("Enrage Buff:", f"{(bleed_mod):.2f}x")]
+                stat_data.append(temp_stat_data)
+
+            x_offset = SCREEN_WIDTH // 6
+            y_offset = (SCREEN_HEIGHT // 2) - 400
+            for i, (stat_name, stat_value) in enumerate(stat_data):
+                stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+                stat_rect = stat_text.get_rect(center=(x_offset, y_offset + i * 50))  # Adjust 50 for spacing
+                screen.blit(stat_text, stat_rect)
                 
             fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
             fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 6) + 1200, (SCREEN_HEIGHT // 2) - 400))
             screen.blit(fps_stat, fps_rect)
-
-            screen.blit(hp_stat, hp_rect)
-            screen.blit(def_stat, def_rect)
-            screen.blit(atk_stat, atk_rect)
-            screen.blit(regain_stat, regain_rect)
-            screen.blit(critrate_stat, critrate_rect)
-            screen.blit(critdamage_stat, critdamage_rect)
-            screen.blit(dodge_stat, dodge_rect)
 
             # Draw the foe's name
             foe_text = font.render(foe.PlayerName, True, (255, 255, 255))
