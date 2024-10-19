@@ -61,10 +61,10 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 100
+                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 1000
                     self.HP: int = self.MHP
-                    self.Def: int = self.Def + int(past_life_data['Def'] / 1000) + 25
-                    self.Atk: int = self.Atk + int(past_life_data['Atk'] / 1000) + 50
+                    self.Def: int = self.Def + int(past_life_data['Def'] / 1000) + 100
+                    self.Atk: int = self.Atk + int(past_life_data['Atk'] / 1000) + 200
                     self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.001
                     self.CritRate: float = self.CritRate + float(past_life_data['CritRate'] * 0.001) + 0.001
                     self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.0001) + 0.0001
@@ -76,6 +76,7 @@ class Player:
                 except Exception as e:
                     print(f"Error loading past life from {filename}: {e}")
                     print(f"Past life data: {past_life_data}")
+                    continue
 
     def save_past_life(self):
         past_lives_folder = "past_lives"
