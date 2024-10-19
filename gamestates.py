@@ -28,6 +28,7 @@ red = Fore.RED
 green = Fore.GREEN
 blue = Fore.BLUE
 white = Fore.WHITE
+yellow = Fore.YELLOW
 
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
@@ -35,9 +36,7 @@ SCREEN_HEIGHT = 900
 enrage_timer = timmer()
 temp_screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage_up, dodgeodds_up):
-    #pygame.init()
-    #screen = pygame.display.set_mode((1600, 900))
+def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage_up, dodgeodds_up, damage_taken, damage_dealt):
     screen = temp_screen.screen
     clock = pygame.time.Clock()
     font = pygame.font.SysFont('Arial', 25)
@@ -54,6 +53,11 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         ('DodgeOdds', dodgeodds_up)
     ]
 
+    menu_stats = [
+        ('Damage Taken:', damage_taken)
+        ('Damage Dealt:', damage_dealt)
+    ]
+
     # Button dimensions and spacing
     button_width = 600
     button_height = 40
@@ -62,10 +66,15 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
     # Create button rectangles
     buttons = []
     for i, (text, value) in enumerate(menu_items):
-        button_x = 100
+        button_x = 10
         button_y = 20 + (i * (button_height + button_margin))
         button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
         buttons.append((button_rect, i + 1))  # Store button rect and corresponding value
+
+    for i, (text, value) in enumerate(menu_stats):
+        text_x = 200
+        text_y = 20 + (i * (button_height + button_margin))
+        text_rect = pygame.Rect(text_x, text_y, button_width, button_height)
 
     # Add Autopick button
     autopick_button_rect = pygame.Rect(button_x, 20 + len(menu_items) * (button_height + button_margin),
@@ -196,7 +205,7 @@ def main(level):
         # Initialize timers for both players before the main loop
         last_player_toss = pygame.time.get_ticks() 
         last_foe_toss = pygame.time.get_ticks()
-        toss_interval = 1000  # 1 second in milliseconds
+        toss_interval = 1000 / 60  # 1 second in milliseconds
 
 
         # heal the player
