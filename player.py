@@ -77,6 +77,9 @@ class Player:
                     print(f"Error loading past life from {filename}: {e}")
                     print(f"Past life data: {past_life_data}")
                     continue
+        
+        number_of_past_lives = int(len([filename for filename in os.listdir(past_lives_folder) if filename.endswith(".pastlife")]) / 2)
+        self.level = number_of_past_lives
 
     def save_past_life(self):
         past_lives_folder = "past_lives"
