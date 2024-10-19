@@ -10,4 +10,4 @@ except Exception as e:
 
 
 if __name__ == "__main__":
-    cProfile.run('main(1)')
+    cProfile.run('main(1)', filename='profiling_results.prof')
