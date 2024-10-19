@@ -352,10 +352,15 @@ def main(level):
                 temp_stat_data = [("Enrage Buff:", f"{(bleed_mod):.2f}x")]
                 stat_data.append(temp_stat_data)
 
-            x_offset = SCREEN_WIDTH // 6
+            x_offset = (SCREEN_WIDTH // 6) + 25
             y_offset = (SCREEN_HEIGHT // 2) - 400
+            
+            num_stats = len(stat_data)
+            font_size = max(16, 44 - 4 * num_stats) 
+            stats_font = pygame.font.SysFont('Arial', font_size)
+
             for i, (stat_name, stat_value) in enumerate(stat_data):
-                stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+                stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
                 stat_rect = stat_text.get_rect(center=(x_offset, y_offset + i * 50))  # Adjust 50 for spacing
                 screen.blit(stat_text, stat_rect)
                 
