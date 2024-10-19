@@ -128,9 +128,8 @@ class Player:
             self.DodgeOdds = dodge_buff * self.level
 
         if themed_names[1] in self.PlayerName.lower():
-            self.MHP = int(self.MHP * 2)
             self.Atk = int(self.Atk / 25)
-            self.Def = int(self.Def * self.level)
+            self.Def = int(self.Def * 4)
             self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
 
         if themed_names[2] in self.PlayerName.lower():
@@ -537,10 +536,10 @@ class Player:
     
     def set_level(self, level):
         self.level = level
-        self.MHP: int = random.randint(2 * self.level, 250 * self.level) + 1000
+        self.MHP: int = random.randint(2 * self.level, 15 * self.level) + 1000
         self.HP: int = self.MHP
-        self.Def: int = self.Def + int((self.MHP * (0.000005 * self.level)) * self.level) + 200
-        self.Atk: int = random.randint(15 * self.level, 25 * self.level) + (self.level * 20)
+        self.Def: int = self.Def + int(self.MHP * (0.000005 * self.level)) + 200
+        self.Atk: int = random.randint(5 * self.level, 15 * self.level) + (self.level * 10)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
         self.CritDamageMod: float = 2 + (self.level * 0.0025)
