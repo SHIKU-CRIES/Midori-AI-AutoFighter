@@ -71,10 +71,12 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
         buttons.append((button_rect, i + 1))  # Store button rect and corresponding value
 
+    stats = []
     for i, (text, value) in enumerate(menu_stats):
         text_x = 650
         text_y = 20 + (i * (button_height + button_margin))
         text_rect = pygame.Rect(text_x, text_y, button_width, button_height)
+        stats.append((text_rect, i + 1))  # Store button rect and corresponding value
 
     # Add Autopick button
     autopick_button_rect = pygame.Rect(button_x, 20 + len(menu_items) * (button_height + button_margin),
@@ -101,6 +103,15 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         screen.fill((0, 0, 0))  # Clear the screen
 
         for i, ((text, value), (button_rect, _)) in enumerate(zip(menu_items, buttons)):
+            # Draw button background
+            pygame.draw.rect(screen, (100, 100, 100), button_rect)
+
+            # Draw button text
+            text_surface = font.render(f'{i+1}. {text} (+{value})', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=button_rect.center)
+            screen.blit(text_surface, text_rect)
+
+        for i, ((text, value), (button_rect, _)) in enumerate(zip(menu_stats, stats)):
             # Draw button background
             pygame.draw.rect(screen, (100, 100, 100), button_rect)
 
