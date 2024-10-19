@@ -346,7 +346,7 @@ def main(level):
                 ("Crit Rate:", f"{(player.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(player.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
-                ("Dodge Odds:", f"{(player.DodgeOdds * 100):.2f}%"),
+                ("Dodge Odds:", f"{((player.DodgeOdds* 100) / bleed_mod):.2f}%"),
             ]
 
             if enrage_timer.timed_out:
@@ -380,7 +380,7 @@ def main(level):
                 ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
-                ("Dodge Odds:", f"{(foe.DodgeOdds * 100):.2f}%"),
+                ("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"),
             ]
 
             # Foe stats drawing
