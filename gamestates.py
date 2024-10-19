@@ -346,8 +346,10 @@ def main(level):
                 ("Crit Rate:", f"{(player.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(player.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
-                ("Dodge Odds:", f"{((player.DodgeOdds* 100) / bleed_mod):.2f}%"),
             ]
+
+            if player.DodgeOdds > 0.01:
+                stat_data.append("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%")
 
             if enrage_timer.timed_out:
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
@@ -380,8 +382,10 @@ def main(level):
                 ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
-                ("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"),
             ]
+
+            if foe.DodgeOdds > 0.01:
+                stat_data.append("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%")
 
             # Foe stats drawing
             foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 175
