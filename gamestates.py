@@ -72,7 +72,7 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         buttons.append((button_rect, i + 1))  # Store button rect and corresponding value
 
     for i, (text, value) in enumerate(menu_stats):
-        text_x = 200
+        text_x = 650
         text_y = 20 + (i * (button_height + button_margin))
         text_rect = pygame.Rect(text_x, text_y, button_width, button_height)
 
