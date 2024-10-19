@@ -361,7 +361,7 @@ def main(level):
 
             spacing_moded = 50 - (num_stats * 2)
 
-            font_size = max(16, 44 - 2 * num_stats) 
+            font_size = max(16, 54 - 2 * num_stats) 
             stats_font = pygame.font.SysFont('Arial', font_size)
 
             try:
@@ -395,7 +395,7 @@ def main(level):
 
             foe_spacing_moded = 50 - (foe_num_stats * 2)
 
-            foe_font_size = max(16, 44 - 2 * foe_num_stats) 
+            foe_font_size = max(16, 54 - 2 * foe_num_stats) 
             foe_stats_font = pygame.font.SysFont('Arial', foe_font_size)
 
             try:
