@@ -348,7 +348,7 @@ def main(level):
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
-            if player.DodgeOdds > 0.01:
+            if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             if enrage_timer.timed_out:
@@ -384,7 +384,7 @@ def main(level):
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
             ]
 
-            if foe.DodgeOdds > 0.01:
+            if (foe.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             # Foe stats drawing
