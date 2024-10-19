@@ -1,4 +1,5 @@
 import os
+import cProfile
 
 from gamestates import main
 
@@ -9,4 +10,4 @@ except Exception as e:
 
 
 if __name__ == "__main__":
-    main(1)
+    cProfile.run('main(1)')
