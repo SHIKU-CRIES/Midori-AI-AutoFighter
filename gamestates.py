@@ -339,6 +339,7 @@ def main(level):
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
             
             stat_data = [
+                ("Stats of:", player.PlayerName),
                 ("Max HP:", player.MHP),
                 ("Def:", player.Def),
                 ("Atk:", player.Atk),
@@ -352,7 +353,7 @@ def main(level):
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
 
             x_offset = (SCREEN_WIDTH // 8) - 175
-            y_offset = (SCREEN_HEIGHT // 2) - 400
+            y_offset = (SCREEN_HEIGHT // 2) - 350
             
             num_stats = len(stat_data)
 
@@ -370,6 +371,29 @@ def main(level):
             
             except Exception as error:
                 print(f"Could not render stats due to {str(error)}")
+                
+            foe_stat_data = [
+                ("Stats of:", foe.PlayerName),
+                ("Max HP:", foe.MHP),
+                ("Def:", foe.Def),
+                ("Atk:", foe.Atk),
+                ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
+                ("Crit Damage Mod:", f"{(foe.CritDamageMod * 100):.2f}%"),
+                ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
+                ("Dodge Odds:", f"{(foe.DodgeOdds * 100):.2f}%"),
+            ]
+
+            # Foe stats drawing
+            foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 175
+            foe_y_offset = (SCREEN_HEIGHT // 2) - 350 
+
+            try:
+                for i, (stat_name, stat_value) in enumerate(foe_stat_data):
+                    stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+                    stat_rect = stat_text.get_rect(topright=(foe_x_offset, foe_y_offset + i * spacing_moded))
+                    screen.blit(stat_text, stat_rect)
+            except Exception as error:
+                print(f"Could not render foe stats due to {str(error)}")
                 
             fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
             fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 6) + 1200, (SCREEN_HEIGHT // 2) - 400))
