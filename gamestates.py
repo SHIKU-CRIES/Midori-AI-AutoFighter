@@ -351,7 +351,7 @@ def main(level):
             if enrage_timer.timed_out:
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
 
-            x_offset = (SCREEN_WIDTH // 8) - 200
+            x_offset = (SCREEN_WIDTH // 8) - 175
             y_offset = (SCREEN_HEIGHT // 2) - 400
             
             num_stats = len(stat_data)
