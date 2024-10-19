@@ -352,7 +352,7 @@ def main(level):
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
 
             x_offset = (SCREEN_WIDTH // 6) + 25
-            y_offset = (SCREEN_HEIGHT // 2) - 400
+            y_offset = (SCREEN_HEIGHT // 2) - 600
             
             num_stats = len(stat_data)
 
@@ -365,7 +365,7 @@ def main(level):
 
                 for i, (stat_name, stat_value) in enumerate(stat_data):
                     stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                    stat_rect = stat_text.get_rect(topright=(x_offset, y_offset + i * spacing_moded))
+                    stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing_moded))
                     screen.blit(stat_text, stat_rect)
             
             except Exception as error:
