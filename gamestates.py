@@ -353,7 +353,7 @@ def main(level):
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
 
             x_offset = (SCREEN_WIDTH // 8) - 175
-            y_offset = (SCREEN_HEIGHT // 2) - 350
+            y_offset = (SCREEN_HEIGHT // 2) - 550
             
             num_stats = len(stat_data)
 
@@ -385,12 +385,19 @@ def main(level):
 
             # Foe stats drawing
             foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 175
-            foe_y_offset = (SCREEN_HEIGHT // 2) - 350 
+            foe_y_offset = (SCREEN_HEIGHT // 2) - 550 
+
+            foe_num_stats = len(foe_stat_data)
+
+            foe_spacing_moded = 50 - (foe_num_stats * 2)
+
+            foe_font_size = max(16, 44 - 2 * foe_num_stats) 
+            foe_stats_font = pygame.font.SysFont('Arial', foe_font_size)
 
             try:
                 for i, (stat_name, stat_value) in enumerate(foe_stat_data):
-                    stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                    stat_rect = stat_text.get_rect(topright=(foe_x_offset, foe_y_offset + i * spacing_moded))
+                    stat_text = foe_stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+                    stat_rect = stat_text.get_rect(topright=(foe_x_offset, foe_y_offset + i * foe_spacing_moded))
                     screen.blit(stat_text, stat_rect)
             except Exception as error:
                 print(f"Could not render foe stats due to {str(error)}")
