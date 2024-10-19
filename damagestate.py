@@ -28,7 +28,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
 
     def_mod = max(1, (enrage_buff * 0.5))
 
-    if target.DodgeOdds >= (random.random() * enrage_buff):
+    if (target.DodgeOdds / enrage_buff) >= random.random():
         log(green, f"{target.PlayerName} dodged!")
     else:
         if source.CritRate >= random.random():
