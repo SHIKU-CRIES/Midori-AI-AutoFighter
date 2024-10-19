@@ -385,7 +385,7 @@ def main(level):
             ]
 
             if (foe.DodgeOdds * 100) / bleed_mod > 1:
-                stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
+                foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             # Foe stats drawing
             foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 175
