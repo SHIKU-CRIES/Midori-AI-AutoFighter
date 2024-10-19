@@ -232,7 +232,7 @@ def main(level):
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
-            bleed_mod = (0.0001 * ((enrage_mod * level) * (enrage_mod * 5))) + 1
+            bleed_mod = (0.000001 * ((enrage_mod * level) * (enrage_mod * 5))) + 1
 
             fps_cap = 20
             clock.tick(fps_cap)
