@@ -234,11 +234,11 @@ def main(level):
             enrage_mod = enrage_timer.get_timeout_duration()
             bleed_mod = (0.0001 * ((enrage_mod * level) * (enrage_mod * 0.25))) + 1
 
-            fps_cap = 5 * max(4, min(bleed_mod, 8))
+            fps_cap = 20
             clock.tick(fps_cap)
 
             # Define movement speed for items (adjust this for faster/slower movement)
-            toss_velocity = max(95, 5 * min(bleed_mod, 25))
+            toss_velocity = max(80, 2 * min(bleed_mod, 55))
 
             player.HP = player.HP + int((player.Regain * 100) - ((player.Bleed * bleed_mod) / player.Def))
             foe.HP = foe.HP + int(foe.Regain * 1) - int((foe.Bleed * bleed_mod) / foe.Def)
