@@ -376,7 +376,7 @@ def main(level):
                 ("Stats of:", foe.PlayerName),
                 ("Max HP:", foe.MHP),
                 ("Def:", foe.Def),
-                ("Atk:", foe.Atk),c
+                ("Atk:", foe.Atk),
                 ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod * 100):.2f}%"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
