@@ -1,5 +1,4 @@
 import sys
-import pygame
 import random
 
 from weapons import get_weapon
@@ -14,10 +13,17 @@ from themedstuff import themed_names
 
 from typing import Tuple
 
-from screendata import Screen
-
 from colorama import Fore, Style
 
+use_pygame = False
+
+try:
+    import pygame
+    from screendata import Screen
+    use_pygame = True
+except Exception as error:
+    print("Pygame not installed, running as CLI app")
+    
 red = Fore.RED
 green = Fore.GREEN
 blue = Fore.BLUE
@@ -134,6 +140,7 @@ def log(color, text):
 
 def main(level):
     from player import Player
+
     # Initialize the game engine
     pygame.init()
 
@@ -187,8 +194,10 @@ def main(level):
         foe_item_index = 0
 
         # Initialize timers for both players before the main loop
-        player_toss_timer = 0
-        foe_toss_timer = 0
+        last_player_toss = pygame.time.get_ticks() 
+        last_foe_toss = pygame.time.get_ticks()
+        toss_interval = 1000  # 1 second in milliseconds
+
 
         # heal the player
         player.HP = player.MHP
@@ -203,7 +212,7 @@ def main(level):
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
-            bleed_mod = (0.001 * ((enrage_mod * level) * (enrage_mod * 0.05))) + 1
+            bleed_mod = (0.0001 * ((enrage_mod * level) * (enrage_mod * 0.25))) + 1
 
             fps_cap = 5 * max(4, min(bleed_mod, 8))
             clock.tick(fps_cap)
@@ -230,13 +239,11 @@ def main(level):
                 break
             elif foe.HP > foe.MHP:
                 foe.HP = foe.MHP
-
-            # Update toss timers
-            player_toss_timer = 1
-            foe_toss_timer = 1
+    
+            current_time = pygame.time.get_ticks()
 
             # Toss one item from the player to the foe every 1 second
-            if player_toss_timer >= 1:
+            if current_time - last_player_toss >= toss_interval:
                 if player_item_index >= len(player.Inv):
                     player_item_index = 0  # Loop over items
 
@@ -260,11 +267,11 @@ def main(level):
 
                 # Reset the toss timer after an item is tossed
                 del current_item
-                player_toss_timer = 0
+                last_player_toss = current_time 
 
 
             # Toss one item from the foe to the player every 1 second
-            if foe_toss_timer >= 1:
+            if current_time - last_foe_toss >= toss_interval: 
                 if foe_item_index >= len(foe.Inv):
                     foe_item_index = 0  # Loop over items
 
@@ -288,7 +295,7 @@ def main(level):
 
                 # Reset the toss timer after an item is tossed
                 del current_item
-                foe_toss_timer = 0
+                last_foe_toss = current_time
 
 
             # Render the screen            

@@ -27,6 +27,8 @@ class Player:
         self.CritRate: float = 0.03
         self.CritDamageMod: float = 2
         self.DodgeOdds: float = 0.03
+        self.DamageTaken: int = 0
+        self.DamageDealt: int = 0
         self.RushStat: int = 3
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list = []

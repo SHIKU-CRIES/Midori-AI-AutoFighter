@@ -53,3 +53,6 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
             else:
                 log(red, f"Hit! {source.PlayerName} {current_item.game_obj} hits {target.PlayerName} for {mited_damage_dealt:.2f} damage!")
                 target.HP = target.HP - mited_damage_dealt
+        
+        target.DamageTaken += mited_damage_dealt
+        source.DamageDealt += mited_damage_dealt
