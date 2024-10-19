@@ -355,6 +355,9 @@ def main(level):
             y_offset = (SCREEN_HEIGHT // 2) - 400
             
             num_stats = len(stat_data)
+
+            spacing_moded = 50 - (num_stats * 2)
+
             font_size = max(16, 44 - 2 * num_stats) 
             stats_font = pygame.font.SysFont('Arial', font_size)
 
@@ -362,7 +365,7 @@ def main(level):
 
                 for i, (stat_name, stat_value) in enumerate(stat_data):
                     stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                    stat_rect = stat_text.get_rect(center=(x_offset, y_offset + i * 50))  # Adjust 50 for spacing
+                    stat_rect = stat_text.get_rect(center=(x_offset, y_offset + i * spacing_moded))
                     screen.blit(stat_text, stat_rect)
             
             except Exception as error:
