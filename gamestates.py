@@ -349,7 +349,7 @@ def main(level):
             ]
 
             if player.DodgeOdds > 0.01:
-                stat_data.append("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%")
+                stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             if enrage_timer.timed_out:
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
@@ -385,7 +385,7 @@ def main(level):
             ]
 
             if foe.DodgeOdds > 0.01:
-                stat_data.append("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%")
+                stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             # Foe stats drawing
             foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 175
