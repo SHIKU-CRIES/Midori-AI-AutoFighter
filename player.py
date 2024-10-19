@@ -124,9 +124,10 @@ class Player:
             self.DodgeOdds = dodge_buff * self.level
 
         if themed_names[1] in self.PlayerName.lower():
-            self.MHP = int(self.MHP * self.level)
+            self.MHP = int(self.MHP * 2)
             self.Atk = int(self.Atk / 25)
             self.Def = int(self.Def * self.level)
+            self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
 
         if themed_names[2] in self.PlayerName.lower():
             self.MHP = int(self.MHP / 2)
@@ -142,8 +143,8 @@ class Player:
         if themed_names[4] in self.PlayerName.lower():
             self.Atk = int(self.Atk * 1.5)
             self.Def = int(self.Def * 0.5) + 1
-            self.CritRate = 1
-            self.CritDamageMod = self.CritDamageMod * ((0.025 * self.level) + 1)
+            self.CritRate = self.CritRate + 1
+            self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
             self.MHP = int(self.MHP * 1.9)
@@ -493,7 +494,7 @@ class Player:
         def_up: int = random.randint(5 * self.level, 20 * self.level) * int_mod
         atk_up: int = random.randint(25 * self.level, 125 * self.level) * int_mod
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
-        critrate_up: float = random.uniform(0.001 * self.level, 0.0015 * self.level) * mod_fixed
+        critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.04 * self.level, 0.08 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.0001 * self.level, 0.0002 * self.level) * mod_fixed
 
