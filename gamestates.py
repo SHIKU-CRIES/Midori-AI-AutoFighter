@@ -54,7 +54,7 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
     ]
 
     menu_stats = [
-        ('Damage Taken:', damage_taken)
+        ('Damage Taken:', damage_taken),
         ('Damage Dealt:', damage_dealt)
     ]
 
