@@ -365,7 +365,7 @@ def main(level):
 
                 for i, (stat_name, stat_value) in enumerate(stat_data):
                     stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                    stat_rect = stat_text.get_rect(center=(x_offset, y_offset + i * spacing_moded))
+                    stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing_moded))
                     screen.blit(stat_text, stat_rect)
             
             except Exception as error:
