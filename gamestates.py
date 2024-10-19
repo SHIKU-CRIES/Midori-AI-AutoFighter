@@ -353,7 +353,7 @@ def main(level):
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
 
             x_offset = (SCREEN_WIDTH // 8) - 175
-            y_offset = (SCREEN_HEIGHT // 2) - 550
+            y_offset = (SCREEN_HEIGHT // 2) - 425
             
             num_stats = len(stat_data)
 
@@ -376,7 +376,7 @@ def main(level):
                 ("Stats of:", foe.PlayerName),
                 ("Max HP:", foe.MHP),
                 ("Def:", foe.Def),
-                ("Atk:", foe.Atk),
+                ("Atk:", foe.Atk),c
                 ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod * 100):.2f}%"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
@@ -385,7 +385,7 @@ def main(level):
 
             # Foe stats drawing
             foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 175
-            foe_y_offset = (SCREEN_HEIGHT // 2) - 550 
+            foe_y_offset = (SCREEN_HEIGHT // 2) - 425 
 
             foe_num_stats = len(foe_stat_data)
 
