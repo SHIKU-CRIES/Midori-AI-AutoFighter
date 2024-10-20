@@ -575,10 +575,9 @@ class Player:
             
             # Apply bonus every x levels past 200
             bonus_levels = (level - 200) // 25
-            self.MHP *= int(2 ** bonus_levels) 
-            self.Def *= int(2 ** bonus_levels)
-            self.CritRate += int(2 ** bonus_levels)
-            self.CritDamageMod += int(2 ** bonus_levels)
+            self.MHP += int(2 ** bonus_levels) + int(200 * bonus_levels)
+            self.CritRate *= int(2 ** bonus_levels)
+            self.CritDamageMod *= int(2 ** bonus_levels)
 
         self.check_name_mod()
         self.check_stats()
