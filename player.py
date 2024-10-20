@@ -536,7 +536,7 @@ class Player:
     
     def set_level(self, level):
         self.level = level
-        self.MHP: int = random.randint(2 * self.level, 15 * self.level) + 1000
+        self.MHP: int = random.randint(4 * self.level, 45 * self.level) + 1000
         self.HP: int = self.MHP
         self.Def: int = self.Def + int(self.MHP * (0.000005 * self.level)) + 200
         self.Atk: int = random.randint(5 * self.level, 15 * self.level) + (self.level * 10)
@@ -546,30 +546,35 @@ class Player:
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
 
         if level > 10:
+            self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
 
         if level > 20:
+            self.MHP = self.MHP + (5 * level)
             self.Atk = self.Atk + (45 * level)
             self.Def = self.Def + (5 * level)
             self.CritRate = self.CritRate + 0.01
 
         if level > 50:
+            self.MHP = self.MHP + (25 * level)
             self.Atk = self.Atk + (90 * level)
             self.Def = self.Def + (15 * level)
             self.CritRate = self.CritRate + 0.05
 
         if level > 100:
+            self.MHP = self.MHP + (75 * level)
             self.Atk = self.Atk + (180 * level)
             self.Def = self.Def + (30 * level)
             self.CritRate = self.CritRate + 0.1
 
         if level > 200:
+            self.MHP = self.MHP + (150 * level)
             self.Atk = self.Atk + (250 * level)
             self.Def = self.Def + (60 * level)
             self.CritRate = self.CritRate + 0.2
             
-            # Apply bonus every 100 levels past 200
-            bonus_levels = (level - 200) // 100
+            # Apply bonus every x levels past 200
+            bonus_levels = (level - 200) // 25
             self.MHP *= int(2 ** bonus_levels) 
             self.Def *= int(2 ** bonus_levels)
             self.Regain += int(2 ** bonus_levels)
