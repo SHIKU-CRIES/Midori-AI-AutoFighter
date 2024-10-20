@@ -240,8 +240,9 @@ def main(level):
             # Define movement speed for items (adjust this for faster/slower movement)
             toss_velocity = max(80, 2 * min(bleed_mod, 55))
 
-            player.HP = player.HP + int((player.Regain * 100) - ((player.Bleed * bleed_mod) / player.Def))
-            foe.HP = foe.HP + int(foe.Regain * 1) - int((foe.Bleed * bleed_mod) / foe.Def)
+            if int(pygame.time.get_ticks() / 1000) % 1 == 0: 
+                player.HP = player.HP + int(player.Regain * 100) - int((player.Bleed * bleed_mod) / player.Def)
+                foe.HP = foe.HP + int(foe.Regain * 1) - int((foe.Bleed * bleed_mod) / foe.Def)
 
             if player.HP < 1:
                 log(red, "you lose... restart game to load a new buffed save file")
