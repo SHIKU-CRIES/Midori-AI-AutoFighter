@@ -577,7 +577,6 @@ class Player:
             bonus_levels = (level - 200) // 25
             self.MHP *= int(2 ** bonus_levels) 
             self.Def *= int(2 ** bonus_levels)
-            self.Regain += int(2 ** bonus_levels)
             self.CritRate += int(2 ** bonus_levels)
             self.CritDamageMod += int(2 ** bonus_levels)
 
