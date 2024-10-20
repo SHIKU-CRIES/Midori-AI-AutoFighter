@@ -564,15 +564,17 @@ class Player:
             self.CritRate = self.CritRate + 0.1
 
         if level > 200:
-            self.Atk = self.Atk + (3600 * level)
-            self.Def = self.Def + (600 * level) * level
-            self.CritRate = self.CritRate + 0.5
+            self.Atk = self.Atk + (250 * level)
+            self.Def = self.Def + (60 * level) * level
+            self.CritRate = self.CritRate + 0.2
             
             # Apply bonus every 100 levels past 200
             bonus_levels = (level - 200) // 100
             self.MHP *= int(2 ** bonus_levels) 
-            self.Def *= int(2 ** bonus_levels) 
-            self.Regain += int(2 ** bonus_levels) 
+            self.Def *= int(2 ** bonus_levels)
+            self.Regain += int(2 ** bonus_levels)
+            self.CritRate += int(2 ** bonus_levels)
+            self.CritDamageMod += int(2 ** bonus_levels)
 
         self.check_name_mod()
         self.check_stats()
