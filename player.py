@@ -565,7 +565,7 @@ class Player:
 
         if level > 200:
             self.Atk = self.Atk + (250 * level)
-            self.Def = self.Def + (60 * level) * level
+            self.Def = self.Def + (60 * level)
             self.CritRate = self.CritRate + 0.2
             
             # Apply bonus every 100 levels past 200
