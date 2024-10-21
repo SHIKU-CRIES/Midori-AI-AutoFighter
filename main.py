@@ -1,4 +1,5 @@
 import os
+import colorama
 import cProfile
 
 from gamestates import main
