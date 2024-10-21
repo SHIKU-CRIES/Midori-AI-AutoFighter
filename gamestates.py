@@ -216,6 +216,7 @@ def main(level):
         # Initialize timers for both players before the main loop
         last_player_toss = pygame.time.get_ticks() 
         last_foe_toss = pygame.time.get_ticks()
+        last_hp_update = pygame.time.get_ticks()
         toss_interval = 1000 / 60  # 1 second in milliseconds
 
 
