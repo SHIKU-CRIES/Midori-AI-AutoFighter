@@ -48,14 +48,16 @@ class Player:
         except Exception as e:
             print(f"Error loading save file: {e}")
 
-    def load_mimic(self, filename):
-        try:
-            with open(f'filename', 'rb') as f:
-                self.__dict__ = pickle.load(f)
-        except FileNotFoundError:
-            print(f"Save file for {filename} not found. Error...")
-        except Exception as e:
-            print(f"Error loading save file: {e}")
+    def load_mimic(self):
+        for filename in os.listdir("."):
+            if ".dat" in filename.lower():
+                try:
+                    with open(f'filename', 'rb') as f:
+                        self.__dict__ = pickle.load(f)
+                except FileNotFoundError:
+                    print(f"Save file for {filename} not found. Error...")
+                except Exception as e:
+                    print(f"Error loading save file: {e}")
 
     def load_past_lives(self):
         past_lives_folder = "past_lives"
@@ -164,8 +166,7 @@ class Player:
 
         if themed_names[6] in self.PlayerName.lower():
             tempname = self.PlayerName
-            dat_files = [f for f in os.listdir('.') if f.endswith('.dat')]
-            self.load_mimic(dat_files[0])
+            self.load_mimic()
             self.PlayerName = tempname
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
