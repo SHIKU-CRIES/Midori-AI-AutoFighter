@@ -537,9 +537,9 @@ class Player:
     
     def set_level(self, level):
         self.level = level
-        self.MHP: int = random.randint(4 * self.level, 45 * self.level) + 1000
+        self.MHP: int = random.randint(25 * self.level, 45 * self.level) + 1000
         self.HP: int = self.MHP
-        self.Def: int = self.Def + int(self.MHP * (0.000005 * self.level)) + 200
+        self.Def: int = self.Def + int(self.MHP * (0.00005 * self.level)) + 200
         self.Atk: int = random.randint(5 * self.level, 15 * self.level) + (self.level * 10)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
@@ -576,7 +576,7 @@ class Player:
             
             # Apply bonus every x levels past 200
             bonus_levels = (level - 200) // 5
-            self.Vitality += 0.001 ** bonus_levels
+            self.Vitality += 0.002 ** bonus_levels
 
         self.check_name_mod()
         self.check_stats()
