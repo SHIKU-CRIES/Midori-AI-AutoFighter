@@ -576,7 +576,7 @@ class Player:
             
             # Apply bonus every x levels past 200
             bonus_levels = (level - 200) // 5
-            self.Vitality += 0.002 ** bonus_levels
+            self.Vitality += 0.004 ** bonus_levels
 
         self.check_name_mod()
         self.check_stats()
@@ -590,6 +590,7 @@ class Player:
         print(f"Defense: {self.Def}")
         print(f"Attack: {self.Atk}")
         print(f"Regain: {self.Regain}")
+        print(f"Vitality: {self.Vitality}")
         print(f"Crit Rate: {self.CritRate}")
         print(f"Crit Damage Modifier: {self.CritDamageMod}")
         print(f"Dodge Odds: {self.DodgeOdds}")
