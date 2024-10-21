@@ -576,7 +576,7 @@ class Player:
             
             # Apply bonus every x levels past 200
             bonus_levels = (level - 200) // 5
-            self.Vitality = self.Vitality + (0.01 ** bonus_levels)
+            self.Vitality = self.Vitality + (0.1 ** bonus_levels)
 
         self.check_name_mod()
         self.check_stats()
