@@ -499,7 +499,7 @@ class Player:
         atk_up: int = random.randint(25 * self.level, 125 * self.level) * int_mod
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
-        critdamage_up: float = random.uniform(0.04 * self.level, 0.08 * self.level) * mod_fixed
+        critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.0001 * self.level, 0.0002 * self.level) * mod_fixed
 
         # Autopick logic
