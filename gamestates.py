@@ -349,6 +349,9 @@ def main(level):
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
+            if player.Vitality > 1.01:
+                stat_data.append(("Vitality:", f"{(player.Vitality):.2f}x"))
+
             if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
@@ -384,6 +387,9 @@ def main(level):
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
             ]
+
+            if foe.Vitality > 1.01:
+                stat_data.append(("Vitality:", f"{(foe.Vitality):.2f}x"))
 
             if (foe.DodgeOdds * 100) / bleed_mod > 1:
                 foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
