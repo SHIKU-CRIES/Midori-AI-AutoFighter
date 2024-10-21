@@ -167,6 +167,8 @@ class Player:
         if themed_names[6] in self.PlayerName.lower():
             tempname = self.PlayerName
             self.load_mimic()
+            self.Regain = self.Regain / 5
+            self.Vitality = self.Vitality / 2
             self.PlayerName = tempname
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
