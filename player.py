@@ -130,8 +130,12 @@ class Player:
 
         Every 1 crit rate increase costs 10x more points.
         """
+        to_be_lowered_by = 10
         current_rate = self.CritRate
-        desired_increase = points / (10 ** (current_rate + 1))
+
+        if current_rate > 1:
+            desired_increase = points / (to_be_lowered_by * (current_rate // 2))
+
         self.CritRate = current_rate + desired_increase
 
     def gain_crit_damage(self, points):
@@ -140,7 +144,11 @@ class Player:
         Every 1 crit damage increase costs 10x more points.
         """
         current_damage = self.CritDamageMod
-        desired_increase = points / (10 ** (current_damage + 1))
+        to_be_lowered_by = 10
+
+        if current_damage > 10:
+            desired_increase = points / (to_be_lowered_by * (current_damage // 10))
+
         self.CritDamageMod += desired_increase 
 
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
