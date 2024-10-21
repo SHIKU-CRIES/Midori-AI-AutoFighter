@@ -31,6 +31,7 @@ class Player:
         self.DamageTaken: int = 0
         self.DamageDealt: int = 0
         self.RushStat: int = 3
+        self.Logs: list = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list = []
         
@@ -488,22 +489,23 @@ class Player:
 
     def check_stats(self):
         max_dodgeodds = 500
-        max_crit_rate = 1
-
-        while self.CritRate > (max_crit_rate + 0.01):
-            self.Atk = self.Atk + 5
-            self.CritDamageMod = self.CritDamageMod + 0.0005
-            self.CritRate = self.CritRate - 0.0001
-
-        if self.CritRate > max_crit_rate:
-            self.CritRate = max_crit_rate
+        max_crit_rate = 5
 
         while self.DodgeOdds > (max_dodgeodds + 0.01):
-            self.Def = self.Def + 5
+            self.Def = self.Def + 1
+            self.CritRate = self.CritRate + 0.0001
             self.DodgeOdds = self.DodgeOdds - 0.001
 
         if self.DodgeOdds > max_dodgeodds:
             self.DodgeOdds = max_dodgeodds
+
+        while self.CritRate > (max_crit_rate + 0.01):
+            self.Atk = self.Atk + 5
+            self.CritDamageMod = self.CritDamageMod + 0.001
+            self.CritRate = self.CritRate - 0.0001
+
+        if self.CritRate > max_crit_rate:
+            self.CritRate = max_crit_rate
 
     def level_up(self, mod=1):
         """
@@ -512,7 +514,7 @@ class Player:
         from gamestates import display_stats_menu
         self.level += 1
 
-        mod_fixed = (mod * 0.001) + 1
+        mod_fixed = (mod * 0.01) + 1
         int_mod = int(mod_fixed)
 
         hp_up: int = random.randint(100 * self.level, 25240 * self.level) * int_mod
