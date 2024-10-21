@@ -148,13 +148,13 @@ class Player:
         if themed_names[2] in self.PlayerName.lower():
             self.MHP = int(self.MHP / 2)
             self.Atk = int(self.Atk * 8)
-            self.CritRate = 0
+            self.CritRate = self.CritRate / 1000
 
         if themed_names[3] in self.PlayerName.lower():
             self.Atk = int(self.Atk * 1.5)
             self.Def = int(self.Def * 1.5)
             self.CritDamageMod = self.CritDamageMod * ((0.005 * self.level) + 1)
-            self.DodgeOdds = 0
+            self.DodgeOdds = self.DodgeOdds / 1000
 
         if themed_names[4] in self.PlayerName.lower():
             self.Atk = int(self.Atk * 1.5)
@@ -610,7 +610,7 @@ class Player:
             self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.2
         else:
-            self.DodgeOdds = self.DodgeOdds / 2
+            self.DodgeOdds = self.DodgeOdds / 4
 
         self.check_stats()
 
