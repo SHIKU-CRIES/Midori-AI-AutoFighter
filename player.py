@@ -48,6 +48,15 @@ class Player:
         except Exception as e:
             print(f"Error loading save file: {e}")
 
+    def load_mimic(self, filename):
+        try:
+            with open(f'filename', 'rb') as f:
+                self.__dict__ = pickle.load(f)
+        except FileNotFoundError:
+            print(f"Save file for {filename} not found. Error...")
+        except Exception as e:
+            print(f"Error loading save file: {e}")
+
     def load_past_lives(self):
         past_lives_folder = "past_lives"
         if not os.path.exists(past_lives_folder):
@@ -114,7 +123,7 @@ class Player:
             self.Inv.remove(item)
     
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
-#themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi"]
+#themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic"]
 
     def check_name_mod(self):
         if themed_names[0] in self.PlayerName.lower():
@@ -149,6 +158,15 @@ class Player:
             self.Def = int(self.Def * 0.5) + 1
             self.CritRate = self.CritRate + 1
             self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
+
+        if themed_names[5] in self.PlayerName.lower():
+            self.Vitality = self.Vitality * 1.2
+
+        if themed_names[6] in self.PlayerName.lower():
+            tempname = self.PlayerName
+            dat_files = [f for f in os.listdir('.') if f.endswith('.dat')]
+            self.load_mimic(dat_files[0])
+            self.PlayerName = tempname
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
             self.MHP = int(self.MHP * 1.9)
@@ -561,28 +579,28 @@ class Player:
             self.MHP = self.MHP + (5 * level)
             self.Atk = self.Atk + (45 * level)
             self.Def = self.Def + (5 * level)
-            self.Vitality = self.Vitality + (0.001 * level)
+            self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.01
 
         if level > 50:
             self.MHP = self.MHP + (25 * level)
             self.Atk = self.Atk + (90 * level)
             self.Def = self.Def + (15 * level)
-            self.Vitality = self.Vitality + (0.001 * level)
+            self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.05
 
         if level > 100:
             self.MHP = self.MHP + (75 * level)
             self.Atk = self.Atk + (180 * level)
             self.Def = self.Def + (30 * level)
-            self.Vitality = self.Vitality + (0.001 * level)
+            self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.1
 
         if level > 200:
             self.MHP = self.MHP + (150 * level)
             self.Atk = self.Atk + (250 * level)
             self.Def = self.Def + (60 * level)
-            self.Vitality = self.Vitality + (0.001 * level)
+            self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.2
 
         self.check_name_mod()
