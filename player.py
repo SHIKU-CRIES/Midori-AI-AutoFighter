@@ -193,12 +193,12 @@ class Player:
             self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
 
         if themed_names[5] in self.PlayerName.lower():
-            self.Vitality = self.Vitality * 1.2
+            self.Vitality = self.Vitality * 1.4
 
         if themed_names[6] in self.PlayerName.lower():
             tempname = self.PlayerName
             self.load_mimic()
-            self.MHP = int(self.MHP / (10000 - self.level))
+            self.MHP = int(self.MHP / ((10000 / self.level) + 1))
             self.Regain = self.Regain / 5
             self.Vitality = self.Vitality / 4
             self.PlayerName = tempname
@@ -605,7 +605,7 @@ class Player:
         if level > 10:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
-            self.Vitality = self.Vitality + (0.005 * level)
+            self.Vitality = self.Vitality + (0.003 * level)
             
             # Apply bonus every xyz levels past 10
             xyz = 25
