@@ -532,7 +532,7 @@ class Player:
 
         while self.CritRate > (max_crit_rate + 0.01):
             self.Atk = self.Atk + 5
-            self.CritDamageMod = self.CritDamageMod + 0.001
+            self.gain_crit_damage(0.001)
             self.CritRate = self.CritRate - 0.0001
 
         if self.CritRate > max_crit_rate:
