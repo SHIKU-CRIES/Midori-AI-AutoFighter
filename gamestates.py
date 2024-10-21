@@ -240,7 +240,7 @@ def main(level):
             # Define movement speed for items (adjust this for faster/slower movement)
             toss_velocity = max(80, 2 * min(bleed_mod, 55))
 
-            if int(pygame.time.get_ticks() / 1000) % 2 == 0: 
+            if int(pygame.time.get_ticks() / 1000) % 1 == 0: 
                 player.HP = player.HP + int(player.Regain * player.Vitality) - int((player.Bleed * bleed_mod) / player.Def)
                 foe.HP = foe.HP + int(foe.Regain * foe.Vitality) - int((foe.Bleed * bleed_mod) / foe.Def)
 
@@ -395,7 +395,7 @@ def main(level):
                 foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             # Foe stats drawing
-            foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) + 165
+            foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) + 170
             foe_y_offset = (SCREEN_HEIGHT // 2) - 425 
 
             foe_num_stats = len(foe_stat_data)
