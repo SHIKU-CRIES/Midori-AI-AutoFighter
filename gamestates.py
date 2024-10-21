@@ -241,8 +241,8 @@ def main(level):
             toss_velocity = max(80, 2 * min(bleed_mod, 55))
 
             if int(pygame.time.get_ticks() / 1000) % 2 == 0: 
-                player.HP = player.HP + int(player.Regain * 100) - int((player.Bleed * bleed_mod) / player.Def)
-                foe.HP = foe.HP + int(foe.Regain * 1) - int((foe.Bleed * bleed_mod) / foe.Def)
+                player.HP = player.HP + int(player.Regain * player.Vitality) - int((player.Bleed * bleed_mod) / player.Def)
+                foe.HP = foe.HP + int(foe.Regain * foe.Vitality) - int((foe.Bleed * bleed_mod) / foe.Def)
 
             if player.HP < 1:
                 log(red, "you lose... restart game to load a new buffed save file")

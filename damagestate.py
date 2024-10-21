@@ -26,14 +26,14 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
     enrage_timer = fight_env_list[1]
     current_item = fight_env_list[2]
 
-    def_mod = max(1, (enrage_buff * 0.5))
+    def_mod = max(1, (enrage_buff * 0.05))
 
     if (target.DodgeOdds / enrage_buff) >= random.random():
         log(green, f"{target.PlayerName} dodged!")
     else:
         if source.CritRate >= random.random():
-            damage_dealt = (current_item.damage * source.Atk)
-            mited_damage_dealt = ((damage_dealt * enrage_buff / (target.Def / def_mod)) * source.CritDamageMod)
+            damage_dealt = (current_item.damage * source.Atk) * source.Vitality
+            mited_damage_dealt = ((damage_dealt * enrage_buff / ((target.Def / def_mod) * target.Vitality)) * source.CritDamageMod)
             mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
 
             if enrage_timer.timed_out:
@@ -43,8 +43,8 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
                 log(blue, f"Crit! {source.PlayerName} {current_item.game_obj} crits {target.PlayerName} for {mited_damage_dealt:.2f} damage!")
                 target.HP = target.HP - mited_damage_dealt
         else:
-            damage_dealt = (current_item.damage * source.Atk)
-            mited_damage_dealt = (damage_dealt * enrage_buff / (target.Def / def_mod))
+            damage_dealt = (current_item.damage * source.Atk) * source.Vitality
+            mited_damage_dealt = (damage_dealt * enrage_buff / ((target.Def / def_mod) * target.Vitality))
             mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
             
             if enrage_timer.timed_out:

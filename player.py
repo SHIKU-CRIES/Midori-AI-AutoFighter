@@ -23,6 +23,7 @@ class Player:
         self.Def: int = 25
         self.Atk: int = 250
         self.Regain: float = 0.02
+        self.Vitality: float = 1
         self.Bleed: float = 0
         self.CritRate: float = 0.03
         self.CritDamageMod: float = 2
@@ -574,10 +575,8 @@ class Player:
             self.CritRate = self.CritRate + 0.2
             
             # Apply bonus every x levels past 200
-            bonus_levels = (level - 200) // 25
-            self.MHP += int(2 ** bonus_levels) + int(200 * bonus_levels)
-            self.CritRate *= int(2 ** bonus_levels)
-            self.CritDamageMod *= int(2 ** bonus_levels)
+            bonus_levels = (level - 200) // 5
+            self.Vitality += 0.001 ** bonus_levels
 
         self.check_name_mod()
         self.check_stats()
