@@ -551,9 +551,9 @@ class Player:
             self.Atk = self.Atk + (20 * level)
             
             # Apply bonus every xyz levels past 10
-            xyz = 5
+            xyz = 25
             bonus_levels = (level - 10) // xyz
-            self.Vitality = self.Vitality + ((2 ** bonus_levels) * 0.01)
+            self.Vitality = self.Vitality + ((2 ** bonus_levels) * 0.001)
 
         if level > 20:
             self.MHP = self.MHP + (5 * level)
