@@ -134,7 +134,7 @@ class Player:
         current_rate = self.CritRate
 
         if current_rate > 1:
-            desired_increase = points / (to_be_lowered_by * (current_rate // 2)) + 1
+            desired_increase = points / ((to_be_lowered_by * (current_rate // 2)) + 1)
         else:
             desired_increase = points
 
@@ -149,7 +149,7 @@ class Player:
         to_be_lowered_by = 10
 
         if current_damage > 10:
-            desired_increase = points / (to_be_lowered_by * (current_damage // 10)) + 1
+            desired_increase = points / ((to_be_lowered_by * (current_damage // 10)) + 1)
         else:
             desired_increase = points
 
