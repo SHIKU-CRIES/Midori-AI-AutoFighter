@@ -395,7 +395,7 @@ def main(level):
                 foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             # Foe stats drawing
-            foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 200
+            foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) - 400
             foe_y_offset = (SCREEN_HEIGHT // 2) - 425 
 
             foe_num_stats = len(foe_stat_data)
@@ -414,7 +414,7 @@ def main(level):
                 print(f"Could not render foe stats due to {str(error)}")
                 
             fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
-            fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 0, (SCREEN_HEIGHT // 2) - 400))
+            fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
             screen.blit(fps_stat, fps_rect)
 
             # Draw the foe's name
