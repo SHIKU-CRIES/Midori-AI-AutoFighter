@@ -549,34 +549,40 @@ class Player:
         if level > 10:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
+            self.Vitality = self.Vitality + (0.001 * level)
             
             # Apply bonus every xyz levels past 10
             xyz = 25
             bonus_levels = (level - 10) // xyz
-            self.Vitality = self.Vitality + ((2 ** bonus_levels) * 0.001)
+            self.MHP = self.MHP + (2 * bonus_levels)
+            self.Atk = self.Atk + (20 * bonus_levels)
 
         if level > 20:
             self.MHP = self.MHP + (5 * level)
             self.Atk = self.Atk + (45 * level)
             self.Def = self.Def + (5 * level)
+            self.Vitality = self.Vitality + (0.001 * level)
             self.CritRate = self.CritRate + 0.01
 
         if level > 50:
             self.MHP = self.MHP + (25 * level)
             self.Atk = self.Atk + (90 * level)
             self.Def = self.Def + (15 * level)
+            self.Vitality = self.Vitality + (0.001 * level)
             self.CritRate = self.CritRate + 0.05
 
         if level > 100:
             self.MHP = self.MHP + (75 * level)
             self.Atk = self.Atk + (180 * level)
             self.Def = self.Def + (30 * level)
+            self.Vitality = self.Vitality + (0.001 * level)
             self.CritRate = self.CritRate + 0.1
 
         if level > 200:
             self.MHP = self.MHP + (150 * level)
             self.Atk = self.Atk + (250 * level)
             self.Def = self.Def + (60 * level)
+            self.Vitality = self.Vitality + (0.001 * level)
             self.CritRate = self.CritRate + 0.2
 
         self.check_name_mod()
