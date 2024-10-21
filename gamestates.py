@@ -235,14 +235,16 @@ def main(level):
             bleed_mod = (0.000002 * ((enrage_mod * level) * (enrage_mod * level))) + 1
 
             fps_cap = 20
-            clock.tick(fps_cap)
+            dt = clock.tick(fps_cap) / 1000
 
             # Define movement speed for items (adjust this for faster/slower movement)
             toss_velocity = max(80, 2 * min(bleed_mod, 55))
 
-            if int(pygame.time.get_ticks() / 1000) % 1 == 0: 
-                player.HP = player.HP + int(player.Regain * player.Vitality) - int((player.Bleed * bleed_mod) / player.Def)
-                foe.HP = foe.HP + int(foe.Regain * foe.Vitality) - int((foe.Bleed * bleed_mod) / foe.Def)
+            current_time = pygame.time.get_ticks()
+            if current_time - last_hp_update >= 1000:
+                player.HP = player.HP + int((player.Regain * player.Vitality) * 100) - int((player.Bleed * bleed_mod) / player.Def)
+                foe.HP = foe.HP + int((foe.Regain * foe.Vitality) * 100) - int((foe.Bleed * bleed_mod) / foe.Def)
+                last_hp_update = current_time
 
             if player.HP < 1:
                 log(red, "you lose... restart game to load a new buffed save file")
