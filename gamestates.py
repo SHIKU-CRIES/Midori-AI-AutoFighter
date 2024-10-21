@@ -388,7 +388,7 @@ def main(level):
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
             ]
 
-            if foe.Vitality > 1.01:
+            if foe.Vitality > 1.5:
                 stat_data.append(("Vitality:", f"{(foe.Vitality):.2f}x"))
 
             if (foe.DodgeOdds * 100) / bleed_mod > 1:

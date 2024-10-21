@@ -549,6 +549,11 @@ class Player:
         if level > 10:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
+            
+            # Apply bonus every xyz levels past 10
+            xyz = 5
+            bonus_levels = (level - 10) // xyz
+            self.Vitality = self.Vitality + ((2 ** bonus_levels) * 0.01)
 
         if level > 20:
             self.MHP = self.MHP + (5 * level)
@@ -573,10 +578,6 @@ class Player:
             self.Atk = self.Atk + (250 * level)
             self.Def = self.Def + (60 * level)
             self.CritRate = self.CritRate + 0.2
-            
-            # Apply bonus every x levels past 200
-            bonus_levels = (level - 200) // 5
-            self.Vitality = self.Vitality + ((2 ** bonus_levels) * 0.01)
 
         self.check_name_mod()
         self.check_stats()
