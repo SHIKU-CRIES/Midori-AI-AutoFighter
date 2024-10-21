@@ -52,7 +52,7 @@ class Player:
         for filename in os.listdir("."):
             if ".dat" in filename.lower():
                 try:
-                    with open(f'filename', 'rb') as f:
+                    with open(f'{filename}', 'rb') as f:
                         self.__dict__ = pickle.load(f)
                 except FileNotFoundError:
                     print(f"Save file for {filename} not found. Error...")
