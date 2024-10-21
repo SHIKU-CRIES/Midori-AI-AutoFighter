@@ -124,7 +124,25 @@ class Player:
             self.Inv.append(item)
         else:
             self.Inv.remove(item)
-    
+
+    def gain_crit_rate(self, points):
+        """Increases crit rate based on points, with increasing cost.
+
+        Every 0.1 crit rate increase costs 10x more points.
+        """
+        current_rate = self.CritRate
+        desired_increase = points / (10 ** ((current_rate * 10) + 1))
+        self.CritRate = current_rate + desired_increase
+
+    def gain_crit_damage(self, points):
+        """Increases crit damage based on points, with increasing cost.
+
+        Every 0.1 crit damage increase costs 10x more points.
+        """
+        current_damage = self.CritDamageMod
+        desired_increase = points / (10 ** ((current_damage * 10) + 1))
+        self.CritDamageMod += desired_increase 
+
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
 #themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic"]
 
@@ -541,9 +559,9 @@ class Player:
         elif choice == 5:
             self.Regain += regain_up
         elif choice == 6:
-            self.CritRate += critrate_up
+            self.gain_crit_rate(critrate_up)
         elif choice == 7:
-            self.CritDamageMod += critdamage_up
+            self.gain_crit_damage(critdamage_up)
         elif choice == 8:
             self.DodgeOdds += dodgeodds_up
         elif choice == 9:
@@ -552,8 +570,8 @@ class Player:
             self.Def += int(def_up / 5)
             self.Atk += int(atk_up / 5)
             self.Regain += regain_up / 2
-            self.CritRate += critrate_up / 10
-            self.CritDamageMod += critdamage_up / 10
+            self.gain_crit_rate(critrate_up / 10)
+            self.gain_crit_damage(critdamage_up / 10)
             self.DodgeOdds += dodgeodds_up / 2
 
         self.check_stats()
