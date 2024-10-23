@@ -166,13 +166,13 @@ class Player:
                 dodge_buff = dodge_buff + 0.00001
                 self.MHP = self.MHP - 1
 
-            self.Atk = int(self.Atk * 1)
+            self.Atk = int(self.Atk * 2)
             self.Def = int(self.Def * 8)
             self.DodgeOdds = dodge_buff * self.level
 
         if themed_names[1] in self.PlayerName.lower():
             self.Atk = int(self.Atk / 25)
-            self.Def = int(self.Def * (4 + self.level))
+            self.Def = int(self.Def * (40 + self.level))
             self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
 
         if themed_names[2] in self.PlayerName.lower():
@@ -193,7 +193,7 @@ class Player:
             self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
 
         if themed_names[5] in self.PlayerName.lower():
-            self.Vitality = self.Vitality * 1.4
+            self.Vitality = self.Vitality * (0.02 * self.level)
 
         if themed_names[6] in self.PlayerName.lower():
             tempname = self.PlayerName
@@ -610,25 +610,25 @@ class Player:
             # Apply bonus every xyz levels past 10
             xyz = 25
             bonus_levels = (level - 10) // xyz
-            self.MHP = self.MHP + (2 * bonus_levels)
+            self.MHP = self.MHP + (4 * bonus_levels)
             self.Atk = self.Atk + (20 * bonus_levels)
 
         if level > 20:
-            self.MHP = self.MHP + (5 * level)
+            self.MHP = self.MHP + (50 * level)
             self.Atk = self.Atk + (45 * level)
             self.Def = self.Def + (5 * level)
             self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.01
 
         if level > 50:
-            self.MHP = self.MHP + (25 * level)
+            self.MHP = self.MHP + (250 * level)
             self.Atk = self.Atk + (90 * level)
             self.Def = self.Def + (15 * level)
             self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.05
 
         if level > 100:
-            self.MHP = self.MHP + (75 * level)
+            self.MHP = self.MHP + (750 * level)
             self.Atk = self.Atk + (180 * level)
             self.Def = self.Def + (30 * level)
             self.Vitality = self.Vitality + (0.0001 * level)
