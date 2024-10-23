@@ -635,7 +635,7 @@ class Player:
             self.CritRate = self.CritRate + 0.1
 
         if level > 200:
-            self.MHP = self.MHP + (150 * level)
+            self.MHP = self.MHP + (1500 * level)
             self.Atk = self.Atk + (250 * level)
             self.Def = self.Def + (60 * level)
             self.Vitality = self.Vitality + (0.0001 * level)
