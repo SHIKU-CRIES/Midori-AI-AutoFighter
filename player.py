@@ -172,7 +172,7 @@ class Player:
 
         if themed_names[1] in self.PlayerName.lower():
             self.Atk = int(self.Atk / 25)
-            self.Def = int(self.Def * 4)
+            self.Def = int(self.Def * (4 + self.level))
             self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
 
         if themed_names[2] in self.PlayerName.lower():
