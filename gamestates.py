@@ -420,9 +420,17 @@ def main(level):
             except Exception as error:
                 print(f"Could not render foe stats due to {str(error)}")
                 
-            fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
-            fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
-            screen.blit(fps_stat, fps_rect)
+            if enrage_timer.timed_out:
+                fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
+                enrage_timer_stat = font.render(f"Time of fight: {enrage_mod}", True, (255, 255, 255))
+                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 800, (SCREEN_HEIGHT // 2) - 400))
+                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 400, (SCREEN_HEIGHT // 2) - 400))
+                screen.blit(fps_stat, fps_rect)
+                screen.blit(enrage_timer_stat, enrage_timer_rect)
+            else:
+                fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
+                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
+                screen.blit(fps_stat, fps_rect)
 
             # Draw the foe's name
             foe_text = font.render(foe.PlayerName, True, (255, 255, 255))
