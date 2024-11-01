@@ -424,7 +424,7 @@ def main(level):
                 fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
                 enrage_timer_stat = font.render(f"Enrage: {enrage_mod:1f}", True, (255, 255, 255))
                 fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
-                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 600))
+                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 200))
                 screen.blit(fps_stat, fps_rect)
                 screen.blit(enrage_timer_stat, enrage_timer_rect)
             else:
