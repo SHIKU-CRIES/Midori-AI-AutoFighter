@@ -74,7 +74,7 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 1000
+                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 5
                     self.HP: int = self.MHP
                     self.Def: int = self.Def + int(past_life_data['Def'] / 1000) + 100
                     self.Atk: int = self.Atk + int(past_life_data['Atk'] / 1000) + 200
@@ -548,7 +548,7 @@ class Player:
         mod_fixed = (mod * 0.01) + 1
         int_mod = int(mod_fixed)
 
-        hp_up: int = random.randint(100 * self.level, 25240 * self.level) * int_mod
+        hp_up: int = random.randint(15 * self.level, 40 * self.level) * int_mod
         def_up: int = random.randint(5 * self.level, 20 * self.level) * int_mod
         atk_up: int = random.randint(25 * self.level, 125 * self.level) * int_mod
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
