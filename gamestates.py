@@ -228,6 +228,10 @@ def main(level):
 
         # Main game loop
         while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
             enrage_timer.check_timeout()
             
             fps = clock.get_fps()
