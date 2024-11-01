@@ -638,7 +638,7 @@ class Player:
             self.MHP = self.MHP + (1500 * level)
             self.Atk = self.Atk + (250 * level)
             self.Def = self.Def + (60 * level)
-            self.Vitality = self.Vitality + (0.0002 * level)
+            self.Vitality = self.Vitality + (0.0005 * level)
             self.CritRate = self.CritRate + (0.002 * level)
         else:
             self.DodgeOdds = self.DodgeOdds / 4
