@@ -74,7 +74,7 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 5
+                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 100
                     self.HP: int = self.MHP
                     self.Def: int = self.Def + int(past_life_data['Def'] / 1000) + 100
                     self.Atk: int = self.Atk + int(past_life_data['Atk'] / 1000) + 200
@@ -548,7 +548,7 @@ class Player:
         mod_fixed = (mod * 0.01) + 1
         int_mod = int(mod_fixed)
 
-        hp_up: int = random.randint(15 * self.level, 40 * self.level) * int_mod
+        hp_up: int = random.randint(10 * self.level, 25 * self.level) * int_mod
         def_up: int = random.randint(5 * self.level, 20 * self.level) * int_mod
         atk_up: int = random.randint(25 * self.level, 125 * self.level) * int_mod
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
@@ -580,18 +580,18 @@ class Player:
         elif choice == 9:
             self.MHP += int(hp_up / 10)
             self.HP += int(hp_up / 10)
-            self.Def += int(def_up / 5)
-            self.Atk += int(atk_up / 5)
-            self.Regain += regain_up / 2
+            self.Def += int(def_up / 10)
+            self.Atk += int(atk_up / 10)
+            self.Regain += regain_up / 10
             self.gain_crit_rate(critrate_up / 10)
             self.gain_crit_damage(critdamage_up / 10)
-            self.DodgeOdds += dodgeodds_up / 2
+            self.DodgeOdds += dodgeodds_up / 10
 
         self.check_stats()
     
     def set_level(self, level):
         self.level = level
-        self.MHP: int = random.randint(25 * self.level, 45 * self.level) + 1000
+        self.MHP: int = random.randint(25 * self.level, 45 * self.level) + 100
         self.HP: int = self.MHP
         self.Def: int = self.Def + int(self.MHP * (0.00005 * self.level)) + 200
         self.Atk: int = random.randint(5 * self.level, 15 * self.level) + (self.level * 10)
