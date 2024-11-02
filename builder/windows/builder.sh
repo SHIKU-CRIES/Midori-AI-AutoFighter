@@ -14,8 +14,9 @@ cp -t . ../../../*
 # Install Python into the Wine prefix
 WINEPREFIX=$TMPDIR wine python-3.12.4-amd64.exe
 WINEPREFIX=$TMPDIR wine python -m ensurepip
+WINEPREFIX=$TMPDIR wine python -m pip install --upgrade pip
 WINEPREFIX=$TMPDIR wine python -m pip install colorama pygame pyinstaller
-WINEPREFIX=$TMPDIR wine python -m pyinstaller --onefile --clean main.py
+WINEPREFIX=$TMPDIR wine pyinstaller --onefile --clean main.py
 
 # Go back to starting folder
 cd ..
