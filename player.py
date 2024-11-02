@@ -74,7 +74,7 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 100
+                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 100000) + 100
                     self.HP: int = self.MHP
                     self.Def: int = self.Def + int(past_life_data['Def'] / 1000) + 100
                     self.Atk: int = self.Atk + int(past_life_data['Atk'] / 1000) + 200
