@@ -8,22 +8,18 @@ WINEPREFIX=$TMPDIR WINEARCH=win64 winecfg /v win10
 
 # Change to the temporary directory
 cd $TMPDIR
+wget "https://www.python.org/ftp/python/3.12.4/python-3.12.4-amd64.exe"
 cp -t . ../../../*
 
 # Install Python into the Wine prefix
-WINEPREFIX=$TMPDIR winetricks --unattended powershell 
-
-# Verify Python installation
-echo 'powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"' > builder.bat
-echo 'powershell Add-Content -Path $PROFILE -Value "'"'(& uv generate-shell-completion powershell) | Out-String | Invoke-Expression'"'"' >> builder.bat
-echo 'drive_c\users\lunamidori\.cargo/bin\uv.exe python install 3.12' >> builder.bat
-echo 'drive_c\users\lunamidori\.cargo/bin\uv.exe run pyinstaller --onefile --clean main.py' >> builder.bat
-
-WINEPREFIX=$TMPDIR wine builder.bat
+WINEPREFIX=$TMPDIR wine python-3.12.4-amd64.exe
+WINEPREFIX=$TMPDIR wine python -m ensurepip
+WINEPREFIX=$TMPDIR wine python -m pip install colorama pygame pyinstaller
+WINEPREFIX=$TMPDIR wine python -m pyinstaller --onefile --clean main.py
 
 # Go back to starting folder
 cd ..
 
 # Cleanup
 sleep 5
-rm -rf .wine-python
+#rm -rf .wine-python
