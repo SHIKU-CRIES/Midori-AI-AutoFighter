@@ -8,7 +8,7 @@ mkdir .python
 
 # Change to the temporary directory
 cd $TMPDIR
-cp -t . /game-code/*
+cp -r -t . /game-code/*
 
 uv sync
 uv pip install pyinstaller

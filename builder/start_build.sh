@@ -5,7 +5,7 @@ mkdir output
 mkdir output/windows
 mkdir output/linux
 
-cp -t temp_game/. ../*
+cp -r -t temp_game/. ../*
 
 # Build the Docker image
 docker build -t game-builder .
