@@ -4,8 +4,8 @@ RUN sudo sed -i 's/Emerald/Game Builder/g' /etc/os-release
 
 WORKDIR /game
 
-RUN sudo echo "[multilib]" > /etc/pacman.conf
-RUN sudo echo "Include = /etc/pacman.d/mirrorlist" > /etc/pacman.conf
+RUN sudo echo "[multilib]" >> /etc/pacman.conf
+RUN sudo echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
 
 RUN yay -Syu --noconfirm wine && yay -Yccc --noconfirm
 
