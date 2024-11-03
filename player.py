@@ -161,7 +161,7 @@ class Player:
     def check_name_mod(self):
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.010
-            max_hp_debuff = random.randint(250, 2000)
+            max_hp_debuff = self.MHP / 4
             while self.MHP > max_hp_debuff:
                 dodge_buff = dodge_buff + 0.00001
                 self.MHP = self.MHP - 1
@@ -171,8 +171,14 @@ class Player:
             self.DodgeOdds = dodge_buff * self.level
 
         if themed_names[1] in self.PlayerName.lower():
-            self.Atk = int(self.Atk / 25)
-            self.Def = int(self.Def * (40 + self.level))
+            max_hp_debuff = self.MHP / 2
+            
+            while self.MHP > max_hp_debuff:
+                self.Def = self.Def + 1
+                self.MHP = self.MHP - 1
+
+            self.Atk = int(self.Atk / 25) + 1
+            self.Def = int(self.Def * (2 * self.level))
             self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
 
         if themed_names[2] in self.PlayerName.lower():
@@ -613,6 +619,7 @@ class Player:
             self.MHP = self.MHP + (100 * bonus_levels)
             self.Atk = self.Atk + (20 * bonus_levels)
             self.Def = self.Def + (20 * bonus_levels)
+            self.Vitality = self.Vitality + (0.000001 * (bonus_levels * level))
 
         if level > 100:
             self.MHP = self.MHP + (50 * level)
