@@ -360,7 +360,7 @@ def main(level):
             # Draw the players profile picture
             player_profile_pic = pygame.image.load(os.path.join("photos", player.photo))
             player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
-            screen.blit(player_profile_pic, (player_hp_bar.x, player_hp_bar.y - offset_photo_size))
+            screen.blit(player_profile_pic, (player_hp_bar.x, player_hp_bar.y + offset_photo_size))
             
             stat_data = [
                 ("Stats of:", player.PlayerName),
@@ -465,7 +465,7 @@ def main(level):
             foe_profile_pic = pygame.image.load(os.path.join("photos", foe.photo))
             foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
             foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
-            screen.blit(foe_profile_pic, (foe_hp_bar.x, foe_hp_bar.y - offset_photo_size))
+            screen.blit(foe_profile_pic, (foe_hp_bar.x + 200, foe_hp_bar.y + offset_photo_size))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):
