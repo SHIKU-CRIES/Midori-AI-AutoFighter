@@ -187,7 +187,7 @@ class Player:
 
             while self.CritRate > max_crit_rate:
                 self.Def = self.Def + 1
-                self.CritRate = self.CritRate - 0.0001
+                self.CritRate = self.CritRate / 2
 
             while self.Atk > max_atk_stat:
                 self.Def = self.Def + 1
