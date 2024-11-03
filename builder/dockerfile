@@ -18,7 +18,6 @@ RUN yay -Syu --noconfirm wine xorg-server-xvfb && yay -Yccc --noconfirm
 COPY builder.sh .
 
 RUN sudo chown -R $USERNAME:$USERNAME /game
-RUN sudo chown -R $USERNAME:$USERNAME /game-code
 RUN chmod +x builder.sh
 
 RUN ls -la /game && sleep 15
