@@ -11,6 +11,11 @@ from weapons import get_weapon
 from themedstuff import themed_ajt
 from themedstuff import themed_names
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
 class Player:
     def __init__(self, name):
         """
@@ -49,13 +54,13 @@ class Player:
             print(f"Save file for {self.PlayerName} not found. Starting new game.")
         except Exception as e:
             print(f"Error loading save file: {e}")
-    
+
     def set_photo(self, photo):
-        if os.path.exists(os.path.join("photos", f"{photo}.png")):
+        if os.path.exists(resource_path(os.path.join("photos", f"{photo}.png"))):
             self.photo: str = f"{photo}.png"
         else:
-            photos = os.listdir(os.path.join("photos", "fallbacks"))
-            self.photo: str = os.path.join("fallbacks", f"{random.choice(photos)}")
+            photos = os.listdir(resource_path(os.path.join("photos", "fallbacks")))
+            self.photo: str = resource_path(os.path.join("fallbacks", f"{random.choice(photos)}"))
 
     def load_mimic(self):
         for filename in os.listdir("."):
