@@ -15,9 +15,9 @@ USER $USERNAME
 
 RUN yay -Syu --noconfirm wine && yay -Yccc --noconfirm
 
-USER root
-
 COPY builder.sh .
+COPY .. .
 
+RUN chown -R $USERNAME:$USERNAME /game
 RUN chmod +x builder.sh
 CMD bash builder.sh
