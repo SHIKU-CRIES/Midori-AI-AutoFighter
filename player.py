@@ -34,7 +34,7 @@ class Player:
         self.Logs: list = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list = []
-        self.photo: str = "placeholder.png"
+        self.photo: str = "player.png"
         
 
     def save(self):
@@ -49,6 +49,10 @@ class Player:
             print(f"Save file for {self.PlayerName} not found. Starting new game.")
         except Exception as e:
             print(f"Error loading save file: {e}")
+    
+    def set_photo(self, photo):
+        if os.path.exists(os.path.join("photos", photo)):
+            self.photo: str = f"{photo}.png"
 
     def load_mimic(self):
         for filename in os.listdir("."):

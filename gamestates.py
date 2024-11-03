@@ -34,7 +34,7 @@ yellow = Fore.YELLOW
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
 
-photo_size = 128 * 2
+photo_size = 128 * 3
 
 enrage_timer = timmer()
 temp_screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -207,6 +207,7 @@ def main(level):
 
         foe = Player(f"{foe_pre_name} ({level})")
         foe.set_level(level)
+        foe.set_photo(themed_name.lower())
 
         foe_photo_preloaded = os.path.join("photos", foe.photo)
         foe_profile_pic = pygame.image.load(foe_photo_preloaded)
