@@ -10,6 +10,8 @@ mkdir .python
 cd $TMPDIR
 cp -t . /game-code/*
 
+uv sync
+uv pip install pyinstaller
 uv run pyinstaller --onefile --clean main.py
 
 mv dist/main ../../output/linux_game
