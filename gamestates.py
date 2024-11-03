@@ -367,7 +367,7 @@ def main(level):
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
             # Draw the players profile picture
-            screen.blit(player_profile_pic, ((SCREEN_WIDTH // 6) - player_offset, (SCREEN_HEIGHT // 2) + 85))
+            screen.blit(player_profile_pic, (player_rect.x, player_rect.y + 85))
             
             stat_data = [
                 ("Stats of:", player.PlayerName),
