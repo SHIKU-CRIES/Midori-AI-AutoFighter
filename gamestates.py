@@ -457,14 +457,14 @@ def main(level):
 
             # Draw the foe's name
             foe_text = font.render(foe.PlayerName, True, (255, 255, 255))
-            foe_rect = foe_text.get_rect(topleft=(SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2))
+            foe_rect = foe_text.get_rect(center=(SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2))
             screen.blit(foe_text, foe_rect)
 
             # Draw the foe's HP bar
             foe_hp_percent = foe.HP / foe.MHP * 100
             foe_hp_bar = pygame.Rect(foe_rect.x, foe_rect.y + 60, foe_hp_percent * 4, 5)
             foe_hp_text = font.render(f"{int(foe.HP)}/{int(foe.MHP)}", True, (255, 255, 255))
-            foe_hp_rect = foe_hp_text.get_rect(topleft=(foe_rect.x - 115, foe_rect.y + 25))
+            foe_hp_rect = foe_hp_text.get_rect(center=(foe_rect.x - 115, foe_rect.y + 25))
             pygame.draw.rect(screen, (255, 0, 0), foe_hp_bar)
             screen.blit(foe_hp_text, foe_hp_rect)
 
