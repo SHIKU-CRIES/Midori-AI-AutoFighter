@@ -9,7 +9,7 @@ WINEPREFIX=$TMPDIR WINEARCH=win64 winecfg /v win10
 # Change to the temporary directory
 cd $TMPDIR
 wget "https://www.python.org/ftp/python/3.12.7/python-3.12.7-amd64.exe"
-cp -t . ../../../*
+cp -t . /game-code/*
 
 # Install Python into the Wine prefix
 WINEPREFIX=$TMPDIR wine python-3.12.7-amd64.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
