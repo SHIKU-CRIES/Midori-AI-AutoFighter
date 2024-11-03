@@ -21,4 +21,5 @@ COPY ../ /game-code
 RUN sudo chown -R $USERNAME:$USERNAME /game
 RUN sudo chown -R $USERNAME:$USERNAME /game-code
 RUN chmod +x builder.sh
-CMD bash builder.sh
+
+#CMD bash builder.sh
