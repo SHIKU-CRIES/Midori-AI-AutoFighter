@@ -350,7 +350,7 @@ def main(level):
             screen.fill((0, 0, 0))
 
             # Draw the player's name
-            player_offset = 80
+            player_offset = 90
             player_hp_bar_offset = player_offset - 50
             player_text = font.render(player.PlayerName, True, (255, 255, 255))
             player_rect = player_text.get_rect(center=((SCREEN_WIDTH // 6) - player_offset, SCREEN_HEIGHT // 2))
@@ -469,7 +469,7 @@ def main(level):
             screen.blit(foe_hp_text, foe_hp_rect)
 
             # Draw the foe's profile picture
-            screen.blit(foe_profile_pic, (SCREEN_WIDTH * 5 // 6, (SCREEN_HEIGHT // 2) + 85))
+            screen.blit(foe_profile_pic, (SCREEN_WIDTH * 5 // 6 + 50, (SCREEN_HEIGHT // 2) + 85))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):
