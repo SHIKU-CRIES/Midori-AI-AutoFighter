@@ -185,6 +185,8 @@ def main(level):
     player.load()
 
     player_photo_preloaded = os.path.join("photos", player.photo)
+    player_profile_pic = pygame.image.load(player_photo_preloaded)
+    player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
 
     if player.level < 5:
         player.load_past_lives()
@@ -205,7 +207,11 @@ def main(level):
 
         foe = Player(f"{foe_pre_name} ({level})")
         foe.set_level(level)
+
         foe_photo_preloaded = os.path.join("photos", foe.photo)
+        foe_profile_pic = pygame.image.load(foe_photo_preloaded)
+        foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
+        foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
 
         # Initialize item positions and velocity for tossing
         for item in player.Inv:
@@ -360,8 +366,6 @@ def main(level):
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
             # Draw the players profile picture
-            player_profile_pic = pygame.image.load(player_photo_preloaded)
-            player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
             screen.blit(player_profile_pic, ((SCREEN_WIDTH // 6) - player_offset, (SCREEN_HEIGHT // 2) + 160))
             
             stat_data = [
@@ -464,9 +468,6 @@ def main(level):
             screen.blit(foe_hp_text, foe_hp_rect)
 
             # Draw the foe's profile picture
-            foe_profile_pic = pygame.image.load(foe_photo_preloaded)
-            foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
-            foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
             screen.blit(foe_profile_pic, (SCREEN_WIDTH * 5 // 6, (SCREEN_HEIGHT // 2) + 160))
 
             # Draw the current tossed items
