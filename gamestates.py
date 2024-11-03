@@ -187,6 +187,8 @@ def main(level):
     while True:
 
         player.Bleed = 0
+        player.DamageDealt = 0
+        player.DamageTaken = 0
 
         if level < player.level:
             level = player.level + 1
