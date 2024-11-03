@@ -1,6 +1,11 @@
 #!/bin/bash
+
+alias butler='~/.config/itch/apps/butler/butler'
+
 mkdir temp_game
 mkdir output
+mkdir output/windows
+mkdir output/linux
 
 cp -t temp_game/. ../*
 
@@ -14,3 +19,6 @@ docker run --rm -v $(pwd):/game -v $(pwd)/temp_game:/game-code game-builder
 docker image rm game-builder
 
 rm -rf temp_game
+
+butler push output/windows lunamidori/midori-endless-auto-fighter:windows
+butler push output/linux lunamidori/midori-endless-auto-fighter:linux

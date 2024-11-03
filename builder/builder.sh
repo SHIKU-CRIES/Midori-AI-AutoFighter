@@ -13,3 +13,5 @@ cd linux
 chmod +x builder.sh
 
 ./builder.sh
+
+cd ..
