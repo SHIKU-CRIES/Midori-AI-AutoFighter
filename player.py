@@ -74,7 +74,7 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 100000) + 100
+                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 100
                     self.HP: int = self.MHP
                     self.Def: int = self.Def + int(past_life_data['Def'] / 1000) + 100
                     self.Atk: int = self.Atk + int(past_life_data['Atk'] / 1000) + 200
@@ -82,6 +82,9 @@ class Player:
                     self.CritRate: float = self.CritRate + float(past_life_data['CritRate'] * 0.001) + 0.01
                     self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.0003) + 0.001
                     self.DodgeOdds: float = self.DodgeOdds + float(past_life_data['DodgeOdds'] * 0.0025) + 0.01
+
+                    if past_life_data['Vitality'] > self.Vitality:
+                        self.Vitality = self.Vitality + (past_life_data['Vitality'] - 1)
 
                     print(f"Loaded past life from {filename}: {past_life_data}")
 
