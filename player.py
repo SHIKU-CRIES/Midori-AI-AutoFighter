@@ -524,9 +524,9 @@ class Player:
             self.MHP = int(self.MHP * 1.9)
 
         if themed_ajt[72] in self.PlayerName.lower(): # unholy
-            self.MHP = int(self.MHP * 25)
-            self.Atk = int(self.Atk * 10)
-            self.CritDamageMod = self.CritDamageMod * 5
+            self.MHP = int(self.MHP * 250)
+            self.Atk = int(self.Atk * 2)
+            self.CritDamageMod = self.CritDamageMod * 0.8
 
         if themed_ajt[73] in self.PlayerName.lower(): # venomous
             self.Atk = int(self.Atk * 1.1)
