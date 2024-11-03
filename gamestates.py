@@ -1,6 +1,9 @@
 import os
 import sys
+import pygame
 import random
+
+from screendata import Screen
 
 from weapons import get_weapon
 from weapons import get_random_weapon
@@ -15,15 +18,6 @@ from themedstuff import themed_names
 from typing import Tuple
 
 from colorama import Fore, Style
-
-use_pygame = False
-
-try:
-    import pygame
-    from screendata import Screen
-    use_pygame = True
-except Exception as error:
-    print("Pygame not installed, running as CLI app")
     
 red = Fore.RED
 green = Fore.GREEN

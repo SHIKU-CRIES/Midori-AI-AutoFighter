@@ -138,7 +138,7 @@ class Player:
             pass  # Ignore if the file doesn't exist
 
 
-    def update_inv(self, item: int, add: bool):
+    def update_inv(self, item: WeaponType, add: bool):
         if add:
             self.Inv.append(item)
         else:
