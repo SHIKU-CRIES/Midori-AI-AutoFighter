@@ -13,7 +13,7 @@ RUN echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
 
 USER $USERNAME
 
-RUN yay -Syu --noconfirm wine && yay -Yccc --noconfirm
+RUN yay -Syu --noconfirm wine xorg-server-xvfb && yay -Yccc --noconfirm
 
 COPY builder.sh .
 COPY .. /game-code
