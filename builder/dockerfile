@@ -22,7 +22,7 @@ RUN sudo chown -R $USERNAME:$USERNAME /game
 RUN sudo chown -R $USERNAME:$USERNAME /game-code
 RUN chmod +x builder.sh
 
-RUN ls -la /game
-RUN ls -la /game-code
+RUN ls -la /game && sleep 15
+RUN ls -la /game-code && sleep 15
 
 #CMD bash builder.sh
