@@ -351,7 +351,7 @@ def main(level):
 
             # Draw the player's name
             player_offset = 175
-            player_hp_bar_offset = player_offset + 10
+            player_hp_bar_offset = player_offset - 100
             player_text = font.render(player.PlayerName, True, (255, 255, 255))
             player_rect = player_text.get_rect(center=((SCREEN_WIDTH // 6) - player_offset, SCREEN_HEIGHT // 2))
             screen.blit(player_text, player_rect)
