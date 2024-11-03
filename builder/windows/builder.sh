@@ -18,9 +18,11 @@ WINEPREFIX=$TMPDIR wine python -m pip install --upgrade pip
 WINEPREFIX=$TMPDIR wine python -m pip install colorama pygame pyinstaller
 WINEPREFIX=$TMPDIR wine pyinstaller --onefile --clean main.py
 
+mv dist/main.exe ../game.exe
+
 # Go back to starting folder
 cd ..
 
 # Cleanup
 sleep 5
-#rm -rf .wine-python
+rm -rf .wine-python
