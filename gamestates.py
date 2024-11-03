@@ -185,7 +185,7 @@ def main(level):
     player.load()
     player.set_photo("Player".lower())
 
-    player_photo_preloaded = os.path.join("photos", player.photo)
+    player_photo_preloaded = os.path.join(player.photo)
     player_profile_pic = pygame.image.load(player_photo_preloaded)
     player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
 
@@ -210,7 +210,7 @@ def main(level):
         foe.set_level(level)
         foe.set_photo(themed_name.lower())
 
-        foe_photo_preloaded = os.path.join("photos", foe.photo)
+        foe_photo_preloaded = os.path.join(foe.photo)
         foe_profile_pic = pygame.image.load(foe_photo_preloaded)
         foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
         foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
