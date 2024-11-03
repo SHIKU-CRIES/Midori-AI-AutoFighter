@@ -367,7 +367,7 @@ def main(level):
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
             # Draw the players profile picture
-            screen.blit(player_profile_pic, ((SCREEN_WIDTH // 6) - player_offset, (SCREEN_HEIGHT // 2) + 160))
+            screen.blit(player_profile_pic, ((SCREEN_WIDTH // 6) - player_offset, (SCREEN_HEIGHT // 2) + 85))
             
             stat_data = [
                 ("Stats of:", player.PlayerName),
@@ -469,7 +469,7 @@ def main(level):
             screen.blit(foe_hp_text, foe_hp_rect)
 
             # Draw the foe's profile picture
-            screen.blit(foe_profile_pic, (SCREEN_WIDTH * 5 // 6, (SCREEN_HEIGHT // 2) + 160))
+            screen.blit(foe_profile_pic, (SCREEN_WIDTH * 5 // 6, (SCREEN_HEIGHT // 2) + 85))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):

@@ -51,7 +51,7 @@ class Player:
             print(f"Error loading save file: {e}")
     
     def set_photo(self, photo):
-        if os.path.exists(os.path.join("photos", photo)):
+        if os.path.exists(os.path.join("photos", f"{photo}.png")):
             self.photo: str = f"{photo}.png"
 
     def load_mimic(self):
