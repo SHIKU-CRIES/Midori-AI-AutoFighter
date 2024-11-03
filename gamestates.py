@@ -191,7 +191,10 @@ def main(level):
         if level < player.level:
             level = player.level + 1
         
-        foe_pre_name = f"{random.choice(themed_ajt).capitalize()} {random.choice(themed_names).capitalize()}"
+        themed_name = str(random.choices(themed_names, [0.2, 0.1, 0.7])).capitalize()
+        themed_title = random.choice(themed_ajt).capitalize()
+
+        foe_pre_name = f"{themed_title} {themed_name}"
 
         foe = Player(f"{foe_pre_name} ({level})")
         foe.set_level(level)
