@@ -6,12 +6,16 @@ ARG USERNAME=midori-ai
 
 WORKDIR /game
 
-RUN yay -Syu --noconfirm wine && yay -Yccc --noconfirm
-
 USER root
 
 RUN echo "[multilib]" >> /etc/pacman.conf
 RUN echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+
+USER $USERNAME
+
+RUN yay -Syu --noconfirm wine && yay -Yccc --noconfirm
+
+USER root
 
 COPY builder.sh .
 
