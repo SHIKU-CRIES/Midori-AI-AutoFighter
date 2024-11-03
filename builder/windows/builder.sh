@@ -12,11 +12,11 @@ wget "https://www.python.org/ftp/python/3.12.7/python-3.12.7-amd64.exe"
 cp -t . /game-code/*
 
 # Install Python into the Wine prefix
-WINEPREFIX=$TMPDIR wine python-3.12.7-amd64.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
-WINEPREFIX=$TMPDIR wine python -m ensurepip
-WINEPREFIX=$TMPDIR wine python -m pip install --upgrade pip
-WINEPREFIX=$TMPDIR wine python -m pip install colorama pygame pyinstaller
-WINEPREFIX=$TMPDIR wine pyinstaller --onefile --clean main.py
+WINEPREFIX=$TMPDIR xvfb-run wine python-3.12.7-amd64.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+WINEPREFIX=$TMPDIR xvfb-run wine python -m ensurepip
+WINEPREFIX=$TMPDIR xvfb-run wine python -m pip install --upgrade pip
+WINEPREFIX=$TMPDIR xvfb-run wine python -m pip install colorama pygame pyinstaller
+WINEPREFIX=$TMPDIR xvfb-run wine pyinstaller --onefile --clean main.py
 
 mv dist/main.exe ../game.exe
 
