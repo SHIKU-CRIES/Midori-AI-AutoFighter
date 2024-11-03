@@ -237,12 +237,14 @@ def main(level):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
             enrage_timer.check_timeout()
             
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
             bleed_mod = (0.000002 * ((enrage_mod * level) * (enrage_mod * level))) + 1
+            def_mod = max(1, (bleed_mod * 0.1))
 
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
@@ -354,7 +356,7 @@ def main(level):
             stat_data = [
                 ("Stats of:", player.PlayerName),
                 ("Max HP:", player.MHP),
-                ("Def:", player.Def),
+                ("Def:", int(player.Def / def_mod)),
                 ("Atk:", player.Atk),
                 ("Crit Rate:", f"{(player.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(player.CritDamageMod):.2f}x"),
@@ -393,7 +395,7 @@ def main(level):
             foe_stat_data = [
                 ("Stats of:", foe.PlayerName),
                 ("Max HP:", foe.MHP),
-                ("Def:", foe.Def),
+                ("Def:", int(foe.Def / def_mod)),
                 ("Atk:", foe.Atk),
                 ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
