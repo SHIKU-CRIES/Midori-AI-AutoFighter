@@ -20,6 +20,4 @@ COPY builder.sh .
 RUN sudo chown -R $USERNAME:$USERNAME /game
 RUN chmod +x builder.sh
 
-RUN ls -la /game && sleep 15
-
-CMD ls -la /game-code && sleep 15 && bash builder.sh
+CMD bash builder.sh

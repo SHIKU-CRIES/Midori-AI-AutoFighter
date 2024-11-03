@@ -1,5 +1,6 @@
 #!/bin/bash
 mkdir temp_game
+mkdir output
 
 cp -t temp_game/. ../*
 
@@ -11,3 +12,5 @@ docker run --rm -v $(pwd):/game -v $(pwd)/temp_game:/game-code game-builder
 
 # Remove the Docker image
 docker image rm game-builder
+
+rm -rf temp_game
