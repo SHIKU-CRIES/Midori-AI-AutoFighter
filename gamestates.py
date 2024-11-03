@@ -35,7 +35,7 @@ SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
 
 photo_size = 128 * 2
-offset_photo_size = photo_size + 200
+offset_photo_size = (photo_size + 200) * -1
 
 enrage_timer = timmer()
 temp_screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
