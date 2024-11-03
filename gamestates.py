@@ -183,6 +183,7 @@ def main(level):
     player = Player("Player")
 
     player.load()
+    player.set_photo("Player".lower())
 
     player_photo_preloaded = os.path.join("photos", player.photo)
     player_profile_pic = pygame.image.load(player_photo_preloaded)
