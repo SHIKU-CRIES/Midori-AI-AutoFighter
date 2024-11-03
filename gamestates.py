@@ -466,7 +466,7 @@ def main(level):
             pygame.draw.rect(screen, (255, 0, 0), foe_hp_bar)
 
             # Draw the foe's profile picture
-            screen.blit(foe_profile_pic, (foe_rect.x + 50, foe_rect.y + 85))
+            screen.blit(foe_profile_pic, (foe_rect.x + 0, foe_rect.y + 85))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):
