@@ -2,10 +2,16 @@ FROM lunamidori5/pixelarch:emerald
 
 RUN sudo sed -i 's/Emerald/Game Builder/g' /etc/os-release
 
+ARG USERNAME=midori-ai
+
 WORKDIR /game
 
-RUN sudo echo "[multilib]" >> /etc/pacman.conf
-RUN sudo echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+USER root
+
+RUN echo "[multilib]" >> /etc/pacman.conf
+RUN echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+
+USER $USERNAME
 
 RUN yay -Syu --noconfirm wine && yay -Yccc --noconfirm
 
