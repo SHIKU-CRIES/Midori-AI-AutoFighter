@@ -464,12 +464,12 @@ def main(level):
             foe_hp_percent = foe.HP / foe.MHP * 100
             foe_hp_bar = pygame.Rect(foe_rect.x, foe_rect.y + 60, foe_hp_percent * 2, 5)
             foe_hp_text = font.render(f"{int(foe.HP)}/{int(foe.MHP)}", True, (255, 255, 255))
-            foe_hp_rect = foe_hp_text.get_rect(center=(SCREEN_WIDTH * 5 // 6, (SCREEN_HEIGHT // 2) + 60))
+            foe_hp_rect = foe_hp_text.get_rect(center=(foe_rect.x, foe_rect.y + 60))
             pygame.draw.rect(screen, (255, 0, 0), foe_hp_bar)
             screen.blit(foe_hp_text, foe_hp_rect)
 
             # Draw the foe's profile picture
-            screen.blit(foe_profile_pic, (SCREEN_WIDTH * 5 // 6 + 50, (SCREEN_HEIGHT // 2) + 85))
+            screen.blit(foe_profile_pic, (foe_rect.x + 50, foe_rect.y + 85))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):
