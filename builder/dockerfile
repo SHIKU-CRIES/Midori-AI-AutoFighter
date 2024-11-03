@@ -16,13 +16,11 @@ USER $USERNAME
 RUN yay -Syu --noconfirm wine xorg-server-xvfb && yay -Yccc --noconfirm
 
 COPY builder.sh .
-COPY ../../ /game-code
 
 RUN sudo chown -R $USERNAME:$USERNAME /game
 RUN sudo chown -R $USERNAME:$USERNAME /game-code
 RUN chmod +x builder.sh
 
 RUN ls -la /game && sleep 15
-RUN ls -la /game-code && sleep 15
 
-#CMD bash builder.sh
+CMD ls -la /game-code && sleep 15 && bash builder.sh
