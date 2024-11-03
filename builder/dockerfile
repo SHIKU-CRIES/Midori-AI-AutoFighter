@@ -17,5 +17,5 @@ RUN yay -Syu --noconfirm wine && yay -Yccc --noconfirm
 
 COPY builder.sh .
 
-RUN chmod +x builder.sh
+RUN sudo chmod +x builder.sh
 CMD ./builder.sh
