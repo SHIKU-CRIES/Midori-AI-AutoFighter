@@ -34,6 +34,7 @@ class Player:
         self.Logs: list = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list = []
+        self.photo: str = "placeholder.png"
         
 
     def save(self):

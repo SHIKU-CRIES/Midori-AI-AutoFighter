@@ -1,3 +1,4 @@
+import os
 import sys
 import random
 
@@ -352,6 +353,10 @@ def main(level):
             pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
             pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
+
+            # Draw the players profile picture
+            player_profile_pic = pygame.image.load(os.path.join("photos", player.photo))
+            screen.blit(player_profile_pic, (player_hp_bar.x - 50, player_hp_bar.y - 50))
             
             stat_data = [
                 ("Stats of:", player.PlayerName),
@@ -451,6 +456,11 @@ def main(level):
             foe_hp_rect = foe_hp_text.get_rect(center=(SCREEN_WIDTH * 5 // 6, (SCREEN_HEIGHT // 2) + 60))
             pygame.draw.rect(screen, (255, 0, 0), foe_hp_bar)
             screen.blit(foe_hp_text, foe_hp_rect)
+
+            # Draw the foe's profile picture
+            foe_profile_pic = pygame.image.load(os.path.join("photos", foe.photo))
+            foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
+            screen.blit(foe_profile_pic, (foe_hp_bar.x - 50, foe_hp_bar.y - 50))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):
