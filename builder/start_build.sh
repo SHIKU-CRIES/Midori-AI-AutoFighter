@@ -8,7 +8,7 @@ mkdir output/linux
 cp -r -t temp_game/. ../*
 
 # Build the Docker image
-docker build -t game-builder .
+docker build --no-cache -t game-builder .
 
 # Run the Docker container and wait until it finishes
 docker run --rm -v $(pwd):/game -v $(pwd)/temp_game:/game-code game-builder
