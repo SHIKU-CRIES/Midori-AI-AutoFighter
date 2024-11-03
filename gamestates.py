@@ -201,8 +201,8 @@ def main(level):
         foe_pre_name = f"{themed_title} {themed_name}"
 
         foe = Player(f"{foe_pre_name} ({level})")
-        foe.set_level(level)
         foe.set_photo(themed_name.lower())
+        foe.set_level(level)
 
         foe_photo_preloaded = os.path.join(foe.photo)
         foe_profile_pic = pygame.image.load(foe_photo_preloaded)

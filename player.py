@@ -180,14 +180,16 @@ class Player:
     def check_name_mod(self):
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.010
-            max_hp_debuff = self.MHP / 4
+            max_hp_debuff = self.MHP / 8
+
             while self.MHP > max_hp_debuff:
-                dodge_buff = dodge_buff + 0.00001
+                dodge_buff = dodge_buff + 0.000001
                 self.MHP = self.MHP - 1
 
-            self.Atk = int(self.Atk * 2)
-            self.Def = int(self.Def * 8)
-            self.DodgeOdds = dodge_buff * self.level
+            self.Atk = int(self.Atk * 1)
+            self.Def = int(self.Def * 2)
+            self.CritRate = self.CritRate + (0.01 * self.level)
+            self.DodgeOdds = self.DodgeOdds + (dodge_buff * self.level)
 
         if themed_names[1] in self.PlayerName.lower():
             max_hp_debuff = self.MHP / 2
@@ -238,6 +240,7 @@ class Player:
             self.Regain = self.Regain / 5
             self.Vitality = self.Vitality / 4
             self.PlayerName = tempname
+            self.set_photo("Player".lower())
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
             self.MHP = int(self.MHP * 1.9)
