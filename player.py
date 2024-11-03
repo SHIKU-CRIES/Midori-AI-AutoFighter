@@ -618,14 +618,14 @@ class Player:
         if level > 50:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
-            self.Vitality = self.Vitality + (0.003 * level)
+            self.Vitality = self.Vitality + (0.0003 * level)
             
             # Apply bonus every xyz levels past 10
             xyz = 25
             bonus_levels = (level - 50) // xyz
             self.MHP = self.MHP + (100 * bonus_levels)
             self.Atk = self.Atk + (20 * bonus_levels)
-            self.Def = self.Def + (20 * bonus_levels)
+            self.Def = self.Def - (12 * bonus_levels)
             self.Vitality = self.Vitality + (0.000001 * (bonus_levels * level))
 
         if level > 100:
