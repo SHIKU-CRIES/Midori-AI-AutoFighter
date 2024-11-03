@@ -623,8 +623,6 @@ class Player:
         self.CritDamageMod: float = 2 + (self.level * 0.0025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
 
-        self.check_name_mod()
-
         if level > 50:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
@@ -668,6 +666,8 @@ class Player:
         else:
             self.DodgeOdds = self.DodgeOdds / 4
 
+        self.check_stats()
+        self.check_name_mod()
         self.check_stats()
 
         self.HP = self.MHP
