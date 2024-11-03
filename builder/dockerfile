@@ -1,5 +1,7 @@
 FROM lunamidori5/pixelarch:topaz
 
+ENV PYTHONOPTIMIZE=2
+
 RUN sudo sed -i 's/Topaz/Game Builder/g' /etc/os-release
 
 ARG USERNAME=midori-ai
