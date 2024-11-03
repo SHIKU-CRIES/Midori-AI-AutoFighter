@@ -1,6 +1,6 @@
-FROM lunamidori5/pixelarch:emerald
+FROM lunamidori5/pixelarch:topaz
 
-RUN sudo sed -i 's/Emerald/Game Builder/g' /etc/os-release
+RUN sudo sed -i 's/Topaz/Game Builder/g' /etc/os-release
 
 ARG USERNAME=midori-ai
 
