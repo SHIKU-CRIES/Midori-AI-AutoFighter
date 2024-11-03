@@ -34,6 +34,8 @@ yellow = Fore.YELLOW
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
 
+photo_size = 128
+
 enrage_timer = timmer()
 temp_screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
@@ -356,6 +358,7 @@ def main(level):
 
             # Draw the players profile picture
             player_profile_pic = pygame.image.load(os.path.join("photos", player.photo))
+            player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
             screen.blit(player_profile_pic, (player_hp_bar.x - 50, player_hp_bar.y - 50))
             
             stat_data = [
@@ -460,6 +463,7 @@ def main(level):
             # Draw the foe's profile picture
             foe_profile_pic = pygame.image.load(os.path.join("photos", foe.photo))
             foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
+            foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
             screen.blit(foe_profile_pic, (foe_hp_bar.x - 50, foe_hp_bar.y - 50))
 
             # Draw the current tossed items
