@@ -368,6 +368,9 @@ def main(level):
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
             # Draw the players profile picture
+            if player_hp_percent < 75:
+                player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
+
             screen.blit(player_profile_pic, (player_rect.x - player_hp_bar_offset, player_rect.y + 85))
             
             stat_data = [
@@ -467,6 +470,9 @@ def main(level):
             pygame.draw.rect(screen, (255, 0, 0), foe_hp_bar)
 
             # Draw the foe's profile picture
+            if foe_hp_percent < 75:
+                foe_profile_pic.set_alpha(int(255 * foe_hp_percent / 75))
+
             screen.blit(foe_profile_pic, (foe_rect.x + 0, foe_rect.y + 85))
 
             # Draw the current tossed items
