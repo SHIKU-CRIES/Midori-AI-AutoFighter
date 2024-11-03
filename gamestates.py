@@ -361,7 +361,7 @@ def main(level):
             player_hp_bar = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, player_hp_percent * 4, 5)
             player_hp_bar_full = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, 100 * 4, 5)
             player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
-            player_hp_percent_rect = player_hp_percent_text.get_rect(center=((SCREEN_WIDTH // 6) - player_offset + 60, (SCREEN_HEIGHT // 2)))
+            player_hp_percent_rect = player_hp_percent_text.get_rect(center=((SCREEN_WIDTH // 6) + player_offset, (SCREEN_HEIGHT // 2)))
             pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
             pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
             screen.blit(player_hp_percent_text, player_hp_percent_rect)
