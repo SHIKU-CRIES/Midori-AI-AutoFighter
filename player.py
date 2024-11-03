@@ -591,10 +591,10 @@ class Player:
     
     def set_level(self, level):
         self.level = level
-        self.MHP: int = random.randint(25 * self.level, 45 * self.level) + 100
+        self.MHP: int = random.randint(5 * self.level, 12 * self.level) + 100
         self.HP: int = self.MHP
-        self.Def: int = self.Def + int(self.MHP * (0.00005 * self.level)) + 200
-        self.Atk: int = random.randint(5 * self.level, 15 * self.level) + (self.level * 10)
+        self.Def: int = self.Def + int(self.MHP * (0.000005 * self.level)) + 50
+        self.Atk: int = random.randint(5 * self.level, 15 * self.level) + (self.level * 2)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
         self.CritDamageMod: float = 2 + (self.level * 0.0025)
@@ -602,39 +602,40 @@ class Player:
 
         self.check_name_mod()
 
-        if level > 10:
+        if level > 50:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
             self.Vitality = self.Vitality + (0.003 * level)
             
             # Apply bonus every xyz levels past 10
             xyz = 25
-            bonus_levels = (level - 10) // xyz
-            self.MHP = self.MHP + (4 * bonus_levels)
+            bonus_levels = (level - 50) // xyz
+            self.MHP = self.MHP + (100 * bonus_levels)
             self.Atk = self.Atk + (20 * bonus_levels)
+            self.Def = self.Def + (20 * bonus_levels)
 
-        if level > 20:
+        if level > 100:
             self.MHP = self.MHP + (50 * level)
             self.Atk = self.Atk + (45 * level)
             self.Def = self.Def + (5 * level)
             self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.01
 
-        if level > 50:
+        if level > 150:
             self.MHP = self.MHP + (250 * level)
             self.Atk = self.Atk + (90 * level)
             self.Def = self.Def + (15 * level)
             self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.05
 
-        if level > 100:
+        if level > 200:
             self.MHP = self.MHP + (750 * level)
             self.Atk = self.Atk + (180 * level)
             self.Def = self.Def + (30 * level)
             self.Vitality = self.Vitality + (0.0001 * level)
             self.CritRate = self.CritRate + 0.1
 
-        if level > 200:
+        if level > 250:
             self.MHP = self.MHP + (1500 * level)
             self.Atk = self.Atk + (250 * level)
             self.Def = self.Def + (60 * level)

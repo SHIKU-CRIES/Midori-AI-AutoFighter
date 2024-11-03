@@ -1,7 +1,5 @@
 #!/bin/bash
 
-alias butler='~/.config/itch/apps/butler/butler'
-
 mkdir temp_game
 mkdir output
 mkdir output/windows
