@@ -254,14 +254,39 @@ def main(level):
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_u:
-                        print("Key press seen, lowering stats")
+                        print("Key press seen, trying to lower stats")
                         if player.MHP > 1000:
-                            player.MHP = int(player.MHP / 10)
-                            player.Atk = int(player.Atk / 10)
-                            player.Def = int(player.Def / 10)
-                            player.CritRate = player.CritRate / 10
-                            player.CritDamageMod = player.CritDamageMod / 10
-                            player.Regain = player.Regain / 10
+                            print("Lowering MHP")
+                            player.MHP -= 100
+                            player.Vitality = player.Vitality + 0.00001
+
+                        if player.Atk > 1000:
+                            print("Lowering Atk")
+                            player.Atk -= 100
+                            player.Vitality = player.Vitality + 0.00001
+
+                        if player.Def > 1000:
+                            print("Lowering Def")
+                            player.Def -= 100
+                            player.Vitality = player.Vitality + 0.00001
+
+                        if player.CritRate > 0.5:
+                            print("Lowering CritRate")
+                            player.CritRate = player.CritRate - 0.1
+                            player.Vitality = player.Vitality + 0.00001
+
+                        if player.CritDamageMod > 2:
+                            print("Lowering CritDamageMod")
+                            player.CritDamageMod = player.CritDamageMod - 1
+                            player.Vitality = player.Vitality + 0.00001
+
+                        if player.Regain > 1:
+                            print("Lowering Regain")
+                            player.Regain = player.Regain - 0.1
+                            player.Vitality = player.Vitality + 0.00001
+
+                        if player.DodgeOdds > 1:
+                            print("Lowering DodgeOdds")
                             player.DodgeOdds = player.DodgeOdds / 10
                             player.Vitality = player.Vitality + 0.00001
 
