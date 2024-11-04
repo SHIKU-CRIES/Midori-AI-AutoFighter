@@ -589,6 +589,9 @@ class Player:
         if self.CritRate > max_crit_rate:
             self.CritRate = max_crit_rate
 
+        if self.Vitality < 0.9:
+            print("Warning Vitality is low... numbers are wrong?")
+
     def level_up(self, mod=1):
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
