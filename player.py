@@ -657,37 +657,38 @@ class Player:
             self.Vitality = self.Vitality + (0.0001 * (bonus_levels * level))
 
         if level > 100:
-            self.MHP = self.MHP + (50 * level)
+            self.MHP = self.MHP + (4 * level)
             self.Atk = self.Atk + (25 * level)
             self.Def = self.Def + (5 * level)
             self.Vitality = self.Vitality + (0.0002 * level)
             self.CritRate = self.CritRate + 0.01
 
         if level > 150:
-            self.MHP = self.MHP + (250 * level)
+            self.MHP = self.MHP + (8 * level)
             self.Atk = self.Atk + (30 * level)
             self.Def = self.Def + (15 * level)
             self.Vitality = self.Vitality + (0.0003 * level)
             self.CritRate = self.CritRate + 0.05
 
         if level > 200:
-            self.MHP = self.MHP + (750 * level)
+            self.MHP = self.MHP + (16 * level)
             self.Atk = self.Atk + (40 * level)
             self.Def = self.Def + (30 * level)
             self.Vitality = self.Vitality + (0.0004 * level)
             self.CritRate = self.CritRate + 0.1
 
+        self.check_stats()
+        self.check_name_mod()
+
         if level > 250:
-            self.MHP = self.MHP + (1500 * level)
+            self.MHP = self.MHP + (32 * level)
             self.Atk = self.Atk + (50 * level)
             self.Def = self.Def + (60 * level)
             self.Vitality = self.Vitality + (0.001 * level)
             self.gain_crit_rate(0.002 * level)
         else:
             self.DodgeOdds = self.DodgeOdds * (level / 250)
-
-        self.check_stats()
-        self.check_name_mod()
+            
         self.check_stats()
 
         self.HP = self.MHP
