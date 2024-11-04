@@ -372,6 +372,8 @@ def main(level):
             # Draw the players profile picture
             if player_hp_percent < 75:
                 player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
+            else:
+                player_profile_pic.set_alpha(255)
 
             screen.blit(player_profile_pic, (player_rect.x - player_hp_bar_offset, player_rect.y + 85))
             
