@@ -268,7 +268,7 @@ def main(level):
             toss_velocity = max(80, 2 * min(bleed_mod, 55))
 
             current_time = pygame.time.get_ticks()
-            if current_time - last_hp_update >= 1000:
+            if current_time - last_hp_update >= (1000 / max(foe.Vitality, player.Vitality, 1)):
                 player.HP = player.HP + int((player.Regain * (player.Vitality ** 5)) * 100) - int((player.Bleed * bleed_mod) / player.Def)
                 foe.HP = foe.HP + int((foe.Regain * (foe.Vitality ** 5)) * 100) - int((foe.Bleed * bleed_mod) / foe.Def)
                 last_hp_update = current_time
