@@ -592,6 +592,10 @@ class Player:
         if self.Vitality < 0.9:
             print("Warning Vitality is low... numbers are wrong?")
 
+        if self.Vitality < 0:
+            print("Warning Vitality is way too low... fixing...")
+            self.Vitality = 1
+
     def level_up(self, mod=1):
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
