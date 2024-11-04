@@ -213,9 +213,9 @@ class Player:
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def * self.level) + 1
 
-            while self.Def > max_def_stat:
-                self.Vitality = self.Vitality + 0.0000001
-                self.Def = self.Def - 1
+            if self.Def > max_def_stat:
+                self.Vitality = self.Vitality + (self.Def / 1000000)
+                self.Def = int(self.Def / 100)
 
             self.gain_crit_damage((0.0002 * self.level))
             
