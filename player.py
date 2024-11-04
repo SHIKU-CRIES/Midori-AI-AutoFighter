@@ -8,13 +8,10 @@ import pickle
 from weapons import WeaponType
 from weapons import get_weapon
 
+from load_photos import resource_path
+
 from themedstuff import themed_ajt
 from themedstuff import themed_names
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
 
 class Player:
     def __init__(self, name):
@@ -688,7 +685,7 @@ class Player:
             self.gain_crit_rate(0.002 * level)
         else:
             self.DodgeOdds = self.DodgeOdds * (level / 250)
-            
+
         self.check_stats()
 
         self.HP = self.MHP

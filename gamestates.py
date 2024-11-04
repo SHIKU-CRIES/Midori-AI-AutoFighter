@@ -12,6 +12,8 @@ from timerhelper import timmer
 
 from damagestate import take_damage
 
+from load_photos import set_bg_photo
+
 from themedstuff import themed_ajt
 from themedstuff import themed_names
 
@@ -183,6 +185,9 @@ def main(level):
     player_profile_pic = pygame.image.load(player_photo_preloaded)
     player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
 
+    background_file_name = set_bg_photo()
+    background_image = pygame.image.load(background_file_name)
+
     if player.level < 5:
         player.load_past_lives()
 
@@ -342,7 +347,7 @@ def main(level):
 
 
             # Render the screen            
-            screen.fill((0, 0, 0))
+            screen.set_background(background_image)
 
             # Draw the player's name
             player_offset = 175
