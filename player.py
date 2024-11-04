@@ -592,7 +592,7 @@ class Player:
         if self.Vitality < 0.9:
             print("Warning Vitality is low... numbers are wrong?")
 
-        if self.Vitality < 0:
+        if self.Vitality < 0.1:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
 
