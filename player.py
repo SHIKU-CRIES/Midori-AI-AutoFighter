@@ -162,7 +162,7 @@ class Player:
     def gain_crit_damage(self, points):
         """Increases crit damage based on points, with increasing cost.
 
-        Every 1 crit damage increase costs 10x more points.
+        Every 10 crit damage increase costs 10x more points.
         """
         current_damage = self.CritDamageMod
         to_be_lowered_by = 10
@@ -188,7 +188,7 @@ class Player:
 
             self.Atk = int(self.Atk * 1)
             self.Def = int(self.Def * 2)
-            self.CritRate = self.CritRate + (0.01 * self.level)
+            self.gain_crit_rate(0.01 * self.level)
             self.DodgeOdds = self.DodgeOdds + (dodge_buff * self.level)
 
         if themed_names[1] in self.PlayerName.lower():
@@ -207,6 +207,10 @@ class Player:
             while self.Atk > max_atk_stat:
                 self.Def = self.Def + 1
                 self.Atk = self.Atk - 1
+
+            while self.Regain > 1:
+                self.Def = self.Def + 5
+                self.Regain = self.Regain - 1
 
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def) + 1
@@ -227,7 +231,7 @@ class Player:
         if themed_names[4] in self.PlayerName.lower():
             self.Atk = int(self.Atk * 1.5)
             self.Def = int(self.Def * 0.5) + 1
-            self.CritRate = self.CritRate + 1
+            self.gain_crit_rate(1)
             self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
 
         if themed_names[5] in self.PlayerName.lower():
@@ -563,7 +567,7 @@ class Player:
 
         while self.DodgeOdds > (max_dodgeodds + 0.01):
             self.Def = self.Def + 1
-            self.CritRate = self.CritRate + 0.0001
+            self.gain_crit_rate(0.0001)
             self.DodgeOdds = self.DodgeOdds - 0.001
 
         if self.DodgeOdds > max_dodgeodds:
@@ -654,33 +658,33 @@ class Player:
 
         if level > 100:
             self.MHP = self.MHP + (50 * level)
-            self.Atk = self.Atk + (45 * level)
+            self.Atk = self.Atk + (25 * level)
             self.Def = self.Def + (5 * level)
-            self.Vitality = self.Vitality + (0.0001 * level)
+            self.Vitality = self.Vitality + (0.0002 * level)
             self.CritRate = self.CritRate + 0.01
 
         if level > 150:
             self.MHP = self.MHP + (250 * level)
-            self.Atk = self.Atk + (90 * level)
+            self.Atk = self.Atk + (30 * level)
             self.Def = self.Def + (15 * level)
-            self.Vitality = self.Vitality + (0.0001 * level)
+            self.Vitality = self.Vitality + (0.0003 * level)
             self.CritRate = self.CritRate + 0.05
 
         if level > 200:
             self.MHP = self.MHP + (750 * level)
-            self.Atk = self.Atk + (180 * level)
+            self.Atk = self.Atk + (40 * level)
             self.Def = self.Def + (30 * level)
-            self.Vitality = self.Vitality + (0.0001 * level)
+            self.Vitality = self.Vitality + (0.0004 * level)
             self.CritRate = self.CritRate + 0.1
 
         if level > 250:
             self.MHP = self.MHP + (1500 * level)
-            self.Atk = self.Atk + (250 * level)
+            self.Atk = self.Atk + (50 * level)
             self.Def = self.Def + (60 * level)
             self.Vitality = self.Vitality + (0.001 * level)
-            self.CritRate = self.CritRate + (0.002 * level)
+            self.gain_crit_rate(0.002 * level)
         else:
-            self.DodgeOdds = self.DodgeOdds / 4
+            self.DodgeOdds = self.DodgeOdds * (level / 250)
 
         self.check_stats()
         self.check_name_mod()
