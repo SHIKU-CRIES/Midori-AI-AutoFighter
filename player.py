@@ -192,7 +192,7 @@ class Player:
             max_hp_debuff = self.MHP / 2
             max_crit_rate = self.CritRate / 100
             max_atk_stat = self.Atk / 100
-            max_def_stat = random.randint(10000000, 100000000)
+            max_def_stat = random.randint(10000000, 50000000)
 
             while self.MHP > max_hp_debuff:
                 self.Def = self.Def + 1
@@ -214,7 +214,7 @@ class Player:
             self.Def = int(self.Def * self.level) + 1
 
             while self.Def > max_def_stat:
-                self.Vitality = self.Vitality + 0.0001
+                self.Vitality = self.Vitality + 0.0000001
                 self.Def = self.Def - 1
 
             self.gain_crit_damage((0.0002 * self.level))
@@ -657,9 +657,9 @@ class Player:
             self.Vitality = self.Vitality + (0.0003 * level)
             
             # Apply bonus every xyz levels past 10
-            xyz = 25
+            xyz = 10
             bonus_levels = (level - 50) // xyz
-            self.MHP = self.MHP + (100 * bonus_levels)
+            self.MHP = self.MHP + (1000 * bonus_levels)
             self.Atk = self.Atk + (20 * bonus_levels)
             self.Def = self.Def - (12 * bonus_levels)
             self.Vitality = self.Vitality + (0.0001 * (bonus_levels * level))
@@ -688,14 +688,13 @@ class Player:
         self.check_stats()
         self.check_name_mod()
 
-        if level > 1000:
-            self.MHP = self.MHP + (32 * level)
-            self.Atk = self.Atk + (50 * level)
-            self.Def = self.Def + (60 * level)
-            self.Vitality = self.Vitality + (0.001 * level)
-            self.gain_crit_rate(0.002 * level)
-        else:
-            self.DodgeOdds = self.DodgeOdds * (level / 1000)
+        top_level = 1000
+
+        self.Atk = self.Atk + int(50 * (level / top_level))
+        self.Def = self.Def + int(60 * (level / top_level))
+        self.gain_crit_rate(0.002 * (level / top_level))
+        self.Vitality = self.Vitality * (level / top_level)
+        self.DodgeOdds = self.DodgeOdds * (level / top_level)
 
         self.check_stats()
 
