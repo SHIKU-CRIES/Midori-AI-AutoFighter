@@ -210,7 +210,7 @@ class Player:
                 self.Regain = self.Regain - 1
 
             self.Atk = int(self.Atk) + 1
-            self.Def = int(self.Def) + 1
+            self.Def = int(self.Def * 2) + 1
             self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
             self.Vitality = self.Vitality * 0.8
 
@@ -677,14 +677,14 @@ class Player:
         self.check_stats()
         self.check_name_mod()
 
-        if level > 250:
+        if level > 1000:
             self.MHP = self.MHP + (32 * level)
             self.Atk = self.Atk + (50 * level)
             self.Def = self.Def + (60 * level)
             self.Vitality = self.Vitality + (0.001 * level)
             self.gain_crit_rate(0.002 * level)
         else:
-            self.DodgeOdds = self.DodgeOdds * (level / 250)
+            self.DodgeOdds = self.DodgeOdds * (level / 1000)
 
         self.check_stats()
 
