@@ -188,11 +188,7 @@ def main(level):
     background_file_name = set_bg_photo()
     background_image = pygame.image.load(background_file_name)
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
-    overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    overlay_surface.fill((0, 0, 0, 128))
-
-    background_image.blit(overlay_surface, (0, 0))
+    background_image.set_alpha(128)
 
     if player.level < 5:
         player.load_past_lives()
@@ -356,7 +352,6 @@ def main(level):
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
             
-
             # Draw the player's name
             player_offset = 175
             player_hp_bar_offset = player_offset - 175
