@@ -94,7 +94,7 @@ class Player:
                     self.DodgeOdds: float = self.DodgeOdds + float(past_life_data['DodgeOdds'] * 0.0025) + 0.01
 
                     if past_life_data['Vitality'] > self.Vitality:
-                        self.Vitality = self.Vitality + (past_life_data['Vitality'] - 1)
+                        self.Vitality = self.Vitality + ((past_life_data['Vitality'] / 10) - 1)
 
                     print(f"Loaded past life from {filename}: {past_life_data}")
 
