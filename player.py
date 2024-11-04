@@ -95,6 +95,8 @@ class Player:
 
                     if past_life_data['Vitality'] > self.Vitality:
                         self.Vitality = self.Vitality + ((past_life_data['Vitality'] / 10) - 1)
+                    
+                    self.check_stats()
 
                     print(f"Loaded past life from {filename}: {past_life_data}")
 
