@@ -253,7 +253,7 @@ class Player:
             self.MHP = int(self.MHP * 150)
 
         if themed_names[8] in self.PlayerName.lower():
-            self.Regain = self.Regain * (0.0002 * self.level)
+            self.Regain = self.Regain * (0.002 * self.level)
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
             self.MHP = int(self.MHP * 1.9)
