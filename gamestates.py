@@ -347,7 +347,7 @@ def main(level):
 
 
             # Render the screen            
-            screen.set_background(background_image)
+            screen.fill(background_image)
 
             # Draw the player's name
             player_offset = 175
