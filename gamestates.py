@@ -187,7 +187,7 @@ def main(level):
 
     background_file_name = set_bg_photo()
     background_image = pygame.image.load(background_file_name)
-    background_image = pygame.transform.scale(background_image, (SCREEN_HEIGHT, SCREEN_WIDTH))
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
     if player.level < 5:
         player.load_past_lives()
