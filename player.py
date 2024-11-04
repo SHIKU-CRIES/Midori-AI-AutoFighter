@@ -210,7 +210,7 @@ class Player:
                 self.Regain = self.Regain - 1
 
             self.Atk = int(self.Atk) + 1
-            self.Def = int(self.Def * 2) + 1
+            self.Def = int(self.Def * 25) + 1
             self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
             self.Vitality = self.Vitality * 0.8
 
