@@ -348,7 +348,7 @@ def main(level):
 
             # Render the screen            
             screen.fill(0, 0, 0)
-            screen.blit(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            screen.blit(background_image, (0, 0))
 
             # Draw the player's name
             player_offset = 175
