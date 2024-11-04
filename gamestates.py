@@ -252,6 +252,17 @@ def main(level):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_u:
+                        print("Key press seen, lowering stats")
+                        player.MHP = int(player.MHP / 10)
+                        player.Atk = int(player.Atk / 10)
+                        player.Def = int(player.Def / 10)
+                        player.CritRate = player.CritRate / 10
+                        player.CritDamageMod = player.CritDamageMod / 10
+                        player.Regain = player.Regain / 10
+                        player.DodgeOdds = player.DodgeOdds / 10
+                        player.Vitality = player.Vitality + 0.00001
 
             enrage_timer.check_timeout()
             
@@ -389,6 +400,9 @@ def main(level):
 
             if player.Vitality > 1.01:
                 stat_data.append(("Vitality:", f"{(player.Vitality):.2f}x"))
+                
+            elif player.level > 300:
+                stat_data.append(("Press `U` to gain Vitality:", f"{(player.Vitality):.2f}x"))
 
             if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
