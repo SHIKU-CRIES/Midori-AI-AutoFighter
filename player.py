@@ -192,6 +192,7 @@ class Player:
             max_hp_debuff = self.MHP / 2
             max_crit_rate = self.CritRate / 100
             max_atk_stat = self.Atk / 100
+            max_def_stat = random.randint(10000000, 100000000)
 
             while self.MHP > max_hp_debuff:
                 self.Def = self.Def + 1
@@ -211,8 +212,13 @@ class Player:
 
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def * self.level) + 1
-            self.CritDamageMod = self.CritDamageMod * ((0.0001 * self.level) + 1)
-            self.Vitality = self.Vitality * 0.8
+
+            while self.Def > max_def_stat:
+                self.Vitality = self.Vitality + 0.0001
+                self.Def = self.Def - 1
+
+            self.gain_crit_damage((0.0002 * self.level))
+            
 
         if themed_names[2] in self.PlayerName.lower():
             self.MHP = int(self.MHP / 2)
@@ -244,7 +250,7 @@ class Player:
             self.set_photo("Player".lower())
 
         if themed_names[7] in self.PlayerName.lower():
-            self.Vitality = self.Vitality * (0.02 * self.level)
+            self.MHP = int(self.MHP * 150)
 
         if themed_names[8] in self.PlayerName.lower():
             self.Regain = self.Regain * (0.0002 * self.level)
