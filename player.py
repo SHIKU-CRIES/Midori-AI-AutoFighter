@@ -93,8 +93,12 @@ class Player:
                     self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.0003) + 0.001
                     self.DodgeOdds: float = self.DodgeOdds + float(past_life_data['DodgeOdds'] * 0.0025) + 0.01
 
-                    if past_life_data['Vitality'] > self.Vitality:
-                        self.Vitality = self.Vitality + ((past_life_data['Vitality'] / 10) - 1)
+                    if past_life_data['Vitality'] < 0:
+                        print("Vitality is negative. Deleting past life file.")
+                        os.remove(filename)
+
+                    elif past_life_data['Vitality'] > self.Vitality:
+                        self.Vitality = self.Vitality + ((past_life_data['Vitality'] / 100))
                     
                     self.check_stats()
 
