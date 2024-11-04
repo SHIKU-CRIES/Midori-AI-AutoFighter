@@ -347,6 +347,7 @@ def main(level):
 
 
             # Render the screen            
+            screen.fill(0, 0, 0)
             screen.blit(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
             # Draw the player's name
