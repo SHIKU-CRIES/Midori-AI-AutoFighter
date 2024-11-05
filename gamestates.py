@@ -236,7 +236,8 @@ def main(level):
         # Initialize timers for both players before the main loop
         last_player_toss = pygame.time.get_ticks() 
         last_foe_toss = pygame.time.get_ticks()
-        last_hp_update = pygame.time.get_ticks()
+        player_last_hp_update = pygame.time.get_ticks()
+        foe_last_hp_update = pygame.time.get_ticks()
         toss_interval = 1000 / 60  # 1 second in milliseconds
 
 
@@ -255,7 +256,7 @@ def main(level):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_u:
                         print("Key press seen, trying to lower stats")
-                        while player.MHP > 1000:
+                        while player.MHP > 10000:
                             print("Lowering MHP")
                             player.MHP -= 100
                             player.Vitality = player.Vitality + 0.000001
@@ -287,7 +288,7 @@ def main(level):
 
                         while player.DodgeOdds > 1:
                             print("Lowering DodgeOdds")
-                            player.DodgeOdds = player.DodgeOdds / 2
+                            player.DodgeOdds = player.DodgeOdds - 0.001
                             player.Vitality = player.Vitality + 0.000001
 
             enrage_timer.check_timeout()
@@ -305,10 +306,13 @@ def main(level):
             toss_velocity = max(80, 2 * min(bleed_mod, 55))
 
             current_time = pygame.time.get_ticks()
-            if current_time - last_hp_update >= (1000 / max(foe.Vitality, player.Vitality, 1)):
+            if current_time - player_last_hp_update >= (1000 / max(player.Vitality, 1)):
                 player.HP = player.HP + int((player.Regain * (player.Vitality ** 5)) * 100) - int((player.Bleed * bleed_mod) / player.Def)
+                player_last_hp_update = current_time
+
+            if current_time - foe_last_hp_update >= (1000 / max(foe.Vitality, 1)):
                 foe.HP = foe.HP + int((foe.Regain * (foe.Vitality ** 5)) * 100) - int((foe.Bleed * bleed_mod) / foe.Def)
-                last_hp_update = current_time
+                foe_last_hp_update = current_time
 
             if player.HP < 1:
                 log(red, "you lose... restart game to load a new buffed save file")
@@ -424,7 +428,10 @@ def main(level):
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
-            if player.Vitality > 1:
+            if player.Vitality > 1.01:
+                stat_data.append(("Vitality:", f"{(player.Vitality):.2f}x"))
+
+            elif player.Vitality > 1.00001:
                 stat_data.append(("Vitality:", f"{(player.Vitality):.5f}x"))
 
             elif player.level > 300:
