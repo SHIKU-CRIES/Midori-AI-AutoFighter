@@ -16,7 +16,7 @@ def log(color, text):
 
 def debug_log(text):
     with open("debug_log.txt", "a") as f:
-        f.write(text)
+        f.write(f"\n{text}")
     
     return text
 
