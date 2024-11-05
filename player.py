@@ -654,6 +654,18 @@ class Player:
             self.DodgeOdds += dodgeodds_up / 5
 
         self.check_stats()
+
+        print(f"Name: {self.PlayerName}")
+        print(f"Level: {self.level}")
+        print(f"MHP: {self.MHP}")
+        print(f"HP: {self.HP}")
+        print(f"Defense: {self.Def}")
+        print(f"Attack: {self.Atk}")
+        print(f"Regain: {self.Regain}")
+        print(f"Vitality: {self.Vitality}")
+        print(f"Crit Rate: {self.CritRate}")
+        print(f"Crit Damage Modifier: {self.CritDamageMod}")
+        print(f"Dodge Odds: {self.DodgeOdds}")
     
     def set_level(self, level):
         self.level = level
@@ -708,7 +720,7 @@ class Player:
         self.Atk = self.Atk + int(50 * (level / top_level))
         self.Def = self.Def + int(60 * (level / top_level))
         self.gain_crit_rate(0.002 * (level / top_level))
-        self.Vitality = max((self.Vitality * (level / top_level)), 1)
+        self.Vitality = max((self.Vitality * (level / (top_level * 4))), 0.75)
         self.DodgeOdds = self.DodgeOdds * (level / top_level)
 
         self.check_stats()
