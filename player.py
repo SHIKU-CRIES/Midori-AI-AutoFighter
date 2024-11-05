@@ -97,7 +97,7 @@ class Player:
                         print("Vitality is negative. Deleting past life file.")
                         os.remove(filename)
 
-                    elif past_life_data['Vitality'] > 1.000001:
+                    elif past_life_data['Vitality'] > self.Vitality:
                         self.Vitality = self.Vitality + ((past_life_data['Vitality'] / 1000))
                     
                     self.check_stats()
