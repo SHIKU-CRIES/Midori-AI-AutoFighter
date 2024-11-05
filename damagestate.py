@@ -11,7 +11,6 @@ white = Fore.WHITE
 
 def log(color, text):
     print(color + text + Style.RESET_ALL)
-    debug_log(text)
     return text
 
 def debug_log(text):
