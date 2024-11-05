@@ -250,6 +250,8 @@ class Player:
             tempname = self.PlayerName
             self.load_mimic()
             self.MHP = int(self.MHP / ((10000 / self.level) + 1))
+            self.Atk = int(self.Atk / 5)
+            self.Def = int(self.Def / 4)
             self.Regain = self.Regain / 5
             self.Vitality = self.Vitality / 4
             self.PlayerName = tempname
