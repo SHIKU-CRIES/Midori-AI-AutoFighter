@@ -17,6 +17,8 @@ def log(color, text):
 def debug_log(text):
     with open("debug_log.txt", "a") as f:
         f.write(text)
+    
+    return text
 
 def take_damage(source: Player, target: Player, fight_env_list: list):
     """
@@ -41,7 +43,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
         source_vit = (source.Vitality ** 3)
         target_vit = (target.Vitality ** 5)
         def_val = (target.Def / def_mod)
-        text_to_log = log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
+        text_to_log = debug_log(f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
 
         if source.CritRate >= random.random():
             mited_damage_dealt = (((damage_dealt * enrage_buff) / ((target.Def / def_mod) * (target.Vitality ** 5))) * source.CritDamageMod) * max(1, source.CritRate)
