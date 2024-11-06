@@ -275,11 +275,11 @@ def main(level):
 
             current_time = pygame.time.get_ticks()
             if current_time - player_last_hp_update >= (1000 / max(player.Vitality, 1)):
-                player.HP = player.HP + int((player.Regain * (player.Vitality ** 5)) * 100) - int((player.Bleed * bleed_mod) / player.Def)
+                player.HP = player.HP + int(player.Regain * (player.Vitality ** 5)) - int((player.Bleed * bleed_mod) / player.Def)
                 player_last_hp_update = current_time
 
             if current_time - foe_last_hp_update >= (1000 / max(foe.Vitality, 1)):
-                foe.HP = foe.HP + int((foe.Regain * (foe.Vitality ** 5)) * 100) - int((foe.Bleed * bleed_mod) / foe.Def)
+                foe.HP = foe.HP + int(foe.Regain * (foe.Vitality ** 5)) - int((foe.Bleed * bleed_mod) / foe.Def)
                 foe_last_hp_update = current_time
 
             if player.HP < 1:
