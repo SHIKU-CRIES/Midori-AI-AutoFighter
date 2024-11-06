@@ -673,10 +673,10 @@ class Player:
     
     def set_level(self, level):
         self.level = level
-        self.MHP: int = random.randint(15 * self.level, 25 * self.level) + 100
+        self.MHP: int = random.randint(150 * self.level, 250 * self.level) + 100
         self.HP: int = self.MHP
         self.Def: int = self.Def + int(self.MHP * (0.00005 * self.level)) + 50
-        self.Atk: int = random.randint(10 * self.level, 45 * self.level) + (self.level * 2)
+        self.Atk: int = random.randint(10 * self.level, 35 * self.level) + (self.level * 2)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
         self.CritDamageMod: float = 2 + (self.level * 0.0025)
