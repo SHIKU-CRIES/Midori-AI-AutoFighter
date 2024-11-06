@@ -84,10 +84,10 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + int(past_life_data['MHP'] / 10000) + 100
+                    self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] / 10000) + 100)
                     self.HP: int = self.MHP
-                    self.Def: int = self.Def + int(past_life_data['Def'] / 1000) + 100
-                    self.Atk: int = self.Atk + int(past_life_data['Atk'] / 1000) + 200
+                    self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def'] / 1000) + 100)
+                    self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk'] / 1000) + 200)
                     self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.01
                     self.CritRate: float = self.CritRate + float(past_life_data['CritRate'] * 0.001) + 0.01
                     self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.0003) + 0.001
@@ -176,6 +176,17 @@ class Player:
             desired_increase = points
 
         self.CritDamageMod += desired_increase 
+    
+    def check_base_stats(self, stat_total, stat_gain):
+        stats_to_start_lower = 10000
+        to_be_lowered_by = 5
+
+        if stat_total > stats_to_start_lower:
+            desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
+        else:
+            desired_increase = stat_gain
+
+        return int(desired_increase) 
 
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
 #themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray"]
@@ -605,17 +616,6 @@ class Player:
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
-    
-    def check_base_stats(self, stat_total, stat_gain):
-        stats_to_start_lower = 10000
-        to_be_lowered_by = 5
-
-        if stat_total > stats_to_start_lower:
-            desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
-        else:
-            desired_increase = stat_gain
-
-        return int(desired_increase) 
 
     def level_up(self, mod=1):
         """
