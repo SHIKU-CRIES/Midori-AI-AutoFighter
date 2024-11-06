@@ -597,9 +597,6 @@ class Player:
         if self.CritRate > max_crit_rate:
             self.CritRate = max_crit_rate
 
-        if self.Vitality < 0.9:
-            print("Warning Vitality is low... numbers are wrong?")
-
         if self.Vitality < 0.1:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
@@ -611,12 +608,12 @@ class Player:
         from gamestates import display_stats_menu
         self.level += 1
 
-        mod_fixed = (mod * 0.0015) + 1
+        mod_fixed = (mod * 0.15) + 1
         int_mod = int(mod_fixed)
 
-        hp_up: int = random.randint(25 * self.level, 55 * self.level) * int_mod
-        def_up: int = random.randint(5 * self.level, 20 * self.level) * int_mod
-        atk_up: int = random.randint(15 * self.level, 35 * self.level) * int_mod
+        hp_up: int = random.randint(25 * self.level, 55 * self.level * int_mod)
+        def_up: int = random.randint(5 * self.level, 20 * self.level * int_mod)
+        atk_up: int = random.randint(15 * self.level, 35 * self.level * int_mod)
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
@@ -726,7 +723,7 @@ class Player:
         self.Atk = self.Atk + int(50 * (level / top_level))
         self.Def = self.Def + int(60 * (level / top_level))
         self.gain_crit_rate(0.002 * (level / top_level_full))
-        self.Vitality = max((self.Vitality * (level / (top_level_full * 1))), 0.75)
+        self.Vitality = max((self.Vitality * (level / (top_level_full * 2))), 0.25)
         self.DodgeOdds = self.DodgeOdds * (level / top_level_full)
 
         self.check_stats()
