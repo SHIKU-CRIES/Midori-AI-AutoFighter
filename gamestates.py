@@ -199,8 +199,6 @@ def main(level):
         player.DamageDealt = 0
         player.DamageTaken = 0
 
-        take_vitality = False
-
         if level < player.level:
             level = player.level + 1
         
@@ -255,10 +253,6 @@ def main(level):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_u:
-                        print("Key press seen, trying to lower stats on next level up")
-                        take_vitality = True
 
             enrage_timer.check_timeout()
             
@@ -294,7 +288,7 @@ def main(level):
                 log(white, "Saving Data")
                 level = level + 1
                 log(white, "The foe has leveled up")
-                player.level_up(mod=bleed_mod, vit=take_vitality)
+                player.level_up(mod=bleed_mod)
                 player.save()
                 break
             elif foe.HP > foe.MHP:
