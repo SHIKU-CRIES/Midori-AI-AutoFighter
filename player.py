@@ -581,9 +581,10 @@ class Player:
     def check_stats(self):
         max_dodgeodds = 5000
         max_crit_rate = 5
+        def_up = 0
 
         while self.DodgeOdds > (max_dodgeodds + 0.01):
-            self.Def = self.Def + 1
+            def_up = def_up + 1
             self.gain_crit_rate(0.0001)
             self.DodgeOdds = self.DodgeOdds - 0.001
 
@@ -596,6 +597,10 @@ class Player:
 
         if self.CritRate > max_crit_rate:
             self.CritRate = max_crit_rate
+        
+        if def_up > 1:
+            def_up = self.check_base_stats(self.Def, def_up)
+            self.Def = self.Def + def_up
 
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
