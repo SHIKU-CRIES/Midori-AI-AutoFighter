@@ -602,10 +602,11 @@ class Player:
             self.Vitality = 1
     
     def check_base_stats(self, stat_total, stat_gain):
-        to_be_lowered_by = 10
+        stats_to_start_lower = 10000
+        to_be_lowered_by = 5
 
-        if stat_total > 10000:
-            desired_increase = stat_gain / ((to_be_lowered_by * (stat_total // 250)) + 1)
+        if stat_total > stats_to_start_lower:
+            desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
         else:
             desired_increase = stat_gain
 
