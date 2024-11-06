@@ -397,14 +397,14 @@ def main(level):
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
+            if player.level > 300:
+                stat_data.append(("Now Gaining:", "Vitality"))
+
             if player.Vitality > 1.01:
                 stat_data.append(("Vitality:", f"{(player.Vitality):.2f}x"))
 
             elif player.Vitality > 1.00001:
                 stat_data.append(("Vitality:", f"{(player.Vitality):.5f}x"))
-
-            elif player.level > 300:
-                stat_data.append(("Press `U` to gain Vitality:", f"{(player.Vitality):.6f}x"))
 
             if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
