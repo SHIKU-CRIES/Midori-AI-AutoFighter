@@ -604,7 +604,7 @@ class Player:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
 
-    def level_up(self, mod=1):
+    def level_up(self, mod=1, vit=False):
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
         """
@@ -621,37 +621,67 @@ class Player:
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.0002 * self.level, 0.0004 * self.level) * mod_fixed
+        vitality_up: float = random.uniform(0.00000001 * self.level, 0.00000002 * self.level) * max((mod_fixed / 100), 1)
 
         # Autopick logic
         if os.path.exists("auto.pick"):
             choice = 9
         else:
             choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt)
+        
+        if vit:
+            if choice == 1:
+                self.MHP += int(hp_up / 100)
+                self.HP += int(hp_up / 100)
+            elif choice == 2:
+                self.Def += int(def_up / 100)
+            elif choice == 3:
+                self.Atk += int(atk_up / 100)
+            elif choice == 5:
+                self.Regain += regain_up / 100
+            elif choice == 6:
+                self.gain_crit_rate(critrate_up / 100)
+            elif choice == 7:
+                self.gain_crit_damage(critdamage_up / 100)
+            elif choice == 8:
+                self.DodgeOdds += dodgeodds_up / 100
+            elif choice == 9:
+                self.MHP += int(hp_up / 500)
+                self.HP += int(hp_up / 500)
+                self.Def += int(def_up / 500)
+                self.Atk += int(atk_up / 500)
+                self.Regain += regain_up / 500
+                self.gain_crit_rate(critrate_up / 500)
+                self.gain_crit_damage(critdamage_up / 500)
+                self.DodgeOdds += dodgeodds_up / 500
+            
+            self.Vitality += vitality_up
 
-        if choice == 1:
-            self.MHP += int(hp_up)
-            self.HP += int(hp_up)
-        elif choice == 2:
-            self.Def += int(def_up)
-        elif choice == 3:
-            self.Atk += int(atk_up)
-        elif choice == 5:
-            self.Regain += regain_up
-        elif choice == 6:
-            self.gain_crit_rate(critrate_up)
-        elif choice == 7:
-            self.gain_crit_damage(critdamage_up)
-        elif choice == 8:
-            self.DodgeOdds += dodgeodds_up
-        elif choice == 9:
-            self.MHP += int(hp_up / 5)
-            self.HP += int(hp_up / 5)
-            self.Def += int(def_up / 5)
-            self.Atk += int(atk_up / 5)
-            self.Regain += regain_up / 5
-            self.gain_crit_rate(critrate_up / 5)
-            self.gain_crit_damage(critdamage_up / 5)
-            self.DodgeOdds += dodgeodds_up / 5
+        else:
+            if choice == 1:
+                self.MHP += int(hp_up)
+                self.HP += int(hp_up)
+            elif choice == 2:
+                self.Def += int(def_up)
+            elif choice == 3:
+                self.Atk += int(atk_up)
+            elif choice == 5:
+                self.Regain += regain_up
+            elif choice == 6:
+                self.gain_crit_rate(critrate_up)
+            elif choice == 7:
+                self.gain_crit_damage(critdamage_up)
+            elif choice == 8:
+                self.DodgeOdds += dodgeodds_up
+            elif choice == 9:
+                self.MHP += int(hp_up / 5)
+                self.HP += int(hp_up / 5)
+                self.Def += int(def_up / 5)
+                self.Atk += int(atk_up / 5)
+                self.Regain += regain_up / 5
+                self.gain_crit_rate(critrate_up / 5)
+                self.gain_crit_damage(critdamage_up / 5)
+                self.DodgeOdds += dodgeodds_up / 5
 
         self.check_stats()
 
