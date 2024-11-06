@@ -611,7 +611,7 @@ class Player:
         from gamestates import display_stats_menu
         self.level += 1
 
-        mod_fixed = (mod * 0.15) + 1
+        mod_fixed = (mod * 0.0015) + 1
         int_mod = int(mod_fixed)
 
         hp_up: int = random.randint(25 * self.level, 55 * self.level) * int_mod
