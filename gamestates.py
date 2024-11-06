@@ -192,7 +192,7 @@ def main(level):
     background_image.set_alpha(128)
 
     pygame.mixer.music.set_volume(0.05)
-    music = pygame.mixer.music.load('path/to/music.mp3')
+    music = pygame.mixer.music.load(set_bg_music())
     pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
 
     if player.level < 5:
