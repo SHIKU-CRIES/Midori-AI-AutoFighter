@@ -294,7 +294,7 @@ def main(level):
                 log(white, "Saving Data")
                 level = level + 1
                 log(white, "The foe has leveled up")
-                player.level_up(mod=bleed_mod,)
+                player.level_up(mod=bleed_mod, vit=take_vitality)
                 player.save()
                 break
             elif foe.HP > foe.MHP:
