@@ -10,7 +10,7 @@ cp -r -t . /game-code/*
 
 uv sync
 uv pip install pyinstaller
-uv run pyinstaller --onefile --add-data photos:photos --clean main.py
+uv run pyinstaller --onefile --add-data photos:photos --add-data music:music --clean main.py
 
 mv dist/main ../../output/linux/linux_game
 

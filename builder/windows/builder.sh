@@ -16,7 +16,7 @@ WINEPREFIX=$TMPDIR xvfb-run wine python-3.12.7-amd64.exe /quiet InstallAllUsers=
 WINEPREFIX=$TMPDIR xvfb-run wine python -m ensurepip
 WINEPREFIX=$TMPDIR xvfb-run wine python -m pip install --upgrade pip
 WINEPREFIX=$TMPDIR xvfb-run wine python -m pip install colorama pygame pyinstaller
-WINEPREFIX=$TMPDIR xvfb-run wine pyinstaller --onefile --add-data photos:photos --clean main.py
+WINEPREFIX=$TMPDIR xvfb-run wine pyinstaller --onefile --add-data photos:photos --add-data music:music --clean main.py
 
 mv dist/main.exe ../../output/windows/windows_game.exe
 
