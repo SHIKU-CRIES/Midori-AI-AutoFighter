@@ -52,6 +52,8 @@ class Player:
         except Exception as e:
             print(f"Error loading save file: {e}")
 
+        self.check_stats()
+
     def set_photo(self, photo):
         if os.path.exists(resource_path(os.path.join("photos", f"{photo}.png"))):
             self.photo: str = resource_path(os.path.join("photos", f"{photo}.png"))
@@ -616,6 +618,9 @@ class Player:
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
+        
+        if self.MHP > 20000000000:
+            self.MHP = 1
 
     def level_up(self, mod=1):
         """
