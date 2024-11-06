@@ -186,7 +186,7 @@ class Player:
             max_hp_debuff = self.MHP / 8
 
             while self.MHP > max_hp_debuff:
-                dodge_buff = dodge_buff + 0.0000004
+                dodge_buff = dodge_buff + 0.0000008
                 self.MHP = self.MHP - 1
 
             self.Atk = int(self.Atk * 1)
@@ -227,7 +227,7 @@ class Player:
             
 
         if themed_names[2] in self.PlayerName.lower():
-            self.MHP = int(self.MHP / 2)
+            self.MHP = int(self.MHP * 15)
             self.Atk = int(self.Atk * 8)
             self.CritRate = self.CritRate / 1000
 
