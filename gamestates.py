@@ -256,37 +256,37 @@ def main(level):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_u:
                         print("Key press seen, trying to lower stats")
-                        while player.MHP > 10000:
+                        if player.MHP > 10000:
                             print("Lowering MHP")
                             player.MHP -= 100
                             player.Vitality = player.Vitality + 0.000001
 
-                        while player.Atk > 1000:
+                        if player.Atk > 1000:
                             print("Lowering Atk")
                             player.Atk -= 100
                             player.Vitality = player.Vitality + 0.000001
 
-                        while player.Def > 1000:
+                        if player.Def > 1000:
                             print("Lowering Def")
                             player.Def -= 100
                             player.Vitality = player.Vitality + 0.000001
 
-                        while player.CritRate > 0.5:
+                        if player.CritRate > 0.5:
                             print("Lowering CritRate")
                             player.CritRate = player.CritRate - 0.1
                             player.Vitality = player.Vitality + 0.000001
 
-                        while player.CritDamageMod > 2:
+                        if player.CritDamageMod > 2:
                             print("Lowering CritDamageMod")
                             player.CritDamageMod = player.CritDamageMod - 1
                             player.Vitality = player.Vitality + 0.000001
 
-                        while player.Regain > 1:
+                        if player.Regain > 0.1:
                             print("Lowering Regain")
                             player.Regain = player.Regain - 0.1
                             player.Vitality = player.Vitality + 0.000001
 
-                        while player.DodgeOdds > 1:
+                        if player.DodgeOdds > 0.1:
                             print("Lowering DodgeOdds")
                             player.DodgeOdds = player.DodgeOdds - 0.001
                             player.Vitality = player.Vitality + 0.000001
