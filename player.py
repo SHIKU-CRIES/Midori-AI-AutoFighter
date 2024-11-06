@@ -611,9 +611,9 @@ class Player:
         mod_fixed = (mod * 0.15) + 1
         int_mod = int(mod_fixed)
         
-        hp_up: int = random.randint(25 * self.level, 55 * self.level * int_mod) // ((1000 // self.MHP) + 1)
-        def_up: int = random.randint(5 * self.level, 20 * self.level * int_mod) // ((1000 // self.Def) + 1)
-        atk_up: int = random.randint(15 * self.level, 35 * self.level * int_mod) // ((1000 // self.Atk) + 1)
+        hp_up: int = random.randint(25 * self.level, 55 * self.level * int_mod) // ((1000 / self.MHP) + 1)
+        def_up: int = random.randint(5 * self.level, 20 * self.level * int_mod) // ((1000 / self.Def) + 1)
+        atk_up: int = random.randint(15 * self.level, 35 * self.level * int_mod) // ((1000 / self.Atk) + 1)
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
