@@ -13,6 +13,7 @@ from timerhelper import timmer
 from damagestate import take_damage
 
 from load_photos import set_bg_photo
+from load_photos import set_bg_music
 
 from themedstuff import themed_ajt
 from themedstuff import themed_names
@@ -189,6 +190,10 @@ def main(level):
     background_image = pygame.image.load(background_file_name)
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     background_image.set_alpha(128)
+
+    pygame.mixer.music.set_volume(0.05)
+    music = pygame.mixer.music.load('path/to/music.mp3')
+    pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
 
     if player.level < 5:
         player.load_past_lives()

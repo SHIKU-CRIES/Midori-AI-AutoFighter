@@ -20,3 +20,8 @@ def set_bg_photo():
     """ Sets the background photo to be displayed. """
     photos = os.listdir(resource_path(os.path.join("photos", "background")))
     return resource_path(os.path.join(os.path.join("photos", "background"), f"{random.choice(photos)}"))
+
+def set_bg_music():
+    """ Sets the background music to be played. """
+    musices = os.listdir(resource_path(os.path.join("music", "background")))
+    return resource_path(os.path.join(os.path.join("music", "background"), f"{random.choice(musices)}"))
