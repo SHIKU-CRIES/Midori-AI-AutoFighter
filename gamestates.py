@@ -191,7 +191,7 @@ def main(level):
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     background_image.set_alpha(128)
 
-    pygame.mixer.music.set_volume(0.05)
+    pygame.mixer.music.set_volume(0.05 / 2)
     music = pygame.mixer.music.load(set_bg_music())
     pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
 
