@@ -600,6 +600,16 @@ class Player:
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
+    
+    def check_base_stats(self, stat_total, stat_gain):
+        to_be_lowered_by = 100
+
+        if stat_total > 10000:
+            desired_increase = stat_gain / ((to_be_lowered_by * (stat_total // 10)) + 1)
+        else:
+            desired_increase = stat_gain
+
+        return int(desired_increase) 
 
     def level_up(self, mod=1):
         """
@@ -611,14 +621,18 @@ class Player:
         mod_fixed = (mod * 0.15) + 1
         int_mod = int(mod_fixed)
         
-        hp_up: int = random.randint(25 * self.level, 55 * self.level * int_mod) // (int(1000 / self.MHP) + 1)
-        def_up: int = random.randint(5 * self.level, 20 * self.level * int_mod) // (int(1000 / self.Def) + 1)
-        atk_up: int = random.randint(15 * self.level, 35 * self.level * int_mod) // (int(1000 / self.Atk) + 1)
+        hp_up: int = random.randint(25 * self.level, 55 * self.level * int_mod)
+        def_up: int = random.randint(5 * self.level, 20 * self.level * int_mod)
+        atk_up: int = random.randint(15 * self.level, 35 * self.level * int_mod)
         regain_up: float = random.uniform(0.001 * self.level, 0.005 * self.level) * mod_fixed
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.0002 * self.level, 0.0004 * self.level) * mod_fixed
         vitality_up: float = random.uniform(0.00000001 * self.level, 0.00000004 * self.level) * max((mod_fixed / 100), 1)
+
+        hp_up = self.check_base_stats(self.MHP, hp_up)
+        def_up = self.check_base_stats(self.Def, def_up)
+        atk_up = self.check_base_stats(self.Atk, atk_up)
 
         # Autopick logic
         if os.path.exists("auto.pick"):
