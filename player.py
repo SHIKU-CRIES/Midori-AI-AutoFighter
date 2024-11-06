@@ -619,6 +619,13 @@ class Player:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
         
+        ### Checking for hackers
+        if self.level > 500:
+            if self.Vitality == 1:
+                print("Hacking games is wrong, and you should not do that ;)")
+                os.remove(f'{self.PlayerName}.dat')
+                exit(404)
+        
         if self.MHP > 20000000000:
             self.MHP = 1
 
