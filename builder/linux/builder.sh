@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Create a temporary directory for the Wine prefix
 TMPDIR=$(pwd)/.python
 
-# Create a Wine prefix in the temporary directory
 mkdir .python
 
 # Change to the temporary directory

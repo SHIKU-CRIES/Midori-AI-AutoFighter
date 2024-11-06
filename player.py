@@ -220,7 +220,7 @@ class Player:
             self.Def = int(self.Def * self.level) + 1
 
             if self.Def > max_def_stat:
-                self.Vitality = self.Vitality + (self.Def / 1000000)
+                self.Vitality = self.Vitality + (self.Def / 1000000000)
                 self.Def = int(self.Def / 100)
 
             self.gain_crit_damage((0.0002 * self.level))
@@ -244,7 +244,7 @@ class Player:
             self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
 
         if themed_names[5] in self.PlayerName.lower():
-            self.Vitality = self.Vitality * (0.02 * self.level)
+            self.Vitality = self.Vitality * (0.0002 * self.level)
 
         if themed_names[6] in self.PlayerName.lower():
             tempname = self.PlayerName
