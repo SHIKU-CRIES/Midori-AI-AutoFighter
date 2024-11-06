@@ -244,7 +244,7 @@ class Player:
             self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
 
         if themed_names[5] in self.PlayerName.lower():
-            self.Vitality = self.Vitality * (0.0002 * self.level)
+            self.Vitality = self.Vitality + (0.002 * self.level)
 
         if themed_names[6] in self.PlayerName.lower():
             tempname = self.PlayerName
