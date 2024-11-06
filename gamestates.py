@@ -391,9 +391,6 @@ def main(level):
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
-            if player.level > 300:
-                stat_data.append(("Now Gaining:", "Vitality"))
-
             if player.Vitality > 1.01:
                 stat_data.append(("Vitality:", f"{(player.Vitality):.2f}x"))
 
