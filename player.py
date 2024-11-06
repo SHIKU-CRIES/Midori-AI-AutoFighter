@@ -719,13 +719,15 @@ class Player:
         self.check_stats()
         self.check_name_mod()
 
-        top_level = 1000
+        top_level = 500
+        top_level_full = 1000
 
+        self.MHP = self.MHP + int(100 * (level / top_level))
         self.Atk = self.Atk + int(50 * (level / top_level))
         self.Def = self.Def + int(60 * (level / top_level))
-        self.gain_crit_rate(0.002 * (level / top_level))
-        self.Vitality = max((self.Vitality * (level / (top_level * 1))), 0.75)
-        self.DodgeOdds = self.DodgeOdds * (level / top_level)
+        self.gain_crit_rate(0.002 * (level / top_level_full))
+        self.Vitality = max((self.Vitality * (level / (top_level_full * 1))), 0.75)
+        self.DodgeOdds = self.DodgeOdds * (level / top_level_full)
 
         self.check_stats()
 
