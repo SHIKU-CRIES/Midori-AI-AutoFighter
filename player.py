@@ -724,7 +724,7 @@ class Player:
         self.Atk = self.Atk + int(50 * (level / top_level))
         self.Def = self.Def + int(60 * (level / top_level))
         self.gain_crit_rate(0.002 * (level / top_level))
-        self.Vitality = max((self.Vitality * (level / (top_level * 4))), 0.75)
+        self.Vitality = max((self.Vitality * (level / (top_level * 2))), 0.75)
         self.DodgeOdds = self.DodgeOdds * (level / top_level)
 
         self.check_stats()
