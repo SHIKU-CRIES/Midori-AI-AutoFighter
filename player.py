@@ -722,7 +722,7 @@ class Player:
             self.MHP = self.MHP + (1000 * bonus_levels)
             self.Atk = self.Atk + (20 * bonus_levels)
             self.Def = self.Def - (12 * bonus_levels)
-            self.Vitality = self.Vitality + (0.0001 * (bonus_levels * level))
+            self.Vitality = self.Vitality + (0.0006 * (bonus_levels * level))
 
         if level > 100:
             self.MHP = self.MHP + (4 * level)
