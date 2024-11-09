@@ -100,7 +100,7 @@ class Player:
                         os.remove(filename)
 
                     elif past_life_data['Vitality'] > 1.0000001:
-                        self.Vitality = self.Vitality + ((past_life_data['Vitality'] - 1) / ((self.Vitality ** 15) + 100))
+                        self.Vitality = self.Vitality + max(((past_life_data['Vitality'] - 1) / ((self.Vitality ** 15) + 100)), 0.000001 * 0.00001)
                     
                     self.check_stats()
 
@@ -683,7 +683,7 @@ class Player:
                 self.gain_crit_rate(critrate_up / 10)
                 self.gain_crit_damage(critdamage_up / 10)
                 self.DodgeOdds += dodgeodds_up / 10
-                
+
             else:
                 self.MHP += int(hp_up / 5)
                 self.HP += int(hp_up / 5)
