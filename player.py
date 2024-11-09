@@ -752,12 +752,13 @@ class Player:
         top_level_full = 100000
 
         pre_temp_vit = self.Vitality
+        post_temp_vit = (self.Vitality * (level / (top_level_full * 2)))
 
         self.MHP = self.MHP + int(100 * (level / top_level))
         self.Atk = self.Atk + int(50 * (level / top_level))
         self.Def = self.Def + int(60 * (level / top_level))
         self.gain_crit_rate(0.002 * (level / top_level_full))
-        self.Vitality = max((self.Vitality * (level / (top_level_full * 2))), 0.45)
+        self.Vitality = max(post_temp_vit, 0.45)
         self.DodgeOdds = self.DodgeOdds * (level / top_level_full)
 
         self.check_stats()
@@ -772,7 +773,8 @@ class Player:
         print(f"Attack: {self.Atk}")
         print(f"Regain: {self.Regain}")
         print(f"Raw Vitality: {pre_temp_vit}")
-        print(f"Vitality: {self.Vitality}")
+        print(f"Moded Vitality: {post_temp_vit}")
+        print(f"True Vitality: {self.Vitality}")
         print(f"Crit Rate: {self.CritRate}")
         print(f"Crit Damage Modifier: {self.CritDamageMod}")
         print(f"Dodge Odds: {self.DodgeOdds}")
