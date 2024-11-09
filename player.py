@@ -734,9 +734,9 @@ class Player:
             bonus_levels = (level - 50) // xyz
             self.MHP = self.MHP + (50 * bonus_levels)
             self.Atk = self.Atk + (15 * bonus_levels)
-            self.Def = self.Def - (12 * bonus_levels)
+            self.Def = self.Def + (12 * bonus_levels)
             self.Vitality = self.Vitality + (0.00003 * (bonus_levels * level))
-            self.CritRate = self.CritRate + (0.0000001 * (bonus_levels * level))
+            self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
         self.check_stats()
         self.check_name_mod()
