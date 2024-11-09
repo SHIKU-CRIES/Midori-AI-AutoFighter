@@ -754,9 +754,9 @@ class Player:
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full * 2)))
 
-        self.MHP = self.MHP + int(100 * (level / top_level))
-        self.Atk = self.Atk + int(50 * (level / top_level))
-        self.Def = self.Def + int(60 * (level / top_level))
+        self.MHP = int(self.MHP * (level / top_level))
+        self.Atk = int(self.Atk * (level / top_level))
+        self.Def = int(self.Def * (level / top_level))
         self.gain_crit_rate(0.002 * (level / top_level_full))
         self.Vitality = max(post_temp_vit, 0.045)
         self.DodgeOdds = self.DodgeOdds * (level / top_level_full)
