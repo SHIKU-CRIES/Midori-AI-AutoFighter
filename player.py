@@ -722,7 +722,7 @@ class Player:
             self.MHP = self.MHP + (1000 * bonus_levels)
             self.Atk = self.Atk + (20 * bonus_levels)
             self.Def = self.Def - (12 * bonus_levels)
-            self.Vitality = self.Vitality + (0.00002 * (bonus_levels * level))
+            self.Vitality = self.Vitality + (0.00003 * (bonus_levels * level))
 
         if level > 100:
             self.MHP = self.MHP + (4 * level)
@@ -749,7 +749,7 @@ class Player:
         self.check_name_mod()
 
         top_level = 1000
-        top_level_full = 100000
+        top_level_full = 10000
 
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full * 2)))
