@@ -675,6 +675,7 @@ class Player:
             self.DodgeOdds += dodgeodds_up
         elif choice == 9:
             if self.level > 300:
+                vitality_up *= 2
                 self.MHP += int(hp_up / 10)
                 self.HP += int(hp_up / 10)
                 self.Def += int(def_up / 10)
