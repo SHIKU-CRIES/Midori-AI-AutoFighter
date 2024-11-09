@@ -751,6 +751,8 @@ class Player:
         top_level = 50000
         top_level_full = 100000
 
+        pre_temp_vit = self.Vitality
+
         self.MHP = self.MHP + int(100 * (level / top_level))
         self.Atk = self.Atk + int(50 * (level / top_level))
         self.Def = self.Def + int(60 * (level / top_level))
@@ -769,6 +771,7 @@ class Player:
         print(f"Defense: {self.Def}")
         print(f"Attack: {self.Atk}")
         print(f"Regain: {self.Regain}")
+        print(f"Raw Vitality: {pre_temp_vit}")
         print(f"Vitality: {self.Vitality}")
         print(f"Crit Rate: {self.CritRate}")
         print(f"Crit Damage Modifier: {self.CritDamageMod}")
