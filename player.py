@@ -715,10 +715,10 @@ class Player:
     
     def set_level(self, level):
         self.level = level
-        self.MHP: int = random.randint(150 * self.level, 250 * self.level) + 100
+        self.MHP: int = random.randint(5 * self.level, 15 * self.level) + 100
         self.HP: int = self.MHP
         self.Def: int = self.Def + int(self.MHP * (0.00005 * self.level)) + 50
-        self.Atk: int = random.randint(10 * self.level, 35 * self.level) + (self.level * 2)
+        self.Atk: int = random.randint(10 * self.level, 20 * self.level) + (self.level * 2)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
         self.CritDamageMod: float = 2 + (self.level * 0.0025)
@@ -732,31 +732,11 @@ class Player:
             # Apply bonus every xyz levels past 10
             xyz = 10
             bonus_levels = (level - 50) // xyz
-            self.MHP = self.MHP + (1000 * bonus_levels)
-            self.Atk = self.Atk + (20 * bonus_levels)
+            self.MHP = self.MHP + (50 * bonus_levels)
+            self.Atk = self.Atk + (15 * bonus_levels)
             self.Def = self.Def - (12 * bonus_levels)
             self.Vitality = self.Vitality + (0.00003 * (bonus_levels * level))
-
-        if level > 100:
-            self.MHP = self.MHP + (4 * level)
-            self.Atk = self.Atk + (25 * level)
-            self.Def = self.Def + (5 * level)
-            self.Vitality = self.Vitality + (0.0002 * level)
-            self.CritRate = self.CritRate + 0.01
-
-        if level > 150:
-            self.MHP = self.MHP + (8 * level)
-            self.Atk = self.Atk + (30 * level)
-            self.Def = self.Def + (15 * level)
-            self.Vitality = self.Vitality + (0.0003 * level)
-            self.CritRate = self.CritRate + 0.05
-
-        if level > 200:
-            self.MHP = self.MHP + (16 * level)
-            self.Atk = self.Atk + (40 * level)
-            self.Def = self.Def + (30 * level)
-            self.Vitality = self.Vitality + (0.0004 * level)
-            self.CritRate = self.CritRate + 0.1
+            self.CritRate = self.CritRate + (0.01 * (bonus_levels * level))
 
         self.check_stats()
         self.check_name_mod()
