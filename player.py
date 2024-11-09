@@ -748,7 +748,7 @@ class Player:
         self.check_stats()
         self.check_name_mod()
 
-        top_level = 50000
+        top_level = 1000
         top_level_full = 100000
 
         pre_temp_vit = self.Vitality
