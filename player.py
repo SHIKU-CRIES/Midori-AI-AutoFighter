@@ -179,16 +179,16 @@ class Player:
 
         self.CritDamageMod += desired_increase 
     
-    def check_base_stats(self, stat_total, stat_gain):
+    def check_base_stats(self, stat_total: int, stat_gain:int):
         stats_to_start_lower = 10000
-        to_be_lowered_by = 5
+        to_be_lowered_by = 5 + (stat_total // 1000)
 
         if stat_total > stats_to_start_lower:
             desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
         else:
             desired_increase = stat_gain
 
-        return int(desired_increase) 
+        return max(int(desired_increase), 1) 
 
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
 #themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray"]
@@ -605,6 +605,7 @@ class Player:
             self.DodgeOdds = max_dodgeodds
 
         while self.CritRate > (max_crit_rate + 0.01):
+            def_up = def_up + 1
             self.gain_crit_damage(0.001)
             self.CritRate = self.CritRate - 0.0001
 
