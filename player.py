@@ -97,6 +97,16 @@ class Player:
                     self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.0003) + 0.001
                     self.DodgeOdds: float = self.DodgeOdds + float(past_life_data['DodgeOdds'] * 0.0025) + 0.01
 
+                    for item in past_life_data['Items']:
+                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
+                        self.HP: int = self.MHP
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, 50)
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50)
+                        self.Regain: float = self.Regain + 0.01
+                        self.CritRate: float = self.CritRate + 0.01
+                        self.CritDamageMod: float = self.CritDamageMod + 0.001
+                        self.DodgeOdds: float = self.DodgeOdds + 0.01
+
                     if past_life_data['Vitality'] < 0:
                         print("Vitality is negative. Deleting past life file.")
                         os.remove(filename)
