@@ -770,8 +770,8 @@ class Player:
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
             for i in range(int(bonus_levels)):
-                if len(self.Items) > random.randint(5, 15):
-                    random.choice(self.Items).upgrade(1)
+                if len(self.Items) > random.randint(5, 10):
+                    random.choice(self.Items).upgrade(2)
                 else:
                     self.Items.append(ItemType())
 
