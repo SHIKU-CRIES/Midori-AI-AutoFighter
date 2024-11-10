@@ -694,7 +694,7 @@ class Player:
             self.gain_crit_damage(critdamage_up)
         elif choice == 8:
             self.DodgeOdds += dodgeodds_up
-        elif choice == 9:            
+        elif choice == 9:
             if len(self.Items) < random.randint(5, 15):
                 self.Items.append(ItemType())
             else:
@@ -711,6 +711,9 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 4)
                 self.DodgeOdds += dodgeodds_up / 4
 
+                if len(self.Items) > 1:
+                    random.choice(self.Items).upgrade(mod_fixed)
+
             else:
                 self.MHP += int(hp_up / 2)
                 self.HP += int(hp_up / 2)
@@ -720,6 +723,9 @@ class Player:
                 self.gain_crit_rate(critrate_up / 2)
                 self.gain_crit_damage(critdamage_up / 2)
                 self.DodgeOdds += dodgeodds_up / 2
+                
+                if len(self.Items) > 1:
+                    random.choice(self.Items).upgrade(mod_fixed)
 
         if self.level > 300:
             self.Vitality += vitality_up
