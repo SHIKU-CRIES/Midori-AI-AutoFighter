@@ -400,6 +400,9 @@ def main(level):
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
+            if len(player.Items) > 0:
+                stat_data.append(("Blessings:", f"{len(player.Items)}"))
+
             if player.Vitality > 1.01:
                 stat_data.append(("Vitality:", f"{(player.Vitality):.2f}x"))
 
@@ -441,6 +444,9 @@ def main(level):
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
             ]
+
+            if len(foe.Items) > 0:
+                foe_stat_data.append(("Blessings:", f"{len(foe.Items)}"))
 
             if foe.Vitality > 1.5:
                 foe_stat_data.append(("Vitality:", f"{(foe.Vitality):.2f}x"))
