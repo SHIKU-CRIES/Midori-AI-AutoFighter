@@ -745,6 +745,9 @@ class Player:
             print(f"Name: {item.name}, Power: {item.power:.2f}")
     
     def set_level(self, level):
+        top_level = 1000
+        top_level_full = 5000
+
         self.level = level
         self.MHP: int = random.randint(5 * self.level, 15 * self.level) + 100
         self.HP: int = self.MHP
@@ -771,15 +774,12 @@ class Player:
 
             for i in range(int(bonus_levels)):
                 if len(self.Items) > random.randint(5, 10):
-                    random.choice(self.Items).upgrade(2)
+                    random.choice(self.Items).upgrade((level / 400))
                 else:
                     self.Items.append(ItemType())
 
         self.check_stats()
         self.check_name_mod()
-
-        top_level = 1000
-        top_level_full = 5000
 
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
