@@ -769,6 +769,12 @@ class Player:
             self.Vitality = self.Vitality + (0.00003 * (bonus_levels * level))
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
+            for i in range(int(bonus_levels)):
+                if len(self.Items) > random.randint(5, 15):
+                    random.choice(self.Items).upgrade(1)
+                else:
+                    self.Items.append(ItemType())
+
         self.check_stats()
         self.check_name_mod()
 
