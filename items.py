@@ -8,9 +8,9 @@ class ItemType():
         self.power = random.uniform(1.001, 1.2)
         self.name = "Blessing of " + self.type[0]
 
-    def upgrade(self):
+    def upgrade(self, mod_fixed):
         """Upgrades the item's power stat."""
-        self.power += random.uniform(0.01, 0.1)
+        self.power += (random.uniform(0.01, 0.1) * mod_fixed)
 
     def on_damage_taken(self, pre_damage_taken: float):
         """This function is called when the player takes damage.
