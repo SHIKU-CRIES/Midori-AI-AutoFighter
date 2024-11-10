@@ -51,7 +51,7 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         ('CritRate', critrate_up),
         ('CritDamageMod', critdamage_up),
         ('DodgeOdds', dodgeodds_up),
-        ('Get a random blessing', 1)
+        ('Random Blessing Or Upgrade Blessing', 1)
     ]
 
     menu_stats = [

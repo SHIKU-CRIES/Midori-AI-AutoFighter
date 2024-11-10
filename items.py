@@ -9,14 +9,8 @@ class ItemType():
         self.name = "Blessing of " + self.type[0]
 
     def upgrade(self):
-        """Upgrades the item to a random new type."""
-        item_types = ["damage", "defense", "utility"]
-        for current_type in self.type:
-            item_types.remove(current_type)
-        if len(item_types) == 0:
-            raise Exception("Cannot upgrade item with all types")
-        new_type = random.choice(item_types)
-        self.type.append(new_type)
+        """Upgrades the item's power stat."""
+        self.power += random.uniform(0.01, 0.1)
 
     def on_damage_taken(self, pre_damage_taken: float):
         """This function is called when the player takes damage.

@@ -683,11 +683,8 @@ class Player:
             if len(self.Items) < 5:
                 self.Items.append(ItemType())
             else:
-                if random.choice([True, False, False, False]):
-                    try:
-                        random.choice(self.Items).upgrade()
-                    except Exception as e:
-                        print(f"Failed to upgrade item: {e}")
+                if random.choice([True, True, True, False]):
+                    random.choice(self.Items).upgrade()
                 else:
                     self.Items.append(ItemType())
         elif choice == 10:
