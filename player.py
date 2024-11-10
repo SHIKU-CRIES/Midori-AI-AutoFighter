@@ -683,7 +683,7 @@ class Player:
             if len(self.Items) < 5:
                 self.Items.append(ItemType())
             else:
-                if random.choice([True, False]):
+                if random.choice([True, False, False, False]):
                     try:
                         random.choice(self.Items).upgrade()
                     except Exception as e:
