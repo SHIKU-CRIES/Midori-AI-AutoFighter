@@ -28,7 +28,7 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
                 before_damage = mited_damage_dealt
                 mited_damage_dealt = item.on_damage_dealt(mited_damage_dealt)
                 source.DamageDealt += int(mited_damage_dealt)
-                log(white, f"Item effect from {source.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
+                log(white, f"Damage Buff effect from {source.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
             except Exception as error:
                 continue
 
@@ -39,7 +39,7 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
                 before_damage = mited_damage_dealt
                 mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
                 target.DamageTaken += int(mited_damage_dealt)
-                log(white, f"Item effect from {target.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
+                log(white, f"Damage Mit effect from {target.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
             except Exception as error:
                 continue
 
