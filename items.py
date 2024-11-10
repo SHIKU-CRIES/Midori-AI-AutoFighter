@@ -5,7 +5,7 @@ class ItemType():
         """Initialises an Item object."""
         item_types = ["damage", "defense", "utility"]
         self.type = [random.choice(item_types)]
-        self.power = random.uniform(0.5, 1.5)
+        self.power = random.uniform(1.1, 1.9)
         self.name = "Blessing of " + self.type[0]
 
     def upgrade(self):
