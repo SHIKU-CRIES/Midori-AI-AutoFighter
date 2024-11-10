@@ -28,7 +28,7 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
                 before_damage = mited_damage_dealt
                 mited_damage_dealt = item.on_damage_dealt(mited_damage_dealt)
                 source.DamageDealt += int(mited_damage_dealt)
-                log(white, f"Damage Buff effect from {source.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
+                # log(white, f"Damage Buff effect from {source.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
             except Exception as error:
                 continue
 
@@ -39,7 +39,7 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
                 before_damage = mited_damage_dealt
                 mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
                 target.DamageTaken += int(mited_damage_dealt)
-                log(white, f"Damage Mit effect from {target.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
+                # log(white, f"Damage Mit effect from {target.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
             except Exception as error:
                 continue
 
@@ -69,7 +69,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
         source_vit = (source.Vitality ** 3)
         target_vit = (target.Vitality ** 5)
         def_val = (target.Def / def_mod)
-        text_to_log = log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
+        # text_to_log = log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
 
         if source.CritRate >= random.random():
             mited_damage_dealt = float(((damage_dealt * enrage_buff) / ((target.Def / def_mod) * (target.Vitality ** 5))) * source.CritDamageMod) * max(1, source.CritRate)
