@@ -106,8 +106,13 @@ class Player:
                     
                     self.check_stats()
 
-                    print(f"Loaded past life from {filename}: {past_life_data}")
+                    if len(str(past_life_data['Logs'])) > 1:
+                        past_life_data['Logs'] = ""
 
+                        with open(filepath, 'wb') as f:
+                            pickle.dump(past_life_data, f)
+
+                    print(f"Loaded past life from {filename}: {past_life_data}")
 
                 except Exception as e:
                     print(f"Error loading past life from {filename}: {e}")
