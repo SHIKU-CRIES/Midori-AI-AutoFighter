@@ -34,10 +34,10 @@ class ItemType():
         else:
             return float(damage_delt)
 
-    def stat_gain(self, power: float):
+    def stat_gain(self, desired_increase: float):
         """This function is called when the player gains stats.
         If the item type is "utility", this function will handle the dodge-related functionality."""
         if "utility" in str(self.type):
-            return float((power * self.power) * self.power)
+            return float((desired_increase * self.power) * self.power)
         else:
-            return float(power)
+            return float(desired_increase)
