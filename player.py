@@ -755,10 +755,10 @@ class Player:
         self.check_name_mod()
 
         top_level = 1000
-        top_level_full = 10000
+        top_level_full = 5000
 
         pre_temp_vit = self.Vitality
-        post_temp_vit = (self.Vitality * (level / (top_level_full * 2)))
+        post_temp_vit = (self.Vitality * (level / (top_level_full)))
 
         self.MHP = int(self.MHP * min((level / top_level), (4)))
         self.Atk = int(self.Atk * min((level / top_level), (2)))
