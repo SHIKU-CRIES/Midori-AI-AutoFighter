@@ -8,6 +8,8 @@ import pickle
 from weapons import WeaponType
 from weapons import get_weapon
 
+from items import ItemType
+
 from load_photos import resource_path
 
 from themedstuff import themed_ajt
@@ -35,7 +37,7 @@ class Player:
         self.RushStat: int = 3
         self.Logs: list = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
-        self.Items: list = []
+        self.Items: list[ItemType] = []
         self.photo: str = "player.png"
         
 
@@ -655,7 +657,7 @@ class Player:
 
         # Autopick logic
         if os.path.exists("auto.pick"):
-            choice = 9
+            choice = 10
         else:
             choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt)
 
@@ -674,7 +676,18 @@ class Player:
             self.gain_crit_damage(critdamage_up)
         elif choice == 8:
             self.DodgeOdds += dodgeodds_up
-        elif choice == 9:
+        elif choice == 9:            
+            if len(self.Items) < 5:
+                self.Items.append(ItemType())
+            else:
+                if random.choice([True, False]):
+                    try:
+                        random.choice(self.Items).upgrade()
+                    except Exception as e:
+                        print(f"Failed to upgrade item: {e}")
+                else:
+                    self.Items.append(ItemType())
+        elif choice == 10:
             if self.level > 300:
                 vitality_up *= 2
                 self.MHP += int(hp_up / 10)

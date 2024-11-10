@@ -50,7 +50,8 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         ('Regain', regain_up),
         ('CritRate', critrate_up),
         ('CritDamageMod', critdamage_up),
-        ('DodgeOdds', dodgeodds_up)
+        ('DodgeOdds', dodgeodds_up),
+        ('Get a random blessing', 1)
     ]
 
     menu_stats = [
@@ -97,7 +98,7 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
                     if autopick_button_rect.collidepoint(event.pos):
                         with open("auto.pick", 'w') as file:
                             file.write("hi")
-                        return 9
+                        return 10
 
         # Draw menu items and buttons
         screen.fill((0, 0, 0))  # Clear the screen
