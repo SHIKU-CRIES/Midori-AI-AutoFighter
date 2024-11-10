@@ -24,7 +24,7 @@ class ItemType():
         if self.type == "damage":
             return float(pre_damage_taken / self.power)
         else:
-            return float(pre_damage_taken)
+            return float(pre_damage_taken / self.power)
 
     def on_damage_dealt(self, damage_delt: float):
         """This function is called when the player deals damage.
@@ -32,7 +32,7 @@ class ItemType():
         if self.type == "damage":
             return float(damage_delt * self.power)
         else:
-            return float(damage_delt)
+            return float(damage_delt * self.power)
 
     def stat_gain(self, power: float):
         """This function is called when the player gains stats.
@@ -40,4 +40,4 @@ class ItemType():
         if self.type == "utility":
             return float(power * self.power)
         else:
-            return float(power)
+            return float(power * self.power)
