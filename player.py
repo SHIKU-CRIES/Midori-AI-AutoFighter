@@ -725,6 +725,9 @@ class Player:
         print(f"Crit Rate: {self.CritRate}")
         print(f"Crit Damage Modifier: {self.CritDamageMod}")
         print(f"Dodge Odds: {self.DodgeOdds}")
+
+        for item in self.Items:
+            print(f"Name: {item.name}, Power: {item.power}")
     
     def set_level(self, level):
         self.level = level
@@ -784,3 +787,6 @@ class Player:
         print(f"Crit Rate: {self.CritRate}")
         print(f"Crit Damage Modifier: {self.CritDamageMod}")
         print(f"Dodge Odds: {self.DodgeOdds}")
+
+        for item in self.Items:
+            print(f"Name: {item.name}, Power: {item.power}")

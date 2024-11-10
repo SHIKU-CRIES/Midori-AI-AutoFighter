@@ -6,7 +6,7 @@ class ItemType():
         item_types = ["damage", "defense", "utility"]
         self.type = [random.choice(item_types)]
         self.power = random.uniform(1.001, 1.2)
-        self.name = "Blessing of " + self.type[0]
+        self.name = "Blessing of " + self.type[0].title()
 
     def upgrade(self, mod_fixed):
         """Upgrades the item's power stat."""
