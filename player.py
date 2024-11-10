@@ -705,24 +705,24 @@ class Player:
         elif choice == 10:
             if self.level > 300:
                 vitality_up *= 2
-                self.MHP += int(hp_up / 10)
-                self.HP += int(hp_up / 10)
-                self.Def += int(def_up / 10)
-                self.Atk += int(atk_up / 10)
-                self.Regain += regain_up / 10
-                self.gain_crit_rate(critrate_up / 10)
-                self.gain_crit_damage(critdamage_up / 10)
-                self.DodgeOdds += dodgeodds_up / 10
+                self.MHP += int(hp_up / 4)
+                self.HP += int(hp_up / 4)
+                self.Def += int(def_up / 4)
+                self.Atk += int(atk_up / 4)
+                self.Regain += regain_up / 4
+                self.gain_crit_rate(critrate_up / 4)
+                self.gain_crit_damage(critdamage_up / 4)
+                self.DodgeOdds += dodgeodds_up / 4
 
             else:
-                self.MHP += int(hp_up / 5)
-                self.HP += int(hp_up / 5)
-                self.Def += int(def_up / 5)
-                self.Atk += int(atk_up / 5)
-                self.Regain += regain_up / 5
-                self.gain_crit_rate(critrate_up / 5)
-                self.gain_crit_damage(critdamage_up / 5)
-                self.DodgeOdds += dodgeodds_up / 5
+                self.MHP += int(hp_up / 2)
+                self.HP += int(hp_up / 2)
+                self.Def += int(def_up / 2)
+                self.Atk += int(atk_up / 2)
+                self.Regain += regain_up / 2
+                self.gain_crit_rate(critrate_up / 2)
+                self.gain_crit_damage(critdamage_up / 2)
+                self.DodgeOdds += dodgeodds_up / 2
 
         if self.level > 300:
             self.Vitality += vitality_up
