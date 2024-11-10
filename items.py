@@ -5,7 +5,7 @@ class ItemType():
         """Initialises an Item object."""
         item_types = ["damage", "defense", "utility"]
         self.type = [random.choice(item_types)]
-        self.power = random.uniform(1.1, 1.9)
+        self.power = random.uniform(1.001, 1.9)
         self.name = "Blessing of " + self.type[0]
 
     def upgrade(self):
@@ -24,7 +24,7 @@ class ItemType():
         if "defense" in str(self.type):
             return float((pre_damage_taken / self.power) / self.power)
         else:
-            return float(pre_damage_taken / self.power)
+            return float(pre_damage_taken)
 
     def on_damage_dealt(self, damage_delt: float):
         """This function is called when the player deals damage.
@@ -32,7 +32,7 @@ class ItemType():
         if "damage" in str(self.type):
             return float((damage_delt * self.power) * self.power)
         else:
-            return float(damage_delt * self.power)
+            return float(damage_delt)
 
     def stat_gain(self, power: float):
         """This function is called when the player gains stats.
@@ -40,4 +40,4 @@ class ItemType():
         if "utility" in str(self.type):
             return float((power * self.power) * self.power)
         else:
-            return float(power * self.power)
+            return float(power)
