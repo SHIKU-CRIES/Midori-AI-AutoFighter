@@ -259,6 +259,9 @@ def main(level):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
+                    print("oops you died")
+                    player.HP = 0
 
             enrage_timer.check_timeout()
             

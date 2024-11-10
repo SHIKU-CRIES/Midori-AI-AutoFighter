@@ -5,7 +5,7 @@ class ItemType():
         """Initialises an Item object."""
         item_types = ["damage", "defense", "utility"]
         self.type = [random.choice(item_types)]
-        self.power = random.randint(1, 100)
+        self.power = random.uniform(0.5, 1.5)
         self.name = "Blessing of " + self.type[0]
 
     def upgrade(self):
@@ -34,10 +34,10 @@ class ItemType():
         else:
             return float(damage_delt)
 
-    def on_dodge(self, power: float):
-        """This function is called when the player dodges an attack.
+    def stat_gain(self, power: float):
+        """This function is called when the player gains stats.
         If the item type is "utility", this function will handle the dodge-related functionality."""
         if self.type == "utility":
-            return float(power)
+            return float(power * self.power)
         else:
             return float(power)
