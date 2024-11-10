@@ -695,13 +695,10 @@ class Player:
         elif choice == 8:
             self.DodgeOdds += dodgeodds_up
         elif choice == 9:            
-            if len(self.Items) < 5:
+            if len(self.Items) < random.randint(5, 15):
                 self.Items.append(ItemType())
             else:
-                if random.choice([True, True, True, True, True, True, False]):
-                    random.choice(self.Items).upgrade(mod_fixed)
-                else:
-                    self.Items.append(ItemType())
+                random.choice(self.Items).upgrade(mod_fixed)
         elif choice == 10:
             if self.level > 300:
                 vitality_up *= 2
