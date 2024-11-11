@@ -712,7 +712,7 @@ class Player:
                 self.DodgeOdds += dodgeodds_up / 4
 
                 if len(self.Items) > 1:
-                    random.choice(self.Items).upgrade(mod_fixed)
+                    random.choice(self.Items).upgrade(mod_fixed / 100)
 
             else:
                 self.MHP += int(hp_up / 2)
@@ -725,7 +725,7 @@ class Player:
                 self.DodgeOdds += dodgeodds_up / 2
                 
                 if len(self.Items) > 1:
-                    random.choice(self.Items).upgrade(mod_fixed)
+                    random.choice(self.Items).upgrade(mod_fixed / 10)
 
         if self.level > 300:
             self.Vitality += vitality_up
