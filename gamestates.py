@@ -218,7 +218,7 @@ def main(level):
 
         foe_pre_name = f"{themed_title} {themed_name}"
 
-        foe = Player(f"{foe_pre_name} ({level})")
+        foe = Player(f"{foe_pre_name}")
         foe.set_photo(themed_name.lower())
         foe.set_level(level)
 
@@ -397,6 +397,7 @@ def main(level):
             
             stat_data = [
                 ("Stats of:", player.PlayerName),
+                ("Level:", player.level),
                 ("Max HP:", player.MHP),
                 ("Def:", int(player.Def / def_mod)),
                 ("Atk:", player.Atk),
@@ -442,6 +443,7 @@ def main(level):
                 
             foe_stat_data = [
                 ("Stats of:", foe.PlayerName),
+                ("Level:", foe.level),
                 ("Max HP:", foe.MHP),
                 ("Def:", int(foe.Def / def_mod)),
                 ("Atk:", foe.Atk),
