@@ -98,14 +98,14 @@ class Player:
                     self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.01)
 
                     for item in past_life_data['Items']:
-                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
+                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000 * item['power'])
                         self.HP: int = self.MHP
-                        self.Def: int = self.Def + self.check_base_stats(self.Def, 50)
-                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50)
-                        self.Regain: float = self.Regain + 0.01
-                        self.gain_crit_rate(0.01)
-                        self.gain_crit_damage(0.01)
-                        self.gain_dodgeodds_rate(0.01)
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, 50 * item['power'])
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50 * item['power'])
+                        self.Regain: float = self.Regain + (0.01 * item['power'])
+                        self.gain_crit_rate(0.01 * item['power'])
+                        self.gain_crit_damage(0.01 * item['power'])
+                        self.gain_dodgeodds_rate(0.01 * item['power'])
 
                     if past_life_data['Vitality'] < 0:
                         print("Vitality is negative. Deleting past life file.")
@@ -129,7 +129,7 @@ class Player:
                     print(f"Past life data: {past_life_data}")
                     continue
         
-        number_of_past_lives = int(len([filename for filename in os.listdir(past_lives_folder) if filename.endswith(".pastlife")]) / 5)
+        number_of_past_lives = int(len([filename for filename in os.listdir(past_lives_folder) if filename.endswith(".pastlife")]) / 2)
         self.level = max(number_of_past_lives, 1)
 
     def save_past_life(self):
