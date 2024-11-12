@@ -93,9 +93,9 @@ class Player:
                     self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def'] / 1000) + 100)
                     self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk'] / 1000) + 200)
                     self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.01
-                    self.CritRate: float = self.CritRate + float(past_life_data['CritRate'] * 0.001) + 0.01
-                    self.CritDamageMod: float = self.CritDamageMod + float(past_life_data['CritDamageMod'] * 0.0003) + 0.001
-                    self.DodgeOdds: float = self.DodgeOdds + float(past_life_data['DodgeOdds'] * 0.0025) + 0.01
+                    self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
+                    self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
+                    self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.01)
 
                     for item in past_life_data['Items']:
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
@@ -103,9 +103,9 @@ class Player:
                         self.Def: int = self.Def + self.check_base_stats(self.Def, 50)
                         self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50)
                         self.Regain: float = self.Regain + 0.01
-                        self.CritRate: float = self.CritRate + 0.01
-                        self.CritDamageMod: float = self.CritDamageMod + 0.001
-                        self.DodgeOdds: float = self.DodgeOdds + 0.01
+                        self.gain_crit_rate(0.01)
+                        self.gain_crit_damage(0.01)
+                        self.gain_dodgeodds_rate(0.01)
 
                     if past_life_data['Vitality'] < 0:
                         print("Vitality is negative. Deleting past life file.")
@@ -165,6 +165,21 @@ class Player:
             self.Inv.append(item)
         else:
             self.Inv.remove(item)
+
+    def gain_dodgeodds_rate(self, points):
+        """Increases dodge odds based on points, with increasing cost.
+
+        Every 1 dodge odds increase costs 100x more points.
+        """
+        to_be_lowered_by = 10
+        current_rate = self.DodgeOdds
+
+        if current_rate > 1:
+            desired_increase = points / ((to_be_lowered_by * (current_rate // 2)) + 1)
+        else:
+            desired_increase = points
+
+        self.DodgeOdds = current_rate + desired_increase
 
     def gain_crit_rate(self, points):
         """Increases crit rate based on points, with increasing cost.
@@ -693,7 +708,7 @@ class Player:
         elif choice == 7:
             self.gain_crit_damage(critdamage_up)
         elif choice == 8:
-            self.DodgeOdds += dodgeodds_up
+            self.gain_dodgeodds_rate(dodgeodds_up)
         elif choice == 9:
             if len(self.Items) < random.randint(5, 15):
                 self.Items.append(ItemType())
@@ -709,7 +724,7 @@ class Player:
                 self.Regain += regain_up / 4
                 self.gain_crit_rate(critrate_up / 4)
                 self.gain_crit_damage(critdamage_up / 4)
-                self.DodgeOdds += dodgeodds_up / 4
+                self.gain_dodgeodds_rate(dodgeodds_up / 4)
 
                 if len(self.Items) > 1:
                     random.choice(self.Items).upgrade(mod_fixed / 100)
@@ -722,7 +737,7 @@ class Player:
                 self.Regain += regain_up / 2
                 self.gain_crit_rate(critrate_up / 2)
                 self.gain_crit_damage(critdamage_up / 2)
-                self.DodgeOdds += dodgeodds_up / 2
+                self.gain_dodgeodds_rate(dodgeodds_up / 2)
                 
                 if len(self.Items) > 1:
                     random.choice(self.Items).upgrade(mod_fixed / 10)
