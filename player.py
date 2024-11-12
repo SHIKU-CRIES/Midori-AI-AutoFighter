@@ -726,7 +726,7 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 4)
                 self.gain_dodgeodds_rate(dodgeodds_up / 4)
 
-                if len(self.Items) > 1:
+                if len(self.Items) > 0:
                     random.choice(self.Items).upgrade(mod_fixed / 100)
 
             else:
