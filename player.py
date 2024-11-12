@@ -785,7 +785,7 @@ class Player:
             xyz = 10
             bonus_levels = (level - 50) // xyz
             self.MHP = self.MHP + (50 * bonus_levels)
-            self.Atk = self.Atk + (15 * bonus_levels)
+            self.Atk = self.Atk + (2 * bonus_levels)
             self.Def = self.Def + (12 * bonus_levels)
             self.Vitality = self.Vitality + (0.00003 * (bonus_levels * level))
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
@@ -803,7 +803,7 @@ class Player:
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
 
         self.MHP = int(self.MHP * min((level / top_level), (4)))
-        self.Atk = int(self.Atk * min((level / top_level), (2)))
+        self.Atk = int(self.Atk * min((level / top_level), (0.5)))
         self.Def = int(self.Def * min((level / top_level), (2)))
         self.gain_crit_rate(0.002 * (level / top_level_full))
         self.Vitality = max(post_temp_vit, 0.75)
