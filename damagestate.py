@@ -65,14 +65,14 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
         text_to_log = log(green, f"{target.PlayerName} dodged!")
     else:
         mited_damage_dealt = float(0)
-        damage_dealt = ((current_item.damage * source.Atk) / 2) * (source.Vitality ** 3)
-        source_vit = (source.Vitality ** 3)
-        target_vit = (target.Vitality ** 5)
+        damage_dealt = ((current_item.damage * source.Atk) / 2) * (source.Vitality ** 2)
+        source_vit = (source.Vitality ** 2)
+        target_vit = (target.Vitality ** 15)
         def_val = (target.Def / def_mod)
         # text_to_log = log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
 
         if source.CritRate >= random.random():
-            mited_damage_dealt = float(((damage_dealt * enrage_buff) / ((target.Def / def_mod) * (target.Vitality ** 5))) * source.CritDamageMod) * max(1, source.CritRate)
+            mited_damage_dealt = float(((damage_dealt * enrage_buff) / ((target.Def / def_mod) * (target.Vitality ** 15))) * source.CritDamageMod) * max(1, source.CritRate)
             mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
             mited_damage_dealt = apply_damage_item_effects(source, target, mited_damage_dealt)
 
@@ -81,7 +81,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
             else:
                 text_to_log = log(blue, f"Crit! {source.PlayerName} {current_item.game_obj} crits {target.PlayerName} for {mited_damage_dealt:.2f} damage!")
         else:
-            mited_damage_dealt = float((damage_dealt * enrage_buff) / ((target.Def / def_mod) * (target.Vitality ** 5)))
+            mited_damage_dealt = float((damage_dealt * enrage_buff) / ((target.Def / def_mod) * (target.Vitality ** 15)))
             mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
             mited_damage_dealt = apply_damage_item_effects(source, target, mited_damage_dealt)
             
