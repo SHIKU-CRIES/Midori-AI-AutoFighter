@@ -14,6 +14,7 @@ from damagestate import take_damage
 
 from load_photos import set_bg_photo
 from load_photos import set_bg_music
+from load_photos import resource_path
 
 from themedstuff import themed_ajt
 from themedstuff import themed_names
@@ -167,6 +168,10 @@ def main(level):
 
     # Create the screen
     screen = temp_screen.screen
+    icon = pygame.image.load(resource_path(os.path.join("photos", f"midoriai-logo.png")))
+    pygame.display.set_icon(icon)
+    
+    pygame.display.set_caption("Midori AI Auto Fighter", "Welcome to the fighting zone!")
 
     # Create a clock
     clock = pygame.time.Clock()
