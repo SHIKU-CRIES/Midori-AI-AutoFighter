@@ -301,9 +301,13 @@ def main(level):
             if foe.HP < 1:
                 log(white, "Saving Data")
                 level = level + 1
+                
                 if level < 500:
                     if bleed_mod < 2:
-                        level = level + 4
+                        for multiplier in range(4):
+                            level = level + 1
+                            player.level_up(mod=bleed_mod)
+
                 log(white, "The foe has leveled up")
                 player.level_up(mod=bleed_mod)
                 player.save()
