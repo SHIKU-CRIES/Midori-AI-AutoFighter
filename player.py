@@ -681,7 +681,7 @@ class Player:
         regain_up: float = random.uniform(0.0001 * self.level, 0.0005 * self.level) * mod_fixed
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
-        dodgeodds_up: float = random.uniform(0.00002 * self.level, 0.00004 * self.level) * mod_fixed
+        dodgeodds_up: float = random.uniform(0.00002 * self.level, 0.0004 * self.level) * mod_fixed
         vitality_up: float = random.uniform(0.00000001 * self.level, 0.00000004 * self.level) * max((mod_fixed / 100), 1)
 
         hp_up = self.check_base_stats(self.MHP, hp_up)
