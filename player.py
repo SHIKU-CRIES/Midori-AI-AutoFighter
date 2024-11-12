@@ -239,7 +239,7 @@ class Player:
 
             self.Atk = int(self.Atk * 1)
             self.Def = int(self.Def * 2)
-            self.gain_crit_rate(0.01 * self.level)
+            self.gain_crit_rate(0.0001 * self.level)
             self.DodgeOdds = self.DodgeOdds + (dodge_buff * self.level)
 
         if themed_names[1] in self.PlayerName.lower():
