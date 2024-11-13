@@ -774,11 +774,11 @@ class Player:
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
         self.CritDamageMod: float = 2 + (self.level * 0.0025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
+        self.Vitality: float = 1 + (self.level * 0.00000001)
 
         if level > 50:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (20 * level)
-            self.Vitality = self.Vitality + (0.00003 * level)
             
             # Apply bonus every xyz levels past 10
             xyz = 10
@@ -786,7 +786,6 @@ class Player:
             self.MHP = self.MHP + (50 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
             self.Def = self.Def + (12 * bonus_levels)
-            self.Vitality = self.Vitality + (0.00003 * (bonus_levels * level))
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
@@ -799,14 +798,14 @@ class Player:
         self.check_name_mod()
 
         pre_temp_vit = self.Vitality
-        post_temp_vit = (self.Vitality * (level / (top_level_full)))
+        post_temp_vit = (self.Vitality * (level / (top_level)))
 
         self.MHP = int(self.MHP * min((level / top_level), (4)))
         self.Atk = int(self.Atk * min((level / top_level), (0.5)))
         self.Def = int(self.Def * min((level / top_level), (2)))
         self.gain_crit_rate(0.002 * (level / top_level_full))
         self.Vitality = max(post_temp_vit, 0.75)
-        self.DodgeOdds = self.DodgeOdds * (level / top_level_full)
+        self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 2))
 
         self.check_stats()
 
