@@ -112,7 +112,7 @@ class Player:
                         os.remove(filename)
 
                     elif past_life_data['Vitality'] > 1.0000001:
-                        self.Vitality = self.Vitality + min(((past_life_data['Vitality'] - 1) / ((self.Vitality ** 15) + 100)), 0.01)
+                        self.Vitality = self.Vitality + min(((past_life_data['Vitality'] - 1) / ((self.Vitality ** 2) + 100)), 0.01)
                     
                     self.check_stats()
 
