@@ -716,10 +716,10 @@ class Player:
         elif choice == 10:
             if self.level > 300:
                 vitality_up *= 2
-                self.MHP += int(hp_up / 4)
-                self.HP += int(hp_up / 4)
-                self.Def += int(def_up / 4)
-                self.Atk += int(atk_up / 4)
+                self.MHP += int(hp_up / 4) + 1
+                self.HP += int(hp_up / 4) + 1
+                self.Def += int(def_up / 4) + 1
+                self.Atk += int(atk_up / 4) + 1
                 self.Regain += regain_up / 4
                 self.gain_crit_rate(critrate_up / 4)
                 self.gain_crit_damage(critdamage_up / 4)
@@ -729,10 +729,10 @@ class Player:
                     random.choice(self.Items).upgrade(mod_fixed / 100)
 
             else:
-                self.MHP += int(hp_up / 2)
-                self.HP += int(hp_up / 2)
-                self.Def += int(def_up / 2)
-                self.Atk += int(atk_up / 2)
+                self.MHP += int(hp_up / 2) + 25
+                self.HP += int(hp_up / 2) + 25
+                self.Def += int(def_up / 2) + 25
+                self.Atk += int(atk_up / 2) + 25
                 self.Regain += regain_up / 2
                 self.gain_crit_rate(critrate_up / 2)
                 self.gain_crit_damage(critdamage_up / 2)
