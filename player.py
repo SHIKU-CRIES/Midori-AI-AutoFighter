@@ -245,7 +245,6 @@ class Player:
             max_hp_debuff = self.MHP / 2
             max_crit_rate = self.CritRate / 100
             max_atk_stat = self.Atk / 100
-            max_def_stat = random.randint(10000000, 50000000)
 
             while self.MHP > max_hp_debuff:
                 self.Def = self.Def + 1
@@ -265,10 +264,6 @@ class Player:
 
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def * self.level) + 1
-
-            if self.Def > max_def_stat:
-                self.Vitality = self.Vitality + (self.Def / 1000000000)
-                self.Def = int(self.Def / 100)
 
             self.gain_crit_damage((0.0002 * self.level))
             
@@ -291,7 +286,7 @@ class Player:
             self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
 
         if themed_names[5] in self.PlayerName.lower():
-            self.Vitality = self.Vitality + (0.002 * self.level)
+            self.Vitality = self.Vitality + (0.00001 * self.level)
 
         if themed_names[6] in self.PlayerName.lower():
             tempname = self.PlayerName
@@ -300,7 +295,6 @@ class Player:
             self.Atk = int(self.Atk / 5)
             self.Def = int(self.Def / 4)
             self.Regain = self.Regain / 5
-            self.Vitality = self.Vitality / 4
             self.PlayerName = tempname
             self.set_photo("Player".lower())
 
@@ -308,7 +302,7 @@ class Player:
             self.MHP = int(self.MHP * 150)
 
         if themed_names[8] in self.PlayerName.lower():
-            self.Regain = self.Regain * (0.02 * self.level)
+            self.Regain = self.Regain * (0.05 * self.level)
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
             self.MHP = int(self.MHP * 1.9)
@@ -681,7 +675,7 @@ class Player:
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.00002 * self.level, 0.0004 * self.level) * mod_fixed
-        vitality_up: float = random.uniform(0.00000001 * self.level, 0.00000004 * self.level) * max((mod_fixed / 100), 1)
+        vitality_up: float = random.uniform(0.00000002 * self.level, 0.00000008 * self.level) * max((mod_fixed / 100), 1)
 
         hp_up = self.check_base_stats(self.MHP, hp_up) + 15
         def_up = self.check_base_stats(self.Def, def_up) + 5
