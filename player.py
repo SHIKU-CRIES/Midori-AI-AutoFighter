@@ -213,7 +213,7 @@ class Player:
     
     def check_base_stats(self, stat_total: int, stat_gain:int):
         stats_to_start_lower = 1000
-        to_be_lowered_by = 5 + (stat_total // 2000)
+        to_be_lowered_by = 5 + (stat_total // 100000)
 
         if stat_total > stats_to_start_lower:
             desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
