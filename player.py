@@ -297,6 +297,10 @@ class Player:
             self.Regain = self.Regain / 5
             self.DodgeOdds = self.DodgeOdds / 4
             self.Vitality -= self.Vitality / 4
+            
+            if self.Vitality > 4:
+                self.Vitality = 4
+
             self.PlayerName = tempname
             self.set_photo("Player".lower())
 
