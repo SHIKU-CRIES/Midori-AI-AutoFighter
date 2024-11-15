@@ -280,6 +280,10 @@ def main(level):
             player_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * player.Vitality))
             foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality))
             bleed_mod = (0.00000001 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+
+            if bleed_mod > 100:
+                bleed_mod /= 2
+                
             def_mod = max(1, (bleed_mod * 0.001))
 
             fps_cap = 20
@@ -424,11 +428,11 @@ def main(level):
             if len(player.Items) > 0:
                 stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
-            if player.Vitality / bleed_mod > 1.01:
-                stat_data.append(("Vitality:", f"{(player.Vitality / bleed_mod):.2f}x"))
+            if player.Vitality / def_mod > 1.01:
+                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
 
-            elif player.Vitality / bleed_mod > 1.00001:
-                stat_data.append(("Vitality:", f"{(player.Vitality / bleed_mod):.5f}x"))
+            elif player.Vitality / def_mod > 1.00001:
+                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
 
             if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
