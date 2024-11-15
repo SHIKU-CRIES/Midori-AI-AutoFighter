@@ -37,7 +37,7 @@ photo_size = 128 * 3
 enrage_timer = timmer()
 temp_screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage_up, dodgeodds_up, damage_taken, damage_dealt):
+def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage_up, dodgeodds_up, damage_taken, damage_dealt, items):
     screen = temp_screen.screen
     clock = pygame.time.Clock()
     font = pygame.font.SysFont('Arial', 25)
@@ -59,6 +59,9 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         ('Damage Taken:', damage_taken),
         ('Damage Dealt:', damage_dealt)
     ]
+
+    for item in items:
+        menu_stats.append((item.name, item.power))
 
     # Button dimensions and spacing
     button_width = 600

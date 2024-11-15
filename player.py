@@ -685,7 +685,7 @@ class Player:
         if os.path.exists("auto.pick"):
             choice = 10
         else:
-            choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt)
+            choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt, self.Items)
 
         if choice == 1:
             self.MHP += int(hp_up)
