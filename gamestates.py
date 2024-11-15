@@ -307,7 +307,7 @@ def main(level):
                 log(white, "Saving Data")
                 level = level + 1
                 
-                if level < 500:
+                if level < 2000:
                     if bleed_mod < 2:
                         for multiplier in range(4):
                             level = level + 1

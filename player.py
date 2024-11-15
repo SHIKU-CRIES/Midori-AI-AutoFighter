@@ -295,6 +295,7 @@ class Player:
             self.Atk = int(self.Atk / 5)
             self.Def = int(self.Def / 4)
             self.Regain = self.Regain / 5
+            self.DodgeOdds = self.DodgeOdds / 4
             self.PlayerName = tempname
             self.set_photo("Player".lower())
 
@@ -665,7 +666,7 @@ class Player:
         from gamestates import display_stats_menu
         self.level += 1
 
-        mod_fixed = ((mod * 0.15) + 1) * self.Vitality
+        mod_fixed = ((mod * 0.35) + 1) * self.Vitality
         int_mod = int(mod_fixed)
         
         hp_up: int = random.randint(25 * self.level, 55 * self.level * int_mod)
