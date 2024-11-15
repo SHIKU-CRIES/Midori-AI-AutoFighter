@@ -421,11 +421,11 @@ def main(level):
             if len(player.Items) > 0:
                 stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
-            if player.Vitality > 1.01:
-                stat_data.append(("Vitality:", f"{(player.Vitality):.2f}x"))
+            if player.Vitality / bleed_mod > 1.01:
+                stat_data.append(("Vitality:", f"{(player.Vitality / bleed_mod):.2f}x"))
 
-            elif player.Vitality > 1.00001:
-                stat_data.append(("Vitality:", f"{(player.Vitality):.5f}x"))
+            elif player.Vitality / bleed_mod > 1.00001:
+                stat_data.append(("Vitality:", f"{(player.Vitality / bleed_mod):.5f}x"))
 
             if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
@@ -467,8 +467,8 @@ def main(level):
             if len(foe.Items) > 0:
                 foe_stat_data.append(("Blessings:", f"{len(foe.Items)}"))
 
-            if foe.Vitality > 1.5:
-                foe_stat_data.append(("Vitality:", f"{(foe.Vitality):.2f}x"))
+            if foe.Vitality / bleed_mod > 1.5:
+                foe_stat_data.append(("Vitality:", f"{(foe.Vitality / bleed_mod):.2f}x"))
 
             if (foe.DodgeOdds * 100) / bleed_mod > 1:
                 foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
