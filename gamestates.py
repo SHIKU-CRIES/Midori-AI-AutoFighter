@@ -276,7 +276,10 @@ def main(level):
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
-            bleed_mod = (0.000004 * ((enrage_mod * (level * player.Vitality)) * (enrage_mod * (level * foe.Vitality)))) + 1
+            level_base_enrage_mod = (level / 4)
+            player_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * player.Vitality))
+            foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality))
+            bleed_mod = (0.00000001 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
             def_mod = max(1, (bleed_mod * 0.001))
 
             fps_cap = 20
