@@ -59,7 +59,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
     enrage_timer = fight_env_list[1]
     current_item = fight_env_list[2]
 
-    def_mod = max(1, (enrage_buff * 0.001))
+    def_mod = max(1, (enrage_buff * 0.1))
 
     if (target.DodgeOdds / enrage_buff) >= random.random():
         text_to_log = log(green, f"{target.PlayerName} dodged!")
