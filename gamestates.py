@@ -74,14 +74,14 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         button_x = 10
         button_y = 20 + (i * (button_height + button_margin))
         button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
-        buttons.append((button_rect, i + 1))  # Store button rect and corresponding value
+        buttons.append((button_rect, i + 1))
 
     stats = []
     for i, (text, value) in enumerate(menu_stats):
         text_x = 650
         text_y = 20 + (i * (button_height + button_margin))
         text_rect = pygame.Rect(text_x, text_y, button_width, button_height)
-        stats.append((text_rect, i + 1))  # Store button rect and corresponding value
+        stats.append((text_rect, i + 1))
 
     # Add Autopick button
     autopick_button_rect = pygame.Rect(button_x, 20 + len(menu_items) * (button_height + button_margin),
@@ -297,6 +297,8 @@ def main(level):
             if player.HP < 1:
                 log(red, "you lose... restart game to load a new buffed save file")
                 player.save_past_life()
+                pygame.quit()
+                input("Press enter to exit: ")
                 exit()
             elif player.HP > player.MHP:
                 player.HP = player.MHP
