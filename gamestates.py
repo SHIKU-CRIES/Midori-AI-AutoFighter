@@ -284,7 +284,7 @@ def main(level):
             if bleed_mod > 100:
                 bleed_mod /= 2
 
-            def_mod = max(1, (bleed_mod ** 0.1))
+            def_mod = max(1, (bleed_mod ** 0.001))
 
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
