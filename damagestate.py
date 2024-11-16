@@ -45,7 +45,7 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
 
         return mited_damage_dealt
 
-def take_damage(source: Player, target: Player, fight_env_list: list):
+def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: float):
     """
     Handles a player taking damage from another player.
 
@@ -58,8 +58,6 @@ def take_damage(source: Player, target: Player, fight_env_list: list):
     enrage_buff = fight_env_list[0]
     enrage_timer = fight_env_list[1]
     current_item = fight_env_list[2]
-
-    def_mod = max(1, (enrage_buff * 0.1))
 
     if (target.DodgeOdds / enrage_buff) >= random.random():
         text_to_log = log(green, f"{target.PlayerName} dodged!")

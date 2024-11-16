@@ -284,7 +284,7 @@ def main(level):
             if bleed_mod > 100:
                 bleed_mod /= 2
 
-            def_mod = max(1, (bleed_mod * 0.1))
+            def_mod = max(1, (bleed_mod ** 0.1))
 
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
@@ -346,7 +346,7 @@ def main(level):
                 # Check if the item has reached the foe's text
                 foe_rect = font.render(foe.PlayerName, True, (255, 255, 255)).get_rect(center=(SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2))
                 if foe_rect.collidepoint(current_item.position):
-                    take_damage(player, foe, [bleed_mod, enrage_timer, current_item])
+                    take_damage(player, foe, [bleed_mod, enrage_timer, current_item], def_mod)
 
                     current_item.velocity = 0  # Reset velocity after hit
                     current_item.position = (SCREEN_WIDTH // 6, SCREEN_HEIGHT // 2)
@@ -374,7 +374,7 @@ def main(level):
                 # Check if the item has reached the player's text
                 player_rect = font.render(player.PlayerName, True, (255, 255, 255)).get_rect(center=(SCREEN_WIDTH // 6, SCREEN_HEIGHT // 2))
                 if player_rect.collidepoint(current_item.position):
-                    take_damage(foe, player, [bleed_mod, enrage_timer, current_item])
+                    take_damage(foe, player, [bleed_mod, enrage_timer, current_item], def_mod)
 
                     current_item.velocity = 0  # Reset velocity after hit
                     current_item.position = (SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2)
