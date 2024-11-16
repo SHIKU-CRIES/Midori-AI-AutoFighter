@@ -777,7 +777,7 @@ class Player:
         self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
         self.CritDamageMod: float = 2 + (self.level * 0.0025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
-        self.Vitality: float = 1 + (self.level * 0.00000001)
+        self.Vitality: float = 1 + (self.level * 0.0005)
 
         if level > 50:
             self.MHP = self.MHP + (2 * level)
@@ -792,7 +792,7 @@ class Player:
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
-                if len(self.Items) > random.randint(5, 10):
+                if len(self.Items) > random.randint(1, 4):
                     random.choice(self.Items).upgrade((level / 400))
                 else:
                     self.Items.append(ItemType())
