@@ -282,7 +282,7 @@ def main(level):
             bleed_mod = (0.00000001 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
 
             if bleed_mod > 10:
-                bonus_levels = (bleed_mod - 10) ** 2
+                bonus_levels = (bleed_mod - 10) // 2
                 bleed_mod /= bonus_levels
 
             def_mod = max(1, (bleed_mod ** 0.02))
