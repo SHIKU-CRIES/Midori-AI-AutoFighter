@@ -419,7 +419,7 @@ def main(level):
                 ("Level:", player.level),
                 ("Max HP:", player.MHP),
                 ("Def:", int(player.Def / def_mod)),
-                ("Atk:", int(player.Atk * (player.Vitality ** 2))),
+                ("Atk:", int(player.Atk * ((player.Vitality / def_mod) ** 2))),
                 ("Crit Rate:", f"{(player.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(player.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
@@ -465,7 +465,7 @@ def main(level):
                 ("Level:", foe.level),
                 ("Max HP:", foe.MHP),
                 ("Def:", int(foe.Def / def_mod)),
-                ("Atk:", int(foe.Atk * (foe.Vitality ** 2))),
+                ("Atk:", int(foe.Atk * ((foe.Vitality / def_mod) ** 2))),
                 ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
                 ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
@@ -474,8 +474,8 @@ def main(level):
             if len(foe.Items) > 0:
                 foe_stat_data.append(("Blessings:", f"{len(foe.Items)}"))
 
-            if foe.Vitality / bleed_mod > 1.5:
-                foe_stat_data.append(("Vitality:", f"{(foe.Vitality / bleed_mod):.2f}x"))
+            if foe.Vitality / def_mod > 1.5:
+                foe_stat_data.append(("Vitality:", f"{(foe.Vitality / def_mod):.2f}x"))
 
             if (foe.DodgeOdds * 100) / bleed_mod > 1:
                 foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
