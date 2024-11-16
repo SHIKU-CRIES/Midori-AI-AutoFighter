@@ -63,14 +63,14 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
         text_to_log = log(green, f"{target.PlayerName} dodged!")
     else:
         mited_damage_dealt = float(0)
-        damage_dealt = ((current_item.damage * source.Atk) / 2) * (source.Vitality ** 2)
         source_vit = (source.Vitality ** 2)
         target_vit = (target.Vitality ** 15)
         def_val = (target.Def / def_mod)
+        damage_dealt = ((current_item.damage * (source.Atk * source_vit)) / 2)
         # text_to_log = log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
 
         if source.CritRate >= random.random():
-            mited_damage_dealt = float(((damage_dealt * enrage_buff) / max((target.Def / def_mod) * ((target.Vitality ** 15) / def_mod), 2)) * source.CritDamageMod) * max(1, source.CritRate)
+            mited_damage_dealt = float(((damage_dealt * enrage_buff) / max(def_val * (target_vit / def_mod), 2)) * source.CritDamageMod) * max(1, source.CritRate)
             mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
             mited_damage_dealt = apply_damage_item_effects(source, target, mited_damage_dealt)
 
@@ -79,7 +79,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
             else:
                 text_to_log = log(blue, f"Crit! {source.PlayerName} {current_item.game_obj} crits {target.PlayerName} for {mited_damage_dealt:.2f} damage!")
         else:
-            mited_damage_dealt = float((damage_dealt * enrage_buff) / max((target.Def / def_mod) * ((target.Vitality ** 15) / def_mod), 2))
+            mited_damage_dealt = float((damage_dealt * enrage_buff) / max(def_val * (target_vit / def_mod), 2))
             mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
             mited_damage_dealt = apply_damage_item_effects(source, target, mited_damage_dealt)
             
