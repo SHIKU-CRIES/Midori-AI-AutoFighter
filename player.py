@@ -242,7 +242,7 @@ class Player:
             self.Atk = int(self.Atk * 1)
             self.Def = int(self.Def * 2)
             self.gain_crit_rate(0.0001 * self.level)
-            self.DodgeOdds = self.DodgeOdds + (dodge_buff * self.level)
+            self.DodgeOdds = (self.DodgeOdds + (dodge_buff * self.level)) * self.Vitality
 
         if themed_names[1] in self.PlayerName.lower():
             max_hp_debuff = self.MHP / 2

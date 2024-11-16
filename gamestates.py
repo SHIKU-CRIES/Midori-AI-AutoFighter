@@ -428,7 +428,7 @@ def main(level):
             if player.Vitality / def_mod > 1.01:
                 stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
 
-            elif player.Vitality / def_mod > 1.00001:
+            elif player.Vitality / def_mod != 1:
                 stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
 
             if (player.DodgeOdds * 100) / bleed_mod > 1:
