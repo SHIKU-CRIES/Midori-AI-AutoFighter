@@ -63,9 +63,9 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
         text_to_log = log(green, f"{target.PlayerName} dodged!")
     else:
         mited_damage_dealt = float(0)
-        source_vit = ((source.Vitality ** 2) / def_mod)
-        target_vit = ((target.Vitality ** 4) / def_mod)
-        def_val = ((target.Def ** 2) / def_mod)
+        source_vit = ((source.Vitality / def_mod) ** 2)
+        target_vit = ((target.Vitality / def_mod) ** 4)
+        def_val = ((target.Def / def_mod) ** 2)
         damage_dealt = ((current_item.damage * (source.Atk * source_vit)) / 2)
         # text_to_log = log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
 
