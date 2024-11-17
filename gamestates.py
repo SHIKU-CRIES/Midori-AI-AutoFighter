@@ -279,9 +279,12 @@ def main(level):
             level_base_enrage_mod = (level / 4)
             player_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * player.Vitality))
             foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality))
-            bleed_mod = (0.00000001 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+            bleed_mod = (0.00000002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
 
-            def_mod = max(1, (bleed_mod * 0.2))
+            def_mod = max(1, (bleed_mod * 0.5))
+
+            if bleed_mod > 5:
+                def_mod = max(1, (bleed_mod * 2.5))
 
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
