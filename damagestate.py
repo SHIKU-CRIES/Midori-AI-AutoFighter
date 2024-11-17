@@ -66,7 +66,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
         source_vit = ((source.Vitality / def_mod) ** 2)
         target_vit = ((target.Vitality / def_mod) ** 4)
         def_val = ((target.Def / def_mod) ** 2)
-        damage_dealt = ((current_item.damage * (source.Atk ** source_vit)) / 2)
+        damage_dealt = ((current_item.damage * (source.Atk * source_vit)) * 2)
         # text_to_log = log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")
 
         if source.CritRate >= random.random():
