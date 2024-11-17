@@ -113,9 +113,9 @@ class Player:
 
                     elif past_life_data['Vitality'] > 1.0000001:
                         if self.Vitality > 2:
-                            self.Vitality = self.Vitality + ((past_life_data['Vitality'] - 1) / ((self.Vitality ** 2)))
+                            self.Vitality = self.Vitality + ((past_life_data['Vitality'] - 1) / 250)
                         else:
-                            self.Vitality = self.Vitality + max(((past_life_data['Vitality'] - 1) / ((self.Vitality ** 2))), 0.001) + 0.0001
+                            self.Vitality = self.Vitality + max(((past_life_data['Vitality'] - 1) / 100), 0.001) + 0.0001
                     
                     self.check_stats()
 
