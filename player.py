@@ -270,6 +270,7 @@ class Player:
             
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
+                item.power += 0.5
 
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def * self.level) + 1
