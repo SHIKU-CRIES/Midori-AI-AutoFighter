@@ -113,7 +113,7 @@ class Player:
 
                     elif past_life_data['Vitality'] > 1.0000001:
                         if self.Vitality > 2:
-                            self.Vitality = self.Vitality + ((past_life_data['Vitality'] - 1) / self.Vitality)
+                            self.Vitality = self.Vitality + ((past_life_data['Vitality'] - 1) / (self.Vitality / 2))
                         else:
                             self.Vitality = self.Vitality + max(((past_life_data['Vitality'] - 1) / 2), 0.001) + 0.0001
                     
@@ -788,7 +788,7 @@ class Player:
             bonus_levels = (level - 50) // xyz
             self.MHP = self.MHP + (50 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
-            self.Def = self.Def + (12 * bonus_levels)
+            self.Def = self.Def + (4 * bonus_levels)
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
