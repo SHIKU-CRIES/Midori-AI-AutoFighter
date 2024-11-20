@@ -247,7 +247,7 @@ class Player:
         if themed_names[1] in self.PlayerName.lower():
             max_hp_debuff = self.MHP / 2
             max_crit_rate = self.CritRate / 100
-            max_atk_stat = self.Atk / 100
+            max_atk_stat = self.Atk / 4
 
             while self.MHP > max_hp_debuff:
                 self.Def = self.Def + 1
@@ -262,7 +262,7 @@ class Player:
                 self.Atk = self.Atk - 1
 
             while self.Regain > 0.1:
-                self.Def = self.Def + 5
+                self.Def = self.Def + 1
                 self.Regain = self.Regain - 0.001
 
             self.Atk = int(self.Atk) + 1
