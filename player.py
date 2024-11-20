@@ -267,6 +267,9 @@ class Player:
             while self.Regain > 0.1:
                 self.Def = self.Def + 1
                 self.Regain = self.Regain - 0.001
+            
+            for item in self.Items:
+                item.name = "Carly\'s Blessing of Defense"
 
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def * self.level) + 1
