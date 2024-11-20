@@ -117,7 +117,7 @@ class Player:
                             if self.Vitality > 2:
                                 self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 3))
                             else:
-                                self.Vitality = self.Vitality + 0.000001
+                                self.Vitality = self.Vitality + 0.00001
                             temp_past_life_vitality -= 0.0001
                     
                     self.check_stats()
