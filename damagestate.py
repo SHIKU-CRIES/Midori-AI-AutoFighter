@@ -88,4 +88,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
             else:
                 text_to_log = log(red, f"Hit! {source.PlayerName} {current_item.game_obj} hits {target.PlayerName} for {mited_damage_dealt:.2f} damage!")
 
-        target.HP -= int(mited_damage_dealt)
+        target.HP -= int(max(mited_damage_dealt, 1))
+    
+        if enrage_buff > 10:
+            target.Bleed += int(max(mited_damage_dealt / 10, 1))
