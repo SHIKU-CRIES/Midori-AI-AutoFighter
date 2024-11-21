@@ -281,7 +281,7 @@ def main(level):
             foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality))
 
             if enrage_mod > 35:
-                bleed_mod = (0.00000003 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                bleed_mod = (0.00000004 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
             else:
                 bleed_mod = (0.00000002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
 
