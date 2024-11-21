@@ -684,14 +684,14 @@ class Player:
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality
         int_mod = int(mod_fixed)
         
-        hp_up: int = random.randint(25 * self.level, 55 * self.level * int_mod)
-        def_up: int = random.randint(5 * self.level, 20 * self.level * int_mod)
-        atk_up: int = random.randint(15 * self.level, 35 * self.level * int_mod)
+        hp_up: int = random.randint(25 * self.level, 550 * self.level * int_mod)
+        def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
+        atk_up: int = random.randint(15 * self.level, 350 * self.level * int_mod)
         regain_up: float = random.uniform(0.0001 * self.level, 0.0005 * self.level) * mod_fixed
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.00002 * self.level, 0.0004 * self.level) * mod_fixed
-        vitality_up: float = random.uniform(0.00000002 * self.level, 0.00000008 * self.level) * max((mod_fixed / 100), 1)
+        vitality_up: float = random.uniform(0.00000003 * self.level, 0.00000008 * self.level) * max((mod_fixed / 100), 1)
 
         hp_up = self.check_base_stats(self.MHP, hp_up) + 15
         def_up = self.check_base_stats(self.Def, def_up) + 5
@@ -724,8 +724,7 @@ class Player:
             else:
                 random.choice(self.Items).upgrade(mod_fixed)
         elif choice == 10:
-            if self.level > 300:
-                vitality_up *= 2
+            if self.level > 500:
                 self.MHP += int(hp_up / 4)
                 self.HP += int(hp_up / 4)
                 self.Def += int(def_up / 4)
@@ -735,7 +734,9 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 4)
                 self.gain_dodgeodds_rate(dodgeodds_up / 4)
 
-                if len(self.Items) > 0:
+                if len(self.Items) < random.randint(5, 15):
+                    self.Items.append(ItemType())
+                else:
                     random.choice(self.Items).upgrade(mod_fixed / 100)
 
             else:
@@ -748,7 +749,9 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 2)
                 self.gain_dodgeodds_rate(dodgeodds_up / 2)
                 
-                if len(self.Items) > 0:
+                if len(self.Items) < random.randint(5, 15):
+                    self.Items.append(ItemType())
+                else:
                     random.choice(self.Items).upgrade(mod_fixed / 10)
 
         if self.level > 300:
