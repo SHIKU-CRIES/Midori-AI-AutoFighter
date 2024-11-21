@@ -486,7 +486,7 @@ def main(level):
                 foe_stat_data.append(("Vitality:", f"{(foe.Vitality / def_mod):.2f}x"))
 
             if foe.Bleed != 0:
-                foe_stat_data.append(("Bleed:", f"{foe.Bleed:.2f}x"))
+                foe_stat_data.append(("Bleed:", f"{foe.Bleed:.0f}x"))
 
             if (foe.DodgeOdds * 100) / bleed_mod > 1:
                 foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
