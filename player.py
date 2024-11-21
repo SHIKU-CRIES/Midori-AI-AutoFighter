@@ -89,11 +89,15 @@ class Player:
         
         spinner.start(text="Past Lifes: Starting")
 
+        total_items = len(os.listdir(past_lives_folder))
+        starting_items = 0
         for filename in os.listdir(past_lives_folder):
             if filename.endswith(".pastlife"):
                 filepath = os.path.join(past_lives_folder, filename)
+
+                starting_items += 1
         
-                spinner.start(text=f"Past Lifes: {filepath}")
+                spinner.start(text=f"Past Lifes: {filepath} ({starting_items}/{total_items})")
 
                 try:
                     with open(filepath, 'rb') as f:
