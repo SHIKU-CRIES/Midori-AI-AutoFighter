@@ -230,7 +230,7 @@ class Player:
         self.CritDamageMod += desired_increase 
     
     def check_base_stats(self, stat_total: int, stat_gain:int):
-        stats_to_start_lower = 100
+        stats_to_start_lower = 50
         to_be_lowered_by = 5 + (stat_total // 100000)
 
         if stat_total > stats_to_start_lower:
