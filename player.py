@@ -117,7 +117,7 @@ class Player:
                         temp_past_life_vitality = past_life_data['Vitality']
                         while temp_past_life_vitality > 0:
                             if self.Vitality > 2:
-                                self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 3))
+                                self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 3))
                             else:
                                 self.Vitality = self.Vitality + 0.00001
                             temp_past_life_vitality -= 0.0001
