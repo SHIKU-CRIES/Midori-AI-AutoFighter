@@ -237,7 +237,9 @@ class Player:
         stats_to_start_lower = 50
         to_be_lowered_by = 5 + (stat_total // 100000)
 
-        if stat_total > stats_to_start_lower:
+        if stat_total > 1000000000:
+            desired_increase = stat_gain / max(((to_be_lowered_by ** 10) * (stat_total // stats_to_start_lower)), 1)
+        elif stat_total > stats_to_start_lower:
             desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
         else:
             desired_increase = stat_gain
