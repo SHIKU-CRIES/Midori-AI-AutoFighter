@@ -15,6 +15,8 @@ from load_photos import resource_path
 from themedstuff import themed_ajt
 from themedstuff import themed_names
 
+max_blessing = 65
+
 class Player:
     def __init__(self, name):
         """
@@ -719,7 +721,7 @@ class Player:
         elif choice == 8:
             self.gain_dodgeodds_rate(dodgeodds_up)
         elif choice == 9:
-            if len(self.Items) < random.randint(5, 15):
+            if len(self.Items) < random.randint(5, max_blessing):
                 self.Items.append(ItemType())
             else:
                 random.choice(self.Items).upgrade(mod_fixed)
@@ -734,7 +736,7 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 4)
                 self.gain_dodgeodds_rate(dodgeodds_up / 4)
 
-                if len(self.Items) < random.randint(5, 15):
+                if len(self.Items) < random.randint(5, max_blessing):
                     self.Items.append(ItemType())
                 else:
                     random.choice(self.Items).upgrade(mod_fixed / 100)
@@ -749,7 +751,7 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 2)
                 self.gain_dodgeodds_rate(dodgeodds_up / 2)
                 
-                if len(self.Items) < random.randint(5, 15):
+                if len(self.Items) < random.randint(5, max_blessing):
                     self.Items.append(ItemType())
                 else:
                     random.choice(self.Items).upgrade(mod_fixed / 10)
@@ -802,7 +804,7 @@ class Player:
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
-                if len(self.Items) > random.randint(1, 4):
+                if len(self.Items) > random.randint(1, max_blessing):
                     random.choice(self.Items).upgrade((level / 400))
                 else:
                     self.Items.append(ItemType())
