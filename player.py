@@ -133,6 +133,7 @@ class Player:
                 except Exception as e:
                     print(f"Error loading past life from {filename}: {e}")
                     print(f"Past life data: {past_life_data}")
+                    os.remove(filename)
                     continue
                 
         self.level = 1
