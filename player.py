@@ -739,7 +739,8 @@ class Player:
                 if len(self.Items) < random.randint(5, max_blessing):
                     self.Items.append(ItemType())
                 else:
-                    random.choice(self.Items).upgrade(mod_fixed / 100)
+                    for item in self.Items:
+                        item.upgrade(mod_fixed / 1000)
 
             else:
                 self.MHP += int(hp_up / 2)
@@ -754,7 +755,8 @@ class Player:
                 if len(self.Items) < random.randint(5, max_blessing):
                     self.Items.append(ItemType())
                 else:
-                    random.choice(self.Items).upgrade(mod_fixed / 10)
+                    for item in self.Items:
+                        item.upgrade(mod_fixed / 100)
 
         if self.level > 300:
             self.Vitality += vitality_up
