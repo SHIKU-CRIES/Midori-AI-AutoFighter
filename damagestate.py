@@ -90,5 +90,5 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
 
         target.HP -= int(max(mited_damage_dealt, 1))
     
-        if enrage_buff > 10:
-            target.Bleed += int(max(mited_damage_dealt * enrage_buff, 1 * enrage_buff))
+        if enrage_buff > 55:
+            target.Bleed += int(max((mited_damage_dealt * (enrage_buff / 55)) / def_val, 1))
