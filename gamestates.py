@@ -61,7 +61,7 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
     ]
 
     for item in items:
-        menu_stats.append((item.name, item.power))
+        menu_stats.append((item.name, f"{item.power:.1f}"))
 
     # Button dimensions and spacing
     button_width = 600
