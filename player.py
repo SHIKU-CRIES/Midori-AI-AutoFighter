@@ -110,7 +110,7 @@ class Player:
                     self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.01
                     self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
                     self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
-                    self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.01)
+                    self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.001)
 
                     for item in past_life_data['Items']:
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
@@ -120,7 +120,7 @@ class Player:
                         self.Regain: float = self.Regain + (0.01)
                         self.gain_crit_rate(0.01)
                         self.gain_crit_damage(0.01)
-                        self.gain_dodgeodds_rate(0.01)
+                        self.gain_dodgeodds_rate(0.001)
 
                     if past_life_data['Vitality'] < 0:
                         spinner.fail(text=f"Past Lifes: {filepath} failed to load (Vitality is negative. Deleting past life file.)")
@@ -711,7 +711,7 @@ class Player:
         regain_up: float = random.uniform(0.0001 * self.level, 0.0005 * self.level) * mod_fixed
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
-        dodgeodds_up: float = random.uniform(0.00002 * self.level, 0.0004 * self.level) * mod_fixed
+        dodgeodds_up: float = random.uniform(0.000002 * self.level, 0.00004 * self.level) * mod_fixed
         vitality_up: float = random.uniform(0.00000003 * self.level, 0.00000008 * self.level) * max((mod_fixed / 100), 1)
 
         hp_up = self.check_base_stats(self.MHP, hp_up)
