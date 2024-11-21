@@ -119,8 +119,9 @@ class Player:
                         self.gain_dodgeodds_rate(0.01)
 
                     if past_life_data['Vitality'] < 0:
-                        print("Vitality is negative. Deleting past life file.")
+                        spinner.fail(text=f"Past Lifes: {filepath} failed to load (Vitality is negative. Deleting past life file.)")
                         os.remove(filepath)
+                        continue
 
                     elif past_life_data['Vitality'] > 1.0000001:
                         temp_past_life_vitality = past_life_data['Vitality']
@@ -129,7 +130,7 @@ class Player:
                                 self.Vitality = self.Vitality + ((0.0000001) / (self.Vitality ** 3))
                             else:
                                 self.Vitality = self.Vitality + 0.0000001
-                            temp_past_life_vitality -= 0.000001
+                            temp_past_life_vitality -= 0.00001
                     
                     self.check_stats()
 
@@ -140,8 +141,7 @@ class Player:
                             pickle.dump(past_life_data, f)
 
                 except Exception as e:
-                    print(f"Error loading past life from {filepath}: {e}")
-                    print(f"Past life data: {past_life_data}")
+                    spinner.fail(text=f"Past Lifes: {filepath} failed to load ({str(e)}. Deleting past life file.)")
                     os.remove(filepath)
                     continue
         
