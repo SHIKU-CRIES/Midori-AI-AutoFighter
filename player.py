@@ -686,7 +686,7 @@ class Player:
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality
         int_mod = int(mod_fixed)
 
-        max_blessing = int(min((self.level / 16) + 1, starting_max_blessing))
+        max_blessing = int(min((self.level / 16) + 6, starting_max_blessing))
         
         hp_up: int = random.randint(25 * self.level, 550 * self.level * int_mod)
         def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
