@@ -708,9 +708,9 @@ class Player:
         dodgeodds_up: float = random.uniform(0.00002 * self.level, 0.0004 * self.level) * mod_fixed
         vitality_up: float = random.uniform(0.00000003 * self.level, 0.00000008 * self.level) * max((mod_fixed / 100), 1)
 
-        hp_up = self.check_base_stats(self.MHP, hp_up) + 15
-        def_up = self.check_base_stats(self.Def, def_up) + 5
-        atk_up = self.check_base_stats(self.Atk, atk_up) + 5
+        hp_up = self.check_base_stats(self.MHP, hp_up)
+        def_up = self.check_base_stats(self.Def, def_up)
+        atk_up = self.check_base_stats(self.Atk, atk_up)
 
         # Autopick logic
         if os.path.exists("auto.pick"):
