@@ -100,14 +100,14 @@ class Player:
                     self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.01)
 
                     for item in past_life_data['Items']:
-                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000 * max(item['power'], 1))
+                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
                         self.HP: int = self.MHP
-                        self.Def: int = self.Def + self.check_base_stats(self.Def, 50 * max(item['power'], 1))
-                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50 * max(item['power'], 1))
-                        self.Regain: float = self.Regain + (0.01 * max(item['power'], 1))
-                        self.gain_crit_rate(0.01 * max(item['power'], 1))
-                        self.gain_crit_damage(0.01 * max(item['power'], 1))
-                        self.gain_dodgeodds_rate(0.01 * max(item['power'], 1))
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, 50)
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50)
+                        self.Regain: float = self.Regain + (0.01)
+                        self.gain_crit_rate(0.01)
+                        self.gain_crit_damage(0.01)
+                        self.gain_dodgeodds_rate(0.01)
 
                     if past_life_data['Vitality'] < 0:
                         print("Vitality is negative. Deleting past life file.")
