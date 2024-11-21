@@ -6,5 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "colorama>=0.4.6",
+    "halo>=0.0.31",
     "pygame>=2.6.1",
 ]

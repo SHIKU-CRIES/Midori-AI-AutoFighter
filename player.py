@@ -5,6 +5,8 @@ import random
 
 import pickle
 
+from halo import Halo
+
 from weapons import WeaponType
 from weapons import get_weapon
 
@@ -14,6 +16,8 @@ from load_photos import resource_path
 
 from themedstuff import themed_ajt
 from themedstuff import themed_names
+
+spinner = Halo(text='Loading', spinner='dots', color='green')
 
 starting_max_blessing = 65
 
@@ -86,6 +90,9 @@ class Player:
         for filename in os.listdir(past_lives_folder):
             if filename.endswith(".pastlife"):
                 filepath = os.path.join(past_lives_folder, filename)
+        
+                spinner.start(text=f"Loading Past Lifes: {filepath}")
+
                 try:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
@@ -129,6 +136,8 @@ class Player:
 
                         with open(filepath, 'wb') as f:
                             pickle.dump(past_life_data, f)
+        
+                    spinner.succeed(text=f"Loaded Past Lifes: {filepath}")
 
                 except Exception as e:
                     print(f"Error loading past life from {filepath}: {e}")
