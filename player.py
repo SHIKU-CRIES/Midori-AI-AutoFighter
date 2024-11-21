@@ -86,12 +86,14 @@ class Player:
             os.makedirs(past_lives_folder)
             print("No past lives found.")
             return
+        
+        spinner.start(text="Past Lifes: Starting")
 
         for filename in os.listdir(past_lives_folder):
             if filename.endswith(".pastlife"):
                 filepath = os.path.join(past_lives_folder, filename)
         
-                spinner.start(text=f"Loading Past Lifes: {filepath}")
+                spinner.start(text=f"Past Lifes: {filepath}")
 
                 try:
                     with open(filepath, 'rb') as f:
@@ -136,14 +138,14 @@ class Player:
 
                         with open(filepath, 'wb') as f:
                             pickle.dump(past_life_data, f)
-        
-                    spinner.succeed(text=f"Loaded Past Lifes: {filepath}")
 
                 except Exception as e:
                     print(f"Error loading past life from {filepath}: {e}")
                     print(f"Past life data: {past_life_data}")
                     os.remove(filepath)
                     continue
+        
+        spinner.succeed(text=f"Past Lifes: Fully Loaded")
                 
         self.level = 1
 
