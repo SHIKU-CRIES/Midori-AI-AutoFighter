@@ -111,7 +111,7 @@ class Player:
 
                     if past_life_data['Vitality'] < 0:
                         print("Vitality is negative. Deleting past life file.")
-                        os.remove(filename)
+                        os.remove(filepath)
 
                     elif past_life_data['Vitality'] > 1.0000001:
                         temp_past_life_vitality = past_life_data['Vitality']
@@ -131,9 +131,9 @@ class Player:
                             pickle.dump(past_life_data, f)
 
                 except Exception as e:
-                    print(f"Error loading past life from {filename}: {e}")
+                    print(f"Error loading past life from {filepath}: {e}")
                     print(f"Past life data: {past_life_data}")
-                    os.remove(filename)
+                    os.remove(filepath)
                     continue
                 
         self.level = 1
