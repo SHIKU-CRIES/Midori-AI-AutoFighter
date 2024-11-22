@@ -294,21 +294,6 @@ def main(level):
             if bleed_mod > 5:
                 def_mod = max(1, (bleed_mod * 0.2) + (bleed_mod * 0.2) + (bleed_mod * 0.1))
 
-            fps_cap = 20
-            dt = clock.tick(fps_cap) / 1000
-
-            # Define movement speed for items (adjust this for faster/slower movement)
-            toss_velocity = max(80, 2 * min(bleed_mod, 55))
-
-            current_time = pygame.time.get_ticks()
-            if current_time - player_last_hp_update >= (1000 / max(player.Vitality, 1)):
-                player.HP = player.HP + int(player.Regain * (player.Vitality ** 5)) - int((player.Bleed * bleed_mod) / player.Def)
-                player_last_hp_update = current_time
-
-            if current_time - foe_last_hp_update >= (1000 / max(foe.Vitality, 1)):
-                foe.HP = foe.HP + int(foe.Regain * (foe.Vitality ** 5)) - int((foe.Bleed * bleed_mod) / foe.Def)
-                foe_last_hp_update = current_time
-
             if player.HP < 1:
                 log(red, "you lose... restart game to load a new buffed save file")
                 player.save_past_life()
@@ -336,6 +321,21 @@ def main(level):
                 break
             elif foe.HP > foe.MHP:
                 foe.HP = foe.MHP
+
+            fps_cap = 20
+            dt = clock.tick(fps_cap) / 1000
+
+            # Define movement speed for items (adjust this for faster/slower movement)
+            toss_velocity = max(80, 2 * min(bleed_mod, 55))
+
+            current_time = pygame.time.get_ticks()
+            if current_time - player_last_hp_update >= (1000 / max(player.Vitality, 1)):
+                player.HP = player.HP + int(player.Regain * (player.Vitality ** 5)) - int((player.Bleed * bleed_mod) / player.Def)
+                player_last_hp_update = current_time
+
+            if current_time - foe_last_hp_update >= (1000 / max(foe.Vitality, 1)):
+                foe.HP = foe.HP + int(foe.Regain * (foe.Vitality ** 5)) - int((foe.Bleed * bleed_mod) / foe.Def)
+                foe_last_hp_update = current_time
     
             current_time = pygame.time.get_ticks()
 
