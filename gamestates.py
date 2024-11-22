@@ -322,11 +322,13 @@ def main(level):
                 log(white, "Saving Data")
                 level = level + 1
                 
-                if level < 2000:
-                    if bleed_mod < 2:
-                        for multiplier in range(4):
-                            level = level + 1
-                            player.level_up(mod=bleed_mod)
+                if bleed_mod < 10:
+                    player.RushStat += 1
+                    for multiplier in range(player.RushStat):
+                        level = level + 1
+                        player.level_up(mod=bleed_mod)
+                else:
+                    player.RushStat = 0
 
                 log(white, "The foe has leveled up")
                 player.level_up(mod=bleed_mod)
