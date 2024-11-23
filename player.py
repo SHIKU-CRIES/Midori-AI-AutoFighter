@@ -258,7 +258,7 @@ class Player:
             max_hp_debuff = self.MHP / 8
 
             while self.MHP > max_hp_debuff:
-                dodge_buff = dodge_buff + 0.0000008
+                dodge_buff = dodge_buff + 0.0000007
                 self.MHP = self.MHP - 1
 
             self.Atk = int(self.Atk * 1)
@@ -807,8 +807,8 @@ class Player:
         self.Def: int = self.Def + int(self.MHP * (0.0005 * self.level)) + 500
         self.Atk: int = random.randint(10 * self.level, 20 * self.level) + (self.level * 2)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
-        self.CritRate: float = random.uniform(0.001 * self.level, (self.level * 0.002)) + (self.level * 0.001)
-        self.CritDamageMod: float = 2 + (self.level * 0.0025)
+        self.CritRate: float = random.uniform(0.0001 * self.level, (self.level * 0.0002)) + (self.level * 0.0001)
+        self.CritDamageMod: float = 2 + (self.level * 0.00025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
         self.Vitality: float = 1 + (self.level * 0.0005)
 
@@ -826,7 +826,7 @@ class Player:
 
             for i in range(int((level - 50) // 50) + 1):
                 if len(self.Items) > random.randint(1, starting_max_blessing):
-                    random.choice(self.Items).upgrade((level / 400))
+                    random.choice(self.Items).upgrade((level / (bonus_levels * 200)))
                 else:
                     self.Items.append(ItemType())
 
@@ -839,7 +839,7 @@ class Player:
         self.MHP = int(self.MHP * min((level / top_level), (4)))
         self.Atk = int(self.Atk * min((level / top_level), (0.5)))
         self.Def = int(self.Def * min((level / top_level_full), (2)))
-        self.gain_crit_rate(0.002 * (level / top_level_full))
+        self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.Vitality = max(post_temp_vit, 0.75)
         self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 2))
 
