@@ -166,6 +166,15 @@ def log(color, text):
 def main(level):
     from player import Player
 
+    # Create the player and foe objects
+    player = Player("Player")
+
+    player.load()
+    player.set_photo("Player".lower())
+
+    if player.level < 5:
+        player.load_past_lives()
+
     # Initialize the game engine
     pygame.init()
 
@@ -185,12 +194,6 @@ def main(level):
     # Set the running flag to True
     running = True
 
-    # Create the player and foe objects
-    player = Player("Player")
-
-    player.load()
-    player.set_photo("Player".lower())
-
     player_photo_preloaded = os.path.join(player.photo)
     player_profile_pic = pygame.image.load(player_photo_preloaded)
     player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
@@ -203,9 +206,6 @@ def main(level):
     pygame.mixer.music.set_volume(0.05 / 2)
     music = pygame.mixer.music.load(set_bg_music())
     pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
-
-    if player.level < 5:
-        player.load_past_lives()
 
     while True:
 
