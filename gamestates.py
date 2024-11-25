@@ -189,6 +189,15 @@ def main(level):
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     background_image.set_alpha(128)
 
+    pygame.mixer.music.set_volume(0.05 / 2)
+    music = pygame.mixer.music.load(set_bg_music())
+    pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
+
+    screen.fill((0, 0, 0))
+    screen.blit(background_image, (0, 0))
+
+    pygame.display.flip()
+
     # Create the player and foe objects
     player = Player("Player")
 
@@ -201,10 +210,6 @@ def main(level):
     player_photo_preloaded = os.path.join(player.photo)
     player_profile_pic = pygame.image.load(player_photo_preloaded)
     player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
-
-    pygame.mixer.music.set_volume(0.05 / 2)
-    music = pygame.mixer.music.load(set_bg_music())
-    pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
 
     while True:
 
@@ -394,7 +399,7 @@ def main(level):
                 last_foe_toss = current_time
 
 
-            # Render the screen            
+            # Render the screen
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
             
