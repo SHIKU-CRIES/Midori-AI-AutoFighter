@@ -166,16 +166,6 @@ def log(color, text):
 def main(level):
     from player import Player
 
-    # Create the player and foe objects
-    player = Player("Player")
-
-    player.load()
-    player.set_photo("Player".lower())
-
-    if player.level < 5:
-        player.load_past_lives()
-
-    # Initialize the game engine
     pygame.init()
 
     # Create the screen
@@ -194,14 +184,23 @@ def main(level):
     # Set the running flag to True
     running = True
 
-    player_photo_preloaded = os.path.join(player.photo)
-    player_profile_pic = pygame.image.load(player_photo_preloaded)
-    player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
-
     background_file_name = set_bg_photo()
     background_image = pygame.image.load(background_file_name)
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     background_image.set_alpha(128)
+
+    # Create the player and foe objects
+    player = Player("Player")
+
+    player.load()
+    player.set_photo("Player".lower())
+
+    if player.level < 5:
+        player.load_past_lives()
+
+    player_photo_preloaded = os.path.join(player.photo)
+    player_profile_pic = pygame.image.load(player_photo_preloaded)
+    player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
 
     pygame.mixer.music.set_volume(0.05 / 2)
     music = pygame.mixer.music.load(set_bg_music())

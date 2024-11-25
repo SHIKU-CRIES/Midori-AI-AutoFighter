@@ -135,7 +135,7 @@ class Player:
                             else:
                                 self.Vitality = self.Vitality + 0.0000001
 
-                            temp_past_life_vitality -= 0.000001
+                            temp_past_life_vitality -= 0.00001
                     
                     self.check_stats()
 
