@@ -1,3 +1,4 @@
+import math
 import random
 
 class ItemType():
@@ -11,7 +12,7 @@ class ItemType():
 
     def upgrade(self, mod_fixed):
         """Upgrades the item's power stat."""
-        self.power += round(random.uniform(0.01, 0.1) * mod_fixed, 2)
+        self.power += round(math.log10(random.uniform(0.01, 0.1) * mod_fixed), 2)
 
     def on_damage_taken(self, pre_damage_taken: float):
         """This function is called when the player takes damage.
