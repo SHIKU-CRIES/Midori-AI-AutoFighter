@@ -275,19 +275,19 @@ class Player:
             max_atk_stat = self.Atk / 4
 
             while self.MHP > max_hp_debuff:
-                self.Def = self.Def + 1
+                self.Def += self.check_base_stats(self.Def, 100)
                 self.MHP = self.MHP - 1
 
             while self.CritRate > max_crit_rate:
-                self.Def = self.Def + 1
+                self.Def += self.check_base_stats(self.Def, 100)
                 self.CritRate = self.CritRate / 2
 
             while self.Atk > max_atk_stat:
-                self.Def = self.Def + 1
+                self.Def += self.check_base_stats(self.Def, 100)
                 self.Atk = self.Atk - 1
 
             while self.Regain > 0.1:
-                self.Def = self.Def + 1
+                self.Def += self.check_base_stats(self.Def, 100)
                 self.Regain = self.Regain - 0.001
             
             for item in self.Items:
@@ -295,7 +295,7 @@ class Player:
                 item.power += (self.level * 0.00085)
 
             self.Atk = int(self.Atk) + 1
-            self.Def = int(self.Def * self.level) + 1
+            self.Def += self.check_base_stats(self.Def, int(self.Def * self.level) + 1)
 
             self.gain_crit_damage((0.0002 * self.level))
             
