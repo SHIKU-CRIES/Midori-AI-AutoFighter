@@ -817,7 +817,7 @@ class Player:
         self.CritRate: float = random.uniform(0.0001 * self.level, (self.level * 0.0002)) + (self.level * 0.0001)
         self.CritDamageMod: float = 2 + (self.level * 0.00025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
-        self.Vitality: float = 1 + (self.level * 0.0002)
+        self.Vitality: float = 1 + (self.level * 0.00002)
 
         if level > 50:
             self.MHP = self.MHP + (2 * level)
@@ -829,7 +829,7 @@ class Player:
             self.MHP = self.MHP + (50 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
             self.Def = self.Def + (4 * bonus_levels)
-            self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
+            self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
                 if len(self.Items) > starting_max_blessing:
@@ -842,12 +842,12 @@ class Player:
 
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level)))
-
-        self.MHP = int(self.MHP * min((level / top_level), (4)))
-        self.Atk = int(self.Atk * min((level / top_level), (0.5)))
-        self.Def = int(self.Def * min((level / top_level_full), (2)))
-        self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.Vitality = max(post_temp_vit, 0.75)
+
+        self.MHP = int(self.MHP * min((level / top_level), (4)) * self.Vitality)
+        self.Atk = int(self.Atk * min((level / top_level), (0.5)) * self.Vitality)
+        self.Def = int(self.Def * min((level / top_level_full), (2)) * self.Vitality)
+        self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 2))
 
         self.check_stats()
