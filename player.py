@@ -19,7 +19,7 @@ from themedstuff import themed_names
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
 
-starting_max_blessing = 65
+starting_max_blessing = 5
 
 class Player:
     def __init__(self, name):
@@ -740,7 +740,7 @@ class Player:
         elif choice == 8:
             self.gain_dodgeodds_rate(dodgeodds_up)
         elif choice == 9:
-            if len(self.Items) < random.randint(5, max_blessing):
+            if len(self.Items) < starting_max_blessing:
                 self.Items.append(ItemType())
             else:
                 random.choice(self.Items).upgrade(mod_fixed)
@@ -755,7 +755,7 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 4)
                 self.gain_dodgeodds_rate(dodgeodds_up / 4)
 
-                if len(self.Items) < random.randint(5, max_blessing):
+                if len(self.Items) < starting_max_blessing:
                     self.Items.append(ItemType())
                 else:
                     for item in self.Items:
@@ -771,7 +771,7 @@ class Player:
                 self.gain_crit_damage(critdamage_up / 2)
                 self.gain_dodgeodds_rate(dodgeodds_up / 2)
                 
-                if len(self.Items) < random.randint(5, max_blessing):
+                if len(self.Items) < starting_max_blessing:
                     self.Items.append(ItemType())
                 else:
                     for item in self.Items:
@@ -825,7 +825,7 @@ class Player:
             self.CritRate = self.CritRate + (0.00000001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
-                if len(self.Items) > random.randint(1, starting_max_blessing):
+                if len(self.Items) > starting_max_blessing:
                     random.choice(self.Items).upgrade((level / (bonus_levels * 200)))
                 else:
                     self.Items.append(ItemType())
