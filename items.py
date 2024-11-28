@@ -12,7 +12,7 @@ class ItemType():
 
     def upgrade(self, mod_fixed):
         """Upgrades the item's power stat."""
-        self.power += round(max(math.log10(random.uniform(0.01, 0.1) * mod_fixed), 0.01), 2)
+        self.power += round(max(math.log10(random.uniform(0.001, 0.01) * mod_fixed), 0.0001), 2)
 
     def on_damage_taken(self, pre_damage_taken: float):
         """This function is called when the player takes damage.
