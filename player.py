@@ -809,7 +809,7 @@ class Player:
         top_level_full = 5000
 
         self.level = level
-        self.MHP: int = random.randint(5 * self.level, 15 * self.level) + 1000
+        self.MHP: int = random.randint(10 * self.level, 15 * self.level) + 1000
         self.HP: int = self.MHP
         self.Def: int = self.Def + int(self.MHP * (0.0005 * self.level)) + 500
         self.Atk: int = random.randint(10 * self.level, 20 * self.level) + (self.level * 2)
@@ -817,7 +817,7 @@ class Player:
         self.CritRate: float = random.uniform(0.0001 * self.level, (self.level * 0.0002)) + (self.level * 0.0001)
         self.CritDamageMod: float = 2 + (self.level * 0.00025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
-        self.Vitality: float = 1 + (self.level * 0.0005)
+        self.Vitality: float = 1 + (self.level * 0.0002)
 
         if level > 50:
             self.MHP = self.MHP + (2 * level)
