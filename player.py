@@ -129,9 +129,11 @@ class Player:
                         continue
 
                     elif past_life_data['Vitality'] > 1.0000001:
-                        temp_past_life_vitality = past_life_data['Vitality']
+                        temp_past_life_vitality = past_life_data['Vitality'] - 1
                         while temp_past_life_vitality > 0:
-                            if self.Vitality > 2:
+                            if self.Vitality > 5:
+                                self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 4))
+                            elif self.Vitality > 2:
                                 self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 2))
                             else:
                                 self.Vitality = self.Vitality + 0.000001
