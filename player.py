@@ -289,14 +289,13 @@ class Player:
             
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
-                item.power += (self.level * 0.0005)
+                item.power += (self.level * 0.0008)
 
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def * self.level) + 1
 
             self.gain_crit_damage((0.0002 * self.level))
             
-
         if themed_names[2] in self.PlayerName.lower():
             self.MHP = int(self.MHP * 15)
             self.Atk = int(self.Atk * 8)
@@ -338,6 +337,13 @@ class Player:
 
         if themed_names[8] in self.PlayerName.lower():
             self.Regain = self.Regain * (0.05 * self.level)
+
+        if themed_names[9] in self.PlayerName.lower():
+            for item in self.Items:
+                item.name = "Bubbles\'s Blessing of Damage, Defense, and Utility"
+                item.power += (self.level * 0.0008)
+
+
 
         if themed_ajt[0] in self.PlayerName.lower(): # atrocious
             self.MHP = int(self.MHP * 1.9)
@@ -712,7 +718,7 @@ class Player:
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * mod_fixed
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * mod_fixed
         dodgeodds_up: float = random.uniform(0.000002 * self.level, 0.00004 * self.level) * mod_fixed
-        vitality_up: float = random.uniform(0.00000003 * self.level, 0.00000008 * self.level) * max((mod_fixed / 100), 1)
+        vitality_up: float = random.uniform(0.00000006 * self.level, 0.00000008 * self.level) * max((mod_fixed / 100), 1)
 
         hp_up = self.check_base_stats(self.MHP, hp_up)
         def_up = self.check_base_stats(self.Def, def_up)
@@ -720,7 +726,7 @@ class Player:
 
         # Autopick logic
         if os.path.exists("auto.pick"):
-            choice = 10
+            choice = 9
         else:
             choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt, self.Items)
 
@@ -731,20 +737,20 @@ class Player:
             self.Def += int(def_up)
         elif choice == 3:
             self.Atk += int(atk_up)
-        elif choice == 5:
+        elif choice == 4:
             self.Regain += regain_up
-        elif choice == 6:
+        elif choice == 5:
             self.gain_crit_rate(critrate_up)
-        elif choice == 7:
+        elif choice == 6:
             self.gain_crit_damage(critdamage_up)
-        elif choice == 8:
+        elif choice == 7:
             self.gain_dodgeodds_rate(dodgeodds_up)
-        elif choice == 9:
+        elif choice == 8:
             if len(self.Items) < starting_max_blessing:
                 self.Items.append(ItemType())
             else:
                 random.choice(self.Items).upgrade(mod_fixed)
-        elif choice == 10:
+        elif choice == 9:
             if self.level > 500:
                 self.MHP += int(hp_up / 4)
                 self.HP += int(hp_up / 4)
@@ -759,7 +765,7 @@ class Player:
                     self.Items.append(ItemType())
                 else:
                     for item in self.Items:
-                        item.upgrade(mod_fixed / 1000)
+                        item.upgrade(mod_fixed / 100)
 
             else:
                 self.MHP += int(hp_up / 2)
@@ -775,7 +781,7 @@ class Player:
                     self.Items.append(ItemType())
                 else:
                     for item in self.Items:
-                        item.upgrade(mod_fixed / 100)
+                        item.upgrade(mod_fixed / 10)
 
         if self.level > 300:
             self.Vitality += vitality_up

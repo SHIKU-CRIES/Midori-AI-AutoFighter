@@ -47,7 +47,6 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         ('HP', hp_up),
         ('Def', def_up),
         ('Atk', atk_up),
-        ('Unused', 0),
         ('Regain', regain_up),
         ('CritRate', critrate_up),
         ('CritDamageMod', critdamage_up),
