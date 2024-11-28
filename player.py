@@ -711,8 +711,6 @@ class Player:
 
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality
         int_mod = int(mod_fixed)
-
-        max_blessing = int(min((self.level / 16) + 6, starting_max_blessing))
         
         hp_up: int = random.randint(25 * self.level, 550 * self.level * int_mod)
         def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
@@ -752,7 +750,7 @@ class Player:
             if len(self.Items) < starting_max_blessing:
                 self.Items.append(ItemType())
             else:
-                random.choice(self.Items).upgrade(mod_fixed)
+                random.choice(self.Items).upgrade(mod_fixed * 25)
         elif choice == 9:
             if self.level > 500:
                 self.MHP += int(hp_up / 4)
@@ -768,7 +766,7 @@ class Player:
                     self.Items.append(ItemType())
                 else:
                     for item in self.Items:
-                        item.upgrade(mod_fixed / 100)
+                        item.upgrade(mod_fixed)
 
             else:
                 self.MHP += int(hp_up / 2)
@@ -784,7 +782,7 @@ class Player:
                     self.Items.append(ItemType())
                 else:
                     for item in self.Items:
-                        item.upgrade(mod_fixed / 10)
+                        item.upgrade(mod_fixed)
 
         if self.level > 300:
             self.Vitality += vitality_up
