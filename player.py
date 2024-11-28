@@ -235,7 +235,7 @@ class Player:
     
     def check_base_stats(self, stat_total: int, stat_gain:int):
         stats_to_start_lower = 50
-        to_be_lowered_by = 10 + (stat_total // 5000)
+        to_be_lowered_by = 10 + (stat_total // 10000)
 
         if stat_total > 1000000:
             desired_increase = stat_gain / max(((to_be_lowered_by ** 10) * (stat_total // stats_to_start_lower)), 1)
@@ -250,7 +250,7 @@ class Player:
         return max(int(desired_increase), 5) 
 
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
-#themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray"]
+#themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray", "bubbles"]
 
     def check_name_mod(self):
         if themed_names[0] in self.PlayerName.lower():
@@ -289,7 +289,7 @@ class Player:
             
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
-                item.power += (self.level * 0.0008)
+                item.power += (self.level * 0.00085)
 
             self.Atk = int(self.Atk) + 1
             self.Def = int(self.Def * self.level) + 1
@@ -341,7 +341,7 @@ class Player:
         if themed_names[9] in self.PlayerName.lower():
             for item in self.Items:
                 item.name = "Bubbles\'s Blessing of Damage, Defense, and Utility"
-                item.power += (self.level * 0.0008)
+                item.power += (self.level * 0.0007)
 
 
 
