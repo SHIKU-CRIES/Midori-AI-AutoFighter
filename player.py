@@ -270,24 +270,25 @@ class Player:
             self.DodgeOdds = (self.DodgeOdds + (dodge_buff * self.level)) * self.Vitality
 
         if themed_names[1] in self.PlayerName.lower():
-            max_hp_debuff = self.MHP / 2
+            def_to_add = 100 * self.level
+            max_hp_debuff = max(self.MHP - random.randint(1000, 2000), 10)
             max_crit_rate = self.CritRate / 100
             max_atk_stat = self.Atk / 4
 
             while self.MHP > max_hp_debuff:
-                self.Def += self.check_base_stats(self.Def, 100)
+                self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.MHP = self.MHP - 1
 
             while self.CritRate > max_crit_rate:
-                self.Def += self.check_base_stats(self.Def, 100)
-                self.CritRate = self.CritRate / 2
+                self.Def += self.check_base_stats(self.Def, def_to_add)
+                self.CritRate -= self.CritRate / 15
 
             while self.Atk > max_atk_stat:
-                self.Def += self.check_base_stats(self.Def, 100)
+                self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Atk = self.Atk - 1
 
             while self.Regain > 0.1:
-                self.Def += self.check_base_stats(self.Def, 100)
+                self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Regain = self.Regain - 0.001
             
             for item in self.Items:
