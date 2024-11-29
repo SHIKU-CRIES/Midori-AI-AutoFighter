@@ -13,7 +13,7 @@ class ItemType():
 
     def upgrade(self, mod_fixed):
         """Upgrades the item's power stat."""
-        self.power += max(math.log10(random.uniform(10, 1) * self.check_mods(mod_fixed)), 0.00001)
+        self.power += max(math.log10(random.uniform(0.001, 0.01)) * math.log10(self.check_mods(mod_fixed)), 0.00001)
     
     def check_mods(self, temp_power: float):
         for index, item_mod in enumerate(item_mods):
