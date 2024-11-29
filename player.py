@@ -293,7 +293,7 @@ class Player:
             
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
-                item.power += (self.level * 0.00085)
+                item.power += (self.level * 0.0004)
 
             self.Atk = int(self.Atk) + 1
             self.Def += self.check_base_stats(self.Def, int(self.Def * self.level) + 1)
@@ -345,7 +345,7 @@ class Player:
         if themed_names[9] in self.PlayerName.lower():
             for item in self.Items:
                 item.name = "Bubbles\'s Blessing of Damage, Defense, and Utility"
-                item.power += (self.level * 0.0007)
+                item.power += (self.level * 0.0003)
 
 
 
