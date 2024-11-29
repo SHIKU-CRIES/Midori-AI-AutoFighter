@@ -257,11 +257,11 @@ class Player:
 
     def check_name_mod(self):
         if themed_names[0] in self.PlayerName.lower():
-            dodge_buff = 0.010
+            dodge_buff = 0.015
             max_hp_debuff = self.MHP / 8
 
             while self.MHP > max_hp_debuff:
-                dodge_buff = dodge_buff + 0.0000007
+                dodge_buff = dodge_buff + (0.0000007 * self.Vitality)
                 self.MHP = self.MHP - 1
 
             self.Atk = int(self.Atk * 1)
