@@ -275,6 +275,14 @@ class Player:
             max_crit_rate = self.CritRate / 100
             max_atk_stat = self.Atk / 4
 
+            while self.Vitality > 1.01:
+                self.Items.append(ItemType())
+                self.Vitality = self.Vitality - 0.01
+            
+            for item in self.Items:
+                item.name = "Carly\'s Blessing of Defense"
+                item.power += (self.level * random.uniform(0.0004, 0.0008))
+
             while self.MHP > max_hp_debuff:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.MHP = self.MHP - 1
@@ -290,14 +298,6 @@ class Player:
             while self.Regain > 0.1:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Regain = self.Regain - 0.001
-
-            while self.Vitality > 1.1:
-                self.Items.append(ItemType())
-                self.Vitality = self.Vitality - 0.01
-            
-            for item in self.Items:
-                item.name = "Carly\'s Blessing of Defense"
-                item.power += (self.level * 0.0004)
 
             self.Atk = int(self.Atk) + 1
             self.Def += self.check_base_stats(self.Def, int(self.Def * self.level) + 1)
@@ -693,8 +693,8 @@ class Player:
             def_up = self.check_base_stats(self.Def, def_up)
             self.Def = self.Def + def_up
         
-        if self.Def < 101:
-            self.Def = 100
+        if self.Def < 5:
+            self.Def = 5
 
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
@@ -813,7 +813,7 @@ class Player:
             print(f"Name: {item.name}, Power: {item.power:.2f}")
     
     def set_level(self, level):
-        top_level = 1000
+        top_level = 10000
         top_level_full = 5000
 
         self.level = level
