@@ -666,7 +666,7 @@ class Player:
 
     def check_stats(self):
         max_dodgeodds = 5000
-        max_crit_rate = 5
+        max_crit_rate = 15
         def_up = 0
 
         while self.DodgeOdds > (max_dodgeodds + 0.01):
