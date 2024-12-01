@@ -688,6 +688,9 @@ class Player:
         if def_up > 1:
             def_up = self.check_base_stats(self.Def, def_up)
             self.Def = self.Def + def_up
+        
+        if self.Def < 101:
+            self.Def = 100
 
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
