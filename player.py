@@ -290,6 +290,10 @@ class Player:
             while self.Regain > 0.1:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Regain = self.Regain - 0.001
+
+            while self.Vitality > 1.1:
+                self.Items.append(ItemType())
+                self.Vitality = self.Vitality - 0.01
             
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
