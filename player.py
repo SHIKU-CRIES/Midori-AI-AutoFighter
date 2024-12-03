@@ -98,13 +98,13 @@ class Player:
 
                 starting_items += 1
         
-                spinner.start(text=f"Past Lifes: {filepath} ({starting_items}/{total_items})")
+                spinner.start(text=f"({starting_items}/{total_items}) Past Lifes: {filepath}")
 
                 try:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * 2) + 100)
+                    self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 100)
                     self.HP: int = self.MHP
                     self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 100)
                     self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 200)
