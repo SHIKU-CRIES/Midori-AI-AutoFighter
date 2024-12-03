@@ -718,7 +718,7 @@ class Player:
         self.level += 1
 
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
-        int_mod = int(mod_fixed * (self.level / 100))
+        int_mod = max(int(mod_fixed * (self.level / 100)), 1)
         
         hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
         def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
