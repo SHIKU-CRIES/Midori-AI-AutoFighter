@@ -428,10 +428,12 @@ def main(level):
             screen.blit(player_profile_pic, (player_rect.x - player_hp_bar_offset, player_rect.y + 85))
             
             stat_data = [
-                ("Stats of:", f"{player.PlayerName} ({player.level})"),
+                ("Stats of:", player.PlayerName),
+                ("Level:", player.level),
                 ("Max HP:", player.MHP),
-                ("Atk / Def:", f"{int(player.Atk)} / {int(player.Def / def_mod)}"),
-                ("Crit Rate / Damage:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
+                ("Def:", int(player.Def / def_mod)),
+                ("Atk:", int(player.Atk)),
+                ("Crit Rate / Mod:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
@@ -474,10 +476,13 @@ def main(level):
                 print(f"Could not render stats due to {str(error)}")
                 
             foe_stat_data = [
-                ("Stats of:", f"{foe.PlayerName} ({foe.level})"),
+                ("Stats of:", foe.PlayerName),
+                ("Level:", foe.level),
                 ("Max HP:", foe.MHP),
-                ("Atk / Def:", f"{int(foe.Atk)} / {int(foe.Def / def_mod)}"),
-                ("Crit Rate / Damage:", f"{(foe.CritRate * 100):.1f}% / {(foe.CritDamageMod):.2f}x"),
+                ("Def:", int(foe.Def / def_mod)),
+                ("Atk:", int(foe.Atk)),
+                ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
+                ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
             ]
 
