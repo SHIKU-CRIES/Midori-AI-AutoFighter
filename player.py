@@ -680,7 +680,7 @@ class Player:
         def_up = 0
 
         if self.DodgeOdds > (max_dodgeodds + 0.01):
-            mod_number_dodge = (self.DodgeOdds - (max_dodgeodds + 0.01)) / -0.01 + 1
+            mod_number_dodge = (self.DodgeOdds - (max_dodgeodds - 0.01))
             def_up = def_up + int(mod_number_dodge)
             self.gain_crit_rate(0.0001 * mod_number_dodge)
             self.DodgeOdds = max_dodgeodds
@@ -689,7 +689,7 @@ class Player:
             self.DodgeOdds = max_dodgeodds
 
         if self.CritRate > (max_crit_rate + 0.01):
-            mod_number_crit = (self.CritRate - (max_crit_rate + 0.01)) / -0.01 + 1
+            mod_number_crit = (self.CritRate - (max_crit_rate - 0.01))
             def_up = def_up + int(mod_number_crit)
             self.gain_crit_damage(0.001 * mod_number_crit)
             self.CritRate = max_crit_rate
