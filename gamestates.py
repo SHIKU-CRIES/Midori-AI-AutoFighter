@@ -273,6 +273,9 @@ def main(level):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
                     print("oops you died")
                     player.HP = 0
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_w: 
+                    player.level = int(input("Please enter your new level: "))
+                    foe.HP = 0
 
             enrage_timer.check_timeout()
             
