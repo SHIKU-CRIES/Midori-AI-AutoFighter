@@ -274,20 +274,20 @@ class Player:
             max_hp_debuff = max(self.MHP - random.randint(1000, 2000), 10)
             max_crit_rate = self.CritRate / 100
             max_atk_stat = self.Atk / 4
-            item_buff = (self.level * random.uniform(0.0004, 0.0008))
+            item_buff = random.uniform(0.0004, 0.0008)
 
             while self.Vitality > 1.01:
-                item_buff += (self.level * random.uniform(0.0004, 0.0008))
+                item_buff += random.uniform(0.00002, 0.00003)
                 self.Vitality = self.Vitality - 0.01
             
             if self.level > 3000:
                 while self.Def > 25000:
-                    item_buff += (self.level * random.uniform(0.0004, 0.0008))
+                    item_buff += random.uniform(0.00002, 0.00003)
                     self.Def = self.Def - 1000
             
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
-                item.power += item_buff
+                item.power += self.level * item_buff
 
             while self.MHP > max_hp_debuff:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
