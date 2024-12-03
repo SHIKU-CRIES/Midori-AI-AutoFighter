@@ -717,8 +717,8 @@ class Player:
         from gamestates import display_stats_menu
         self.level += 1
 
-        mod_fixed = ((mod * 0.35) + 1) * self.Vitality
-        int_mod = int(mod_fixed)
+        mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
+        int_mod = int(mod_fixed * (self.level / 100))
         
         hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
         def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
@@ -761,11 +761,11 @@ class Player:
                 random.choice(self.Items).upgrade(mod_fixed * 25)
         elif choice == 9:
             if self.level > 500:
-                self.MHP += int(hp_up / 4)
-                self.HP += int(hp_up / 4)
-                self.Def += int(def_up / 4)
-                self.Atk += int(atk_up / 4)
-                self.Regain += regain_up / 4
+                self.MHP += int(hp_up)
+                self.HP += int(hp_up)
+                self.Def += int(def_up)
+                self.Atk += int(atk_up)
+                self.Regain += regain_up
                 self.gain_crit_rate(critrate_up)
                 self.gain_crit_damage(critdamage_up)
                 self.gain_dodgeodds_rate(dodgeodds_up)
