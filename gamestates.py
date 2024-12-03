@@ -428,24 +428,18 @@ def main(level):
             screen.blit(player_profile_pic, (player_rect.x - player_hp_bar_offset, player_rect.y + 85))
             
             stat_data = [
-                ("Stats of:", player.PlayerName),
-                ("Level:", player.level),
+                ("Stats of:", f"{player.PlayerName} ({player.level})"),
                 ("Max HP:", player.MHP),
-                ("Def:", int(player.Def / def_mod)),
-                ("Atk:", int(player.Atk)),
-                ("Crit Rate:", f"{(player.CritRate * 100):.1f}%"),
-                ("Crit Damage Mod:", f"{(player.CritDamageMod):.2f}x"),
+                ("Atk / Def:", f"{int(player.Atk)} / {int(player.Def / def_mod)}"),
+                ("Crit Rate / Damage:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
             if player.Vitality / def_mod > 1.01:
-                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
+                stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
 
             elif player.Vitality / def_mod != 1:
-                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
-            
-            if player.Vitality / def_mod != player.Vitality:
-                stat_data.append(("True Vitality:", f"{(player.Vitality):.2f}x"))
+                stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
 
             if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
@@ -480,13 +474,10 @@ def main(level):
                 print(f"Could not render stats due to {str(error)}")
                 
             foe_stat_data = [
-                ("Stats of:", foe.PlayerName),
-                ("Level:", foe.level),
+                ("Stats of:", f"{foe.PlayerName} ({foe.level})"),
                 ("Max HP:", foe.MHP),
-                ("Def:", int(foe.Def / def_mod)),
-                ("Atk:", int(foe.Atk)),
-                ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
-                ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
+                ("Atk / Def:", f"{int(foe.Atk)} / {int(foe.Def / def_mod)}"),
+                ("Crit Rate / Damage:", f"{(foe.CritRate * 100):.1f}% / {(foe.CritDamageMod):.2f}x"),
                 ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
             ]
 
@@ -496,11 +487,11 @@ def main(level):
             if foe.Vitality / def_mod > 1.5:
                 foe_stat_data.append(("Vitality:", f"{(foe.Vitality / def_mod):.2f}x"))
 
-            if foe.Bleed != 0:
-                foe_stat_data.append(("Bleed:", f"{foe.Bleed:.1f}x"))
-
             if (foe.DodgeOdds * 100) / bleed_mod > 1:
                 foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
+
+            if foe.Bleed != 0:
+                foe_stat_data.append(("Bleed:", f"{foe.Bleed:.1f}x"))
 
             # Foe stats drawing
             foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) + 170
