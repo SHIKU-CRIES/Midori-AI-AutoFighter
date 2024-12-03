@@ -682,7 +682,7 @@ class Player:
         while self.DodgeOdds > (max_dodgeodds + 0.01):
             def_up = def_up + 1
             self.gain_crit_rate(0.0001)
-            self.DodgeOdds = self.DodgeOdds - 0.001
+            self.DodgeOdds = self.DodgeOdds - 0.01
 
         if self.DodgeOdds > max_dodgeodds:
             self.DodgeOdds = max_dodgeodds
@@ -690,7 +690,7 @@ class Player:
         while self.CritRate > (max_crit_rate + 0.01):
             def_up = def_up + 1
             self.gain_crit_damage(0.001)
-            self.CritRate = self.CritRate - 0.0001
+            self.CritRate = self.CritRate - 0.01
 
         if self.CritRate > max_crit_rate:
             self.CritRate = max_crit_rate
