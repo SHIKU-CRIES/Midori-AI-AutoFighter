@@ -327,7 +327,7 @@ def main(level):
                 log(white, "Saving Data")
                 level = level + 1
                 
-                if bleed_mod < 10:
+                if bleed_mod < 100:
                     player.RushStat += 1
                     for multiplier in range(player.RushStat):
                         level = level + 1
