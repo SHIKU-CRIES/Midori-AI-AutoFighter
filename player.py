@@ -279,6 +279,11 @@ class Player:
                 self.Items.append(ItemType())
                 self.Vitality = self.Vitality - 0.01
             
+            if self.level > 3000:
+                while self.Def > 25000:
+                    self.Items.append(ItemType())
+                    self.Def = self.Def - 1000
+            
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
                 item.power += (self.level * random.uniform(0.0004, 0.0008))
