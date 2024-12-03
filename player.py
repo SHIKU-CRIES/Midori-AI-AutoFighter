@@ -679,18 +679,20 @@ class Player:
         max_crit_rate = 15
         def_up = 0
 
-        while self.DodgeOdds > (max_dodgeodds + 0.01):
-            def_up = def_up + 1
-            self.gain_crit_rate(0.0001)
-            self.DodgeOdds = self.DodgeOdds - 0.01
+        if self.DodgeOdds > (max_dodgeodds + 0.01):
+            mod_number_dodge = (self.DodgeOdds - (max_dodgeodds + 0.01)) / -0.01 + 1
+            def_up = def_up + int(mod_number_dodge)
+            self.gain_crit_rate(0.0001 * mod_number_dodge)
+            self.DodgeOdds = max_dodgeodds
 
         if self.DodgeOdds > max_dodgeodds:
             self.DodgeOdds = max_dodgeodds
 
-        while self.CritRate > (max_crit_rate + 0.01):
-            def_up = def_up + 1
-            self.gain_crit_damage(0.001)
-            self.CritRate = self.CritRate - 0.01
+        if self.CritRate > (max_crit_rate + 0.01):
+            mod_number_crit = (self.CritRate - (max_crit_rate + 0.01)) / -0.01 + 1
+            def_up = def_up + int(mod_number_crit)
+            self.gain_crit_damage(0.001 * mod_number_crit)
+            self.CritRate = max_crit_rate
 
         if self.CritRate > max_crit_rate:
             self.CritRate = max_crit_rate
