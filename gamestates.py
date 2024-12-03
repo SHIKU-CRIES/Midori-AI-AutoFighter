@@ -273,16 +273,13 @@ def main(level):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
                     print("oops you died")
                     player.HP = 0
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_w: 
-                    player.level = int(input("Please enter your new level: "))
-                    foe.HP = 0
 
             enrage_timer.check_timeout()
             
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
-            level_base_enrage_mod = (level / 4)
+            level_base_enrage_mod = (level / max(level / 1000, 1))
             player_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * player.Vitality))
             foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality))
 
@@ -299,6 +296,9 @@ def main(level):
 
             if bleed_mod > 15:
                 def_mod = max(1, (bleed_mod * 0.02) + (bleed_mod * 0.02) + (bleed_mod * 0.01))
+            
+            if bleed_mod > 35:
+                def_mod = max(1, (bleed_mod * 0.04) + (bleed_mod * 0.04) + (bleed_mod * 0.02))
 
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
