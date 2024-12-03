@@ -442,10 +442,13 @@ def main(level):
                 stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
             if player.Vitality / def_mod > 1.01:
-                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.2f}x ({(player.Vitality):.2f})"))
+                stat_data.append(("Moded Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
 
             elif player.Vitality / def_mod != 1:
-                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.5f}x ({(player.Vitality):.2f})"))
+                stat_data.append(("Moded Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
+            
+            if player.Vitality / def_mod != player.Vitality:
+                stat_data.append(("True Vitality:", f"{(player.Vitality):.2f}x"))
 
             if player.Bleed != 0:
                 stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
