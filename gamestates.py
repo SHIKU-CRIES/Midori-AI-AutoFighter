@@ -438,26 +438,26 @@ def main(level):
                 ("HP Regain:", f"{(player.Regain * 100):.0f}"),
             ]
 
-            if len(player.Items) > 0:
-                stat_data.append(("Blessings:", f"{len(player.Items)}"))
-
             if player.Vitality / def_mod > 1.01:
-                stat_data.append(("Moded Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
+                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
 
             elif player.Vitality / def_mod != 1:
-                stat_data.append(("Moded Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
+                stat_data.append(("Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
             
             if player.Vitality / def_mod != player.Vitality:
                 stat_data.append(("True Vitality:", f"{(player.Vitality):.2f}x"))
-
-            if player.Bleed != 0:
-                stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
             if (player.DodgeOdds * 100) / bleed_mod > 1:
                 stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
             if enrage_timer.timed_out:
                 stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
+
+            if len(player.Items) > 0:
+                stat_data.append(("Blessings:", f"{len(player.Items)}"))
+
+            if player.Bleed != 0:
+                stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
             x_offset = (SCREEN_WIDTH // 8) - 175
             y_offset = (SCREEN_HEIGHT // 2) - 425
