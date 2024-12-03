@@ -292,16 +292,16 @@ def main(level):
             else:
                 bleed_mod = (0.00000002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
 
-            def_mod = max(1, (bleed_mod * 0.5))
+            def_mod = max(1, (bleed_mod * 0.05))
 
-            if bleed_mod > 5:
-                def_mod = max(1, (bleed_mod * 0.2) + (bleed_mod * 0.2) + (bleed_mod * 0.1))
+            if bleed_mod > 15:
+                def_mod = max(1, (bleed_mod * 0.02) + (bleed_mod * 0.02) + (bleed_mod * 0.01))
 
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
 
             # Define movement speed for items (adjust this for faster/slower movement)
-            toss_velocity = max(80, 2 * min(bleed_mod, 55))
+            toss_velocity = max(80, 2 * min(bleed_mod, 75))
 
             current_time = pygame.time.get_ticks()
             if current_time - player_last_hp_update >= (1000 / max(player.Vitality, 1)):
