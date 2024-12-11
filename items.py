@@ -21,7 +21,6 @@ class ItemType():
     def check_mods(self, temp_power: float):
         for index, item_mod in enumerate(item_mods):
             if item_mod.lower() in self.name.lower():
-                #return temp_power
                 return temp_power + (index * 0.0005)
         
         return temp_power
