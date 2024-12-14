@@ -284,13 +284,13 @@ def main(level):
             foe_base_enrage_mod = (level_base_enrage_mod * foe.Vitality)
 
             if enrage_mod > 10:
-                buffed_starter = ((enrage_mod - 10) * 0.000000004) + ((enrage_mod - 5) * 0.000000002)
-                bleed_mod = ((0.00000002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                buffed_starter = ((enrage_mod - 10) * 0.00000004) + ((enrage_mod - 5) * 0.00000002)
+                bleed_mod = ((0.0000002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
             elif enrage_mod > 5:
-                buffed_starter = ((enrage_mod - 5) * 0.000000002)
-                bleed_mod = ((0.00000002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                buffed_starter = ((enrage_mod - 5) * 0.00000002)
+                bleed_mod = ((0.0000002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
             else:
-                bleed_mod = (0.00000002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                bleed_mod = (0.0000002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
 
             def_mod = max(1, (bleed_mod * 0.05))
 
