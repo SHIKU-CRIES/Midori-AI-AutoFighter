@@ -280,17 +280,17 @@ def main(level):
 
             enrage_mod = enrage_timer.get_timeout_duration()
             level_base_enrage_mod = (level / max(level / 1000, 1))
-            player_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * player.Vitality))
-            foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality))
+            player_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * player.Vitality * player.DodgeOdds))
+            foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality * foe.DodgeOdds))
 
             if enrage_mod > 10:
                 buffed_starter = ((enrage_mod - 10) * 0.000000004) + ((enrage_mod - 5) * 0.000000002)
-                bleed_mod = ((0.00000002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                bleed_mod = ((0.00000002 + buffed_starter) * (max(player_base_enrage_mod, foe_base_enrage_mod))) + 1
             elif enrage_mod > 5:
                 buffed_starter = ((enrage_mod - 5) * 0.000000002)
-                bleed_mod = ((0.00000002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                bleed_mod = ((0.00000002 + buffed_starter) * (max(player_base_enrage_mod, foe_base_enrage_mod))) + 1
             else:
-                bleed_mod = (0.00000002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                bleed_mod = (0.00000002 * (max(player_base_enrage_mod, foe_base_enrage_mod))) + 1
 
             def_mod = max(1, (bleed_mod * 0.05))
 
