@@ -199,7 +199,7 @@ def main(level):
     pygame.display.flip()
 
     # Create the player and foe objects
-    playerlist = []
+    playerlist: list[Player] = []
 
     player = Player("Player")
 
@@ -227,7 +227,7 @@ def main(level):
 
     while True:
         
-        foelist = []
+        foelist: list[Player] = []
 
         for player in playerlist:
             player.Bleed = 0
@@ -255,27 +255,9 @@ def main(level):
 
             foelist.append(foe)
 
-        # Initialize item positions and velocity for tossing
-        for item in player.Inv:
-            item.position = (SCREEN_WIDTH // 6, SCREEN_HEIGHT // 2)
-            item.velocity = 0
-            item.arc_offset = 0
-
-        for item in foe.Inv:
-            item.position = (SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2)
-            item.velocity = 0
-            item.arc_offset = 0
-
-        # Index to track the current item being tossed
-        player_item_index = 0
-        foe_item_index = 0
-
         # Initialize timers for both players before the main loop
-        last_player_toss = pygame.time.get_ticks() 
-        last_foe_toss = pygame.time.get_ticks()
         player_last_hp_update = pygame.time.get_ticks()
         foe_last_hp_update = pygame.time.get_ticks()
-        toss_interval = 1000 / 60  # 1 second in milliseconds
 
         # heal the player
         player.HP = player.MHP
@@ -322,9 +304,6 @@ def main(level):
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
 
-            # Define movement speed for items (adjust this for faster/slower movement)
-            toss_velocity = max(80, 2 * min(bleed_mod, 75))
-
             current_time = pygame.time.get_ticks()
             if current_time - player_last_hp_update >= (1000 / max(player.Vitality, 1)):
                 player.HP = player.HP + int(player.Regain * (player.Vitality ** 5)) - int((player.Bleed * bleed_mod) / player.Def)
@@ -336,95 +315,12 @@ def main(level):
     
             current_time = pygame.time.get_ticks()
 
-            if player.HP < 1:
-                log(red, "you lose... restart game to load a new buffed save file")
-                player.save_past_life()
-                pygame.quit()
-                input("Press enter to exit: ")
-                exit()
-            elif player.HP > player.MHP:
-                player.HP = player.MHP
-
-            if foe.HP < 1:
-                log(white, "Saving Data")
-                level = level + 1
-                
-                if bleed_mod < 100:
-                    player.RushStat += 1
-                    for multiplier in range(player.RushStat):
-                        level = level + 1
-                        player.level_up(mod=bleed_mod)
-                else:
-                    player.RushStat = 0
-
-                log(white, "The foe has leveled up")
-                player.level_up(mod=bleed_mod)
-                player.save()
-                break
-            elif foe.HP > foe.MHP:
-                foe.HP = foe.MHP
-
-            # Toss one item from the player to the foe every 1 second
-            if current_time - last_player_toss >= toss_interval:
-                if player_item_index >= len(player.Inv):
-                    player_item_index = 0  # Loop over items
-
-                current_item = player.Inv[player_item_index]
-                if current_item.velocity == 0:
-                    # Set initial velocity and a random arc offset
-                    current_item.velocity = toss_velocity
-                    current_item.arc_offset = random.randint(-15, 15)  # Random arc up or down
-
-                end_pos = (SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2)
-                current_item.position = move_towards_with_arc(current_item.position, end_pos, current_item.velocity, current_item.arc_offset)
-
-                # Check if the item has reached the foe's text
-                foe_rect = font.render(foe.PlayerName, True, (255, 255, 255)).get_rect(center=(SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2))
-                if foe_rect.collidepoint(current_item.position):
-                    take_damage(player, foe, [bleed_mod, enrage_timer, current_item], def_mod)
-
-                    current_item.velocity = 0  # Reset velocity after hit
-                    current_item.position = (SCREEN_WIDTH // 6, SCREEN_HEIGHT // 2)
-                    player_item_index += 1  # Move to the next itemc
-
-                # Reset the toss timer after an item is tossed
-                del current_item
-                last_player_toss = current_time 
-
-
-            # Toss one item from the foe to the player every 1 second
-            if current_time - last_foe_toss >= toss_interval: 
-                if foe_item_index >= len(foe.Inv):
-                    foe_item_index = 0  # Loop over items
-
-                current_item = foe.Inv[foe_item_index]
-                if current_item.velocity == 0:
-                    # Set initial velocity and a random arc offset
-                    current_item.velocity = toss_velocity
-                    current_item.arc_offset = random.randint(-15, 15)  # Random arc up or down
-
-                end_pos = (SCREEN_WIDTH // 6, SCREEN_HEIGHT // 2)
-                current_item.position = move_towards_with_arc(current_item.position, end_pos, current_item.velocity, current_item.arc_offset)
-
-                # Check if the item has reached the player's text
-                player_rect = font.render(player.PlayerName, True, (255, 255, 255)).get_rect(center=(SCREEN_WIDTH // 6, SCREEN_HEIGHT // 2))
-                if player_rect.collidepoint(current_item.position):
-                    take_damage(foe, player, [bleed_mod, enrage_timer, current_item], def_mod)
-
-                    current_item.velocity = 0  # Reset velocity after hit
-                    current_item.position = (SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2)
-                    foe_item_index += 1  # Move to the next item
-
-                # Reset the toss timer after an item is tossed
-                del current_item
-                last_foe_toss = current_time
-
 
             # Render the screen
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
 
-            foe_bottom = 0
+            foe_bottom = 100
             player_bottom = 625
             item_total_size = photo_size / 2
             size = (item_total_size, item_total_size)
@@ -433,92 +329,42 @@ def main(level):
                 item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                 render_player_obj(pygame, testplayer, testplayer.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-            for i, testfoe in enumerate(foelist):
-                item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
-                render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                if testplayer.HP > 0:
+                    tartget_to_damage = random.choice(foelist)
+                    take_damage(tartget_to_damage, testplayer, [bleed_mod, enrage_timer], def_mod)
 
-            foe_stat_data = [
-                ("Stats of:", foe.PlayerName),
-                ("Level:", foe.level),
-                ("Max HP:", foe.MHP),
-                ("Atk:", int(foe.Atk)),
-                ("Def:", int(foe.Def / def_mod)),
-                ("Crit Rate:", f"{(foe.CritRate * 100):.1f}%"),
-                ("Crit Damage Mod:", f"{(foe.CritDamageMod):.2f}x"),
-                ("HP Regain:", f"{(foe.Regain * 100):.0f}"),
-            ]
+                    if tartget_to_damage.HP < 1:
+                        foelist.remove(tartget_to_damage)
+                        log(white, "Saving Data")
+                        level = level + 1
+                        testplayer.level_up(mod=bleed_mod)
+                        testplayer.save()
 
-            if len(foe.Items) > 0:
-                foe_stat_data.append(("Blessings:", f"{len(foe.Items)}"))
+                    elif tartget_to_damage.HP > tartget_to_damage.MHP:
+                        tartget_to_damage.HP = tartget_to_damage.MHP
 
-            if foe.Vitality / def_mod > 1.5:
-                foe_stat_data.append(("Vitality:", f"{(foe.Vitality / def_mod):.2f}x"))
+                else:
+                    if testplayer.HP < 1:
+                        testplayer.save_past_life()
+                        playerlist.remove(testplayer)
 
-            if (foe.DodgeOdds * 100) / bleed_mod > 1:
-                foe_stat_data.append(("Dodge Odds:", f"{((foe.DodgeOdds * 100) / bleed_mod):.2f}%"))
+                    elif testplayer.HP > testplayer.MHP:
+                        testplayer.HP = testplayer.MHP
 
-            if foe.Bleed != 0:
-                foe_stat_data.append(("Bleed:", f"{foe.Bleed:.1f}x"))
+            if all(player.HP <= 0 for player in playerlist):
+                log(red, "you lose... restart game to load a new buffed save file")
+                pygame.quit()
+                input("Press enter to exit: ")
+                exit()
 
-            # Foe stats drawing
-            foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) + 170
-            foe_y_offset = (SCREEN_HEIGHT // 2) - 425 
+            if len(foelist) > 0:
+                for i, testfoe in enumerate(foelist):
+                    item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
+                    render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-            foe_num_stats = len(foe_stat_data)
-
-            foe_spacing_moded = 55 - (foe_num_stats * 2)
-
-            foe_font_size = max(16, 54 - 2 * foe_num_stats) 
-            foe_stats_font = pygame.font.SysFont('Arial', foe_font_size)
-
-            try:
-                for i, (stat_name, stat_value) in enumerate(foe_stat_data):
-                    stat_text = foe_stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                    stat_rect = stat_text.get_rect(topright=(foe_x_offset, foe_y_offset + i * foe_spacing_moded))
-                    screen.blit(stat_text, stat_rect)
-            except Exception as error:
-                print(f"Could not render foe stats due to {str(error)}")
-                
-            if enrage_timer.timed_out:
-                fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
-                enrage_timer_stat = font.render(f"Enrage: {(enrage_mod + enrage_timer.timeout_seconds):.1f}", True, (255, 255, 255))
-                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
-                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 350))
-                screen.blit(fps_stat, fps_rect)
-                screen.blit(enrage_timer_stat, enrage_timer_rect)
+                    tartget_to_damage = random.choice(playerlist)
+                    take_damage(tartget_to_damage, testfoe, [bleed_mod, enrage_timer], def_mod)
             else:
-                fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
-                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
-                screen.blit(fps_stat, fps_rect)
+                break
 
-            # Draw the foe's name
-            foe_text = font.render(foe.PlayerName, True, (255, 255, 255))
-            foe_rect = foe_text.get_rect(center=(SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2))
-            screen.blit(foe_text, foe_rect)
-
-            # Draw the foe's HP bar
-            foe_hp_percent = foe.HP / foe.MHP * 100
-            foe_hp_bar = pygame.Rect(foe_rect.x, foe_rect.y + 60, foe_hp_percent * 4, 5)
-            pygame.draw.rect(screen, (255, 0, 0), foe_hp_bar)
-
-            # Draw the foe's profile picture
-            if foe_hp_percent < 75:
-                foe.photodata.set_alpha(int(255 * foe_hp_percent / 75))
-
-            screen.blit(foe.photodata, (foe_rect.x + 0, foe_rect.y + 85))
-
-            # Draw the current tossed items
-            if player_item_index < len(player.Inv):
-                current_item = player.Inv[player_item_index]
-                item_text = font.render(current_item.game_obj, True, (255, 255, 255))
-                item_rect = item_text.get_rect(center=current_item.position)
-                screen.blit(item_text, item_rect)
-
-            if foe_item_index < len(foe.Inv):
-                current_item = foe.Inv[foe_item_index]
-                item_text = font.render(current_item.game_obj, True, (255, 255, 255))
-                item_rect = item_text.get_rect(center=current_item.position)
-                screen.blit(item_text, item_rect)
-
-            # Flip the display
             pygame.display.flip()
