@@ -905,20 +905,19 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
 
     # Draw HP percentage
     player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
-    player_hp_percent_rect = player_hp_percent_text.get_rect(center=(x + width // 2, y + 60))
+    player_hp_percent_rect = player_hp_percent_text.get_rect(center=(x, y + 120))
     screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
-    # Draw the player's profile picture
-    icon_rect = pygame.Rect(player_rect.x - width // 4, player_rect.y + 85, width // 2, height // 2)
     if player_hp_percent < 75:
         player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
     else:
         player_profile_pic.set_alpha(255)
+
     screen.blit(player_profile_pic, (player_rect.x, player_rect.y))
 
     # Show stats if hover is enabled and mouse is over the icon
     mouse_pos = pygame.mouse.get_pos()
-    if icon_rect.collidepoint(mouse_pos):
+    if player_profile_pic.collidepoint(mouse_pos):
         stat_data = [
             ("Stats of:", player.PlayerName),
             ("Level:", player.level),
