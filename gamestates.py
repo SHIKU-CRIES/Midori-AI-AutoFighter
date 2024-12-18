@@ -232,9 +232,9 @@ def main(level):
             foe.set_level(level)
 
             foe_photo_preloaded = os.path.join(foe.photo)
-            foe_profile_pic = pygame.image.load(foe_photo_preloaded)
-            foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
-            foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
+            foe.photodata = pygame.image.load(foe_photo_preloaded)
+            foe.photodata = pygame.transform.flip(foe.photodata, True, False)
+            foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
 
             foe.update_inv(get_weapon(get_random_weapon()), True)
 
@@ -418,7 +418,7 @@ def main(level):
 
             for i, testfoe in enumerate(testfoelist):
                 item_total_position = ((25 * i) + (50 + ((photo_size / 2) * i)), foe_bottom)
-                render_player_obj(pygame, testfoe, foe_profile_pic, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
             foe_stat_data = [
                 ("Stats of:", foe.PlayerName),
