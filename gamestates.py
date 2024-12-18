@@ -381,8 +381,12 @@ def main(level):
 
             if len(playerlist) > 0:
                 for i, testplayer in enumerate(playerlist):
+
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                     render_player_obj(pygame, testplayer, testplayer.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                
+                    if bleed_mod > 100:
+                        testplayer.RushStat = 0
 
                     if testplayer.HP > 0:
                         testplayer.HP = testplayer.HP + int(testplayer.Regain * (testplayer.Vitality ** 5)) - int((testplayer.Bleed * bleed_mod) / testplayer.Def)
