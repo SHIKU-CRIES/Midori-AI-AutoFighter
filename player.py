@@ -959,7 +959,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
         x_offset = x
-        y_offset = y - 225
+        y_offset = y - 275
         spacing = 25
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
