@@ -914,10 +914,11 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
         player_profile_pic.set_alpha(255)
 
     screen.blit(player_profile_pic, (player_rect.x, player_rect.y))
+    icon_rect = pygame.Rect(player_rect.x, player_rect.y, width, height)
 
     # Show stats if hover is enabled and mouse is over the icon
     mouse_pos = pygame.mouse.get_pos()
-    if player_profile_pic.collidepoint(mouse_pos):
+    if icon_rect.collidepoint(mouse_pos):
         stat_data = [
             ("Stats of:", player.PlayerName),
             ("Level:", player.level),
