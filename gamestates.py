@@ -418,7 +418,8 @@ def main(level):
             render_player_obj(pygame, player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50, player_bottom), size, True)
 
             for i, testfoe in enumerate(testfoelist):
-                render_player_obj(pygame, testfoe, foe_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (25 + (50 + ((photo_size / 2) * i)), player_bottom), size, True)
+                item_total_position = ((25 * i) + (50 + ((photo_size / 2) * i)), player_bottom)
+                render_player_obj(pygame, testfoe, foe_profile_pic, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
             foe_stat_data = [
                 ("Stats of:", foe.PlayerName),
