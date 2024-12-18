@@ -237,8 +237,12 @@ def main(level):
 
             if level > player.level:
                 level = player.level + 1
-        
-        for i in range(5):
+        if level < 2000:
+            number_of_foes = 15
+        else:
+            number_of_foes = 3
+
+        for i in range(number_of_foes):
             themed_name = random.choice(themed_names).capitalize()
             themed_title = random.choice(themed_ajt).capitalize()
 
