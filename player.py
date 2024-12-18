@@ -866,7 +866,7 @@ class Player:
         self.check_name_mod()
 
         pre_temp_vit = self.Vitality
-        post_temp_vit = (self.Vitality * (level / (top_level)))
+        post_temp_vit = (self.Vitality * (level / (top_level_full)))
         self.Vitality = max(post_temp_vit, 0.75)
 
         self.MHP = int(self.MHP * min((level / top_level), (4)) * post_temp_vit) + 5
