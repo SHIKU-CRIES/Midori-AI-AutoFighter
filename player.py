@@ -898,7 +898,6 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     player_rect = player_text.get_rect(center=(x, y))
     
     player_profile_pic = pygame.transform.scale(player_profile_pic, size)
-    icon_rect = player_profile_pic.get_rect((player_rect.x, player_rect.y - height))
 
     screen.blit(player_profile_pic, (player_rect.x, player_rect.y - height))
 
@@ -920,6 +919,8 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
     else:
         player_profile_pic.set_alpha(255)
+        
+    icon_rect = pygame.Rect(player_rect.x, player_rect.y + height, width, height)
 
     # Show stats if hover is enabled and mouse is over the icon
     mouse_pos = pygame.mouse.get_pos()
