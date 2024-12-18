@@ -311,6 +311,19 @@ def main(level):
             item_total_size = photo_size / 2
             size = (item_total_size, item_total_size)
 
+            if len(foelist) > 0:
+                for i, testfoe in enumerate(foelist):
+                    item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
+                    render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+
+                    testfoe.HP = testfoe.HP + int(testfoe.Regain * (testfoe.Vitality ** 5)) - int((testfoe.Bleed * bleed_mod) / testfoe.Def)
+
+                    if len(playerlist) > 0:
+                        tartget_to_damage = random.choice(playerlist)
+                        take_damage(tartget_to_damage, testfoe, [bleed_mod, enrage_timer], def_mod)
+            else:
+                break
+
             if len(playerlist) > 0:
                 for i, testplayer in enumerate(playerlist):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
@@ -344,19 +357,6 @@ def main(level):
                 pygame.quit()
                 input("Press enter to exit: ")
                 exit()
-
-            if len(foelist) > 0:
-                for i, testfoe in enumerate(foelist):
-                    item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
-                    render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
-
-                    testfoe.HP = testfoe.HP + int(testfoe.Regain * (testfoe.Vitality ** 5)) - int((testfoe.Bleed * bleed_mod) / testfoe.Def)
-
-                    if len(playerlist) > 0:
-                        tartget_to_damage = random.choice(playerlist)
-                        take_damage(tartget_to_damage, testfoe, [bleed_mod, enrage_timer], def_mod)
-            else:
-                break
                 
             if enrage_timer.timed_out:
                 fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
