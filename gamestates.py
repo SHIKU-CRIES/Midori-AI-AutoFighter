@@ -200,7 +200,10 @@ def main(level):
 
     # Create the player and foe objects
     playerlist: list[Player] = []
-    temp_themed_names = themed_names
+    temp_themed_names = []
+
+    for item in themed_names:
+        temp_themed_names.append(item)
 
     player = Player("Player")
 
