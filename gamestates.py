@@ -315,7 +315,6 @@ def main(level):
     
             current_time = pygame.time.get_ticks()
 
-
             # Render the screen
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
@@ -325,33 +324,33 @@ def main(level):
             item_total_size = photo_size / 2
             size = (item_total_size, item_total_size)
 
-            for i, testplayer in enumerate(playerlist):
-                item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
-                render_player_obj(pygame, testplayer, testplayer.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+            if len(playerlist) > 0:
+                for i, testplayer in enumerate(playerlist):
+                    item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
+                    render_player_obj(pygame, testplayer, testplayer.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                if testplayer.HP > 0:
-                    tartget_to_damage = random.choice(foelist)
-                    take_damage(tartget_to_damage, testplayer, [bleed_mod, enrage_timer], def_mod)
+                    if testplayer.HP > 0:
+                        tartget_to_damage = random.choice(foelist)
+                        take_damage(tartget_to_damage, testplayer, [bleed_mod, enrage_timer], def_mod)
 
-                    if tartget_to_damage.HP < 1:
-                        foelist.remove(tartget_to_damage)
-                        log(white, "Saving Data")
-                        level = level + 1
-                        testplayer.level_up(mod=bleed_mod)
-                        testplayer.save()
+                        if tartget_to_damage.HP < 1:
+                            foelist.remove(tartget_to_damage)
+                            log(white, "Saving Data")
+                            level = level + 1
+                            testplayer.level_up(mod=bleed_mod)
+                            testplayer.save()
 
-                    elif tartget_to_damage.HP > tartget_to_damage.MHP:
-                        tartget_to_damage.HP = tartget_to_damage.MHP
+                        elif tartget_to_damage.HP > tartget_to_damage.MHP:
+                            tartget_to_damage.HP = tartget_to_damage.MHP
 
-                else:
-                    if testplayer.HP < 1:
-                        testplayer.save_past_life()
-                        playerlist.remove(testplayer)
+                    else:
+                        if testplayer.HP < 1:
+                            testplayer.save_past_life()
+                            playerlist.remove(testplayer)
 
-                    elif testplayer.HP > testplayer.MHP:
-                        testplayer.HP = testplayer.MHP
-
-            if all(player.HP <= 0 for player in playerlist):
+                        elif testplayer.HP > testplayer.MHP:
+                            testplayer.HP = testplayer.MHP
+            else:
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
                 input("Press enter to exit: ")
