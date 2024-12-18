@@ -227,7 +227,8 @@ def main(level):
         playerlist.append(player)
 
     while True:
-        
+
+        level_sum = 0
         foelist: list[Player] = []
 
         for player in playerlist:
@@ -235,10 +236,13 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-            if level > player.level:
-                level = player.level + 1
-        if level < 2000:
-            number_of_foes = 15
+            level_sum += player.level
+            
+        average_level = level_sum / len(playerlist)
+        level = average_level
+
+        if level < 1000:
+            number_of_foes = 5
         else:
             number_of_foes = 3
 
