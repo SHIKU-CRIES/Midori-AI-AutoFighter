@@ -332,10 +332,9 @@ def main(level):
                             elif tartget_to_damage.HP > tartget_to_damage.MHP:
                                 tartget_to_damage.HP = tartget_to_damage.MHP
 
-                        else:
-                            if testplayer.HP < 1:
-                                testplayer.save_past_life()
-                                playerlist.remove(testplayer)
+                    else:
+                        testplayer.save_past_life()
+                        playerlist.remove(testplayer)
 
                     if testplayer.HP > testplayer.MHP:
                         testplayer.HP = testplayer.MHP
