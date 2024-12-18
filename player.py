@@ -827,8 +827,8 @@ class Player:
             print(f"Name: {item.name}, Power: {item.power:.2f}")
     
     def set_level(self, level):
-        top_level = 10000
-        top_level_full = 5000
+        top_level = 2000
+        top_level_full = 1000
 
         self.level = level
         self.MHP: int = random.randint(10 * self.level, 15 * self.level) + 1000
