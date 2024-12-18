@@ -486,9 +486,9 @@ def main(level):
 
             # Draw the foe's profile picture
             if foe_hp_percent < 75:
-                foe_profile_pic.set_alpha(int(255 * foe_hp_percent / 75))
+                foe.photodata.set_alpha(int(255 * foe_hp_percent / 75))
 
-            screen.blit(foe_profile_pic, (foe_rect.x + 0, foe_rect.y + 85))
+            screen.blit(foe.photodata, (foe_rect.x + 0, foe_rect.y + 85))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):
