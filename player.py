@@ -920,7 +920,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     else:
         player_profile_pic.set_alpha(255)
         
-    icon_rect = pygame.Rect(player_rect.x, player_rect.y + height, width, height)
+    icon_rect = pygame.Rect(player_rect.x, player_rect.y, width, height * -1)
 
     # Show stats if hover is enabled and mouse is over the icon
     mouse_pos = pygame.mouse.get_pos()
