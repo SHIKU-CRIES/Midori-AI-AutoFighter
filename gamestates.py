@@ -248,9 +248,9 @@ def main(level):
             foe.set_level(level)
 
             foe.photodata = os.path.join(foe.photo)
-            #foe.photodata = pygame.image.load(foe_photo_preloaded)
-            #foe.photodata = pygame.transform.flip(foe.photodata, True, False)
-            #foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
+            foe_photo_preloaded = pygame.image.load(foe.photodata)
+            foe_photo_preloaded = pygame.transform.flip(foe_photo_preloaded, True, False)
+            foe_photo_preloaded = pygame.transform.scale(foe_photo_preloaded, (photo_size, photo_size))
 
             foe.update_inv(get_weapon(get_random_weapon()), True)
 
