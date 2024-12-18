@@ -164,6 +164,7 @@ def log(color, text):
 
 def main(level):
     from player import Player
+    from player import render_player_obj
 
     pygame.init()
 
@@ -404,80 +405,9 @@ def main(level):
             # Render the screen
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
-            
-            # Draw the player's name
-            player_offset = 175
-            player_hp_bar_offset = player_offset - 175
-            player_text = font.render(player.PlayerName, True, (255, 255, 255))
-            player_rect = player_text.get_rect(center=((SCREEN_WIDTH // 6) - player_offset, SCREEN_HEIGHT // 2))
-            screen.blit(player_text, player_rect)
 
-            # Draw the player's HP bar
-            player_hp_percent = player.HP / player.MHP * 100
-            player_hp_bar = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, player_hp_percent * 4, 5)
-            player_hp_bar_full = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, 100 * 4, 5)
-            player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
-            player_hp_percent_rect = player_hp_percent_text.get_rect(center=((SCREEN_WIDTH // 6) + player_offset - 60, (SCREEN_HEIGHT // 2)))
-            pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
-            pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
-            screen.blit(player_hp_percent_text, player_hp_percent_rect)
+            render_player_obj(pygame, font, player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, SCREEN_WIDTH, SCREEN_HEIGHT)
 
-            # Draw the players profile picture
-            if player_hp_percent < 75:
-                player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
-            else:
-                player_profile_pic.set_alpha(255)
-
-            screen.blit(player_profile_pic, (player_rect.x - player_hp_bar_offset, player_rect.y + 85))
-            
-            stat_data = [
-                ("Stats of:", player.PlayerName),
-                ("Level:", player.level),
-                ("Max HP:", player.MHP),
-                ("Atk:", int(player.Atk)),
-                ("Def:", int(player.Def / def_mod)),
-                ("Crit Rate / Mod:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
-                ("HP Regain:", f"{(player.Regain * 100):.0f}"),
-            ]
-
-            if player.Vitality / def_mod > 1.01:
-                stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
-
-            elif player.Vitality / def_mod != 1:
-                stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
-
-            if (player.DodgeOdds * 100) / bleed_mod > 1:
-                stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
-
-            if enrage_timer.timed_out:
-                stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
-
-            if len(player.Items) > 0:
-                stat_data.append(("Blessings:", f"{len(player.Items)}"))
-
-            if player.Bleed != 0:
-                stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
-
-            x_offset = (SCREEN_WIDTH // 8) - 175
-            y_offset = (SCREEN_HEIGHT // 2) - 425
-            
-            num_stats = len(stat_data)
-
-            spacing_moded = 55 - (num_stats * 2)
-
-            font_size = max(16, 54 - 2 * num_stats) 
-            stats_font = pygame.font.SysFont('Arial', font_size)
-
-            try:
-
-                for i, (stat_name, stat_value) in enumerate(stat_data):
-                    stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                    stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing_moded))
-                    screen.blit(stat_text, stat_rect)
-            
-            except Exception as error:
-                print(f"Could not render stats due to {str(error)}")
-                
             foe_stat_data = [
                 ("Stats of:", foe.PlayerName),
                 ("Level:", foe.level),
