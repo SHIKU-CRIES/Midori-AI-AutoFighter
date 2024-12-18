@@ -819,7 +819,7 @@ class Player:
         print(f"Attack: {self.Atk}")
         print(f"Regain: {self.Regain}")
         print(f"Vitality: {self.Vitality}")
-        print(f"Crit Rate: {self.CritRate}")c
+        print(f"Crit Rate: {self.CritRate}")
         print(f"Crit Damage Modifier: {self.CritDamageMod}")
         print(f"Dodge Odds: {self.DodgeOdds}")
 
