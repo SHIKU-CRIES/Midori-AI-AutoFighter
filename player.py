@@ -307,7 +307,7 @@ class Player:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Atk = self.Atk - 1
 
-            while self.Regain > 0.1:
+            while self.Regain > 1:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Regain = self.Regain - 0.001
 
