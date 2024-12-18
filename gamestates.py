@@ -394,6 +394,15 @@ def main(level):
                             if tartget_to_damage.HP < 1:
                                 foelist.remove(tartget_to_damage)
                                 log(white, "Saving Data")
+                
+                                if bleed_mod < 100:
+                                    testplayer.RushStat += 1
+                                    for multiplier in range(testplayer.RushStat):
+                                        level = level + 1
+                                        testplayer.level_up(mod=bleed_mod)
+                                else:
+                                    testplayer.RushStat = 0
+
                                 level = level + 1
                                 testplayer.level_up(mod=bleed_mod)
                                 testplayer.save()
