@@ -164,6 +164,11 @@ class Player:
 
                             with open(filepath, 'wb') as f:
                                 pickle.dump(past_life_data, f)
+                    else:
+                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 50)
+                        self.HP: int = self.MHP
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 50)
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 100)
 
                 except Exception as e:
                     spinner.fail(text=f"Past Lifes: {filepath} failed to load ({str(e)}. Deleting past life file.)")
@@ -750,7 +755,7 @@ class Player:
         hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
         def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
         atk_up: int = random.randint(15 * self.level, 350 * self.level * int_mod)
-        regain_up: float = random.uniform(0.0001 * self.level, 0.0005 * self.level) * max((mod_fixed / 10000), 1)
+        regain_up: float = random.uniform(0.00001 * self.level, 0.00005 * self.level) * max((mod_fixed / 10000), 1)
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * max((mod_fixed / 10000), 1)
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * max((mod_fixed / 10000), 1)
         dodgeodds_up: float = random.uniform(0.000002 * self.level, 0.00004 * self.level) * max((mod_fixed / 10000), 1)
