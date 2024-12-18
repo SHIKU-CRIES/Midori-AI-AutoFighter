@@ -887,51 +887,38 @@ class Player:
         for item in self.Items:
             print(f"Name: {item.name}, Power: {item.power:.2f}")
 
-def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, SCREEN_WIDTH, SCREEN_HEIGHT, hover_enabled=True):
-    # Player positioning
-    player_offset = 175
-    player_name_x = SCREEN_WIDTH // 6 - player_offset
-    player_name_y = SCREEN_HEIGHT // 2
+def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, position, size, show_stats_on_hover=True):
+    x, y = position
+    width, height = size
 
-    # Draw Player Name
+    # Player name
     player_text = font.render(player.PlayerName, True, (255, 255, 255))
-    player_rect = player_text.get_rect(center=(player_name_x, player_name_y))
+    player_rect = player_text.get_rect(center=(x, y))
     screen.blit(player_text, player_rect)
 
-    # Calculate and draw HP Bar
-    hp_bar_width = 100 * 4
-    hp_bar_height = 5
-    hp_percent = player.HP / player.MHP
+    # Draw player's HP bar
+    player_hp_percent = player.HP / player.MHP * 100
+    player_hp_bar = pygame.Rect(player_rect.x, player_rect.y + 60, player_hp_percent * (width / 100), 5)
+    player_hp_bar_full = pygame.Rect(player_rect.x, player_rect.y + 60, width, 5)
+    pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
+    pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
 
-    hp_bar_x = player_name_x - hp_bar_width // 2
-    hp_bar_y = player_name_y + 20
+    # Draw HP percentage
+    player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
+    player_hp_percent_rect = player_hp_percent_text.get_rect(center=(x + width // 2, y + 60))
+    screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
-    # Full HP bar
-    full_hp_bar = pygame.Rect(hp_bar_x, hp_bar_y, hp_bar_width, hp_bar_height)
-    pygame.draw.rect(screen, (255, 0, 0), full_hp_bar)
+    # Draw the player's profile picture
+    icon_rect = pygame.Rect(player_rect.x - width // 4, player_rect.y + 85, width // 2, height // 2)
+    if player_hp_percent < 75:
+        player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
+    else:
+        player_profile_pic.set_alpha(255)
+    screen.blit(player_profile_pic, icon_rect.topleft)
 
-    # Current HP
-    current_hp_width = int(hp_percent * hp_bar_width)
-    current_hp_bar = pygame.Rect(hp_bar_x, hp_bar_y, current_hp_width, hp_bar_height)
-    pygame.draw.rect(screen, (0, 255, 0), current_hp_bar)
-
-    # HP Percent Text
-    hp_percent_text = font.render(f"{hp_percent * 100:.2f}%", True, (255, 255, 255))
-    hp_percent_rect = hp_percent_text.get_rect(center=(player_name_x, hp_bar_y - 10))
-    screen.blit(hp_percent_text, hp_percent_rect)
-
-    # Draw the player profile picture
-    profile_pic_size = 100
-    profile_pic_x = player_name_x - profile_pic_size // 2
-    profile_pic_y = hp_bar_y + 30
-
-    player_profile_pic = pygame.transform.scale(player_profile_pic, (profile_pic_size, profile_pic_size))
-    player_profile_pic_rect = pygame.Rect(profile_pic_x, profile_pic_y, profile_pic_size, profile_pic_size)
-    screen.blit(player_profile_pic, (profile_pic_x, profile_pic_y))
-
-    # Hover Detection - Optional Stats Rendering
+    # Show stats if hover is enabled and mouse is over the icon
     mouse_pos = pygame.mouse.get_pos()
-    if hover_enabled and player_profile_pic_rect.collidepoint(mouse_pos):
+    if icon_rect.collidepoint(mouse_pos):
         stat_data = [
             ("Stats of:", player.PlayerName),
             ("Level:", player.level),
@@ -958,11 +945,14 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
 
         if player.Bleed != 0:
             stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
-        
-        # Position for stats display
-        stats_x = profile_pic_x + profile_pic_size + 10
-        stats_y = profile_pic_y
+
+        x_offset = x + width + 10
+        y_offset = y - 50
+        spacing = 20
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
             stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-            screen.blit(stat_text, (stats_x, stats_y + i * 20))
+            stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing))
+            screen.blit(stat_text, stat_rect)
+
+                
