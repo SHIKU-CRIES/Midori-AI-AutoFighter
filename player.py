@@ -898,7 +898,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     player_rect = player_text.get_rect(center=(x, y))
     
     player_profile_pic = pygame.transform.scale(player_profile_pic, size)
-    icon_rect = player_profile_pic.get_rect(center=(player_profile_pic.x, player_profile_pic.y))
+    icon_rect = player_profile_pic.get_rect((player_rect.x, player_rect.y - height))
 
     screen.blit(player_profile_pic, (player_rect.x, player_rect.y - height))
 
