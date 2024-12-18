@@ -914,7 +914,7 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
         player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
     else:
         player_profile_pic.set_alpha(255)
-    screen.blit(player_profile_pic, icon_rect.topleft)
+    screen.blit(player_profile_pic, (player_rect.x - 175, player_rect.y + 85))
 
     # Show stats if hover is enabled and mouse is over the icon
     mouse_pos = pygame.mouse.get_pos()
@@ -948,7 +948,7 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
 
         x_offset = x + width + 10
         y_offset = y - 50
-        spacing = 20
+        spacing = 50
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
             stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
