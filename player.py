@@ -50,9 +50,11 @@ class Player:
         
 
     def save(self):
+        temp_data = self.photodata
         self.photodata = "No Photo Data"
         with open(f'{self.PlayerName}.dat', 'wb') as f:
             pickle.dump(self.__dict__, f)
+        self.photodata = temp_data
 
     def load(self):
         try:
@@ -898,7 +900,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     # Player name
     player_text = font.render(player.PlayerName, True, (255, 255, 255))
     player_rect = player_text.get_rect(topleft=(x, y))
-    
+
     player_profile_pic_loaded = pygame.transform.scale(player_profile_pic, size)
 
     screen.blit(player_profile_pic_loaded, (player_rect.x, player_rect.y))
