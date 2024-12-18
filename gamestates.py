@@ -238,7 +238,7 @@ def main(level):
 
             level_sum += player.level
             
-        average_level = level_sum / len(playerlist)
+        average_level = round(level_sum / len(playerlist))
         level = average_level
 
         if level < 1000:
