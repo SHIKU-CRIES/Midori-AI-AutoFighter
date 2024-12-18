@@ -211,7 +211,7 @@ def main(level):
 
     starting_level = player.level
 
-    player_profile_pic = pygame.image.load(os.path.join(player.photo))
+    player.photodata = pygame.image.load(os.path.join(player.photo))
 
     playerlist.append(player)
         
