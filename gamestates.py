@@ -406,7 +406,7 @@ def main(level):
             screen.blit(background_image, (0, 0))
 
             render_player_obj(pygame, player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50, 585), (photo_size / 2, photo_size / 2), True)
-            render_player_obj(pygame, foe, foe_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50 * 2, 585), (photo_size / 2, photo_size / 2), True)
+            render_player_obj(pygame, foe, foe_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50 * 4, 585), (photo_size / 2, photo_size / 2), True)
 
             foe_stat_data = [
                 ("Stats of:", foe.PlayerName),
