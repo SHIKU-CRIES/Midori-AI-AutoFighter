@@ -308,7 +308,7 @@ def main(level):
 
             foe_bottom = 250
             player_bottom = 625
-            item_total_size = photo_size
+            item_total_size = photo_size - (photo_size / 4)
             size = (item_total_size, item_total_size)
 
             if len(foelist) > 0:
