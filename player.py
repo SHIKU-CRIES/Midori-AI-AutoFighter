@@ -887,9 +887,11 @@ class Player:
         for item in self.Items:
             print(f"Name: {item.name}, Power: {item.power:.2f}")
 
-def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, position, size, show_stats_on_hover=True):
+def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, position, size, show_stats_on_hover=True):
     x, y = position
     width, height = size
+
+    font = pygame.font.SysFont('Arial', 25)
 
     # Player name
     player_text = font.render(player.PlayerName, True, (255, 255, 255))
