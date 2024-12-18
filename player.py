@@ -175,6 +175,7 @@ class Player:
         self.level = 1
 
     def save_past_life(self):
+        lives_folder = "lives"
         past_lives_folder = "past_lives"
         self.photodata = "No Photo Data"
 
@@ -198,7 +199,7 @@ class Player:
 
         # Remove the .dat file
         try:
-            os.remove(f'{self.PlayerName}.dat')
+            os.remove(os.path.join(lives_folder, f'{self.PlayerName}.dat'))
         except FileNotFoundError:
             pass  # Ignore if the file doesn't exist
 
