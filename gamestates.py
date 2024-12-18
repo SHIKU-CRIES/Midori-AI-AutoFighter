@@ -199,6 +199,8 @@ def main(level):
     pygame.display.flip()
 
     # Create the player and foe objects
+    playerlist = []
+
     player = Player("Player")
 
     player.load()
@@ -207,19 +209,36 @@ def main(level):
     if player.level < 5:
         player.load_past_lives()
 
-    player_photo_preloaded = os.path.join(player.photo)
-    player_profile_pic = pygame.image.load(player_photo_preloaded)
+    starting_level = player.level
+
+    player_profile_pic = pygame.image.load(os.path.join(player.photo))
+
+    playerlist.append(player)
+        
+    for i in range(3):
+        themed_name = random.choice(themed_names).capitalize()
+
+        player = Player(f"{themed_name}")
+        player.set_photo(themed_name.lower())
+        player.set_level(starting_level)
+
+        player_photo_preloaded = os.path.join(player.photo)
+        player.photodata = pygame.image.load(player_photo_preloaded)
+        player.photodata = pygame.transform.flip(player.photodata, True, False)
+        player.photodata = pygame.transform.scale(player.photodata, (photo_size, photo_size))
+        playerlist.append(player)
 
     while True:
+        
+        foelist = []
 
-        player.Bleed = 0
-        player.DamageDealt = 0
-        player.DamageTaken = 0
+        for player in playerlist:
+            player.Bleed = 0
+            player.DamageDealt = 0
+            player.DamageTaken = 0
 
         if level < player.level:
             level = player.level + 1
-        
-        testfoelist = []
         
         for i in range(5):
             themed_name = random.choice(themed_names).capitalize()
@@ -238,7 +257,7 @@ def main(level):
 
             foe.update_inv(get_weapon(get_random_weapon()), True)
 
-            testfoelist.append(foe)
+            foelist.append(foe)
 
         # Initialize item positions and velocity for tossing
         for item in player.Inv:
@@ -414,10 +433,12 @@ def main(level):
             item_total_size = photo_size / 2
             size = (item_total_size, item_total_size)
 
-            render_player_obj(pygame, player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50, player_bottom), size, True)
+            for i, testplayer in enumerate(playerlist):
+                item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
+                render_player_obj(pygame, testplayer, testplayer.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-            for i, testfoe in enumerate(testfoelist):
-                item_total_position = ((25 * i) + (50 + ((photo_size / 2) * i)), foe_bottom)
+            for i, testfoe in enumerate(foelist):
+                item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                 render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
             foe_stat_data = [
