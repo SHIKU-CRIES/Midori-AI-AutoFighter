@@ -200,6 +200,7 @@ def main(level):
 
     # Create the player and foe objects
     playerlist: list[Player] = []
+    temp_themed_names = themed_names
 
     player = Player("Player")
 
@@ -213,8 +214,9 @@ def main(level):
 
     playerlist.append(player)
         
-    for i in range(3):
-        themed_name = random.choice(themed_names).capitalize()
+    for i in range(4):
+        themed_name = random.choice(temp_themed_names).capitalize()
+        temp_themed_names.remove(themed_name.lower())
 
         player = Player(f"{themed_name}")
         player.load()
