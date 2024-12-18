@@ -255,10 +255,6 @@ def main(level):
 
             foelist.append(foe)
 
-        # Initialize timers for both players before the main loop
-        player_last_hp_update = pygame.time.get_ticks()
-        foe_last_hp_update = pygame.time.get_ticks()
-
         # heal the player
         player.HP = player.MHP
 
@@ -272,8 +268,8 @@ def main(level):
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
-                    print("oops you died")
-                    player.HP = 0
+                    for player in playerlist:
+                        player.HP = 0
 
             enrage_timer.check_timeout()
             
@@ -281,8 +277,8 @@ def main(level):
 
             enrage_mod = enrage_timer.get_timeout_duration()
             level_base_enrage_mod = (level / max(level / 1000, 1))
-            player_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * player.Vitality * max(player.DodgeOdds / 10, 1)))
-            foe_base_enrage_mod = (enrage_mod * (level_base_enrage_mod * foe.Vitality * max(foe.DodgeOdds / 10, 1)))
+            player_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
+            foe_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
 
             if enrage_mod > 10:
                 buffed_starter = ((enrage_mod - 10) * 0.000000004) + ((enrage_mod - 5) * 0.000000002)
@@ -303,17 +299,7 @@ def main(level):
 
             fps_cap = 20
             dt = clock.tick(fps_cap) / 1000
-
-            current_time = pygame.time.get_ticks()
-            if current_time - player_last_hp_update >= (1000 / max(player.Vitality, 1)):
-                player.HP = player.HP + int(player.Regain * (player.Vitality ** 5)) - int((player.Bleed * bleed_mod) / player.Def)
-                player_last_hp_update = current_time
-
-            if current_time - foe_last_hp_update >= (1000 / max(foe.Vitality, 1)):
-                foe.HP = foe.HP + int(foe.Regain * (foe.Vitality ** 5)) - int((foe.Bleed * bleed_mod) / foe.Def)
-                foe_last_hp_update = current_time
     
-            current_time = pygame.time.get_ticks()
 
             # Render the screen
             screen.fill((0, 0, 0))
@@ -330,6 +316,8 @@ def main(level):
                     render_player_obj(pygame, testplayer, testplayer.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if testplayer.HP > 0:
+                        testplayer.HP = testplayer.HP + int(testplayer.Regain * (testplayer.Vitality ** 5)) - int((testplayer.Bleed * bleed_mod) / testplayer.Def)
+
                         if len(foelist) > 0:
                             tartget_to_damage = random.choice(foelist)
                             take_damage(tartget_to_damage, testplayer, [bleed_mod, enrage_timer], def_mod)
@@ -361,6 +349,8 @@ def main(level):
                 for i, testfoe in enumerate(foelist):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+
+                    testfoe.HP = testfoe.HP + int(testfoe.Regain * (testfoe.Vitality ** 5)) - int((testfoe.Bleed * bleed_mod) / testfoe.Def)
 
                     if len(playerlist) > 0:
                         tartget_to_damage = random.choice(playerlist)
