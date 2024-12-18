@@ -337,8 +337,8 @@ def main(level):
                                 testplayer.save_past_life()
                                 playerlist.remove(testplayer)
 
-                            elif testplayer.HP > testplayer.MHP:
-                                testplayer.HP = testplayer.MHP
+                    if testplayer.HP > testplayer.MHP:
+                        testplayer.HP = testplayer.MHP
             else:
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
