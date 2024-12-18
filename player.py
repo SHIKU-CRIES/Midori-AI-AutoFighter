@@ -52,13 +52,25 @@ class Player:
     def save(self):
         temp_data = self.photodata
         self.photodata = "No Photo Data"
-        with open(f'{self.PlayerName}.dat', 'wb') as f:
+
+        lives_folder = "lives"
+
+        if not os.path.exists(lives_folder):
+            os.makedirs(lives_folder)
+
+        with open(os.path.join(lives_folder, f'{self.PlayerName}.dat'), 'wb') as f:
             pickle.dump(self.__dict__, f)
         self.photodata = temp_data
 
     def load(self):
         try:
-            with open(f'{self.PlayerName}.dat', 'rb') as f:
+
+            lives_folder = "lives"
+
+            if not os.path.exists(lives_folder):
+                os.makedirs(lives_folder)
+
+            with open(os.path.join(lives_folder, f'{self.PlayerName}.dat'), 'rb') as f:
                 self.__dict__ = pickle.load(f)
         except FileNotFoundError:
             print(f"Save file for {self.PlayerName} not found. Starting new game.")
