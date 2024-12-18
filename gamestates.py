@@ -312,6 +312,48 @@ def main(level):
             size = (item_total_size, item_total_size)
 
             if len(foelist) > 0:
+                foe_stat_data = [
+                    ("Stats of:", foelist[0].PlayerName),
+                    ("Level:", foelist[0].level),
+                    ("Max HP:", foelist[0].MHP),
+                    ("Atk:", int(foelist[0].Atk)),
+                    ("Def:", int(foelist[0].Def / def_mod)),
+                    ("Crit Rate:", f"{(foelist[0].CritRate * 100):.1f}%"),
+                    ("Crit Damage Mod:", f"{(foelist[0].CritDamageMod):.2f}x"),
+                    ("HP Regain:", f"{(foelist[0].Regain * 100):.0f}"),
+                ]
+
+                if len(foelist[0].Items) > 0:
+                    foe_stat_data.append(("Blessings:", f"{len(foelist[0].Items)}"))
+
+                if foelist[0].Vitality / def_mod > 1.5:
+                    foe_stat_data.append(("Vitality:", f"{(foelist[0].Vitality / def_mod):.2f}x"))
+
+                if (foelist[0].DodgeOdds * 100) / bleed_mod > 1:
+                    foe_stat_data.append(("Dodge Odds:", f"{((foelist[0].DodgeOdds * 100) / bleed_mod):.2f}%"))
+
+                if foelist[0].Bleed != 0:
+                    foe_stat_data.append(("Bleed:", f"{foelist[0].Bleed:.1f}x"))
+
+                # Foe stats drawing
+                foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) + 170
+                foe_y_offset = (SCREEN_HEIGHT // 2) - 425 
+
+                foe_num_stats = len(foe_stat_data)
+
+                foe_spacing_moded = 55 - (foe_num_stats * 2)
+
+                foe_font_size = max(16, 54 - 2 * foe_num_stats) 
+                foe_stats_font = pygame.font.SysFont('Arial', foe_font_size)
+
+                try:
+                    for i, (stat_name, stat_value) in enumerate(foe_stat_data):
+                        stat_text = foe_stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+                        stat_rect = stat_text.get_rect(topright=(foe_x_offset, foe_y_offset + i * foe_spacing_moded))
+                        screen.blit(stat_text, stat_rect)
+                except Exception as error:
+                    print(f"Could not render foe stats due to {str(error)}")
+
                 for i, testfoe in enumerate(foelist):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
