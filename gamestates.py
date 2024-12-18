@@ -219,27 +219,32 @@ def main(level):
         if level < player.level:
             level = player.level + 1
         
-        themed_name = random.choice(themed_names).capitalize()
-        themed_title = random.choice(themed_ajt).capitalize()
+        testfoelist = []
+        
+        for i in range(5):
+            themed_name = random.choice(themed_names).capitalize()
+            themed_title = random.choice(themed_ajt).capitalize()
 
-        foe_pre_name = f"{themed_title} {themed_name}"
+            foe_pre_name = f"{themed_title} {themed_name}"
 
-        foe = Player(f"{foe_pre_name}")
-        foe.set_photo(themed_name.lower())
-        foe.set_level(level)
+            foe = Player(f"{foe_pre_name}")
+            foe.set_photo(themed_name.lower())
+            foe.set_level(level)
 
-        foe_photo_preloaded = os.path.join(foe.photo)
-        foe_profile_pic = pygame.image.load(foe_photo_preloaded)
-        foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
-        foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
+            foe_photo_preloaded = os.path.join(foe.photo)
+            foe_profile_pic = pygame.image.load(foe_photo_preloaded)
+            foe_profile_pic = pygame.transform.flip(foe_profile_pic, True, False)
+            foe_profile_pic = pygame.transform.scale(foe_profile_pic, (photo_size, photo_size))
+
+            foe.update_inv(get_weapon(get_random_weapon()), True)
+
+            testfoelist.append(foe)
 
         # Initialize item positions and velocity for tossing
         for item in player.Inv:
             item.position = (SCREEN_WIDTH // 6, SCREEN_HEIGHT // 2)
             item.velocity = 0
             item.arc_offset = 0
-
-        foe.update_inv(get_weapon(get_random_weapon()), True)
 
         for item in foe.Inv:
             item.position = (SCREEN_WIDTH * 5 // 6, SCREEN_HEIGHT // 2)
@@ -256,13 +261,6 @@ def main(level):
         player_last_hp_update = pygame.time.get_ticks()
         foe_last_hp_update = pygame.time.get_ticks()
         toss_interval = 1000 / 60  # 1 second in milliseconds
-
-        testfoelist = []
-        testfoelist.append(foe)
-        testfoelist.append(foe)
-        testfoelist.append(foe)
-        testfoelist.append(foe)
-        testfoelist.append(foe)
 
         # heal the player
         player.HP = player.MHP

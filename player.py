@@ -955,7 +955,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
         x_offset = x
         y_offset = y - 250
-        spacing = 10
+        spacing = 15
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
             stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
