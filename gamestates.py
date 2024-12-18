@@ -235,8 +235,8 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-        if level < player.level:
-            level = player.level + 1
+            if level < player.level:
+                level = player.level + 1
         
         for i in range(5):
             themed_name = random.choice(themed_names).capitalize()
