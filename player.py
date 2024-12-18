@@ -266,7 +266,7 @@ class Player:
             max_hp_debuff = self.MHP / 8
 
             while self.MHP > max_hp_debuff:
-                dodge_buff = dodge_buff + (0.0000007 * self.Vitality)
+                dodge_buff = dodge_buff + (0.000000007 * self.Vitality)
                 self.MHP = self.MHP - 1
 
             self.Atk = int(self.Atk * 1)
