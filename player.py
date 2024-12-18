@@ -894,6 +894,11 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
     # Player name
     player_text = font.render(player.PlayerName, True, (255, 255, 255))
     player_rect = player_text.get_rect(center=(x, y))
+    
+    player_profile_pic = pygame.transform.scale(player_profile_pic, size)
+
+    screen.blit(player_profile_pic, (player_rect.x, player_rect.y + 10))
+
     screen.blit(player_text, player_rect)
 
     # Draw player's HP bar
@@ -912,10 +917,6 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
         player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
     else:
         player_profile_pic.set_alpha(255)
-    
-    player_profile_pic = pygame.transform.scale(player_profile_pic, size)
-
-    screen.blit(player_profile_pic, (player_rect.x, player_rect.y))
     icon_rect = pygame.Rect(player_rect.x, player_rect.y, width, height)
 
     # Show stats if hover is enabled and mouse is over the icon
