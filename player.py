@@ -102,7 +102,7 @@ class Player:
 
                 starting_items += 1
         
-                spinner.start(text=f"({starting_items}/{total_items}) Past Lifes: {filepath}")
+                spinner.start(text=f"({starting_items}/{total_items}) Past Lifes ({self.PlayerName}): {filepath}")
 
                 try:
                     with open(filepath, 'rb') as f:

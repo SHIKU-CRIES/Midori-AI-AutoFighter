@@ -220,7 +220,7 @@ def main(level):
 
         player = Player(f"{themed_name}")
         player.set_photo(themed_name.lower())
-        player.set_level(starting_level)
+        player.load_past_lives()
 
         player.photodata = pygame.image.load(os.path.join(player.photo))
         playerlist.append(player)
