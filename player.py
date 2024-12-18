@@ -895,7 +895,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
     # Player name
     player_text = font.render(player.PlayerName, True, (255, 255, 255))
-    player_rect = player_text.get_rect(center=(x, y))
+    player_rect = player_text.get_rect(topleft=(x, y))
     
     player_profile_pic = pygame.transform.scale(player_profile_pic, size)
 
@@ -913,7 +913,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
     # Draw HP percentage
     player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
-    player_hp_percent_rect = player_hp_percent_text.get_rect(center=(x + 165, y))
+    player_hp_percent_rect = player_hp_percent_text.get_rect(topleft=(x, y + player_hp_bar_offset + 5))
     screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
     if player_hp_percent < 75:
