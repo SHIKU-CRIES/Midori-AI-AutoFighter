@@ -108,49 +108,50 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
-                    self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 100)
-                    self.HP: int = self.MHP
-                    self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 100)
-                    self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 200)
-                    self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.01
-                    self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
-                    self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
-                    self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.001)
-
-                    for item in past_life_data['Items']:
-                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
+                    if self.PlayerName == past_life_data['PlayerName']:
+                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 100)
                         self.HP: int = self.MHP
-                        self.Def: int = self.Def + self.check_base_stats(self.Def, 50)
-                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50)
-                        self.Regain: float = self.Regain + (0.01)
-                        self.gain_crit_rate(0.01)
-                        self.gain_crit_damage(0.01)
-                        self.gain_dodgeodds_rate(0.001)
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 100)
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 200)
+                        self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.01
+                        self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
+                        self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
+                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.001)
 
-                    if past_life_data['Vitality'] < 0:
-                        spinner.fail(text=f"Past Lifes: {filepath} failed to load (Vitality is negative. Deleting past life file.)")
-                        os.remove(filepath)
-                        continue
+                        for item in past_life_data['Items']:
+                            self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
+                            self.HP: int = self.MHP
+                            self.Def: int = self.Def + self.check_base_stats(self.Def, 50)
+                            self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50)
+                            self.Regain: float = self.Regain + (0.01)
+                            self.gain_crit_rate(0.01)
+                            self.gain_crit_damage(0.01)
+                            self.gain_dodgeodds_rate(0.001)
 
-                    elif past_life_data['Vitality'] > 1.0000001:
-                        temp_past_life_vitality = past_life_data['Vitality'] - 1
-                        while temp_past_life_vitality > 0:
-                            if self.Vitality > 5:
-                                self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 4))
-                            elif self.Vitality > 2:
-                                self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 2))
-                            else:
-                                self.Vitality = self.Vitality + 0.000001
+                        if past_life_data['Vitality'] < 0:
+                            spinner.fail(text=f"Past Lifes: {filepath} failed to load (Vitality is negative. Deleting past life file.)")
+                            os.remove(filepath)
+                            continue
 
-                            temp_past_life_vitality -= 0.00001
-                    
-                    self.check_stats()
+                        elif past_life_data['Vitality'] > 1.0000001:
+                            temp_past_life_vitality = past_life_data['Vitality'] - 1
+                            while temp_past_life_vitality > 0:
+                                if self.Vitality > 5:
+                                    self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 4))
+                                elif self.Vitality > 2:
+                                    self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 2))
+                                else:
+                                    self.Vitality = self.Vitality + 0.000001
 
-                    if len(str(past_life_data['Logs'])) > 1:
-                        past_life_data['Logs'] = ""
+                                temp_past_life_vitality -= 0.00001
+                        
+                        self.check_stats()
 
-                        with open(filepath, 'wb') as f:
-                            pickle.dump(past_life_data, f)
+                        if len(str(past_life_data['Logs'])) > 1:
+                            past_life_data['Logs'] = ""
+
+                            with open(filepath, 'wb') as f:
+                                pickle.dump(past_life_data, f)
 
                 except Exception as e:
                     spinner.fail(text=f"Past Lifes: {filepath} failed to load ({str(e)}. Deleting past life file.)")
