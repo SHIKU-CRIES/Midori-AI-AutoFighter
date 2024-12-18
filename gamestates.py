@@ -209,7 +209,7 @@ def main(level):
 
     player_photo_preloaded = os.path.join(player.photo)
     player_profile_pic = pygame.image.load(player_photo_preloaded)
-    player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size, photo_size))
+    player_profile_pic = pygame.transform.scale(player_profile_pic, (photo_size / 4, photo_size / 4))
 
     while True:
 
