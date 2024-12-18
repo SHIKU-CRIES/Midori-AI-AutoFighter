@@ -235,7 +235,7 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-            if level < player.level:
+            if level > player.level:
                 level = player.level + 1
         
         for i in range(5):
