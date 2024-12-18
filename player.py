@@ -953,9 +953,9 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         if player.Bleed != 0:
             stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
-        x_offset = x + width + 10
-        y_offset = y - 50
-        spacing = 50
+        x_offset = x
+        y_offset = y - 250
+        spacing = 10
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
             stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))

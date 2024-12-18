@@ -257,6 +257,12 @@ def main(level):
         foe_last_hp_update = pygame.time.get_ticks()
         toss_interval = 1000 / 60  # 1 second in milliseconds
 
+        testfoelist = []
+        testfoelist.append(foe)
+        testfoelist.append(foe)
+        testfoelist.append(foe)
+        testfoelist.append(foe)
+        testfoelist.append(foe)
 
         # heal the player
         player.HP = player.MHP
@@ -405,8 +411,14 @@ def main(level):
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
 
-            render_player_obj(pygame, player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50, 625), (photo_size / 2, photo_size / 2), True)
-            render_player_obj(pygame, foe, foe_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50 + (photo_size / 2) + 25, 625), (photo_size / 2, photo_size / 2), True)
+            player_bottom = 625
+            item_total_size = photo_size / 2
+            size = (item_total_size, item_total_size)
+
+            render_player_obj(pygame, player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (50, player_bottom), size, True)
+
+            for i, testfoe in enumerate(testfoelist):
+                render_player_obj(pygame, testfoe, foe_profile_pic, screen, enrage_timer, def_mod, bleed_mod, (25 + (50 + ((photo_size / 2) * i)), player_bottom), size, True)
 
             foe_stat_data = [
                 ("Stats of:", foe.PlayerName),
