@@ -905,7 +905,7 @@ def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, 
 
     # Draw HP percentage
     player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
-    player_hp_percent_rect = player_hp_percent_text.get_rect(center=(x, y + 240))
+    player_hp_percent_rect = player_hp_percent_text.get_rect(center=(x + 20, y))
     screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
     if player_hp_percent < 75:
