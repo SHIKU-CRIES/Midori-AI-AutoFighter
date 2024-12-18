@@ -887,76 +887,72 @@ class Player:
         for item in self.Items:
             print(f"Name: {item.name}, Power: {item.power:.2f}")
 
-def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, SCREEN_WIDTH, SCREEN_HEIGHT):
-            player_offset = 175
-            player_hp_bar_offset = player_offset - 175
-            player_text = font.render(player.PlayerName, True, (255, 255, 255))
-            player_rect = player_text.get_rect(center=((SCREEN_WIDTH // 6) - player_offset, SCREEN_HEIGHT // 2))
-            screen.blit(player_text, player_rect)
+def render_player_obj(pygame, font, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, position, size, show_stats_on_hover=True):
+    x, y = position
+    width, height = size
 
-            # Draw the player's HP bar
-            player_hp_percent = player.HP / player.MHP * 100
-            player_hp_bar = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, player_hp_percent * 4, 5)
-            player_hp_bar_full = pygame.Rect(player_rect.x - player_hp_bar_offset, player_rect.y + 60, 100 * 4, 5)
-            player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
-            player_hp_percent_rect = player_hp_percent_text.get_rect(center=((SCREEN_WIDTH // 6) + player_offset - 60, (SCREEN_HEIGHT // 2)))
-            pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
-            pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
-            screen.blit(player_hp_percent_text, player_hp_percent_rect)
+    # Player name
+    player_text = font.render(player.PlayerName, True, (255, 255, 255))
+    player_rect = player_text.get_rect(center=(x, y))
+    screen.blit(player_text, player_rect)
 
-            # Draw the players profile picture
-            if player_hp_percent < 75:
-                player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
-            else:
-                player_profile_pic.set_alpha(255)
+    # Draw player's HP bar
+    player_hp_percent = player.HP / player.MHP * 100
+    player_hp_bar = pygame.Rect(player_rect.x, player_rect.y + 60, player_hp_percent * (width / 100), 5)
+    player_hp_bar_full = pygame.Rect(player_rect.x, player_rect.y + 60, width, 5)
+    pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
+    pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
 
-            screen.blit(player_profile_pic, (player_rect.x - player_hp_bar_offset, player_rect.y + 85))
-            
-            stat_data = [
-                ("Stats of:", player.PlayerName),
-                ("Level:", player.level),
-                ("Max HP:", player.MHP),
-                ("Atk:", int(player.Atk)),
-                ("Def:", int(player.Def / def_mod)),
-                ("Crit Rate / Mod:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
-                ("HP Regain:", f"{(player.Regain * 100):.0f}"),
-            ]
+    # Draw HP percentage
+    player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255))
+    player_hp_percent_rect = player_hp_percent_text.get_rect(center=(x + width // 2, y + 60))
+    screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
-            if player.Vitality / def_mod > 1.01:
-                stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
+    # Draw the player's profile picture
+    icon_rect = pygame.Rect(player_rect.x - width // 4, player_rect.y + 85, width // 2, height // 2)
+    if player_hp_percent < 75:
+        player_profile_pic.set_alpha(int(255 * player_hp_percent / 75))
+    else:
+        player_profile_pic.set_alpha(255)
+    screen.blit(player_profile_pic, icon_rect.topleft)
 
-            elif player.Vitality / def_mod != 1:
-                stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
+    # Show stats if hover is enabled and mouse is over the icon
+    mouse_pos = pygame.mouse.get_pos()
+    if show_stats_on_hover and icon_rect.collidepoint(mouse_pos):
+        stat_data = [
+            ("Stats of:", player.PlayerName),
+            ("Level:", player.level),
+            ("Max HP:", player.MHP),
+            ("Atk:", int(player.Atk)),
+            ("Def:", int(player.Def / def_mod)),
+            ("Crit Rate / Mod:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
+            ("HP Regain:", f"{(player.Regain * 100):.0f}"),
+        ]
 
-            if (player.DodgeOdds * 100) / bleed_mod > 1:
-                stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
+        if player.Vitality / def_mod > 1.01:
+            stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
+        elif player.Vitality / def_mod != 1:
+            stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
 
-            if enrage_timer.timed_out:
-                stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
+        if (player.DodgeOdds * 100) / bleed_mod > 1:
+            stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
-            if len(player.Items) > 0:
-                stat_data.append(("Blessings:", f"{len(player.Items)}"))
+        if enrage_timer.timed_out:
+            stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
 
-            if player.Bleed != 0:
-                stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
+        if len(player.Items) > 0:
+            stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
-            x_offset = (SCREEN_WIDTH // 8) - 175
-            y_offset = (SCREEN_HEIGHT // 2) - 425
-            
-            num_stats = len(stat_data)
+        if player.Bleed != 0:
+            stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
-            spacing_moded = 55 - (num_stats * 2)
+        x_offset = x + width + 10
+        y_offset = y - 50
+        spacing = 20
 
-            font_size = max(16, 54 - 2 * num_stats) 
-            stats_font = pygame.font.SysFont('Arial', font_size)
+        for i, (stat_name, stat_value) in enumerate(stat_data):
+            stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+            stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing))
+            screen.blit(stat_text, stat_rect)
 
-            try:
-
-                for i, (stat_name, stat_value) in enumerate(stat_data):
-                    stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                    stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing_moded))
-                    screen.blit(stat_text, stat_rect)
-            
-            except Exception as error:
-                print(f"Could not render stats due to {str(error)}")
                 
