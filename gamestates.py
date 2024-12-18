@@ -209,8 +209,6 @@ def main(level):
     if player.level < 5:
         player.load_past_lives()
 
-    starting_level = player.level
-
     player.photodata = pygame.image.load(os.path.join(player.photo))
 
     playerlist.append(player)
@@ -219,8 +217,11 @@ def main(level):
         themed_name = random.choice(themed_names).capitalize()
 
         player = Player(f"{themed_name}")
+        player.load()
         player.set_photo(themed_name.lower())
-        player.load_past_lives()
+
+        if player.level < 5:
+            player.load_past_lives()
 
         player.photodata = pygame.image.load(os.path.join(player.photo))
         playerlist.append(player)

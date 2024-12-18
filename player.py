@@ -959,11 +959,11 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
         x_offset = x
-        y_offset = y - 125
+        y_offset = y - 175
         spacing = 25
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
-            stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
+            stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255), (0, 0, 0))
             stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing))
             screen.blit(stat_text, stat_rect)
 
