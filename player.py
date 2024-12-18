@@ -163,6 +163,7 @@ class Player:
 
     def save_past_life(self):
         past_lives_folder = "past_lives"
+        self.photodata = "No Photo Data"
 
         if not os.path.exists(past_lives_folder):
             os.makedirs(past_lives_folder)
