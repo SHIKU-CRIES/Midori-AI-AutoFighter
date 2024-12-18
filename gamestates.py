@@ -211,7 +211,7 @@ def main(level):
 
     starting_level = player.level
 
-    player.photodata = pygame.image.load(os.path.join(player.photo))
+    player.photodata = os.path.join(player.photo)
 
     playerlist.append(player)
         
@@ -222,10 +222,7 @@ def main(level):
         player.set_photo(themed_name.lower())
         player.set_level(starting_level)
 
-        player_photo_preloaded = os.path.join(player.photo)
-        player.photodata = pygame.image.load(player_photo_preloaded)
-        player.photodata = pygame.transform.flip(player.photodata, True, False)
-        player.photodata = pygame.transform.scale(player.photodata, (photo_size, photo_size))
+        player.photodata = os.path.join(player.photo)
         playerlist.append(player)
 
     while True:
