@@ -151,7 +151,7 @@ class Player:
                                 if self.Vitality > 5:
                                     self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 4))
                                 elif self.Vitality > 2:
-                                    self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 2))
+                                    self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 3))
                                 else:
                                     self.Vitality = self.Vitality + 0.000001
 
@@ -755,7 +755,7 @@ class Player:
         hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
         def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
         atk_up: int = random.randint(15 * self.level, 350 * self.level * int_mod)
-        regain_up: float = random.uniform(0.00001 * self.level, 0.00005 * self.level) * max((mod_fixed / 10000), 1)
+        regain_up: float = random.uniform(0.00001, 0.00005 * self.level)
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * max((mod_fixed / 10000), 1)
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * max((mod_fixed / 10000), 1)
         dodgeodds_up: float = random.uniform(0.000002 * self.level, 0.00004 * self.level) * max((mod_fixed / 10000), 1)
@@ -828,21 +828,6 @@ class Player:
             self.Vitality += vitality_up
 
         self.check_stats()
-
-        print(f"Name: {self.PlayerName}")
-        print(f"Level: {self.level}")
-        print(f"MHP: {self.MHP}")
-        print(f"HP: {self.HP}")
-        print(f"Defense: {self.Def}")
-        print(f"Attack: {self.Atk}")
-        print(f"Regain: {self.Regain}")
-        print(f"Vitality: {self.Vitality}")
-        print(f"Crit Rate: {self.CritRate}")
-        print(f"Crit Damage Modifier: {self.CritDamageMod}")
-        print(f"Dodge Odds: {self.DodgeOdds}")
-
-        for item in self.Items:
-            print(f"Name: {item.name}, Power: {item.power:.2f}")
     
     def set_level(self, level):
         top_level = 10000
@@ -893,23 +878,6 @@ class Player:
         self.check_stats()
 
         self.HP = self.MHP
-
-        print(f"Name: {self.PlayerName}")
-        print(f"Level: {self.level}")
-        print(f"MHP: {self.MHP}")
-        print(f"HP: {self.HP}")
-        print(f"Defense: {self.Def}")
-        print(f"Attack: {self.Atk}")
-        print(f"Regain: {self.Regain}")
-        print(f"Raw Vitality: {pre_temp_vit}")
-        print(f"Moded Vitality: {post_temp_vit}")
-        print(f"True Vitality: {self.Vitality}")
-        print(f"Crit Rate: {self.CritRate}")
-        print(f"Crit Damage Modifier: {self.CritDamageMod}")
-        print(f"Dodge Odds: {self.DodgeOdds}")
-
-        for item in self.Items:
-            print(f"Name: {item.name}, Power: {item.power:.2f}")
 
 def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, position, size, show_stats_on_hover=True):
     x, y = position
