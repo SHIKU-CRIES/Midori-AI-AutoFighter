@@ -46,9 +46,11 @@ class Player:
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list[ItemType] = []
         self.photo: str = "player.png"
+        self.photodata = ""
         
 
     def save(self):
+        self.photodata = "No Photo Data"
         with open(f'{self.PlayerName}.dat', 'wb') as f:
             pickle.dump(self.__dict__, f)
 

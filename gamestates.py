@@ -211,7 +211,7 @@ def main(level):
 
     starting_level = player.level
 
-    player.photodata = os.path.join(player.photo)
+    player.photodata = pygame.image.load(os.path.join(player.photo))
 
     playerlist.append(player)
         
@@ -222,7 +222,7 @@ def main(level):
         player.set_photo(themed_name.lower())
         player.set_level(starting_level)
 
-        player.photodata = os.path.join(player.photo)
+        player.photodata = pygame.image.load(os.path.join(player.photo))
         playerlist.append(player)
 
     while True:
@@ -247,10 +247,9 @@ def main(level):
             foe.set_photo(themed_name.lower())
             foe.set_level(level)
 
-            foe.photodata = os.path.join(foe.photo)
-            foe_photo_preloaded = pygame.image.load(foe.photodata)
-            foe_photo_preloaded = pygame.transform.flip(foe_photo_preloaded, True, False)
-            foe_photo_preloaded = pygame.transform.scale(foe_photo_preloaded, (photo_size, photo_size))
+            foe.photodata = pygame.image.load(os.path.join(foe.photo))
+            foe.photodata = pygame.transform.flip(foe.photodata, True, False)
+            foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
 
             foe.update_inv(get_weapon(get_random_weapon()), True)
 
@@ -504,9 +503,9 @@ def main(level):
 
             # Draw the foe's profile picture
             if foe_hp_percent < 75:
-                foe_photo_preloaded.set_alpha(int(255 * foe_hp_percent / 75))
+                foe.photodata.set_alpha(int(255 * foe_hp_percent / 75))
 
-            screen.blit(foe_photo_preloaded, (foe_rect.x + 0, foe_rect.y + 85))
+            screen.blit(foe.photodata, (foe_rect.x + 0, foe_rect.y + 85))
 
             # Draw the current tossed items
             if player_item_index < len(player.Inv):
