@@ -134,30 +134,6 @@ def display_stats_menu(hp_up, def_up, atk_up, regain_up, critrate_up, critdamage
         pygame.display.flip()
         clock.tick(10)
 
-# Helper function to move an item towards a target, considering velocity
-def move_towards_with_arc(current_pos, target_pos, velocity, arc_offset):
-    cx, cy = current_pos
-    tx, ty = target_pos
-    dx, dy = tx - cx, ty - cy
-
-    # Calculate the distance to the target
-    dist = (dx**2 + dy**2) ** 0.5
-
-    # If the item is already at the target, return the target position
-    if dist == 0:
-        return tx, ty
-
-    # Calculate the step size in the x and y directions
-    step_x = velocity * dx / dist
-    step_y = velocity * (dy + arc_offset) / dist
-
-    # If the item is close enough to the target, move it directly to the target
-    if dist < 15:
-        return tx, ty
-
-    # Otherwise, move the item towards the target with the calculated step size
-    return cx + step_x, cy + step_y
-
 
 def log(color, text):
     print(color + text + Style.RESET_ALL)
@@ -203,7 +179,10 @@ def main(level):
     temp_themed_names = []
 
     for item in themed_names:
-        temp_themed_names.append(item)
+        if "mimic".lower() in item.lower():
+            continue
+        else:
+            temp_themed_names.append(item)
 
     player = Player("Player")
 
@@ -234,7 +213,16 @@ def main(level):
     while True:
 
         level_sum = 0
+        level_high = 0
         foelist: list[Player] = []
+
+        for player in playerlist:
+            if player.level > level_high:
+                level_high = player.level
+
+        for player in playerlist:
+            while player.level < level_high:
+                player.level_up(1)
 
         for player in playerlist:
             player.Bleed = 0
