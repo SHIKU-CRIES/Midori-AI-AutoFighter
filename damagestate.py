@@ -27,7 +27,10 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
         target.Bleed += max(mited_damage_dealt / 100, 25)
 
     if themed_names[1] in source.PlayerName.lower():
-        pass
+        if source.Bleed > 1:
+            log(red, f"{source.PlayerName} removes bleed from self for some def...")
+            source.Bleed -= 1
+            source.Def += 2
         
     if themed_names[2] in source.PlayerName.lower():
         pass
