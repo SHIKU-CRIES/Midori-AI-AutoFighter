@@ -232,7 +232,7 @@ def main(level):
             level_sum += player.level
             
         average_level = round(level_sum / len(playerlist))
-        level = average_level
+        level = level_sum
 
         if level < 2500:
             number_of_foes = 10
