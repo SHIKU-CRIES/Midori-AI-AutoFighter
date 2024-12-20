@@ -868,7 +868,7 @@ class Player:
         self.level = level
         self.MHP: int = random.randint(10 * self.level, 15 * self.level) + 1000
         self.HP: int = self.MHP
-        self.Def: int = self.Def + int(self.MHP * (0.0005 * self.level)) + 500
+        self.Def: int = self.Def + int(self.MHP * (0.000005 * self.level)) + 500
         self.Atk: int = random.randint(10 * self.level, 20 * self.level) + (self.level * 2)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.0001 * self.level, (self.level * 0.0002)) + (self.level * 0.0001)
@@ -884,8 +884,8 @@ class Player:
             xyz = 10
             bonus_levels = (level - 50) // xyz
             self.MHP = self.MHP + (50 * bonus_levels)
-            self.Atk = self.Atk + (2 * bonus_levels)
-            self.Def = self.Def + (4 * bonus_levels)
+            self.Atk = self.Atk + (4 * bonus_levels)
+            self.Def = self.Def + (2 * bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
@@ -903,7 +903,7 @@ class Player:
 
         self.MHP = int(self.MHP * min((level / top_level), (4)) * post_temp_vit) + 5
         self.Atk = int(self.Atk * min((level / top_level), (0.5)) * post_temp_vit) + 5
-        self.Def = int(self.Def * min((level / top_level_full), (2)) * post_temp_vit) + 5
+        self.Def = int(self.Def * min((level / top_level), (2)) * post_temp_vit) + 5
         self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 2))
 
