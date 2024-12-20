@@ -222,7 +222,7 @@ def main(level):
 
         for player in playerlist:
             while player.level < level_high:
-                player.level_up(1)
+                player.level_up(25)
 
         for player in playerlist:
             player.Bleed = 0
@@ -359,7 +359,7 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    testfoe.HP = testfoe.HP + int(testfoe.Regain * (testfoe.Vitality ** 5)) - int((testfoe.Bleed * bleed_mod) / testfoe.Def)
+                    testfoe.HP = min(testfoe.MHP, testfoe.HP + int(testfoe.Regain * (testfoe.Vitality ** 5)) - int((testfoe.Bleed * bleed_mod) / testfoe.Def))
 
                     if len(playerlist) > 0:
                         tartget_to_damage = random.choice(playerlist)
@@ -377,7 +377,7 @@ def main(level):
                         testplayer.RushStat = 0
 
                     if testplayer.HP > 0:
-                        testplayer.HP = testplayer.HP + int(testplayer.Regain * (testplayer.Vitality ** 5)) - int((testplayer.Bleed * bleed_mod) / testplayer.Def)
+                        testplayer.HP = min(testplayer.MHP, testplayer.HP + int(testplayer.Regain * (testplayer.Vitality ** 5)) - int((testplayer.Bleed * bleed_mod) / testplayer.Def))
 
                         if len(foelist) > 0:
                             tartget_to_damage = random.choice(foelist)
