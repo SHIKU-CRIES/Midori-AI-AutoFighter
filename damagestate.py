@@ -27,8 +27,8 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[1] in source.PlayerName.lower():
         if source.Bleed > 1:
-            source.Bleed -= source.Bleed
             source.Def += source.Bleed * 2
+            source.Bleed -= source.Bleed
         
     if themed_names[2] in source.PlayerName.lower():
         if source.Bleed > 1:
