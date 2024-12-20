@@ -974,7 +974,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
-        if player.Bleed >= 0.5:
+        if player.Bleed != 0:
             stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
         x_offset = x
