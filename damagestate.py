@@ -23,7 +23,7 @@ def debug_log(text):
 
 def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
-        target.Bleed += max(mited_damage_dealt, 25)
+        target.Bleed += max(mited_damage_dealt / target.Def, 1)
 
     if themed_names[1] in source.PlayerName.lower():
         if source.Bleed > 1:
@@ -35,7 +35,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             mited_damage_dealt = mited_damage_dealt + (100 * source.Bleed)
 
     if themed_names[3] in source.PlayerName.lower():
-        pass
+        if target.MHP > source.MHP:
+            source.MHP += 1
+            target.MHP -= 1
 
     if themed_names[4] in source.PlayerName.lower():
         pass
