@@ -284,7 +284,7 @@ class Player:
             return random.choice([5, 6, 7, 9])
 
         if themed_names[1] in self.PlayerName.lower():
-            return random.choice([2, 2, 2, 2, 9])
+            return random.choice([2, 2, 2, 2, 2, 2, 2, 2, 9])
             
         if themed_names[2] in self.PlayerName.lower():
             return random.choice([1, 3, 5, 6, 9])
