@@ -279,107 +279,36 @@ class Player:
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
 #themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray", "bubbles"]
 
-    def check_name_stats_mod(self, stat, startingval):
+    def check_name_stats_mod(self):
         if themed_names[0] in self.PlayerName.lower():
-            dodge_buff = 0.0015
-            max_hp_debuff = self.MHP / 8
-
-            while self.MHP > max_hp_debuff:
-                dodge_buff = dodge_buff + (0.000000007 * self.Vitality)
-                self.MHP = self.MHP - 1
-
-            self.Atk = int(self.Atk * 1)
-            self.Def = int(self.Def * 2)
-            self.gain_crit_rate(0.0001 * self.level)
-            self.DodgeOdds = (self.DodgeOdds + (dodge_buff * self.level)) * self.Vitality
+            return random.choice([5, 6, 7, 9])
 
         if themed_names[1] in self.PlayerName.lower():
-            def_to_add = 100 * self.level
-            max_hp_debuff = max(self.MHP - random.randint(1000, 2000), 10)
-            max_crit_rate = self.CritRate / 100
-            max_atk_stat = self.Atk / 4
-            item_buff = random.uniform(0.0004, 0.0008)
-
-            while self.Vitality > 1.01:
-                item_buff += random.uniform(0.00002, 0.00003)
-                self.Vitality = self.Vitality - 0.01
-            
-            if self.level > 3000:
-                while self.Def > 25000:
-                    item_buff += random.uniform(0.00002, 0.00003)
-                    self.Def = self.Def - 1000
-            
-            for item in self.Items:
-                item.name = "Carly\'s Blessing of Defense"
-                item.power += self.level * item_buff
-
-            while self.MHP > max_hp_debuff:
-                self.Def += self.check_base_stats(self.Def, def_to_add)
-                self.MHP = self.MHP - 1
-
-            while self.CritRate > max_crit_rate:
-                self.Def += self.check_base_stats(self.Def, def_to_add)
-                self.CritRate -= self.CritRate / 15
-
-            while self.Atk > max_atk_stat:
-                self.Def += self.check_base_stats(self.Def, def_to_add)
-                self.Atk = self.Atk - 1
-
-            while self.Regain > 1:
-                self.Def += self.check_base_stats(self.Def, def_to_add)
-                self.Regain = self.Regain - 0.001
-
-            self.Atk = int(self.Atk) + 1
-            self.Def += self.check_base_stats(self.Def, int(self.Def * self.level) + 1)
-
-            self.gain_crit_damage((0.0002 * self.level))
+            return random.choice([2, 2, 2, 2, 9])
             
         if themed_names[2] in self.PlayerName.lower():
-            self.MHP = int(self.MHP * 15)
-            self.Atk = int(self.Atk * 8)
-            self.CritRate = self.CritRate / 1000
+            return random.choice([1, 3, 5, 6, 9])
 
         if themed_names[3] in self.PlayerName.lower():
-            self.Atk = int(self.Atk * 1.5)
-            self.Def = int(self.Def * 1.5)
-            self.CritDamageMod = self.CritDamageMod * ((0.005 * self.level) + 1)
-            self.DodgeOdds = self.DodgeOdds / 1000
+            return random.choice([1, 2, 3, 9])
 
         if themed_names[4] in self.PlayerName.lower():
-            self.Atk = int(self.Atk * 1.5)
-            self.Def = int(self.Def * 0.5) + 1
-            self.gain_crit_rate(1)
-            self.CritDamageMod = self.CritDamageMod * ((0.035 * self.level) + 1)
+            return random.choice([6, 6, 6, 6, 6, 6, 9])
 
         if themed_names[5] in self.PlayerName.lower():
-            self.Vitality = self.Vitality + (0.0001 * self.level)
+            return 9
 
         if themed_names[6] in self.PlayerName.lower():
-            tempname = self.PlayerName
-            self.load_mimic()
-            self.MHP = int(self.MHP / ((10000 / self.level) + 1))
-            self.Atk = int(self.Atk / 5)
-            self.Def = int(self.Def / 4)
-            self.Regain = self.Regain / 5
-            self.DodgeOdds = self.DodgeOdds / 4
-            self.Vitality -= self.Vitality / 4
-
-            if self.Vitality > 1:
-                self.Vitality = 1
-
-            self.PlayerName = tempname
-            self.set_photo("Player".lower())
+            return 9
 
         if themed_names[7] in self.PlayerName.lower():
-            self.MHP = int(self.MHP * 150)
+            return random.choice([1, 9])
 
         if themed_names[8] in self.PlayerName.lower():
-            self.Regain = self.Regain * (0.05 * self.level)
+            return random.choice([4, 9])
 
         if themed_names[9] in self.PlayerName.lower():
-            for item in self.Items:
-                item.name = "Bubbles\'s Blessing of Damage, Defense, and Utility"
-                item.power += (self.level * 0.0003)
+            return random.choice([8, 9])
 
     def check_name_mod(self):
         if themed_names[0] in self.PlayerName.lower():
@@ -866,11 +795,13 @@ class Player:
         def_up = self.check_base_stats(self.Def, def_up)
         atk_up = self.check_base_stats(self.Atk, atk_up)
 
-        # Autopick logic
-        if os.path.exists("auto.pick"):
-            choice = 9
+        if "player" in self.PlayerName.lower():
+            if os.path.exists("auto.pick"):
+                choice = 9
+            else:
+                choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt, self.Items)
         else:
-            choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt, self.Items)
+            choice = self.check_name_stats_mod()
 
         if choice == 1:
             self.MHP += int(hp_up)
