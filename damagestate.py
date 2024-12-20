@@ -28,12 +28,12 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[1] in source.PlayerName.lower():
         if source.Bleed > 1:
-            log(red, f"{source.PlayerName} removes bleed from self for some def...")
             source.Bleed -= 1
-            source.Def += 2
+            source.Def += 5
         
     if themed_names[2] in source.PlayerName.lower():
-        pass
+        if source.Bleed > 1:
+            mited_damage_dealt = mited_damage_dealt + (100 * source.Bleed)
 
     if themed_names[3] in source.PlayerName.lower():
         pass
@@ -55,6 +55,8 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[9] in source.PlayerName.lower():
         pass
+    
+    return mited_damage_dealt
 
 def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt: float):
         
@@ -114,7 +116,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
         mited_damage_dealt = float(damage_dealt / max(def_val * target_vit, 2))
         mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
     
-    check_passive_mod(source, target, mited_damage_dealt)
+    mited_damage_dealt = check_passive_mod(source, target, mited_damage_dealt)
 
     if (target.DodgeOdds / enrage_buff) >= random.random():
         text_to_log = log(green, f"{target.PlayerName} dodged!")
