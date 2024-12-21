@@ -23,11 +23,11 @@ def debug_log(text):
 
 def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
-        target.Bleed += max(mited_damage_dealt / target.Def, 1)
+        target.Bleed += max(mited_damage_dealt / target.Def, 15)
 
     if themed_names[1] in source.PlayerName.lower():
-        if source.Bleed > 10:
-            source.Def += source.check_base_stats(source.Def, source.Bleed * (1000 * source.level))
+        if source.Bleed > 100:
+            source.Def += source.check_base_stats(source.Def, source.Bleed * (4 ** source.level))
             source.Bleed -= source.Bleed
         
     if themed_names[2] in source.PlayerName.lower():
@@ -36,7 +36,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:
-            source.MHP += 1
+            source.MHP += 10
             target.MHP -= 1
 
     if themed_names[4] in source.PlayerName.lower():
@@ -53,8 +53,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[8] in source.PlayerName.lower():
         if source.HP < source.MHP / 2:
-            source.Regain += 0.01
-            source.Atk -= 1
+            if source.Atk > 1000:
+                source.Regain += 0.01
+                source.Atk -= 1
 
     if themed_names[9] in source.PlayerName.lower():
         pass
