@@ -27,7 +27,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             log(red, f"{source.PlayerName} tried to hit {target.PlayerName}!")
             log(green, f"Why would I hit myself user... you think I am dumb?")
         elif themed_names[1] in target.PlayerName.lower():
-            target.Bleed += max(mited_damage_dealt, 15)
+            target.Bleed += max(source.Def / 4, 15)
         else:
             target.Bleed += max(mited_damage_dealt / target.Def, 15)
 
