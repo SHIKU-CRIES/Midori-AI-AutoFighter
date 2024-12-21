@@ -24,8 +24,7 @@ def debug_log(text):
 def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
         if themed_names[0] in target.PlayerName.lower():
-            log(red, f"{source.PlayerName} tried to hit {target.PlayerName}!")
-            log(green, f"Why would I hit myself user... you think I am dumb?")
+            log(white, f"{random.choice([red, green, blue])}{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
         elif themed_names[1] in target.PlayerName.lower():
             target.Bleed += max(source.Def / 4, 15)
         else:
