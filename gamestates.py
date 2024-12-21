@@ -124,17 +124,18 @@ def main(level):
 
         for player in playerlist:
             while player.level < level_high:
-                player.level_up(25)
+                player.level_up(250)
 
         for player in playerlist:
             player.Bleed = 0
             player.DamageDealt = 0
             player.DamageTaken = 0
+            player.HP = player.MHP
 
-            level_sum += player.level
+            level_sum += player.level + 100
             
         average_level = round(level_sum / len(playerlist))
-        level = level_sum
+        level = average_level
 
         if level < 2500:
             number_of_foes = 10
@@ -180,7 +181,7 @@ def main(level):
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
-            level_base_enrage_mod = (level / max(level / 1000, 1))
+            level_base_enrage_mod = (level / max(level / 1000, 15))
             player_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
             foe_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
 
