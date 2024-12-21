@@ -124,7 +124,7 @@ def main(level):
 
         for player in playerlist:
             while player.level < level_high:
-                player.level_up(250)
+                player.level_up(50)
 
         for player in playerlist:
             player.Bleed = 0
