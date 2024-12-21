@@ -148,14 +148,16 @@ class Player:
                         elif past_life_data['Vitality'] > 1.0000001:
                             temp_past_life_vitality = past_life_data['Vitality'] - 1
                             while temp_past_life_vitality > 0:
-                                if self.Vitality > 5:
-                                    self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 4))
+                                if self.Vitality > 15:
+                                    self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 4.5))
+                                elif self.Vitality > 5:
+                                    self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 3))
                                 elif self.Vitality > 2:
-                                    self.Vitality = self.Vitality + ((0.000001) / (self.Vitality ** 3))
+                                    self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 1.5))
                                 else:
-                                    self.Vitality = self.Vitality + 0.000001
+                                    self.Vitality = self.Vitality + 0.00001
 
-                                temp_past_life_vitality -= 0.00001
+                                temp_past_life_vitality -= 0.0001
                         
                         self.check_stats()
 
@@ -776,7 +778,6 @@ class Player:
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
         """
-        from gamestates import display_stats_menu
         self.level += 1
 
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
@@ -796,10 +797,7 @@ class Player:
         atk_up = self.check_base_stats(self.Atk, atk_up)
 
         if "player" in self.PlayerName.lower():
-            if os.path.exists("auto.pick"):
-                choice = 9
-            else:
-                choice = display_stats_menu(f"{hp_up:.2f}", f"{def_up:.2f}", f"{atk_up:.2f}", f"{regain_up * 100:.2f}", f"{critrate_up * 100:.2f}%", f"{critdamage_up * 100:.2f}%", f"{dodgeodds_up * 100:.2f}%", self.DamageTaken, self.DamageDealt, self.Items)
+            choice = 9
         else:
             choice = self.check_name_stats_mod()
 
