@@ -133,7 +133,10 @@ def main(level):
             player.HP = player.MHP
 
             level_sum += player.level + 100
-            
+
+            if player.level > 2000:
+                level_sum += 500 + (player.level / 10)
+
         average_level = round(level_sum / len(playerlist))
         level = average_level
 
