@@ -1,3 +1,4 @@
+import math
 import random
 
 from player import Player
@@ -28,12 +29,12 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
             
             mited_damage_dealt = 0
-            target.DodgeOdds += 0.01
+            target.DodgeOdds += 0.05
 
         else:
             if source.HP > source.MHP * 0.35:
                 source.HP -= (source.MHP * 0.01)
-                target.Bleed += max(mited_damage_dealt * 2, 55)
+                target.Bleed += max(mited_damage_dealt * (source.MHP - source.HP), 55)
             else:
                 target.Bleed += max(mited_damage_dealt, 1)
 
