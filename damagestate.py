@@ -24,7 +24,8 @@ def debug_log(text):
 def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
         if themed_names[0] in target.PlayerName.lower():
-            log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
+            if random.random() >= random.random():
+                log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
             
             mited_damage_dealt = 0
             target.HP += 200
@@ -33,9 +34,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             target.Bleed += max(mited_damage_dealt / target.Def, 1)
 
     if themed_names[1] in source.PlayerName.lower():
-        if source.Bleed > 5:
+        if source.Bleed > 55:
             if random.choice([True, False]):
-                source.Def += source.check_base_stats(source.Def, source.Bleed ** 4)
+                source.Def += source.check_base_stats(source.Def, source.Bleed ** 2) + source.Bleed
                 source.Bleed /= 2
         
     if themed_names[2] in source.PlayerName.lower():
@@ -57,7 +58,8 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
         pass
 
     if themed_names[7] in source.PlayerName.lower():
-        pass
+        if source.HP < source.MHP * 0.85:
+            mited_damage_dealt = mited_damage_dealt + (source.MHP / 4)
 
     if themed_names[8] in source.PlayerName.lower():
         if source.HP < source.MHP / 2:
@@ -66,8 +68,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 source.Atk -= 1
 
     if themed_names[9] in source.PlayerName.lower():
-        if source.HP < source.MHP / 2:
-            mited_damage_dealt = mited_damage_dealt + (source.MHP / 4)
+        pass
     
     return mited_damage_dealt
 
