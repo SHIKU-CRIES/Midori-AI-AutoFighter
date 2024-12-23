@@ -128,7 +128,7 @@ class Player:
                         self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.0000001) + 0.000001
                         self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
                         self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
-                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0025) + 0.001)
+                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds']) + 0.001)
 
                         for item in past_life_data['Items']:
                             self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
@@ -267,9 +267,9 @@ class Player:
         to_be_lowered_by = 10 + (stat_total // 100000)
 
         if stat_total > 5000000:
-            desired_increase = stat_gain / max(((to_be_lowered_by ** 4) * (stat_total // stats_to_start_lower)), 1)
+            desired_increase = stat_gain / max(((to_be_lowered_by ** 1.5) * (stat_total // stats_to_start_lower)), 1)
         elif stat_total > 1000000:
-            desired_increase = stat_gain / max(((to_be_lowered_by ** 2) * (stat_total // stats_to_start_lower)), 1)
+            desired_increase = stat_gain / max(((to_be_lowered_by ** 1.2) * (stat_total // stats_to_start_lower)), 1)
         elif stat_total > stats_to_start_lower:
             desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
         else:
