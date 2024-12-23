@@ -28,7 +28,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
             
             mited_damage_dealt = 0
-            target.HP += 200
+            target.DodgeOdds += 0.01
 
         else:
             if source.HP > source.MHP * 0.35:
