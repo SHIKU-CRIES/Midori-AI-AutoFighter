@@ -99,10 +99,10 @@ def main(level):
     playerlist.append(player)
         
     for i in range(4):
-        if random.random() < 0.6:
-            themed_name = random.choice(temp_themed_names[:2]).capitalize()
+        if random.random() < 0.4:
+            themed_name = random.choice(temp_themed_names[:1]).capitalize()
         else:
-            themed_name = random.choice(temp_themed_names[2:]).capitalize()
+            themed_name = random.choice(temp_themed_names[1:]).capitalize()
         temp_themed_names.remove(themed_name.lower())
 
         player = Player(f"{themed_name}")
@@ -144,7 +144,7 @@ def main(level):
         level = average_level
 
         if level < 3000:
-            number_of_foes = 10
+            number_of_foes = 8
         elif level < 7000:
             number_of_foes = 5
         else:
