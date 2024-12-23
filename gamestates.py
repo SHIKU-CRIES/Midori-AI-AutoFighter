@@ -140,8 +140,10 @@ def main(level):
         average_level = round(level_sum / len(playerlist))
         level = average_level
 
-        if level < 2500:
+        if level < 3000:
             number_of_foes = 10
+        elif level < 7000:
+            number_of_foes = 5
         else:
             number_of_foes = 3
 
@@ -300,9 +302,11 @@ def main(level):
                                         testplayer.level_up(mod=bleed_mod)
                                 else:
                                     testplayer.RushStat = 0
-
-                                level = level + 1
-                                testplayer.level_up(mod=bleed_mod)
+                                    
+                                for multiplier in range(3):
+                                    level = level + 1
+                                    testplayer.level_up(mod=bleed_mod)
+                                    
                                 testplayer.save()
 
                             elif tartget_to_damage.HP > tartget_to_damage.MHP:
