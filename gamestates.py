@@ -99,7 +99,10 @@ def main(level):
     playerlist.append(player)
         
     for i in range(4):
-        themed_name = random.choice(temp_themed_names).capitalize()
+        if random.random() < 0.6:
+            themed_name = random.choice(temp_themed_names[:2]).capitalize()
+        else:
+            themed_name = random.choice(temp_themed_names[2:]).capitalize()
         temp_themed_names.remove(themed_name.lower())
 
         player = Player(f"{themed_name}")
