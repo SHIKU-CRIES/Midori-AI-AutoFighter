@@ -37,6 +37,10 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             else:
                 target.Bleed += max(mited_damage_dealt / target.Def , 1)
 
+    if themed_names[1] in target.PlayerName.lower():
+        if target.HP < target.MHP * 0.55:
+            mited_damage_dealt = apply_damage_item_effects(source, target, mited_damage_dealt)
+
     if themed_names[1] in source.PlayerName.lower():
         if source.Bleed > 55:
             if random.choice([True, False]):
