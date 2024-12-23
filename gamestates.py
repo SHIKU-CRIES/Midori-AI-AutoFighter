@@ -78,7 +78,7 @@ def main(level):
 
     # Create the player and foe objects
     playerlist: list[Player] = []
-    temp_themed_names = []
+    temp_themed_names: list[str] = []
 
     for item in themed_names:
         if "mimic".lower() in item.lower():
@@ -99,10 +99,11 @@ def main(level):
     playerlist.append(player)
         
     for i in range(4):
-        if random.random() < 0.4:
-            themed_name = random.choice(temp_themed_names[:1]).capitalize()
+        if random.random() < 0.7:
+            themed_name = temp_themed_names[0].capitalize()
         else:
             themed_name = random.choice(temp_themed_names[1:]).capitalize()
+
         temp_themed_names.remove(themed_name.lower())
 
         player = Player(f"{themed_name}")
