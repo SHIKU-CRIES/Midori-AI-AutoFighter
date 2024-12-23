@@ -121,14 +121,14 @@ class Player:
                         past_life_data = pickle.load(f)
 
                     if self.PlayerName == past_life_data['PlayerName']:
-                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 100)
+                        self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
                         self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 100)
                         self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 200)
                         self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.0000001) + 0.000001
                         self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
                         self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
-                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds']) + 0.001)
+                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.75) + 0.001)
 
                         for item in past_life_data['Items']:
                             self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
@@ -220,9 +220,9 @@ class Player:
     def gain_dodgeodds_rate(self, points):
         """Increases dodge odds based on points, with increasing cost.
 
-        Every 1 dodge odds increase costs 2x more points.
+        Every 1 dodge odds increase costs 5x more points.
         """
-        to_be_lowered_by = 2
+        to_be_lowered_by = 5
         current_rate = self.DodgeOdds
 
         if current_rate > 1:
