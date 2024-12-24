@@ -87,6 +87,7 @@ def import_relics(relics_folder="relics"):
                 try:
                     module = importlib.import_module(f"{relics_folder}.{module_name}")
                     relics.append(module)
+                    print(f"Imported {module_name}!")
                 except Exception as e:
                     print(f"Error importing relic {filename}: {e}")
     except FileNotFoundError:
