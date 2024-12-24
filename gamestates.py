@@ -292,7 +292,9 @@ def main(level):
                         testplayer.RushStat = 0
 
                     if testplayer.HP > 0:
-                        if testplayer.Bleed > 0:
+                        if testplayer.Bleed > testplayer.MHP * 0.01:
+                            testplayer.Bleed = max(testplayer.Bleed - (testplayer.Regain * 100), testplayer.MHP * 0.01)
+                        else:
                             testplayer.Bleed = max(testplayer.Bleed - (testplayer.Regain * 10), 0)
 
                         testplayer.HP = min(testplayer.MHP, testplayer.HP + int(testplayer.Regain * testplayer.Vitality) - int(testplayer.Bleed / testplayer.Vitality))
