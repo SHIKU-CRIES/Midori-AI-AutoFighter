@@ -32,11 +32,17 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             target.DodgeOdds += 0.05
 
         else:
+            if source.Regain > 10:
+                source.Regain -= 0.01
+                source.MHP += 10
+                source.Atk += 1
+                source.Def += 1
+
             if source.HP > source.MHP * 0.65:
                 source.HP -= (source.MHP * 0.01)
                 target.Bleed += max(mited_damage_dealt, 55)
             else:
-                target.Bleed += max(max(mited_damage_dealt, 1) * (source.MHP - source.HP) / target.Def, 5)
+                target.Bleed += min(max(max(mited_damage_dealt, 1) * (source.MHP - source.HP) / (target.Def * 2), 5), 1000)
 
             mited_damage_dealt = mited_damage_dealt * ((source.MHP - source.HP) / (target.Def * 2))
 
