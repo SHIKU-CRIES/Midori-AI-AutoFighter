@@ -132,7 +132,7 @@ def main(level):
                 player.level_up(50)
 
         for player in playerlist:
-            player.Bleed *= 0.8
+            player.Bleed *= 0.65
             player.DamageDealt = 0
             player.DamageTaken = 0
 
