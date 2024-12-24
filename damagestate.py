@@ -36,7 +36,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 source.HP -= (source.MHP * 0.01)
                 target.Bleed += max(mited_damage_dealt, 55)
             else:
-                target.Bleed += max(mited_damage_dealt * (source.MHP - source.HP), 1)
+                target.Bleed += max(mited_damage_dealt, 1) * (source.MHP - source.HP)
 
             mited_damage_dealt = mited_damage_dealt * (source.MHP - source.HP)
 
