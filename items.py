@@ -1,10 +1,12 @@
-import os
+# Leaving blank
+
 import math
 import random
-import importlib
+
+from player import Player
 
 item_mods = ["Powerful", "Strong", "Enhanced", "Fortified", "Empowered", "Reinforced", "Supercharged", "Boosted", "Overclocked"]
-item_types = ["damage", "defense", "utility"]
+item_types = ["damage", "defense", "utility", "bleed", "healing", "passive"]
 
 class ItemType():
     def __init__(self):
@@ -35,9 +37,9 @@ class ItemType():
         if "defense" in str(self.name).lower():
             temp_power = math.log2(self.power)
             temp_def_power = math.exp(temp_power * 0.5)
-            total_output = float(pre_damage_taken / temp_def_power)
+            total_output += float(pre_damage_taken / temp_def_power)
         else:
-            total_output = float(pre_damage_taken)
+            total_output += float(pre_damage_taken)
 
         return total_output
 
@@ -47,9 +49,9 @@ class ItemType():
         total_output = 0
         
         if "damage" in str(self.name).lower():
-            total_output = float(damage_delt * self.power)
+            total_output += float(damage_delt * self.power)
         else:
-            total_output = float(damage_delt)
+            total_output += float(damage_delt)
 
         return total_output
 
@@ -59,39 +61,24 @@ class ItemType():
         total_output = 0
 
         if "utility" in str(self.name).lower():
-            total_output = float(desired_increase * self.power)
+            total_output += float(desired_increase * self.power)
         else:
-            total_output = float(desired_increase)
+            total_output += float(desired_increase)
 
         return total_output
+    
+    def on_passive_use(self, player: Player, desired_increase: float):
+        total_output = 0
 
+        if "passive" in str(self.name).lower():
+            total_output += float(desired_increase * self.power)
+        else:
+            total_output += float(desired_increase)
 
-
-def import_relics(relics_folder="relics"):
-    """Imports all Python files from the relics folder and returns a list of their modules.
-
-    Args:
-        relics_folder: The name of the folder containing the relic files.
-
-    Returns:
-        A list of imported relic modules, or None if there's an error.  
-        Also prints error messages if individual files fail to import.
-    """
-
-    relics = []
-    try:
-        for filename in os.listdir(relics_folder):
-            if filename.endswith(".py"):
-                module_name = filename[:-3] # Remove the .py extension
-
-                try:
-                    module = importlib.import_module(f"{relics_folder}.{module_name}")
-                    relics.append(module)
-                    print(f"Imported {module_name}!")
-                except Exception as e:
-                    print(f"Error importing relic {filename}: {e}")
-    except FileNotFoundError:
-        print(f"Error: relics folder '{relics_folder}' not found.")
-        return None
-
-    return relics
+        return total_output
+    
+    def on_heal(self, desired_increase: float):
+        pass
+    
+    def on_bleed(self, desired_decrease: float):
+        pass

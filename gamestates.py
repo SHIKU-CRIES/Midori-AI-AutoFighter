@@ -6,8 +6,6 @@ import importlib
 
 from screendata import Screen
 
-from items import import_relics
-
 from weapons import get_weapon
 from weapons import get_random_weapon
 
@@ -47,6 +45,9 @@ def main(level):
     from player import Player
     from player import render_player_obj
 
+    if os.name() == "nt":
+        print("We recommend playing on Linux for better gaming, Midori AI does not support windows.")
+
     pygame.init()
 
     # Create the screen
@@ -78,8 +79,6 @@ def main(level):
     screen.blit(background_image, (0, 0))
 
     pygame.display.flip()
-
-    relics = import_relics()
 
     # Create the player and foe objects
     playerlist: list[Player] = []
@@ -148,6 +147,9 @@ def main(level):
 
         average_level = round(level_sum / len(playerlist))
         level = average_level
+
+        if os.name() == "nt":
+            level = average_level * 2
 
         if level < 3000:
             number_of_foes = 8
