@@ -786,8 +786,8 @@ class Player:
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
         
         hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
-        def_up: int = random.randint(5 * self.level, 200 * self.level * int_mod)
-        atk_up: int = random.randint(15 * self.level, 350 * self.level * int_mod)
+        def_up: int = random.randint(15 * self.level, 200 * self.level * int_mod)
+        atk_up: int = random.randint(25 * self.level, 350 * self.level * int_mod)
         regain_up: float = random.uniform(0.00000001, 0.0000009 * self.level)
         critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * max((mod_fixed / 10000), 1)
         critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * max((mod_fixed / 10000), 1)
@@ -877,15 +877,15 @@ class Player:
         self.Vitality: float = 1 + (self.level * 0.00002)
 
         if level > 50:
-            self.MHP = self.MHP + (2 * level)
-            self.Atk = self.Atk + (20 * level)
+            self.MHP = self.MHP + (25 * level)
+            self.Atk = self.Atk + (4 * level)
             
             # Apply bonus every xyz levels past 10
             xyz = 10
             bonus_levels = (level - 50) // xyz
             self.MHP = self.MHP + (50 * bonus_levels)
-            self.Atk = self.Atk + (4 * bonus_levels)
-            self.Def = self.Def + (2 * bonus_levels)
+            self.Atk = self.Atk + (2 * bonus_levels)
+            self.Def = self.Def + (4 * bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
