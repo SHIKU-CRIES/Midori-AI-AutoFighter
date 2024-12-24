@@ -868,7 +868,7 @@ class Player:
         self.level = level
         self.MHP: int = random.randint(10 * self.level, 25 * self.level) + 1000
         self.HP: int = self.MHP
-        self.Def: int = self.Def + int(self.MHP * (0.000015 * self.level)) + 500
+        self.Def: int = self.Def + random.randint(int(self.MHP * (0.000015 * self.level)), int(self.MHP * (0.000055 * self.level))) + 500
         self.Atk: int = random.randint(10 * self.level, 20 * self.level) + (self.level * 2)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.0001 * self.level, (self.level * 0.0002)) + (self.level * 0.0001)
