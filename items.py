@@ -1,5 +1,7 @@
+import os
 import math
 import random
+import importlib
 
 item_mods = ["Powerful", "Strong", "Enhanced", "Fortified", "Empowered", "Reinforced", "Supercharged", "Boosted", "Overclocked"]
 item_types = ["damage", "defense", "utility"]
@@ -62,3 +64,33 @@ class ItemType():
             total_output = float(desired_increase)
 
         return total_output
+
+
+
+def import_relics(relics_folder="relics"):
+    """Imports all Python files from the relics folder and returns a list of their modules.
+
+    Args:
+        relics_folder: The name of the folder containing the relic files.
+
+    Returns:
+        A list of imported relic modules, or None if there's an error.  
+        Also prints error messages if individual files fail to import.
+    """
+
+    relics = []
+    try:
+        for filename in os.listdir(relics_folder):
+            if filename.endswith(".py"):
+                module_name = filename[:-3] # Remove the .py extension
+
+                try:
+                    module = importlib.import_module(f"{relics_folder}.{module_name}")
+                    relics.append(module)
+                except Exception as e:
+                    print(f"Error importing relic {filename}: {e}")
+    except FileNotFoundError:
+        print(f"Error: relics folder '{relics_folder}' not found.")
+        return None
+
+    return relics

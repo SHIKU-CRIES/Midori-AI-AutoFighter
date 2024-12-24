@@ -2,8 +2,11 @@ import os
 import sys
 import pygame
 import random
+import importlib
 
 from screendata import Screen
+
+from items import import_relics
 
 from weapons import get_weapon
 from weapons import get_random_weapon
