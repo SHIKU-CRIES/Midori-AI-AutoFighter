@@ -292,7 +292,7 @@ def main(level):
 
                     if testplayer.HP > 0:
                         if testplayer.Bleed > 0:
-                            testplayer.Bleed = max(testplayer.Bleed - testplayer.Regain, 0)
+                            testplayer.Bleed = max(testplayer.Bleed - (testplayer.Regain * 100), 0)
 
                         testplayer.HP = min(testplayer.MHP, testplayer.HP + int(testplayer.Regain * testplayer.Vitality) - int(testplayer.Bleed / testplayer.Vitality))
 
