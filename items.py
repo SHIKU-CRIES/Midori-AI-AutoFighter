@@ -4,7 +4,7 @@ import math
 import random
 
 item_mods = ["Powerful", "Strong", "Enhanced", "Fortified", "Empowered", "Reinforced", "Supercharged", "Boosted", "Overclocked"]
-item_types = ["damage", "defense", "utility", "bleed", "healing", "passive"]
+item_types = ["damage", "defense", "utility", "blocking", "healing", "passive"]
 
 class ItemType():
     def __init__(self):
@@ -30,14 +30,20 @@ class ItemType():
     def on_damage_taken(self, pre_damage_taken: float):
         """This function is called when the player takes damage.
         If the item type is "defense", this function will handle the damage-related functionality."""
-        total_output = 0
+        total_output = pre_damage_taken
 
         if "defense" in str(self.name).lower():
             temp_power = math.log2(self.power)
             temp_def_power = math.exp(temp_power * 0.5)
-            total_output += float(pre_damage_taken / temp_def_power)
+            total_output += float(total_output / temp_def_power)
         else:
-            total_output += float(pre_damage_taken)
+            total_output += float(total_output)
+
+        if "blocking" in str(self.name).lower():
+            if total_output > temp_power * 2000:
+                total_output += float(temp_power * 2000)
+        else:
+            total_output += float(total_output)
 
         return total_output
 
@@ -74,9 +80,3 @@ class ItemType():
             total_output += float(desired_increase)
 
         return total_output
-    
-    def on_heal(self, desired_increase: float):
-        pass
-    
-    def on_bleed(self, desired_decrease: float):
-        pass
