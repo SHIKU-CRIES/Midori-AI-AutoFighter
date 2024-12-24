@@ -79,6 +79,8 @@ def main(level):
 
     pygame.display.flip()
 
+    relics = import_relics()
+
     # Create the player and foe objects
     playerlist: list[Player] = []
     temp_themed_names: list[str] = []
