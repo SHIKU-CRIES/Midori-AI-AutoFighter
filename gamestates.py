@@ -132,10 +132,8 @@ def main(level):
                 player.level_up(50)
 
         for player in playerlist:
-            player.Bleed = 0
             player.DamageDealt = 0
             player.DamageTaken = 0
-            player.HP = player.MHP
 
             level_sum += player.level + 100
 
@@ -272,6 +270,9 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
+                    if testfoe.Bleed > 0:
+                        testfoe.Bleed = max(testfoe.Bleed - (testfoe.Regain / 100), 0)
+
                     testfoe.HP = min(testfoe.MHP, testfoe.HP + int(testfoe.Regain * testfoe.Vitality) - int(testfoe.Bleed  / testfoe.Vitality))
 
                     if len(playerlist) > 0:
@@ -290,6 +291,9 @@ def main(level):
                         testplayer.RushStat = 0
 
                     if testplayer.HP > 0:
+                        if testplayer.Bleed > 0:
+                            testplayer.Bleed = max(testplayer.Bleed - testplayer.Regain, 0)
+
                         testplayer.HP = min(testplayer.MHP, testplayer.HP + int(testplayer.Regain * testplayer.Vitality) - int(testplayer.Bleed / testplayer.Vitality))
 
                         if len(foelist) > 0:
