@@ -42,9 +42,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[1] in source.PlayerName.lower():
         if source.Bleed > 55:
-            if random.choice([True, False]):
+            if random.choice([True, False, False, False]):
                 source.Def += source.check_base_stats(source.Def, source.Bleed ** 2) + source.Bleed
-                source.Bleed /= 2
+                source.Bleed *= 0.85
 
     elif themed_names[1] in target.PlayerName.lower():
         if target.HP < target.MHP * 0.55:
