@@ -3,8 +3,6 @@
 import math
 import random
 
-from player import Player
-
 item_mods = ["Powerful", "Strong", "Enhanced", "Fortified", "Empowered", "Reinforced", "Supercharged", "Boosted", "Overclocked"]
 item_types = ["damage", "defense", "utility", "bleed", "healing", "passive"]
 
@@ -67,7 +65,7 @@ class ItemType():
 
         return total_output
     
-    def on_passive_use(self, player: Player, desired_increase: float):
+    def on_passive_use(self, desired_increase: float):
         total_output = 0
 
         if "passive" in str(self.name).lower():
