@@ -54,10 +54,22 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     elif themed_names[1] in target.PlayerName.lower():
         if target.HP < target.MHP * 0.55:
-            mited_damage_dealt = apply_damage_item_effects(source, target, mited_damage_dealt)
+            for item in target.Items:
+                if not item:
+                    continue
+                try:
+                    mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
+                except Exception as error:
+                    continue
 
         if target.HP < target.MHP * 0.25:
-            mited_damage_dealt = apply_damage_item_effects(source, target, mited_damage_dealt)
+            for item in target.Items:
+                if not item:
+                    continue
+                try:
+                    mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
+                except Exception as error:
+                    continue
         
     if themed_names[2] in source.PlayerName.lower():
         if source.Bleed > 1:
