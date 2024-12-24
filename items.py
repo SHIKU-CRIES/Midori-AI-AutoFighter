@@ -37,13 +37,13 @@ class ItemType():
             temp_def_power = math.exp(temp_power * 0.5)
             total_output += float(total_output / temp_def_power)
         else:
-            total_output += float(total_output)
+            total_output = float(total_output)
 
         if "blocking" in str(self.name).lower():
             if total_output > temp_power * 2000:
                 total_output += float(temp_power * 2000)
         else:
-            total_output += float(total_output)
+            total_output = float(total_output)
 
         return total_output
 
@@ -55,7 +55,7 @@ class ItemType():
         if "damage" in str(self.name).lower():
             total_output += float(damage_delt * self.power)
         else:
-            total_output += float(damage_delt)
+            total_output = float(damage_delt)
 
         return total_output
 
@@ -67,7 +67,7 @@ class ItemType():
         if "utility" in str(self.name).lower():
             total_output += float(desired_increase * self.power)
         else:
-            total_output += float(desired_increase)
+            total_output = float(desired_increase)
 
         return total_output
     
@@ -77,6 +77,6 @@ class ItemType():
         if "passive" in str(self.name).lower():
             total_output += float(desired_increase * self.power)
         else:
-            total_output += float(desired_increase)
+            total_output = float(desired_increase)
 
         return total_output
