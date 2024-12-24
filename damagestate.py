@@ -134,11 +134,11 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
 
     if source.CritRate >= random_crit:
         crit = True
-        damage_dealt = apply_damage_item_effects(source, target, damage_dealt * (enrage_buff * (source.CritDamageMod * max(1, source.CritRate)) * def_mod))
+        damage_dealt = apply_damage_item_effects(source, target, damage_dealt * (enrage_buff * (source.CritDamageMod * max(1, source.CritRate))))
         mited_damage_dealt = float(damage_dealt / max(def_val * target_vit, 2))
         mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
     else:
-        damage_dealt = apply_damage_item_effects(source, target, damage_dealt * (enrage_buff * def_mod))
+        damage_dealt = apply_damage_item_effects(source, target, damage_dealt * enrage_buff)
         mited_damage_dealt = float(damage_dealt / max(def_val * target_vit, 2))
         mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
     

@@ -960,10 +960,10 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             ("HP Regain:", f"{(player.Regain * 100):.0f}"),
         ]
 
-        if player.Vitality / def_mod > 1.01:
-            stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.2f}x"))
-        elif player.Vitality / def_mod != 1:
-            stat_data.append(("Live Vitality:", f"{(player.Vitality / def_mod):.5f}x"))
+        if player.Vitality > 1.01:
+            stat_data.append(("Live Vitality:", f"{(player.Vitality):.2f}x"))
+        elif player.Vitality != 1:
+            stat_data.append(("Live Vitality:", f"{(player.Vitality):.5f}x"))
 
         if (player.DodgeOdds * 100) / bleed_mod > 1:
             stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
