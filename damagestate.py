@@ -81,7 +81,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[7] in source.PlayerName.lower():
         if source.HP < source.MHP * 0.85:
-            mited_damage_dealt = mited_damage_dealt + (source.MHP / 4)
+            mited_damage_dealt = mited_damage_dealt + ((source.MHP / 4) / (target.Def * 2))
 
     if themed_names[8] in source.PlayerName.lower():
         if source.HP != source.MHP:
