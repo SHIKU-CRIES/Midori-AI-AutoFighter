@@ -48,32 +48,22 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[1] in source.PlayerName.lower():
         if source.Bleed > 55:
-            if random.choice([True, False, False, False]):
+            if random.random() > 0.8:
                 source.Def += source.check_base_stats(source.Def, source.Bleed ** 2) + source.Bleed
                 source.Bleed *= 0.85
 
     elif themed_names[1] in target.PlayerName.lower():
         if target.HP < target.MHP * 0.55:
-            for item in target.Items:
-                if not item:
-                    continue
-                try:
-                    mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
-                except Exception as error:
-                    continue
+            mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
 
         if target.HP < target.MHP * 0.25:
-            for item in target.Items:
-                if not item:
-                    continue
-                try:
-                    mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
-                except Exception as error:
-                    continue
+            mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
+            
         
     if themed_names[2] in source.PlayerName.lower():
-        if source.Bleed > 1:
-            mited_damage_dealt = mited_damage_dealt + (10 * source.Bleed)
+        if source.Bleed > 100:
+            source.Atk += source.check_base_stats(source.Atk, source.Bleed ** 2) + source.Bleed
+            source.Bleed *= 0.85
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:
@@ -104,6 +94,17 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[9] in source.PlayerName.lower():
         pass
+    
+    return mited_damage_dealt
+
+def carly_mit_adder(target: Player, mited_damage_dealt: float):
+    for item in target.Items:
+        if not item:
+            continue
+        try:
+            mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
+        except Exception as error:
+            continue
     
     return mited_damage_dealt
 
