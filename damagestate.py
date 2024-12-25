@@ -98,7 +98,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
     if themed_names[9] in source.PlayerName.lower():
         pass
     
-    return mited_damage_dealt
+    return max(mited_damage_dealt, 1)
 
 def carly_mit_adder(target: Player, mited_damage_dealt: float):
     for item in target.Items:
