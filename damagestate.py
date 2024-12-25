@@ -47,6 +47,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             mited_damage_dealt = mited_damage_dealt * ((source.MHP - source.HP) / (target.Def * 2))
 
     if themed_names[1] in source.PlayerName.lower():
+        if source.DodgeOdds > 0.5:
+            source.Def += source.check_base_stats(source.Def, source.DodgeOdds ** 2) + source.DodgeOdds
+            source.DodgeOdds = 0
         if source.Bleed > 55:
             if random.random() > 0.8:
                 source.Def += source.check_base_stats(source.Def, source.Bleed ** 2) + source.Bleed
