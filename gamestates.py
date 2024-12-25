@@ -305,75 +305,72 @@ def main(level):
                 except Exception as error:
                     print(f"Could not render foe stats due to {str(error)}")
 
-                for i, testfoe in enumerate(foelist):
+                for i, person in enumerate(foelist):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
-                    render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                    render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    if testfoe.Bleed > testfoe.MHP * 0.01:
-                        testfoe.Bleed = max(testfoe.Bleed - (testfoe.Regain * 100), testfoe.MHP * 0.01)
+                    if person.Bleed > person.MHP * 0.001:
+                        person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.001)
                     else:
-                        testfoe.Bleed = max(testfoe.Bleed - (testfoe.Regain * 10), 0)
+                        person.Bleed = max(person.Bleed - (person.Regain * 5), 0)
 
-                    if testfoe.Bleed > 0:
-                        testfoe.Bleed = max(testfoe.Bleed - (testfoe.Regain / 100), 0)
-
-                    testfoe.HP = min(testfoe.MHP, testfoe.HP + int(testfoe.Regain * testfoe.Vitality) - int(testfoe.Bleed  / testfoe.Vitality))
+                    person.HP = min(person.MHP, person.HP + int(person.Regain * person.Vitality) - int(person.Bleed  / person.Vitality))
 
                     if len(playerlist) > 0:
                         tartget_to_damage = random.choice(playerlist)
-                        take_damage(tartget_to_damage, testfoe, [bleed_mod, enrage_timer], def_mod)
+                        take_damage(tartget_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
                         if tartget_to_damage.HP < 1:
                             tartget_to_damage.save_past_life()
-                            kill_person(tartget_to_damage, testfoe)
+                            kill_person(tartget_to_damage, person)
                             playerlist.remove(tartget_to_damage)
             else:
                 break
 
             if len(playerlist) > 0:
-                for i, testplayer in enumerate(playerlist):
+                for i, person in enumerate(playerlist):
 
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
-                    render_player_obj(pygame, testplayer, testplayer.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                    render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
                 
                     if bleed_mod > 100:
-                        testplayer.RushStat = 0
+                        person.RushStat = 0
 
-                    if testplayer.HP > 0:
-                        if testplayer.Bleed > testplayer.MHP * 0.01:
-                            testplayer.Bleed = max(testplayer.Bleed - (testplayer.Regain * 100), testplayer.MHP * 0.01)
+                    if person.HP > 0:
+                        if person.Bleed > person.MHP * 0.001:
+                            person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.001)
                         else:
-                            testplayer.Bleed = max(testplayer.Bleed - (testplayer.Regain * 10), 0)
+                            person.Bleed = max((person.Bleed - (person.Regain * 5)), 0)
 
-                        testplayer.HP = min(testplayer.MHP, testplayer.HP + int(testplayer.Regain * testplayer.Vitality) - int(testplayer.Bleed / testplayer.Vitality))
+                        person.HP = min(person.MHP, person.HP + int(person.Regain * person.Vitality) - int(person.Bleed / person.Vitality))
 
                         if len(foelist) > 0:
                             tartget_to_damage = random.choice(foelist)
-                            take_damage(tartget_to_damage, testplayer, [bleed_mod, enrage_timer], def_mod)
+                            take_damage(tartget_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
                             if tartget_to_damage.HP < 1:
                                 foelist.remove(tartget_to_damage)
                                 log(white, "Saving Data")
                 
                                 if bleed_mod < 100:
-                                    testplayer.RushStat += 1
-                                    for multiplier in range(testplayer.RushStat):
+                                    person.RushStat += 1
+                                    for multiplier in range(person.RushStat):
                                         level = level + 1
-                                        testplayer.level_up(mod=bleed_mod)
+                                        person.level_up(mod=bleed_mod)
                                 else:
-                                    testplayer.RushStat = 0
+                                    person.RushStat = 0
                                     
                                 for multiplier in range(13):
                                     level = level + 1
-                                    testplayer.level_up(mod=bleed_mod)
+                                    person.level_up(mod=bleed_mod)
                                     
-                                testplayer.save()
+                                person.save()
 
                             elif tartget_to_damage.HP > tartget_to_damage.MHP:
                                 tartget_to_damage.HP = tartget_to_damage.MHP
 
-                    if testplayer.HP > testplayer.MHP:
-                        testplayer.HP = testplayer.MHP
+                    if person.HP > person.MHP:
+                        person.HP = person.MHP
             else:
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
