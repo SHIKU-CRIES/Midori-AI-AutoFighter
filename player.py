@@ -862,8 +862,8 @@ class Player:
         self.check_stats()
     
     def set_level(self, level):
-        top_level = 10000
-        top_level_full = 5000
+        top_level = 100000
+        top_level_full = 50000
 
         self.level = level
         self.MHP: int = random.randint(10 * self.level, 25 * self.level) + 1000
