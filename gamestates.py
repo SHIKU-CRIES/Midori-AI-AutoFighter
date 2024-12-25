@@ -40,6 +40,44 @@ temp_screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 def log(color, text):
     print(color + text + Style.RESET_ALL)
+    return text
+
+def debug_log(filename, text):
+    with open(filename, "a") as f:
+        f.write(f"\n{text}")
+    
+    return text
+
+def kill_person(dead, killer):
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"{killer.PlayerName} killed {dead.PlayerName}, Below are stats for both...")
+
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Dead Person")
+
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Name: {dead.PlayerName}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Level: {dead.level}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"MHP: {dead.MHP}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"HP: {dead.HP}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Defense: {dead.Def}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Attack: {dead.Atk}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Regain: {dead.Regain}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"True Vitality: {dead.Vitality}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Crit Rate: {dead.CritRate}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Crit Damage Modifier: {dead.CritDamageMod}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Dodge Odds: {dead.DodgeOdds}")
+    
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Killer")
+
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Name: {killer.PlayerName}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Level: {killer.level}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"MHP: {killer.MHP}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"HP: {killer.HP}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Defense: {killer.Def}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Attack: {killer.Atk}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Regain: {killer.Regain}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"True Vitality: {killer.Vitality}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Crit Rate: {killer.CritRate}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Crit Damage Modifier: {killer.CritDamageMod}")
+    debug_log(f"{dead.PlayerName.lower()}.txt", f"Dodge Odds: {killer.DodgeOdds}")
 
 def main(level):
     from player import Player
@@ -279,6 +317,11 @@ def main(level):
                     if len(playerlist) > 0:
                         tartget_to_damage = random.choice(playerlist)
                         take_damage(tartget_to_damage, testfoe, [bleed_mod, enrage_timer], def_mod)
+
+                        if tartget_to_damage.HP < 1:
+                            tartget_to_damage.save_past_life()
+                            kill_person(tartget_to_damage, testfoe)
+                            playerlist.remove(tartget_to_damage)
             else:
                 break
 
@@ -304,6 +347,7 @@ def main(level):
                             take_damage(tartget_to_damage, testplayer, [bleed_mod, enrage_timer], def_mod)
 
                             if tartget_to_damage.HP < 1:
+                                kill_person(tartget_to_damage, testplayer)
                                 foelist.remove(tartget_to_damage)
                                 log(white, "Saving Data")
                 
@@ -323,10 +367,6 @@ def main(level):
 
                             elif tartget_to_damage.HP > tartget_to_damage.MHP:
                                 tartget_to_damage.HP = tartget_to_damage.MHP
-
-                    else:
-                        testplayer.save_past_life()
-                        playerlist.remove(testplayer)
 
                     if testplayer.HP > testplayer.MHP:
                         testplayer.HP = testplayer.MHP
