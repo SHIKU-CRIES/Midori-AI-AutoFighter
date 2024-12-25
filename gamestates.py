@@ -347,7 +347,6 @@ def main(level):
                             take_damage(tartget_to_damage, testplayer, [bleed_mod, enrage_timer], def_mod)
 
                             if tartget_to_damage.HP < 1:
-                                kill_person(tartget_to_damage, testplayer)
                                 foelist.remove(tartget_to_damage)
                                 log(white, "Saving Data")
                 
