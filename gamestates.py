@@ -363,7 +363,7 @@ def main(level):
                                 else:
                                     testplayer.RushStat = 0
                                     
-                                for multiplier in range(3):
+                                for multiplier in range(13):
                                     level = level + 1
                                     testplayer.level_up(mod=bleed_mod)
                                     
