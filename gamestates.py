@@ -309,6 +309,11 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, testfoe, testfoe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
+                    if testfoe.Bleed > testfoe.MHP * 0.01:
+                        testfoe.Bleed = max(testfoe.Bleed - (testfoe.Regain * 100), testfoe.MHP * 0.01)
+                    else:
+                        testfoe.Bleed = max(testfoe.Bleed - (testfoe.Regain * 10), 0)
+
                     if testfoe.Bleed > 0:
                         testfoe.Bleed = max(testfoe.Bleed - (testfoe.Regain / 100), 0)
 

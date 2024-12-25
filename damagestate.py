@@ -32,11 +32,11 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             target.DodgeOdds += 0.05
 
         else:
-            if source.Regain > 10:
-                source.Regain -= 0.01
-                source.MHP += 10
-                source.Atk += 1
-                source.Def += 1
+            if source.Regain > 1:
+                source.Regain -= 0.5
+                source.MHP += 500
+                source.Atk += 50
+                source.Def += 50
 
             if source.HP > source.MHP * 0.65:
                 source.HP -= (source.MHP * 0.01)
