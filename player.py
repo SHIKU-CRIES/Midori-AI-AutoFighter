@@ -767,7 +767,7 @@ class Player:
             self.Vitality = 1
         
         ### Checking for hackers
-        if self.level > 500:
+        if self.level > 50000:
             if self.Vitality == 1:
                 print("Hacking games is wrong, and you should not do that ;)")
                 os.remove(f'{self.PlayerName}.dat')
