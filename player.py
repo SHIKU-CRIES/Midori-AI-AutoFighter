@@ -864,7 +864,7 @@ class Player:
 
             self.check_stats()
         else:
-            self.EXP =+ round(((self.level * 1.2) * mod_fixed) + 25)
+            self.EXP =+ round((self.level * 1.2) * mod_fixed) + 150
     
     def set_level(self, level):
         top_level = 100000
