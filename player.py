@@ -785,12 +785,12 @@ class Player:
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
         
-        self.EXP += max(round((self.level * 4) * mod_fixed), self.level * 2) + 150
+        self.EXP += max(round((self.level * 1.2) * mod_fixed), self.level * 2) + 150
 
-        if self.EXP >= self.level * 5:
+        while self.EXP >= self.level * 50:
             self.level += 1
 
-            self.EXP = 0
+            self.EXP -= self.level * 50
             
             hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
             def_up: int = random.randint(15 * self.level, 200 * self.level * int_mod)
@@ -866,7 +866,7 @@ class Player:
             if self.level > 3000:
                 self.Vitality += vitality_up
 
-            self.check_stats()
+        self.check_stats()
     
     def set_level(self, level):
         top_level = 100000
