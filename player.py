@@ -107,9 +107,11 @@ class Player:
         
         spinner.start(text="Past Lifes: Starting")
 
-        total_items = len(os.listdir(past_lives_folder))
+        past_lives_folder_list = os.listdir(past_lives_folder)
+        total_items = len(past_lives_folder_list)
+        random.shuffle(past_lives_folder_list)
         starting_items = 0
-        for filename in os.listdir(past_lives_folder):
+        for filename in past_lives_folder_list:
             if filename.endswith(".pastlife"):
                 filepath = os.path.join(past_lives_folder, filename)
 
