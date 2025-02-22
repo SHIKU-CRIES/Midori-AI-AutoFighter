@@ -174,7 +174,7 @@ def main(level):
             if player.level > 500:
                 level_sum += 500 + (player.level / 5)
 
-        average_level = round((level_sum + (foes_killed * foes_killed)) / len(playerlist))
+        average_level = round((level_sum + (foes_killed + foes_killed)) / len(playerlist))
         level = average_level
 
         if level < 3000:
