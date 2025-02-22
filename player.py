@@ -777,7 +777,7 @@ class Player:
         if self.MHP > 20000000000:
             self.MHP = 1
 
-    def level_up(self, mod=1):
+    def level_up(self, mod=float(1)):
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
         """

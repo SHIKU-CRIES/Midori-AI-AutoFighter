@@ -345,13 +345,13 @@ def main(level):
                 
                                 if bleed_mod < 100:
                                     person.RushStat += 1
-                                    person.level_up(mod=bleed_mod * person.RushStat)
+                                    person.level_up(mod=bleed_mod * person.RushStat * level)
                                     for multiplier in range(person.RushStat):
                                         level = level + 1
                                 else:
                                     person.RushStat = 0
                                     
-                                person.level_up(mod=bleed_mod * 13)
+                                person.level_up(mod=bleed_mod * 25 * level)
                                 for multiplier in range(13):
                                     level = level + 1
                                     
