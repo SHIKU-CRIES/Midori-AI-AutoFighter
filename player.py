@@ -787,6 +787,10 @@ class Player:
         
         self.EXP += max(round((self.level * 0.02) * int_mod), round(self.level * 0.05)) + 150
 
+        if self.level < 5000:
+            self.EXP += 100000
+            self.EXP *= 4
+
         while self.EXP >= self.level * 50:
             self.level += 1
 
