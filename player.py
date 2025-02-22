@@ -787,8 +787,6 @@ class Player:
         
         self.EXP += max(round((self.level * 0.02) * int_mod), round(self.level * 0.05)) + 150
 
-        spinner.start(text=f"Leveling Up: {self.PlayerName}")
-
         while self.EXP >= self.level * 50:
             self.level += 1
 
@@ -871,8 +869,6 @@ class Player:
                 self.Vitality += vitality_up
 
         self.check_stats()
-
-        spinner.succeed(text=f"Leveled Up: {self.PlayerName} ({self.level})")
     
     def set_level(self, level):
         top_level = 100000
