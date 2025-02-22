@@ -100,6 +100,7 @@ def main(level):
 
     # Set the running flag to True
     running = True
+    foes_killed = 0
 
     background_file_name = set_bg_photo()
     background_image = pygame.image.load(background_file_name)
@@ -170,7 +171,7 @@ def main(level):
             if player.level > 2000:
                 level_sum += 500 + (player.level / 10)
 
-        average_level = round(level_sum / len(playerlist))
+        average_level = round((level_sum + (foes_killed * 10)) / len(playerlist))
         level = average_level
 
         if level < 3000:
@@ -179,6 +180,8 @@ def main(level):
             number_of_foes = 5
         else:
             number_of_foes = 3
+        
+        foes_killed += number_of_foes
 
         for i in range(number_of_foes):
             themed_name = random.choice(themed_names).capitalize()
