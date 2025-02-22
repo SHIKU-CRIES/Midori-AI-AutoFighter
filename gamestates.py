@@ -358,6 +358,7 @@ def main(level):
 
                             if tartget_to_damage.HP < 1:
                                 foelist.remove(tartget_to_damage)
+                                person.Kills += 1
                                 log(white, "Saving Data")
                 
                                 if bleed_mod < 100:

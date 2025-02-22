@@ -42,6 +42,7 @@ class Player:
         self.DodgeOdds: float = 0.03
         self.DamageTaken: int = 0
         self.DamageDealt: int = 0
+        self.Kills: int = 0
         self.RushStat: int = 3
         self.Logs: list = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
@@ -970,6 +971,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         stat_data = [
             ("Stats of:", player.PlayerName),
             ("Level:", player.level),
+            ("Kills:", player.Kills),
             ("Max HP:", player.MHP),
             ("Atk:", int(player.Atk)),
             ("Def:", int(player.Def / def_mod)),
