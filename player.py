@@ -785,11 +785,11 @@ class Player:
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
         
-        self.EXP += max(round((self.level * 1.2) * mod_fixed), self.level * 2) + 150
+        self.EXP += max(round((self.level * 0.2) * mod_fixed), self.level * 0.5) + 150
 
         spinner.start(text=f"Leveling Up: {self.PlayerName}")
 
-        while self.EXP >= self.level * 50:
+        if self.EXP >= self.level * 50:
             self.level += 1
 
             self.EXP -= self.level * 50
