@@ -166,15 +166,9 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-            level_sum += player.level + 100
+            level_sum += player.level / 2
 
-            if player.level > 200:
-                level_sum += 200 + (player.level / 10)
-
-            if player.level > 500:
-                level_sum += 500 + (player.level / 5)
-
-        average_level = round((level_sum + (foes_killed + foes_killed)) / len(playerlist))
+        average_level = round((level_sum + foes_killed) / len(playerlist))
         level = average_level
 
         if level < 3000:
