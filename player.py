@@ -151,6 +151,7 @@ class Player:
                         elif past_life_data['Vitality'] > 1.0000001:
                             temp_past_life_vitality = past_life_data['Vitality'] - 1
                             while temp_past_life_vitality > 0:
+                                spinner.start(text=f"({starting_items}/{total_items}) Past Lifes ({self.PlayerName}): Granting Vitality ({temp_past_life_vitality} > {self.Vitality})")
                                 if self.Vitality > 15:
                                     self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 4.5))
                                 elif self.Vitality > 5:
