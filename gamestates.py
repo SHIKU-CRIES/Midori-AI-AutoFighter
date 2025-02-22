@@ -158,16 +158,7 @@ def main(level):
     while True:
 
         level_sum = 0
-        level_high = 0
         foelist: list[Player] = []
-
-        for player in playerlist:
-            if player.level > level_high:
-                level_high = player.level
-
-        for player in playerlist:
-            if player.level < level_high:
-                player.level_up(level_high * 50)
 
         for player in playerlist:
             player.Bleed *= 0.65
