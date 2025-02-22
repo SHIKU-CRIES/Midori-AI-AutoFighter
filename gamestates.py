@@ -181,10 +181,21 @@ def main(level):
         else:
             number_of_foes = 3
         
-        foes_killed += number_of_foes
+        foes_killed += (number_of_foes * 4)
+
+        temp_foe_themed_names: list[str] = []
+
+        for item in themed_names:
+            temp_foe_themed_names.append(item)
 
         for i in range(number_of_foes):
-            themed_name = random.choice(themed_names).capitalize()
+            if random.random() < 0.7:
+                themed_name = temp_foe_themed_names[0].capitalize()
+            else:
+                themed_name = random.choice(temp_foe_themed_names[1:]).capitalize()
+
+            temp_foe_themed_names.remove(themed_name.lower())
+            
             themed_title = random.choice(themed_ajt).capitalize()
 
             foe_pre_name = f"{themed_title} {themed_name}"
