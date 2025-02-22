@@ -166,7 +166,7 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-            level_sum += max(10, player.level / 2)
+            level_sum += max(10, player.level / 5)
 
         average_level = round((level_sum + foes_killed) / len(playerlist))
         level = average_level
