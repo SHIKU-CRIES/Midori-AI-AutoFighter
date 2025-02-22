@@ -791,8 +791,6 @@ class Player:
             self.level += 1
 
             self.EXP = 0
-
-            spinner.start(text=f"Leveling Up: {self.PlayerName} ({self.level})")
             
             hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
             def_up: int = random.randint(15 * self.level, 200 * self.level * int_mod)
