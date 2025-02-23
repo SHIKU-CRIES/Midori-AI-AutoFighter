@@ -171,7 +171,7 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-            level_sum += max(round(foes_killed / 5) + 10, player.level / 5)
+            level_sum += max(round(foes_killed / 565) + 10, player.level / 5)
 
             while player.level < max_player_level:
                 player.level_up(player.Kills * 2)
