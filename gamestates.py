@@ -100,7 +100,7 @@ def main(level):
 
     # Set the running flag to True
     running = True
-    foes_killed = 0
+    foes_killed = 1
 
     background_file_name = set_bg_photo()
     background_image = pygame.image.load(background_file_name)
@@ -166,7 +166,7 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-            level_sum += max(foes_killed + 10, player.level / 5)
+            level_sum += max(round(foes_killed / 5) + 10, player.level / 5)
 
         average_level = round((level_sum + (foes_killed * 2)) / len(playerlist))
         level = average_level
