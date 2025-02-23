@@ -372,7 +372,7 @@ def main(level):
                                 else:
                                     person.RushStat = 0
                                     
-                                person.level_up(mod=bleed_mod * 2 * level)
+                                person.level_up(mod=bleed_mod * 5 * level)
                                     
                                 person.save()
 
