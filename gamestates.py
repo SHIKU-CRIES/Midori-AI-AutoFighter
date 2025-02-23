@@ -171,14 +171,18 @@ def main(level):
         average_level = round((level_sum + (foes_killed * 2)) / len(playerlist))
         level = average_level
 
-        if level < 3000:
+        if level < 1000:
             number_of_foes = 8
-        elif level < 7000:
+            foes_killed += 8
+        elif level < 2000:
             number_of_foes = 5
-        elif level < 10000:
+            foes_killed += 10
+        elif level < 3000:
             number_of_foes = 3
+            foes_killed += 25
         else:
             number_of_foes = 1
+            foes_killed += 50
         
         foes_killed += number_of_foes
 
