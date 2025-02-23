@@ -168,15 +168,17 @@ def main(level):
 
             level_sum += max(10, player.level / 5)
 
-        average_level = round((level_sum + foes_killed) / len(playerlist))
+        average_level = round((level_sum + (foes_killed * 2)) / len(playerlist))
         level = average_level
 
         if level < 3000:
             number_of_foes = 8
         elif level < 7000:
             number_of_foes = 5
-        else:
+        elif level < 10000:
             number_of_foes = 3
+        else:
+            number_of_foes = 1
         
         foes_killed += number_of_foes
 
@@ -186,10 +188,7 @@ def main(level):
             temp_foe_themed_names.append(item)
 
         for i in range(number_of_foes):
-            if random.random() < 0.7:
-                themed_name = temp_foe_themed_names[0].capitalize()
-            else:
-                themed_name = random.choice(temp_foe_themed_names[1:]).capitalize()
+            themed_name = random.choice(temp_foe_themed_names).capitalize()
 
             temp_foe_themed_names.remove(themed_name.lower())
 
