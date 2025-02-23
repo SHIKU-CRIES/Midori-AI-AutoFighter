@@ -124,7 +124,14 @@ class Player:
                     with open(filepath, 'rb') as f:
                         past_life_data = pickle.load(f)
 
+                    can_load = False
+
                     if self.PlayerName == past_life_data['PlayerName']:
+                        can_load = True
+                    elif self.PlayerName.lower() == "player":
+                        can_load = True
+                    
+                    if can_load:
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
                         self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 100)
@@ -153,9 +160,9 @@ class Player:
                             temp_past_life_vitality = past_life_data['Vitality'] - 1
                             while temp_past_life_vitality > 0:
                                 spinner.start(text=f"({starting_items}/{total_items}) Past Lifes ({self.PlayerName}): Granting Vitality ({temp_past_life_vitality} > {self.Vitality})")
-                                if temp_past_life_vitality > 200:
-                                    self.Vitality = self.Vitality + ((50) / (self.Vitality ** 8))
-                                    temp_past_life_vitality -= 200
+                                if temp_past_life_vitality > 10:
+                                    self.Vitality = self.Vitality + ((5) / (self.Vitality ** 8))
+                                    temp_past_life_vitality -= 10
                                 elif self.Vitality > 15:
                                     self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 4.5))
                                 elif self.Vitality > 5:
