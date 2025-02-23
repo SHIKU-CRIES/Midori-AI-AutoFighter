@@ -881,7 +881,7 @@ class Player:
                         for item in self.Items:
                             item.upgrade(mod_fixed)
 
-            if self.level > 3000:
+            if self.level > 300:
                 self.Vitality += vitality_up
 
         self.check_stats()
