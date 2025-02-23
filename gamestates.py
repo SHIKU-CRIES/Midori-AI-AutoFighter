@@ -159,7 +159,12 @@ def main(level):
     while True:
 
         level_sum = 0
+        max_player_level = 0
         foelist: list[Player] = []
+
+        for player in playerlist:
+            if player.level > max_player_level:
+                max_player_level = player.level
 
         for player in playerlist:
             player.Bleed *= 0.65
@@ -167,6 +172,9 @@ def main(level):
             player.DamageTaken = 0
 
             level_sum += max(round(foes_killed / 5) + 10, player.level / 5)
+
+            while player.level < max_player_level:
+                player.level_up(player.Kills * 2)
 
         average_level = round((level_sum + (foes_killed * 2)) / len(playerlist))
         level = average_level
@@ -361,14 +369,10 @@ def main(level):
                                 if bleed_mod < 100:
                                     person.RushStat += 1
                                     person.level_up(mod=bleed_mod * person.RushStat * level)
-                                    for multiplier in range(person.RushStat):
-                                        level = level + 1
                                 else:
                                     person.RushStat = 0
                                     
-                                person.level_up(mod=bleed_mod * 25 * level)
-                                for multiplier in range(13):
-                                    level = level + 1
+                                person.level_up(mod=bleed_mod * 2 * level)
                                     
                                 person.save()
 
