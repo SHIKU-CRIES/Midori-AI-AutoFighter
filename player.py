@@ -139,7 +139,7 @@ class Player:
                         self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.000001) + 0.00001
                         self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
                         self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
-                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.75) + 0.001)
+                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.01) + 0.001)
 
                         for item in past_life_data['Items']:
                             self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
