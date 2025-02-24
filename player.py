@@ -808,7 +808,7 @@ class Player:
         while self.EXP >= self.level * 50:
             self.level += 1
 
-            self.EXP = 0
+            self.EXP = max(self.EXP - (self.level * 50), 0)
             
             hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
             def_up: int = random.randint(15 * self.level, 200 * self.level * int_mod)
