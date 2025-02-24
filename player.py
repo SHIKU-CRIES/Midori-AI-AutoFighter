@@ -795,6 +795,8 @@ class Player:
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
         """
+        level_ups = 0
+        max_level_ups = 5
 
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
@@ -806,6 +808,11 @@ class Player:
             self.EXP *= 4
 
         while self.EXP >= self.level * 50:
+            if level_ups > max_level_ups:
+                break
+            else:
+                level_ups += 1
+
             self.level += 1
 
             self.EXP = max(self.EXP - (self.level * 50), 0)
