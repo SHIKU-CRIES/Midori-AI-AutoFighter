@@ -180,16 +180,16 @@ def main(level):
         level = average_level
 
         if level < 250:
-            number_of_foes = 8
-            foes_killed += 8
+            number_of_foes = 10
+            foes_killed += 5
         elif level < 500:
             number_of_foes = 5
-            foes_killed += 10
+            foes_killed += 15
         elif level < 1000:
-            number_of_foes = 3
+            number_of_foes = 5
             foes_killed += 25
         else:
-            number_of_foes = 1
+            number_of_foes = 5
             foes_killed += 50
         
         foes_killed += number_of_foes
