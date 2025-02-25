@@ -277,27 +277,30 @@ class Player:
 
         self.CritDamageMod += desired_increase 
     
-    def check_base_stats(self, stat_total: int, stat_gain:int):
+    def check_base_stats(self, stat_total: int, stat_gain: int):
         stats_to_start_lower = 50
         to_be_lowered_by = 10 + (stat_total // 100000)
 
-        if stat_total > 10000:
-            desired_increase = stat_gain / max(((to_be_lowered_by ** 3.5) * (stat_total // stats_to_start_lower)), 1)
-        elif stat_total > 5000:
-            desired_increase = stat_gain / max(((to_be_lowered_by ** 2.0) * (stat_total // stats_to_start_lower)), 1)
-        elif stat_total > 2000:
-            desired_increase = stat_gain / max(((to_be_lowered_by ** 1.5) * (stat_total // stats_to_start_lower)), 1)
-        elif stat_total > 1000:
-            desired_increase = stat_gain / max(((to_be_lowered_by ** 1.2) * (stat_total // stats_to_start_lower)), 1)
-        elif stat_total > stats_to_start_lower:
-            desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
-        else:
-            desired_increase = stat_gain
+        stat_modifiers = {}
+
+        for i in range(20):
+            new_key = (i * 1000)
+            new_value = to_be_lowered_by ** max(0.7 * (i + 1), 1.2)
+            stat_modifiers[new_key] = new_value
+
+        stat_modifiers[stats_to_start_lower] = to_be_lowered_by
+
+        desired_increase = stat_gain
 
         for item in self.Items:
             desired_increase = item.stat_gain(desired_increase)
 
-        return max(min(int(desired_increase), 1000000), 5) 
+        for threshold, modifier in stat_modifiers.items():
+            if stat_total > threshold:
+                desired_increase = desired_increase / max((modifier * (stat_total // stats_to_start_lower)), 1)
+                break
+
+        return max(min(int(desired_increase), 1000000), 5)
 
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
 #themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray", "bubbles"]
