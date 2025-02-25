@@ -199,6 +199,10 @@ def main(level):
         for item in themed_names:
             temp_foe_themed_names.append(item)
 
+        if level < 3000:
+            temp_foe_themed_names.remove("Luna".lower())
+            temp_foe_themed_names.remove("Carly".lower())
+
         for i in range(number_of_foes):
             themed_name = random.choice(temp_foe_themed_names).capitalize()
 
