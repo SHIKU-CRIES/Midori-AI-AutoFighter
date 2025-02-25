@@ -51,7 +51,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
         if source.DodgeOdds > 0.5:
             source.Def += source.check_base_stats(source.Def, round(source.DodgeOdds ** 2)) + round(source.DodgeOdds)
             source.DodgeOdds = 0
-        if source.Bleed > 55:
+        if source.Bleed > 125:
             if random.random() > 0.95:
                 source.Def += source.check_base_stats(source.Def, round(source.Bleed ** 2)) + round(source.Bleed)
                 source.Bleed *= 0.95
