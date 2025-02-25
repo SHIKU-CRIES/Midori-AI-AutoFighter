@@ -52,9 +52,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             source.Def += source.check_base_stats(source.Def, round(source.DodgeOdds ** 2)) + round(source.DodgeOdds)
             source.DodgeOdds = 0
         if source.Bleed > 55:
-            if random.random() > 0.8:
+            if random.random() > 0.95:
                 source.Def += source.check_base_stats(source.Def, round(source.Bleed ** 2)) + round(source.Bleed)
-                source.Bleed *= 0.85
+                source.Bleed *= 0.95
 
             hp_percentage = source.HP / source.MHP
             if hp_percentage < 0.75:
