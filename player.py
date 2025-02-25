@@ -281,9 +281,13 @@ class Player:
         stats_to_start_lower = 50
         to_be_lowered_by = 10 + (stat_total // 100000)
 
-        if stat_total > 5000000:
+        if stat_total > 10000:
+            desired_increase = stat_gain / max(((to_be_lowered_by ** 3.5) * (stat_total // stats_to_start_lower)), 1)
+        elif stat_total > 5000:
+            desired_increase = stat_gain / max(((to_be_lowered_by ** 2.0) * (stat_total // stats_to_start_lower)), 1)
+        elif stat_total > 2000:
             desired_increase = stat_gain / max(((to_be_lowered_by ** 1.5) * (stat_total // stats_to_start_lower)), 1)
-        elif stat_total > 1000000:
+        elif stat_total > 1000:
             desired_increase = stat_gain / max(((to_be_lowered_by ** 1.2) * (stat_total // stats_to_start_lower)), 1)
         elif stat_total > stats_to_start_lower:
             desired_increase = stat_gain / max((to_be_lowered_by * (stat_total // stats_to_start_lower)), 1)
