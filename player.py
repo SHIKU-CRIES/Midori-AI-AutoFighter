@@ -250,9 +250,9 @@ class Player:
     def gain_crit_rate(self, points):
         """Increases crit rate based on points, with increasing cost.
 
-        Every 1 crit rate increase costs 100000x more points.
+        Every 1 crit rate increase costs 10000x more points.
         """
-        to_be_lowered_by = 100000
+        to_be_lowered_by = 10000
         current_rate = self.CritRate
 
         if current_rate > 1:
