@@ -48,11 +48,11 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
     if themed_names[1] in source.PlayerName.lower():
         if source.DodgeOdds > 0.5:
-            source.Def += source.check_base_stats(source.Def, source.DodgeOdds ** 2) + source.DodgeOdds
+            source.Def += source.check_base_stats(source.Def, round(source.DodgeOdds ** 2)) + round(source.DodgeOdds)
             source.DodgeOdds = 0
         if source.Bleed > 55:
             if random.random() > 0.8:
-                source.Def += source.check_base_stats(source.Def, source.Bleed ** 2) + source.Bleed
+                source.Def += source.check_base_stats(source.Def, round(source.Bleed ** 2)) + round(source.Bleed)
                 source.Bleed *= 0.85
 
             hp_percentage = source.HP / source.MHP
@@ -60,7 +60,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 def_bonus = (1 - hp_percentage) * 500
                 bleed_reduction = (1 - hp_percentage) * 0.5
 
-                source.Def += source.check_base_stats(source.Def, (source.Bleed * def_bonus) ** 2) + source.Bleed
+                source.Def += source.check_base_stats(source.Def, round((source.Bleed * def_bonus) ** 2)) + round(source.Bleed)
                 source.Bleed *= (1 - bleed_reduction)
 
 
@@ -74,8 +74,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
         
     if themed_names[2] in source.PlayerName.lower():
         if source.Bleed > 100:
-            source.Atk += source.check_base_stats(source.Atk, source.Bleed ** 2) + source.Bleed
-            source.Bleed *= 0.85
+            if random.random() > 0.8:
+                source.Atk += source.check_base_stats(source.Atk, round(source.Bleed ** 2)) + round(source.Bleed)
+                source.Bleed *= 0.95
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:
