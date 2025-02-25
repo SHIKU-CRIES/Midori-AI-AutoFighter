@@ -25,11 +25,11 @@ def debug_log(text):
 def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
         if themed_names[0] in target.PlayerName.lower():
-            if random.random() >= 0.95:
+            if random.random() >= 0.98:
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
             
             mited_damage_dealt = mited_damage_dealt / 4
-            target.DodgeOdds += 0.05
+            target.DodgeOdds += 0.005
 
         else:
             if source.Regain > 1:
