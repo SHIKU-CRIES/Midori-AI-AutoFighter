@@ -35,6 +35,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             if source.Regain > 1:
                 source.Regain -= 0.5
                 source.MHP += 500
+                source.HP += 500
                 source.Atk += 50
                 source.Def += 50
 
