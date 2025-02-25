@@ -368,11 +368,11 @@ def main(level):
                 
                                 if bleed_mod < 100:
                                     person.RushStat += 1
-                                    person.level_up(mod=bleed_mod * 25 * person.RushStat * level)
+                                    person.level_up(mod=bleed_mod)
                                 else:
                                     person.RushStat = 0
-                                    
-                                person.level_up(mod=bleed_mod * 15 * (person.Kills + level))
+                                
+                                person.level_up(mod=bleed_mod)
                                     
                                 person.save()
 
