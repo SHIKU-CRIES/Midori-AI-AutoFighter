@@ -898,7 +898,7 @@ class Player:
     
     def set_level(self, level):
         top_level = 1000
-        top_level_full = 1000
+        top_level_full = top_level * 2
 
         self.level = level
         self.MHP: int = random.randint(10 * self.level, 25 * self.level) + 1000
@@ -918,7 +918,7 @@ class Player:
             # Apply bonus every xyz levels past 10
             xyz = 10
             bonus_levels = (level - 50) // xyz
-            self.MHP = self.MHP + (10 * bonus_levels)
+            self.MHP = self.MHP + (6 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
             self.Def = self.Def + (4 * bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
@@ -936,9 +936,9 @@ class Player:
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
         self.Vitality = max(post_temp_vit, 0.75)
 
-        self.MHP = int(self.MHP * min((level / top_level), (20)) * post_temp_vit) + 5
+        self.MHP = int(self.MHP * min((level / top_level), (5)) * post_temp_vit) + 5
         self.Atk = int(self.Atk * min((level / top_level), (1)) * post_temp_vit) + 5
-        self.Def = int(self.Def * min((level / top_level), (8)) * post_temp_vit) + 5
+        self.Def = int(self.Def * min((level / top_level), (2)) * post_temp_vit) + 5
         self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 5))
 
