@@ -824,9 +824,9 @@ class Player:
 
             self.EXP = max(self.EXP - (self.level * 50), 0)
             
-            hp_up: int = random.randint(400 * self.level, 550 * self.level * int_mod)
-            def_up: int = random.randint(15 * self.level, 200 * self.level * int_mod)
-            atk_up: int = random.randint(25 * self.level, 350 * self.level * int_mod)
+            hp_up: int = random.randint(5 * self.level, 10 * self.level * int_mod)
+            def_up: int = random.randint(2 * self.level, 5 * self.level * int_mod)
+            atk_up: int = random.randint(2 * self.level, 5 * self.level * int_mod)
             regain_up: float = random.uniform(0.00001, 0.00002 * self.level * self.Vitality)
             critrate_up: float = random.uniform(0.00000001 * self.level, 0.000000025 * self.level) * max((mod_fixed / 10000), 1)
             critdamage_up: float = random.uniform(0.000004 * self.level, 0.000008 * self.level) * max((mod_fixed / 10000), 1)
