@@ -285,7 +285,7 @@ class Player:
 
         for i in range(45):
             new_key = (i * 1000)
-            new_value = to_be_lowered_by ** max(0.7 * (i + 1), 1.2)
+            new_value = to_be_lowered_by ** max(0.7 * (i + 1), 1.0)
             stat_modifiers[new_key] = new_value
 
         stat_modifiers[stats_to_start_lower] = to_be_lowered_by
@@ -300,7 +300,7 @@ class Player:
                 desired_increase = desired_increase / max((modifier * (stat_total // stats_to_start_lower)), 1)
                 break
 
-        return max(min(int(desired_increase), 1000000), 5)
+        return max(min(int(desired_increase), 1000000), 1)
 
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
 #themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray", "bubbles"]
