@@ -171,7 +171,7 @@ def main(level):
             player.DamageDealt = 0
             player.DamageTaken = 0
 
-            level_sum += max(round(foes_killed / 565) + 10, player.level / 15)
+            level_sum += player.level
 
             while player.level < max_player_level:
                 player.level_up(player.Kills * 2)
@@ -181,16 +181,12 @@ def main(level):
 
         if level < 250:
             number_of_foes = 6
-            foes_killed += 5
         elif level < 500:
             number_of_foes = 5
-            foes_killed += 15
         elif level < 1000:
             number_of_foes = 5
-            foes_killed += 25
         else:
             number_of_foes = 5
-            foes_killed += 50
         
         foes_killed += number_of_foes
 
@@ -214,7 +210,7 @@ def main(level):
 
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
-            foe.set_level(level)
+            foe.set_level(random.randint(min(level - 10, 1), level + 10))
 
             foe.photodata = pygame.image.load(os.path.join(foe.photo))
             foe.photodata = pygame.transform.flip(foe.photodata, True, False)
