@@ -808,7 +808,7 @@ class Player:
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
         
-        self.EXP += max(round((self.level * 0.02) * int_mod), round(self.level * 0.05)) + 150
+        self.EXP += max(round((self.level * 0.25) * int_mod), round(self.level * 0.65)) + 150
 
         while self.EXP >= self.level * 50:
             if level_ups > max_level_ups:
@@ -897,7 +897,7 @@ class Player:
         self.check_stats()
     
     def set_level(self, level):
-        top_level = 500
+        top_level = 1000
         top_level_full = 1000
 
         self.level = level
