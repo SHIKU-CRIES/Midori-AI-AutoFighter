@@ -386,7 +386,6 @@ def main(level):
             else:
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
-                input("Press enter to exit: ")
                 exit()
                 
             if enrage_timer.timed_out:
