@@ -362,7 +362,7 @@ def main(level):
                 
                                 if bleed_mod < 100:
                                     person.RushStat += 1
-                                    person.level_up(mod=bleed_mod)
+                                    person.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
                                 else:
                                     person.RushStat = 0
                                 
