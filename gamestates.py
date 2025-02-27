@@ -81,7 +81,7 @@ def kill_person(dead, killer):
 
 def main(level):
     from player import Player
-    from player import render_player_obj
+
     running = True
     foes_killed = 1
 
@@ -146,6 +146,8 @@ def main(level):
     screen.blit(background_image, (0, 0))
 
     pygame.display.flip()
+    
+    from player import render_player_obj
 
     for player in playerlist:
         player.photodata = pygame.image.load(os.path.join(player.photo))
