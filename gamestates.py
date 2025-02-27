@@ -390,10 +390,11 @@ def main(level):
                 
             if enrage_timer.timed_out:
                 fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
-                enrage_timer_stat = font.render(f"Enrage: {(enrage_mod + enrage_timer.timeout_seconds):.1f} ({(bleed_mod):.2f}x)", True, (255, 255, 255))
                 fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
-                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 350))
                 screen.blit(fps_stat, fps_rect)
+                
+                enrage_timer_stat = font.render(f"Enrage: {(enrage_mod + enrage_timer.timeout_seconds):.1f} ({(bleed_mod):.2f}x)", True, (255, 255, 255))
+                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 350))
                 screen.blit(enrage_timer_stat, enrage_timer_rect)
             else:
                 fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
