@@ -210,7 +210,7 @@ def main(level):
 
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
-            foe.set_level(random.randint(min(level - 10, 1), level + 10))
+            foe.set_level(random.randint(max(level - 10, 1), level + 10))
 
             foe.photodata = pygame.image.load(os.path.join(foe.photo))
             foe.photodata = pygame.transform.flip(foe.photodata, True, False)
