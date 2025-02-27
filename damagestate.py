@@ -59,7 +59,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             hp_percentage = source.HP / source.MHP
             if hp_percentage < 0.75:
                 def_bonus = (1 - hp_percentage) * 500
-                bleed_reduction = (1 - hp_percentage) * 0.5
+                bleed_reduction = (1 - hp_percentage) * 0.35
 
                 source.Def += source.check_base_stats(source.Def, round((source.Bleed * def_bonus) ** 2)) + round(source.Bleed)
                 source.Bleed *= (1 - bleed_reduction)
