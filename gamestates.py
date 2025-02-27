@@ -82,41 +82,9 @@ def kill_person(dead, killer):
 def main(level):
     from player import Player
     from player import render_player_obj
-
-    pygame.init()
-
-    # Create the screen
-    screen = temp_screen.screen
-    icon = pygame.image.load(resource_path(os.path.join("photos", f"midoriai-logo.png")))
-    pygame.display.set_icon(icon)
-    
-    pygame.display.set_caption("Midori AI Auto Fighter", "Welcome to the fighting zone!")
-
-    # Create a clock
-    clock = pygame.time.Clock()
-
-    # Create a font object
-    font = pygame.font.SysFont('Arial', 44)
-
-    # Set the running flag to True
     running = True
     foes_killed = 1
 
-    background_file_name = set_bg_photo()
-    background_image = pygame.image.load(background_file_name)
-    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-    background_image.set_alpha(128)
-
-    pygame.mixer.music.set_volume(0.05 / 2)
-    music = pygame.mixer.music.load(set_bg_music())
-    pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
-
-    screen.fill((0, 0, 0))
-    screen.blit(background_image, (0, 0))
-
-    pygame.display.flip()
-
-    # Create the player and foe objects
     playerlist: list[Player] = []
     temp_themed_names: list[str] = []
 
@@ -133,8 +101,6 @@ def main(level):
 
     if player.level < 5:
         player.load_past_lives()
-
-    player.photodata = pygame.image.load(os.path.join(player.photo))
 
     playerlist.append(player)
         
@@ -153,8 +119,36 @@ def main(level):
         if player.level < 5:
             player.load_past_lives()
 
-        player.photodata = pygame.image.load(os.path.join(player.photo))
         playerlist.append(player)
+
+    pygame.init()
+
+    screen = temp_screen.screen
+    icon = pygame.image.load(resource_path(os.path.join("photos", f"midoriai-logo.png")))
+    pygame.display.set_icon(icon)
+    
+    pygame.display.set_caption("Midori AI Auto Fighter", "Welcome to the fighting zone!")
+
+    clock = pygame.time.Clock()
+
+    font = pygame.font.SysFont('Arial', 44)
+
+    background_file_name = set_bg_photo()
+    background_image = pygame.image.load(background_file_name)
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+    background_image.set_alpha(128)
+
+    pygame.mixer.music.set_volume(0.05 / 2)
+    music = pygame.mixer.music.load(set_bg_music())
+    pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
+
+    screen.fill((0, 0, 0))
+    screen.blit(background_image, (0, 0))
+
+    pygame.display.flip()
+
+    for player in playerlist:
+        player.photodata = pygame.image.load(os.path.join(player.photo))
 
     while True:
 
@@ -259,7 +253,6 @@ def main(level):
             fps_cap = 35
             dt = clock.tick(fps_cap) / 1000
     
-
             # Render the screen
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
