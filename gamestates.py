@@ -36,7 +36,6 @@ SCREEN_HEIGHT = 900
 photo_size = 128 * 3
 
 enrage_timer = timmer()
-temp_screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 def log(color, text):
     print(color + text + Style.RESET_ALL)
@@ -81,6 +80,7 @@ def kill_person(dead, killer):
 
 def main(level):
     from player import Player
+    from player import render_player_obj
 
     running = True
     foes_killed = 1
@@ -123,7 +123,7 @@ def main(level):
 
     pygame.init()
 
-    screen = temp_screen.screen
+    screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT).screen
     icon = pygame.image.load(resource_path(os.path.join("photos", f"midoriai-logo.png")))
     pygame.display.set_icon(icon)
     
@@ -146,8 +146,6 @@ def main(level):
     screen.blit(background_image, (0, 0))
 
     pygame.display.flip()
-    
-    from player import render_player_obj
 
     for player in playerlist:
         player.photodata = pygame.image.load(os.path.join(player.photo))
