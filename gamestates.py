@@ -159,12 +159,7 @@ def main(level):
     while True:
 
         level_sum = 0
-        max_player_level = 0
         foelist: list[Player] = []
-
-        for player in playerlist:
-            if player.level > max_player_level:
-                max_player_level = player.level
 
         for player in playerlist:
             player.Bleed *= 0.65
@@ -172,9 +167,6 @@ def main(level):
             player.DamageTaken = 0
 
             level_sum += player.level
-
-            while player.level < max_player_level:
-                player.level_up(player.Kills * 2)
 
         average_level = round((level_sum + (foes_killed * 2)) / len(playerlist))
         level = average_level
@@ -392,7 +384,7 @@ def main(level):
                 fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
                 fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
                 screen.blit(fps_stat, fps_rect)
-                
+
                 enrage_timer_stat = font.render(f"Enrage: {(enrage_mod + enrage_timer.timeout_seconds):.1f} ({(bleed_mod):.2f}x)", True, (255, 255, 255))
                 enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 350))
                 screen.blit(enrage_timer_stat, enrage_timer_rect)
