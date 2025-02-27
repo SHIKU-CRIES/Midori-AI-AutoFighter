@@ -803,7 +803,7 @@ class Player:
         if self.MHP > 20000000000:
             self.MHP = 1
 
-    def level_up(self, mod=float(1)):
+    def level_up(self, mod=float(1), foe_level=int(1)):
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
         """
@@ -813,7 +813,7 @@ class Player:
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
         
-        self.EXP += max(round((self.level * 0.95) * int_mod), round(self.level * 1.15)) + 150
+        self.EXP += max(round(((self.level + foe_level) * 0.95) * int_mod), round((self.level + foe_level) * 1.15)) + 150
 
         while self.EXP >= self.level ** 2:
             if level_ups > max_level_ups:

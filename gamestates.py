@@ -324,13 +324,13 @@ def main(level):
                     person.HP = min(person.MHP, person.HP + int(person.Regain * person.Vitality) - int(person.Bleed  / person.Vitality))
 
                     if len(playerlist) > 0:
-                        tartget_to_damage = random.choice(playerlist)
-                        take_damage(tartget_to_damage, person, [bleed_mod, enrage_timer], def_mod)
+                        target_to_damage = random.choice(playerlist)
+                        take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
-                        if tartget_to_damage.HP < 1:
-                            tartget_to_damage.save_past_life()
-                            kill_person(tartget_to_damage, person)
-                            playerlist.remove(tartget_to_damage)
+                        if target_to_damage.HP < 1:
+                            target_to_damage.save_past_life()
+                            kill_person(target_to_damage, person)
+                            playerlist.remove(target_to_damage)
             else:
                 break
 
@@ -352,11 +352,11 @@ def main(level):
                         person.HP = min(person.MHP, person.HP + int(person.Regain * person.Vitality) - int(person.Bleed / person.Vitality))
 
                         if len(foelist) > 0:
-                            tartget_to_damage = random.choice(foelist)
-                            take_damage(tartget_to_damage, person, [bleed_mod, enrage_timer], def_mod)
+                            target_to_damage = random.choice(foelist)
+                            take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
-                            if tartget_to_damage.HP < 1:
-                                foelist.remove(tartget_to_damage)
+                            if target_to_damage.HP < 1:
+                                foelist.remove(target_to_damage)
                                 person.Kills += 1
                                 log(white, "Saving Data")
                 
@@ -366,12 +366,12 @@ def main(level):
                                 else:
                                     person.RushStat = 0
                                 
-                                person.level_up(mod=bleed_mod)
+                                person.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
                                     
                                 person.save()
 
-                            elif tartget_to_damage.HP > tartget_to_damage.MHP:
-                                tartget_to_damage.HP = tartget_to_damage.MHP
+                            elif target_to_damage.HP > target_to_damage.MHP:
+                                target_to_damage.HP = target_to_damage.MHP
 
                     if person.HP > person.MHP:
                         person.HP = person.MHP
