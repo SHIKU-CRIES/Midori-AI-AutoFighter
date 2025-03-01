@@ -171,8 +171,12 @@ def main(level):
             number_of_foes = 5
         elif level < 1000:
             number_of_foes = 5
+        elif level < 2000:
+            number_of_foes = 5
+            foes_killed += number_of_foes * 2
         else:
             number_of_foes = 5
+            foes_killed += number_of_foes * 4
         
         foes_killed += number_of_foes
 
