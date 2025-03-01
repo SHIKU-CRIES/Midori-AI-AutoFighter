@@ -48,6 +48,8 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) / (target.Def * 2))
 
     if themed_names[1] in source.PlayerName.lower():
+        hp_percentage = source.HP / source.MHP
+
         if source.DodgeOdds > 0.5:
             source.Def += source.check_base_stats(source.Def, round(source.DodgeOdds ** 2)) + round(source.DodgeOdds)
             source.DodgeOdds = 0
@@ -56,7 +58,6 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 source.Def += source.check_base_stats(source.Def, round(source.Bleed ** 2)) + round(source.Bleed)
                 source.Bleed *= 0.95
 
-            hp_percentage = source.HP / source.MHP
             if hp_percentage < 0.75:
                 def_bonus = (1 - hp_percentage) * 500
                 bleed_reduction = (1 - hp_percentage) * 0.35
@@ -66,10 +67,16 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
 
     elif themed_names[1] in target.PlayerName.lower():
-        if target.HP < target.MHP * 0.55:
+        hp_percentage = source.HP / source.MHP
+
+        if hp_percentage < 0.75:
+            damage_reduction = (1 - hp_percentage) * 0.95
+            mited_damage_dealt *= (1 - damage_reduction)
+
+        if hp_percentage < 0.55:
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
 
-        if target.HP < target.MHP * 0.25:
+        if hp_percentage < 0.25:
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
             
         
