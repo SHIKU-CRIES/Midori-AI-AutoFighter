@@ -287,7 +287,7 @@ def main(level):
                 if (foelist[0].DodgeOdds * 100) / bleed_mod > 1:
                     foe_stat_data.append(("Dodge Odds:", f"{((foelist[0].DodgeOdds * 100) / bleed_mod):.2f}%"))
 
-                if foelist[0].Bleed != 0:
+                if foelist[0].Bleed >= 10000:
                     foe_stat_data.append(("Bleed:", f"{foelist[0].Bleed:.1f}x"))
 
                 # Foe stats drawing
