@@ -163,9 +163,9 @@ class Player:
                                 
                                 bonus = max(0.001, self.Vitality - 1)
                                 
-                                scaling_factor = 0.5
+                                scaling_factor = 0.95
                                 
-                                vit_gain = (bonus * scaling_factor) * 0.01
+                                vit_gain = (bonus * scaling_factor) * 0.1
                                 
                                 self.gain_vit(vit_gain)
 
