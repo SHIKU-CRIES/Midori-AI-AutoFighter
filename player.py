@@ -160,19 +160,10 @@ class Player:
                             temp_past_life_vitality = past_life_data['Vitality'] - 1
                             while temp_past_life_vitality > 0:
                                 spinner.start(text=f"({starting_items}/{total_items}) Past Lifes ({self.PlayerName}): Granting Vitality ({temp_past_life_vitality} > {self.Vitality})")
-                                if temp_past_life_vitality > 10:
-                                    self.Vitality = self.Vitality + ((5) / (self.Vitality ** 8))
-                                    temp_past_life_vitality -= 10
-                                elif self.Vitality > 15:
-                                    self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 4.5))
-                                elif self.Vitality > 5:
-                                    self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 3))
-                                elif self.Vitality > 2:
-                                    self.Vitality = self.Vitality + ((0.00001) / (self.Vitality ** 1.5))
-                                else:
-                                    self.Vitality = self.Vitality + 0.00001
+                                
+                                self.gain_vit(0.001)
 
-                                temp_past_life_vitality -= 0.0001
+                                temp_past_life_vitality -= 0.001
                         
                         self.check_stats()
 
@@ -306,6 +297,30 @@ class Player:
                 break
 
         return max(min(int(desired_increase), 1000000), 1)
+    
+    def gain_vit(self, points):
+        stats_to_start_lower = 1.2
+        to_be_lowered_by = 10 + (self.Vitality ** 1.5)
+
+        stat_modifiers = {}
+
+        for i in range(45):
+            new_key = (i * 0.25)
+            new_value = to_be_lowered_by ** max(0.7 * (i + 1), 1.0)
+            stat_modifiers[new_key] = new_value
+
+        stat_modifiers[stats_to_start_lower] = to_be_lowered_by
+
+        desired_increase = points
+
+        for item in self.Items:
+            desired_increase = item.stat_gain(desired_increase)
+
+        for threshold, modifier in stat_modifiers.items():
+            if self.Vitality > threshold:
+                desired_increase = max(((points) / (self.Vitality ** modifier)), 0.0000000001)
+                self.Vitality += desired_increase
+                break
 
 #themed_ajt = ["atrocious", "baneful", "barbaric", "beastly", "belligerent", "bloodthirsty", "brutal", "callous", "cannibalistic", "cowardly", "cruel", "cunning", "dangerous", "demonic", "depraved", "destructive", "diabolical", "disgusting", "dishonorable", "dreadful", "eerie", "evil", "execrable", "fiendish", "filthy", "foul", "frightening", "ghastly", "ghoulish", "gruesome", "heinous", "hideous", "homicidal", "horrible", "hostile", "inhumane", "insidious", "intimidating", "malevolent", "malicious", "monstrous", "murderous", "nasty", "nefarious", "noxious", "obscene", "odious", "ominous", "pernicious", "perverted", "poisonous", "predatory", "premeditated", "primal", "primitive", "profane", "psychopathic", "rabid", "relentless", "repulsive", "ruthless", "sadistic", "savage", "scary", "sinister", "sociopathic", "spiteful", "squalid", "terrifying", "threatening", "treacherous", "ugly", "unholy", "venomous", "vicious", "villainous", "violent", "wicked", "wrongful", "xenophobic"]
 #themed_names = ["luna", "carly", "becca", "ally", "hilander", "chibi", "mimic", "mezzy", "graygray", "bubbles"]
