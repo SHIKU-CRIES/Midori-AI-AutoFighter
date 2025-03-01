@@ -311,7 +311,7 @@ class Player:
         stat_modifiers = {}
 
         for i in range(65):
-            new_key = (i * 0.05)
+            new_key = (i * 0.15)
             new_value = to_be_lowered_by ** max(0.7 * (i + 1), 1.0)
             stat_modifiers[new_key] = new_value
 
