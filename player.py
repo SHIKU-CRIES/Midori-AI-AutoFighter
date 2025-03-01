@@ -161,9 +161,15 @@ class Player:
                             while temp_past_life_vitality > 0:
                                 spinner.start(text=f"({starting_items}/{total_items}) Past Lifes ({self.PlayerName}): Granting Vitality ({temp_past_life_vitality} > {self.Vitality})")
                                 
-                                self.gain_vit(0.001)
+                                bonus = max(0, self.Vitality - 1)
+                                
+                                scaling_factor = 0.1
+                                
+                                vit_gain = 0.001 + (bonus * scaling_factor) * 0.001
+                                
+                                self.gain_vit(vit_gain)
 
-                                temp_past_life_vitality -= 0.001
+                                temp_past_life_vitality -= vit_gain
                         
                         self.check_stats()
 
