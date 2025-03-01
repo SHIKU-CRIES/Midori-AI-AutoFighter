@@ -165,7 +165,7 @@ class Player:
                                 
                                 scaling_factor = 0.95
                                 
-                                vit_gain = (bonus * scaling_factor) * 0.1
+                                vit_gain = (bonus * scaling_factor)
                                 
                                 self.gain_vit(vit_gain)
 
