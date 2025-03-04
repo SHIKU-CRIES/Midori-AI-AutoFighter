@@ -410,7 +410,7 @@ class Player:
 
             while self.Def > 25000:
                 item_buff += random.uniform(0.00005, 0.00015)
-                self.Def = self.Def - 1000
+                self.Def = self.Def - 5
             
             for item in self.Items:
                 item.name = "Carly\'s Blessing of Defense"
