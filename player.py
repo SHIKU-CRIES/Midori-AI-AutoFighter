@@ -380,8 +380,8 @@ class Player:
             def_to_add = 100
             max_hp_debuff = max(self.MHP - random.randint(1000 * self.level, 2000 * self.level), 10)
             max_crit_rate = self.CritRate / 100
-            max_atk_stat = round(self.Atk * 0.95)
-            item_buff = random.uniform(0.1, 0.9)
+            max_atk_stat = round(self.Atk * 0.55)
+            item_buff = random.uniform(0.4, 0.9)
 
             while self.Vitality > 1.01:
                 item_buff += random.uniform(0.02, 0.3)
