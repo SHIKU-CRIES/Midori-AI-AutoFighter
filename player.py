@@ -381,10 +381,10 @@ class Player:
             max_hp_debuff = max(self.MHP - random.randint(1000 * self.level, 2000 * self.level), 10)
             max_crit_rate = self.CritRate / 100
             max_atk_stat = round(self.Atk * 0.95)
-            item_buff = random.uniform(0.0004, 0.0008)
+            item_buff = random.uniform(0.1, 0.9)
 
             while self.Vitality > 1.01:
-                item_buff += random.uniform(0.002, 0.003)
+                item_buff += random.uniform(0.02, 0.3)
                 self.Vitality = self.Vitality - 0.01
 
             while self.MHP > max_hp_debuff:
@@ -399,7 +399,7 @@ class Player:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Atk = self.Atk - 1
 
-            while self.Regain > 1:
+            while self.Regain > 100:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Regain = self.Regain - 0.001
 
@@ -409,7 +409,7 @@ class Player:
             self.gain_crit_damage((0.0002 * self.level))
 
             while self.Def > 25000:
-                item_buff += random.uniform(0.005, 0.015)
+                item_buff += random.uniform(0.05, 0.15)
                 self.Def = self.Def - 5
             
             for item in self.Items:
