@@ -378,23 +378,14 @@ class Player:
 
         if themed_names[1] in self.PlayerName.lower():
             def_to_add = 100 * self.level
-            max_hp_debuff = max(self.MHP - random.randint(1000, 2000), 10)
+            max_hp_debuff = max(self.MHP - random.randint(1000 * self.level, 2000 * self.level), 10)
             max_crit_rate = self.CritRate / 100
-            max_atk_stat = self.Atk / 4
+            max_atk_stat = round(self.Atk * 0.95)
             item_buff = random.uniform(0.0004, 0.0008)
 
             while self.Vitality > 1.01:
                 item_buff += random.uniform(0.00002, 0.00003)
                 self.Vitality = self.Vitality - 0.01
-            
-            if self.level > 3000:
-                while self.Def > 25000:
-                    item_buff += random.uniform(0.00002, 0.00003)
-                    self.Def = self.Def - 1000
-            
-            for item in self.Items:
-                item.name = "Carly\'s Blessing of Defense"
-                item.power += self.level * item_buff
 
             while self.MHP > max_hp_debuff:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
@@ -416,6 +407,14 @@ class Player:
             self.Def += self.check_base_stats(self.Def, int(self.Def * self.level) + 1)
 
             self.gain_crit_damage((0.0002 * self.level))
+
+            while self.Def > 25000:
+                item_buff += random.uniform(0.00005, 0.00015)
+                self.Def = self.Def - 1000
+            
+            for item in self.Items:
+                item.name = "Carly\'s Blessing of Defense"
+                item.power += self.level * item_buff
             
         if themed_names[2] in self.PlayerName.lower():
             self.MHP = int(self.MHP * 15)
