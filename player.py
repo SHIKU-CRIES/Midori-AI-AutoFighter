@@ -377,7 +377,7 @@ class Player:
             self.DodgeOdds = (self.DodgeOdds + dodge_buff) * self.Vitality
 
         if themed_names[1] in self.PlayerName.lower():
-            def_to_add = 100 * self.level
+            def_to_add = 100
             max_hp_debuff = max(self.MHP - random.randint(1000 * self.level, 2000 * self.level), 10)
             max_crit_rate = self.CritRate / 100
             max_atk_stat = round(self.Atk * 0.95)
@@ -399,7 +399,7 @@ class Player:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Atk = self.Atk - 1
 
-            while self.Regain > 100:
+            while self.Regain > 5:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
                 self.Regain = self.Regain - 0.001
 
