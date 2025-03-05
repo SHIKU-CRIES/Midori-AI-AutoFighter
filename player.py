@@ -305,14 +305,27 @@ class Player:
         return max(min(int(desired_increase), 1000000), 1)
     
     def gain_vit(self, points):
+        """
+        Increases the player's Vitality stat based on the input points, applying diminishing returns
+        and item bonuses.
+
+        The amount of Vitality gained decreases as the player's Vitality increases,
+        simulating diminishing returns.  This diminishing return is controlled by a series
+        of stat modifiers that apply based on thresholds of existing Vitality. Items the player
+        possesses can also affect the amount of vitality gained.
+
+        Args:
+            points (float): The base number of Vitality points to be added.  This value is modified
+                           by item effects and diminishing returns.
+        """
         stats_to_start_lower = 1.2
-        to_be_lowered_by = 10 + (self.Vitality ** 1.5)
+        to_be_lowered_by = (self.Vitality ** 1.5)
 
         stat_modifiers = {}
 
         for i in range(65):
-            new_key = (i * 0.15)
-            new_value = to_be_lowered_by ** max(0.7 * (i + 1), 1.0)
+            new_key = (i * 0.25)
+            new_value = to_be_lowered_by ** max(0.3 * (i + 1), 1.0)
             stat_modifiers[new_key] = new_value
 
         stat_modifiers[stats_to_start_lower] = to_be_lowered_by
