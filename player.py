@@ -396,9 +396,9 @@ class Player:
             max_atk_stat = round(self.Atk * 0.95)
             item_buff = random.uniform(0.4, 0.9)
 
-            while self.Vitality > 1.01:
-                item_buff += random.uniform(0.02, 0.3)
-                self.Vitality = self.Vitality - 0.01
+            while self.Vitality > max(0.01, self.Vitality / self.level):
+                item_buff += random.uniform(0.00002, 0.0003)
+                self.Vitality = self.Vitality - 0.001
 
             while self.MHP > max_hp_debuff:
                 self.Def += self.check_base_stats(self.Def, def_to_add)
