@@ -32,18 +32,18 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             target.DodgeOdds += 0.005
 
         else:
-            if source.Regain > 10:
+            if source.Regain > 1000:
                 source.Regain -= 0.01
                 source.MHP += 500
                 source.HP += 500
                 source.Atk += 50
                 source.Def += 50
 
-            if source.HP > source.MHP * 0.25:
-                source.HP -= round(source.MHP * 0.01)
+            if source.HP > source.MHP * 0.251:
+                source.HP -= round(source.MHP * 0.0001)
                 target.Bleed += max(mited_damage_dealt, 250)
             else:
-                target.Bleed += max(max(mited_damage_dealt, 1) * (source.MHP - source.HP) / ((target.Def * 2) * (target.Vitality)), 200)
+                target.Bleed += max(max(mited_damage_dealt, 1) * (source.MHP - source.HP) / ((target.Def * 25) * (target.Vitality * 2)), 5)
 
             mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) / (target.Def * 2))
 
@@ -105,13 +105,12 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             mited_damage_dealt = mited_damage_dealt + ((source.MHP / 4) / (target.Def * 2))
 
     if themed_names[8] in source.PlayerName.lower():
-        if source.HP != source.MHP:
-            if source.Atk > 1000:
-                source.Regain += 0.01
-                source.Atk -= 1
-            if source.Def > 1000:
-                source.Regain += 0.01
-                source.Def -= 1
+        if source.Atk > 1000:
+            source.Regain += 0.05
+            source.Atk -= 1
+        if source.Def > 1000:
+            source.Regain += 0.05
+            source.Def -= 1
 
     if themed_names[9] in source.PlayerName.lower():
         pass
