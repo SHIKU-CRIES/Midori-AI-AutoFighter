@@ -24,7 +24,7 @@ class ItemType():
 
             print(f"{temp_math}")
             self.power += temp_math
-            input()
+            
         except Exception as error:
             print(str(error))
     
