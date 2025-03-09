@@ -324,8 +324,6 @@ def main(level):
                 
                     if bleed_mod > 100:
                         person.RushStat = 0
-                    else:
-                        person.RushStat += 1
 
                     if person.HP > 0:
                         if person.Bleed > person.MHP * 0.001:
@@ -343,6 +341,9 @@ def main(level):
                                 foelist.remove(target_to_damage)
                                 person.Kills += 1
                                 log(white, "Saving Data")
+
+                                if bleed_mod < 100:
+                                    person.RushStat += 1
 
                                 for player in playerlist:
                                     rushmod = max(1, player.RushStat)
