@@ -21,9 +21,10 @@ class ItemType():
                 temp_math = max(math.log10(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10)), 0.00001)
             else:
                 temp_math = max(math.log10(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10)) / (100 * self.power), 0.00001)
-                
+
             print(f"{temp_math}")
             self.power += temp_math
+            input()
         except Exception as error:
             print(str(error))
     
