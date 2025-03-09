@@ -39,9 +39,9 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 source.Atk += 50
                 source.Def += 50
 
-            if source.HP > source.MHP * 0.251:
-                hp_diff = source.HP - source.MHP * 0.251
-                reduction_factor = hp_diff / (source.MHP * 0.749)
+            if source.HP > source.MHP * 0.25:
+                hp_diff = source.HP - source.MHP * 0.25
+                reduction_factor = hp_diff / (source.MHP * 0.75)
                 
                 scaled_reduction = reduction_factor ** 2 * 0.01
 
