@@ -19,14 +19,14 @@ class ItemType():
         if self.power < 5:
             self.power += max(math.log10(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10)), 0.00001)
         else:
-            self.power += math.log10(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10)) / (100 * self.power)
+            self.power += max(math.log10(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10)) / (100 * self.power), 0.00001)
     
     def check_mods(self, temp_power: float):
         for index, item_mod in enumerate(item_mods):
             if item_mod.lower() in self.name.lower():
                 return temp_power + (index * 0.0005)
         
-        return temp_power
+        return max(temp_power, 1)
 
     def on_damage_taken(self, pre_damage_taken: float):
         """This function is called when the player takes damage.
