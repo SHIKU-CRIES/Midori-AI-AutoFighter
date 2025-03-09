@@ -838,7 +838,7 @@ class Player:
             self.MHP = 1
 
     def exp_to_levelup(self):
-        return self.level ** 1.25
+        return self.level ** 1.35
 
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
@@ -852,7 +852,7 @@ class Player:
 
         EXP_to_levelup = self.exp_to_levelup()
         
-        self.EXP += max(round(((self.level + foe_level) ** 0.15) * int_mod), round((self.level + foe_level) ** 0.35)) + 20
+        self.EXP += max(round(((self.level + foe_level) ** 0.25) * int_mod), round((self.level + foe_level) ** 0.45)) + 1
 
         while self.EXP >= EXP_to_levelup:
             if level_ups > max_level_ups:
