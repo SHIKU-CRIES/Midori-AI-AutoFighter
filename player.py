@@ -851,8 +851,11 @@ class Player:
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
 
         EXP_to_levelup = self.exp_to_levelup()
-        
-        self.EXP += max(round(((self.level + foe_level) ** 0.25) * int_mod), round((self.level + foe_level) ** 0.45)) + 1
+
+        if self.EXP >= EXP_to_levelup * 100:
+            self.EXP += max(round(((self.level + foe_level) ** 0.00025) * int_mod), round((self.level + foe_level) ** 0.00045)) + 1
+        else:
+            self.EXP += max(round(((self.level + foe_level) ** 0.25) * int_mod), round((self.level + foe_level) ** 0.45)) + 1
 
         while self.EXP >= EXP_to_levelup:
             if level_ups > max_level_ups:
