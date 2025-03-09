@@ -838,7 +838,7 @@ class Player:
             self.MHP = 1
 
     def exp_to_levelup(self):
-        return self.level ** 1.45
+        return self.level ** 1.85
 
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
