@@ -947,26 +947,26 @@ class Player:
         self.Def: int = self.Def + random.randint(int(self.MHP * (0.000015 * self.level)), int(self.MHP * (0.000055 * self.level))) + 500
         self.Atk: int = random.randint(10 * self.level, 20 * self.level) + (self.level * 2)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
-        self.CritRate: float = random.uniform(0.0001 * self.level, (self.level * 0.0002)) + (self.level * 0.0001)
+        self.CritRate: float = random.uniform(0.000001 * self.level, (self.level * 0.000002)) + (self.level * 0.000001)
         self.CritDamageMod: float = 2 + (self.level * 0.00025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
         self.Vitality: float = 1 + (self.level * 0.00002)
 
-        if level > 50:
+        if level > top_level:
             self.MHP = self.MHP + (2 * level)
             self.Atk = self.Atk + (4 * level)
             
-            # Apply bonus every xyz levels past 10
-            xyz = 10
-            bonus_levels = (level - 50) // xyz
+            # Apply bonus every xyz levels past top_level
+            xyz = 5
+            bonus_levels = (level - top_level) // xyz
             self.MHP = self.MHP + (6 * bonus_levels)
-            self.Atk = self.Atk + (20 * bonus_levels)
+            self.Atk = self.Atk + (8 * bonus_levels)
             self.Def = self.Def + (4 * bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
                 if len(self.Items) > starting_max_blessing:
-                    random.choice(self.Items).upgrade((level / (bonus_levels * 200)))
+                    random.choice(self.Items).upgrade((bonus_levels * 200) / level)
                 else:
                     self.Items.append(ItemType())
 
