@@ -324,6 +324,8 @@ def main(level):
                 
                     if bleed_mod > 100:
                         person.RushStat = 0
+                    else:
+                        person.RushStat += 1
 
                     if person.HP > 0:
                         if person.Bleed > person.MHP * 0.001:
@@ -343,10 +345,11 @@ def main(level):
                                 log(white, "Saving Data")
 
                                 for player in playerlist:
+                                    rushmod = max(1, player.RushStat)
                                     if person.PlayerName == player.PlayerName:
-                                        player.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
+                                        player.level_up(mod=bleed_mod * rushmod, foe_level=target_to_damage.level)
                                     else:
-                                        player.level_up(mod=bleed_mod/2, foe_level=max(5, round(target_to_damage.level/2)))
+                                        player.level_up(mod=(bleed_mod * rushmod)/2, foe_level=max(5, round(target_to_damage.level/2)))
                                     
                                 person.save()
 
