@@ -837,6 +837,9 @@ class Player:
         if self.MHP > 20000000000:
             self.MHP = 1
 
+    def exp_to_levelup(self):
+        return self.level ** 1.15
+
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
         Levels up the player by 1 and allows the user to choose which stat to increase.
@@ -847,7 +850,7 @@ class Player:
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(int(mod_fixed * (self.level / 100)), 1)
 
-        EXP_to_levelup = self.level ** 1.15
+        EXP_to_levelup = self.exp_to_levelup()
         
         self.EXP += max(round(((self.level + foe_level) * 0.95) * int_mod), round((self.level + foe_level) * 1.15)) + 150
 
@@ -1029,7 +1032,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         stat_data = [
             ("Stats of:", player.PlayerName),
             ("Level:", player.level),
-            ("Kills:", player.Kills),
+            ("EXP:", f"{player.EXP}/{round(player.exp_to_levelup())}"),
             ("Max HP:", player.MHP),
             ("Atk:", int(player.Atk)),
             ("Def:", int(player.Def / def_mod)),
