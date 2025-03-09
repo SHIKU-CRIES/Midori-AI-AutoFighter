@@ -364,7 +364,7 @@ def main(level):
                                     if person.PlayerName == player.PlayerName:
                                         person.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
                                     else:
-                                        person.level_up(mod=bleed_mod/25, foe_level=target_to_damage.level)
+                                        person.level_up(mod=bleed_mod/25, foe_level=max(1, round(target_to_damage.level/25)))
                                     
                                 person.save()
 
