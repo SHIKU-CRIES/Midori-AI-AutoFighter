@@ -340,12 +340,6 @@ def main(level):
                                 foelist.remove(target_to_damage)
                                 person.Kills += 1
                                 log(white, "Saving Data")
-                
-                                if bleed_mod < 100:
-                                    person.RushStat += 1
-                                    person.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
-                                else:
-                                    person.RushStat = 0
 
                                 for player in playerlist:
                                     if person.PlayerName == player.PlayerName:
