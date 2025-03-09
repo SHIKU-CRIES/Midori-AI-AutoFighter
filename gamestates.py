@@ -162,33 +162,20 @@ def main(level):
 
             level_sum += player.level
 
-        average_level = round((level_sum + (foes_killed * 2)) / len(playerlist))
+        average_level = round(level_sum / len(playerlist))
         level = average_level
 
-        if level < 250:
-            number_of_foes = 6
-        elif level < 500:
-            number_of_foes = 5
-        elif level < 1000:
-            number_of_foes = 5
-        elif level < 2000:
-            number_of_foes = 5
-            foes_killed += number_of_foes * 2
-        else:
-            number_of_foes = 5
-            foes_killed += number_of_foes * 4
-        
-        foes_killed += number_of_foes
+        number_of_foes = 4
 
         temp_foe_themed_names: list[str] = []
 
         for item in themed_names:
             temp_foe_themed_names.append(item)
 
-        if level < 1800:
+        if level < 700:
             temp_foe_themed_names.remove("Carly".lower())
 
-        if level < 3000:
+        if level < 1000:
             temp_foe_themed_names.remove("Luna".lower())
 
         for i in range(number_of_foes):
