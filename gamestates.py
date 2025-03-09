@@ -246,7 +246,7 @@ def main(level):
             else:
                 bleed_mod = (0.0000002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
 
-            def_mod = max(1, (bleed_mod * 0.05))
+            def_mod = max(1, (bleed_mod * 0.0005))
 
             if bleed_mod > 15:
                 def_mod = max(1, (bleed_mod * 0.02) + (bleed_mod * 0.02) + (bleed_mod * 0.01))
@@ -286,9 +286,6 @@ def main(level):
 
                 if (foelist[0].DodgeOdds * 100) / bleed_mod > 1:
                     foe_stat_data.append(("Dodge Odds:", f"{((foelist[0].DodgeOdds * 100) / bleed_mod):.2f}%"))
-
-                if foelist[0].Bleed >= 10000:
-                    foe_stat_data.append(("Bleed:", f"{foelist[0].Bleed:.1f}x"))
 
                 # Foe stats drawing
                 foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) + 170
@@ -362,8 +359,12 @@ def main(level):
                                     person.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
                                 else:
                                     person.RushStat = 0
-                                
-                                person.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
+
+                                for player in playerlist:
+                                    if person.PlayerName == player.PlayerName:
+                                        person.level_up(mod=bleed_mod, foe_level=target_to_damage.level)
+                                    else:
+                                        person.level_up(mod=bleed_mod/25, foe_level=target_to_damage.level)
                                     
                                 person.save()
 
