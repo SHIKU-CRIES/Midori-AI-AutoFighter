@@ -132,6 +132,7 @@ class Player:
                         can_load = True
                     
                     if can_load:
+                        self.level += 1
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
                         self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 100)
