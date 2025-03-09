@@ -1032,7 +1032,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         stat_data = [
             ("Stats of:", player.PlayerName),
             ("Level:", player.level),
-            ("EXP:", f"{player.EXP}/{round(player.exp_to_levelup())}"),
+            ("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"),
             ("Max HP:", player.MHP),
             ("Atk:", int(player.Atk)),
             ("Def:", int(player.Def / def_mod)),
