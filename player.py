@@ -375,6 +375,8 @@ class Player:
 
         if themed_names[9] in self.PlayerName.lower():
             return random.choice([8, 9])
+        
+        return 9
 
     def check_name_mod(self):
         if "lady" in self.PlayerName.lower():
