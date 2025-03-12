@@ -298,8 +298,8 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    if person.Bleed > person.MHP * 0.001:
-                        person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.001)
+                    if person.Bleed > person.MHP * 0.0001:
+                        person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.0001)
                     else:
                         person.Bleed = max(person.Bleed - (person.Regain * 5), 0)
 
@@ -326,8 +326,8 @@ def main(level):
                         person.RushStat = 0
 
                     if person.HP > 0:
-                        if person.Bleed > person.MHP * 0.001:
-                            person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.001)
+                        if person.Bleed > person.MHP * 0.0001:
+                            person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.0001)
                         else:
                             person.Bleed = max((person.Bleed - (person.Regain * 5)), 0)
 
