@@ -404,7 +404,7 @@ class Player:
             item_buff = random.uniform(0.4, 0.9)
 
             while self.Vitality > max(0.2, self.Vitality / self.level):
-                item_buff += random.uniform(0.00002, 0.0003)
+                item_buff += random.uniform(0.0002, 0.003)
                 self.Vitality = self.Vitality - 0.001
 
             while self.MHP > max_hp_debuff:
@@ -429,7 +429,7 @@ class Player:
             self.gain_crit_damage((0.0002 * self.level))
 
             while self.Def > 25000:
-                item_buff += random.uniform(0.05, 0.15)
+                item_buff += random.uniform(0.05, 0.25)
                 self.Def = self.Def - 5
             
             for item in self.Items:
