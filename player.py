@@ -1000,6 +1000,9 @@ class Player:
         self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 5))
 
+        if self.DodgeOdds > 0.5:
+            self.DodgeOdds = 0.5
+
         self.check_stats()
 
         self.HP = self.MHP
