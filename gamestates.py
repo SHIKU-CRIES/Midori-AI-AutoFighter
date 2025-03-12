@@ -89,7 +89,6 @@ def main(level):
     temp_themed_names: list[str] = []
 
     for item in themed_names:
-        print(item)
         if "mimic".lower() in item.lower():
             continue
         else:
@@ -172,7 +171,6 @@ def main(level):
         temp_foe_themed_names: list[str] = []
 
         for item in themed_names:
-            print(item)
             temp_foe_themed_names.append(item)
 
         if level < 8000:
@@ -183,8 +181,6 @@ def main(level):
 
         for i in range(number_of_foes):
             themed_name = random.choice(temp_foe_themed_names).capitalize()
-
-            print(themed_name)
 
             temp_foe_themed_names.remove(themed_name.lower())
 
