@@ -162,11 +162,10 @@ def main(level):
 
             level_sum += player.level
 
-        average_level = round(level_sum + foes_killed / len(playerlist))
-        level = average_level
+        level = round(level_sum + foes_killed / len(playerlist))
 
         number_of_foes = 4
-        foes_killed += 1
+        foes_killed += round(number_of_foes / len(playerlist))
 
         temp_foe_themed_names: list[str] = []
 
