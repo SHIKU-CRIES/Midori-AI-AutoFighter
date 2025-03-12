@@ -51,7 +51,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             else:
                 target.Bleed += max(max(mited_damage_dealt, 1) * (source.MHP - source.HP) / ((target.Def * 10) * (target.Vitality * 2)), 5)
 
-            mited_damage_dealt = mited_damage_dealt * ((source.MHP - source.HP) + 1)
+        mited_damage_dealt = mited_damage_dealt * ((source.MHP - source.HP) + 1)
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
