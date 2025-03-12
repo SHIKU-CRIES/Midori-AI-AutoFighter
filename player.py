@@ -381,10 +381,10 @@ class Player:
             self.MHP *= 10
             self.Atk *= 2
             self.Def *= 2
-            self.Vitality *= 2.5
+            self.Vitality *= 1.5
             if "light" in self.PlayerName.lower():
                 self.Regain *= 2
-                self.Vitality *= 2
+                self.Vitality *= 1.5
 
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.15
@@ -953,7 +953,7 @@ class Player:
         self.check_stats()
     
     def set_level(self, level):
-        top_level = 1000
+        top_level = 2500
         top_level_full = top_level * 2
 
         self.level = level
