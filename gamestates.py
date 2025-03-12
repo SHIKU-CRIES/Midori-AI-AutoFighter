@@ -184,6 +184,8 @@ def main(level):
         for i in range(number_of_foes):
             themed_name = random.choice(temp_foe_themed_names).capitalize()
 
+            print(themed_name)
+
             temp_foe_themed_names.remove(themed_name.lower())
 
             themed_title = random.choice(themed_ajt).capitalize()
