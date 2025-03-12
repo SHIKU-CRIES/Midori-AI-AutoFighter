@@ -89,6 +89,7 @@ def main(level):
     temp_themed_names: list[str] = []
 
     for item in themed_names:
+        print(item)
         if "mimic".lower() in item.lower():
             continue
         else:
