@@ -953,7 +953,7 @@ class Player:
         self.check_stats()
     
     def set_level(self, level):
-        top_level = 2500
+        top_level = 1000
         top_level_full = top_level * 2
 
         self.level = level
