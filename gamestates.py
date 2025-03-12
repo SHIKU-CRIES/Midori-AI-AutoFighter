@@ -189,7 +189,7 @@ def main(level):
             foe_pre_name = f"{themed_title} {themed_name}"
 
             foe = Player(f"{foe_pre_name}")
-            foe.set_photo(themed_name.lower())
+            foe.set_photo(themed_name.lower().replace(" ", "_"))
             foe.set_level(random.randint(max(level - 10, 1), level + 10))
 
             foe.photodata = pygame.image.load(os.path.join(foe.photo))

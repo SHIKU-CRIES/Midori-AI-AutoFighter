@@ -377,6 +377,11 @@ class Player:
             return random.choice([8, 9])
 
     def check_name_mod(self):
+        if "lady" in self.PlayerName.lower():
+            self.MHP *= 2
+            self.Atk *= 2
+            self.Def *= 2
+            
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.15
             max_hp_debuff = self.MHP / 4
