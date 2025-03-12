@@ -83,6 +83,7 @@ def main(level):
     from player import render_player_obj
 
     running = True
+    past_level = 1
     foes_killed = 1
 
     playerlist: list[Player] = []
@@ -163,6 +164,11 @@ def main(level):
             level_sum += player.level
 
         level = round(level_sum + foes_killed / len(playerlist))
+
+        if level < max(past_level - 10, 1):
+            level = random.randint(max(past_level - 10, 1), past_level + 10)
+        else:
+            past_level = level
 
         number_of_foes = 4
         foes_killed += round(number_of_foes / len(playerlist))
