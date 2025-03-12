@@ -381,7 +381,10 @@ class Player:
             self.MHP *= 10
             self.Atk *= 2
             self.Def *= 2
-            self.Vitality *= 4
+            self.Vitality *= 2.5
+            if "light" in self.PlayerName.lower():
+                self.Regain *= 2
+                self.Vitality *= 2
 
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.15
