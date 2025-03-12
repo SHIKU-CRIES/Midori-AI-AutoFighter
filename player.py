@@ -400,14 +400,14 @@ class Player:
             self.DodgeOdds = (self.DodgeOdds + dodge_buff) * self.Vitality
 
         if themed_names[1] in self.PlayerName.lower():
-            def_to_add = 1000
+            def_to_add = 10000
             max_hp_debuff = max(self.MHP - random.randint(5 * self.level, 15 * self.level), 10)
             max_crit_rate = self.CritRate / 100
             max_atk_stat = round(self.Atk * 0.95)
             item_buff = random.uniform(0.4, 0.9)
 
             while self.Vitality > max(0.2, self.Vitality / self.level):
-                item_buff += random.uniform(0.0002, 0.003)
+                item_buff += random.uniform(0.01, 0.3)
                 self.Vitality = self.Vitality - 0.001
 
             while self.MHP > max_hp_debuff:
