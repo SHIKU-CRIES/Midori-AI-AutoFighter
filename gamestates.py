@@ -172,6 +172,7 @@ def main(level):
         temp_foe_themed_names: list[str] = []
 
         for item in themed_names:
+            print(item)
             temp_foe_themed_names.append(item)
 
         if level < 8000:
