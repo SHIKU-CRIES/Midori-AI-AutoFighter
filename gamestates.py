@@ -173,7 +173,7 @@ def main(level):
         for item in themed_names:
             temp_foe_themed_names.append(item)
 
-        if level < 8000:
+        if level < 3000:
             temp_foe_themed_names.remove("Carly".lower())
 
         if level < 5000:
