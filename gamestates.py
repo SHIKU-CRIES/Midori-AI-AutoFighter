@@ -343,17 +343,20 @@ def main(level):
                             if target_to_damage.HP < 1:
                                 foelist.remove(target_to_damage)
                                 person.Kills += 1
+                                total_rushmod = 0
                                 log(white, "Saving Data")
 
                                 if bleed_mod < 100:
                                     person.RushStat += 1
 
                                 for player in playerlist:
-                                    rushmod = max(1, player.RushStat)
+                                    total_rushmod += max(1, player.RushStat)
+
+                                for player in playerlist:
                                     if person.PlayerName == player.PlayerName:
-                                        player.level_up(mod=bleed_mod * rushmod, foe_level=target_to_damage.level)
+                                        player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
                                     else:
-                                        player.level_up(mod=bleed_mod * 100 * rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
+                                        player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
                                     
                                 person.save()
 
