@@ -327,9 +327,9 @@ def main(level):
 
                     if person.HP > 0:
                         if person.Bleed > person.MHP * 0.0001:
-                            person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.0001)
+                            person.Bleed = max(person.Bleed - (person.Regain * person.Vitality * 5), person.MHP * 0.0001)
                         else:
-                            person.Bleed = max((person.Bleed - (person.Regain * 5)), 0)
+                            person.Bleed = max((person.Bleed - (person.Regain * person.Vitality)), 0)
 
                         person.HP = min(person.MHP, person.HP + int(person.Regain * person.Vitality) - int(person.Bleed / person.Vitality))
 
