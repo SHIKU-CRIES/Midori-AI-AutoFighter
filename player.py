@@ -34,6 +34,7 @@ class Player:
         self.HP: int = self.MHP
         self.Def: int = 25
         self.Atk: int = 250
+        self.Mitigation: int = 2
         self.Regain: float = 0.02
         self.Vitality: float = 1
         self.Bleed: float = 0
@@ -218,7 +219,6 @@ class Player:
             os.remove(os.path.join(lives_folder, f'{self.PlayerName}.dat'))
         except FileNotFoundError:
             pass
-
 
     def update_inv(self, item: WeaponType, add: bool):
         if add:
@@ -844,6 +844,9 @@ class Player:
         if self.MHP > 20000000000:
             self.MHP = 1
 
+    def damage_mitigation(self, damage_pre: float):
+        return (damage_pre / (self.Mitigation * self.Vitality))
+    
     def exp_to_levelup(self):
         return self.level ** 1.15
 

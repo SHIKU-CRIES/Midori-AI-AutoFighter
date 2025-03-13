@@ -194,6 +194,8 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
     
     mited_damage_dealt = check_passive_mod(source, target, mited_damage_dealt)
 
+    mited_damage_dealt = target.damage_mitigation(mited_damage_dealt)
+
     if (target.DodgeOdds / enrage_buff) >= random.random():
         log(green, f"{target.PlayerName} dodged!")
     else:
