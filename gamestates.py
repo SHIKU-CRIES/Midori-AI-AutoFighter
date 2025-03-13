@@ -257,12 +257,6 @@ def main(level):
             item_total_size = photo_size - (photo_size / 4)
             size = (item_total_size, item_total_size)
 
-            wait_time = pygame.time.get_ticks() + 1000
-            
-            while pygame.time.get_ticks() < wait_time:
-                    for event in pygame.event.get():
-                        continue
-
             if len(foelist) > 0:
                 foe_stat_data = [
                     ("Stats of:", foelist[0].PlayerName),
