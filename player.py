@@ -877,9 +877,9 @@ class Player:
 
             self.EXP = max(self.EXP - (EXP_to_levelup), 0)
             
-            hp_up: int = random.randint(5 * self.level, 10 * self.level * int_mod)
-            def_up: int = random.randint(2 * self.level, 5 * self.level * int_mod)
-            atk_up: int = random.randint(2 * self.level, 5 * self.level * int_mod)
+            hp_up: int = random.randint(5, 10 * int_mod)
+            def_up: int = random.randint(2, 5 * int_mod)
+            atk_up: int = random.randint(2, 5 * int_mod)
             regain_up: float = random.uniform(0.00001, 0.00002 * self.level * self.Vitality)
             critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * max((mod_fixed / 10000), 1)
             critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * max((mod_fixed / 10000), 1)
@@ -962,13 +962,14 @@ class Player:
         self.level = level
         self.MHP: int = random.randint(2 * self.level, 5 * self.level) + 1000
         self.HP: int = self.MHP
-        self.Def: int = self.Def + random.randint(int(self.MHP * (0.000015 * self.level)), int(self.MHP * (0.000055 * self.level))) + 500
-        self.Atk: int = random.randint(10 * self.level, 20 * self.level) + (self.level * 2)
+        self.Def: int = self.Def + random.randint(int(self.MHP * (0.000000015 * self.level)), int(self.MHP * (0.000000055 * self.level))) + 500
+        self.Atk: int = random.randint(2 * self.level, 3 * self.level)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.000001 * self.level, (self.level * 0.000002)) + (self.level * 0.000001)
         self.CritDamageMod: float = 2 + (self.level * 0.00025)
         self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
         self.Vitality: float = 1 + (self.level * 0.00002)
+        self.Mitigation: float = 1
 
         if level > top_level:
             self.MHP = self.MHP + (2 * level)
@@ -978,8 +979,8 @@ class Player:
             xyz = 5
             bonus_levels = (level - top_level) // xyz
             self.MHP = self.MHP + (6 * bonus_levels)
-            self.Atk = self.Atk + (8 * bonus_levels)
-            self.Def = self.Def + (4 * bonus_levels)
+            self.Atk = self.Atk + (2 * bonus_levels)
+            self.Def = self.Def + (bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
