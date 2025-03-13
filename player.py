@@ -229,12 +229,12 @@ class Player:
     def gain_dodgeodds_rate(self, points):
         """Increases dodge odds based on points, with increasing cost.
 
-        Every 1 dodge odds increase costs 500x more points.
+        Every 0.5 dodge odds increase costs 5000x more points.
         """
-        to_be_lowered_by = 500
+        to_be_lowered_by = 5000
         current_rate = self.DodgeOdds
 
-        if current_rate > 1:
+        if current_rate > 0.5:
             desired_increase = points / ((to_be_lowered_by * (current_rate // 2)) + 1)
         else:
             desired_increase = points
