@@ -884,6 +884,7 @@ class Player:
             critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * max((mod_fixed / 10000), 1)
             critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * max((mod_fixed / 10000), 1)
             dodgeodds_up: float = random.uniform(0.000002 * self.level, 0.00004 * self.level) * max((mod_fixed / 10000), 1)
+            mitigation_up: float = (random.uniform(0.0000000001, 0.0000000002) / self.Mitigation) * max((mod_fixed / 1000000), 1)
             vitality_up: float = (random.uniform(0.00000016 * (self.level - 300), 0.00000032 * (self.level - 300)) / self.Vitality) * max((mod_fixed / 1000000), 1)
 
             hp_up = self.check_base_stats(self.MHP, hp_up)
@@ -949,6 +950,7 @@ class Player:
                             item.upgrade(mod_fixed)
 
             if self.level > 300:
+                self.Mitigation += mitigation_up
                 self.Vitality += vitality_up
 
         self.check_stats()
