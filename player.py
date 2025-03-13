@@ -34,7 +34,7 @@ class Player:
         self.HP: int = self.MHP
         self.Def: int = 25
         self.Atk: int = 250
-        self.Mitigation: int = 2
+        self.Mitigation: float = 2
         self.Regain: float = 0.02
         self.Vitality: float = 1
         self.Bleed: float = 0
