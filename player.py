@@ -136,8 +136,8 @@ class Player:
                         self.level_up()
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
-                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 100)
-                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 200)
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 2)
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 2)
                         self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.0001) + 0.01
                         self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
                         self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
@@ -278,12 +278,12 @@ class Player:
     
     def check_base_stats(self, stat_total: int, stat_gain: int):
         stats_to_start_lower = 50
-        to_be_lowered_by = 10 + (stat_total // 100000)
+        to_be_lowered_by = 10 + (stat_total // 1000)
 
         stat_modifiers = {}
 
         for i in range(45):
-            new_key = (i * 1000)
+            new_key = (i * 250)
             new_value = to_be_lowered_by ** max(0.7 * (i + 1), 1.0)
             stat_modifiers[new_key] = new_value
 
