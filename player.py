@@ -202,13 +202,11 @@ class Player:
         if not os.path.exists(past_lives_folder):
             os.makedirs(past_lives_folder)
 
-        # Generate a UUID for the past life file
         past_life_id = str(uuid.uuid4())
         past_life_filename = os.path.join(past_lives_folder, f"{past_life_id}.pastlife")
 
         self.Logs = []
 
-        # Save the current state as a past life
         try:
             with open(past_life_filename, 'wb') as f:
                 pickle.dump(self.__dict__, f)
@@ -216,12 +214,10 @@ class Player:
         except Exception as e:
             print(f"Error saving past life: {e}")
 
-
-        # Remove the .dat file
         try:
             os.remove(os.path.join(lives_folder, f'{self.PlayerName}.dat'))
         except FileNotFoundError:
-            pass  # Ignore if the file doesn't exist
+            pass
 
 
     def update_inv(self, item: WeaponType, add: bool):
