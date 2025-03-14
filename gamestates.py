@@ -240,10 +240,10 @@ def main(level):
             def_mod = max(1, (bleed_mod * 0.0005))
 
             if bleed_mod > 5:
-                def_mod = max(1, (bleed_mod * 0.02) + (bleed_mod * 0.02) + (bleed_mod * 0.01))
+                def_mod = max(1, (bleed_mod * 0.002) + (bleed_mod * 0.002) + (bleed_mod * 0.001))
             
             if bleed_mod > 10:
-                def_mod = max(1, (bleed_mod * 0.04) + (bleed_mod * 0.04) + (bleed_mod * 0.02))
+                def_mod = max(1, (bleed_mod * 0.004) + (bleed_mod * 0.004) + (bleed_mod * 0.002))
 
             fps_cap = 35
             dt = clock.tick(fps_cap) / 1000
