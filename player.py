@@ -20,7 +20,7 @@ from themedstuff import themed_names
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
 
-starting_max_blessing = 15
+starting_max_blessing = 5
 
 class Player:
     def __init__(self, name):
@@ -1077,11 +1077,11 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         elif player.Vitality != 1:
             stat_data.append(("Live Vitality:", f"{(player.Vitality):.5f}x"))
 
+        if player.Mitigation > 1.01:
+            stat_data.append(("Mitigation:", f"{(player.Mitigation):.2f}x"))
+
         if (player.DodgeOdds * 100) / bleed_mod > 1:
             stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
-
-        if enrage_timer.timed_out:
-            stat_data.append(("Enrage Buff:", f"{(bleed_mod):.2f}x"))
 
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
