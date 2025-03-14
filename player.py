@@ -393,6 +393,9 @@ class Player:
             self.Def *= 2
             self.Vitality *= 1.5
 
+            self.Bleed += 100
+            self.Bleed *= 100
+
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.15
             max_hp_debuff = self.MHP / 4
