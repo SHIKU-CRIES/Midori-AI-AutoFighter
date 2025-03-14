@@ -1,7 +1,7 @@
 import time
 
 class timmer:
-    def __init__(self, timeout_seconds=5):
+    def __init__(self, timeout_seconds=15):
         self.timeout_seconds = timeout_seconds
         self.start_time = None
         self.timed_out = False
