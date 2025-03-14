@@ -407,6 +407,7 @@ class Player:
 
         if themed_names[1] in self.PlayerName.lower():
             def_to_add = 10000
+            self.MHP *= 1000
             max_hp_debuff = max(self.MHP - random.randint(5 * self.level, 15 * self.level), 10)
             max_crit_rate = self.CritRate / 100
             max_atk_stat = round(self.Atk * 0.95)
