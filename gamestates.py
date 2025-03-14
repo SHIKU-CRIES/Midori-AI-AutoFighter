@@ -225,8 +225,8 @@ def main(level):
 
             enrage_mod = enrage_timer.get_timeout_duration()
             level_base_enrage_mod = (level / max(level / 10000, 15))
-            player_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
-            foe_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
+            player_base_enrage_mod = (enrage_mod * level_base_enrage_mod) / 4
+            foe_base_enrage_mod = (enrage_mod * level_base_enrage_mod) / 4
 
             if enrage_mod > 10:
                 buffed_starter = ((enrage_mod - 10) * 0.00000004) + ((enrage_mod - 5) * 0.00000002)
