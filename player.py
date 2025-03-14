@@ -20,7 +20,7 @@ from themedstuff import themed_names
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
 
-starting_max_blessing = 5
+starting_max_blessing = 15
 
 class Player:
     def __init__(self, name):
