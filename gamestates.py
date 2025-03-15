@@ -160,7 +160,6 @@ def main(level):
         foelist: list[Player] = []
 
         for player in playerlist:
-            player.Bleed *= 0.65
             player.DamageDealt = 0
             player.DamageTaken = 0
 
@@ -306,13 +305,6 @@ def main(level):
 
                     last_known_foe = person.PlayerName
 
-                    if person.Bleed > person.MHP * 0.0001:
-                        person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.0001)
-                    else:
-                        person.Bleed = max(person.Bleed - (person.Regain * 5), 0)
-
-                    person.HP = min(person.MHP, person.HP + int(person.Regain * person.Vitality) - int(person.Bleed  / person.Vitality))
-
                     if len(playerlist) > 0:
                         target_to_damage = random.choice(playerlist)
                         take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
@@ -336,12 +328,6 @@ def main(level):
                         person.RushStat = 0
 
                     if person.HP > 0:
-                        if person.Bleed > person.MHP * 0.0001:
-                            person.Bleed = max(person.Bleed - (person.Regain * person.Vitality * 5), person.MHP * 0.0001)
-                        else:
-                            person.Bleed = max((person.Bleed - (person.Regain * person.Vitality)), 0)
-
-                        person.HP = min(person.MHP, person.HP + int(person.Regain * person.Vitality) - int(person.Bleed / person.Vitality))
 
                         if len(foelist) > 0:
                             target_to_damage = random.choice(foelist)

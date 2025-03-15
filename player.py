@@ -8,10 +8,13 @@ import pickle
 
 from halo import Halo
 
+from items import ItemType
+
 from weapons import WeaponType
 from weapons import get_weapon
 
-from items import ItemType
+from damage_over_time import dot
+from healing_over_time import hot
 
 from load_photos import resource_path
 
@@ -37,7 +40,6 @@ class Player:
         self.Mitigation: float = 2
         self.Regain: float = 0.02
         self.Vitality: float = 1
-        self.Bleed: float = 0
         self.CritRate: float = 0.03
         self.CritDamageMod: float = 2
         self.DodgeOdds: float = 0.03
@@ -48,6 +50,8 @@ class Player:
         self.Logs: list = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list[ItemType] = []
+        self.HOT: list[hot] = []
+        self.DOT: list[dot] = []
         self.photo: str = "player.png"
         self.photodata = ""
         
@@ -862,6 +866,15 @@ class Player:
 
     def damage_mitigation(self, damage_pre: float):
         return (damage_pre / (self.Mitigation * self.Vitality))
+    
+    def regain_hp(self):
+        self.HP = min(self.MHP, self.HP + round((self.Regain * self.Vitality) * 10))
+
+    def take_dot(self):
+        pass
+
+    def take_hot(self):
+        pass
     
     def exp_to_levelup(self):
         return self.level ** 1.15

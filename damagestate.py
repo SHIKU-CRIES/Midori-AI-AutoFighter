@@ -3,6 +3,9 @@ import random
 
 from player import Player
 
+from damage_over_time import dot
+from healing_over_time import hot
+
 from colorama import Fore, Style
 
 from themedstuff import themed_names
