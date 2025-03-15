@@ -384,12 +384,12 @@ class Player:
 
             if "light" in self.PlayerName.lower():
                 self.Regain *= 2
-                self.Mitigation += 4
+                self.Mitigation += 1
                 self.Vitality *= 1.5
 
             if "dark" in self.PlayerName.lower():
                 self.Regain /= 2
-                self.Mitigation /= 4
+                self.Mitigation /= 2
                 self.Vitality *= 2.5
 
             self.MHP *= 10
