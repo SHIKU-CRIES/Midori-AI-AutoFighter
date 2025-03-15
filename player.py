@@ -863,6 +863,7 @@ class Player:
     
     def heal_damage(self, input_healing: float):
         self.HP += round(input_healing)
+        if self.HP > self.MHP: self.HP = self.MHP
 
     def take_damage(self, input_damage: float):
         total_damage = self.damage_mitigation(input_damage)
@@ -872,8 +873,6 @@ class Player:
         self.regain_hp()
         self.take_dot()
         self.take_hot()
-
-        if self.HP > self.MHP: self.HP = self.MHP
 
     def damage_mitigation(self, damage_pre: float):
         return (damage_pre / (self.Mitigation * self.Vitality))
