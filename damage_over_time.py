@@ -42,9 +42,6 @@ class dot:
             self.turns -= 1
             return self.damage
         
-        elif self.turns == -1:
-            return self.damage
-        
         return 0
 
     def is_active(self) -> bool:

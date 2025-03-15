@@ -42,9 +42,6 @@ class hot:
             self.turns -= 1
             return self.healing
         
-        elif self.turns == -1:
-            return self.healing
-        
         return 0
 
     def is_active(self) -> bool:
