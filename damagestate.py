@@ -33,7 +33,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             
             mited_damage_dealt = mited_damage_dealt / 4
             
-            target.HOTS.append(healingovertimetype("light", round(mited_damage_dealt), 100, "generic", source.PlayerName, 2))
+            target.HOTS.append(healingovertimetype("light", round(1), 25, "generic", source.PlayerName, 2))
             target.DodgeOdds += 0.005
 
         else:
@@ -44,7 +44,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 source.Atk += 50
                 source.Def += 50
 
-                source.HOTS.append(healingovertimetype("light", round(mited_damage_dealt), 100, "generic", source.PlayerName, 2))
+                source.HOTS.append(healingovertimetype("light", round(1), 15, "generic", source.PlayerName, 2))
 
             if source.HP > source.MHP * 0.25:
                 hp_diff = source.HP - source.MHP * 0.25
