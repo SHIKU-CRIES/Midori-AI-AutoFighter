@@ -384,19 +384,18 @@ class Player:
 
             if "light" in self.PlayerName.lower():
                 self.Regain *= 2
-                self.Mitigation += 1
+                self.Mitigation += 4
                 self.Vitality *= 1.5
 
             if "dark" in self.PlayerName.lower():
                 self.Regain /= 2
-                self.Mitigation /= 2
+                self.Mitigation /= 5
                 self.Vitality *= 2.5
 
             self.MHP *= 10
             self.Atk *= 2
             self.Def *= 2
             self.Vitality *= 1.5
-            self.Mitigation /= 2
 
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.15
@@ -879,7 +878,7 @@ class Player:
         return (damage_pre / (self.Mitigation * self.Vitality))
     
     def regain_hp(self):
-        self.heal_damage(min(self.MHP, self.HP + (self.Regain * self.Vitality) ** 0.2))
+        self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) * 1))
 
     def take_dot(self):
         for dot in self.DOTS:
