@@ -66,8 +66,8 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         for player in playerlist:
             if source.isplayer == player.isplayer:
                 if player.HP < source.HP:
-                    source.take_damage(5)
-                    player.heal_damage(15)
+                    source.take_damage(source.HP * 0.25)
+                    player.heal_damage(player.HP * 0.55)
 
 
     elif themed_names[1] in target.PlayerName.lower():
