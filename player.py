@@ -868,7 +868,7 @@ class Player:
     def take_damage(self, input_damage: float):
         total_damage = self.damage_mitigation(input_damage)
         self.HP -= round(total_damage)
-        if self.HP < 1: self.MHP = 0; self.HP = -1000
+        if self.HP < 1: self.HP = -1000
     
     def do_pre_turn(self):
         self.regain_hp()
