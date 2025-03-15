@@ -131,13 +131,13 @@ class Player:
 
                     can_load = False
 
-                    if self.PlayerName == past_life_data['PlayerName']:
+                    if self.PlayerName in past_life_data['PlayerName']:
                         can_load = True
                     elif self.PlayerName.lower() == "player":
                         can_load = True
                     
                     if can_load:
-                        self.level_up()
+                        self.level_up(int(past_life_data['level']), int(past_life_data['level']))
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
                         self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 2)
