@@ -360,6 +360,9 @@ def main(level):
 
                             elif target_to_damage.HP > target_to_damage.MHP:
                                 target_to_damage.HP = target_to_damage.MHP
+                    else:
+                        person.save_past_life()
+                        playerlist.remove(person)
 
                     if person.HP > person.MHP:
                         person.HP = person.MHP
