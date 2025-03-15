@@ -168,8 +168,8 @@ def main(level):
 
         level = round(level_sum + foes_killed / len(playerlist))
 
-        if level < max(past_level - 10, 1):
-            level = random.randint(max(past_level - 10, 1), past_level + 10)
+        if level < max(round(past_level / 2) - 10, 1):
+            level = random.randint(max(round(past_level / 2) - 10, 1), round(past_level / 2) + 10)
         else:
             past_level = level
 
