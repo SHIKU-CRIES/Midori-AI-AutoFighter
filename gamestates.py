@@ -316,6 +316,8 @@ def main(level):
                                 target_to_damage.save_past_life()
                                 kill_person(target_to_damage, person)
                                 playerlist.remove(target_to_damage)
+                    else:
+                        foelist.remove(person)
             else:
                 break
 
