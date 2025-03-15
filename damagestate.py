@@ -51,10 +51,10 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 source.HP -= round(source.MHP * scaled_reduction)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
-                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt * 25, 25000, "generic", source.PlayerName, 2))
+                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt * 25, 10000, "generic", source.PlayerName, 2))
             else:
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 2)
-                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt * 10, 25000, "generic", source.PlayerName, 1))
+                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt * 10, 10000, "generic", source.PlayerName, 1))
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
