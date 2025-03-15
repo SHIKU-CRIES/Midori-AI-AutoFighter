@@ -257,7 +257,7 @@ class Player:
         temp_points = points
 
         while temp_points > max_point_gain:
-            if self.CritRate > 0.05:
+            if self.CritRate > 1:
                 desired_increase = max_point_gain / ((to_be_lowered_by * (self.CritRate // 2)) + 1)
             else:
                 desired_increase = max_point_gain
