@@ -86,6 +86,9 @@ def main(level):
     past_level = 1
     foes_killed = 1
 
+    last_known_player = ""
+    last_known_foe = ""
+
     playerlist: list[Player] = []
     temp_themed_names: list[str] = []
 
@@ -301,6 +304,8 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
+                    last_known_foe = person.PlayerName
+
                     if person.Bleed > person.MHP * 0.0001:
                         person.Bleed = max(person.Bleed - (person.Regain * 25), person.MHP * 0.0001)
                     else:
@@ -324,6 +329,8 @@ def main(level):
 
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+
+                    last_known_player = person.PlayerName
                 
                     if bleed_mod > 1.2:
                         person.RushStat = 0
@@ -366,6 +373,7 @@ def main(level):
                     if person.HP > person.MHP:
                         person.HP = person.MHP
             else:
+                log(red, f"Your {last_known_player} at {level} kill by {last_known_foe}")
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
                 exit()
