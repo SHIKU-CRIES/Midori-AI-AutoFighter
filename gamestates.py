@@ -341,6 +341,7 @@ def main(level):
                             take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
                             if target_to_damage.HP < 1:
+                                target_to_damage.save_past_life()
                                 foelist.remove(target_to_damage)
                                 person.Kills += 1
                                 total_rushmod = 0
