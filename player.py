@@ -37,7 +37,7 @@ class Player:
         self.HP: int = self.MHP
         self.Def: int = 25
         self.Atk: int = 250
-        self.Mitigation: float = 2
+        self.Mitigation: float = 0.5
         self.Regain: float = 0.02
         self.Vitality: float = 1
         self.CritRate: float = 0.03
@@ -137,11 +137,11 @@ class Player:
                         can_load = True
                     
                     if can_load:
-                        self.level_up(int(past_life_data['level']), int(past_life_data['level']))
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
-                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) + 2)
-                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 2)
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) * total_items)
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) * total_items)
+                        self.Mitigation: float = self.Mitigation + (0.0005)
                         self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.01
                         self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
                         self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
