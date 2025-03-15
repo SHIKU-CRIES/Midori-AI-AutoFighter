@@ -103,6 +103,8 @@ def main(level):
     player.load()
     player.set_photo("Player".lower())
 
+    player.isplayer = True
+
     if player.level < 5:
         player.load_past_lives()
 
@@ -119,6 +121,8 @@ def main(level):
         player = Player(f"{themed_name.replace("_", " ")}")
         player.load()
         player.set_photo(themed_name.lower())
+
+        player.isplayer = True
 
         if player.level < 5:
             player.load_past_lives()

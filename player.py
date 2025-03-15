@@ -47,7 +47,8 @@ class Player:
         self.DamageDealt: int = 0
         self.Kills: int = 0
         self.RushStat: int = 3
-        self.Logs: list = []
+        self.isplayer: bool = False
+        self.Logs: list[str] = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list[ItemType] = []
         self.DOTS: list[damageovertimetype] = []

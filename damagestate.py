@@ -62,6 +62,12 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if source.DodgeOdds > 0.5:
             source.Def += source.check_base_stats(source.Def, round(source.DodgeOdds ** 2)) + round(source.DodgeOdds)
             source.DodgeOdds = 0
+        
+        for player in playerlist:
+            if source.isplayer == player.isplayer:
+                if player.HP < source.HP:
+                    source.take_damage(5)
+                    player.heal_damage(15)
 
 
     elif themed_names[1] in target.PlayerName.lower():
