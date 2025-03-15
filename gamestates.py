@@ -305,7 +305,7 @@ def main(level):
 
                     last_known_foe = person.PlayerName
 
-                    if person.HP > 0:
+                    if person.HP > 1:
                         person.do_pre_turn()
 
                         if len(playerlist) > 0:
