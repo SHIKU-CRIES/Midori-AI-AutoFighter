@@ -46,7 +46,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 hp_diff = source.HP - source.MHP * 0.25
                 reduction_factor = hp_diff / (source.MHP * 0.75)
                 
-                scaled_reduction = reduction_factor // source.Regain * 0.05
+                scaled_reduction = reduction_factor / source.Regain * 0.05
 
                 source.HP -= round(source.MHP * scaled_reduction)
 
