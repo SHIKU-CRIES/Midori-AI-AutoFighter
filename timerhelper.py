@@ -3,7 +3,7 @@ import time
 class timmer:
     def __init__(self, timeout_seconds=15):
         self.timeout_seconds = timeout_seconds
-        self.start_time = None
+        self.start_time = 0.0
         self.timed_out = False
 
     def start(self):
@@ -19,7 +19,7 @@ class timmer:
 
     def reset(self):
         """Resets the timer to its initial state."""
-        self.start_time = None
+        self.start_time = 0.0
         self.timed_out = False
 
     def get_timeout_duration(self):
