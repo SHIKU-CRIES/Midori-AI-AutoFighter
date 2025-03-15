@@ -247,7 +247,7 @@ def main(level):
             if bleed_mod > 2:
                 def_mod = max(1, (bleed_mod * 0.004) + (bleed_mod * 0.004) + (bleed_mod * 0.002) + 1)
 
-            fps_cap = 35
+            fps_cap = 90
             dt = clock.tick(fps_cap) / 1000
     
             # Render the screen
@@ -300,6 +300,7 @@ def main(level):
                     print(f"Could not render foe stats due to {str(error)}")
 
                 for i, person in enumerate(foelist):
+                    dt = clock.tick(fps_cap) / 1000
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
@@ -324,6 +325,7 @@ def main(level):
             if len(playerlist) > 0:
                 for i, person in enumerate(playerlist):
 
+                    dt = clock.tick(fps_cap) / 1000
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
