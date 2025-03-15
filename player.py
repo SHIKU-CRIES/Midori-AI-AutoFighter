@@ -877,7 +877,7 @@ class Player:
         return (damage_pre / (self.Mitigation * self.Vitality))
     
     def regain_hp(self):
-        self.HP = min(self.MHP, self.HP + round(self.MHP * 0.0001), self.HP + round((self.Regain * self.Vitality) * 1))
+        self.heal_damage(min(self.MHP, self.HP + round(self.MHP * 0.0001), self.HP + round((self.Regain * self.Vitality) * 1)))
 
     def take_dot(self):
         for dot in self.DOTS:
