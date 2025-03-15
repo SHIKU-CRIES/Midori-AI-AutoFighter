@@ -32,15 +32,19 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
             
             mited_damage_dealt = mited_damage_dealt / 4
+            
+            target.HOTS.append(healingovertimetype("light", round(mited_damage_dealt), 100, "generic", source.PlayerName, 2))
             target.DodgeOdds += 0.005
 
         else:
-            if source.Regain > 1000:
+            if source.Regain > 1:
                 source.Regain -= 0.01
                 source.MHP += 500
                 source.HP += 500
                 source.Atk += 50
                 source.Def += 50
+
+                source.HOTS.append(healingovertimetype("light", round(mited_damage_dealt), 100, "generic", source.PlayerName, 2))
 
             if source.HP > source.MHP * 0.25:
                 hp_diff = source.HP - source.MHP * 0.25
@@ -51,10 +55,10 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
                 source.HP -= round(source.MHP * scaled_reduction)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
-                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt, 3, "generic", source.PlayerName, 2))
+                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt, 25, "generic", source.PlayerName, 2))
             else:
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 2)
-                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt, 3, "generic", source.PlayerName, 1))
+                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt, 25, "generic", source.PlayerName, 1))
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
