@@ -25,7 +25,7 @@ def debug_log(text):
     
     return text
 
-def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
+def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
             source.Regain -= 0.01
@@ -149,7 +149,7 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
 
         return mited_damage_dealt
 
-def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: float):
+def take_damage(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, fight_env_list: list, def_mod: float):
     """
     Handles a player taking damage from another player.
 
@@ -181,7 +181,7 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
         mited_damage_dealt = float(damage_dealt / max(def_val * target_vit, 2))
         mited_damage_dealt = mited_damage_dealt * random.uniform(0.95, 1.05)
     
-    mited_damage_dealt = check_passive_mod(source, target, mited_damage_dealt)
+    mited_damage_dealt = check_passive_mod(foelist, playerlist, source, target, mited_damage_dealt)
 
     if (target.DodgeOdds / enrage_buff) >= random.random():
         log(green, f"{target.PlayerName} dodged!")

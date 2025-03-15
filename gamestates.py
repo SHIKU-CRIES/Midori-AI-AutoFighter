@@ -311,7 +311,7 @@ def main(level):
 
                         if len(playerlist) > 0:
                             target_to_damage = random.choice(playerlist)
-                            take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
+                            take_damage(foelist, playerlist, target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
                             if target_to_damage.HP < 1:
                                 target_to_damage.save_past_life()
@@ -340,7 +340,7 @@ def main(level):
 
                         if len(foelist) > 0:
                             target_to_damage = random.choice(foelist)
-                            take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
+                            take_damage(foelist, playerlist, target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
                             if target_to_damage.HP < 1:
                                 foelist.remove(target_to_damage)
