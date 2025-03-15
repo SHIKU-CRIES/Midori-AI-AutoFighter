@@ -22,7 +22,7 @@ class hot:
 
         self.name: str = name
         self.healing: int = healing
-        self.turns: int = turns
+        self.turns: int = turns * 1000
         self.healing_type: str = healing_type
         self.source: Optional[str] = source
         self.metadata: Optional[Dict[str, Any]] = metadata
@@ -41,6 +41,10 @@ class hot:
         if self.turns > 0:
             self.turns -= 1
             return self.healing
+        
+        elif self.turns == -1:
+            return self.healing
+        
         return 0
 
     def is_active(self) -> bool:

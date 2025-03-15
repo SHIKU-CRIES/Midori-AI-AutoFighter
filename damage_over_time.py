@@ -22,7 +22,7 @@ class dot:
 
         self.name: str = name
         self.damage: float = damage
-        self.turns: int = turns
+        self.turns: int = turns * 1000
         self.damage_type: str = damage_type
         self.source: Optional[str] = source
         self.metadata: Optional[Dict[str, Any]] = metadata
@@ -41,6 +41,10 @@ class dot:
         if self.turns > 0:
             self.turns -= 1
             return self.damage
+        
+        elif self.turns == -1:
+            return self.damage
+        
         return 0
 
     def is_active(self) -> bool:
