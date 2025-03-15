@@ -17,7 +17,7 @@ class dot:
         ValueError: If 'turns' is not a integer.
     """
     def __init__(self, name: str, damage: float, turns: int, damage_type: str = "generic", source: Optional[str] = None, tick_interval: int = 1, metadata: Optional[Dict[str, Any]] = None) -> None:
-        if not isinstance(turns, int) or turns <= 0:
+        if not isinstance(turns, int):
             raise ValueError("Turns must be a integer.")
 
         self.name: str = name
