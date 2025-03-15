@@ -305,16 +305,17 @@ def main(level):
 
                     last_known_foe = person.PlayerName
 
-                    person.do_pre_turn()
+                    if person.HP > 0:
+                        person.do_pre_turn()
 
-                    if len(playerlist) > 0:
-                        target_to_damage = random.choice(playerlist)
-                        take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
+                        if len(playerlist) > 0:
+                            target_to_damage = random.choice(playerlist)
+                            take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
-                        if target_to_damage.HP < 1:
-                            target_to_damage.save_past_life()
-                            kill_person(target_to_damage, person)
-                            playerlist.remove(target_to_damage)
+                            if target_to_damage.HP < 1:
+                                target_to_damage.save_past_life()
+                                kill_person(target_to_damage, person)
+                                playerlist.remove(target_to_damage)
             else:
                 break
 
