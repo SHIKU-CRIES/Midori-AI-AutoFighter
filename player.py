@@ -13,8 +13,8 @@ from items import ItemType
 from weapons import WeaponType
 from weapons import get_weapon
 
-from damage_over_time import dot
-from healing_over_time import hot
+from damage_over_time import dot as damageovertimetype
+from healing_over_time import hot as healingovertimetype
 
 from load_photos import resource_path
 
@@ -50,8 +50,8 @@ class Player:
         self.Logs: list = []
         self.Inv: list[WeaponType] = [get_weapon('game_bit')]
         self.Items: list[ItemType] = []
-        self.HOT: list[hot] = []
-        self.DOT: list[dot] = []
+        self.DOTS: list[damageovertimetype] = []
+        self.HOTS: list[healingovertimetype] = []
         self.photo: str = "player.png"
         self.photodata = ""
         
@@ -396,9 +396,6 @@ class Player:
             self.Atk *= 2
             self.Def *= 2
             self.Vitality *= 1.5
-
-            self.Bleed += 100
-            self.Bleed *= 100
 
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.15
@@ -863,18 +860,42 @@ class Player:
         
         if self.MHP > 20000000000:
             self.MHP = 1
+    
+    def heal_damage(self, input_healing: float):
+        self.HP += round(input_healing)
+
+    def take_damage(self, input_damage: float):
+        total_damage = self.damage_mitigation(input_damage)
+        self.HP -= round(total_damage)
+    
+    def do_pre_turn(self):
+        self.regain_hp()
+        self.take_dot()
+        self.take_hot()
 
     def damage_mitigation(self, damage_pre: float):
         return (damage_pre / (self.Mitigation * self.Vitality))
     
     def regain_hp(self):
-        self.HP = min(self.MHP, self.HP + round((self.Regain * self.Vitality) * 10))
+        self.HP = min(self.MHP, self.HP + round(self.MHP * 0.0001), self.HP + round((self.Regain * self.Vitality) * 10))
 
     def take_dot(self):
-        pass
+        for dot in self.DOTS:
+            if dot.is_active():
+                dot_damage = dot.tick()
+                for i in range(dot.tick_interval):
+                    self.take_damage(dot_damage)
+            else:
+                self.DOTS.remove(dot)
 
     def take_hot(self):
-        pass
+        for hot in self.HOTS:
+            if hot.is_active():
+                hot_healing = hot.tick()
+                for i in range(hot.tick_interval):
+                    self.heal_damage(hot_healing)
+            else:
+                self.HOTS.remove(hot)
     
     def exp_to_levelup(self):
         return self.level ** 1.15
@@ -1102,9 +1123,6 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
-
-        if player.Bleed != 0:
-            stat_data.append(("Bleed:", f"{player.Bleed:.1f}x"))
 
         x_offset = x
         y_offset = y - 275

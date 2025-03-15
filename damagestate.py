@@ -3,8 +3,8 @@ import random
 
 from player import Player
 
-from damage_over_time import dot
-from healing_over_time import hot
+from damage_over_time import dot as damageovertimetype
+from healing_over_time import hot as healingovertimetype
 
 from colorama import Fore, Style
 
@@ -50,11 +50,11 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
 
                 source.HP -= round(source.MHP * scaled_reduction)
 
-                target.Bleed += max(max(mited_damage_dealt, 1) * ((source.MHP - source.HP) + 1) / ((target.Def / 5) * (target.Vitality / 2)), 5)
+                mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
+                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt, 3, "generic", source.PlayerName, 2))
             else:
-                target.Bleed += max(max(mited_damage_dealt, 1) * ((source.MHP - source.HP) + 1) / ((target.Def * 10) * (target.Vitality * 2)), 5)
-
-        mited_damage_dealt = mited_damage_dealt * ((source.MHP - source.HP) + 1)
+                mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 2)
+                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt, 3, "generic", source.PlayerName, 1))
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
@@ -62,17 +62,6 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
         if source.DodgeOdds > 0.5:
             source.Def += source.check_base_stats(source.Def, round(source.DodgeOdds ** 2)) + round(source.DodgeOdds)
             source.DodgeOdds = 0
-        if source.Bleed > 125:
-            if random.random() > 0.95:
-                source.Def += source.check_base_stats(source.Def, round(source.Bleed ** 2)) + round(source.Bleed)
-                source.Bleed *= 0.95
-
-            if hp_percentage < 0.75:
-                def_bonus = (1 - hp_percentage) * 500
-                bleed_reduction = (1 - hp_percentage) * 0.35
-
-                source.Def += source.check_base_stats(source.Def, round((source.Bleed * def_bonus) ** 2)) + round(source.Bleed)
-                source.Bleed *= (1 - bleed_reduction)
 
 
     elif themed_names[1] in target.PlayerName.lower():
@@ -90,10 +79,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             
         
     if themed_names[2] in source.PlayerName.lower():
-        if source.Bleed > 100:
-            if random.random() > 0.8:
-                source.Atk += source.check_base_stats(source.Atk, round(source.Bleed ** 2)) + round(source.Bleed)
-                source.Bleed *= 0.95
+        pass
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:
@@ -197,8 +183,6 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
     
     mited_damage_dealt = check_passive_mod(source, target, mited_damage_dealt)
 
-    mited_damage_dealt = target.damage_mitigation(mited_damage_dealt)
-
     if (target.DodgeOdds / enrage_buff) >= random.random():
         log(green, f"{target.PlayerName} dodged!")
     else:
@@ -217,4 +201,4 @@ def take_damage(source: Player, target: Player, fight_env_list: list, def_mod: f
         if mited_damage_dealt > target.HP:
             mited_damage_dealt = target.HP + 1000
 
-        target.HP -= int(max(mited_damage_dealt, 1))
+        target.take_damage(max(mited_damage_dealt, 1))

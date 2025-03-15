@@ -16,7 +16,7 @@ class hot:
     Raises:
         ValueError: If 'turns' is not a positive integer.
     """
-    def __init__(self, name: str, healing: int, turns: int, healing_type: str = "generic", source: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None, tick_interval: int = 1) -> None:
+    def __init__(self, name: str, healing: int, turns: int, healing_type: str = "generic", source: Optional[str] = None, tick_interval: int = 1, metadata: Optional[Dict[str, Any]] = None) -> None:
         if not isinstance(turns, int) or turns <= 0:
             raise ValueError("Turns must be a positive integer.")
 

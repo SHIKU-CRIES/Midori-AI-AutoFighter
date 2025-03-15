@@ -305,6 +305,8 @@ def main(level):
 
                     last_known_foe = person.PlayerName
 
+                    person.do_pre_turn()
+
                     if len(playerlist) > 0:
                         target_to_damage = random.choice(playerlist)
                         take_damage(target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
@@ -328,6 +330,8 @@ def main(level):
                         person.RushStat = 0
 
                     if person.HP > 0:
+
+                        person.do_pre_turn()
 
                         if len(foelist) > 0:
                             target_to_damage = random.choice(foelist)

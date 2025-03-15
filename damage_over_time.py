@@ -6,7 +6,7 @@ class dot:
 
     Attributes:
         name (str): The name of the DOT effect (e.g., "Poison," "Burn").
-        damage (int): The amount of damage dealt per turn by the DOT.
+        damage (float): The amount of damage dealt per turn by the DOT.
         turns (int): The number of turns the DOT effect lasts.  Must be greater than 0.
         damage_type (str):  The type of damage the DOT inflicts (e.g., "fire", "poison", "bleed").
         source (Optional[str]):  Optional name or identifier of the entity that applied the DOT.  Helps track responsibility.
@@ -16,12 +16,12 @@ class dot:
     Raises:
         ValueError: If 'turns' is not a positive integer.
     """
-    def __init__(self, name: str, damage: int, turns: int, damage_type: str = "generic", source: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None, tick_interval: int = 1) -> None:
+    def __init__(self, name: str, damage: float, turns: int, damage_type: str = "generic", source: Optional[str] = None, tick_interval: int = 1, metadata: Optional[Dict[str, Any]] = None) -> None:
         if not isinstance(turns, int) or turns <= 0:
             raise ValueError("Turns must be a positive integer.")
 
         self.name: str = name
-        self.damage: int = damage
+        self.damage: float = damage
         self.turns: int = turns
         self.damage_type: str = damage_type
         self.source: Optional[str] = source
