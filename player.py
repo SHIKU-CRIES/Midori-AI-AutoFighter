@@ -1126,6 +1126,12 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         if (player.DodgeOdds * 100) / bleed_mod > 1:
             stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
+        if len(player.DOTS) > 0:
+            stat_data.append(("Dots:", f"{len(player.DOTS)}"))
+
+        if len(player.HOTS) > 0:
+            stat_data.append(("Hots:", f"{len(player.HOTS)}"))
+
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
