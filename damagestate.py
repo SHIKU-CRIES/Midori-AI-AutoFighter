@@ -27,7 +27,7 @@ def debug_log(text):
 
 def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
-        if source.Regain > 1:
+        if source.Regain > 0.01:
             source.Regain -= 0.01
             source.MHP += 500
             source.HP += 500
