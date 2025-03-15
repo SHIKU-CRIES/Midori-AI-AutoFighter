@@ -1072,7 +1072,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     font = pygame.font.SysFont('Arial', 25)
 
     # Player name
-    player_text = font.render(player.PlayerName, True, (255, 255, 255), (0, 0, 0, 200))
+    player_text = font.render(player.PlayerName, True, (255, 255, 255), (0, 0, 0, 125))
     player_rect = player_text.get_rect(topleft=(x, y))
 
     player_profile_pic = pygame.transform.scale(player_profile_pic, size)
