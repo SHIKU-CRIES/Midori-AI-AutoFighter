@@ -873,8 +873,7 @@ class Player:
         self.take_dot()
         self.take_hot()
 
-        if self.HP > self.MHP:
-            self.HP = self.MHP
+        if self.HP > self.MHP: self.HP = self.MHP
 
     def damage_mitigation(self, damage_pre: float):
         return (damage_pre / (self.Mitigation * self.Vitality))
