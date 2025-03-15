@@ -14,11 +14,11 @@ class dot:
         tick_interval (int): how many times to do the effect each turn, good if you want to do it fast and for less time.
 
     Raises:
-        ValueError: If 'turns' is not a positive integer.
+        ValueError: If 'turns' is not a integer.
     """
     def __init__(self, name: str, damage: float, turns: int, damage_type: str = "generic", source: Optional[str] = None, tick_interval: int = 1, metadata: Optional[Dict[str, Any]] = None) -> None:
         if not isinstance(turns, int) or turns <= 0:
-            raise ValueError("Turns must be a positive integer.")
+            raise ValueError("Turns must be a integer.")
 
         self.name: str = name
         self.damage: float = damage
