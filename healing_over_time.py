@@ -22,7 +22,7 @@ class hot:
 
         self.name: str = name
         self.healing: int = healing
-        self.turns: int = turns * 1000
+        self.turns: int = turns
         self.healing_type: str = healing_type
         self.source: Optional[str] = source
         self.metadata: Optional[Dict[str, Any]] = metadata

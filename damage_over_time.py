@@ -22,7 +22,7 @@ class dot:
 
         self.name: str = name
         self.damage: float = damage
-        self.turns: int = turns * 1000
+        self.turns: int = turns
         self.damage_type: str = damage_type
         self.source: Optional[str] = source
         self.metadata: Optional[Dict[str, Any]] = metadata
