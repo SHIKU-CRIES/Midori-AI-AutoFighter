@@ -874,14 +874,15 @@ class Player:
         max_level_ups = 5
 
         mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
-        int_mod = max(int(mod_fixed * (self.level / 100)), 1)
+        int_mod_novit = max(round(((mod * 0.55) + 1) * (self.level / 1000) * (self.level / 100)), 1)
+        int_mod = max(round(mod_fixed * (self.level / 100)), 1)
 
         EXP_to_levelup = self.exp_to_levelup()
 
         if self.EXP >= EXP_to_levelup * 100:
-            self.EXP += max(round(((foe_level * 2) ** 0.00025) * int_mod), round((foe_level * 2) ** 0.00045)) + 1
+            self.EXP += max(round(((foe_level * 2) ** 0.00025) * int_mod_novit), round((foe_level * 2) ** 0.00045)) + 1
         else:
-            self.EXP += max(round(((foe_level * 4) ** 0.15) * int_mod), round((foe_level * 4) ** 0.35)) + 1
+            self.EXP += max(round(((foe_level * 4) ** 0.15) * int_mod_novit), round((foe_level * 4) ** 0.35)) + 1
 
         while self.EXP >= EXP_to_levelup:
             if level_ups > max_level_ups:
