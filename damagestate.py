@@ -27,6 +27,15 @@ def debug_log(text):
 
 def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float):
     if themed_names[0] in source.PlayerName.lower():
+        if source.Regain > 1:
+            source.Regain -= 0.01
+            source.MHP += 500
+            source.HP += 500
+            source.Atk += 50
+            source.Def += 50
+            
+            source.HOTS.append(healingovertimetype("light", round(1), 15, "generic", source.PlayerName, 2))
+
         if themed_names[0] in target.PlayerName.lower():
             if random.random() >= 0.98:
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
@@ -35,17 +44,7 @@ def check_passive_mod(source: Player, target: Player, mited_damage_dealt: float)
             
             target.HOTS.append(healingovertimetype("light", round(1), 25, "generic", source.PlayerName, 2))
             target.DodgeOdds += 0.005
-
         else:
-            if source.Regain > 1:
-                source.Regain -= 0.01
-                source.MHP += 500
-                source.HP += 500
-                source.Atk += 50
-                source.Def += 50
-
-                source.HOTS.append(healingovertimetype("light", round(1), 15, "generic", source.PlayerName, 2))
-
             if source.HP > source.MHP * 0.25:
                 hp_diff = source.HP - source.MHP * 0.25
                 reduction_factor = hp_diff / (source.MHP * 0.75)
