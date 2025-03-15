@@ -31,7 +31,7 @@ class dot:
     def __repr__(self) -> str:
         return f"DOT(name='{self.name}', damage={self.damage}, turns={self.turns}, type={self.damage_type})"
 
-    def tick(self) -> int:
+    def tick(self) -> float:
         """
         Reduces the remaining duration of the DOT.
 
