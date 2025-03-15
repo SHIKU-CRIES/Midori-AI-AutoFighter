@@ -247,7 +247,7 @@ def main(level):
             if bleed_mod > 2:
                 def_mod = max(1, (bleed_mod * 0.004) + (bleed_mod * 0.004) + (bleed_mod * 0.002) + 1)
 
-            fps_cap = 90
+            fps_cap = 65
             dt = clock.tick(fps_cap) / 1000
     
             # Render the screen
