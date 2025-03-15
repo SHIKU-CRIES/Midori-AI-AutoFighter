@@ -1127,7 +1127,11 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             stat_data.append(("Dodge Odds:", f"{((player.DodgeOdds * 100) / bleed_mod):.2f}%"))
 
         if len(player.DOTS) > 0:
-            stat_data.append(("Dots:", f"{len(player.DOTS)}"))
+            total_dot_damge = 0
+            for dots in player.DOTS:
+                total_dot_damge += dots.damage * dots.tick_interval
+
+            stat_data.append(("Dots:", f"{len(player.DOTS)} (Damage/t: {total_dot_damge})"))
 
         if len(player.HOTS) > 0:
             stat_data.append(("Hots:", f"{len(player.HOTS)}"))
