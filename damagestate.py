@@ -26,6 +26,15 @@ def debug_log(text):
     return text
 
 def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, mited_damage_dealt: float):
+        
+    alllist: list[Player] = []
+    
+    for player in foelist:
+        alllist.append(player)
+    
+    for player in playerlist:
+        alllist.append(player)
+
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
             source.Regain -= 0.01
@@ -62,13 +71,13 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if source.DodgeOdds > 0.5:
             source.Def += source.check_base_stats(source.Def, round(source.DodgeOdds ** 2)) + round(source.DodgeOdds)
             source.DodgeOdds = 0
-        
-        for player in playerlist:
+
+        for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.HP < source.HP:
                     source.take_damage(source.HP * 0.01)
                     player.heal_damage(player.HP * 0.25)
-                    
+
                 if player.Def > source.Def:
                     player.Def -= 1
                     source.Def += source.check_base_stats(source.Def, player.level)
