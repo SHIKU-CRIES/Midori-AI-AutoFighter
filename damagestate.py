@@ -101,8 +101,8 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.HP < source.HP:
-                    player.heal_damage(player.HP * 0.05)
-                    player.HOTS.append(healingovertimetype("Heal", round(player.HP * 0.001), 2500, "light", source.PlayerName, 1))
+                    player.heal_damage(player.HP * 0.005)
+                    player.HOTS.append(healingovertimetype("Heal", round(player.HP * 0.001), 250, "light", source.PlayerName, 1))
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:
