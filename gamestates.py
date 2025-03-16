@@ -6,9 +6,6 @@ import importlib
 
 from screendata import Screen
 
-from weapons import get_weapon
-from weapons import get_random_weapon
-
 from timerhelper import timmer
 
 from damagestate import take_damage
@@ -205,7 +202,7 @@ def main(level):
             foe.photodata = pygame.transform.flip(foe.photodata, True, False)
             foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
 
-            foe.update_inv(get_weapon(get_random_weapon()), True)
+            #foe.update_inv(get_weapon(get_random_weapon()), True)
 
             foelist.append(foe)
 
