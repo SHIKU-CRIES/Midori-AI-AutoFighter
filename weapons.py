@@ -4,9 +4,6 @@ from typing import Tuple
 
 from passives import PassiveType
 
-if typing.TYPE_CHECKING:
-    from player import Player
-
 class WeaponType:
     """Represents a weapon type with its attributes and passive effect."""
 
@@ -29,7 +26,7 @@ class WeaponType:
         self.position: Tuple[int, int] = (0, 0)  # type: ignore
         self.passive = passive
 
-    def use_passive(self, target: Player, user: Player) -> None:
+    def use_passive(self, target, user) -> None:
         """Applies the weapon's passive effect, if any.
 
         Args:

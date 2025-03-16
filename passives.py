@@ -1,18 +1,16 @@
 import typing
 
+from typing import Any
 from typing import Union
 
 from typing import Callable
 from typing import Optional
 from typing import Protocol
 
-if typing.TYPE_CHECKING:
-    from player import Player
-
 class PassiveEffect(Protocol):
     """Protocol defining the interface for passive effects."""
 
-    def activate(self, target: Player, user: Player) -> None:
+    def activate(self, target, user) -> None:
         """Applies the passive effect.
 
         Args:
@@ -22,4 +20,4 @@ class PassiveEffect(Protocol):
         ...
 
 
-PassiveType = Optional[Union[Callable[[Player, Player], None], PassiveEffect]]
+PassiveType = Optional[Union[Callable[[Any, Any], None], PassiveEffect]]
