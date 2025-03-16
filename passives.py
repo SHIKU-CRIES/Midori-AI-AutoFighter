@@ -32,9 +32,11 @@ class PassiveType:
         Initializes the PassiveType object.
 
         Args:
+            name: The name of the passive.
             source_type: The expected type of the source.
             target_type: The expected type of the target.
         """
+        self.name = name
         self.source_type = source_type
         self.target_type = target_type
 

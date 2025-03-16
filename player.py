@@ -12,6 +12,8 @@ from items import ItemType
 
 from weapons import WeaponType
 
+from passives import PassiveType
+
 from damage_over_time import dot as damageovertimetype
 from healing_over_time import hot as healingovertimetype
 
