@@ -48,7 +48,7 @@ class Player:
         self.RushStat: int = 3
         self.isplayer: bool = False
         self.Logs: list[str] = []
-        self.Inv: list[WeaponType] = [WeaponType("game_bit", 10, 0.8, 0.05, f"{random.getrandbits(1)}")]
+        self.Inv: list[WeaponType] = []
         self.Items: list[ItemType] = []
         self.DOTS: list[damageovertimetype] = []
         self.HOTS: list[healingovertimetype] = []
