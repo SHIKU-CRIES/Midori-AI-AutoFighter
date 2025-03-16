@@ -172,14 +172,16 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
 
         return mited_damage_dealt
 
-def take_damage(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, fight_env_list: list, def_mod: float):
+def take_damage(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, fight_env_list: list):
     """
     Handles a player taking damage from another player.
 
     Args:
+        foelist (list): A list of enemy Player objects.
+        playerlist (list): A list of all Player objects.
         source (Player): The Player object inflicting the damage.
         target (Player): The Player object receiving the damage.
-        fight_env_list (List): A list of unchangeable outside vars to inpact damage.
+        fight_env_list (list): A list of unchangeable outside vars to impact damage.
     """
 
     enrage_buff = fight_env_list[0]
@@ -189,7 +191,7 @@ def take_damage(foelist: list[Player], playerlist: list[Player], source: Player,
     random_crit = random.random()
     source_vit = source.Vitality
     target_vit = target.Vitality
-    def_val = ((target.Def / def_mod) ** 2)
+    def_val = target.Def ** 2
     damage_dealt = ((source.Atk * source_vit) * 2)
     crit = False
     # log(white, f"pre mitigated dmg: {damage_dealt}, target Vit: {target_vit}, source Vit: {source_vit}, target def: {def_val}")

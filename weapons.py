@@ -2,12 +2,10 @@ import typing
 
 from typing import Tuple
 
-from passives import PassiveProto
-
 class WeaponType:
     """Represents a weapon type with its attributes and passive effect."""
 
-    def __init__(self, name: str, damage: int, accuracy: float, critical_chance: float, passive: PassiveProto, game_str: str) -> None:
+    def __init__(self, name: str, damage: int, accuracy: float, critical_chance: float, game_str: str) -> None:
         """Initializes a WeaponType object.
 
         Args:
@@ -24,17 +22,3 @@ class WeaponType:
         self.critical_chance = critical_chance
         self.game_obj = game_str
         self.position: Tuple[int, int] = (0, 0)  # type: ignore
-        self.passive = passive
-
-    def use_passive(self, target, user) -> None:
-        """Applies the weapon's passive effect, if any.
-
-        Args:
-            target: The target Player object.
-            user: The user Player object.
-        """
-        if self.passive:
-            if callable(self.passive):
-                self.passive(target, user)
-            else:
-                self.passive.activate(target, user)

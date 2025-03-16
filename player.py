@@ -871,13 +871,21 @@ class Player:
         total_damage = self.damage_mitigation(input_damage)
         self.HP -= round(total_damage)
     
+    def deal_damage(self, input_damage_mod: float):
+        damage_dealt = ((self.Atk * self.Vitality) * 2)
+
+        if self.check_crit():
+            damage_dealt = self.crit_damage_mod(damage_dealt)
+
+        return damage_dealt * random.uniform(0.95, 1.05) * input_damage_mod
+    
     def do_pre_turn(self):
         self.regain_hp()
         self.take_dot()
         self.take_hot()
 
     def damage_mitigation(self, damage_pre: float):
-        return (damage_pre / (self.Mitigation * self.Vitality))
+        return (damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 5)))
     
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 0.90))
@@ -903,6 +911,21 @@ class Player:
                     self.heal_damage(hot_healing)
             else:
                 self.HOTS.remove(hot)
+    
+    def check_crit(self):
+        if self.CritRate >= random.random():
+            return True
+        else:
+            return False
+    
+    def check_dodge(self, enrage_buff: float):
+        if self.DodgeOdds / enrage_buff >= random.random():
+            return True
+        else:
+            return False
+
+    def crit_damage_mod(self, damage_pre: float):
+        return damage_pre * self.CritDamageMod * max(1, self.CritRate)
     
     def exp_to_levelup(self):
         return self.level ** 1.15
@@ -971,7 +994,8 @@ class Player:
                 self.gain_dodgeodds_rate(dodgeodds_up)
             elif choice == 8:
                 if len(self.Items) < starting_max_blessing:
-                    self.Items.append(ItemType())
+                    #self.Items.append(ItemType())
+                    continue
                 else:
                     random.choice(self.Items).upgrade(mod_fixed * 25)
             elif choice == 9:
@@ -1002,7 +1026,8 @@ class Player:
                     self.gain_dodgeodds_rate(dodgeodds_up)
                     
                     if len(self.Items) < starting_max_blessing:
-                        self.Items.append(ItemType())
+                        #self.Items.append(ItemType())
+                        continue
                     else:
                         for item in self.Items:
                             item.upgrade(mod_fixed)
@@ -1045,7 +1070,8 @@ class Player:
                 if len(self.Items) > starting_max_blessing:
                     random.choice(self.Items).upgrade((bonus_levels * 200) / level)
                 else:
-                    self.Items.append(ItemType())
+                    continue
+                    #self.Items.append(ItemType())
 
         self.check_stats()
         self.check_name_mod()
@@ -1112,7 +1138,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             ("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"),
             ("Max HP:", player.MHP),
             ("Atk:", int(player.Atk)),
-            ("Def:", int(player.Def / def_mod)),
+            ("Def:", int(player.Def)),
             ("Crit Rate / Mod:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
             ("HP Regain:", f"{(player.Regain * 100):.0f}"),
         ]

@@ -266,7 +266,7 @@ def main(level):
                     ("Level:", foelist[0].level),
                     ("Max HP:", foelist[0].MHP),
                     ("Atk:", int(foelist[0].Atk)),
-                    ("Def:", int(foelist[0].Def / def_mod)),
+                    ("Def:", int(foelist[0].Def)),
                     ("Crit Rate:", f"{(foelist[0].CritRate * 100):.1f}%"),
                     ("Crit Damage Mod:", f"{(foelist[0].CritDamageMod):.2f}x"),
                     ("HP Regain:", f"{(foelist[0].Regain * 100):.0f}"),
@@ -275,8 +275,8 @@ def main(level):
                 if len(foelist[0].Items) > 0:
                     foe_stat_data.append(("Blessings:", f"{len(foelist[0].Items)}"))
 
-                if foelist[0].Vitality / def_mod > 1.5:
-                    foe_stat_data.append(("Vitality:", f"{(foelist[0].Vitality / def_mod):.2f}x"))
+                if foelist[0].Vitality > 1.5:
+                    foe_stat_data.append(("Vitality:", f"{(foelist[0].Vitality):.2f}x"))
 
                 if (foelist[0].DodgeOdds * 100) / bleed_mod > 1:
                     foe_stat_data.append(("Dodge Odds:", f"{((foelist[0].DodgeOdds * 100) / bleed_mod):.2f}%"))
@@ -312,7 +312,8 @@ def main(level):
 
                         if len(playerlist) > 0:
                             target_to_damage = random.choice(playerlist)
-                            take_damage(foelist, playerlist, target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
+                            target_to_damage.take_damage(person.deal_damage(bleed_mod))
+                            #take_damage(foelist, playerlist, target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
                             if target_to_damage.HP < 1:
                                 target_to_damage.save_past_life()
@@ -341,7 +342,8 @@ def main(level):
 
                         if len(foelist) > 0:
                             target_to_damage = random.choice(foelist)
-                            take_damage(foelist, playerlist, target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
+                            target_to_damage.take_damage(person.deal_damage(bleed_mod))
+                            #take_damage(foelist, playerlist, target_to_damage, person, [bleed_mod, enrage_timer], def_mod)
 
                             if target_to_damage.HP < 1:
                                 foelist.remove(target_to_damage)
