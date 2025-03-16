@@ -11,7 +11,6 @@ from halo import Halo
 from items import ItemType
 
 from weapons import WeaponType
-from weapons import get_weapon
 
 from damage_over_time import dot as damageovertimetype
 from healing_over_time import hot as healingovertimetype
@@ -49,7 +48,7 @@ class Player:
         self.RushStat: int = 3
         self.isplayer: bool = False
         self.Logs: list[str] = []
-        self.Inv: list[WeaponType] = [get_weapon('game_bit')]
+        self.Inv: list[WeaponType] = [WeaponType("game_bit", 10, 0.8, 0.05, f"{random.getrandbits(1)}")]
         self.Items: list[ItemType] = []
         self.DOTS: list[damageovertimetype] = []
         self.HOTS: list[healingovertimetype] = []
