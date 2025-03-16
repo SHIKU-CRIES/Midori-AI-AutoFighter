@@ -2,12 +2,12 @@ import typing
 
 from typing import Tuple
 
-from passives import PassiveType
+from passives import PassiveProto
 
 class WeaponType:
     """Represents a weapon type with its attributes and passive effect."""
 
-    def __init__(self, name: str, damage: int, accuracy: float, critical_chance: float, passive: PassiveType, game_str: str) -> None:
+    def __init__(self, name: str, damage: int, accuracy: float, critical_chance: float, passive: PassiveProto, game_str: str) -> None:
         """Initializes a WeaponType object.
 
         Args:

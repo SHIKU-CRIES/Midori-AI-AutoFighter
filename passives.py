@@ -20,4 +20,55 @@ class PassiveEffect(Protocol):
         ...
 
 
-PassiveType = Optional[Union[Callable[[Any, Any], None], PassiveEffect]]
+PassiveProto = Optional[Union[Callable[[Any, Any], None], PassiveEffect]]
+
+class PassiveType:
+    """
+    A class to represent a passive type with source and target type checks.
+    """
+
+    def __init__(self, name: str, source_type, target_type):
+        """
+        Initializes the PassiveType object.
+
+        Args:
+            source_type: The expected type of the source.
+            target_type: The expected type of the target.
+        """
+        self.source_type = source_type
+        self.target_type = target_type
+
+    def check_source_type(self, source):
+        """
+        Checks if the given source is of the expected type.
+
+        Args:
+            source: The source object to check.
+
+        Returns:
+            True if the source is of the expected type, False otherwise.
+        """
+        return isinstance(source, self.source_type)
+
+    def check_target_type(self, target):
+        """
+        Checks if the given target is of the expected type.
+
+        Args:
+            target: The target object to check.
+
+        Returns:
+            True if the target is of the expected type, False otherwise.
+        """
+        return isinstance(target, self.target_type)
+
+    def activate(self, target, user) -> None:
+        """Applies the passive effect."""
+
+        if not self.check_target_type(target):
+            return
+        
+        if not self.check_source_type(user):
+            return
+        
+        pass
