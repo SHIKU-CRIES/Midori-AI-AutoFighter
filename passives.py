@@ -1,5 +1,4 @@
-
-from player import Player
+import typing
 
 from typing import Union
 
@@ -7,6 +6,8 @@ from typing import Callable
 from typing import Optional
 from typing import Protocol
 
+if typing.TYPE_CHECKING:
+    from player import Player
 
 class PassiveEffect(Protocol):
     """Protocol defining the interface for passive effects."""
