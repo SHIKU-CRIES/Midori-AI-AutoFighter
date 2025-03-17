@@ -20,6 +20,8 @@ from themedstuff import themed_names
 from typing import Tuple
 
 from colorama import Fore, Style
+
+from damage_over_time import dot as damageovertimetype
     
 red = Fore.RED
 green = Fore.GREEN
@@ -306,6 +308,10 @@ def main(level):
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     last_known_foe = person.PlayerName
+                
+                    if bleed_mod > 1.5:
+                        person.RushStat = 0
+                        person.DOTS.append(damageovertimetype("Bleed", person.HP * 0.0001 * bleed_mod, max(450, 4 ** bleed_mod), "generic", person.PlayerName, 2))
 
                     if person.HP > 1:
                         person.do_pre_turn()
@@ -333,8 +339,9 @@ def main(level):
 
                     last_known_player = person.PlayerName
                 
-                    if bleed_mod > 1.2:
+                    if bleed_mod > 1.5:
                         person.RushStat = 0
+                        person.DOTS.append(damageovertimetype("Bleed", person.HP * 0.0001 * bleed_mod, max(450, 4 ** bleed_mod), "generic", person.PlayerName, 2))
 
                     if person.HP > 0:
 
