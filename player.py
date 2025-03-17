@@ -889,7 +889,7 @@ class Player:
         self.take_hot()
 
     def damage_mitigation(self, damage_pre: float):
-        return (damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 5)))
+        return (damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 1.5)))
     
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 0.90))
