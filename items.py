@@ -81,3 +81,36 @@ class ItemType():
             total_output = float(desired_increase)
 
         return total_output
+
+
+def on_damage_taken(items: list[ItemType], pre_damage_taken: float):
+    total_output = pre_damage_taken
+    
+    for item in items:
+        total_output = item.on_damage_taken(total_output)
+
+    return total_output
+
+def on_damage_dealt(items: list[ItemType], damage_delt: float):
+    total_output = damage_delt
+    
+    for item in items:
+        total_output = item.on_damage_dealt(total_output)
+
+    return total_output
+
+def on_stat_gain(items: list[ItemType], desired_increase: float):
+    total_output = desired_increase
+    
+    for item in items:
+        total_output = item.stat_gain(total_output)
+
+    return total_output
+
+def on_passive_use(items: list[ItemType], desired_increase: float):
+    total_output = desired_increase
+    
+    for item in items:
+        total_output = item.on_passive_use(total_output)
+
+    return total_output

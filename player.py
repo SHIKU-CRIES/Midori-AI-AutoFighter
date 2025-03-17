@@ -10,6 +10,11 @@ from halo import Halo
 
 from items import ItemType
 
+from items import on_stat_gain
+from items import on_passive_use
+from items import on_damage_dealt
+from items import on_damage_taken
+
 from weapons import WeaponType
 
 from passives import PassiveType
@@ -868,14 +873,13 @@ class Player:
         if self.HP > self.MHP: self.HP = self.MHP
 
     def take_damage(self, input_damage: float):
-        total_damage = self.damage_mitigation(input_damage)
+        total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage))
         self.HP -= round(total_damage)
     
     def deal_damage(self, input_damage_mod: float):
-        damage_dealt = ((self.Atk * self.Vitality) * 2)
+        damage_dealt = on_damage_dealt(self.Items, ((self.Atk * self.Vitality) * 2))
 
-        if self.check_crit():
-            damage_dealt = self.crit_damage_mod(damage_dealt)
+        if self.check_crit(): damage_dealt = self.crit_damage_mod(damage_dealt)
 
         return damage_dealt * random.uniform(0.95, 1.05) * input_damage_mod
     
@@ -932,12 +936,12 @@ class Player:
 
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
-        Levels up the player by 1 and allows the user to choose which stat to increase.
+        Levels up the player.
         """
         level_ups = 0
         max_level_ups = 5
 
-        mod_fixed = ((mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
+        mod_fixed = on_stat_gain(self.Items, (mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 100)), 1)
         int_mod = max(round(mod_fixed * (self.level / 100)), 1)
 
@@ -994,8 +998,7 @@ class Player:
                 self.gain_dodgeodds_rate(dodgeodds_up)
             elif choice == 8:
                 if len(self.Items) < starting_max_blessing:
-                    #self.Items.append(ItemType())
-                    continue
+                    self.Items.append(ItemType())
                 else:
                     random.choice(self.Items).upgrade(mod_fixed * 25)
             elif choice == 9:
@@ -1026,8 +1029,7 @@ class Player:
                     self.gain_dodgeodds_rate(dodgeodds_up)
                     
                     if len(self.Items) < starting_max_blessing:
-                        #self.Items.append(ItemType())
-                        continue
+                        self.Items.append(ItemType())
                     else:
                         for item in self.Items:
                             item.upgrade(mod_fixed)
@@ -1070,8 +1072,7 @@ class Player:
                 if len(self.Items) > starting_max_blessing:
                     random.choice(self.Items).upgrade((bonus_levels * 200) / level)
                 else:
-                    continue
-                    #self.Items.append(ItemType())
+                    self.Items.append(ItemType())
 
         self.check_stats()
         self.check_name_mod()
