@@ -311,7 +311,7 @@ def main(level):
                 
                     if bleed_mod > 1.5:
                         person.RushStat = 0
-                        person.DOTS.append(damageovertimetype("Bleed", person.HP * 0.0001 * bleed_mod, max(450, round(4 ** bleed_mod)), "generic", person.PlayerName, 2))
+                        person.DOTS.append(damageovertimetype("Bleed", person.HP * 0.0001 * bleed_mod, max(10, round(1.5 ** bleed_mod)), "generic", person.PlayerName, 2))
 
                     if person.HP > 1:
                         person.do_pre_turn()
@@ -341,7 +341,7 @@ def main(level):
                 
                     if bleed_mod > 1.5:
                         person.RushStat = 0
-                        person.DOTS.append(damageovertimetype("Bleed", person.HP * 0.0001 * bleed_mod, max(450, round(4 ** bleed_mod)), "generic", person.PlayerName, 2))
+                        person.DOTS.append(damageovertimetype("Bleed", person.HP * 0.0001 * bleed_mod, max(10, round(1.5 ** bleed_mod)), "generic", person.PlayerName, 2))
 
                     if person.HP > 0:
 
