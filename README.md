@@ -1,0 +1,1 @@
+to play, use ``uv run main.py``
