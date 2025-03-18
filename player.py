@@ -506,7 +506,7 @@ class Player:
             if "player" in self.PlayerName.lower():
                 choice = 9
             else:
-                choice = check_name_stats_mod()
+                choice = check_name_stats_mod(self)
 
             if choice == 1:
                 self.MHP += int(hp_up)
@@ -601,7 +601,7 @@ class Player:
                     self.Items.append(ItemType())
 
         self.check_stats()
-        check_name_mod()
+        check_name_mod(self)
 
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
