@@ -10,6 +10,10 @@ from halo import Halo
 
 from items import ItemType
 
+from damagetypes import DamageType
+from damagetypes import get_damage_type
+from damagetypes import Light, Dark, Wind, Lightning, Fire, Ice
+
 from items import on_stat_gain
 from items import on_passive_use
 from items import on_damage_dealt
@@ -54,6 +58,7 @@ class Player:
         self.Kills: int = 0
         self.RushStat: int = 3
         self.isplayer: bool = False
+        self.Type: DamageType = get_damage_type(name)
         self.Logs: list[str] = []
         self.Inv: list[WeaponType] = []
         self.Items: list[ItemType] = []
@@ -408,8 +413,10 @@ class Player:
         total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage))
         self.HP -= round(total_damage)
     
-    def deal_damage(self, input_damage_mod: float):
+    def deal_damage(self, input_damage_mod: float, input_damage_type: DamageType):
         damage_dealt = on_damage_dealt(self.Items, ((self.Atk * self.Vitality) * 2))
+
+        damage_dealt = self.Type.damage_mod(damage_dealt, input_damage_type)
 
         if self.check_crit(): damage_dealt = self.crit_damage_mod(damage_dealt)
 
@@ -627,7 +634,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     font = pygame.font.SysFont('Arial', 25)
 
     # Player name
-    player_text = font.render(player.PlayerName, True, (255, 255, 255), (0, 0, 0, 125))
+    player_text = font.render(player.PlayerName, True, player.Type.color, (0, 0, 0, 125))
     player_rect = player_text.get_rect(topleft=(x, y))
 
     player_profile_pic = pygame.transform.scale(player_profile_pic, size)
@@ -648,15 +655,9 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255), (0, 0, 0))
     player_hp_percent_rect = player_hp_percent_text.get_rect(topleft=(x, y + player_hp_bar_offset + 5))
     screen.blit(player_hp_percent_text, player_hp_percent_rect)
-
-    if player_hp_percent < 75:
-        player_profile_pic.set_alpha(int(255 * (player_hp_percent / 75)))
-    else:
-        player_profile_pic.set_alpha(255)
         
     icon_rect = pygame.Rect(player_rect.x, player_rect.y, width, height)
 
-    # Show stats if hover is enabled and mouse is over the icon
     mouse_pos = pygame.mouse.get_pos()
     if icon_rect.collidepoint(mouse_pos):
         stat_data = [
