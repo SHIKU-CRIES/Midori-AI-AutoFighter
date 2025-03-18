@@ -891,7 +891,7 @@ class Player:
         return damage_dealt * random.uniform(0.95, 1.05) * input_damage_mod
 
     def damage_mitigation(self, damage_pre: float):
-        return (damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 2.25)))
+        return max(damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 2.25)), 1)
     
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 0.90))
@@ -1160,7 +1160,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             total_dot_damge = 0
             for dots in player.DOTS:
                 total_dot_damge += player.damage_mitigation(dots.damage * dots.tick_interval)
-                
+
             stat_data.append(("Dots:", f"{len(player.DOTS)}"))
             stat_data.append(("D/t:", f"({total_dot_damge:.2f})"))
 
