@@ -1,5 +1,8 @@
 from typing import Optional, Dict, Any
 
+from damagetypes import Generic
+from damagetypes import DamageType
+
 class dot:
     """
     Represents a Damage Over Time (DOT) effect applied to a character or entity.
@@ -8,7 +11,7 @@ class dot:
         name (str): The name of the DOT effect (e.g., "Poison," "Burn").
         damage (float): The amount of damage dealt per turn by the DOT.
         turns (int): The number of turns the DOT effect lasts.  Must be greater than 0.
-        damage_type (str):  The type of damage the DOT inflicts (e.g., "fire", "poison", "bleed").
+        damage_type (DamageType):  The type of damage the DOT inflicts (e.g., "fire", "poison", "bleed").
         source (Optional[str]):  Optional name or identifier of the entity that applied the DOT.  Helps track responsibility.
         metadata (Optional[Dict[str, Any]]):  Optional dictionary for storing extra information, like the spell or ability that caused the DOT.
         tick_interval (int): how many times to do the effect each turn, good if you want to do it fast and for less time.
@@ -16,14 +19,14 @@ class dot:
     Raises:
         ValueError: If 'turns' is not a integer.
     """
-    def __init__(self, name: str, damage: float, turns: int, damage_type: str = "generic", source: Optional[str] = None, tick_interval: int = 1, metadata: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, name: str, damage: float, turns: int, damage_type: DamageType = Generic, source: Optional[str] = None, tick_interval: int = 1, metadata: Optional[Dict[str, Any]] = None) -> None:
         if not isinstance(turns, int):
             raise ValueError("Turns must be a integer.")
 
         self.name: str = name
         self.damage: float = damage
         self.turns: int = turns
-        self.damage_type: str = damage_type
+        self.damage_type: DamageType = damage_type
         self.source: Optional[str] = source
         self.metadata: Optional[Dict[str, Any]] = metadata
         self.tick_interval: int = tick_interval

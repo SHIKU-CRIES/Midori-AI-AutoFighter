@@ -28,6 +28,7 @@ class DamageType():
         else:
             return incoming_damage
 
+Generic = DamageType("generic", "none", (255, 255, 255))
 
 Light = DamageType("light", "dark", (255, 255, 255))
 Dark = DamageType("dark", "light", (102, 0, 102))
