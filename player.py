@@ -29,7 +29,7 @@ from themedstuff import themed_names
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
 
-starting_max_blessing = 5
+starting_max_blessing = 15
 
 class Player:
     def __init__(self, name):
@@ -894,7 +894,7 @@ class Player:
         return max(damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 2.25)), 1)
     
     def regain_hp(self):
-        self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 0.90))
+        self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
 
     def damage_over_time(self):
         for dot in self.DOTS:
