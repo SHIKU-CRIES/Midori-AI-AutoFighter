@@ -20,7 +20,7 @@ class DamageType():
         else:
             return False
     
-    def damage_mod(self, incoming_damage, incoming_damge_type):
+    def damage_mod(self, incoming_damage: float, incoming_damge_type):
         if self.is_weak(incoming_damge_type):
             return incoming_damage * 5
         elif self.is_resistance(incoming_damge_type):

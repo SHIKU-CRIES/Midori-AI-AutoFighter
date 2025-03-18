@@ -12,7 +12,7 @@ from items import ItemType
 
 from damagetypes import DamageType
 from damagetypes import get_damage_type
-from damagetypes import Light, Dark, Wind, Lightning, Fire, Ice
+from damagetypes import Light, Dark, Wind, Lightning, Fire, Ice, Generic
 
 from items import on_stat_gain
 from items import on_passive_use
@@ -437,7 +437,7 @@ class Player:
                     dot_damage = self.MHP * 0.1 * self.Mitigation
 
                 for i in range(dot.tick_interval):
-                    self.take_damage(dot_damage)
+                    self.take_damage(self.Type.damage_mod(dot_damage, dot.damage_type))
             else:
                 self.DOTS.remove(dot)
 
@@ -446,7 +446,7 @@ class Player:
             if hot.is_active():
                 hot_healing = hot.tick()
                 for i in range(hot.tick_interval):
-                    self.heal_damage(hot_healing)
+                    self.heal_damage(self.Type.damage_mod(hot_healing, Generic))
             else:
                 self.HOTS.remove(hot)
 
