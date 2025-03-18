@@ -168,7 +168,7 @@ def main(level):
 
             level_sum += player.level
 
-        level = round(level_sum + 10 / len(playerlist))
+        level = round((level_sum + foes_killed) / (len(playerlist) * 2))
 
         if level < max(round(past_level / 2) - 10, 1):
             level = random.randint(max(round(past_level / 2) - 10, 1), round(past_level / 2) + 10)
@@ -176,7 +176,7 @@ def main(level):
             past_level = level
 
         number_of_foes = 4
-        foes_killed += round(number_of_foes / len(playerlist))
+        foes_killed += number_of_foes
 
         temp_foe_themed_names: list[str] = []
 
