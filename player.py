@@ -1159,7 +1159,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         if len(player.DOTS) > 0:
             total_dot_damge = 0
             for dots in player.DOTS:
-                total_dot_damge += player.damage_mitigation(dots.damage * dots.tick_interval)
+                total_dot_damge += player.damage_mitigation(dots.damage) * dots.tick_interval
 
             stat_data.append(("Dots:", f"{len(player.DOTS)}"))
             stat_data.append(("D/t:", f"({total_dot_damge:.2f})"))
