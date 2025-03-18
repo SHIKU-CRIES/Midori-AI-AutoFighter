@@ -29,7 +29,7 @@ class DamageType():
             return incoming_damage
 
 
-Light = DamageType("light", "dark", (255, 255, 102))
+Light = DamageType("light", "dark", (255, 255, 255))
 Dark = DamageType("dark", "light", (102, 0, 102))
 
 Wind = DamageType("wind", "lightning", (173, 216, 230))
