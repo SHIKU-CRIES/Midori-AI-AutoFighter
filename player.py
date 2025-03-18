@@ -388,22 +388,23 @@ class Player:
         return 9
 
     def check_name_mod(self):
-        if "lady" in self.PlayerName.lower():
+        if self.level > 2000:
+            if "lady" in self.PlayerName.lower():
 
-            if "light" in self.PlayerName.lower():
-                self.Regain *= 2
-                self.Mitigation += 4
+                if "light" in self.PlayerName.lower():
+                    self.Regain *= 2
+                    self.Mitigation += 4
+                    self.Vitality *= 1.5
+
+                if "dark" in self.PlayerName.lower():
+                    self.Regain /= 2
+                    self.Mitigation /= 5
+                    self.Vitality *= 2.5
+
+                self.MHP *= 10
+                self.Atk *= 2
+                self.Def *= 2
                 self.Vitality *= 1.5
-
-            if "dark" in self.PlayerName.lower():
-                self.Regain /= 2
-                self.Mitigation /= 5
-                self.Vitality *= 2.5
-
-            self.MHP *= 10
-            self.Atk *= 2
-            self.Def *= 2
-            self.Vitality *= 1.5
 
         if themed_names[0] in self.PlayerName.lower():
             dodge_buff = 0.15
