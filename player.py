@@ -1067,7 +1067,6 @@ class Player:
             bonus_levels = (level - top_level) // xyz
             self.MHP = self.MHP + (6 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
-            self.Def = self.Def + (bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
