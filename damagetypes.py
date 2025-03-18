@@ -31,9 +31,9 @@ class DamageType():
 Generic = DamageType("generic", "none", (255, 255, 255))
 
 Light = DamageType("light", "dark", (255, 255, 255))
-Dark = DamageType("dark", "light", (102, 0, 102))
+Dark = DamageType("dark", "light", (145, 0, 145))
 
-Wind = DamageType("wind", "lightning", (173, 216, 230))
+Wind = DamageType("wind", "lightning", (0, 255, 0))
 Lightning = DamageType("lightning", "wind", (255, 255, 0))
 
 Fire = DamageType("fire", "ice", (255, 0, 0))
