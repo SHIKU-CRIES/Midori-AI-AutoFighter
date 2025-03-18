@@ -2,7 +2,7 @@
 import random
 
 class DamageType():
-    def __init__(self, name, weakness, color):
+    def __init__(self, name :str, weakness :str, color):
         """Initialises the damage type of a player."""
         self.name = name
         self.weakness = weakness
@@ -30,7 +30,7 @@ class DamageType():
 
 
 Light = DamageType("light", "dark", (255, 255, 102))
-Dark = DamageType("dark", "light", (51, 0, 51))
+Dark = DamageType("dark", "light", (102, 0, 102))
 
 Wind = DamageType("wind", "lightning", (173, 216, 230))
 Lightning = DamageType("lightning", "wind", (255, 255, 0))

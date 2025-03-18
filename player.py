@@ -661,7 +661,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     mouse_pos = pygame.mouse.get_pos()
     if icon_rect.collidepoint(mouse_pos):
         stat_data = [
-            ("Stats of:", player.PlayerName),
+            ("Stats of:", f"{player.PlayerName} ({player.Type.name.capitalize()})"),
             ("Level:", player.level),
             ("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"),
             ("Max HP:", player.MHP),
