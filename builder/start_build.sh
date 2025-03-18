@@ -19,7 +19,7 @@ docker image rm game-builder
 butler push output/windows lunamidori/midori-endless-auto-fighter:windows
 butler push output/linux lunamidori/midori-endless-auto-fighter:linux
 
-sleep 15
+sleep 600
 
 rm -rf output
 rm -rf temp_game
