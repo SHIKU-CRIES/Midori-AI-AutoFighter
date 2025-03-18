@@ -57,6 +57,7 @@ class Player:
         self.Logs: list[str] = []
         self.Inv: list[WeaponType] = []
         self.Items: list[ItemType] = []
+        self.Passives: list[PassiveType] = []
         self.DOTS: list[damageovertimetype] = []
         self.HOTS: list[healingovertimetype] = []
         self.photo: str = "player.png"
@@ -868,6 +869,11 @@ class Player:
         if self.MHP > 20000000000:
             self.MHP = 1
     
+    def do_pre_turn(self):
+        self.regain_hp()
+        self.damage_over_time()
+        self.heal_over_time()
+    
     def heal_damage(self, input_healing: float):
         self.HP += round(input_healing)
         if self.HP > self.MHP: self.HP = self.MHP
@@ -882,19 +888,14 @@ class Player:
         if self.check_crit(): damage_dealt = self.crit_damage_mod(damage_dealt)
 
         return damage_dealt * random.uniform(0.95, 1.05) * input_damage_mod
-    
-    def do_pre_turn(self):
-        self.regain_hp()
-        self.take_dot()
-        self.take_hot()
 
     def damage_mitigation(self, damage_pre: float):
-        return (damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 1.75)))
+        return (damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 2.25)))
     
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 0.90))
 
-    def take_dot(self):
+    def damage_over_time(self):
         for dot in self.DOTS:
             if dot.is_active():
                 dot_damage = dot.tick()
@@ -907,7 +908,7 @@ class Player:
             else:
                 self.DOTS.remove(dot)
 
-    def take_hot(self):
+    def heal_over_time(self):
         for hot in self.HOTS:
             if hot.is_active():
                 hot_healing = hot.tick()
@@ -915,21 +916,21 @@ class Player:
                     self.heal_damage(hot_healing)
             else:
                 self.HOTS.remove(hot)
-    
-    def check_crit(self):
-        if self.CritRate >= random.random():
-            return True
-        else:
-            return False
+
+    def crit_damage_mod(self, damage_pre: float):
+        return damage_pre * self.CritDamageMod * max(1, self.CritRate)
     
     def check_dodge(self, enrage_buff: float):
         if self.DodgeOdds / enrage_buff >= random.random():
             return True
         else:
             return False
-
-    def crit_damage_mod(self, damage_pre: float):
-        return damage_pre * self.CritDamageMod * max(1, self.CritRate)
+    
+    def check_crit(self):
+        if self.CritRate >= random.random():
+            return True
+        else:
+            return False
     
     def exp_to_levelup(self):
         return self.level ** 1.15
