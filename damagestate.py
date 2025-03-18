@@ -3,6 +3,8 @@ import random
 
 from player import Player
 
+from damagetypes import Generic
+
 from damage_over_time import dot as damageovertimetype
 from healing_over_time import hot as healingovertimetype
 
@@ -74,13 +76,14 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
         for player in alllist:
             if source.isplayer == player.isplayer:
-                if player.HP < player.MHP * 0.15:
-                    source.take_damage(source.HP * 0.01)
-                    player.heal_damage(player.HP * 0.25)
+                if player.PlayerName is not source.PlayerName:
+                    if player.HP < player.MHP * 0.15:
+                        source.take_damage(source.MHP * 0.05)
+                        player.heal_damage(source.deal_damage(1, Generic) * 0.025)
 
-                if player.Def > source.Def:
-                    player.Def -= 1
-                    source.Def += source.check_base_stats(source.Def, player.level)
+                    if player.Def > source.Def:
+                        player.Def -= 1
+                        source.Def += source.check_base_stats(source.Def, player.level)
 
 
     elif themed_names[1] in target.PlayerName.lower():
@@ -100,16 +103,17 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     if themed_names[2] in source.PlayerName.lower():
         for player in alllist:
             if source.isplayer == player.isplayer:
-                if player.HP < source.HP * 0.15:
-                    player.heal_damage(player.HP * 0.005)
-                    player.HOTS.append(healingovertimetype("Heal", round(player.HP * 0.001), 250, player.Type, source.PlayerName, 1))
-                
-                if len(player.DOTS) > 0:
-                    to_be_moved = random.choice(player.DOTS)
+                if player.PlayerName is not source.PlayerName:
+                    if player.HP < source.MHP * 0.15:
+                        player.heal_damage(source.Atk * 0.005)
+                        player.HOTS.append(healingovertimetype("Heal", round(player.HP * 0.001), 250, player.Type, source.PlayerName, 1))
                     
-                    player.DOTS.remove(to_be_moved)
+                    if len(player.DOTS) > 0:
+                        to_be_moved = random.choice(player.DOTS)
 
-                    random.choice(foelist).DOTS.append(to_be_moved)
+                        player.DOTS.remove(to_be_moved)
+
+                        random.choice(foelist).DOTS.append(to_be_moved)
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:
