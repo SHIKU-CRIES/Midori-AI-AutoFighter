@@ -57,6 +57,7 @@ def check_name_mod(player):
             player.MHP *= 10
             player.Atk *= 2
             player.Def *= 2
+            player.Mitigation = max(player.Mitigation, 1)
             player.Vitality *= 1.5
 
     if themed_names[0] in player.PlayerName.lower():
