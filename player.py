@@ -447,7 +447,7 @@ class Player:
                     dot_damage = self.MHP * 0.1 * self.Mitigation
 
                 for i in range(dot.tick_interval):
-                    self.take_damage(self.Type.damage_mod(dot_damage, dot.damage_type))
+                    self.take_damage(1, self.Type.damage_mod(dot_damage, dot.damage_type))
             else:
                 self.DOTS.remove(dot)
 

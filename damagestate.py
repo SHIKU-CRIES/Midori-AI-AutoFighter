@@ -78,7 +78,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
                     if player.HP < player.MHP * 0.15:
-                        source.take_damage(source.MHP * 0.05)
+                        source.take_damage(1, source.MHP * 0.05)
                         player.heal_damage(source.deal_damage(1, Generic) * 0.025)
 
                     if player.Def > source.Def:
