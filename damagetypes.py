@@ -22,7 +22,7 @@ class DamageType():
     
     def damage_mod(self, incoming_damage: float, incoming_damge_type):
         if self.is_weak(incoming_damge_type):
-            return incoming_damage * 5
+            return incoming_damage * 2
         elif self.is_resistance(incoming_damge_type):
             return incoming_damage * 0.25
         else:
@@ -44,8 +44,11 @@ all_damage_types = [Light, Dark, Wind, Lightning, Fire, Ice]
 def random_damage_type():
     return random.choice(all_damage_types)
 
-def get_damage_type(name):
+def get_damage_type(name: str):
     damage_type_list = []
+
+    if "Luna".lower() in name.lower():
+        return Generic
 
     for damage_type in all_damage_types:
         if damage_type.name.lower() in name.lower():
