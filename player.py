@@ -431,7 +431,10 @@ class Player:
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
 
     def gain_damage_over_time(self, DOT: damageovertimetype, EffectHitRate: float):
-        if random.uniform(self.EffectRES, 1 + self.EffectRES) < random.uniform(EffectHitRate, 1 + EffectHitRate):
+        tomiss = random.uniform(self.EffectRES, 1 + self.EffectRES)
+        tohit = random.uniform(EffectHitRate, 1 + EffectHitRate)
+
+        if tomiss < tohit:
             self.DOTS.append(DOT)
     
     def damage_over_time(self):
