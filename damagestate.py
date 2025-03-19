@@ -95,7 +95,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
         if hp_percentage < 0.55:
                     
-            if len(target.DOTS) > 10:
+            if len(target.DOTS) > 5:
                 target.DOTS.remove(random.choice(target.DOTS))
 
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
