@@ -62,10 +62,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 source.HP -= round(source.MHP * scaled_reduction)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
-                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt ** 0.25, 55000, source.Type, source.PlayerName, 5))
+                target.gain_damage_over_time(damageovertimetype("Bleed", mited_damage_dealt ** 0.25, 55000, source.Type, source.PlayerName, 5), source.EffectHitRate)
             else:
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 2)
-                target.DOTS.append(damageovertimetype("Bleed", mited_damage_dealt ** 0.35, 25000, source.Type, source.PlayerName, 2))
+                target.gain_damage_over_time(damageovertimetype("Bleed", mited_damage_dealt ** 0.35, 25000, source.Type, source.PlayerName, 2), source.EffectHitRate)
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
@@ -113,7 +113,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
                         player.DOTS.remove(to_be_moved)
 
-                        random.choice(foelist).DOTS.append(to_be_moved)
+                        random.choice(foelist).gain_damage_over_time(to_be_moved, source.EffectHitRate)
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:

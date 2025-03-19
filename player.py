@@ -53,6 +53,8 @@ class Player:
         self.CritRate: float = 0.03
         self.CritDamageMod: float = 2
         self.DodgeOdds: float = 0.03
+        self.EffectHitRate: float = 1.05
+        self.EffectRES: float = 0.05
         self.DamageTaken: int = 0
         self.DamageDealt: int = 0
         self.Kills: int = 0
@@ -428,6 +430,10 @@ class Player:
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
 
+    def gain_damage_over_time(self, DOT: damageovertimetype, EffectHitRate: float):
+        if random.uniform(self.EffectRES, 1 + self.EffectRES) < random.uniform(EffectHitRate, 1 + EffectHitRate):
+            self.DOTS.append(DOT)
+    
     def damage_over_time(self):
         for dot in self.DOTS:
             if dot.is_active():
