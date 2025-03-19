@@ -464,9 +464,11 @@ class Player:
     
     def check_dodge(self, enrage_buff: float):
         if self.DodgeOdds / enrage_buff >= random.random():
-            return True
-        else:
+            # Cant be hit
             return False
+        else:
+            # Can be hit
+            return True
     
     def check_crit(self):
         if self.CritRate >= random.random():
