@@ -411,8 +411,8 @@ class Player:
         self.HP += round(input_healing)
         if self.HP > self.MHP: self.HP = self.MHP
 
-    def take_damage(self, input_damage: float):
-        if self.check_dodge(input_damage):
+    def take_damage(self, input_damage_mod: float, input_damage: float):
+        if self.check_dodge(input_damage_mod):
             total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage))
             self.HP -= round(total_damage)
     
