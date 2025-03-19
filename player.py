@@ -252,14 +252,11 @@ class Player:
         Every 0.5 dodge odds increase costs 5000x more points.
         """
         to_be_lowered_by = 5000
-        current_rate = self.DodgeOdds
 
-        if current_rate > 0.5:
-            desired_increase = points / ((to_be_lowered_by * (current_rate // 2)) + 1)
+        if self.DodgeOdds > 0.5:
+            self.DodgeOdds += points / ((to_be_lowered_by * (self.DodgeOdds // 2)) + 1)
         else:
-            desired_increase = points
-
-        self.DodgeOdds = current_rate + desired_increase
+            self.DodgeOdds += points
 
     def gain_crit_rate(self, points):
         """Increases crit rate based on points, with increasing cost.
