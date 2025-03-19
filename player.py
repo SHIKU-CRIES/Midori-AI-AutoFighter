@@ -490,10 +490,10 @@ class Player:
 
         EXP_to_levelup = self.exp_to_levelup()
 
-        if self.EXP >= EXP_to_levelup * 100:
-            self.EXP += max(round(((foe_level * 2) ** 0.00025) * int_mod_novit), round((foe_level * 2) ** 0.00045)) + 1
+        if self.EXP >= EXP_to_levelup * 12:
+            self.EXP += min(max(round(((foe_level * 2) ** 0.00025) * int_mod_novit), round((foe_level * 2) ** 0.00045)) + 1, EXP_to_levelup * 2)
         else:
-            self.EXP += max(round(((foe_level * 4) ** 0.15) * int_mod_novit), round((foe_level * 4) ** 0.35)) + 1
+            self.EXP += min(max(round(((foe_level * 4) ** 0.15) * int_mod_novit), round((foe_level * 4) ** 0.35)) + 1, EXP_to_levelup * 15)
 
         while self.EXP >= EXP_to_levelup:
             if level_ups > max_level_ups:
