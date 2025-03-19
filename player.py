@@ -599,7 +599,7 @@ class Player:
             # Apply bonus every xyz levels past top_level
             xyz = 5
             bonus_levels = (level - top_level) // xyz
-            self.MHP = self.MHP + (6 * bonus_levels)
+            self.MHP = self.MHP + (3 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
@@ -618,7 +618,7 @@ class Player:
 
         self.MHP = int(self.MHP * min((level / top_level), (25)) * post_temp_vit) + 5
         self.Atk = int(self.Atk * min((level / top_level), (5)) * post_temp_vit) + 5
-        self.Def = int(self.Def * min((level / top_level), (2)) * post_temp_vit) + 5
+        self.Def = int(self.Def * min((level / top_level), (2))) + 5
         self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 5))
 
