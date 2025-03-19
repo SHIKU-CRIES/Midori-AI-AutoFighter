@@ -425,7 +425,7 @@ class Player:
         return damage_dealt * random.uniform(0.95, 1.05) * input_damage_mod
 
     def damage_mitigation(self, damage_pre: float):
-        return max(damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 2.25)), 1)
+        return max(damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 1.25)), 1)
     
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
