@@ -17,6 +17,8 @@ class DamageType():
     def is_resistance(self, type_check):
         if type_check == self.name:
             return True
+        elif self.name == "generic":
+            return True
         else:
             return False
     
