@@ -25,7 +25,7 @@ class ItemType():
             self.power += temp_math
 
         except Exception as error:
-            print(str(error))
+            print(f"The Item ({self.name}) errored: `{str(error)}`")
     
     def check_mods(self, temp_power: float):
         for index, item_mod in enumerate(item_mods):
