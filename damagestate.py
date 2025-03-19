@@ -44,6 +44,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             source.HP += 500
             source.Atk += 50
             source.Def += 50
+        
+        if source.Mitigation > 1:
+            source.Mitigation -= 0.001
+            source.EffectHitRate += 0.01
 
         if themed_names[0] in target.PlayerName.lower():
             if random.random() >= 0.98:

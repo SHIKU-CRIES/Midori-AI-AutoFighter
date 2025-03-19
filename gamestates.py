@@ -227,7 +227,7 @@ def main(level):
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
                     for player in playerlist:
-                        player.HP = -10000
+                        player.HP = -100000
 
             enrage_timer.check_timeout()
             
