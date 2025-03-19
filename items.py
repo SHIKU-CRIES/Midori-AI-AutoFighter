@@ -38,7 +38,7 @@ class ItemType():
 
         if "defense" in str(self.name).lower():
             temp_power = math.log2(self.power)
-            temp_def_power = math.exp(temp_power * 0.5)
+            temp_def_power = math.exp(temp_power * 1.5)
             total_output += float(total_output / temp_def_power)
         else:
             total_output = float(total_output)
