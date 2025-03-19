@@ -17,10 +17,7 @@ class ItemType():
     def upgrade(self, mod_fixed):
         """Upgrades the item's power stat."""
         try:
-            if self.power < 5:
-                temp_math = max(math.log10(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10)), 0.00001)
-            else:
-                temp_math = max(math.log10(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10)) / (100 * self.power), 0.00001)
+            temp_math = max(random.uniform(0.1, 0.01) * self.check_mods(mod_fixed / 10) / (100 * self.power), 0.00001)
 
             self.power += temp_math
 
