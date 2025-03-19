@@ -87,6 +87,8 @@ def main(level):
     past_level = 1
     foes_killed = 1
 
+    starting_spawn_rate = 0.8
+
     last_known_player = ""
     last_known_foe = ""
 
@@ -112,8 +114,9 @@ def main(level):
     playerlist.append(player)
         
     for i in range(4):
-        if random.random() < 0.8:
+        if random.random() < starting_spawn_rate:
             themed_name = temp_themed_names[0].capitalize()
+            starting_spawn_rate -= 0.2
         else:
             themed_name = random.choice(temp_themed_names[1:]).capitalize()
 
