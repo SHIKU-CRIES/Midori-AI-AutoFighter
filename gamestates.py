@@ -323,9 +323,7 @@ def main(level):
 
                         if len(playerlist) > 0:
                             target_to_damage = random.choice(playerlist)
-
-                            if target_to_damage.check_dodge(bleed_mod):
-                                target_to_damage.take_damage(take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                            target_to_damage.take_damage(take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
                             
                             if target_to_damage.HP < 1:
                                 target_to_damage.save_past_life()
@@ -355,9 +353,7 @@ def main(level):
 
                         if len(foelist) > 0:
                             target_to_damage = random.choice(foelist)
-
-                            if target_to_damage.check_dodge(bleed_mod):
-                                target_to_damage.take_damage(take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                            target_to_damage.take_damage(take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
 
                             if target_to_damage.HP < 1:
                                 foelist.remove(target_to_damage)

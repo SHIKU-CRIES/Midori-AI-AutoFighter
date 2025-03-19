@@ -53,7 +53,7 @@ class Player:
         self.CritRate: float = 0.03
         self.CritDamageMod: float = 2
         self.DodgeOdds: float = 0.03
-        self.EffectHitRate: float = 1.05
+        self.EffectHitRate: float = 0.05
         self.EffectRES: float = 0.05
         self.DamageTaken: int = 0
         self.DamageDealt: int = 0
@@ -412,8 +412,9 @@ class Player:
         if self.HP > self.MHP: self.HP = self.MHP
 
     def take_damage(self, input_damage: float):
-        total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage))
-        self.HP -= round(total_damage)
+        if self.check_dodge(input_damage):
+            total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage))
+            self.HP -= round(total_damage)
     
     def deal_damage(self, input_damage_mod: float, input_damage_type: DamageType):
         damage_dealt = on_damage_dealt(self.Items, ((self.Atk * self.Vitality) * 2))
