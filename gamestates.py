@@ -116,7 +116,7 @@ def main(level):
     for i in range(4):
         if random.random() < starting_spawn_rate:
             themed_name = temp_themed_names[0].capitalize()
-            starting_spawn_rate -= 0.2
+            starting_spawn_rate /= 2
         else:
             themed_name = random.choice(temp_themed_names[1:]).capitalize()
 
