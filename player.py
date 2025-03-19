@@ -389,13 +389,6 @@ class Player:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
         
-        ### Checking for hackers
-        if self.level > 50000:
-            if self.Vitality == 1:
-                print("Hacking games is wrong, and you should not do that ;)")
-                os.remove(f'{self.PlayerName}.dat')
-                exit(404)
-        
         if self.MHP > 20000000000:
             self.MHP = 1
     
@@ -485,15 +478,15 @@ class Player:
         max_level_ups = 5
 
         mod_fixed = on_stat_gain(self.Items, (mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
-        int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 100)), 1)
+        int_mod_novit = max(round(((mod * 0.55) + 1) * (self.level / 1000) * (self.level / 1000)), 1)
         int_mod = max(round(mod_fixed * (self.level / 100)), 1)
 
         EXP_to_levelup = self.exp_to_levelup()
 
-        if self.EXP >= EXP_to_levelup * 12:
-            self.EXP += min(max(round(((foe_level * 2) ** 0.00025) * int_mod_novit), round((foe_level * 2) ** 0.00045)) + 1, EXP_to_levelup * 2)
+        if self.EXP >= EXP_to_levelup * 2:
+            self.EXP += self.level
         else:
-            self.EXP += min(max(round(((foe_level * 4) ** 0.15) * int_mod_novit), round((foe_level * 4) ** 0.35)) + 1, EXP_to_levelup * 15)
+            self.EXP += min(max(round(((foe_level * 4) ** 0.15) * int_mod_novit), round((foe_level * 4) ** 0.35)) + 1, EXP_to_levelup * max_level_ups)
 
         while self.EXP >= EXP_to_levelup:
             if level_ups > max_level_ups:
