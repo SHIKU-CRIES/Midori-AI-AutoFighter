@@ -33,7 +33,7 @@ from load_photos import resource_path
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
 
-starting_max_blessing = 1
+starting_max_blessing = 5
 
 class Player:
     def __init__(self, name):
