@@ -405,6 +405,10 @@ class Player:
         if self.check_dodge(input_damage_mod):
             total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage))
             self.HP -= round(total_damage)
+
+    def take_damage_nododge(self, input_damage_mod: float, input_damage: float):
+        total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage * input_damage_mod))
+        self.HP -= round(total_damage)
     
     def deal_damage(self, input_damage_mod: float, input_damage_type: DamageType):
         damage_dealt = on_damage_dealt(self.Items, ((self.Atk * self.Vitality) * 2))
@@ -447,7 +451,7 @@ class Player:
                 dot_damage = dot.tick()
 
                 for i in range(dot.tick_interval):
-                    self.take_damage(1, self.Type.damage_mod(dot_damage, dot.damage_type))
+                    self.take_damage_nododge(1, self.Type.damage_mod(dot_damage, dot.damage_type))
             else:
                 self.DOTS.remove(dot)
 
