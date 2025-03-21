@@ -40,14 +40,14 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
             source.Regain -= 0.01
-            source.DodgeOdds += 0.25
+            source.DodgeOdds += 0.001
             source.MHP += 500
             source.HP += 500
             source.Atk += 50
             source.Def += 1
         
         if source.Mitigation > 1:
-            source.DodgeOdds += 0.01
+            source.DodgeOdds += 0.001
             source.Mitigation -= 0.001
             source.EffectHitRate += 0.01
 
