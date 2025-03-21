@@ -587,7 +587,7 @@ class Player:
         self.level = level
         self.MHP: int = random.randint(2 * self.level, 5 * self.level) + 1000
         self.HP: int = self.MHP
-        self.Def: int = self.Def + random.randint(int(self.MHP * (0.000000015 * self.level)), int(self.MHP * (0.000000055 * self.level))) + 500
+        self.Def: int = random.randint(100, int((5 * self.level) + 101))
         self.Atk: int = random.randint(2 * self.level, 3 * self.level)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.000001 * self.level, (self.level * 0.000002)) + (self.level * 0.000001)
@@ -693,8 +693,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             for dots in player.DOTS:
                 total_dot_damge += player.damage_mitigation(dots.damage) * dots.tick_interval
 
-            stat_data.append(("Dots:", f"{len(player.DOTS)}"))
-            stat_data.append(("D/t:", f"({total_dot_damge:.2f})"))
+            stat_data.append(("Dots:", f"{len(player.DOTS)} (DPT: {total_dot_damge:.1f})"))
 
         if len(player.HOTS) > 0:
             stat_data.append(("Hots:", f"{len(player.HOTS)}"))
