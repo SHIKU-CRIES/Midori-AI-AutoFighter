@@ -428,6 +428,9 @@ class Player:
         if tomiss < tohit:
             if len(self.DOTS) < 1500:
                 self.DOTS.append(DOT)
+            else:
+                for dot in self.DOTS:
+                    dot.damage *= 2
     
     def damage_over_time(self):
         for dot in self.DOTS:
