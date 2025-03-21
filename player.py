@@ -267,9 +267,9 @@ class Player:
         desired_increase = 0
         
         if self.CritRate > 1:
-            desired_increase = points / ((to_be_lowered_by * (self.CritRate ** 2)) + 1)
+            desired_increase = points / ((to_be_lowered_by * (self.CritRate * 2)) + 1)
         elif points > 0.25:
-            desired_increase = points / ((to_be_lowered_by * (self.CritRate ** 2)) + 1)
+            desired_increase = points / ((to_be_lowered_by * (self.CritRate * 2)) + 1)
         else:
             desired_increase = points
 
