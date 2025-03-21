@@ -614,7 +614,6 @@ class Player:
                     self.Items.append(ItemType())
 
         self.check_stats()
-        check_name_mod(self)
 
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
@@ -628,6 +627,8 @@ class Player:
 
         if self.DodgeOdds > 0.5:
             self.DodgeOdds = 0.5
+            
+        check_name_mod(self)
 
         self.check_stats()
 
