@@ -254,7 +254,7 @@ class Player:
         to_be_lowered_by = 100
 
         if self.DodgeOdds > 1:
-            self.DodgeOdds += points / ((to_be_lowered_by * (self.DodgeOdds // 2)) + 1)
+            self.DodgeOdds += points / ((to_be_lowered_by * (self.DodgeOdds * 2)) + 1)
         else:
             self.DodgeOdds += points
 
@@ -265,21 +265,15 @@ class Player:
         """
         to_be_lowered_by = 2500
         desired_increase = 0
-        max_point_gain = 0.01
-        temp_points = points / 10
-
+        
         if self.CritRate > 1:
-            temp_points = temp_points / self.CritRate
+            desired_increase = points / ((to_be_lowered_by * (self.CritRate ** 2)) + 1)
+        elif points > 0.25:
+            desired_increase = points / ((to_be_lowered_by * (self.CritRate ** 2)) + 1)
+        else:
+            desired_increase = points
 
-        while temp_points > max_point_gain:
-            if self.CritRate > 1:
-                desired_increase = max_point_gain / ((to_be_lowered_by * (self.CritRate // 2)) + 1)
-            else:
-                desired_increase = max_point_gain
-
-            self.CritRate = self.CritRate + desired_increase
-
-            temp_points -= max_point_gain
+        self.CritRate = self.CritRate + desired_increase
 
     def gain_crit_damage(self, points):
         """Increases crit damage based on points, with increasing cost.
