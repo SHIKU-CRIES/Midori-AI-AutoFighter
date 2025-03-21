@@ -15,5 +15,5 @@ if __name__ == "__main__":
         main(1)
     except Exception as error:
         print(f"A error: {str(error)}")
-        os.remove("Player.dat")
+        
     #cProfile.run('main(1)', filename='profiling_results.prof')
