@@ -699,8 +699,8 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
-        x_offset = x
-        y_offset = y - 275
+        x_offset = mouse_pos[0] + 10
+        y_offset = mouse_pos[1] - 275
         spacing = 25
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
