@@ -426,11 +426,20 @@ class Player:
         tohit = random.uniform(EffectHitRate, 1 + EffectHitRate)
 
         if tomiss < tohit:
+            for dots in self.DOTS:
+                if DOT.name == dots.name:
+                    dots.damage += DOT.damage
+                    dots.tick_interval += DOT.tick_interval
+                    dots.turns += DOT.turns
+
+                    return
+
             if len(self.DOTS) < 1500:
                 self.DOTS.append(DOT)
             else:
-                for dot in self.DOTS:
-                    dot.damage *= 2
+                random.choice(self.DOTS).damage += DOT.damage
+                random.choice(self.DOTS).tick_interval += DOT.tick_interval
+                random.choice(self.DOTS).turns += DOT.turns
     
     def damage_over_time(self):
         for dot in self.DOTS:
