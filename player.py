@@ -615,6 +615,8 @@ class Player:
 
         self.check_stats()
 
+        check_name_mod(self)
+
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
         self.Vitality = max(post_temp_vit, 0.75)
@@ -627,8 +629,6 @@ class Player:
 
         if self.DodgeOdds > 0.5:
             self.DodgeOdds = 0.5
-
-        check_name_mod(self)
 
         self.check_stats()
 
