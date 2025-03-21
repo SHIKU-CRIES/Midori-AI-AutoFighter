@@ -426,7 +426,8 @@ class Player:
         tohit = random.uniform(EffectHitRate, 1 + EffectHitRate)
 
         if tomiss < tohit:
-            self.DOTS.append(DOT)
+            if len(self.DOTS) < 1500:
+                self.DOTS.append(DOT)
     
     def damage_over_time(self):
         for dot in self.DOTS:
