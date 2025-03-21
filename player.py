@@ -266,7 +266,7 @@ class Player:
         to_be_lowered_by = 2500
         desired_increase = 0
         max_point_gain = 1
-        temp_points = points
+        temp_points = points / 10
 
         while temp_points > max_point_gain:
             if self.CritRate > 1:
