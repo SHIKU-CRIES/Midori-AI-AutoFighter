@@ -625,10 +625,7 @@ class Player:
         self.Atk = int(self.Atk * min((level / top_level), (5)) * post_temp_vit) + 5
         # self.Def = int(self.Def * min((level / (top_level * 4)), (2))) + 5
         self.gain_crit_rate(0.0002 * (level / top_level_full))
-        self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 5))
-
-        if self.DodgeOdds > 0.5:
-            self.DodgeOdds = 0.5
+        self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 15))
 
         self.check_stats()
 
