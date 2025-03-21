@@ -2,7 +2,7 @@ import os
 import sys
 import pygame
 import random
-import importlib
+import threading
 
 from screendata import Screen
 
@@ -108,9 +108,6 @@ def main(level):
 
     player.isplayer = True
 
-    if player.level < 5:
-        player.load_past_lives()
-
     playerlist.append(player)
         
     for i in range(4):
@@ -128,10 +125,17 @@ def main(level):
 
         player.isplayer = True
 
-        if player.level < 5:
-            player.load_past_lives()
-
         playerlist.append(player)
+
+    threads = []
+    for player in playerlist:
+        if player.level < 5:
+            thread = threading.Thread(target=player.load_past_lives)
+            threads.append(thread)
+            thread.start()
+
+    for thread in threads:
+        thread.join()
 
     pygame.init()
 
