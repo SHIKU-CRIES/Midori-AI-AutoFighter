@@ -61,17 +61,17 @@ def check_name_mod(player):
             player.Vitality *= 1.5
 
     if themed_names[0] in player.PlayerName.lower():
-        dodge_buff = 0.15
+        dodge_buff = 0.35
         max_hp_debuff = player.MHP / 4
 
         while player.MHP > max_hp_debuff:
-            dodge_buff = dodge_buff + (0.0000007 * player.Vitality)
+            dodge_buff = dodge_buff + (0.001 * player.Vitality)
             player.MHP = player.MHP - 1
 
         player.Atk = int(player.Atk * 1)
         player.Def = int(player.Def * 2)
         player.gain_crit_rate(0.00001 * player.level)
-        player.DodgeOdds = (player.DodgeOdds + dodge_buff) * player.Vitality
+        player.DodgeOdds += dodge_buff * player.Vitality
 
     if themed_names[1] in player.PlayerName.lower():
         def_to_add = 10000
