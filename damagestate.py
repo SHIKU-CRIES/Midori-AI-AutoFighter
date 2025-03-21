@@ -40,12 +40,14 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
             source.Regain -= 0.01
+            source.DodgeOdds += 0.25
             source.MHP += 500
             source.HP += 500
             source.Atk += 50
-            source.Def += 50
+            source.Def += 1
         
         if source.Mitigation > 1:
+            source.DodgeOdds += 0.01
             source.Mitigation -= 0.001
             source.EffectHitRate += 0.01
 
@@ -55,7 +57,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             
             mited_damage_dealt = mited_damage_dealt / 4
             
-            target.DodgeOdds += 0.0001
+            target.DodgeOdds += 0.01
         else:
             if source.HP > source.MHP * 0.25:
                 hp_diff = source.HP - source.MHP * 0.25

@@ -446,9 +446,6 @@ class Player:
             if dot.is_active():
                 dot_damage = dot.tick()
 
-                if dot_damage > self.MHP * 0.1 * self.Mitigation:
-                    dot_damage = self.MHP * 0.1 * self.Mitigation
-
                 for i in range(dot.tick_interval):
                     self.take_damage(1, self.Type.damage_mod(dot_damage, dot.damage_type))
             else:
