@@ -443,6 +443,7 @@ class Player:
 
                 for i in range(dot.tick_interval):
                     self.take_damage_nododge(1, self.Type.damage_mod(dot_damage, dot.damage_type))
+                    dot.damage -= (dot.damage / 4)
             else:
                 self.DOTS.remove(dot)
 
