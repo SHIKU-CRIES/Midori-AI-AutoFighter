@@ -82,7 +82,10 @@ def on_damage_taken(items: list[ItemType], pre_damage_taken: float):
     total_output = pre_damage_taken
     
     for item in items:
-        total_output = item.on_damage_taken(total_output)
+        try:
+            total_output = item.on_damage_taken(total_output)
+        except Exception as e:
+            print(f"Error in on_damage_taken for item {item}: {e}")
 
     return total_output
 
@@ -90,7 +93,10 @@ def on_damage_dealt(items: list[ItemType], damage_delt: float):
     total_output = damage_delt
     
     for item in items:
-        total_output = item.on_damage_dealt(total_output)
+        try:
+            total_output = item.on_damage_dealt(total_output)
+        except Exception as e:
+            print(f"Error in on_damage_dealt for item {item}: {e}")
 
     return total_output
 
@@ -98,7 +104,10 @@ def on_stat_gain(items: list[ItemType], desired_increase: float):
     total_output = desired_increase
     
     for item in items:
-        total_output = item.stat_gain(total_output)
+        try:
+            total_output = item.stat_gain(total_output)
+        except Exception as e:
+            print(f"Error in on_stat_gain for item {item}: {e}")
 
     return total_output
 
@@ -106,6 +115,9 @@ def on_passive_use(items: list[ItemType], desired_increase: float):
     total_output = desired_increase
     
     for item in items:
-        total_output = item.on_passive_use(total_output)
+        try:
+            total_output = item.on_passive_use(total_output)
+        except Exception as e:
+            print(f"Error in on_passive_use for item {item}: {e}")
 
     return total_output
