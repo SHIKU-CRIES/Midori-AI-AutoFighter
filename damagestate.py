@@ -103,6 +103,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                     
             if len(target.DOTS) > 5:
                 target.DOTS.remove(random.choice(target.DOTS))
+            else:
+                for dot in target.DOTS:
+                    dot.damage /= 2
 
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
 
