@@ -265,7 +265,7 @@ class Player:
         """
         to_be_lowered_by = 2500
         desired_increase = 0
-        max_point_gain = 0.01
+        max_point_gain = 0.05
         temp_points = points
 
         while temp_points > max_point_gain:
