@@ -142,7 +142,7 @@ def check_name_mod(player):
         player.load_mimic()
         player.MHP = int(player.MHP / ((10000 / player.level) + 1))
         player.Atk = int(player.Atk / 5)
-        player.Def = int(player.Def / 4)
+        # player.Def = int(player.Def / 4)
         player.Regain = player.Regain / 5
         player.DodgeOdds = player.DodgeOdds / 4
         player.Vitality -= player.Vitality / 4
