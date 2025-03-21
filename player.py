@@ -125,8 +125,6 @@ class Player:
             os.makedirs(past_lives_folder)
             print("No past lives found.")
             return
-        
-        spinner.start(text="Past Lifes: Starting")
 
         past_lives_folder_list = os.listdir(past_lives_folder)
         total_items = len(past_lives_folder_list)
@@ -137,8 +135,6 @@ class Player:
                 filepath = os.path.join(past_lives_folder, filename)
 
                 starting_items += 1
-        
-                spinner.start(text=f"({starting_items}/{total_items}) Past Lifes ({self.PlayerName}): {filepath}")
 
                 try:
                     with open(filepath, 'rb') as f:
@@ -174,15 +170,13 @@ class Player:
                             self.gain_dodgeodds_rate(0.001)
 
                         if past_life_data['Vitality'] < 0:
-                            spinner.fail(text=f"Past Lifes: {filepath} failed to load (Vitality is negative. Deleting past life file.)")
+                            spinner.fail(text=f"Past Lifes ({self.PlayerName}): {filepath} failed to load (Vitality is negative. Deleting past life file.)")
                             os.remove(filepath)
                             continue
 
                         elif past_life_data['Vitality'] > 1.0000001:
                             temp_past_life_vitality = past_life_data['Vitality'] - 1
                             while temp_past_life_vitality > 0:
-                                spinner.start(text=f"({starting_items}/{total_items}) Past Lifes ({self.PlayerName}): Granting Vitality ({temp_past_life_vitality} > {self.Vitality})")
-                                
                                 bonus = max(0.001, self.Vitality - 1)
                                 
                                 scaling_factor = 0.95
@@ -207,11 +201,11 @@ class Player:
                         self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 100)
 
                 except Exception as e:
-                    spinner.fail(text=f"Past Lifes: {filepath} failed to load ({str(e)}. Deleting past life file.)")
+                    spinner.fail(text=f"Past Lifes ({self.PlayerName}): {filepath} failed to load ({str(e)}. Deleting past life file.)")
                     os.remove(filepath)
                     continue
         
-        spinner.succeed(text=f"Past Lifes: Fully Loaded")
+        spinner.succeed(text=f"Past Lifes ({self.PlayerName}): Fully Loaded")
                 
         self.level = 1
 
