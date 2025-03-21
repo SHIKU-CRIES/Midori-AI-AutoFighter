@@ -19,7 +19,7 @@ class ItemType():
         try:
             temp_math = max(random.uniform(0.001, 0.01) * self.check_mods(mod_fixed / 10) / (100 * self.power), 0.00001)
 
-            self.power += temp_math
+            self.power += temp_math * 0.0001
 
         except Exception as error:
             print(f"The Item ({self.name}) errored: `{str(error)}`")
