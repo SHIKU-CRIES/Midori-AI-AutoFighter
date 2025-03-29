@@ -41,7 +41,7 @@ def check_name_stats_mod(player):
     return 9
 
 def check_name_mod(player):
-    if player.level > 2000:
+    if player.level > 1000:
         if "lady" in player.PlayerName.lower():
 
             if "light" in player.PlayerName.lower():
