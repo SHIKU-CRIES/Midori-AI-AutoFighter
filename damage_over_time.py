@@ -33,6 +33,14 @@ class dot:
 
     def __repr__(self) -> str:
         return f"DOT(name='{self.name}', damage={self.damage}, turns={self.turns}, type={self.damage_type})"
+    
+    def check_turns(self) -> None:
+        """
+        Checks the turns remaining, if over a set number, grants more ticks per turn
+        """
+        if self.turns > 1000:
+            self.turns = 999
+            self.tick_interval += 1
 
     def tick(self) -> float:
         """
@@ -41,6 +49,9 @@ class dot:
         Returns:
             The damage dealt this tick.  Returns 0 if the DOT has expired.
         """
+        
+        self.check_turns()
+
         if self.turns > 0:
             self.turns -= 1
             return self.damage
