@@ -68,10 +68,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 source.HP -= round(source.MHP * scaled_reduction)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
-                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.75, 100, source.Type, source.PlayerName, 2), source.EffectHitRate)
+                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.25, 35, source.Type, source.PlayerName, 2), source.EffectHitRate)
             else:
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 2)
-                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.55, 55, source.Type, source.PlayerName, 1), source.EffectHitRate)
+                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.15, 20, source.Type, source.PlayerName, 1), source.EffectHitRate)
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
@@ -106,6 +106,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             else:
                 for dot in target.DOTS:
                     dot.damage /= 2
+
+                    if dot.tick_interval > 5:
+                        dot.tick_interval -= 1
 
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
 
