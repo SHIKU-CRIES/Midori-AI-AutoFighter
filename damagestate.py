@@ -39,19 +39,19 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                         player.heal_damage(source.deal_damage(1, Light) * 0.005)
     
     if source.Type == Dark:
-        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 1.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Wind:
-        pass
+        target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.35, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Lightning:
-        pass
+        target.gain_damage_over_time(damageovertimetype("Charged Decay", mited_damage_dealt ** 0.35, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Ice:
-        pass
+        target.gain_damage_over_time(damageovertimetype("Frozen Wound", mited_damage_dealt ** 0.35, 5, source.Type, source.PlayerName, 1), source.effecthittate())
 
     if source.Type == Fire:
-        target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 2, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Generic:
         pass
