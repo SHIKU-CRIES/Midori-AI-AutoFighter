@@ -3,14 +3,14 @@ import random
 
 from player import Player
 
-from damagetypes import Generic
-
 from damage_over_time import dot as damageovertimetype
 from healing_over_time import hot as healingovertimetype
 
 from colorama import Fore, Style
 
 from themedstuff import themed_names
+
+from damagetypes import Light, Dark, Wind, Lightning, Fire, Ice, Generic
 
 red = Fore.RED
 green = Fore.GREEN
@@ -51,6 +51,24 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             source.Mitigation -= 0.001
             source.EffectRES += 0.01
             source.EffectHitRate += 0.01
+        
+        if source.Type == Light:
+            pass
+        
+        if source.Type == Dark:
+            pass
+        
+        if source.Type == Wind:
+            pass
+        
+        if source.Type == Lightning:
+            pass
+        
+        if source.Type == Ice:
+            pass
+        
+        if source.Type == Fire:
+            target.gain_damage_over_time(damageovertimetype("Burn", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.EffectHitRate)
 
         if themed_names[0] in target.PlayerName.lower():
             if random.random() >= 0.98:
