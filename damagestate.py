@@ -41,7 +41,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) + 2)
     
     if source.Type == Dark:
-        target.gain_damage_over_time(damageovertimetype("Darkness Removal", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.EffectHitRate)
+        target.gain_damage_over_time(damageovertimetype("Darkness Removal", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Wind:
         pass
@@ -53,7 +53,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         pass
 
     if source.Type == Fire:
-        target.gain_damage_over_time(damageovertimetype("Burn", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.EffectHitRate)
+        target.gain_damage_over_time(damageovertimetype("Burn", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Generic:
         pass
@@ -108,10 +108,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 source.HP -= round(source.MHP * scaled_reduction)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
-                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.25, 35, source.Type, source.PlayerName, 2), source.EffectHitRate)
+                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.25, 35, source.Type, source.PlayerName, 2), source.effecthittate())
             else:
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 2)
-                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.15, 20, source.Type, source.PlayerName, 1), source.EffectHitRate)
+                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.15, 20, source.Type, source.PlayerName, 1), source.effecthittate())
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
@@ -169,7 +169,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
                         player.DOTS.remove(to_be_moved)
 
-                        random.choice(foelist).gain_damage_over_time(to_be_moved, source.EffectHitRate)
+                        random.choice(foelist).gain_damage_over_time(to_be_moved, source.effecthittate())
 
     if themed_names[3] in source.PlayerName.lower():
         if target.MHP > source.MHP:

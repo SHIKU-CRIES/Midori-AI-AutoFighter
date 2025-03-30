@@ -413,6 +413,12 @@ class Player:
     def damage_mitigation(self, damage_pre: float):
         return max(damage_pre / ((self.Mitigation * self.Vitality) * (self.Def ** 2.5)), 1)
     
+    def effectres(self):
+        return self.EffectRES * self.Vitality
+    
+    def effecthittate(self):
+        return self.EffectHitRate * self.Vitality
+    
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
 
@@ -423,7 +429,7 @@ class Player:
             EffectHitRate = 1.0
 
         for _ in range(num_applications):
-            starter_tohit = (EffectHitRate - (self.EffectRES * self.Vitality)) * random.uniform(0.90, 1.10)
+            starter_tohit = (EffectHitRate - (self.effectres())) * random.uniform(0.90, 1.10)
 
             tohit = max(0.01, min(1, starter_tohit))
 
