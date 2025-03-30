@@ -501,6 +501,9 @@ class Player:
         level_ups = 0
         max_level_ups = 5
 
+        if self.level < 2000:
+            max_level_ups += 95
+
         mod_fixed = on_stat_gain(self.Items, (mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 1000)), 1)
         int_mod = max(round(mod_fixed * (self.level / 100)), 1)
