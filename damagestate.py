@@ -51,9 +51,30 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     
     if source.Type == Ice:
         pass
-    
+
     if source.Type == Fire:
         target.gain_damage_over_time(damageovertimetype("Burn", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.EffectHitRate)
+    
+    if source.Type == Generic:
+        pass
+
+    if target.Type == Light:
+        mited_damage_dealt = mited_damage_dealt / 25
+
+    if target.Type == Dark:
+        pass
+
+    if target.Type == Wind:
+        pass
+
+    if target.Type == Lightning:
+        pass
+
+    if target.Type == Ice:
+        mited_damage_dealt = mited_damage_dealt / 25
+
+    if target.Type == Fire:
+        pass
 
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
