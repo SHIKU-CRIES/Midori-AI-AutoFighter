@@ -712,9 +712,9 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         if len(player.DOTS) > 0:
             total_dot_damge = 0
             for dots in player.DOTS:
-                total_dot_damge += player.damage_mitigation(dots.damage) * dots.tick_interval
+                total_dot_damge = player.damage_mitigation(dots.damage) * dots.tick_interval
 
-            stat_data.append(("Dots:", f"{len(player.DOTS)} (DPT: {total_dot_damge:.1f})"))
+                stat_data.append((f"{dots.name}:", f"DPT: {total_dot_damge:.1f} / Turns: {dots.turns}"))
 
         if len(player.HOTS) > 0:
             stat_data.append(("Hots:", f"{len(player.HOTS)}"))
