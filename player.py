@@ -470,7 +470,7 @@ class Player:
             if hot.is_active():
                 hot_healing = hot.tick()
                 for i in range(hot.tick_interval):
-                    self.heal_damage(self.Type.damage_mod(hot_healing, Generic))
+                    self.heal_damage(self.Type.damage_mod(hot_healing, hot.healing_type))
             else:
                 self.HOTS.remove(hot)
 
