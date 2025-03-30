@@ -417,13 +417,11 @@ class Player:
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
 
     def gain_damage_over_time(self, DOT: damageovertimetype, EffectHitRate: float):
-        tomiss = self.EffectRES * random.uniform(0.90, 1.10)
-        tohit = EffectHitRate * random.uniform(0.90, 1.10)
+        starter_tohit = (1 + EffectHitRate - self.EffectRES) * random.uniform(0.90, 1.10)
 
-        tomiss = max(0.05, tomiss)
-        tohit = min(0.99, tohit)
+        tohit = max(0.01, min(1, starter_tohit))
 
-        if tomiss < tohit:
+        if random.random() > tohit:
             for dots in self.DOTS:
                 if DOT.name == dots.name:
                     dots.damage += DOT.damage
