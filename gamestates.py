@@ -320,25 +320,28 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    last_known_foe = person.PlayerName
-                
-                    if bleed_mod > 1.5:
-                        person.RushStat = 0
-                        person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.00002 * bleed_mod)
+                    if person.ActionPoints > 100:
+                        last_known_foe = person.PlayerName
+                    
+                        if bleed_mod > 1.5:
+                            person.RushStat = 0
+                            person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.00002 * bleed_mod)
 
-                    if person.HP > 1:
-                        person.do_pre_turn()
+                        if person.HP > 1:
+                            person.do_pre_turn()
 
-                        if len(playerlist) > 0:
-                            target_to_damage = random.choice(playerlist)
-                            target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
-                            
-                            if target_to_damage.HP < 1:
-                                target_to_damage.save_past_life()
-                                kill_person(target_to_damage, person)
-                                playerlist.remove(target_to_damage)
+                            if len(playerlist) > 0:
+                                target_to_damage = random.choice(playerlist)
+                                target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                                
+                                if target_to_damage.HP < 1:
+                                    target_to_damage.save_past_life()
+                                    kill_person(target_to_damage, person)
+                                    playerlist.remove(target_to_damage)
+                        else:
+                            foelist.remove(person)
                     else:
-                        foelist.remove(person)
+                        person.ActionPoints += person.ActionPointsPerTick
             else:
                 break
 
@@ -349,44 +352,47 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    last_known_player = person.PlayerName
-                
-                    if bleed_mod > 1.5:
-                        person.RushStat = 0
-                        person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.00002 * bleed_mod)
+                    if person.ActionPoints > 100:
+                        last_known_player = person.PlayerName
+                    
+                        if bleed_mod > 1.5:
+                            person.RushStat = 0
+                            person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.00002 * bleed_mod)
 
-                    if person.HP > 0:
+                        if person.HP > 0:
 
-                        person.do_pre_turn()
+                            person.do_pre_turn()
 
-                        if len(foelist) > 0:
-                            target_to_damage = random.choice(foelist)
-                            target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                            if len(foelist) > 0:
+                                target_to_damage = random.choice(foelist)
+                                target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
 
-                            if target_to_damage.HP < 1:
-                                foelist.remove(target_to_damage)
-                                person.Kills += 1
-                                total_rushmod = 0
+                                if target_to_damage.HP < 1:
+                                    foelist.remove(target_to_damage)
+                                    person.Kills += 1
+                                    total_rushmod = 0
 
-                                if bleed_mod < 100:
-                                    person.RushStat += 1
+                                    if bleed_mod < 100:
+                                        person.RushStat += 1
 
-                                for player in playerlist:
-                                    total_rushmod += max(1, player.RushStat)
+                                    for player in playerlist:
+                                        total_rushmod += max(1, player.RushStat)
 
-                                for player in playerlist:
-                                    if person.PlayerName == player.PlayerName:
-                                        player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
-                                    else:
-                                        player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
-                                    
-                                person.save()
+                                    for player in playerlist:
+                                        if person.PlayerName == player.PlayerName:
+                                            player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
+                                        else:
+                                            player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
+                                        
+                                    person.save()
 
-                            elif target_to_damage.HP > target_to_damage.MHP:
-                                target_to_damage.HP = target_to_damage.MHP
+                                elif target_to_damage.HP > target_to_damage.MHP:
+                                    target_to_damage.HP = target_to_damage.MHP
+                        else:
+                            person.save_past_life()
+                            playerlist.remove(person)
                     else:
-                        person.save_past_life()
-                        playerlist.remove(person)
+                        person.ActionPoints += person.ActionPointsPerTick
 
                     if person.HP > person.MHP:
                         person.HP = person.MHP
