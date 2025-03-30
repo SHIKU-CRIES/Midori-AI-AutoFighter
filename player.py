@@ -390,8 +390,8 @@ class Player:
     
     def do_pre_turn(self):
         self.regain_hp()
-        self.damage_over_time()
         self.heal_over_time()
+        self.damage_over_time()
     
     def heal_damage(self, input_healing: float):
         self.HP += round(input_healing)
@@ -425,7 +425,7 @@ class Player:
         return self.EffectHitRate * self.Vitality
     
     def regain_hp(self):
-        self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
+        self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.25))
 
     def gain_damage_over_time(self, DOT: damageovertimetype, EffectHitRate: float):
         num_applications = 1
