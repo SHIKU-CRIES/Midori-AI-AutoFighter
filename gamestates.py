@@ -169,6 +169,7 @@ def main(level):
     while True:
 
         level_sum = 0
+        is_deading = False
         foelist: list[Player] = []
 
         for player in playerlist:
@@ -230,8 +231,7 @@ def main(level):
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
-                    for player in playerlist:
-                        player.HP = -100000
+                    is_deading = True
 
             enrage_timer.check_timeout()
             
@@ -258,6 +258,10 @@ def main(level):
             
             if bleed_mod > 2:
                 def_mod = max(1, (bleed_mod * 0.004) + (bleed_mod * 0.004) + (bleed_mod * 0.002) + 1)
+            
+            if is_deading:
+                for player in playerlist:
+                    player.HP -= 100000
 
             fps_cap = 65
             dt = clock.tick(fps_cap) / 1000
