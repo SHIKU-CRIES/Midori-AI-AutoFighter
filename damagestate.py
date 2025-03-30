@@ -38,10 +38,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         alllist.append(player)
         
     if source.Type == Light:
-        pass
+        mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) + 2)
     
     if source.Type == Dark:
-        pass
+        target.gain_damage_over_time(damageovertimetype("Darkness Removal", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.EffectHitRate)
     
     if source.Type == Wind:
         pass
