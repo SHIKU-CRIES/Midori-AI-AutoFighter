@@ -53,7 +53,7 @@ class Player:
         self.CritRate: float = 0.03
         self.CritDamageMod: float = 2
         self.DodgeOdds: float = 0.03
-        self.EffectHitRate: float = 0.05
+        self.EffectHitRate: float = 1
         self.EffectRES: float = 0.05
         self.DamageTaken: int = 0
         self.DamageDealt: int = 0
@@ -417,25 +417,30 @@ class Player:
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.10))
 
     def gain_damage_over_time(self, DOT: damageovertimetype, EffectHitRate: float):
-        starter_tohit = (1 + EffectHitRate - self.EffectRES) * random.uniform(0.90, 1.10)
+        num_applications = 1
+        if EffectHitRate > 1:
+            num_applications = round(math.floor(EffectHitRate))
+            EffectHitRate = 1.0
 
-        tohit = max(0.01, min(1, starter_tohit))
+        for _ in range(num_applications):
+            starter_tohit = (EffectHitRate - self.EffectRES) * random.uniform(0.90, 1.10)
 
-        if random.random() > tohit:
-            for dots in self.DOTS:
-                if DOT.name == dots.name:
-                    dots.damage += DOT.damage
-                    dots.tick_interval += DOT.tick_interval
-                    dots.turns += DOT.turns
+            tohit = max(0.01, min(1, starter_tohit))
 
-                    return
+            if random.random() < tohit:
+                for dots in self.DOTS:
+                    if DOT.name == dots.name:
+                        dots.damage += DOT.damage
+                        dots.tick_interval += DOT.tick_interval
+                        dots.turns += DOT.turns
+                        return
 
-            if len(self.DOTS) < 1500:
-                self.DOTS.append(DOT)
-            else:
-                random.choice(self.DOTS).damage += DOT.damage
-                random.choice(self.DOTS).tick_interval += DOT.tick_interval
-                random.choice(self.DOTS).turns += DOT.turns
+                if len(self.DOTS) < 1500:
+                    self.DOTS.append(DOT)
+                else:
+                    random.choice(self.DOTS).damage += DOT.damage
+                    random.choice(self.DOTS).tick_interval += DOT.tick_interval
+                    random.choice(self.DOTS).turns += DOT.turns
     
     def damage_over_time(self):
         for dot in self.DOTS:

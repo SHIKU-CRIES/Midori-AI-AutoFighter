@@ -49,6 +49,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if source.Mitigation > 1:
             source.DodgeOdds += 0.001
             source.Mitigation -= 0.001
+            source.EffectRES += 0.01
             source.EffectHitRate += 0.01
 
         if themed_names[0] in target.PlayerName.lower():
