@@ -36,6 +36,24 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     
     for player in playerlist:
         alllist.append(player)
+        
+    if source.Type == Light:
+        pass
+    
+    if source.Type == Dark:
+        pass
+    
+    if source.Type == Wind:
+        pass
+    
+    if source.Type == Lightning:
+        pass
+    
+    if source.Type == Ice:
+        pass
+    
+    if source.Type == Fire:
+        target.gain_damage_over_time(damageovertimetype("Burn", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.EffectHitRate)
 
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
@@ -51,24 +69,6 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             source.Mitigation -= 0.001
             source.EffectRES += 0.01
             source.EffectHitRate += 0.01
-        
-        if source.Type == Light:
-            pass
-        
-        if source.Type == Dark:
-            pass
-        
-        if source.Type == Wind:
-            pass
-        
-        if source.Type == Lightning:
-            pass
-        
-        if source.Type == Ice:
-            pass
-        
-        if source.Type == Fire:
-            target.gain_damage_over_time(damageovertimetype("Burn", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.EffectHitRate)
 
         if themed_names[0] in target.PlayerName.lower():
             if random.random() >= 0.98:
