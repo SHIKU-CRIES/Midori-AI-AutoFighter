@@ -27,15 +27,7 @@ def debug_log(text):
     
     return text
 
-def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, mited_damage_dealt: float):
-        
-    alllist: list[Player] = []
-    
-    for player in foelist:
-        alllist.append(player)
-    
-    for player in playerlist:
-        alllist.append(player)
+def check_damage_type_passive(alllist: list[Player], source: Player, target: Player, mited_damage_dealt: float):
         
     if source.Type == Light:
         mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) + 2)
@@ -75,6 +67,20 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
     if target.Type == Fire:
         pass
+
+    return mited_damage_dealt
+
+def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, mited_damage_dealt: float):
+        
+    alllist: list[Player] = []
+    
+    for player in foelist:
+        alllist.append(player)
+    
+    for player in playerlist:
+        alllist.append(player)
+    
+    mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
 
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
