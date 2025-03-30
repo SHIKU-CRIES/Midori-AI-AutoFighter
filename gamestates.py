@@ -320,7 +320,7 @@ def main(level):
                 
                     if bleed_mod > 1.5:
                         person.RushStat = 0
-                        person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.002 * bleed_mod)
+                        person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.00002 * bleed_mod)
 
                     if person.HP > 1:
                         person.do_pre_turn()
@@ -349,7 +349,7 @@ def main(level):
                 
                     if bleed_mod > 1.5:
                         person.RushStat = 0
-                        person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.002 * bleed_mod)
+                        person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.00002 * bleed_mod)
 
                     if person.HP > 0:
 
