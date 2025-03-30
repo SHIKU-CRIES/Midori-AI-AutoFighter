@@ -731,4 +731,10 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing))
             screen.blit(stat_text, stat_rect)
 
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mouse_x, mouse_y = event.pos
+                    if stat_rect.collidepoint(mouse_x, mouse_y):
+                        print("Hello, world!")
+
                 
