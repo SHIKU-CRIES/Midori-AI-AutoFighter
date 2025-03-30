@@ -43,6 +43,7 @@ class Player:
         self.PlayerName: str = name
         self.level: int = 1
         self.EXP: int = 0
+        self.EXPMod: int = 1
         self.MHP: int = 1000 * self.level
         self.HP: int = self.MHP
         self.Def: int = 25
@@ -144,9 +145,9 @@ class Player:
 
                     can_load = False
 
-                    if self.PlayerName in past_life_data['PlayerName']:
+                    if self.PlayerName.lower() in past_life_data['PlayerName'].lower():
                         can_load = True
-                    elif self.PlayerName.lower() == "player":
+                    elif self.PlayerName.lower() == "player".lower():
                         can_load = True
                     
                     if can_load:
@@ -190,6 +191,8 @@ class Player:
                                 temp_past_life_vitality -= vit_gain
                         
                         self.check_stats()
+
+                        self.EXPMod += 1
 
                         if len(str(past_life_data['Logs'])) > 1:
                             past_life_data['Logs'] = ""
