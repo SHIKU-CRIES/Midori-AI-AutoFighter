@@ -38,8 +38,8 @@ class dot:
         """
         Checks the turns remaining, if over a set number, grants more ticks per turn
         """
-        if self.turns > 1000:
-            self.turns = 999
+        if self.turns > 100:
+            self.turns = 99
             self.tick_interval += 1
 
     def tick(self) -> float:
