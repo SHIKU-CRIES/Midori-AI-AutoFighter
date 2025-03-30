@@ -345,6 +345,7 @@ def main(level):
                             foelist.remove(person)
                     else:
                         person.ActionPoints += person.ActionPointsPerTick
+                        if person.HP > 0: person.do_pre_turn()
             else:
                 break
 
@@ -364,7 +365,6 @@ def main(level):
                             person.gain_damage_over_time(damageovertimetype("Bleed", bleed_mod * person.level, max(5, round(0.45 ** bleed_mod)), Generic, person.PlayerName, 1), 0.00002 * bleed_mod)
 
                         if person.HP > 0:
-
                             person.do_pre_turn()
 
                             if len(foelist) > 0:
@@ -397,6 +397,7 @@ def main(level):
                             playerlist.remove(person)
                     else:
                         person.ActionPoints += person.ActionPointsPerTick
+                        if person.HP > 0: person.do_pre_turn()
 
                     if person.HP > person.MHP:
                         person.HP = person.MHP
