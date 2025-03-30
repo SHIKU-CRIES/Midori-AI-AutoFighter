@@ -31,9 +31,15 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         
     if source.Type == Light:
         mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) + 2)
+
+        for player in alllist:
+            if source.isplayer == player.isplayer:
+                if player.PlayerName is not source.PlayerName:
+                    if player.HP < player.MHP * 0.55:
+                        player.heal_damage(source.deal_damage(1, Light) * 0.005)
     
     if source.Type == Dark:
-        target.gain_damage_over_time(damageovertimetype("Darkness Removal", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Wind:
         pass
@@ -45,7 +51,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         pass
 
     if source.Type == Fire:
-        target.gain_damage_over_time(damageovertimetype("Burn", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Generic:
         pass
@@ -114,10 +120,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 source.HP -= round(source.MHP * scaled_reduction)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
-                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.25, 35, source.Type, source.PlayerName, 2), source.effecthittate())
+                target.gain_damage_over_time(damageovertimetype("Twilight Decay", mited_damage_dealt ** 0.25, 35, source.Type, source.PlayerName, 2), source.effecthittate())
             else:
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 2)
-                target.gain_damage_over_time(damageovertimetype("Bleeding Light", mited_damage_dealt ** 0.15, 20, source.Type, source.PlayerName, 1), source.effecthittate())
+                target.gain_damage_over_time(damageovertimetype("Impact Echo", mited_damage_dealt ** 0.15, 20, source.Type, source.PlayerName, 1), source.effecthittate())
 
     if themed_names[1] in source.PlayerName.lower():
         hp_percentage = source.HP / source.MHP
