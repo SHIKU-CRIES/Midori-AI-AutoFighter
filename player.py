@@ -54,7 +54,7 @@ class Player:
         self.CritDamageMod: float = 2
         self.DodgeOdds: float = 0.03
         self.EffectHitRate: float = 1
-        self.EffectRES: float = 0.05
+        self.EffectRES: float = 0.35
         self.DamageTaken: int = 0
         self.DamageDealt: int = 0
         self.Kills: int = 0
@@ -423,7 +423,7 @@ class Player:
             EffectHitRate = 1.0
 
         for _ in range(num_applications):
-            starter_tohit = (EffectHitRate - self.EffectRES) * random.uniform(0.90, 1.10)
+            starter_tohit = (EffectHitRate - (self.EffectRES * self.Vitality)) * random.uniform(0.90, 1.10)
 
             tohit = max(0.01, min(1, starter_tohit))
 
