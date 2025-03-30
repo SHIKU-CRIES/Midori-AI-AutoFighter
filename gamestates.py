@@ -261,7 +261,7 @@ def main(level):
             
             if is_deading:
                 for player in playerlist:
-                    player.HP -= 100000
+                    player.HP -= player.HP
 
             fps_cap = 65
             dt = clock.tick(fps_cap) / 1000
