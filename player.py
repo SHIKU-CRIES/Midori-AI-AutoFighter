@@ -600,6 +600,8 @@ class Player:
             if self.level > 300:
                 self.Mitigation += mitigation_up
                 self.Vitality += vitality_up
+                self.EffectRES += 0.002
+                self.EffectHitRate += 0.01
 
         self.check_stats()
     
