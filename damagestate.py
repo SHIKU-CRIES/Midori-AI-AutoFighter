@@ -91,8 +91,6 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     
     for player in playerlist:
         alllist.append(player)
-    
-    mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
 
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
@@ -217,6 +215,8 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
     if themed_names[9] in source.PlayerName.lower():
         pass
+    
+    mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
     
     return max(mited_damage_dealt, 1)
 
