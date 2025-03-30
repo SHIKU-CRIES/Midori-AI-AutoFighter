@@ -713,7 +713,6 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             total_dot_damge = 0
             for dots in player.DOTS:
                 total_dot_damge = player.damage_mitigation(dots.damage) * dots.tick_interval
-
                 stat_data.append((f"{dots.name}:", f"DPT: {total_dot_damge:.1f} / Turns: {dots.turns}"))
 
         if len(player.HOTS) > 0:
@@ -730,11 +729,5 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             stat_text = font.render(f"{stat_name} {stat_value}", True, (255, 255, 255), (0, 0, 0))
             stat_rect = stat_text.get_rect(topleft=(x_offset, y_offset + i * spacing))
             screen.blit(stat_text, stat_rect)
-
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    mouse_x, mouse_y = event.pos
-                    if stat_rect.collidepoint(mouse_x, mouse_y):
-                        print("Hello, world!")
 
                 
