@@ -346,6 +346,7 @@ def main(level):
                     else:
                         person.ActionPoints += person.ActionPointsPerTick
                         if person.HP > 0: person.do_pre_turn()
+                        else: foelist.remove(person)
             else:
                 break
 
@@ -398,6 +399,7 @@ def main(level):
                     else:
                         person.ActionPoints += person.ActionPointsPerTick
                         if person.HP > 0: person.do_pre_turn()
+                        else: person.save_past_life(); playerlist.remove(person)
 
                     if person.HP > person.MHP:
                         person.HP = person.MHP
