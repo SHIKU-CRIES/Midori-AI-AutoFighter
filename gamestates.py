@@ -321,6 +321,7 @@ def main(level):
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.ActionPoints > 100:
+                        person.ActionPoints = 0
                         last_known_foe = person.PlayerName
                     
                         if bleed_mod > 1.5:
@@ -353,6 +354,7 @@ def main(level):
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.ActionPoints > 100:
+                        person.ActionPoints = 0
                         last_known_player = person.PlayerName
                     
                         if bleed_mod > 1.5:
