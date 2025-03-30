@@ -87,7 +87,7 @@ def main(level):
     past_level = 1
     foes_killed = 1
 
-    turntimer = 20
+    turntimer = 150
 
     starting_spawn_rate = 0.8
 
@@ -323,7 +323,7 @@ def main(level):
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.ActionPoints > turntimer:
-                        person.ActionPoints = 0
+                        person.ActionPoints -= turntimer
                         last_known_foe = person.PlayerName
                     
                         if bleed_mod > 1.5:
@@ -358,7 +358,7 @@ def main(level):
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.ActionPoints > turntimer:
-                        person.ActionPoints = 0
+                        person.ActionPoints -= turntimer
                         last_known_player = person.PlayerName
                     
                         if bleed_mod > 1.5:
