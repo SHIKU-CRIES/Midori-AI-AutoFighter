@@ -695,20 +695,38 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     pygame.draw.rect(screen, (255, 0, 0), player_hp_bar_full)
     pygame.draw.rect(screen, (0, 255, 0), player_hp_bar)
 
-    # Draw HP percentage
-    player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255), (0, 0, 0))
-    player_hp_percent_rect = player_hp_percent_text.get_rect(topleft=(x, y + player_hp_bar_offset + 5))
-    screen.blit(player_hp_percent_text, player_hp_percent_rect)
+    # Draw EXP bar (only if it's the player)
+    if player.isplayer:
+        player_exp_percent = player.EXP / player.exp_to_levelup() * 100
+        player_exp_bar_offset = 35
+        player_exp_bar = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, player_exp_percent * (width / 100), 5)
+        player_exp_bar_full = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, width, 5)
+        pygame.draw.rect(screen, (128, 128, 128), player_exp_bar_full)
+        pygame.draw.rect(screen, (0, 0, 255), player_exp_bar)
+
+        # Draw HP percentage
+        player_hp_percent_text_offset = 15
+        player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255), (0, 0, 0))
+        player_hp_percent_rect = player_hp_percent_text.get_rect(topleft=(x, y + player_exp_bar_offset + player_hp_percent_text_offset))
+        screen.blit(player_hp_percent_text, player_hp_percent_rect)
+    else:
+        player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255), (0, 0, 0))
+        player_hp_percent_rect = player_hp_percent_text.get_rect(topleft=(x, y + player_hp_bar_offset + 5))
+        screen.blit(player_hp_percent_text, player_hp_percent_rect)
         
     icon_rect = pygame.Rect(player_rect.x, player_rect.y, width, height)
+
 
     mouse_pos = pygame.mouse.get_pos()
     if icon_rect.collidepoint(mouse_pos):
         stat_data = []
-        
+
         stat_data.append(("Stats of:", f"{player.PlayerName} ({player.Type.name.capitalize()})"))
         stat_data.append(("Level:", player.level))
-        stat_data.append(("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"))
+
+        if player.isplayer:
+            stat_data.append(("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"))
+
         stat_data.append(("Max HP:", player.MHP))
         stat_data.append(("Atk:", int(player.Atk)))
         stat_data.append(("Def:", int(player.Def)))
