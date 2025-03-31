@@ -452,6 +452,21 @@ class Player:
                     random.choice(self.DOTS).damage += DOT.damage
                     random.choice(self.DOTS).tick_interval += DOT.tick_interval
                     random.choice(self.DOTS).turns += DOT.turns
+
+    def gain_healing_over_time(self, HOT: healingovertimetype):
+        for hot in self.HOTS:
+            if HOT.name == hot.name:
+                hot.healing += HOT.healing
+                hot.tick_interval += HOT.tick_interval
+                hot.turns += HOT.turns
+                return
+
+        if len(self.HOTS) < 1500:
+            self.HOTS.append(HOT)
+        else:
+            random.choice(self.DOTS).damage += HOT.healing
+            random.choice(self.DOTS).tick_interval += HOT.tick_interval
+            random.choice(self.DOTS).turns += HOT.turns
     
     def damage_over_time(self):
         for dot in self.DOTS:
