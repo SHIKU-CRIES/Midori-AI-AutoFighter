@@ -759,12 +759,12 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
         spacing_moded = 55 - (num_stats * 2)
 
-        font_size = max(16, 54 - 2 * spacing_moded) 
+        font_size = max(12, 96 - (2 * spacing_moded)) 
         stats_font = pygame.font.SysFont('Arial', font_size)
 
         x_offset = mouse_pos[0] + 10
         y_offset = mouse_pos[1] - 275
-        spacing = 25
+        spacing = spacing_moded
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
             stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255), (0, 0, 0))
