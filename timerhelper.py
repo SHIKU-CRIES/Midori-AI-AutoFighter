@@ -19,6 +19,7 @@ class timmer:
     def reset(self):
         """Resets the timer to its initial state."""
         self.start_tick = 0
+        self.current_tick = 0
         self.timed_out = False
 
     def get_timeout_duration(self):
