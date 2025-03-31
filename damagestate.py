@@ -58,7 +58,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         target.gain_damage_over_time(damageovertimetype("Frozen Wound", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
 
     if source.Type == Fire:
-        target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.5, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.5, 1, source.Type, source.PlayerName, 1), source.effecthittate() * 5)
     
     if source.Type == Generic:
         source.gain_healing_over_time(healingovertimetype("Twilight Echo", round(source.MHP * 0.01), 5, source.Type, source.PlayerName, 1))
