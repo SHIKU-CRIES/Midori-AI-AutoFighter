@@ -48,8 +48,8 @@ class Player:
         self.HP: int = self.MHP
         self.Def: int = 25
         self.Atk: int = 250
-        self.ActionPointsPerTick: int = 1
-        self.ActionPoints: int = 1
+        self.ActionPointsPerTick: float = 1
+        self.ActionPoints: int = 125
         self.Mitigation: float = 1.5
         self.Regain: float = 0.02
         self.Vitality: float = 1
@@ -615,6 +615,7 @@ class Player:
             if self.level > 300:
                 self.Mitigation += mitigation_up
                 self.Vitality += vitality_up
+                self.ActionPointsPerTick += 0.002
                 self.EffectRES += 0.002
                 self.EffectHitRate += 0.01
 
