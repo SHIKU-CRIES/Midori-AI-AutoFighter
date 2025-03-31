@@ -724,6 +724,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         stat_data.append(("Level:", player.level))
 
         if player.isplayer:
+            stat_data.append(("Speed:", f"{round(player.ActionPoints)}"))
             stat_data.append(("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"))
 
         stat_data.append(("Max HP:", player.MHP))
