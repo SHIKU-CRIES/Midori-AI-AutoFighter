@@ -352,7 +352,7 @@ def main(level):
                         else:
                             foelist.remove(person)
                     else:
-                        person.ActionPoints += round(person.ActionPointsPerTick * enrage_mod)
+                        person.ActionPoints += round(person.ActionPointsPerTick * max(enrage_mod, 1))
                         if person.HP > 0: person.do_pre_turn()
                         else: foelist.remove(person)
             else:
@@ -405,7 +405,7 @@ def main(level):
                             person.save_past_life()
                             playerlist.remove(person)
                     else:
-                        person.ActionPoints += round(person.ActionPointsPerTick * enrage_mod)
+                        person.ActionPoints += round(person.ActionPointsPerTick * max(enrage_mod, 1))
                         if person.HP > 0: person.do_pre_turn()
                         else: person.save_past_life(); playerlist.remove(person)
 
