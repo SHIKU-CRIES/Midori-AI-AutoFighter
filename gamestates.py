@@ -4,6 +4,8 @@ import pygame
 import random
 import threading
 
+from halo import Halo
+
 from screendata import Screen
 
 from timerhelper import timmer
@@ -24,6 +26,8 @@ from typing import Tuple
 from colorama import Fore, Style
 
 from damage_over_time import dot as damageovertimetype
+
+spinner = Halo(text='Loading', spinner='dots', color='green')
     
 red = Fore.RED
 green = Fore.GREEN
@@ -97,6 +101,8 @@ def main(level):
     playerlist: list[Player] = []
     temp_themed_names: list[str] = []
 
+    spinner.start(text=f"Loading Players, please wait...")
+
     for item in themed_names:
         if "mimic".lower() in item.lower():
             continue
@@ -138,6 +144,8 @@ def main(level):
 
     for thread in threads:
         thread.join()
+    
+    spinner.succeed(text=f"Players: Fully Loaded")
 
     pygame.init()
 
