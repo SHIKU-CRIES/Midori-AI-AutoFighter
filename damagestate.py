@@ -45,7 +45,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
                     if player.HP > player.MHP * 0.55:
-                        player.take_damage(1, source.deal_damage(1, player.Type))
+                        player.HP -= round(player.MHP * 0.01)
     
     if source.Type == Wind:
         target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
