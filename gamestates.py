@@ -248,6 +248,7 @@ def main(level):
                         if player.PlayerName.lower() == "player":
                             player.Type = random.choice(all_damage_types)
 
+            enrage_timer.tick()
             enrage_timer.check_timeout()
             
             fps = clock.get_fps()
