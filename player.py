@@ -750,7 +750,10 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
                 stat_data.append((f"{dots.name}:", f"DPT: {total_dot_damge:.1f} / Turns: {dots.turns}"))
 
         if len(player.HOTS) > 0:
-            stat_data.append(("Hots:", f"{len(player.HOTS)}"))
+            total_dot_damge = 0
+            for hots in player.HOTS:
+                total_dot_damge = player.damage_mitigation(hots.healing) * hots.tick_interval
+                stat_data.append((f"{hots.name}:", f"HPT: {total_dot_damge:.1f} / Turns: {hots.turns}"))
 
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
