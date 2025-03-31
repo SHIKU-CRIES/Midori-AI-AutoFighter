@@ -704,16 +704,16 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
     mouse_pos = pygame.mouse.get_pos()
     if icon_rect.collidepoint(mouse_pos):
-        stat_data = [
-            ("Stats of:", f"{player.PlayerName} ({player.Type.name.capitalize()})"),
-            ("Level:", player.level),
-            ("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"),
-            ("Max HP:", player.MHP),
-            ("Atk:", int(player.Atk)),
-            ("Def:", int(player.Def)),
-            ("Crit Rate / Mod:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"),
-            ("HP Regain:", f"{(player.Regain * 100):.0f}"),
-        ]
+        stat_data = []
+        
+        stat_data.append(("Stats of:", f"{player.PlayerName} ({player.Type.name.capitalize()})"))
+        stat_data.append(("Level:", player.level))
+        stat_data.append(("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"))
+        stat_data.append(("Max HP:", player.MHP))
+        stat_data.append(("Atk:", int(player.Atk)))
+        stat_data.append(("Def:", int(player.Def)))
+        stat_data.append(("Crit Rate / Mod:", f"{(player.CritRate * 100):.1f}% / {(player.CritDamageMod):.2f}x"))
+        stat_data.append(("HP Regain:", f"{(player.Regain * 100):.0f}"))
 
         if player.Vitality > 1.01:
             stat_data.append(("Live Vitality:", f"{(player.Vitality):.2f}x"))
