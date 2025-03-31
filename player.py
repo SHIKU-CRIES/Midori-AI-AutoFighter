@@ -702,7 +702,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         player_exp_bar = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, player_exp_percent * (width / 100), 5)
         player_exp_bar_full = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, width, 5)
         pygame.draw.rect(screen, (128, 128, 128), player_exp_bar_full)
-        pygame.draw.rect(screen, (0, 0, 255), player_exp_bar)
+        pygame.draw.rect(screen, (100, 149, 237), player_exp_bar)
 
         # Draw HP percentage
         player_hp_percent_text_offset = 5
