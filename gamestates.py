@@ -279,7 +279,6 @@ def main(level):
                     player.HP -= player.HP + 500000
 
             fps_cap = 65
-            dt = clock.tick(fps_cap) / 1000
     
             # Render the screen
             screen.fill((0, 0, 0))
@@ -331,11 +330,11 @@ def main(level):
                     print(f"Could not render foe stats due to {str(error)}")
 
                 for i, person in enumerate(foelist):
-                    dt = clock.tick(fps_cap) / 1000
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.ActionPoints > turntimer:
+                        dt = clock.tick(fps_cap) / 1000
                         person.ActionPoints -= turntimer
                         last_known_foe = person.PlayerName
                     
@@ -366,11 +365,11 @@ def main(level):
             if len(playerlist) > 0:
                 for i, person in enumerate(playerlist):
 
-                    dt = clock.tick(fps_cap) / 1000
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.ActionPoints > turntimer:
+                        dt = clock.tick(fps_cap) / 1000
                         person.ActionPoints -= turntimer
                         last_known_player = person.PlayerName
                     
