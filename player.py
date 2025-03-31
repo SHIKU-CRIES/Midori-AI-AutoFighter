@@ -772,7 +772,6 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
         x_offset = mouse_pos[0] + 10
         y_offset = mouse_pos[1] - available_height - 10
-        
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
             stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255), (0, 0, 0))
