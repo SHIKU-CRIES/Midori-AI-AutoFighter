@@ -756,15 +756,23 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
         num_stats = len(stat_data)
+        
+        available_height = 250
+        min_font_size = 12
+        max_font_size = 24
+        min_spacing = 10
+        max_spacing = 20
 
-        spacing_moded = 55 - (num_stats * 2)
-
-        font_size = max(12, 96 - (2 * spacing_moded)) 
+        target_font_size = available_height / (num_stats + 0.5)
+        font_size = int(max(min_font_size, min(max_font_size, target_font_size)))
         stats_font = pygame.font.SysFont('Arial', font_size)
 
+        target_spacing = available_height / (num_stats + 1)
+        spacing = int(max(min_spacing, min(max_spacing, target_spacing)))
+
         x_offset = mouse_pos[0] + 10
-        y_offset = mouse_pos[1] - 275
-        spacing = spacing_moded
+        y_offset = mouse_pos[1] - available_height - 10
+        
 
         for i, (stat_name, stat_value) in enumerate(stat_data):
             stat_text = stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255), (0, 0, 0))
