@@ -422,7 +422,7 @@ def main(level):
                 exit()
                 
             if enrage_timer.timed_out:
-                fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
+                fps_stat = font.render(f"FPT: {int(fps)}", True, (255, 255, 255))
                 fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
                 screen.blit(fps_stat, fps_rect)
 
@@ -430,7 +430,7 @@ def main(level):
                 enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 350))
                 screen.blit(enrage_timer_stat, enrage_timer_rect)
             else:
-                fps_stat = font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
+                fps_stat = font.render(f"FPT: {int(fps)}", True, (255, 255, 255))
                 fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
                 screen.blit(fps_stat, fps_rect)
 
