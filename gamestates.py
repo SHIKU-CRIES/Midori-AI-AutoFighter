@@ -19,7 +19,7 @@ from load_photos import resource_path
 from themedstuff import themed_ajt
 from themedstuff import themed_names
 
-from damagetypes import Generic
+from damagetypes import all_damage_types, Generic
 
 from typing import Tuple
 
@@ -88,6 +88,8 @@ def main(level):
     from player import render_player_obj
 
     running = True
+    is_deading = False
+
     past_level = 1
     foes_killed = 1
 
@@ -179,7 +181,6 @@ def main(level):
     while True:
 
         level_sum = 0
-        is_deading = False
         foelist: list[Player] = []
 
         for player in playerlist:
@@ -242,6 +243,10 @@ def main(level):
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
                     is_deading = True
+                if event.type == pygame.KEYDOWN and event.key == pygame.F_d: 
+                    for player in playerlist:
+                        if player.PlayerName.lower() == "player":
+                            player.Type = random.choice(all_damage_types)
 
             enrage_timer.check_timeout()
             
