@@ -60,25 +60,25 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.5, 5, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Generic:
-        pass
+        source.HOTS.append(healingovertimetype("Heal", round(source.MHP * 0.001), 250, source.Type, source.PlayerName, 1))
 
     if target.Type == Light:
         mited_damage_dealt = mited_damage_dealt / 25
 
     if target.Type == Dark:
-        pass
+        mited_damage_dealt = mited_damage_dealt / 25
 
     if target.Type == Wind:
-        pass
+        mited_damage_dealt = mited_damage_dealt / 25
 
     if target.Type == Lightning:
-        pass
+        mited_damage_dealt = mited_damage_dealt / 25
 
     if target.Type == Ice:
         mited_damage_dealt = mited_damage_dealt / 25
 
     if target.Type == Fire:
-        pass
+        mited_damage_dealt = mited_damage_dealt / 25
 
     return mited_damage_dealt
 
@@ -178,7 +178,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 if player.PlayerName is not source.PlayerName:
                     if player.HP < source.MHP * 0.24:
                         player.heal_damage(source.Atk * 0.005)
-                        player.HOTS.append(healingovertimetype("Heal", round(player.HP * 0.001), 250, player.Type, source.PlayerName, 1))
+                        player.HOTS.append(healingovertimetype("Heal", round(player.MHP * 0.001), 250, player.Type, source.PlayerName, 1))
                     
                     if len(player.DOTS) > 0:
                         to_be_moved = random.choice(player.DOTS)
