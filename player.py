@@ -507,7 +507,7 @@ class Player:
             return False
     
     def exp_to_levelup(self):
-        return max((self.level ** 1.15) / self.EXPMod, 1)
+        return max((self.level ** 1.65) / self.EXPMod, 1)
 
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
@@ -517,7 +517,7 @@ class Player:
         max_level_ups = 5
 
         if self.level < 2000:
-            max_level_ups += 95
+            max_level_ups += 195
 
         mod_fixed = on_stat_gain(self.Items, (mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 1000)), 1)
