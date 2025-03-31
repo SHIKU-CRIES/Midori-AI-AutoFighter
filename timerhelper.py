@@ -1,25 +1,24 @@
-import time
-
 class timmer:
-    def __init__(self, timeout_seconds=15):
-        self.timeout_seconds = timeout_seconds
-        self.start_time = 0.0
+    def __init__(self, timeout_ticks=2500):
+        self.timeout_ticks = timeout_ticks
+        self.start_tick = 0
         self.timed_out = False
+        self.current_tick = 0
 
     def start(self):
         """Starts the timer."""
-        self.start_time = time.time()
+        self.start_tick = self.current_tick
 
     def check_timeout(self):
         """Checks if the timeout has been reached and updates timed_out."""
-        if self.start_time is not None:
-            elapsed_time = time.time() - self.start_time
-            if elapsed_time > self.timeout_seconds:
+        if self.start_tick is not None:
+            elapsed_ticks = self.current_tick - self.start_tick
+            if elapsed_ticks > self.timeout_ticks:
                 self.timed_out = True
 
     def reset(self):
         """Resets the timer to its initial state."""
-        self.start_time = 0.0
+        self.start_tick = 0
         self.timed_out = False
 
     def get_timeout_duration(self):
@@ -27,6 +26,11 @@ class timmer:
         If not timed out, returns 0.0.
         """
         if self.timed_out:
-            return time.time() - self.start_time - self.timeout_seconds
+            elapsed_ticks = self.current_tick - self.start_tick - self.timeout_ticks
+            return (elapsed_ticks * 0.001) + 1
         else:
             return 0.0
+
+    def tick(self):
+        """Increments the current tick counter."""
+        self.current_tick += 1
