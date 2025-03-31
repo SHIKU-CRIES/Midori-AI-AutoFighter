@@ -39,7 +39,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                         player.heal_damage(source.deal_damage(1, player.Type) * 0.05)
     
     if source.Type == Dark:
-        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.45, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.45, 50, source.Type, source.PlayerName, 1), source.effecthittate())
 
         for player in alllist:
             if source.isplayer == player.isplayer:
@@ -48,20 +48,20 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                         player.HP -= round(player.MHP * 0.01)
     
     if source.Type == Wind:
-        target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.05, 50, source.Type, source.PlayerName, 1), source.effecthittate())
         target.damage_over_time()
     
     if source.Type == Lightning:
-        target.gain_damage_over_time(damageovertimetype("Charged Decay", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Charged Decay", mited_damage_dealt ** 0.05, 50, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Ice:
-        target.gain_damage_over_time(damageovertimetype("Frozen Wound", mited_damage_dealt ** 0.05, 5, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Frozen Wound", mited_damage_dealt ** 0.05, 50, source.Type, source.PlayerName, 1), source.effecthittate())
 
     if source.Type == Fire:
-        target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.5, 1, source.Type, source.PlayerName, 1), source.effecthittate() * 5)
+        target.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.5, 25, source.Type, source.PlayerName, 1), source.effecthittate() * 15)
     
     if source.Type == Generic:
-        source.gain_healing_over_time(healingovertimetype("Twilight Echo", round(source.MHP * 0.01), 5, source.Type, source.PlayerName, 1))
+        source.gain_healing_over_time(healingovertimetype("Twilight Echo", round(source.MHP * 0.01), 50, source.Type, source.PlayerName, 1))
 
     if target.Type == Light:
         mited_damage_dealt = mited_damage_dealt / 25
