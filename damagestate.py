@@ -220,6 +220,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
         if source.EffectHitRate < 51:
             source.EffectHitRate += 0.25
+        
+        if len(source.DOTS) > 0:
+            for dot in source.DOTS:
+                dot.turns = 0
     
     mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
     
