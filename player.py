@@ -57,7 +57,7 @@ class Player:
         self.CritDamageMod: float = 2
         self.DodgeOdds: float = 0.03
         self.EffectHitRate: float = 1
-        self.EffectRES: float = 0.35
+        self.EffectRES: float = 0.05
         self.DamageTaken: int = 0
         self.DamageDealt: int = 0
         self.Kills: int = 0
@@ -653,6 +653,9 @@ class Player:
                     random.choice(self.Items).upgrade((bonus_levels * 200) / level)
                 else:
                     self.Items.append(ItemType())
+
+        self.EffectRES += 0.00002 * self.level
+        self.EffectHitRate += 0.0001 * self.level
 
         self.check_stats()
 
