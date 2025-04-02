@@ -223,7 +223,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         
         if len(source.DOTS) > 0:
             for dot in source.DOTS:
-                dot.turns = 0
+                dot.turns -= 1
     
     mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
     
@@ -246,10 +246,8 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
             if not item:
                 continue
             try:
-                before_damage = mited_damage_dealt
                 mited_damage_dealt = item.on_damage_dealt(mited_damage_dealt)
                 source.DamageDealt += int(mited_damage_dealt)
-                # log(white, f"Damage Buff effect from {source.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
             except Exception as error:
                 continue
 
@@ -257,10 +255,8 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
             if not item:
                 continue
             try:
-                before_damage = mited_damage_dealt
                 mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
                 target.DamageTaken += int(mited_damage_dealt)
-                # log(white, f"Damage Mit effect from {target.PlayerName}: {item.name}, Item Power: {item.power}, Damage Diff: {mited_damage_dealt - before_damage}")
             except Exception as error:
                 continue
 
