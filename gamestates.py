@@ -375,8 +375,10 @@ def main(level):
                         last_known_player = person.PlayerName
                     
                         if bleed_mod > 1.5:
-                            person.RushStat = 0
                             person.gain_damage_over_time(damageovertimetype("Enrage Bleed", (bleed_mod ** 2) * person.level, max(150, round(100 ** bleed_mod)), Generic, person.PlayerName, 1), 1.1 * bleed_mod)
+
+                        if bleed_mod > 20:
+                            person.RushStat = 0
 
                         if person.HP > 0:
                             person.do_pre_turn()
