@@ -104,12 +104,19 @@ class Player:
 
         self.check_stats()
 
-    def set_photo(self, photo):
-        if os.path.exists(resource_path(os.path.join("photos", f"{photo}.png"))):
-            self.photo: str = resource_path(os.path.join("photos", f"{photo}.png"))
+    def set_photo(self, photo: str):
+        photos = []
+        
+        for root, _, files in os.walk(resource_path("photos")):
+            for f in files:
+                if photo in f and f.endswith(".png"):
+                    photos.append(os.path.join(root, f))
+
+        if photos:
+            self.photo: str = random.choice(photos)
         else:
-            photos = os.listdir(resource_path(os.path.join("photos", "fallbacks")))
-            self.photo: str = resource_path(os.path.join(os.path.join("photos", "fallbacks"), f"{random.choice(photos)}"))
+            fallback_photos = os.listdir(resource_path(os.path.join("photos", "fallbacks")))
+            self.photo: str = resource_path(os.path.join(os.path.join("photos", "fallbacks"), f"{random.choice(fallback_photos)}"))
 
     def load_mimic(self):
         for filename in os.listdir("."):
