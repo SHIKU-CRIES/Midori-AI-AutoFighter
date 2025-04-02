@@ -1,5 +1,5 @@
 class timmer:
-    def __init__(self, timeout_ticks=2500):
+    def __init__(self, timeout_ticks=25000):
         self.timeout_ticks = timeout_ticks
         self.start_tick = 0
         self.timed_out = False
