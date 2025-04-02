@@ -279,6 +279,8 @@ def main(level):
                 for player in playerlist:
                     player.HP -= player.HP + 500000
 
+            enrage_dot = damageovertimetype("Enrage Bleed", (bleed_mod ** 2) * level, max(30, round(25 ** bleed_mod)), Generic, "Enrage Mech", 1)
+
             fps_cap = 65
     
             # Render the screen
@@ -341,7 +343,7 @@ def main(level):
                     
                         if bleed_mod > 1.5:
                             person.RushStat = 0
-                            person.gain_damage_over_time(damageovertimetype("Enrage Bleed", (bleed_mod ** 2) * person.level, max(150, round(100 ** bleed_mod)), Generic, person.PlayerName, 1), 1.1 * bleed_mod)
+                            person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
                         if person.HP > 1:
                             person.do_pre_turn()
@@ -375,7 +377,7 @@ def main(level):
                         last_known_player = person.PlayerName
                     
                         if bleed_mod > 1.5:
-                            person.gain_damage_over_time(damageovertimetype("Enrage Bleed", (bleed_mod ** 2) * person.level, max(150, round(100 ** bleed_mod)), Generic, person.PlayerName, 1), 1.1 * bleed_mod)
+                            person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
                         if bleed_mod > 20:
                             person.RushStat = 0
