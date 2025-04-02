@@ -737,7 +737,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         if player.Vitality > 1.01:
             stat_data.append(("Live Vitality:", f"{(player.Vitality):.2f}x"))
         elif player.Vitality != 1:
-            stat_data.append(("Live Vitality:", f"{(player.Vitality):.5f}x"))
+            stat_data.append(("Live Vitality:", f"{(player.Vitality):.3f}x"))
 
         if player.Mitigation > 1.01:
             stat_data.append(("Mitigation:", f"{(player.Mitigation):.2f}x"))
@@ -749,13 +749,13 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             total_dot_damge = 0
             for dots in player.DOTS:
                 total_dot_damge = player.damage_mitigation(dots.damage) * dots.tick_interval
-                stat_data.append((f"{dots.name}:", f"DPT: {total_dot_damge:.1f} / Turns: {dots.turns}"))
+                stat_data.append((f"{dots.name}:", f"DPT: {total_dot_damge:.0f} / Ticks: {dots.turns}"))
 
         if len(player.HOTS) > 0:
             total_dot_damge = 0
             for hots in player.HOTS:
                 total_dot_damge = player.damage_mitigation(hots.healing) * hots.tick_interval
-                stat_data.append((f"{hots.name}:", f"HPT: {total_dot_damge:.1f} / Turns: {hots.turns}"))
+                stat_data.append((f"{hots.name}:", f"HPT: {total_dot_damge:.0f} / Ticks: {hots.turns}"))
 
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
