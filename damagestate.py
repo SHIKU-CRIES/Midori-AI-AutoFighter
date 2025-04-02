@@ -64,7 +64,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
-                    player.gain_healing_over_time(healingovertimetype("Luna\'s Echo", round(source.MHP * 0.01), 50, source.Type, source.PlayerName, 1))
+                    player.gain_healing_over_time(healingovertimetype("Luna\'s Echo", round(source.MHP * 0.01), 250, source.Type, source.PlayerName, 1))
 
     if target.Type == Light:
         mited_damage_dealt = mited_damage_dealt / 25

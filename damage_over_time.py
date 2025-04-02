@@ -1,3 +1,5 @@
+
+import abc
 from typing import Optional, Dict, Any
 
 from damagetypes import Generic
@@ -38,7 +40,7 @@ class dot:
         """
         Checks the turns remaining, if over a set number, grants more ticks per turn
         """
-        if self.turns > 1000:
+        if self.turns > 5000:
             self.turns = round(self.turns / 2)
             self.tick_interval += 1
 
