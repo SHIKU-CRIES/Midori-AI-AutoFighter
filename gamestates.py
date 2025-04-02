@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import pygame
 import random
 import threading
@@ -39,6 +40,8 @@ SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 900
 
 photo_size = 128 * 3
+
+CONFIG_FILE = "config.json"
 
 enrage_timer = timmer()
 
@@ -83,6 +86,19 @@ def kill_person(dead, killer):
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Crit Damage Modifier: {killer.CritDamageMod}")
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Dodge Odds: {killer.DodgeOdds}")
 
+def load_config():
+    """Loads the configuration from config.json."""
+    try:
+        with open(CONFIG_FILE, "r") as f:
+            config = json.load(f)
+        return config
+    except FileNotFoundError:
+        print(f"Config file not found. Using default settings.")
+        return {"preferred_allies": []}  # Default empty list
+    except json.JSONDecodeError:
+        print(f"Error decoding JSON from {CONFIG_FILE}. Using default settings.")
+        return {"preferred_allies": []}  # Default empty list
+
 def main(level):
     from player import Player
     from player import render_player_obj
@@ -95,13 +111,16 @@ def main(level):
 
     turntimer = 300
 
-    starting_spawn_rate = 0.8
+    starting_spawn_rate = 0.95
 
     last_known_player = ""
     last_known_foe = ""
 
+    config = load_config()
+
     playerlist: list[Player] = []
     temp_themed_names: list[str] = []
+    preferred_themed_names: list[str] = config.get("preferred_allies", [])
 
     spinner.start(text=f"Loading Players, please wait...")
 
@@ -110,22 +129,32 @@ def main(level):
             continue
         else:
             temp_themed_names.append(item)
+    
+    themed_name = "Player"
 
-    player = Player("Player")
+    player = Player(themed_name)
 
     player.load()
-    player.set_photo("Player".lower())
+    player.set_photo(themed_name.lower())
 
     player.isplayer = True
 
     playerlist.append(player)
         
-    for i in range(4):
-        if random.random() < starting_spawn_rate:
-            themed_name = temp_themed_names[0].capitalize()
-            starting_spawn_rate /= 2
+    while len(playerlist) < 5:
+        if preferred_themed_names:
+            preferred_name = preferred_themed_names[0].lower()
+            for themed_name_pre in temp_themed_names:
+                if preferred_name in themed_name_pre.lower():
+                    themed_name = themed_name_pre.capitalize()
+                    preferred_themed_names.pop(0)
+                    break
         else:
-            themed_name = random.choice(temp_themed_names[1:]).capitalize()
+            if random.random() < starting_spawn_rate:
+                themed_name = temp_themed_names[0].capitalize()
+                starting_spawn_rate /= 2
+            else:
+                themed_name = random.choice(temp_themed_names[1:]).capitalize()
 
         temp_themed_names.remove(themed_name.lower())
 
