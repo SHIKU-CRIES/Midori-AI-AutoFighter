@@ -97,7 +97,7 @@ class Player:
 
             with open(os.path.join(lives_folder, f'{self.PlayerName}.dat'), 'rb') as f:
                 self.__dict__ = pickle.load(f)
-                
+
         except FileNotFoundError:
             pass
         except Exception as e:
@@ -454,7 +454,7 @@ class Player:
                         dots.turns += DOT.turns
                         return
 
-                if len(self.DOTS) < 1500:
+                if len(self.DOTS) < 5:
                     self.DOTS.append(DOT)
                 else:
                     random.choice(self.DOTS).damage += DOT.damage
@@ -469,12 +469,12 @@ class Player:
                 hot.turns += HOT.turns
                 return
 
-        if len(self.HOTS) < 1500:
+        if len(self.HOTS) < 2:
             self.HOTS.append(HOT)
         else:
-            random.choice(self.DOTS).damage += HOT.healing
-            random.choice(self.DOTS).tick_interval += HOT.tick_interval
-            random.choice(self.DOTS).turns += HOT.turns
+            random.choice(self.HOTS).healing += HOT.healing
+            random.choice(self.HOTS).tick_interval += HOT.tick_interval
+            random.choice(self.HOTS).turns += HOT.turns
     
     def damage_over_time(self):
         for dot in self.DOTS:
@@ -766,10 +766,10 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
                 stat_data.append((f"{dots.name}:", f"DPT: {total_dot_damge:.0f} / Ticks: {dots.turns}"))
 
         if len(player.HOTS) > 0:
-            total_dot_damge = 0
+            total_hot_damge = 0
             for hots in player.HOTS:
-                total_dot_damge = player.damage_mitigation(hots.healing) * hots.tick_interval
-                stat_data.append((f"{hots.name}:", f"HPT: {total_dot_damge:.0f} / Ticks: {hots.turns}"))
+                total_hot_damge = hots.healing * hots.tick_interval
+                stat_data.append((f"{hots.name}:", f"HPT: {total_hot_damge:.0f} / Ticks: {hots.turns}"))
 
         if len(player.Items) > 0:
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
