@@ -424,7 +424,7 @@ class Player:
         return damage_dealt * random.uniform(0.95, 1.05) * input_damage_mod
 
     def damage_mitigation(self, damage_pre: float):
-        return max(damage_pre / (self.mitigation_buff * (self.Def ** 2.5)), 1)
+        return max(damage_pre / (self.mitigation_buff() * (self.Def ** 2.5)), 1)
     
     def mitigation_buff(self):
         return (self.Mitigation * self.Vitality)
