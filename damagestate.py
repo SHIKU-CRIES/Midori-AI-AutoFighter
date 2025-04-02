@@ -66,25 +66,25 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
-                    player.gain_healing_over_time(healingovertimetype("Luna\'s Echo", round(source.MHP * 0.01), 250, source.Type, source.PlayerName, 1))
+                    player.gain_healing_over_time(healingovertimetype("Luna\'s Echo", round(source.MHP * 0.0001), 250, source.Type, source.PlayerName, 1))
 
     if target.Type == Light:
-        mited_damage_dealt = mited_damage_dealt / 25
+        mited_damage_dealt = mited_damage_dealt / 2
 
     if target.Type == Dark:
-        mited_damage_dealt = mited_damage_dealt / 25
+        mited_damage_dealt = mited_damage_dealt / 2
 
     if target.Type == Wind:
-        mited_damage_dealt = mited_damage_dealt / 25
+        mited_damage_dealt = mited_damage_dealt / 2
 
     if target.Type == Lightning:
-        mited_damage_dealt = mited_damage_dealt / 25
+        mited_damage_dealt = mited_damage_dealt / 2
 
     if target.Type == Ice:
-        mited_damage_dealt = mited_damage_dealt / 25
+        mited_damage_dealt = mited_damage_dealt / 2
 
     if target.Type == Fire:
-        mited_damage_dealt = mited_damage_dealt / 25
+        mited_damage_dealt = mited_damage_dealt / 2
 
     return mited_damage_dealt
 
@@ -215,7 +215,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     if themed_names[14].replace("_", " ") in source.PlayerName.lower():
         source.Type = Lightning
 
-        if source.ActionPointsPerTick < 200:
+        if source.ActionPointsPerTick < 600:
             source.ActionPointsPerTick += 1
 
         if source.EffectHitRate < 51:

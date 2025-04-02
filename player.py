@@ -439,7 +439,7 @@ class Player:
         num_applications = 1
         if EffectHitRate > 1:
             num_applications = round(math.floor(EffectHitRate))
-            EffectHitRate = 1.0
+            EffectHitRate = min(1.95, EffectHitRate)
 
         for _ in range(num_applications):
             starter_tohit = (EffectHitRate - (self.effectres())) * random.uniform(0.90, 1.10)
