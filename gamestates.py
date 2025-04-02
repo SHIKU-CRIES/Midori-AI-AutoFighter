@@ -93,7 +93,7 @@ def main(level):
     past_level = 1
     foes_killed = 1
 
-    turntimer = 1000
+    turntimer = 300
 
     starting_spawn_rate = 0.8
 
