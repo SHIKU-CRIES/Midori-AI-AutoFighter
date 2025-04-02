@@ -97,8 +97,9 @@ class Player:
 
             with open(os.path.join(lives_folder, f'{self.PlayerName}.dat'), 'rb') as f:
                 self.__dict__ = pickle.load(f)
+                
         except FileNotFoundError:
-            print(f"Save file for {self.PlayerName} not found. Starting new game.")
+            pass
         except Exception as e:
             print(f"Error loading save file: {e}")
 
