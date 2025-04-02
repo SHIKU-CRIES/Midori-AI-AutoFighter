@@ -36,11 +36,11 @@ spinner = Halo(text='Loading', spinner='dots', color='green')
 starting_max_blessing = 5
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name: str):
         """
         Initializes a new player character.
         """
-        self.PlayerName: str = name
+        self.PlayerName: str = ' '.join(word.capitalize() for word in name.split())
         self.level: int = 1
         self.EXP: int = 0
         self.EXPMod: int = 1
