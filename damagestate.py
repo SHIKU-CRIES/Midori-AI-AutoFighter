@@ -52,6 +52,10 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         target.damage_over_time()
     
     if source.Type == Lightning:
+
+        if source.ActionPointsPerTick <= 1200:
+            source.ActionPointsPerTick += 1
+
         target.gain_damage_over_time(damageovertimetype("Charged Decay", mited_damage_dealt ** 0.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Ice:
@@ -225,8 +229,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if source.ActionPointsPerTick < 600:
             source.ActionPointsPerTick += 1
 
-        if source.EffectHitRate < 51:
-            source.EffectHitRate += 0.25
+        source.EffectHitRate += 0.25
         
         if len(source.DOTS) > 0:
             for dot in source.DOTS:
