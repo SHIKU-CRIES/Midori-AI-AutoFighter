@@ -794,6 +794,8 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         target_spacing = min_spacing + spacing_adjustment * spacing_range
         spacing = int(target_spacing)
 
+        spacing = int(font_size)
+
         x_offset = mouse_pos[0] + 10
         y_offset = mouse_pos[1] - available_height - 10
 
