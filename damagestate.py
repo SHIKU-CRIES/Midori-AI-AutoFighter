@@ -152,7 +152,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
-                    if player.HP < player.MHP * 0.15:
+                    if player.HP < player.MHP * 0.65:
                         source.take_damage(1, source.MHP * 0.05)
                         player.heal_damage(source.deal_damage(1, Generic) * 0.025)
 
@@ -179,7 +179,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
-                    if player.HP < source.MHP * 0.24:
+                    if player.HP < source.MHP * 0.55:
                         player.heal_damage(source.Atk * 0.005)
                         player.gain_healing_over_time(healingovertimetype(f"{source.PlayerName}\'s Heal", round(player.MHP * 0.01), 5, player.Type, source.PlayerName, 1))
                     
