@@ -154,8 +154,8 @@ def check_name_mod(player: Player):
         if player.Vitality > 1:
             player.Vitality = 1
 
-        if player.Vitality > 1:
-            player.Vitality = 1
+        if player.Mitigation > 1:
+            player.Mitigation = 1
 
         player.PlayerName = tempname
 
