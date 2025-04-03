@@ -139,7 +139,8 @@ def check_name_mod(player):
 
     if themed_names[6] in player.PlayerName.lower():
         tempname = player.PlayerName
-        player.load_mimic()
+        player.PlayerName = "Player"
+        player.load()
         player.MHP = int(player.MHP / ((10000 / player.level) + 1))
         player.Atk = int(player.Atk / 5)
         player.Def = int(player.Def / 4)
@@ -151,7 +152,6 @@ def check_name_mod(player):
             player.Vitality = 1
 
         player.PlayerName = tempname
-        player.set_photo("Player".lower())
 
     if themed_names[7] in player.PlayerName.lower():
         player.MHP = int(player.MHP * 150)

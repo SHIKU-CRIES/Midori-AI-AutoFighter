@@ -119,17 +119,6 @@ class Player:
             fallback_photos = os.listdir(resource_path(os.path.join("photos", "fallbacks")))
             self.photo: str = resource_path(os.path.join(os.path.join("photos", "fallbacks"), f"{random.choice(fallback_photos)}"))
 
-    def load_mimic(self):
-        for filename in os.listdir("."):
-            if ".dat" in filename.lower():
-                try:
-                    with open(f'{filename}', 'rb') as f:
-                        self.__dict__ = pickle.load(f)
-                except FileNotFoundError:
-                    print(f"Save file for {filename} not found. Error...")
-                except Exception as e:
-                    print(f"Error loading save file: {e}")
-
     def load_past_lives(self):
         past_lives_folder = "past_lives"
         if not os.path.exists(past_lives_folder):
@@ -238,9 +227,9 @@ class Player:
         try:
             with open(past_life_filename, 'wb') as f:
                 pickle.dump(self.__dict__, f)
-            print(f"Saved past life to {past_life_filename}")
+            print(f"({self.PlayerName}) Saved past life :: {past_life_filename}")
         except Exception as e:
-            print(f"Error saving past life: {e}")
+            print(f"Error saving past life: {str(e)}")
 
         try:
             os.remove(os.path.join(lives_folder, f'{self.PlayerName}.dat'))
