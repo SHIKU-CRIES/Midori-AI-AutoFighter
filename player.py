@@ -774,7 +774,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         num_stats = len(stat_data)
         
         available_height = 250
-        min_font_size = 12
+        min_font_size = 16
         max_font_size = 24
         min_spacing = 25
         max_spacing = 25
