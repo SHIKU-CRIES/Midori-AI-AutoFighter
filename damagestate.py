@@ -125,9 +125,16 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 hp_diff = source.HP - source.MHP * 0.25
                 reduction_factor = hp_diff / (source.MHP * 0.75)
                 
-                scaled_reduction = reduction_factor ** 0.95 * 0.05
+                scaled_reduction = reduction_factor ** 0.95 * 0.25
 
-                source.HP -= round(source.MHP * scaled_reduction)
+                # Introduce a multiplier that increases with time above 25% HP
+                if not hasattr(source, 'above_threshold_ticks'):
+                    source.above_threshold_ticks = 0
+                source.above_threshold_ticks += 1
+                
+                multiplier = 1 + (source.above_threshold_ticks ** 0.5) * 0.01 
+                
+                source.HP -= round(source.MHP * scaled_reduction * multiplier)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
                 target.gain_damage_over_time(damageovertimetype("Twilight Decay", mited_damage_dealt ** 0.65, 175, source.Type, source.PlayerName, 2), source.effecthittate())

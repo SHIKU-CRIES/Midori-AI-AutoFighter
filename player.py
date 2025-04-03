@@ -64,6 +64,7 @@ class Player:
         self.RushStat: int = 3
         self.isplayer: bool = False
         self.Type: DamageType = get_damage_type(name)
+        self.above_threshold_ticks: int = 0
         self.Logs: list[str] = []
         self.Inv: list[WeaponType] = []
         self.Items: list[ItemType] = []
@@ -73,7 +74,6 @@ class Player:
         self.photo: str = "player.png"
         self.photodata = ""
         
-
     def save(self):
         temp_data = self.photodata
         self.photodata = "No Photo Data"
