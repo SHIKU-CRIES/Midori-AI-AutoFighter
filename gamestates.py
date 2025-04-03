@@ -380,6 +380,7 @@ def main(level):
 
                                 if len(playerlist) > 0:
                                     target_to_damage = max(playerlist, key=lambda player: player.Def)
+                                    log(blue, f"{person.PlayerName} targets {target_to_damage.PlayerName}")
                                     target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
                                     
                                     if target_to_damage.HP < 1:
