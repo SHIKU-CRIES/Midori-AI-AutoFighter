@@ -236,6 +236,7 @@ def main(level):
         if level < 2000:
             temp_foe_themed_names.remove("Luna".lower())
             temp_foe_themed_names.remove("Carly".lower())
+            temp_foe_themed_names.remove("Mezzy".lower())
             temp_foe_themed_names.remove("Mimic".lower())
 
         for i in range(number_of_foes):
