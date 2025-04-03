@@ -136,7 +136,6 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 scaled_reduction = reduction_factor ** 0.95 * 0.25
 
                 # Introduce a multiplier that increases with time above 25% HP
-                source.above_threshold_ticks = 0
                 source.above_threshold_ticks += 1
                 
                 multiplier = 1 + (source.above_threshold_ticks ** 0.5) * 0.01 
