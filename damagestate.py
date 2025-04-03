@@ -231,6 +231,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
         if source.ActionPointsPerTick <= 600:
             source.ActionPointsPerTick += 1
+        
+        if source.EXP < source.exp_to_levelup():
+            source.EXP += 1
 
         if source.EffectHitRate <= 200:
             source.EffectHitRate += 0.25
