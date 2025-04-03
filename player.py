@@ -554,7 +554,7 @@ class Player:
             hp_up: int = random.randint(5, 10 * int_mod)
             def_up: int = random.randint(2, 5 * int_mod)
             atk_up: int = random.randint(2, 5 * int_mod)
-            regain_up: float = random.uniform(0.00001, 0.00002 * self.level * self.Vitality)
+            regain_up: float = random.uniform(0.001, 0.002 * self.level * self.Vitality)
             critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * max((mod_fixed / 10000), 1)
             critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * max((mod_fixed / 10000), 1)
             dodgeodds_up: float = random.uniform(0.000002 * self.level, 0.00004 * self.level) * max((mod_fixed / 10000), 1)
