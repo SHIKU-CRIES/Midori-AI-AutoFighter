@@ -379,7 +379,7 @@ def main(level):
                                 person.do_pre_turn()
 
                                 if len(playerlist) > 0:
-                                    target_to_damage = random.choice(playerlist)
+                                    target_to_damage = max(playerlist, key=lambda player: player.Def)
                                     target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
                                     
                                     if target_to_damage.HP < 1:
@@ -417,7 +417,7 @@ def main(level):
                                 person.do_pre_turn()
 
                                 if len(foelist) > 0:
-                                    target_to_damage = random.choice(foelist)
+                                    target_to_damage = max(foelist, key=lambda player: player.Def)
                                     target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
 
                                     if target_to_damage.HP < 1:
