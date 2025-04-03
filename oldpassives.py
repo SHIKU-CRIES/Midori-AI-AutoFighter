@@ -4,10 +4,12 @@
 
 import random
 
+from player import Player
+
 from themedstuff import themed_ajt
 from themedstuff import themed_names
 
-def check_name_stats_mod(player):
+def check_name_stats_mod(player: Player):
     if themed_names[0] in player.PlayerName.lower():
         return random.choice([5, 6, 7, 9])
 
@@ -40,7 +42,7 @@ def check_name_stats_mod(player):
     
     return 9
 
-def check_name_mod(player):
+def check_name_mod(player: Player):
     if player.level > 2500:
         if "lady" in player.PlayerName.lower():
 
@@ -141,12 +143,16 @@ def check_name_mod(player):
         tempname = player.PlayerName
         player.PlayerName = "Player"
         player.load()
+        player.isplayer = False
         player.MHP = int(player.MHP / ((10000 / player.level) + 1))
         player.Atk = int(player.Atk / 5)
         player.Def = int(player.Def / 4)
         player.Regain = player.Regain / 5
         player.DodgeOdds = player.DodgeOdds / 4
         player.Vitality -= player.Vitality / 4
+
+        if player.Vitality > 1:
+            player.Vitality = 1
 
         if player.Vitality > 1:
             player.Vitality = 1
