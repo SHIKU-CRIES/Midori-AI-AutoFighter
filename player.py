@@ -448,7 +448,7 @@ class Player:
 
                         if dots.turns < 50000:
                             dots.turns += DOT.turns
-                            
+
                         return
 
                 if len(self.DOTS) < 5:
@@ -783,8 +783,16 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         font_size = int(max(min_font_size, min(max_font_size, target_font_size)))
         stats_font = pygame.font.SysFont('Arial', font_size)
 
-        target_spacing = available_height / (num_stats + 1)
-        spacing = int(max(min_spacing, min(max_spacing, target_spacing)))
+        spacing_range = max_spacing - min_spacing
+        font_range = max_font_size - min_font_size
+        
+        if font_range > 0:
+            spacing_adjustment = (font_size - min_font_size) / font_range
+        else:
+            spacing_adjustment = 0
+        
+        target_spacing = min_spacing + spacing_adjustment * spacing_range
+        spacing = int(target_spacing)
 
         x_offset = mouse_pos[0] + 10
         y_offset = mouse_pos[1] - available_height - 10
