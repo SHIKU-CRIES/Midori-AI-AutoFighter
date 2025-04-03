@@ -65,6 +65,7 @@ class Player:
         self.isplayer: bool = False
         self.Type: DamageType = get_damage_type(name)
         self.above_threshold_ticks: int = 0
+        self.ActionsPerTurn: list[str] = ["action"]
         self.Logs: list[str] = []
         self.Inv: list[WeaponType] = []
         self.Items: list[ItemType] = []
