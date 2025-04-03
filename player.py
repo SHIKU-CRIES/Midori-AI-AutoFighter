@@ -774,25 +774,12 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         num_stats = len(stat_data)
         
         available_height = 250
-        min_font_size = 18
+        min_font_size = 12
         max_font_size = 24
-        min_spacing = 25
-        max_spacing = 25
 
         target_font_size = available_height / (num_stats + 0.5)
         font_size = int(max(min_font_size, min(max_font_size, target_font_size)))
         stats_font = pygame.font.SysFont('Arial', font_size)
-
-        spacing_range = max_spacing - min_spacing
-        font_range = max_font_size - min_font_size
-        
-        if font_range > 0:
-            spacing_adjustment = (font_size - min_font_size) / font_range
-        else:
-            spacing_adjustment = 0
-        
-        target_spacing = min_spacing + spacing_adjustment * spacing_range
-        spacing = int(target_spacing)
 
         spacing = int(font_size)
 
