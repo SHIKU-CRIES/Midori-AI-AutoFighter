@@ -108,18 +108,18 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
-            source.Regain -= 0.01
-            source.DodgeOdds += 0.001
-            source.MHP += 500
-            source.HP += 500
-            source.Atk += 50
-            source.Def += 1
+            source.Regain -= 0.01 * source.above_threshold_ticks
+            source.DodgeOdds += 0.001 * source.above_threshold_ticks
+            source.MHP += 500 * source.above_threshold_ticks
+            source.HP += 500 * source.above_threshold_ticks
+            source.Atk += 50 * source.above_threshold_ticks
+            source.Def += 1 * source.above_threshold_ticks
         
         if source.Mitigation > 1:
-            source.DodgeOdds += 0.001
-            source.Mitigation -= 0.001
-            source.EffectRES += 0.01
-            source.EffectHitRate += 0.01
+            source.DodgeOdds += 0.001 * source.above_threshold_ticks
+            source.Mitigation -= 0.001 * source.above_threshold_ticks
+            source.EffectRES += 0.01 * source.above_threshold_ticks
+            source.EffectHitRate += 0.01 * source.above_threshold_ticks
 
         if themed_names[0] in target.PlayerName.lower():
             if random.random() >= 0.98:
