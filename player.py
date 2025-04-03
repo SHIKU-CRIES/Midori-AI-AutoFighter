@@ -445,7 +445,10 @@ class Player:
                     if DOT.name == dots.name:
                         dots.damage += DOT.damage
                         dots.tick_interval += DOT.tick_interval
-                        dots.turns += DOT.turns
+
+                        if dots.turns < 50000:
+                            dots.turns += DOT.turns
+                            
                         return
 
                 if len(self.DOTS) < 5:

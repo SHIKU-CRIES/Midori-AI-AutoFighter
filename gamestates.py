@@ -308,7 +308,7 @@ def main(level):
                 for player in playerlist:
                     player.HP -= player.HP + 500000
 
-            enrage_dot = damageovertimetype("Enrage Bleed", (bleed_mod ** 2) * level, max(30, round(25 ** bleed_mod)), Generic, "Enrage Mech", 1)
+            enrage_dot = damageovertimetype("Enrage Bleed", (bleed_mod ** 5) * level, max(300, min(50000, round(25 * bleed_mod))), Generic, "Enrage Mech", 1)
 
             fps_cap = 65
     
