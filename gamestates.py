@@ -109,8 +109,6 @@ def main(level):
     past_level = 1
     foes_killed = 1
 
-    turntimer = 300
-
     starting_spawn_rate = 0.95
 
     last_known_player = ""
@@ -367,8 +365,8 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    if person.ActionPoints > turntimer:
-                        person.ActionPoints -= turntimer
+                    if person.ActionPoints > person.ActionPointsPerTurn:
+                        person.ActionPoints -= person.ActionPointsPerTurn
                         for action in person.ActionsPerTurn:
                             dt = clock.tick(fps_cap) / 1000
                             last_known_foe = person.PlayerName
@@ -403,8 +401,8 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    if person.ActionPoints > turntimer:
-                        person.ActionPoints -= turntimer
+                    if person.ActionPoints > person.ActionPointsPerTurn:
+                        person.ActionPoints -= person.ActionPointsPerTurn
                         for action in person.ActionsPerTurn:
                             dt = clock.tick(fps_cap) / 1000
                             last_known_player = person.PlayerName
