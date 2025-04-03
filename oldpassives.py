@@ -4,12 +4,10 @@
 
 import random
 
-from player import Player
-
 from themedstuff import themed_ajt
 from themedstuff import themed_names
 
-def check_name_stats_mod(player: Player):
+def check_name_stats_mod(player):
     if themed_names[0] in player.PlayerName.lower():
         return random.choice([5, 6, 7, 9])
 
@@ -42,7 +40,7 @@ def check_name_stats_mod(player: Player):
     
     return 9
 
-def check_name_mod(player: Player):
+def check_name_mod(player):
     if player.level > 2500:
         if "lady" in player.PlayerName.lower():
 
