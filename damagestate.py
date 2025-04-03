@@ -133,7 +133,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 hp_diff = source.HP - source.MHP * 0.25
                 reduction_factor = hp_diff / (source.MHP * 0.75)
                 
-                scaled_reduction = reduction_factor ** 0.95 * 0.25
+                scaled_reduction = reduction_factor ** 0.65 * 0.05
 
                 # Introduce a multiplier that increases with time above 25% HP
                 source.above_threshold_ticks += 1
