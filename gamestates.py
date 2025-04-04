@@ -117,6 +117,7 @@ def main(level):
     config = load_config()
 
     playerlist: list[Player] = []
+    backup_players_list: list[Player] = []
     temp_themed_names: list[str] = []
     preferred_themed_names: list[str] = config.get("preferred_allies", [])
 
@@ -164,8 +165,27 @@ def main(level):
 
         playerlist.append(player)
 
+    while len(temp_themed_names) > 0:
+        themed_name = random.choice(temp_themed_names).capitalize()
+        temp_themed_names.remove(themed_name.lower())
+
+        player = Player(f"{themed_name.replace("_", " ")}")
+        player.load()
+        player.set_photo(themed_name.lower())
+
+        player.isplayer = True
+
+        backup_players_list.append(player)
+
     threads = []
+
     for player in playerlist:
+        if player.level < 5:
+            thread = threading.Thread(target=player.load_past_lives)
+            threads.append(thread)
+            thread.start()
+
+    for player in backup_players_list:
         if player.level < 5:
             thread = threading.Thread(target=player.load_past_lives)
             threads.append(thread)
@@ -209,6 +229,12 @@ def main(level):
 
         level_sum = 0
         foelist: list[Player] = []
+
+        if len(playerlist) < 5:
+            if len(backup_players_list) > 0:
+                new_player = random.choice(backup_players_list)
+                backup_players_list.remove(new_player)
+                playerlist.append(new_player)
 
         for player in playerlist:
             player.DamageDealt = 0
