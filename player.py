@@ -386,6 +386,9 @@ class Player:
             self.MHP = 1
     
     def tick(self, mod):
+        if self.HP < 1:
+            return False
+        
         self.ActionPoints += round(self.ActionPointsPerTick * max(mod, 1))
 
         if self.ActionPointsPerTick >= self.ActionPointsPerTurn:
