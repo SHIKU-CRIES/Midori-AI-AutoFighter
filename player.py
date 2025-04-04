@@ -77,6 +77,8 @@ class Player:
     def save(self):
         temp_data = self.photodata
         self.photodata = "No Photo Data"
+        self.DOTS = []
+        self.HOTS = []
 
         lives_folder = "lives"
 
@@ -215,6 +217,8 @@ class Player:
         lives_folder = "lives"
         past_lives_folder = "past_lives"
         self.photodata = "No Photo Data"
+        self.DOTS = []
+        self.HOTS = []
 
         if not os.path.exists(past_lives_folder):
             os.makedirs(past_lives_folder)
@@ -752,7 +756,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     dot_icon_size = (34, 34)
     dot_x_offset = 0
     for i, dot in enumerate(player.DOTS):
-        dot_icon = pygame.image.load(dot.photodata)
+        dot_icon = dot.photodata
         dot_icon = pygame.transform.scale(dot_icon, dot_icon_size)
         dot_rect = dot_icon.get_rect(bottomleft=(x + dot_x_offset + (i * (dot_icon_size[0] + dot_x_offset)), y + height))
         screen.blit(dot_icon, dot_rect)
