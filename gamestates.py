@@ -414,17 +414,15 @@ def main(level):
                                         else:
                                             target_to_damage = target
 
-                                    target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, person, target_to_damage, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                                    if target_to_damage.HP > 0:
+                                        target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, person, target_to_damage, person.deal_damage(bleed_mod, target_to_damage.Type)))
                                     
                                     if target_to_damage.HP < 1:
                                         target_to_damage.save_past_life()
                                         kill_person(target_to_damage, person)
                                         playerlist.remove(target_to_damage)
-                            else:
-                                foelist.remove(person)
                     else:
                         if person.HP > 0: person.do_pre_turn()
-                        else: foelist.remove(person)
             else:
                 break
 
@@ -449,9 +447,11 @@ def main(level):
 
                                 if len(foelist) > 0:
                                     target_to_damage = random.choice(foelist)
-                                    pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
-                                    damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
-                                    target_to_damage.take_damage(bleed_mod, damge_to_deal)
+                                    
+                                    if target_to_damage.HP > 0:
+                                        pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
+                                        damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
+                                        target_to_damage.take_damage(bleed_mod, damge_to_deal)
 
                                     if target_to_damage.HP < 1:
                                         foelist.remove(target_to_damage)
@@ -474,12 +474,8 @@ def main(level):
 
                                     elif target_to_damage.HP > target_to_damage.MHP:
                                         target_to_damage.HP = target_to_damage.MHP
-                            else:
-                                person.save_past_life()
-                                playerlist.remove(person)
                     else:
                         if person.HP > 0: person.do_pre_turn()
-                        else: person.save_past_life(); playerlist.remove(person)
 
                     if person.HP > person.MHP:
                         person.HP = person.MHP
