@@ -23,8 +23,8 @@ from weapons import WeaponType
 
 from passives import PassiveType
 
-from oldpassives import check_name_mod
-from oldpassives import check_name_stats_mod
+from buldfoepassives import build_foe_stats
+from buldfoepassives import player_stat_picker
 
 from damage_over_time import dot as damageovertimetype
 from healing_over_time import hot as healingovertimetype
@@ -562,7 +562,7 @@ class Player:
             if "player" in self.PlayerName.lower():
                 choice = 9
             else:
-                choice = check_name_stats_mod(self)
+                choice = player_stat_picker(self)
 
             if choice == 1:
                 self.MHP += int(hp_up)
@@ -667,7 +667,7 @@ class Player:
 
         self.check_stats()
 
-        check_name_mod(self)
+        build_foe_stats(self)
 
         pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
@@ -710,7 +710,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     # Draw EXP bar (only if it's the player)
     if player.isplayer:
         player_exp_percent = player.EXP / player.exp_to_levelup() * 100
-        player_exp_bar_offset = 30
+        player_exp_bar_offset = 32
         player_exp_bar = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, player_exp_percent * (width / 100), 5)
         player_exp_bar_full = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, width, 5)
         pygame.draw.rect(screen, (128, 128, 128), player_exp_bar_full)
