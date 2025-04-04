@@ -299,7 +299,7 @@ def main(level):
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
                     is_deading = True
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_f: 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: 
                     for player in playerlist:
                         if player.PlayerName.lower() == "player":
                             player.Type = random.choice(all_damage_types)
