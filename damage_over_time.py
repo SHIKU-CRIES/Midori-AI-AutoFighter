@@ -38,7 +38,7 @@ class dot:
         self.source: Optional[str] = source
         self.metadata: Optional[Dict[str, Any]] = metadata
         self.tick_interval: int = tick_interval
-        self.photodata = pygame.image.load(self.set_photo())
+        self.photodata = self.set_photo()
 
     def set_photo(self):
         photos = []
