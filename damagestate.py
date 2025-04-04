@@ -49,7 +49,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                 if player.PlayerName is not source.PlayerName:
                     if player.HP > player.MHP * 0.25:
                         source.above_threshold_ticks += 1
-                        player.gain_damage_over_time(damageovertimetype("Abyssal Weakness", source.above_threshold_ticks ** 1.05, 25, source.Type, source.PlayerName, 1), source.effecthittate())
+                        player.gain_damage_over_time(damageovertimetype("Abyssal Weakness", source.above_threshold_ticks ** 1.05, 5, source.Type, source.PlayerName, 1), 0.95)
                         source.Atk += source.check_base_stats(source.Atk, random.randint(95, 105) * source.above_threshold_ticks)
     
     if source.Type == Wind:
