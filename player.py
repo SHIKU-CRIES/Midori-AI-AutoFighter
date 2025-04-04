@@ -657,7 +657,7 @@ class Player:
         top_level_full = top_level * 2
 
         self.level = level
-        self.MHP: int = random.randint(2 * self.level, 5 * self.level) + 1000
+        self.MHP: int = random.randint(self.level, 3 * self.level) + 1000
         self.HP: int = self.MHP
         self.Def: int = random.randint(4, self.level + 5) + 15
         self.Atk: int = random.randint(2 * self.level, 3 * self.level)
@@ -675,7 +675,7 @@ class Player:
             # Apply bonus every xyz levels past top_level
             xyz = 5
             bonus_levels = (level - top_level) // xyz
-            self.MHP = self.MHP + (100 * bonus_levels)
+            self.MHP = self.MHP + (3 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
