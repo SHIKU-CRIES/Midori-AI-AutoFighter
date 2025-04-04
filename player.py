@@ -732,7 +732,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
     # Draw EXP bar (only if it's the player)
     if player.isplayer:
         player_exp_percent = player.EXP / player.exp_to_levelup() * 100
-        player_exp_bar_offset = 32
+        player_exp_bar_offset = 31
         player_exp_bar = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, player_exp_percent * (width / 100), 5)
         player_exp_bar_full = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, width, 5)
         pygame.draw.rect(screen, (128, 128, 128), player_exp_bar_full)
@@ -749,8 +749,8 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
     # Draw DOTS icons
-    dot_icon_size = (20, 20)
-    dot_x_offset = 5
+    dot_icon_size = (34, 34)
+    dot_x_offset = 0
     for i, dot in enumerate(player.DOTS):
         dot_icon = pygame.image.load(dot.photodata)
         dot_icon = pygame.transform.scale(dot_icon, dot_icon_size)
