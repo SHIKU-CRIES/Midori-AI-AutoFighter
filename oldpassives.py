@@ -54,11 +54,23 @@ def check_name_mod(player):
                 player.Mitigation /= 5
                 player.Vitality *= 2.5
 
+            if "fire" in player.PlayerName.lower():
+                player.Regain /= 2
+                player.Mitigation *= 2
+                player.Atk *= 4
+
+            if "ice" in player.PlayerName.lower():
+                player.Regain *= 2
+                player.Mitigation *= 5
+                player.Vitality *= 2.5
+
             player.MHP *= 10
             player.Atk *= 2
             player.Def *= 2
             player.Mitigation = max(player.Mitigation, 1)
             player.Vitality *= 1.5
+
+            player.EffectRES += 2
 
     if themed_names[0] in player.PlayerName.lower():
         dodge_buff = 0.35
