@@ -330,6 +330,7 @@ def main(level):
                     player.take_damage_nododge(bleed_mod, enrage_timer.get_total_ticks())
 
                     if player.HP < 1:
+                        player.save_past_life()
                         playerlist.remove(player)
 
             if len(playerlist) < 6:
