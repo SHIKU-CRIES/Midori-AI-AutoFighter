@@ -49,8 +49,8 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                 if player.PlayerName is not source.PlayerName:
                     if player.HP > player.MHP * 0.25:
                         source.above_threshold_ticks += 25
-                        player.take_damage_nododge(1, source.deal_damage(1 + source.above_threshold_ticks, player.Type))
-                        source.Atk += 100 * source.above_threshold_ticks
+                        player.take_damage_nododge(1, source.deal_damage(random.randint(2, 4) * source.above_threshold_ticks, player.Type))
+                        source.Atk += source.check_base_stats(source.Atk, random.randint(95, 105) * source.above_threshold_ticks)
     
     if source.Type == Wind:
         target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
