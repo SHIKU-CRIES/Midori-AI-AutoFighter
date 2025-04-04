@@ -43,7 +43,7 @@ class dot:
     def set_photo(self):
         photos = []
         
-        for root, _, files in os.walk(resource_path("photos")):
+        for root, _, files in os.walk(resource_path(os.path.join("photos", "dots", self.damage_type.name.lower()))):
             for f in files:
                 if self.damage_type.name.lower() in f and f.endswith(".png"):
                     photos.append(os.path.join(root, f))
