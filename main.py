@@ -11,7 +11,6 @@ except Exception as e:
 
 
 if __name__ == "__main__":
-    main(1)
     try:
         main(1)
     except Exception as error:

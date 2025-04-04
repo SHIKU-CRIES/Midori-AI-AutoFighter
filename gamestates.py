@@ -328,12 +328,17 @@ def main(level):
             if is_deading:
                 for player in playerlist:
                     player.take_damage_nododge(bleed_mod, enrage_timer.get_total_ticks())
+            
+            for player in playerlist:
+                if player.HP < 1:
+                    player.save_past_life()
+                    playerlist.remove(player)
+            
+            for foe in foelist:
+                if foe.HP < 1:
+                    foelist.remove(foe)
 
-                    if player.HP < 1:
-                        player.save_past_life()
-                        playerlist.remove(player)
-
-            if len(playerlist) < 6:
+            if len(playerlist) < 5:
                 if len(backup_players_list) > 0:
                     new_player = random.choice(backup_players_list)
                     backup_players_list.remove(new_player)
