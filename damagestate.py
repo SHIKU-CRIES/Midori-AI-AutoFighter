@@ -97,6 +97,16 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
     return mited_damage_dealt
 
 def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: Player, target: Player, mited_damage_dealt: float):
+    """
+    Handles a player taking damage from another player.
+
+    Args:
+        foelist (list): A list of enemy Player objects.
+        playerlist (list): A list of all Player objects.
+        source (Player): The Player object inflicting the damage.
+        target (Player): The Player object receiving the damage.
+        fight_env_list (list): A list of unchangeable outside vars to impact damage.
+    """
         
     alllist: list[Player] = []
     
@@ -105,9 +115,6 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     
     for player in playerlist:
         alllist.append(player)
-
-    if source.isplayer:
-        log(white, f"{source.PlayerName} is taking action")
 
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
@@ -184,7 +191,6 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if hp_percentage < 0.25:
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
             
-        
     if themed_names[2] in source.PlayerName.lower():
         for player in alllist:
             if source.isplayer == player.isplayer:
@@ -244,9 +250,16 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if len(source.DOTS) > 0:
             for dot in source.DOTS:
                 dot.turns -= 1
-
-    if source.isplayer:
-        log(red, f"{source.PlayerName} has taken action")
+            
+    if themed_names[15] in source.PlayerName.lower():
+        source.Type = Lightning
+        
+        for player in alllist:
+            if source.isplayer == player.isplayer:
+                if player.PlayerName is not source.PlayerName:
+                    if source.Def > 1000:
+                        player.Def += 10
+                        source.Def -= 1
     
     mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
     

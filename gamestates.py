@@ -413,8 +413,6 @@ def main(level):
                         person.ActionPoints -= person.ActionPointsPerTurn
                         dt = clock.tick(fps_cap) / 1000
                         last_known_player = person.PlayerName
-
-                        log(white, f"{person.PlayerName} taking action...")
                     
                         if bleed_mod > 1.5:
                             person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
@@ -427,11 +425,9 @@ def main(level):
 
                             if len(foelist) > 0:
                                 target_to_damage = foelist[0]
-                                log(blue, f"{person.PlayerName} Starting action aka atking...")
                                 pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
                                 damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
                                 target_to_damage.take_damage(bleed_mod, damge_to_deal)
-                                log(green, f"{person.PlayerName} done action aka atking...")
 
                                 if target_to_damage.HP < 1:
                                     foelist.remove(target_to_damage)
