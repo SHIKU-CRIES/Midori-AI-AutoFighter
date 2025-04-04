@@ -367,7 +367,7 @@ def main(level):
 
                     if person.ActionPoints > person.ActionPointsPerTurn:
                         person.ActionPoints -= person.ActionPointsPerTurn
-                        for action in person.ActionsPerTurn:
+                        for foe_action in person.ActionsPerTurn:
                             dt = clock.tick(fps_cap) / 1000
                             last_known_foe = person.PlayerName
                         
@@ -403,7 +403,7 @@ def main(level):
 
                     if person.ActionPoints > person.ActionPointsPerTurn:
                         person.ActionPoints -= person.ActionPointsPerTurn
-                        for action in person.ActionsPerTurn:
+                        for player_action in person.ActionsPerTurn:
                             dt = clock.tick(fps_cap) / 1000
                             last_known_player = person.PlayerName
 

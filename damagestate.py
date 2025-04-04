@@ -229,6 +229,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     if themed_names[14].replace("_", " ") in source.PlayerName.lower():
         source.Type = Lightning
 
+        if source.isplayer:
+            log(red, "Echo is seen taking action")
+
         if source.ActionPointsPerTick <= 600:
             source.ActionPointsPerTick += 1
         
