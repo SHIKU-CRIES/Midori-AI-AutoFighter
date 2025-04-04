@@ -41,15 +41,15 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
     if source.Type == Dark:
         target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.65, 325, source.Type, source.PlayerName, 1), source.effecthittate())
 
-        if source.above_threshold_ticks > 10000:
-            source.above_threshold_ticks = 10000
+        if source.above_threshold_ticks > 100:
+            source.above_threshold_ticks = 100
 
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
                     if player.HP > player.MHP * 0.25:
-                        source.above_threshold_ticks += 25
-                        player.take_damage_nododge(1, source.deal_damage(random.randint(2, 4) * source.above_threshold_ticks, player.Type))
+                        source.above_threshold_ticks += 1
+                        player.gain_damage_over_time(damageovertimetype("Abyssal Weakness", source.above_threshold_ticks ** 1.05, 25, source.Type, source.PlayerName, 1), source.effecthittate())
                         source.Atk += source.check_base_stats(source.Atk, random.randint(95, 105) * source.above_threshold_ticks)
     
     if source.Type == Wind:
