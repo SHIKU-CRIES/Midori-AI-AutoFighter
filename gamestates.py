@@ -327,7 +327,8 @@ def main(level):
             
             if is_deading:
                 for player in playerlist:
-                    player.HP -= player.MHP * 2
+                    player.save_past_life()
+                    playerlist.remove(player)
             
             for player in playerlist:
                 if player.HP < 1:
@@ -398,8 +399,9 @@ def main(level):
                     print(f"Could not render foe stats due to {str(error)}")
 
                 for i, person in enumerate(foelist):
-                    item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
-                    render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                    if person.HP > 1:
+                        item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
+                        render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.tick(bleed_mod):
                         for foe_action in person.ActionsPerTurn:
@@ -437,9 +439,9 @@ def main(level):
 
             if len(playerlist) > 0:
                 for i, person in enumerate(playerlist):
-
-                    item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
-                    render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                    if person.HP > 1:
+                        item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
+                        render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                     if person.tick(bleed_mod):
                         for turn in person.ActionsPerTurn:
