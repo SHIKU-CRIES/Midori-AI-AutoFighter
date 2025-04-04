@@ -77,6 +77,8 @@ class Player:
     def save(self):
         temp_data = self.photodata
         self.photodata = "No Photo Data"
+        temp_dots = self.DOTS
+        temp_hots = self.HOTS
         self.DOTS = []
         self.HOTS = []
 
@@ -87,7 +89,11 @@ class Player:
 
         with open(os.path.join(lives_folder, f'{self.PlayerName}.dat'), 'wb') as f:
             pickle.dump(self.__dict__, f)
+
         self.photodata = temp_data
+
+        self.DOTS = temp_dots
+        self.HOTS = temp_hots
 
     def load(self):
         try:
@@ -217,6 +223,8 @@ class Player:
         lives_folder = "lives"
         past_lives_folder = "past_lives"
         self.photodata = "No Photo Data"
+        temp_dots = self.DOTS
+        temp_hots = self.HOTS
         self.DOTS = []
         self.HOTS = []
 
