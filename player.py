@@ -459,11 +459,7 @@ class Player:
             EffectHitRate = min(1.95, EffectHitRate)
 
         for _ in range(num_applications):
-            starter_tohit = (EffectHitRate - (self.effectres())) * random.uniform(0.90, 1.10)
-
-            if self.effectres() >= EffectHitRate:
-                return
-
+            starter_tohit = max(((EffectHitRate / num_applications) - (self.effectres())) * random.uniform(0.90, 1.10), 0.01)
             tohit = max(0.01, min(1, starter_tohit))
 
             if random.random() < tohit:
