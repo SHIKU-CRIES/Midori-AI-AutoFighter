@@ -21,8 +21,6 @@ from items import on_damage_taken
 
 from weapons import WeaponType
 
-from passives import PassiveType
-
 from buldfoepassives import build_foe_stats
 from buldfoepassives import player_stat_picker
 
