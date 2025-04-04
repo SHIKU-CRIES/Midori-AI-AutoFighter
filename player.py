@@ -761,7 +761,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         screen.blit(player_hp_percent_text, player_hp_percent_rect)
 
     # Draw DOTS icons
-    dot_icon_size = (34, 34)
+    dot_icon_size = (128, 128)
     dot_x_offset = 0
     for i, dot in enumerate(player.DOTS):
         dot_icon = dot.photodata
