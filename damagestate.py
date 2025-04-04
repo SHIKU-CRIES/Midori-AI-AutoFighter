@@ -229,9 +229,6 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     if themed_names[14].replace("_", " ") in source.PlayerName.lower():
         source.Type = Lightning
 
-        if source.isplayer:
-            log(red, "Echo is seen taking action")
-
         if source.ActionPointsPerTick <= 600:
             source.ActionPointsPerTick += 1
         
@@ -244,6 +241,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if len(source.DOTS) > 0:
             for dot in source.DOTS:
                 dot.turns -= 1
+
+    if source.isplayer:
+        log(red, f"{source.PlayerName} has taken action")
     
     mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
     
