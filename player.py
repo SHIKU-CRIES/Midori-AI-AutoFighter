@@ -390,8 +390,16 @@ class Player:
 
         if self.ActionPointsPerTick >= self.ActionPointsPerTurn:
             self.ActionPointsPerTick -= self.ActionPointsPerTurn
-            self.ActionPointsPerTurn += 100
-            self.ActionsPerTurn.append("action")
+            self.ActionPointsPerTurn *= 10
+
+            if len(self.ActionsPerTurn) < 6:
+                self.ActionsPerTurn.append("action")
+            else:
+                self.MHP += 1
+                self.Atk += 1
+                self.Def += 1
+                self.Mitigation += 0.00001
+                self.EffectRES += 0.000001
 
         if self.ActionPoints >= self.ActionPointsPerTurn:
             self.ActionPoints -= self.ActionPointsPerTurn
