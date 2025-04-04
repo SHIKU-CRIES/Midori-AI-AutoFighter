@@ -90,6 +90,7 @@ def build_foe_stats(player):
 
         player.MHP *= 10
         player.Mitigation *= 10
+        player.EffectRES += 255
 
         max_hp_debuff = max(player.MHP - random.randint(5 * player.level, 15 * player.level), 10)
         max_crit_rate = player.CritRate / 100
