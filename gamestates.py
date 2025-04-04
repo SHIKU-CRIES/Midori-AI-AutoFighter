@@ -56,6 +56,7 @@ def debug_log(filename, text):
     return text
 
 def kill_person(dead, killer):
+    log(white, f"Your {blue}{dead.PlayerName}{white} at {blue}{dead.level}{white} kill by {red}{killer.PlayerName}{white}")
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"{killer.PlayerName} killed {dead.PlayerName}, Below are stats for both...")
 
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Dead Person")
@@ -487,7 +488,6 @@ def main(level):
                     if person.HP > person.MHP:
                         person.HP = person.MHP
             else:
-                log(red, f"Your {last_known_player} at {level} kill by {last_known_foe}")
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
                 exit()
