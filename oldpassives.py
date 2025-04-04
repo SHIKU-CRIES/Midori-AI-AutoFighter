@@ -143,7 +143,7 @@ def check_name_mod(player):
         player.load()
         player.isplayer = False
         player.HOTS = []
-        player.MHP = int(player.MHP / ((10000 / player.level) + 1))
+        player.MHP = int(player.MHP / ((10000 * player.level) + 1))
         player.Atk = int(player.Atk / 5)
         player.Def = int(player.Def / 4)
         player.Regain = player.Regain / 5
