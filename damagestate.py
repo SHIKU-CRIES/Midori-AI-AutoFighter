@@ -106,6 +106,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     for player in playerlist:
         alllist.append(player)
 
+    if source.isplayer:
+        log(white, f"{source.PlayerName} is taking action")
+
     if themed_names[0] in source.PlayerName.lower():
         if source.Regain > 10:
             source.Regain -= 0.01 * source.above_threshold_ticks
