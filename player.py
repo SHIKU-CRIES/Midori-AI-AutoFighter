@@ -743,6 +743,15 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255), (0, 0, 0))
         player_hp_percent_rect = player_hp_percent_text.get_rect(topleft=(x, y + player_exp_bar_offset + player_hp_percent_text_offset))
         screen.blit(player_hp_percent_text, player_hp_percent_rect)
+
+        # Draw DOTS icons
+        dot_icon_size = (20, 20)
+        dot_x_offset = 5
+        for i, dot in enumerate(player.DOTS):
+            dot_icon = dot.photodata
+            dot_icon = pygame.transform.scale(dot_icon, dot_icon_size)
+            dot_rect = dot_icon.get_rect(bottomleft=(x + dot_x_offset + (i * (dot_icon_size[0] + dot_x_offset)), y + height))
+            screen.blit(dot_icon, dot_rect)
     else:
         player_hp_percent_text = font.render(f"{player_hp_percent:.2f}%", True, (255, 255, 255), (0, 0, 0))
         player_hp_percent_rect = player_hp_percent_text.get_rect(topleft=(x, y + player_hp_bar_offset + 5))
