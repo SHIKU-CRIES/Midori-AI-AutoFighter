@@ -260,18 +260,20 @@ def main(level):
 
         for item in themed_names:
             temp_foe_themed_names.append(item)
+        
+        random.shuffle(temp_foe_themed_names)
 
         if level < 2000:
-            temp_foe_themed_names.remove("Luna".lower())
             temp_foe_themed_names.remove("Carly".lower())
             temp_foe_themed_names.remove("Mezzy".lower())
             temp_foe_themed_names.remove("Mimic".lower())
 
+        if level < 10000:
+            temp_foe_themed_names.remove("Luna".lower())
+
         for i in range(number_of_foes):
             themed_name = random.choice(temp_foe_themed_names).capitalize()
-
             temp_foe_themed_names.remove(themed_name.lower())
-
             themed_title = random.choice(themed_ajt).capitalize()
 
             foe_pre_name = f"{themed_title} {themed_name.replace("_", " ")}"
