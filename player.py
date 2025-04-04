@@ -662,7 +662,7 @@ class Player:
         self.EffectRES /= 2
         self.EffectHitRate /= 100
 
-        self.EffectRES += 0.00002 * self.level
+        self.EffectRES += 0.002 * self.level
         self.EffectHitRate += 0.0001 * self.level
 
         self.check_stats()
