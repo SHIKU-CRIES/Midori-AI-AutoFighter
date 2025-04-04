@@ -406,6 +406,8 @@ def main(level):
                         for action in person.ActionsPerTurn:
                             dt = clock.tick(fps_cap) / 1000
                             last_known_player = person.PlayerName
+
+                            log(white, f"{person.PlayerName} taking action...")
                         
                             if bleed_mod > 1.5:
                                 person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
