@@ -388,7 +388,7 @@ def main(level):
                                         else:
                                             target_to_damage = target
 
-                                    target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                                    target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, person, target_to_damage, person.deal_damage(bleed_mod, target_to_damage.Type)))
                                     
                                     if target_to_damage.HP < 1:
                                         target_to_damage.save_past_life()
@@ -429,7 +429,7 @@ def main(level):
                                 target_to_damage = foelist[0]
                                 log(blue, f"{person.PlayerName} Starting action aka atking...")
                                 pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
-                                damge_to_deal = check_passive_mod(foelist, playerlist, target_to_damage, person, pre_damage_to_deal)
+                                damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
                                 target_to_damage.take_damage(bleed_mod, damge_to_deal)
                                 log(green, f"{person.PlayerName} done action aka atking...")
 
