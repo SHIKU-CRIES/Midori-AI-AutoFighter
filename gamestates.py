@@ -427,7 +427,7 @@ def main(level):
                                 person.do_pre_turn()
 
                                 if len(foelist) > 0:
-                                    target_to_damage = random.choice(foelist)
+                                    target_to_damage = foelist[0]
                                     log(white, f"{person.PlayerName} Starting action aka atking...")
                                     target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
 
