@@ -11,7 +11,7 @@ from screendata import Screen
 
 from timerhelper import timmer
 
-from damagestate import take_damage
+from damagestate import check_passive_mod
 
 from load_photos import set_bg_photo
 from load_photos import set_bg_music
@@ -388,7 +388,7 @@ def main(level):
                                         else:
                                             target_to_damage = target
 
-                                    target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                                    target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
                                     
                                     if target_to_damage.HP < 1:
                                         target_to_damage.save_past_life()
@@ -428,7 +428,7 @@ def main(level):
                             if len(foelist) > 0:
                                 target_to_damage = foelist[0]
                                 log(white, f"{person.PlayerName} Starting action aka atking...")
-                                target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                                target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
 
                                 if target_to_damage.HP < 1:
                                     foelist.remove(target_to_damage)
