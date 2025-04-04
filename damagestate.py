@@ -252,15 +252,8 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 dot.turns -= 1
             
     if themed_names[15] in source.PlayerName.lower():
-        if source.Type == Lightning:
-            source.Type = Dark
-
-        elif source.Type == Dark:
-            source.Type = Lightning
+        source.Type = Dark
         
-        else:
-            source.Type = Lightning
-
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
