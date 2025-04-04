@@ -333,7 +333,7 @@ def main(level):
             
             if is_deading:
                 for player in playerlist:
-                    player.HP -= player.HP + 500000
+                    player.take_damage_nododge(bleed_mod, enrage_timer.get_total_ticks())
 
             enrage_dot = damageovertimetype("Enrage Bleed", (bleed_mod ** 5) * level, max(300, min(50000, round(25 * bleed_mod))), Generic, "Enrage Mech", 1)
 

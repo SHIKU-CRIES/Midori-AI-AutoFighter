@@ -2,6 +2,7 @@ class timmer:
     def __init__(self, timeout_ticks=1200):
         self.timeout_ticks = timeout_ticks
         self.start_tick = 0
+        self.total_ticks = 0
         self.timed_out = False
         self.current_tick = 0
 
@@ -31,7 +32,11 @@ class timmer:
             return (elapsed_ticks * 0.001) + 1
         else:
             return 0.0
+    
+    def get_total_ticks(self):
+        return self.total_ticks
 
     def tick(self):
         """Increments the current tick counter."""
         self.current_tick += 1
+        self.total_ticks += 1
