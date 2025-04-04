@@ -37,6 +37,10 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                 if player.PlayerName is not source.PlayerName:
                     if player.HP < player.MHP * 0.55:
                         player.heal_damage(source.deal_damage(1, player.Type) * 0.05)
+            elif source.isplayer != player.isplayer:
+                light_dot = damageovertimetype("Celestial Atrophy", mited_damage_dealt ** 0.5, 50000, source.Type, source.PlayerName, 1)
+                light_dot.max_turns = 500000000
+                player.gain_damage_over_time(light_dot, source.effecthittate())
     
     if source.Type == Dark:
         target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.65, 325, source.Type, source.PlayerName, 1), source.effecthittate())
