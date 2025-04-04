@@ -411,50 +411,49 @@ def main(level):
 
                     if person.ActionPoints > person.ActionPointsPerTurn:
                         person.ActionPoints -= person.ActionPointsPerTurn
-                        for player_action in person.ActionsPerTurn:
-                            dt = clock.tick(fps_cap) / 1000
-                            last_known_player = person.PlayerName
+                        dt = clock.tick(fps_cap) / 1000
+                        last_known_player = person.PlayerName
 
-                            log(white, f"{person.PlayerName} taking action...")
-                        
-                            if bleed_mod > 1.5:
-                                person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
+                        log(white, f"{person.PlayerName} taking action...")
+                    
+                        if bleed_mod > 1.5:
+                            person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
-                            if bleed_mod > 20:
-                                person.RushStat = 0
+                        if bleed_mod > 20:
+                            person.RushStat = 0
 
-                            if person.HP > 0:
-                                person.do_pre_turn()
+                        if person.HP > 0:
+                            person.do_pre_turn()
 
-                                if len(foelist) > 0:
-                                    target_to_damage = foelist[0]
-                                    log(white, f"{person.PlayerName} Starting action aka atking...")
-                                    target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                            if len(foelist) > 0:
+                                target_to_damage = foelist[0]
+                                log(white, f"{person.PlayerName} Starting action aka atking...")
+                                target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
 
-                                    if target_to_damage.HP < 1:
-                                        foelist.remove(target_to_damage)
-                                        person.Kills += 1
-                                        total_rushmod = 0
+                                if target_to_damage.HP < 1:
+                                    foelist.remove(target_to_damage)
+                                    person.Kills += 1
+                                    total_rushmod = 0
 
-                                        if bleed_mod < 100:
-                                            person.RushStat += 1
+                                    if bleed_mod < 100:
+                                        person.RushStat += 1
 
-                                        for player in playerlist:
-                                            total_rushmod += max(1, player.RushStat)
+                                    for player in playerlist:
+                                        total_rushmod += max(1, player.RushStat)
 
-                                        for player in playerlist:
-                                            if person.PlayerName == player.PlayerName:
-                                                player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
-                                            else:
-                                                player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
-                                            
-                                        person.save()
+                                    for player in playerlist:
+                                        if person.PlayerName == player.PlayerName:
+                                            player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
+                                        else:
+                                            player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
+                                        
+                                    person.save()
 
-                                    elif target_to_damage.HP > target_to_damage.MHP:
-                                        target_to_damage.HP = target_to_damage.MHP
-                            else:
-                                person.save_past_life()
-                                playerlist.remove(person)
+                                elif target_to_damage.HP > target_to_damage.MHP:
+                                    target_to_damage.HP = target_to_damage.MHP
+                        else:
+                            person.save_past_life()
+                            playerlist.remove(person)
                     else:
                         person.ActionPoints += round(person.ActionPointsPerTick * max(bleed_mod, 1))
                         if person.HP > 0: person.do_pre_turn()
