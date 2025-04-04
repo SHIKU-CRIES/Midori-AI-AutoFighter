@@ -649,7 +649,7 @@ class Player:
             # Apply bonus every xyz levels past top_level
             xyz = 5
             bonus_levels = (level - top_level) // xyz
-            self.MHP = self.MHP + (3 * bonus_levels)
+            self.MHP = self.MHP + (5 * bonus_levels)
             self.Atk = self.Atk + (2 * bonus_levels)
             self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
