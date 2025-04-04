@@ -428,7 +428,8 @@ def main(level):
                             if len(foelist) > 0:
                                 target_to_damage = foelist[0]
                                 log(blue, f"{person.PlayerName} Starting action aka atking...")
-                                target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                                damge_to_deal = check_passive_mod(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type))
+                                target_to_damage.take_damage(bleed_mod, damge_to_deal)
                                 log(green, f"{person.PlayerName} done action aka atking...")
 
                                 if target_to_damage.HP < 1:
