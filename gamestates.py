@@ -328,6 +328,7 @@ def main(level):
             if is_deading:
                 for player in playerlist:
                     player.take_damage_nododge(bleed_mod, enrage_timer.get_total_ticks())
+                    bleed_mod += 0.01
             
             for player in playerlist:
                 if player.HP < 1:
