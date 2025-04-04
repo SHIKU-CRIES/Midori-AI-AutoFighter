@@ -46,6 +46,7 @@ class Player:
         self.HP: int = self.MHP
         self.Def: int = 25
         self.Atk: int = 250
+        self.CanAct: bool = False
         self.ActionPointsPerTurn: int = 300
         self.ActionPointsPerTick: float = 1
         self.ActionPoints: int = 125
@@ -68,7 +69,6 @@ class Player:
         self.Logs: list[str] = []
         self.Inv: list[WeaponType] = []
         self.Items: list[ItemType] = []
-        self.Passives: list[PassiveType] = []
         self.DOTS: list[damageovertimetype] = []
         self.HOTS: list[healingovertimetype] = []
         self.photo: str = "player.png"
@@ -385,6 +385,20 @@ class Player:
         if self.MHP > 20000000000:
             self.MHP = 1
     
+    def tick(self, mod):
+        self.ActionPoints += round(self.ActionPointsPerTick * max(mod, 1))
+
+        if self.ActionPointsPerTick >= self.ActionPointsPerTurn:
+            self.ActionPointsPerTick -= self.ActionPointsPerTurn
+            self.ActionPointsPerTurn += 100
+            self.ActionsPerTurn.append("action")
+
+        if self.ActionPoints >= self.ActionPointsPerTurn:
+            self.ActionPoints -= self.ActionPointsPerTurn
+            return True
+        else:
+            return False
+
     def do_pre_turn(self):
         self.regain_hp()
         self.heal_over_time()
@@ -435,7 +449,7 @@ class Player:
 
         for _ in range(num_applications):
             starter_tohit = (EffectHitRate - (self.effectres())) * random.uniform(0.90, 1.10)
-            
+
             if self.effectres() >= EffectHitRate:
                 return
 

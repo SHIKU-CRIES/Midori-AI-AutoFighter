@@ -392,8 +392,7 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    if person.ActionPoints > person.ActionPointsPerTurn:
-                        person.ActionPoints -= person.ActionPointsPerTurn
+                    if person.tick(bleed_mod):
                         for foe_action in person.ActionsPerTurn:
                             dt = clock.tick(fps_cap) / 1000
                             last_known_foe = person.PlayerName
@@ -424,7 +423,6 @@ def main(level):
                             else:
                                 foelist.remove(person)
                     else:
-                        person.ActionPoints += round(person.ActionPointsPerTick * max(bleed_mod, 1))
                         if person.HP > 0: person.do_pre_turn()
                         else: foelist.remove(person)
             else:
@@ -436,52 +434,50 @@ def main(level):
                     item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
                     render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    if person.ActionPoints > person.ActionPointsPerTurn:
-                        person.ActionPoints -= person.ActionPointsPerTurn
-                        dt = clock.tick(fps_cap) / 1000
-                        last_known_player = person.PlayerName
-                    
-                        if bleed_mod > 1.5:
-                            person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
+                    if person.tick(bleed_mod):
+                        for turn in person.ActionsPerTurn:
+                            dt = clock.tick(fps_cap) / 1000
+                        
+                            if bleed_mod > 1.5:
+                                person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
-                        if bleed_mod > 20:
-                            person.RushStat = 0
+                            if bleed_mod > 20:
+                                person.RushStat = 0
 
-                        if person.HP > 0:
-                            person.do_pre_turn()
+                            if person.HP > 0:
+                                person.do_pre_turn()
 
-                            if len(foelist) > 0:
-                                target_to_damage = random.choice(foelist)
-                                pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
-                                damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
-                                target_to_damage.take_damage(bleed_mod, damge_to_deal)
+                                if len(foelist) > 0:
+                                    target_to_damage = random.choice(foelist)
+                                    pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
+                                    damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
+                                    target_to_damage.take_damage(bleed_mod, damge_to_deal)
 
-                                if target_to_damage.HP < 1:
-                                    foelist.remove(target_to_damage)
-                                    person.Kills += 1
-                                    total_rushmod = 0
+                                    if target_to_damage.HP < 1:
+                                        foelist.remove(target_to_damage)
+                                        person.Kills += 1
+                                        total_rushmod = 0
 
-                                    if bleed_mod < 100:
-                                        person.RushStat += 1
+                                        if bleed_mod < 100:
+                                            person.RushStat += 1
 
-                                    for player in playerlist:
-                                        total_rushmod += max(1, player.RushStat)
+                                        for player in playerlist:
+                                            total_rushmod += max(1, player.RushStat)
 
-                                    for player in playerlist:
-                                        if person.PlayerName == player.PlayerName:
-                                            player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
-                                        else:
-                                            player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
-                                        
-                                    person.save()
+                                        for player in playerlist:
+                                            if person.PlayerName == player.PlayerName:
+                                                player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
+                                            else:
+                                                player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level*1.25)))
+                                            
+                                        person.save()
 
-                                elif target_to_damage.HP > target_to_damage.MHP:
-                                    target_to_damage.HP = target_to_damage.MHP
-                        else:
-                            person.save_past_life()
-                            playerlist.remove(person)
+                                    elif target_to_damage.HP > target_to_damage.MHP:
+                                        target_to_damage.HP = target_to_damage.MHP
+                            else:
+                                person.save_past_life()
+                                playerlist.remove(person)
                     else:
-                        person.ActionPoints += round(person.ActionPointsPerTick * max(bleed_mod, 1))
                         if person.HP > 0: person.do_pre_turn()
                         else: person.save_past_life(); playerlist.remove(person)
 
