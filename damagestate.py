@@ -236,14 +236,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         pass
 
     if themed_names[14].replace("_", " ") in source.PlayerName.lower():
-        if source.Type == Lightning:
-            source.Type = Dark
-
-        elif source.Type == Dark:
-            source.Type = Lightning
-        
-        else:
-            source.Type = Lightning
+        source.Type = Lightning
 
         if source.ActionPointsPerTick <= 600:
             source.ActionPointsPerTick += 1
@@ -259,7 +252,14 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 dot.turns -= 1
             
     if themed_names[15] in source.PlayerName.lower():
-        source.Type = Lightning
+        if source.Type == Lightning:
+            source.Type = Dark
+
+        elif source.Type == Dark:
+            source.Type = Lightning
+        
+        else:
+            source.Type = Lightning
 
         for player in alllist:
             if source.isplayer == player.isplayer:
