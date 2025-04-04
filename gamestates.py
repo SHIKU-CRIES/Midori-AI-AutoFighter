@@ -420,6 +420,7 @@ def main(level):
 
                                 if len(foelist) > 0:
                                     target_to_damage = random.choice(foelist)
+                                    log(white, f"{person.PlayerName} Starting action aka atking...")
                                     target_to_damage.take_damage(bleed_mod, take_damage(foelist, playerlist, target_to_damage, person, person.deal_damage(bleed_mod, target_to_damage.Type)))
 
                                     if target_to_damage.HP < 1:
