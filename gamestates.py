@@ -226,6 +226,9 @@ def main(level):
     for player in playerlist:
         player.photodata = pygame.image.load(os.path.join(player.photo))
 
+    for player in backup_players_list:
+        player.photodata = pygame.image.load(os.path.join(player.photo))
+
     while True:
 
         level_sum = 0
@@ -340,7 +343,7 @@ def main(level):
                     foelist.remove(foe)
 
             if len(playerlist) < 5:
-                if len(backup_players_list) > 0:
+                if len(backup_players_list) > 1:
                     new_player = random.choice(backup_players_list)
                     backup_players_list.remove(new_player)
                     playerlist.append(new_player)
