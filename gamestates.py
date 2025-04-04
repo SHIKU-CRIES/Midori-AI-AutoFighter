@@ -424,7 +424,7 @@ def main(level):
                             person.do_pre_turn()
 
                             if len(foelist) > 0:
-                                target_to_damage = foelist[0]
+                                target_to_damage = random.choice(foelist)
                                 pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
                                 damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
                                 target_to_damage.take_damage(bleed_mod, damge_to_deal)
