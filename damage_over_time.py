@@ -34,6 +34,7 @@ class dot:
         self.name: str = name
         self.damage: float = damage
         self.turns: int = turns
+        self.max_turns: int = 5000
         self.damage_type: DamageType = damage_type
         self.source: Optional[str] = source
         self.metadata: Optional[Dict[str, Any]] = metadata
@@ -61,7 +62,7 @@ class dot:
         """
         Checks the turns remaining, if over a set number, grants more ticks per turn
         """
-        if self.turns > 5000:
+        if self.turns > self.max_turns:
             self.turns = round(self.turns / 2)
             self.tick_interval += 1
 
