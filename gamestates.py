@@ -106,21 +106,29 @@ def main(level):
 
     running = True
     is_deading = False
+    preferred_list = False
 
     past_level = 1
     foes_killed = 1
 
     starting_spawn_rate = 0.95
 
-    last_known_player = ""
-    last_known_foe = ""
-
     config = load_config()
 
     playerlist: list[Player] = []
     backup_players_list: list[Player] = []
+    preferred_players_list: list[str] = []
     temp_themed_names: list[str] = []
     preferred_themed_names: list[str] = config.get("preferred_allies", [])
+
+    if preferred_themed_names:
+            preferred_name = preferred_themed_names[0].lower()
+            for themed_name_pre in temp_themed_names:
+                if preferred_name in themed_name_pre.lower():
+                    themed_name = themed_name_pre.capitalize()
+                    preferred_players_list.append(themed_name)
+                    preferred_themed_names.pop(0)
+                    break
 
     spinner.start(text=f"Loading Players, please wait...")
 
@@ -142,19 +150,17 @@ def main(level):
     playerlist.append(player)
         
     while len(playerlist) < 5:
-        if preferred_themed_names:
-            preferred_name = preferred_themed_names[0].lower()
-            for themed_name_pre in temp_themed_names:
-                if preferred_name in themed_name_pre.lower():
-                    themed_name = themed_name_pre.capitalize()
-                    preferred_themed_names.pop(0)
-                    break
-        else:
-            if random.random() < starting_spawn_rate:
-                themed_name = temp_themed_names[0].capitalize()
-                starting_spawn_rate /= 2
+        if random.random() < starting_spawn_rate:
+            if len(preferred_players_list) > 0:
+                themed_name = preferred_players_list[0]
+                preferred_players_list.pop(0)
+
             else:
-                themed_name = random.choice(temp_themed_names[1:]).capitalize()
+                themed_name = temp_themed_names[0].capitalize()
+
+            starting_spawn_rate /= 2
+        else:
+            themed_name = random.choice(temp_themed_names[1:]).capitalize()
 
         temp_themed_names.remove(themed_name.lower())
 
