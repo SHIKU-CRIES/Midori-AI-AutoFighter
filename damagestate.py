@@ -39,13 +39,13 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                         player.heal_damage(source.deal_damage(1, player.Type) * 0.05)
     
     if source.Type == Dark:
-        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.45, 325, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.65, 325, source.Type, source.PlayerName, 1), source.effecthittate())
 
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
-                    if player.HP > player.MHP * 0.55:
-                        player.HP -= round(player.MHP * 0.01)
+                    if player.HP > 0:
+                        player.take_damage(1, source.deal_damage(1, player.Type))
     
     if source.Type == Wind:
         target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
