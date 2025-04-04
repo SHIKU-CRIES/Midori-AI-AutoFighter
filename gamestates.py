@@ -231,12 +231,6 @@ def main(level):
         level_sum = 0
         foelist: list[Player] = []
 
-        if len(playerlist) < 5:
-            if len(backup_players_list) > 0:
-                new_player = random.choice(backup_players_list)
-                backup_players_list.remove(new_player)
-                playerlist.append(new_player)
-
         for player in playerlist:
             player.DamageDealt = 0
             player.DamageTaken = 0
@@ -334,6 +328,15 @@ def main(level):
             if is_deading:
                 for player in playerlist:
                     player.take_damage_nododge(bleed_mod, enrage_timer.get_total_ticks())
+
+                    if player.HP < 1:
+                        playerlist.remove(player)
+
+            if len(playerlist) < 6:
+                if len(backup_players_list) > 0:
+                    new_player = random.choice(backup_players_list)
+                    backup_players_list.remove(new_player)
+                    playerlist.append(new_player)
 
             enrage_dot = damageovertimetype("Enrage Bleed", (bleed_mod ** 5) * level, max(300, min(50000, round(25 * bleed_mod))), Generic, "Enrage Mech", 1)
 
@@ -447,7 +450,7 @@ def main(level):
 
                                 if len(foelist) > 0:
                                     target_to_damage = random.choice(foelist)
-                                    
+
                                     if target_to_damage.HP > 0:
                                         pre_damage_to_deal = person.deal_damage(bleed_mod, target_to_damage.Type)
                                         damge_to_deal = check_passive_mod(foelist, playerlist, person, target_to_damage, pre_damage_to_deal)
