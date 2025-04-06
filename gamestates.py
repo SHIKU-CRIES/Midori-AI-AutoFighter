@@ -167,7 +167,6 @@ def main(level):
         player = Player(f"{themed_name.replace("_", " ")}")
         player.load()
         player.set_photo(themed_name.lower())
-        player.photodata = pygame.image.load(os.path.join(player.photo))
 
         player.isplayer = True
 
@@ -180,7 +179,6 @@ def main(level):
         player = Player(f"{themed_name.replace("_", " ")}")
         player.load()
         player.set_photo(themed_name.lower())
-        player.photodata = pygame.image.load(os.path.join(player.photo))
 
         player.isplayer = True
 
@@ -230,6 +228,11 @@ def main(level):
 
     screen.fill((0, 0, 0))
     screen.blit(background_image, (0, 0))
+
+    for player in playerlist:
+        player.photodata = pygame.image.load(os.path.join(player.photo))
+    for player in backup_players_list:
+        player.photodata = pygame.image.load(os.path.join(player.photo))
 
     pygame.display.flip()
 
