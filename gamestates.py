@@ -204,6 +204,8 @@ def main(level):
 
     for thread in threads:
         thread.join()
+
+    del threads
     
     spinner.succeed(text=f"Players: Fully Loaded")
 
@@ -237,6 +239,7 @@ def main(level):
 
         level_sum = 0
         foelist: list[Player] = []
+        backup_foes_list: list[Player] = []
 
         for player in playerlist:
             player.DamageDealt = 0
@@ -278,7 +281,6 @@ def main(level):
 
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
-            foe.set_level(random.randint(max(level - 10, 1), level + 10))
 
             foe.photodata = pygame.image.load(os.path.join(foe.photo))
             foe.photodata = pygame.transform.flip(foe.photodata, True, False)
@@ -287,6 +289,39 @@ def main(level):
             #foe.update_inv(get_weapon(get_random_weapon()), True)
 
             foelist.append(foe)
+        
+        for foe in temp_foe_themed_names:
+            themed_name = random.choice(temp_foe_themed_names).capitalize()
+            temp_foe_themed_names.remove(themed_name.lower())
+            themed_title = random.choice(themed_ajt).capitalize()
+
+            foe_pre_name = f"{themed_title} {themed_name.replace("_", " ")}"
+
+            foe = Player(f"{foe_pre_name}")
+            foe.set_photo(themed_name.lower())
+
+            foe.photodata = pygame.image.load(os.path.join(foe.photo))
+            foe.photodata = pygame.transform.flip(foe.photodata, True, False)
+            foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
+
+            backup_foes_list.append(foe)
+
+        threads = []
+
+        for foe in foelist:
+            thread = threading.Thread(target=foe.set_level, args=(random.randint(max(level - 10, 1), level + 10),))
+            threads.append(thread)
+            thread.start()
+
+        for foe in backup_foes_list:
+            thread = threading.Thread(target=foe.set_level, args=(random.randint(max(level - 10, 1), level + 10),))
+            threads.append(thread)
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+
+        del threads
 
         # heal the player
         player.HP = player.MHP
