@@ -283,10 +283,13 @@ def main(level):
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
 
-            foe.photodata = pygame.image.load(os.path.join(foe.photo))
-            foe.photodata = pygame.transform.flip(foe.photodata, True, False)
-            foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
-
+            print(f"Loading image from: {foe.photo}") # Debug print
+            try:
+                foe.photodata = pygame.image.load(os.path.join(foe.photo))
+                foe.photodata = pygame.transform.flip(foe.photodata, True, False)
+                foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
+            except FileNotFoundError as e:
+                print(f"Error loading image: {e}")
             #foe.update_inv(get_weapon(get_random_weapon()), True)
 
             foelist.append(foe)
@@ -301,9 +304,13 @@ def main(level):
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
 
-            foe.photodata = pygame.image.load(os.path.join(foe.photo))
-            foe.photodata = pygame.transform.flip(foe.photodata, True, False)
-            foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
+            print(f"Loading image from: {foe.photo}") # Debug print
+            try:
+                foe.photodata = pygame.image.load(os.path.join(foe.photo))
+                foe.photodata = pygame.transform.flip(foe.photodata, True, False)
+                foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
+            except FileNotFoundError as e:
+                print(f"Error loading image: {e}")
 
             backup_foes_list.append(foe)
 
