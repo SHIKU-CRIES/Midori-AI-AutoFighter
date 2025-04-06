@@ -242,9 +242,8 @@ def main(level):
         level_sum = 0
         foelist: list[Player] = []
         backup_foes_list: list[Player] = []
-        log(white, f"Wave :: {wave_number}")
         
-        spinner.start(text=f"Foes: Loading Foes...")
+        spinner.start(text=f"Wave :: {wave_number} :: Foes: Loading Foes...")
 
         for player in playerlist:
             player.DamageDealt = 0
@@ -344,7 +343,7 @@ def main(level):
             except FileNotFoundError as e:
                 print(f"Error loading image: {e}")
         
-        spinner.succeed(text=f"Foes: Fully Loaded")
+        spinner.succeed(text=f"Wave :: {wave_number} :: Foes: Fully Loaded")
 
         # heal the player
         player.HP = player.MHP
@@ -523,7 +522,7 @@ def main(level):
                             if bleed_mod > 1.5:
                                 person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
-                            if bleed_mod > 1:
+                            if bleed_mod > 1.2:
                                 person.RushStat = 0
 
                             if person.HP > 0:
