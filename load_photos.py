@@ -7,6 +7,8 @@ import platform
 
 from typing import Optional, List
 
+TEMP_DIRS = []
+
 def resource_path(relative_path: str) -> str:
     """
     Get absolute path to resource, works for dev and for PyInstaller.
@@ -22,7 +24,6 @@ def resource_path(relative_path: str) -> str:
     full_path = os.path.join(base_path, relative_path)
 
     try:
-        # Check if it's a file. If not, just return the original path
         if not os.path.isfile(full_path):
             return full_path
 
@@ -33,6 +34,8 @@ def resource_path(relative_path: str) -> str:
         else:
             temp_dir = tempfile.mkdtemp(prefix="resource_")
         
+        TEMP_DIRS.append(temp_dir) # Store temp dir for cleanup
+
         resource_name = os.path.basename(relative_path)
         temp_resource_path = os.path.join(temp_dir, resource_name)
         shutil.copy2(full_path, temp_resource_path)
@@ -44,6 +47,18 @@ def resource_path(relative_path: str) -> str:
     except Exception as e:
         print(f"An unexpected error occurred: {e}. Falling back to original path.")
         return full_path
+
+
+def cleanup_temp_dirs():
+    """
+    Clean up all temporary directories created by resource_path.
+    """
+    for temp_dir in TEMP_DIRS:
+        try:
+            shutil.rmtree(temp_dir)
+            print(f"Successfully cleaned up temporary directory: {temp_dir}")
+        except OSError as e:
+            print(f"Failed to clean up temporary directory {temp_dir}: {e}")
 
 def set_photo(photo: str) -> str:
     """
