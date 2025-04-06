@@ -411,8 +411,8 @@ def main(level):
                     backup_players_list.remove(new_player)
                     playerlist.append(new_player)
 
-            if len(foelist) < 5:
-                if len(backup_foes_list) > 2:
+            if len(foelist) < 3:
+                if len(backup_foes_list) > 0:
                     new_player = random.choice(backup_foes_list)
                     backup_foes_list.remove(new_player)
                     foelist.append(new_player)
