@@ -22,6 +22,10 @@ def resource_path(relative_path: str) -> str:
     full_path = os.path.join(base_path, relative_path)
 
     try:
+        # Check if it's a file. If not, just return the original path
+        if not os.path.isfile(full_path):
+            return full_path
+
         if platform.system() == "Windows":
             temp_dir = tempfile.mkdtemp(prefix="resource_")
         elif platform.system() == "Linux":
