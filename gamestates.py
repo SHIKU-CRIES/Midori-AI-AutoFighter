@@ -265,6 +265,8 @@ def main(level):
         
         random.shuffle(temp_foe_themed_names)
 
+        print("NEW WAVE")
+
         if level < 2000:
             temp_foe_themed_names.remove("Carly".lower())
             temp_foe_themed_names.remove("Mezzy".lower())
@@ -292,10 +294,7 @@ def main(level):
                 print(f"Error loading image: {e}")
             #foe.update_inv(get_weapon(get_random_weapon()), True)
 
-            print(f"Foe object ID after setting photodata: {id(foe)}")  # Debug
-            print(f"Foe photodata type after setting: {type(foe.photodata)}") # Debug
-            print(f"Foe photodata value after setting: {foe.photodata}")  #Debug
-
+            print(f"Foe {foe.PlayerName} :: {id(foe)} {type(foe.photodata)} {foe.photodata}")
             foelist.append(foe)
         
         while len(temp_foe_themed_names) > 0:
@@ -316,10 +315,7 @@ def main(level):
             except FileNotFoundError as e:
                 print(f"Error loading image: {e}")
 
-            print(f"Foe object ID after setting photodata: {id(foe)}")  # Debug
-            print(f"Foe photodata type after setting: {type(foe.photodata)}") # Debug
-            print(f"Foe photodata value after setting: {foe.photodata}")  #Debug
-
+            print(f"Foe {foe.PlayerName} :: {id(foe)} {type(foe.photodata)} {foe.photodata}")
             backup_foes_list.append(foe)
 
         threads = []
