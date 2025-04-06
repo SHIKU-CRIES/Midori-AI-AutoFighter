@@ -292,6 +292,10 @@ def main(level):
                 print(f"Error loading image: {e}")
             #foe.update_inv(get_weapon(get_random_weapon()), True)
 
+            print(f"Foe object ID after setting photodata: {id(foe)}")  # Debug
+            print(f"Foe photodata type after setting: {type(foe.photodata)}") # Debug
+            print(f"Foe photodata value after setting: {foe.photodata}")  #Debug
+
             foelist.append(foe)
         
         while len(temp_foe_themed_names) > 0:
@@ -311,6 +315,10 @@ def main(level):
                 foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
             except FileNotFoundError as e:
                 print(f"Error loading image: {e}")
+
+            print(f"Foe object ID after setting photodata: {id(foe)}")  # Debug
+            print(f"Foe photodata type after setting: {type(foe.photodata)}") # Debug
+            print(f"Foe photodata value after setting: {foe.photodata}")  #Debug
 
             backup_foes_list.append(foe)
 
