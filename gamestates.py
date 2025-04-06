@@ -469,6 +469,9 @@ def main(level):
                     for i, foe in enumerate(foelist):
                         if foe.HP > 1:
                             item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
+                            log(red, f"Foe object ID before render_player_obj: {id(foe)} :: {foe.PlayerName}")
+                            log(red, f"Foe photodata type before render_player_obj: {type(foe.photodata)}")
+                            log(red, f"Foe photodata value before render_player_obj: {foe.photodata}")
                             render_player_obj(pygame, foe, foe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
                         if foe.tick(bleed_mod):
