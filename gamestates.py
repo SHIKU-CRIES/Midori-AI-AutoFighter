@@ -286,13 +286,6 @@ def main(level):
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
             
-            try:
-                foe.photodata = pygame.image.load(os.path.join(foe.photo))
-                foe.photodata = pygame.transform.flip(foe.photodata, True, False)
-                foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
-            except FileNotFoundError as e:
-                print(f"Error loading image: {e}")
-                
             foelist.append(foe)
         
         while len(temp_foe_themed_names) > 0:
@@ -304,14 +297,7 @@ def main(level):
 
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
-            
-            try:
-                foe.photodata = pygame.image.load(os.path.join(foe.photo))
-                foe.photodata = pygame.transform.flip(foe.photodata, True, False)
-                foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
-            except FileNotFoundError as e:
-                print(f"Error loading image: {e}")
-                
+
             backup_foes_list.append(foe)
 
         threads = []
@@ -338,6 +324,22 @@ def main(level):
                         sys.exit()
 
             thread.join()
+
+        for foe in foelist:
+            try:
+                foe.photodata = pygame.image.load(os.path.join(foe.photo))
+                foe.photodata = pygame.transform.flip(foe.photodata, True, False)
+                foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
+            except FileNotFoundError as e:
+                print(f"Error loading image: {e}")
+
+        for foe in backup_foes_list:
+            try:
+                foe.photodata = pygame.image.load(os.path.join(foe.photo))
+                foe.photodata = pygame.transform.flip(foe.photodata, True, False)
+                foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
+            except FileNotFoundError as e:
+                print(f"Error loading image: {e}")
 
         # heal the player
         player.HP = player.MHP
