@@ -167,6 +167,7 @@ def main(level):
         player = Player(f"{themed_name.replace("_", " ")}")
         player.load()
         player.set_photo(themed_name.lower())
+        player.photodata = pygame.image.load(os.path.join(player.photo))
 
         player.isplayer = True
 
@@ -179,15 +180,12 @@ def main(level):
         player = Player(f"{themed_name.replace("_", " ")}")
         player.load()
         player.set_photo(themed_name.lower())
+        player.photodata = pygame.image.load(os.path.join(player.photo))
 
         player.isplayer = True
 
         backup_players_list.append(player)
-
-    all_players = playerlist + backup_players_list
-    for player in all_players:
-        player.photodata = pygame.image.load(os.path.join(player.photo))
-
+        
     threads = []
 
     for player in playerlist:
@@ -322,7 +320,7 @@ def main(level):
             while thread.is_alive():
 
                 pygame.display.flip()
-                clock.tick(30)
+                clock.tick(65)
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
