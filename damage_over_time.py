@@ -7,6 +7,7 @@ import random
 from typing import Optional, Dict, Any
 
 from load_photos import resource_path
+from load_photos import set_themed_dot_photo
 
 from damagetypes import Generic
 from damagetypes import DamageType
@@ -42,18 +43,7 @@ class dot:
         self.photodata = pygame.image.load(self.set_photo())
 
     def set_photo(self):
-        photos = []
-        
-        for root, _, files in os.walk(resource_path(os.path.join("photos", "dots", self.damage_type.name.lower()))):
-            for f in files:
-                if self.damage_type.name.lower() in f and f.endswith(".png"):
-                    photos.append(os.path.join(root, f))
-
-        if photos:
-            return random.choice(photos)
-        else:
-            fallback_photos = os.listdir(resource_path(os.path.join("photos", "fallbacks")))
-            return resource_path(os.path.join(os.path.join("photos", "fallbacks"), f"{random.choice(fallback_photos)}"))
+        return set_themed_dot_photo(self.damage_type.name.lower())
 
     def __repr__(self) -> str:
         return f"DOT(name='{self.name}', damage={self.damage}, turns={self.turns}, type={self.damage_type.name})"

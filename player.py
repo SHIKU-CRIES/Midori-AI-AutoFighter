@@ -28,6 +28,7 @@ from damage_over_time import dot as damageovertimetype
 from healing_over_time import hot as healingovertimetype
 
 from load_photos import resource_path
+from load_photos import set_themed_photo
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
 
@@ -114,18 +115,7 @@ class Player:
         self.check_stats()
 
     def set_photo(self, photo: str):
-        photos = []
-        
-        for root, _, files in os.walk(resource_path("photos")):
-            for f in files:
-                if photo in f and f.endswith(".png"):
-                    photos.append(os.path.join(root, f))
-
-        if photos:
-            self.photo: str = random.choice(photos)
-        else:
-            fallback_photos = os.listdir(resource_path(os.path.join("photos", "fallbacks")))
-            self.photo: str = resource_path(os.path.join(os.path.join("photos", "fallbacks"), f"{random.choice(fallback_photos)}"))
+        self.photo: str = set_themed_photo(photo)
 
     def load_past_lives(self):
         past_lives_folder = "past_lives"
