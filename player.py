@@ -582,16 +582,16 @@ class Player:
             hp_up: int = random.randint(5, 10 * int_mod)
             def_up: int = random.randint(2, 5 * int_mod)
             atk_up: int = random.randint(2, 5 * int_mod)
-            regain_up: float = random.uniform(0.001, 0.002 * self.level * self.Vitality)
-            critrate_up: float = random.uniform(0.001 * self.level, 0.0025 * self.level) * max((mod_fixed / 10000), 1)
-            critdamage_up: float = random.uniform(0.004 * self.level, 0.008 * self.level) * max((mod_fixed / 10000), 1)
-            dodgeodds_up: float = random.uniform(0.000002 * self.level, 0.00004 * self.level) * max((mod_fixed / 10000), 1)
+            regain_up: float = random.uniform(0.001, 0.003)
+            critrate_up: float = random.uniform(0.001, 0.0025) * max((mod_fixed / 10000), 1)
+            critdamage_up: float = random.uniform(0.004, 0.008) * max((mod_fixed / 10000), 1)
+            dodgeodds_up: float = random.uniform(0.000002, 0.00004) * max((mod_fixed / 10000), 1)
             mitigation_up: float = (random.uniform(0.0000000001, 0.0000000002) / self.Mitigation) * max((mod_fixed / 1000000), 1)
-            vitality_up: float = (random.uniform(0.00000016 * (self.level - 300), 0.00000032 * (self.level - 300)) / self.Vitality) * max((mod_fixed / 1000000), 1)
+            vitality_up: float = (random.uniform(0.000000001, 0.000000002) / self.Vitality) * max((mod_fixed / 1000000), 1)
 
-            hp_up = self.check_base_stats(self.MHP, hp_up)
-            def_up = self.check_base_stats(self.Def, def_up)
-            atk_up = self.check_base_stats(self.Atk, atk_up)
+            hp_up = self.check_base_stats(self.MHP, round(hp_up * self.Vitality))
+            def_up = self.check_base_stats(self.Def, round(def_up * self.Vitality))
+            atk_up = self.check_base_stats(self.Atk, round(atk_up * self.Vitality))
 
             if "player" in self.PlayerName.lower():
                 choice = 9
@@ -654,9 +654,9 @@ class Player:
             if self.level > 300:
                 self.Mitigation += mitigation_up
                 self.Vitality += vitality_up
-                self.ActionPointsPerTick += 0.002
-                self.EffectRES += 0.002
-                self.EffectHitRate += 0.01
+                self.ActionPointsPerTick += 0.0000002
+                self.EffectRES += 0.0000002
+                self.EffectHitRate += 0.000001
 
         self.check_stats()
     

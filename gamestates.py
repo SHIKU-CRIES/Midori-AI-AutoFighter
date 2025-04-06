@@ -417,7 +417,6 @@ def main(level):
                     if person.tick(bleed_mod):
                         for foe_action in person.ActionsPerTurn:
                             dt = clock.tick(fps_cap) / 1000
-                            last_known_foe = person.PlayerName
                         
                             if bleed_mod > 1.5:
                                 person.RushStat = 0
@@ -461,7 +460,7 @@ def main(level):
                             if bleed_mod > 1.5:
                                 person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
-                            if bleed_mod > 20:
+                            if bleed_mod > 1:
                                 person.RushStat = 0
 
                             if person.HP > 0:
