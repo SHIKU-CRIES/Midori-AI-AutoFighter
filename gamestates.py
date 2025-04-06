@@ -328,7 +328,7 @@ def main(level):
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
-                        
+
             thread.join()
 
         del threads
@@ -398,6 +398,12 @@ def main(level):
                     new_player = random.choice(backup_players_list)
                     backup_players_list.remove(new_player)
                     playerlist.append(new_player)
+
+            if len(foelist) < 5:
+                if len(backup_foes_list) > 1:
+                    new_player = random.choice(backup_foes_list)
+                    backup_foes_list.remove(new_player)
+                    foelist.append(new_player)
 
             enrage_dot = damageovertimetype("Enrage Bleed", (bleed_mod ** 5) * level, max(300, min(50000, round(25 * bleed_mod))), Generic, "Enrage Mech", 1)
 
