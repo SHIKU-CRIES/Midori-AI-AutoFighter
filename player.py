@@ -223,8 +223,6 @@ class Player:
         lives_folder = "lives"
         past_lives_folder = "past_lives"
         self.photodata = "No Photo Data"
-        temp_dots = self.DOTS
-        temp_hots = self.HOTS
         self.DOTS = []
         self.HOTS = []
 

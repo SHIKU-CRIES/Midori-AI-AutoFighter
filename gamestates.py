@@ -56,7 +56,7 @@ def debug_log(filename, text):
     return text
 
 def kill_person(dead, killer):
-    log(white, f"Your {blue}{dead.PlayerName}{white} at {blue}{dead.level}{white} kill by {red}{killer.PlayerName}{white}")
+    spinner.fail(text=f"Your {blue}{dead.PlayerName}{white} at {blue}{dead.level}{white} kill by {red}{killer.PlayerName}{white}")
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"{killer.PlayerName} killed {dead.PlayerName}, Below are stats for both...")
 
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Dead Person")
@@ -106,7 +106,8 @@ def main(level):
 
     running = True
     is_deading = False
-    preferred_list = False
+
+    wave_number = 0
 
     past_level = 1
     foes_killed = 1
@@ -265,7 +266,7 @@ def main(level):
         
         random.shuffle(temp_foe_themed_names)
 
-        print("NEW WAVE")
+        wave_number += 1
 
         if level < 2000:
             temp_foe_themed_names.remove("Carly".lower())
@@ -346,6 +347,7 @@ def main(level):
 
         # Main game loop
         while running:
+            spinner.start(text=f"Wave :: {wave_number}")
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -555,6 +557,7 @@ def main(level):
                     if person.HP > person.MHP:
                         person.HP = person.MHP
             else:
+                spinner.fail(text=f"You lost!")
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
                 exit()
