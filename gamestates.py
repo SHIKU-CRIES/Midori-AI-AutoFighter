@@ -320,8 +320,15 @@ def main(level):
 
         for thread in threads:
             while thread.is_alive():
+
                 pygame.display.flip()
                 clock.tick(30)
+
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                        
             thread.join()
 
         del threads
