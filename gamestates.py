@@ -465,41 +465,42 @@ def main(level):
                 except Exception as error:
                     print(f"Could not render foe stats due to {str(error)}")
 
-                for i, person in enumerate(foelist):
-                    if person.HP > 1:
-                        item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
-                        render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                if len(foelist) > 0:
+                    for i, person in enumerate(foelist):
+                        if person.HP > 1:
+                            item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
+                            render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
 
-                    if person.tick(bleed_mod):
-                        for foe_action in person.ActionsPerTurn:
-                            dt = clock.tick(fps_cap) / 1000
-                        
-                            if bleed_mod > 1.5:
-                                person.RushStat = 0
-                                person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
+                        if person.tick(bleed_mod):
+                            for foe_action in person.ActionsPerTurn:
+                                dt = clock.tick(fps_cap) / 1000
+                            
+                                if bleed_mod > 1.5:
+                                    person.RushStat = 0
+                                    person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
-                            if person.HP > 1:
-                                person.do_pre_turn()
+                                if person.HP > 1:
+                                    person.do_pre_turn()
 
-                                if len(playerlist) > 0:
-                                    max_def = 0
-                                    target_to_damage = random.choice(playerlist)
+                                    if len(playerlist) > 0:
+                                        max_def = 0
+                                        target_to_damage = random.choice(playerlist)
 
-                                    for target in playerlist:
-                                        if target.Def > max_def:
-                                            max_def = target.Def
-                                        else:
-                                            target_to_damage = target
+                                        for target in playerlist:
+                                            if target.Def > max_def:
+                                                max_def = target.Def
+                                            else:
+                                                target_to_damage = target
 
-                                    if target_to_damage.HP > 0:
-                                        target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, person, target_to_damage, person.deal_damage(bleed_mod, target_to_damage.Type)))
-                                    
-                                    if target_to_damage.HP < 1:
-                                        target_to_damage.save_past_life()
-                                        kill_person(target_to_damage, person)
-                                        playerlist.remove(target_to_damage)
-                    else:
-                        if person.HP > 0: person.do_pre_turn()
+                                        if target_to_damage.HP > 0:
+                                            target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, person, target_to_damage, person.deal_damage(bleed_mod, target_to_damage.Type)))
+                                        
+                                        if target_to_damage.HP < 1:
+                                            target_to_damage.save_past_life()
+                                            kill_person(target_to_damage, person)
+                                            playerlist.remove(target_to_damage)
+                        else:
+                            if person.HP > 0: person.do_pre_turn()
             else:
                 break
 
