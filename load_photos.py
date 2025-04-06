@@ -5,7 +5,11 @@ import shutil
 import tempfile
 import platform
 
+from halo import Halo
+
 from typing import Optional, List
+
+spinner = Halo(text='Loading', spinner='dots', color='green')
 
 TEMP_DIRS = []
 
@@ -54,11 +58,13 @@ def cleanup_temp_dirs():
     Clean up all temporary directories created by resource_path.
     """
     for temp_dir in TEMP_DIRS:
+        spinner.start(text=f"Successfully cleaned up temporary directory: {temp_dir}")
         try:
             shutil.rmtree(temp_dir)
-            print(f"Successfully cleaned up temporary directory: {temp_dir}")
         except OSError as e:
-            print(f"Failed to clean up temporary directory {temp_dir}: {e}")
+            spinner.fail(text=f"Failed to clean up temporary directory {temp_dir}: {e}")
+    
+    spinner.succeed(text="Successfully cleaned up temporary directorys")
 
 def set_photo(photo: str) -> str:
     """
