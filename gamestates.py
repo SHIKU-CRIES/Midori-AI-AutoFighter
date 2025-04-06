@@ -242,6 +242,9 @@ def main(level):
         level_sum = 0
         foelist: list[Player] = []
         backup_foes_list: list[Player] = []
+        log(white, f"Wave :: {wave_number}")
+        
+        spinner.start(text=f"Foes: Loading Foes...")
 
         for player in playerlist:
             player.DamageDealt = 0
@@ -340,6 +343,8 @@ def main(level):
                 foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
             except FileNotFoundError as e:
                 print(f"Error loading image: {e}")
+        
+        spinner.succeed(text=f"Foes: Fully Loaded")
 
         # heal the player
         player.HP = player.MHP
@@ -349,7 +354,6 @@ def main(level):
 
         # Main game loop
         while running:
-            log(white, f"Wave :: {wave_number}")
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
