@@ -184,6 +184,10 @@ def main(level):
 
         backup_players_list.append(player)
 
+    all_players = playerlist + backup_players_list
+    for player in all_players:
+        player.photodata = pygame.image.load(os.path.join(player.photo))
+
     threads = []
 
     for player in playerlist:
@@ -228,12 +232,6 @@ def main(level):
     screen.blit(background_image, (0, 0))
 
     pygame.display.flip()
-
-    for player in playerlist:
-        player.photodata = pygame.image.load(os.path.join(player.photo))
-
-    for player in backup_players_list:
-        player.photodata = pygame.image.load(os.path.join(player.photo))
 
     while True:
 
