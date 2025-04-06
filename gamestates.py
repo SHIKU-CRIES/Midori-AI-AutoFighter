@@ -315,18 +315,18 @@ def main(level):
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
-            level_base_enrage_mod = (level / max(level / 100, 15))
+            level_base_enrage_mod = (level / max(level / 5, 15))
             player_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
             foe_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
 
             if enrage_mod > 10:
-                buffed_starter = ((enrage_mod - 10) * 0.00004) + ((enrage_mod - 5) * 0.00002)
-                bleed_mod = ((0.00002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                buffed_starter = ((enrage_mod - 10) * 0.004) + ((enrage_mod - 5) * 0.002)
+                bleed_mod = ((0.002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
             elif enrage_mod > 5:
-                buffed_starter = ((enrage_mod - 5) * 0.00002)
-                bleed_mod = ((0.00002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                buffed_starter = ((enrage_mod - 5) * 0.002)
+                bleed_mod = ((0.002 + buffed_starter) * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
             else:
-                bleed_mod = (0.00002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
+                bleed_mod = (0.002 * (player_base_enrage_mod * foe_base_enrage_mod)) + 1
 
             def_mod = max(1, (bleed_mod * 0.0005))
 
