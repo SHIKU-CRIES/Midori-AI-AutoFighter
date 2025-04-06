@@ -347,7 +347,7 @@ def main(level):
 
         # Main game loop
         while running:
-            spinner.start(text=f"Wave :: {wave_number}")
+            log(white, f"Wave :: {wave_number}")
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
