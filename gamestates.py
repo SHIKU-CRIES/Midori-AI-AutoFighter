@@ -291,7 +291,7 @@ def main(level):
 
             foelist.append(foe)
         
-        for foe in temp_foe_themed_names:
+        while len(temp_foe_themed_names) > 0:
             themed_name = random.choice(temp_foe_themed_names).capitalize()
             temp_foe_themed_names.remove(themed_name.lower())
             themed_title = random.choice(themed_ajt).capitalize()
