@@ -240,6 +240,7 @@ def main(level):
     while True:
 
         level_sum = 0
+        wave_number += 1
         foelist: list[Player] = []
         backup_foes_list: list[Player] = []
         
@@ -267,8 +268,6 @@ def main(level):
             temp_foe_themed_names.append(item)
         
         random.shuffle(temp_foe_themed_names)
-
-        wave_number += 1
 
         if level < 2000:
             temp_foe_themed_names.remove("Carly".lower())
@@ -345,7 +344,6 @@ def main(level):
         
         spinner.succeed(text=f"Wave :: {wave_number} :: Foes: Fully Loaded")
 
-        # heal the player
         player.HP = player.MHP
 
         enrage_timer.reset()
