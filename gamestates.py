@@ -319,6 +319,9 @@ def main(level):
             thread.start()
 
         for thread in threads:
+            while thread.is_alive():
+                pygame.display.flip()
+                clock.tick(30)
             thread.join()
 
         del threads
