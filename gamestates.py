@@ -343,8 +343,6 @@ def main(level):
 
             thread.join()
 
-        del threads
-
         # heal the player
         player.HP = player.MHP
 
