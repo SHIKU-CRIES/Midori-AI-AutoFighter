@@ -534,7 +534,7 @@ class Player:
             return False
     
     def exp_to_levelup(self):
-        return min(max((self.level ** 2.25) / (self.EXPMod ** 0.75), 1), 10 ** 10)
+        return min(max((self.level ** 2.55) / (self.EXPMod ** 0.75), 1), 10 ** 10)
 
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
@@ -653,27 +653,23 @@ class Player:
         top_level_full = top_level * 2
 
         self.level = level
-        self.MHP: int = random.randint(self.level, 3 * self.level) + 1000
-        self.HP: int = self.MHP
-        self.Def: int = random.randint(4, self.level + 5) + 15
-        self.Atk: int = random.randint(2 * self.level, 3 * self.level)
+        hp_up: int = random.randint(self.level, 3 * self.level) + 1000
+        def_up: int = random.randint(4, self.level + 5) + 15
+        atk_up: int = random.randint(2 * self.level, 3 * self.level)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.000001 * self.level, (self.level * 0.000002)) + (self.level * 0.000001)
         self.CritDamageMod: float = 2 + (self.level * 0.00025)
-        self.DodgeOdds: float = 0.03 + (self.level * 0.0001)
+        dodgeodds_up: float = 0.03 + (self.level * 0.0001)
         self.Vitality: float = 1 + (self.level * 0.00002)
         self.Mitigation: float = 1
 
         if level > top_level:
-            self.MHP = self.MHP + (2 * level)
-            self.Atk = self.Atk + (4 * level)
+            hp_up = hp_up + (2 * level)
+            atk_up = atk_up + (4 * level)
             
             # Apply bonus every xyz levels past top_level
             xyz = 5
             bonus_levels = (level - top_level) // xyz
-            self.MHP = self.MHP + (3 * bonus_levels)
-            self.Atk = self.Atk + (2 * bonus_levels)
-            self.CritRate = self.CritRate + (0.00001 * (bonus_levels * level))
 
             for i in range(int((level - 50) // 50) + 1):
                 if len(self.Items) > starting_max_blessing:
@@ -691,19 +687,21 @@ class Player:
 
         build_foe_stats(self)
 
-        pre_temp_vit = self.Vitality
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
-        self.Vitality = max(post_temp_vit, 0.75)
+        self.Vitality = max(min(post_temp_vit, 10 ** 2.5), 0.75)
+
+        hp_up = self.check_base_stats(self.MHP, round(hp_up * self.Vitality))
+        def_up = self.check_base_stats(self.Def, round(def_up * self.Vitality))
+        atk_up = self.check_base_stats(self.Atk, round(atk_up * self.Vitality))
 
         self.MHP = int(self.MHP * min((level / top_level), (25)) * post_temp_vit) + 5
         self.Atk = int(self.Atk * min((level / top_level), (5)) * post_temp_vit) + 5
         # self.Def = int(self.Def * min((level / (top_level * 4)), (2))) + 5
+    
         self.gain_crit_rate(0.0002 * (level / top_level_full))
-        self.DodgeOdds = self.DodgeOdds * (level / (top_level_full * 15))
+        self.gain_dodgeodds_rate(dodgeodds_up * (level / (top_level_full * 15)))
 
-        self.check_stats()
-
-        self.HP = self.MHP
+        self.check_stats(); self.HP: int = self.MHP
 
 def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage_timer, def_mod, bleed_mod, position, size, show_stats_on_hover=True):
     x, y = position
