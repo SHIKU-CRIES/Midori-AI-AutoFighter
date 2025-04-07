@@ -38,12 +38,12 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                     if player.HP < player.MHP * 0.55:
                         player.heal_damage(source.deal_damage(1, player.Type) * 0.05)
             elif source.isplayer != player.isplayer:
-                light_dot = damageovertimetype("Celestial Atrophy", mited_damage_dealt ** 0.5, 50000, source.Type, source.PlayerName, 1)
+                light_dot = damageovertimetype("Celestial Atrophy", mited_damage_dealt ** 1.5, 50000, source.Type, source.PlayerName, 1)
                 light_dot.max_turns = 500000000
                 player.gain_damage_over_time(light_dot, source.effecthittate())
     
     if source.Type == Dark:
-        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 0.65, 325, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 1.65, 325, source.Type, source.PlayerName, 1), source.effecthittate())
 
         if source.above_threshold_ticks > 100:
             source.above_threshold_ticks = 100
@@ -57,7 +57,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                         source.Atk += source.check_base_stats(source.Atk, random.randint(95, 105) * source.above_threshold_ticks)
     
     if source.Type == Wind:
-        target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 1.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
         
         for dot in target.DOTS:
             dot.damage = (dot.damage * 1.001)
@@ -69,25 +69,25 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         if source.ActionPointsPerTick <= 150:
             source.ActionPointsPerTick += 1
 
-        target.gain_damage_over_time(damageovertimetype("Charged Decay", mited_damage_dealt ** 0.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Charged Decay", mited_damage_dealt ** 1.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Ice:
 
         if target.ActionPointsPerTurn <= 1200:
             target.ActionPointsPerTurn += 1
 
-        target.gain_damage_over_time(damageovertimetype("Frozen Wound", mited_damage_dealt ** 0.05, 700, source.Type, source.PlayerName, 1), source.effecthittate())
+        target.gain_damage_over_time(damageovertimetype("Frozen Wound", mited_damage_dealt ** 1.05, 700, source.Type, source.PlayerName, 1), source.effecthittate())
 
     if source.Type == Fire:
         for player in alllist:
             if source.isplayer != player.isplayer:
-                player.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 0.5, 325, source.Type, source.PlayerName, 1), source.effecthittate())
+                player.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 1.5, 325, source.Type, source.PlayerName, 1), source.effecthittate())
     
     if source.Type == Generic:
         for player in alllist:
             if source.isplayer == player.isplayer:
                 if player.PlayerName is not source.PlayerName:
-                    player.gain_healing_over_time(healingovertimetype(f"{source.PlayerName}\'s Echo", round(source.MHP * 0.0001), 5, source.Type, source.PlayerName, 1))
+                    player.gain_healing_over_time(healingovertimetype(f"{source.PlayerName}\'s Echo", round(source.deal_damage(0.2, target.Type)), 5, source.Type, source.PlayerName, 1))
 
     if target.Type == Light:
         mited_damage_dealt = mited_damage_dealt / 2
