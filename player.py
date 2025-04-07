@@ -503,7 +503,7 @@ class Player:
                 for i in range(dot.tick_interval):
                     self.take_damage(1, self.Type.damage_mod(dot_damage, dot.damage_type))
                 
-                dot.damage = (dot.damage * 0.85)
+                dot.damage = (dot.damage * 0.99)
             else:
                 self.DOTS.remove(dot)
 
