@@ -468,7 +468,7 @@ class Player:
             if random.random() < tohit:
                 for dots in self.DOTS:
                     if DOT.name == dots.name:
-                        dots.damage += DOT.damage
+                        dots.damage += max(DOT.damage, 50)
                         dots.tick_interval += DOT.tick_interval
 
                         if dots.turns < 50000:
