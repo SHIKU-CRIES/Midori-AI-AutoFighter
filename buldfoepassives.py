@@ -160,7 +160,7 @@ def build_foe_stats(player):
         player.Atk = int(player.Atk / 5)
         player.Def = int(player.Def / 4)
         player.Regain = player.Regain / 5
-        player.DodgeOdds = player.DodgeOdds / 4
+        player.DodgeOdds = 0
         player.Vitality -= player.Vitality / 4
 
         if player.Vitality > 1:
