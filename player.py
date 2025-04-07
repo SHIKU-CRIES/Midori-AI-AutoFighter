@@ -684,8 +684,8 @@ class Player:
                 else:
                     self.Items.append(ItemType())
 
-        self.EffectRES /= 2
-        self.EffectHitRate /= 100
+        self.EffectRES /= 4
+        self.EffectHitRate = 2
 
         self.EffectRES += 0.002 * self.level
         self.EffectHitRate += 0.0001 * self.level
@@ -696,7 +696,7 @@ class Player:
         build_foe_stats(self)
 
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
-        post_temp_mit = (self.Mitigation * (level / (top_level)))
+        post_temp_mit = (self.Mitigation * (level / (top_level / 2)))
         self.Vitality = max(min(post_temp_vit, 10 ** 4), 0.75)
         self.Mitigation = max(min(post_temp_mit, 525), 0.15)
 
