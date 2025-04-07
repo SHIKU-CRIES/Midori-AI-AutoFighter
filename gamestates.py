@@ -306,11 +306,11 @@ def main(level):
         all_foes = foelist + backup_foes_list
 
         for foe in all_foes:
-            thread = threading.Thread(target=foe.set_level, args=(random.randint(max(level - 10, 1), level + 10),))
+            thread = threading.Thread(target=foe.set_level, args=(random.randint(max(level - 10, 1), level + 55),))
             threads.append(thread)
             thread.start()
 
-            if level > 2000:
+            if level > 20000:
                 thread = threading.Thread(target=foe.load_past_lives)
                 threads.append(thread)
                 thread.start()
