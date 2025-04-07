@@ -151,16 +151,16 @@ class Player:
                         self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) * total_items)
                         self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) * total_items)
                         self.Mitigation: float = self.Mitigation + (0.0005)
-                        self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.001) + 0.01
-                        self.gain_crit_rate(float(past_life_data['CritRate'] * 0.001) + 0.01)
-                        self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.0003) + 0.001)
-                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.01) + 0.01)
+                        self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.00001) + 0.0001
+                        self.gain_crit_rate(float(past_life_data['CritRate'] * 0.00001) + 0.0001)
+                        self.gain_crit_damage(float(past_life_data['CritDamageMod'] * 0.000003) + 0.00001)
+                        self.gain_dodgeodds_rate(float(past_life_data['DodgeOdds'] * 0.0001) + 0.0001)
 
                         for item in past_life_data['Items']:
                             self.MHP: int = self.MHP + self.check_base_stats(self.MHP, 1000)
                             self.HP: int = self.MHP
-                            self.Def: int = self.Def + self.check_base_stats(self.Def, 50)
-                            self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 50)
+                            self.Def: int = self.Def + self.check_base_stats(self.Def, 5)
+                            self.Atk: int = self.Atk + self.check_base_stats(self.Atk, 5)
                             self.Regain: float = self.Regain + (0.001)
                             self.Mitigation: float = self.Mitigation + (0.0001)
                             self.gain_crit_rate(0.01)
@@ -309,7 +309,7 @@ class Player:
                 desired_increase = desired_increase / max((modifier * (stat_total // stats_to_start_lower)), 1)
                 break
 
-        return max(min(int(desired_increase), 1000000), 1)
+        return max(min(int(desired_increase), 1000), 1)
     
     def gain_vit(self, points):
         """
@@ -378,8 +378,8 @@ class Player:
         if self.Def < 5:
             self.Def = 5
         
-        if self.Regain > self.MHP * 0.005:
-            self.Regain = self.MHP * 0.005
+        if self.Regain > self.MHP * 0.00005:
+            self.Regain = self.MHP * 0.00005
 
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
