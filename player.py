@@ -642,7 +642,7 @@ class Player:
             if self.level > 300:
                 self.Mitigation += mitigation_up
                 self.Vitality += vitality_up
-                self.ActionPointsPerTick += 0.0000002
+                self.ActionPointsPerTick += 0.002
                 self.EffectRES += 0.0000002
                 self.EffectHitRate += 0.000001
 
