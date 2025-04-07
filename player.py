@@ -377,13 +377,16 @@ class Player:
         
         if self.Def < 5:
             self.Def = 5
+        
+        if self.Regain > self.MHP * 0.005:
+            self.Regain = self.MHP * 0.005
 
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
         
-        if self.MHP > 20000000000:
-            self.MHP = 1
+        if self.MHP > 2000000000:
+            self.MHP = 2000000000
     
     def tick(self, mod):
         if self.HP < 1:
