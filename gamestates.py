@@ -303,15 +303,17 @@ def main(level):
 
         threads = []
 
-        for foe in foelist:
+        all_foes = foelist + backup_foes_list
+
+        for foe in all_foes:
             thread = threading.Thread(target=foe.set_level, args=(random.randint(max(level - 10, 1), level + 10),))
             threads.append(thread)
             thread.start()
 
-        for foe in backup_foes_list:
-            thread = threading.Thread(target=foe.set_level, args=(random.randint(max(level - 10, 1), level + 10),))
-            threads.append(thread)
-            thread.start()
+            if level > 2000:
+                thread = threading.Thread(target=foe.load_past_lives)
+                threads.append(thread)
+                thread.start()
 
         for thread in threads:
             while thread.is_alive():
@@ -326,15 +328,7 @@ def main(level):
 
             thread.join()
 
-        for foe in foelist:
-            try:
-                foe.photodata = pygame.image.load(os.path.join(foe.photo))
-                foe.photodata = pygame.transform.flip(foe.photodata, True, False)
-                foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
-            except FileNotFoundError as e:
-                print(f"Error loading image: {e}")
-
-        for foe in backup_foes_list:
+        for foe in all_foes:
             try:
                 foe.photodata = pygame.image.load(os.path.join(foe.photo))
                 foe.photodata = pygame.transform.flip(foe.photodata, True, False)
