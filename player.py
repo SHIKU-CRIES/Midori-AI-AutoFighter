@@ -135,8 +135,11 @@ class Player:
                 starting_items += 1
 
                 try:
-                    with open(filepath, 'rb') as f:
-                        past_life_data = pickle.load(f)
+                    if os.path.exists(filepath):
+                        with open(filepath, 'rb') as f:
+                            past_life_data = pickle.load(f)
+                    else:
+                        continue
 
                     can_load = False
 
@@ -206,8 +209,6 @@ class Player:
                     continue
         
         spinner.succeed(text=f"Past Lifes ({self.PlayerName}): Fully Loaded")
-                
-        self.level = 1
 
     def save_past_life(self):
         lives_folder = "lives"
