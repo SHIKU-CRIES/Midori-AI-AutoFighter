@@ -520,6 +520,9 @@ class Player:
                 hot_healing = hot.tick()
                 for i in range(hot.tick_interval):
                     self.heal_damage(self.Type.damage_mod(hot_healing, hot.healing_type))
+                
+                if hot.healing > self.MHP * 0.25:
+                    hot.healing = round(hot.healing * 0.75)
             else:
                 self.HOTS.remove(hot)
 
