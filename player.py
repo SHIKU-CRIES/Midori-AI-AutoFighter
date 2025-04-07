@@ -148,8 +148,8 @@ class Player:
                     if can_load:
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
-                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']) * total_items)
-                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) * total_items)
+                        self.Def: int = self.Def + self.check_base_stats(self.Def, int(past_life_data['Def']))
+                        self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']))
                         self.Mitigation: float = self.Mitigation + (0.0005)
                         self.Regain: float = self.Regain + float(past_life_data['Regain'] * 0.00001) + 0.0001
                         self.gain_crit_rate(float(past_life_data['CritRate'] * 0.00001) + 0.0001)
