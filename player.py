@@ -692,9 +692,9 @@ class Player:
         build_foe_stats(self)
 
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
-        post_temp_mit = (self.Mitigation * (level / (top_level_full)))
-        self.Vitality = max(min(post_temp_vit, 10 ** 2.5), 0.75)
-        self.Mitigation = max(min(post_temp_mit, 10 ** 2.5), 0.75)
+        post_temp_mit = (self.Mitigation * (level / (top_level)))
+        self.Vitality = max(min(post_temp_vit, 10 ** 4), 0.75)
+        self.Mitigation = max(min(post_temp_mit, 525), 0.15)
 
         hp_up = self.check_base_stats(self.MHP, round(hp_up * self.Vitality))
         def_up = self.check_base_stats(self.Def, round(def_up * self.Vitality))
