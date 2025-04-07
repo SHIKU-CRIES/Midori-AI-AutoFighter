@@ -349,7 +349,7 @@ class Player:
                 break
 
     def check_stats(self):
-        max_dodgeodds = 5000
+        max_dodgeodds = 5
         max_crit_rate = 15
         def_up = 0
 
@@ -686,12 +686,15 @@ class Player:
         self.EffectRES += 0.002 * self.level
         self.EffectHitRate += 0.0001 * self.level
 
+
         self.check_stats()
 
         build_foe_stats(self)
 
         post_temp_vit = (self.Vitality * (level / (top_level_full)))
+        post_temp_mit = (self.Mitigation * (level / (top_level_full)))
         self.Vitality = max(min(post_temp_vit, 10 ** 2.5), 0.75)
+        self.Mitigation = max(min(post_temp_mit, 10 ** 2.5), 0.75)
 
         hp_up = self.check_base_stats(self.MHP, round(hp_up * self.Vitality))
         def_up = self.check_base_stats(self.Def, round(def_up * self.Vitality))
