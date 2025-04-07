@@ -534,7 +534,7 @@ class Player:
             return False
     
     def exp_to_levelup(self):
-        return min(max((self.level ** 2.55) / (self.EXPMod ** 0.75), 1), 10 ** 10)
+        return min(max((self.level ** 1.55) / (self.EXPMod ** 0.75), 1), 10 ** 10)
 
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
