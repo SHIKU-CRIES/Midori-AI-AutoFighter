@@ -60,7 +60,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 0.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
         
         for dot in target.DOTS:
-            dot.damage = (dot.damage * 1.25)
+            dot.damage = (dot.damage * 1.001)
         
         target.damage_over_time()
     
