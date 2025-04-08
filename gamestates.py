@@ -356,9 +356,10 @@ def main(level):
                     sys.exit()
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
                     is_deading = True
+
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_b:  
                     for player in foelist:
-                        player.Atk += round(player.HP * 0.35) + 1
+                        player.Atk += round(player.HP * 0.35) + 1000
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: 
                     for player in playerlist:
