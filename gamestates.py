@@ -56,7 +56,11 @@ def debug_log(filename, text):
     return text
 
 def kill_person(dead, killer):
-    spinner.fail(text=f"The {dead.Type.colorama_color}{dead.PlayerName}{white} at {blue}{dead.level}{white} kill by {killer.Type.colorama_color}{killer.PlayerName}{white}")
+    if dead.isplayer:
+        spinner.fail(text=f"Your {dead.Type.colorama_color}{dead.PlayerName}{white} at {blue}{dead.level}{white} kill by {killer.Type.colorama_color}{killer.PlayerName}{white}")
+    else:
+        spinner.succeed(text=f"The {dead.Type.colorama_color}{dead.PlayerName}{white} at {blue}{dead.level}{white} kill by {killer.Type.colorama_color}{killer.PlayerName}{white}")
+
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"{killer.PlayerName} killed {dead.PlayerName}, Below are stats for both...")
 
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Dead Person")
