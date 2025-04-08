@@ -371,7 +371,7 @@ def main(level):
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
-            level_base_enrage_mod = (level * max(min(level / 1000, 10000), 2))
+            level_base_enrage_mod = (level / max(min(level / 1000, 10000), 2))
             player_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
             foe_base_enrage_mod = (enrage_mod * level_base_enrage_mod)
 
