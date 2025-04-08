@@ -427,6 +427,7 @@ def main(level):
 
             foe_bottom = 150
             player_bottom = 610
+            photo_offset = 20
             side_offset = 20
             srink_setting = 0.95
             item_total_size = photo_size - (photo_size / 4)
@@ -436,7 +437,7 @@ def main(level):
             if len(foelist) > 0:
                 for i, foe in enumerate(foelist):
                     if foe.HP > 1:
-                        item_total_position = ((25 * i) + (side_offset + (item_total_size * i)), foe_bottom)
+                        item_total_position = ((photo_offset * i) + (side_offset + (item_total_size * i)), foe_bottom)
                         render_player_obj(pygame, foe, foe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, foe_size, True)
 
                     if foe.tick(bleed_mod):
@@ -475,7 +476,7 @@ def main(level):
             if len(playerlist) > 0:
                 for i, person in enumerate(playerlist):
                     if person.HP > 1:
-                        item_total_position = ((25 * i) + (side_offset + (item_total_size * i)), player_bottom)
+                        item_total_position = ((photo_offset * i) + (side_offset + (item_total_size * i)), player_bottom)
                         render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, player_size, True)
 
                     if person.tick(bleed_mod):
