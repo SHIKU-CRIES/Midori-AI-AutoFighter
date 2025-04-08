@@ -411,7 +411,7 @@ def main(level):
                     backup_players_list.remove(new_player)
                     playerlist.append(new_player)
 
-            if len(foelist) < 3:
+            if len(foelist) < 5:
                 if len(backup_foes_list) > 0:
                     new_player = random.choice(backup_foes_list)
                     backup_foes_list.remove(new_player)
@@ -428,84 +428,45 @@ def main(level):
             foe_bottom = 250
             player_bottom = 625
             item_total_size = photo_size - (photo_size / 4)
-            size = (item_total_size, item_total_size)
-
+            player_size = (item_total_size, item_total_size)
+            foe_size = (item_total_size, item_total_size)
+            
             if len(foelist) > 0:
-                foe_stat_data = [
-                    ("Stats of:", foelist[0].PlayerName),
-                    ("Level:", foelist[0].level),
-                    ("Max HP:", foelist[0].MHP),
-                    ("Atk:", int(foelist[0].Atk)),
-                    ("Def:", int(foelist[0].Def)),
-                    ("Crit Rate:", f"{(foelist[0].CritRate * 100):.1f}%"),
-                    ("Crit Damage Mod:", f"{(foelist[0].CritDamageMod):.2f}x"),
-                    ("HP Regain:", f"{(foelist[0].Regain * 100):.0f}"),
-                ]
+                for i, foe in enumerate(foelist):
+                    if foe.HP > 1:
+                        item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
+                        render_player_obj(pygame, foe, foe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, foe_size, True)
 
-                if len(foelist[0].Items) > 0:
-                    foe_stat_data.append(("Blessings:", f"{len(foelist[0].Items)}"))
+                    if foe.tick(bleed_mod):
+                        for foe_action in foe.ActionsPerTurn:
+                            dt = clock.tick(fps_cap) / 1000
+                        
+                            if bleed_mod > 1.5:
+                                foe.RushStat = 0
+                                foe.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
-                if foelist[0].Vitality > 1.5:
-                    foe_stat_data.append(("Vitality:", f"{(foelist[0].Vitality):.2f}x"))
+                            if foe.HP > 1:
+                                foe.do_pre_turn()
 
-                if (foelist[0].DodgeOdds * 100) / bleed_mod > 1:
-                    foe_stat_data.append(("Dodge Odds:", f"{((foelist[0].DodgeOdds * 100) / bleed_mod):.2f}%"))
+                                if len(playerlist) > 0:
+                                    max_def = 0
+                                    target_to_damage = random.choice(playerlist)
 
-                # Foe stats drawing
-                foe_x_offset = SCREEN_WIDTH - (SCREEN_WIDTH // 8) + 170
-                foe_y_offset = (SCREEN_HEIGHT // 2) - 425 
+                                    for target in playerlist:
+                                        if target.Def > max_def:
+                                            max_def = target.Def
+                                        else:
+                                            target_to_damage = target
 
-                foe_num_stats = len(foe_stat_data)
-
-                foe_spacing_moded = 55 - (foe_num_stats * 2)
-
-                foe_font_size = max(16, 54 - 2 * foe_num_stats) 
-                foe_stats_font = pygame.font.SysFont('Arial', foe_font_size)
-
-                try:
-                    for i, (stat_name, stat_value) in enumerate(foe_stat_data):
-                        stat_text = foe_stats_font.render(f"{stat_name} {stat_value}", True, (255, 255, 255))
-                        stat_rect = stat_text.get_rect(topright=(foe_x_offset, foe_y_offset + i * foe_spacing_moded))
-                        screen.blit(stat_text, stat_rect)
-                except Exception as error:
-                    print(f"Could not render foe stats due to {str(error)}")
-
-                if len(foelist) > 0:
-                    for i, foe in enumerate(foelist):
-                        if foe.HP > 1:
-                            item_total_position = ((25 * i) + (50 + (item_total_size * i)), foe_bottom)
-                            render_player_obj(pygame, foe, foe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
-
-                        if foe.tick(bleed_mod):
-                            for foe_action in foe.ActionsPerTurn:
-                                dt = clock.tick(fps_cap) / 1000
-                            
-                                if bleed_mod > 1.5:
-                                    foe.RushStat = 0
-                                    foe.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
-
-                                if foe.HP > 1:
-                                    foe.do_pre_turn()
-
-                                    if len(playerlist) > 0:
-                                        max_def = 0
-                                        target_to_damage = random.choice(playerlist)
-
-                                        for target in playerlist:
-                                            if target.Def > max_def:
-                                                max_def = target.Def
-                                            else:
-                                                target_to_damage = target
-
-                                        if target_to_damage.HP > 0:
-                                            target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, foe, target_to_damage, foe.deal_damage(bleed_mod, target_to_damage.Type)))
-                                        
-                                        if target_to_damage.HP < 1:
-                                            target_to_damage.save_past_life()
-                                            kill_person(target_to_damage, foe)
-                                            playerlist.remove(target_to_damage)
-                        else:
-                            if foe.HP > 0: foe.do_pre_turn()
+                                    if target_to_damage.HP > 0:
+                                        target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, foe, target_to_damage, foe.deal_damage(bleed_mod, target_to_damage.Type)))
+                                    
+                                    if target_to_damage.HP < 1:
+                                        target_to_damage.save_past_life()
+                                        kill_person(target_to_damage, foe)
+                                        playerlist.remove(target_to_damage)
+                    else:
+                        if foe.HP > 0: foe.do_pre_turn()
             else:
                 break
 
@@ -513,7 +474,7 @@ def main(level):
                 for i, person in enumerate(playerlist):
                     if person.HP > 1:
                         item_total_position = ((25 * i) + (50 + (item_total_size * i)), player_bottom)
-                        render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, size, True)
+                        render_player_obj(pygame, person, person.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, player_size, True)
 
                     if person.tick(bleed_mod):
                         for turn in person.ActionsPerTurn:
