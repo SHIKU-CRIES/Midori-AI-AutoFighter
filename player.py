@@ -250,10 +250,7 @@ class Player:
         """
         to_be_lowered_by = 100
 
-        if self.DodgeOdds > 1:
-            self.DodgeOdds += points / ((to_be_lowered_by * (self.DodgeOdds * 2)) + 1)
-        else:
-            self.DodgeOdds += points
+        self.DodgeOdds += points / ((to_be_lowered_by * (self.DodgeOdds * 5)) + 1)
 
     def gain_crit_rate(self, points):
         """Increases crit rate based on points, with increasing cost.
