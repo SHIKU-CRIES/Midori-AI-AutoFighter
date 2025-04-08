@@ -534,6 +534,7 @@ def main(level):
 
                                     if target_to_damage.HP < 1:
                                         foelist.remove(target_to_damage)
+                                        kill_person(target_to_damage, person)
                                         person.Kills += 1
                                         total_rushmod = 0
 
