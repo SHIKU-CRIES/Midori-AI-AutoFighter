@@ -665,14 +665,14 @@ class Player:
 
         self.level = level
         hp_up: int = random.randint(self.level, 3 * self.level) + 1000
-        def_up: int = random.randint(100, (self.level * 5) + 250) + 15
+        def_up: int = random.randint((self.level * 2) + 100, (self.level * 5) + 250) + 15
         atk_up: int = random.randint(2 * self.level, 3 * self.level)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.000001 * self.level, (self.level * 0.000002)) + (self.level * 0.000001)
         self.CritDamageMod: float = 2 + (self.level * 0.00025)
         dodgeodds_up: float = 0.03 + (self.level * 0.0001)
         self.Vitality: float = 1 + (self.level * 0.00002)
-        self.Mitigation: float = 1
+        self.Mitigation: float = 1 + (self.level * 0.00003)
 
         if level > top_level:
             hp_up = hp_up + (2 * level)
