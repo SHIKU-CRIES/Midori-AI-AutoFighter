@@ -427,8 +427,8 @@ def main(level):
 
             foe_bottom = 150
             player_bottom = 610
-            photo_offset = 20
-            side_offset = 20
+            photo_offset = 15
+            side_offset = 15
             srink_setting = 0.95
             item_total_size = photo_size - (photo_size / 4)
             player_size = (item_total_size * srink_setting, item_total_size * srink_setting)
