@@ -425,7 +425,7 @@ def main(level):
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
 
-            foe_top = 60
+            foe_top = 10
             player_bottom = 620
             photo_offset = 15
             side_offset = 15
