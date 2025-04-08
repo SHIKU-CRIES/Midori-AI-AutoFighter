@@ -426,7 +426,7 @@ def main(level):
             screen.blit(background_image, (0, 0))
 
             foe_bottom = 250
-            player_bottom = 625
+            player_bottom = 620
             item_total_size = photo_size - (photo_size / 4)
             player_size = (item_total_size, item_total_size)
             foe_size = (item_total_size, item_total_size)
