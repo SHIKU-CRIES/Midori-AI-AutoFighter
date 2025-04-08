@@ -706,7 +706,7 @@ class Player:
 
         hp_up = self.check_base_stats(self.MHP, round(hp_up * self.Vitality))
         def_up = self.check_base_stats(self.Def, round(def_up * self.Vitality))
-        atk_up = self.check_base_stats(self.Atk, round(atk_up * self.Vitality)) * 4
+        atk_up = self.check_base_stats(self.Atk, round(atk_up * self.Vitality)) * 8
 
         self.MHP = int((self.MHP + hp_up) * min((level / top_level), (25)) * post_temp_vit) + 5
         self.Atk = int((self.Atk + atk_up) * min((level / top_level), (5)) * post_temp_vit) + 5
