@@ -427,9 +427,10 @@ def main(level):
 
             foe_bottom = 150
             player_bottom = 610
+            srink_setting = 0.99
             item_total_size = photo_size - (photo_size / 4)
-            player_size = (item_total_size, item_total_size)
-            foe_size = (item_total_size, item_total_size)
+            player_size = (item_total_size * srink_setting, item_total_size * srink_setting)
+            foe_size = (item_total_size * srink_setting, item_total_size * srink_setting)
             
             if len(foelist) > 0:
                 for i, foe in enumerate(foelist):
