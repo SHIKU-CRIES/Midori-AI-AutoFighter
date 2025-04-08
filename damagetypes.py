@@ -1,12 +1,16 @@
 
 import random
 
+from colorama import Fore
+from colorama import Style
+
 class DamageType():
     def __init__(self, name :str, weakness :str, color):
         """Initialises the damage type of a player."""
         self.name = name
         self.weakness = weakness
         self.color = color
+        self.colorama_color = self.convert_to_colorama(color)
     
     def is_weak(self, type_check):
         if type_check == self.weakness:
@@ -29,6 +33,29 @@ class DamageType():
             return incoming_damage * 0.75
         else:
             return incoming_damage
+
+    def convert_to_colorama(self, color_tuple):
+        """Converts an RGB tuple to a colorama color code."""
+        r, g, b = color_tuple
+        if r > g and r > b:
+            return Fore.RED
+        elif g > r and g > b:
+            return Fore.GREEN
+        elif b > r and b > g:
+            return Fore.BLUE
+        elif r == g and g == b:
+            if r > 128:
+                return Fore.WHITE
+            else:
+                return Fore.BLACK
+        elif r == g and r > b:
+            return Fore.YELLOW
+        elif r == b and r > g:
+            return Fore.MAGENTA
+        elif g == b and g > r:
+            return Fore.CYAN
+        else:
+            return Fore.WHITE
 
 Generic = DamageType("generic", "none", (255, 255, 255))
 
