@@ -708,9 +708,9 @@ class Player:
         def_up = self.check_base_stats(self.Def, round(def_up * self.Vitality))
         atk_up = self.check_base_stats(self.Atk, round(atk_up * self.Vitality))
 
-        self.MHP = int(self.MHP * min((level / top_level), (25)) * post_temp_vit) + 5
-        self.Atk = int(self.Atk * min((level / top_level), (5)) * post_temp_vit) + 5
-        # self.Def = int(self.Def * min((level / (top_level * 4)), (2))) + 5
+        self.MHP = int((self.MHP + hp_up) * min((level / top_level), (25)) * post_temp_vit) + 5
+        self.Atk = int((self.Atk + atk_up) * min((level / top_level), (5)) * post_temp_vit) + 5
+        self.Def = int((self.Def + def_up) * min((level / (top_level * 4)), (2))) + 5
     
         self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.gain_dodgeodds_rate(dodgeodds_up * (level / (top_level_full * 15)))
