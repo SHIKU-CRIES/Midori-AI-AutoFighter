@@ -425,7 +425,7 @@ def main(level):
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
 
-            foe_bottom = 100
+            foe_top = 60
             player_bottom = 620
             photo_offset = 15
             side_offset = 15
@@ -437,7 +437,7 @@ def main(level):
             if len(foelist) > 0:
                 for i, foe in enumerate(foelist):
                     if foe.HP > 1:
-                        item_total_position = ((photo_offset * i) + (side_offset + (item_total_size * i)), foe_bottom)
+                        item_total_position = ((photo_offset * i) + (side_offset + (item_total_size * i)), foe_top)
                         render_player_obj(pygame, foe, foe.photodata, screen, enrage_timer, def_mod, bleed_mod, item_total_position, foe_size, True)
 
                     if foe.tick(bleed_mod):
@@ -537,15 +537,15 @@ def main(level):
                 
             if enrage_timer.timed_out:
                 fps_stat = font.render(f"FPT: {int(fps)}", True, (255, 255, 255))
-                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
+                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 200))
                 screen.blit(fps_stat, fps_rect)
 
                 enrage_timer_stat = font.render(f"Enrage: {(enrage_mod):.1f} ({(bleed_mod):.2f}x)", True, (255, 255, 255))
-                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 350))
+                enrage_timer_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 150))
                 screen.blit(enrage_timer_stat, enrage_timer_rect)
             else:
                 fps_stat = font.render(f"FPT: {int(fps)}", True, (255, 255, 255))
-                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 400))
+                fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 200))
                 screen.blit(fps_stat, fps_rect)
 
             pygame.display.flip()
