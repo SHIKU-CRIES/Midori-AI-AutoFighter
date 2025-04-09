@@ -149,8 +149,6 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
             
             mited_damage_dealt = mited_damage_dealt / 4
-            
-            target.DodgeOdds += 0.01
         else:
             if source.HP > source.MHP * 0.25:
                 hp_diff = source.HP - source.MHP * 0.25
