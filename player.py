@@ -249,10 +249,7 @@ class Player:
         cost = 1 + self.DodgeOdds
         to_be_lowered_by = 100
 
-        if self.DodgeOdds > 0.25:
-            temppoints = points / (to_be_lowered_by ** 3.5)
-        else:
-            temppoints = points
+        temppoints = points / (to_be_lowered_by ** 3.5)
 
         while temppoints > 0.01:
             self.DodgeOdds += max(0.00001 ** 0.00001, 0.1 / ((to_be_lowered_by * (self.DodgeOdds ** 3)) + 1))
