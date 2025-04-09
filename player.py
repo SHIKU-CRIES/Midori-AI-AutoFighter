@@ -380,7 +380,7 @@ class Player:
         if self.Def < 5:
             self.Def = 5
         
-        if self.Regain > self.MHP * random.uniform(0.000001, 0.00005):
+        if self.Regain > self.MHP * 0.0005:
             self.Vitality *= 1.01
             self.Regain *= 0.99
 
