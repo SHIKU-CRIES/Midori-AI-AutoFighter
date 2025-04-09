@@ -5,6 +5,7 @@ class timmer:
         self.total_ticks = 0
         self.timed_out = False
         self.current_tick = 0
+        self.printed = False
 
     def start(self):
         """Starts the timer."""
@@ -22,6 +23,7 @@ class timmer:
         self.start_tick = 0
         self.current_tick = 0
         self.timed_out = False
+        self.printed = False
 
     def get_timeout_duration(self):
         """Returns the number of seconds past the timeout as a float.
@@ -29,7 +31,11 @@ class timmer:
         """
         if self.timed_out:
             elapsed_ticks = self.current_tick - self.start_tick - self.timeout_ticks
-            return (elapsed_ticks * 0.001) + 1
+            duration = (elapsed_ticks * 0.001) + 1
+            if not self.printed:
+                print(f"Timeout duration :: {duration}")
+                self.printed = True
+            return duration
         else:
             return 0.0
     
