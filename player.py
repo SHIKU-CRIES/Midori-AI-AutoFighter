@@ -507,7 +507,7 @@ class Player:
                     else:
                         self.take_damage(1, self.Type.damage_mod(dot_damage, dot.damage_type))
                 
-                if self.damage_mitigation(dot.damage) > self.MHP * 0.25:
+                if self.damage_mitigation(dot.damage) > self.MHP * 0.05:
                     dot.damage = (dot.damage * 0.99)
             else:
                 self.DOTS.remove(dot)
