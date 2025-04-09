@@ -380,8 +380,9 @@ class Player:
         if self.Def < 5:
             self.Def = 5
         
-        if self.Regain > self.MHP * 0.00005:
-            self.Regain = self.MHP * 0.00005
+        while self.Regain > self.MHP * random.uniform(0.000001, 0.000005):
+            self.Vitality *= 1.01
+            self.Regain *= 0.99
 
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
@@ -576,7 +577,7 @@ class Player:
             hp_up: int = random.randint(5, 10 * int_mod)
             def_up: int = random.randint(2, 5 * int_mod)
             atk_up: int = random.randint(2, 5 * int_mod)
-            regain_up: float = random.uniform(0.001, 0.003)
+            regain_up: float = random.uniform(0.0000001, 0.0000005)
             critrate_up: float = random.uniform(0.001, 0.0025) * max((mod_fixed / 10000), 1)
             critdamage_up: float = random.uniform(0.004, 0.008) * max((mod_fixed / 10000), 1)
             dodgeodds_up: float = random.uniform(0.000002, 0.00004) * max((mod_fixed / 10000), 1)
