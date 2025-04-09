@@ -145,7 +145,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             source.EffectHitRate += 0.01 * source.above_threshold_ticks
 
         if themed_names[0] in target.PlayerName.lower():
-            if random.random() >= 0.98:
+            if random.random() > 0.999:
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
             
             mited_damage_dealt = mited_damage_dealt / 4
