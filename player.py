@@ -430,7 +430,7 @@ class Player:
         self.HP -= round(total_damage / 4)
     
     def deal_damage(self, input_damage_mod: float, input_damage_type: DamageType):
-        damage_dealt = on_damage_dealt(self.Items, ((self.Atk * self.Vitality) * 2))
+        damage_dealt = on_damage_dealt(self.Items, ((self.Atk * self.Vitality) * 0.05))
 
         damage_dealt = self.Type.damage_mod(damage_dealt, input_damage_type)
 
