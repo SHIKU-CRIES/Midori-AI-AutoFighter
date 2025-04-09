@@ -45,10 +45,10 @@ class Player:
         self.EXPMod: int = 1
         self.MHP: int = 1000 * self.level
         self.HP: int = self.MHP
-        self.Def: int = 25
+        self.Def: int = 1500
         self.Atk: int = 250
         self.CanAct: bool = False
-        self.ActionPointsPerTurn: int = 300
+        self.ActionPointsPerTurn: int = random.randint(150, 655)
         self.ActionPointsPerTick: float = 1
         self.ActionPoints: int = 125
         self.Mitigation: float = 1.5
