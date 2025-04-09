@@ -551,7 +551,7 @@ class Player:
 
         int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 1000)), 1)
 
-        if self.EXP >= EXP_to_levelup * 2:
+        if self.EXP >= EXP_to_levelup * 15:
             self.EXP += min(max(round((foe_level ** 0.0015) * int_mod_novit), round(foe_level  ** 0.0035)) + 1, EXP_to_levelup * 2)
         else:
             self.EXP += min(max(round(((foe_level * 4) ** 0.55) * int_mod_novit), round((foe_level * 4) ** 0.75)) + 1, EXP_to_levelup * 5)
