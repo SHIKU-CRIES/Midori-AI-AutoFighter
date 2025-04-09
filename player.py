@@ -563,20 +563,11 @@ class Player:
         """
         Levels up the player.
         """
-        level_ups = 0
-        max_level_ups = 5
-
-        if self.level < 2000:
-            max_level_ups += 195
 
         mod_fixed = on_stat_gain(self.Items, (mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(round(mod_fixed * (self.level / 100)), 1)
 
         while self.EXP >= self.exp_to_levelup():
-            if level_ups > max_level_ups:
-                break
-            else:
-                level_ups += 1
 
             self.level += 1
 
