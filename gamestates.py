@@ -274,8 +274,10 @@ def main(level):
         
         random.shuffle(temp_foe_themed_names)
 
-        if level < 2000:
+        if level < 1000:
             temp_foe_themed_names.remove("Carly".lower())
+
+        if level < 2000:
             temp_foe_themed_names.remove("Mezzy".lower())
             temp_foe_themed_names.remove("Mimic".lower())
 
