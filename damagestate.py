@@ -203,6 +203,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
         if hp_percentage < 0.25:
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
+        
+        if mited_damage_dealt > 100:
+            mited_damage_dealt = 100
             
     if themed_names[2] in source.PlayerName.lower():
         for player in alllist:
