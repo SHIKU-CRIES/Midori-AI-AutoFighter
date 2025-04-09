@@ -561,7 +561,7 @@ class Player:
         EXP_to_levelup = self.exp_to_levelup()
 
         if self.EXP >= EXP_to_levelup * 2:
-            self.EXP += min(max(round((foe_level ** 0.0015) * int_mod_novit), round(foe_level  ** 0.0035)) + 1, EXP_to_levelup)
+            self.EXP += min(max(round((foe_level ** 0.0015) * int_mod_novit), round(foe_level  ** 0.0035)) + 1, EXP_to_levelup * 2)
         else:
             self.EXP += min(max(round(((foe_level * 4) ** 0.55) * int_mod_novit), round((foe_level * 4) ** 0.75)) + 1, EXP_to_levelup * max_level_ups)
 
@@ -662,7 +662,7 @@ class Player:
 
         self.level = level
         hp_up: int = random.randint(self.level, 3 * self.level) + 1000
-        def_up: int = random.randint((self.level * 2) + 100, (self.level * 5) + 250) + 15
+        def_up: int = random.randint((self.level * 2) + 1000, (self.level * 5) + 2500) + 15
         atk_up: int = random.randint(2 * self.level, 3 * self.level)
         self.Regain: float = random.uniform(0.0001 * self.level, (self.level * 0.002)) + (self.level * 0.004)
         self.CritRate: float = random.uniform(0.000001 * self.level, (self.level * 0.000002)) + (self.level * 0.000001)
