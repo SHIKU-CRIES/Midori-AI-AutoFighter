@@ -747,7 +747,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
 
     # Draw EXP bar (only if it's the player)
     if player.isplayer:
-        player_exp_percent = player.EXP / player.exp_to_levelup() * 100
+        player_exp_percent = min(100, player.EXP / player.exp_to_levelup() * 100)
         player_exp_bar_offset = 31
         player_exp_bar = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, player_exp_percent * (width / 100), 5)
         player_exp_bar_full = pygame.Rect(player_rect.x, player_rect.y + player_exp_bar_offset, width, 5)
@@ -783,7 +783,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         stat_data.append(("Level:", player.level))
 
         if player.isplayer:
-            stat_data.append(("Speed:", f"{round(player.ActionPoints)}"))
+            stat_data.append(("Speed:", f"{round(player.ActionPoints)} :: {round(player.ActionPointsPerTurn)}"))
             stat_data.append(("EXP:", f"{round(player.EXP)}/{round(player.exp_to_levelup())}"))
 
         stat_data.append(("Max HP:", player.MHP))
