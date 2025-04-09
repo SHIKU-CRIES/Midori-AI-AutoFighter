@@ -352,7 +352,7 @@ def main(level):
             except FileNotFoundError as e:
                 print(f"Error loading image: {e}")
         
-        spinner.succeed(text=f"Wave :: {wave_number} :: Foes: Fully Loaded")
+        spinner.succeed(text=f"Wave :: {wave_number} :: Fully Loaded")
 
         player.HP = player.MHP
 
