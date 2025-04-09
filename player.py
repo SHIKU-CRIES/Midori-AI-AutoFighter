@@ -545,8 +545,19 @@ class Player:
         else:
             return False
     
+    def gain_exp(self, mod=float(1), foe_level=int(1)):
+
+        EXP_to_levelup = self.exp_to_levelup()
+
+        int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 1000)), 1)
+
+        if self.EXP >= EXP_to_levelup * 2:
+            self.EXP += min(max(round((foe_level ** 0.0015) * int_mod_novit), round(foe_level  ** 0.0035)) + 1, EXP_to_levelup * 2)
+        else:
+            self.EXP += min(max(round(((foe_level * 4) ** 0.55) * int_mod_novit), round((foe_level * 4) ** 0.75)) + 1, EXP_to_levelup * 5)
+
     def exp_to_levelup(self):
-        return min(max((self.level ** 1.55) / (self.EXPMod ** 0.75), 1), 10 ** 10)
+        return min(max((self.level ** 1.55) / (self.EXPMod ** 0.55), 1), 10 ** 10)
 
     def level_up(self, mod=float(1), foe_level=int(1)):
         """
@@ -559,17 +570,9 @@ class Player:
             max_level_ups += 195
 
         mod_fixed = on_stat_gain(self.Items, (mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
-        int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 1000)), 1)
         int_mod = max(round(mod_fixed * (self.level / 100)), 1)
 
-        EXP_to_levelup = self.exp_to_levelup()
-
-        if self.EXP >= EXP_to_levelup * 2:
-            self.EXP += min(max(round((foe_level ** 0.0015) * int_mod_novit), round(foe_level  ** 0.0035)) + 1, EXP_to_levelup * 2)
-        else:
-            self.EXP += min(max(round(((foe_level * 4) ** 0.55) * int_mod_novit), round((foe_level * 4) ** 0.75)) + 1, EXP_to_levelup * max_level_ups)
-
-        while self.EXP >= EXP_to_levelup:
+        while self.EXP >= self.exp_to_levelup():
             if level_ups > max_level_ups:
                 break
             else:
@@ -577,7 +580,7 @@ class Player:
 
             self.level += 1
 
-            self.EXP = max(self.EXP - (EXP_to_levelup), 0)
+            self.EXP = max(self.EXP - (self.exp_to_levelup()), 0)
             
             hp_up: int = random.randint(5, 10 * int_mod)
             def_up: int = random.randint(2, 5 * int_mod)

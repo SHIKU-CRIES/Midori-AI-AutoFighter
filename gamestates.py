@@ -249,7 +249,7 @@ def main(level):
         foelist: list[Player] = []
         backup_foes_list: list[Player] = []
         
-        spinner.start(text=f"Wave :: {wave_number} :: Foes: Loading Foes...")
+        spinner.start(text=f"Wave :: {wave_number} :: Loading...")
 
         for player in playerlist:
             player.DamageDealt = 0
@@ -309,6 +309,7 @@ def main(level):
         threads = []
 
         all_foes = foelist + backup_foes_list
+        all_allys = playerlist + backup_players_list
 
         for foe in all_foes:
             thread = threading.Thread(target=foe.set_level, args=(random.randint(max(level - 10, 1), level + 55),))
@@ -320,11 +321,21 @@ def main(level):
                 threads.append(thread)
                 thread.start()
 
+        for player in all_allys:
+            thread = threading.Thread(target=player.level_up)
+            threads.append(thread)
+            thread.start()
+
+        for player in all_allys:
+            thread = threading.Thread(target=player.save)
+            threads.append(thread)
+            thread.start()
+
         for thread in threads:
             while thread.is_alive():
 
                 pygame.display.flip()
-                clock.tick(65)
+                clock.tick(10)
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -516,13 +527,11 @@ def main(level):
 
                                         for player in playerlist:
                                             if person.PlayerName == player.PlayerName:
-                                                player.level_up(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
+                                                player.gain_exp(mod=bleed_mod * total_rushmod, foe_level=target_to_damage.level)
                                             else:
-                                                player.level_up(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level * 1.25)))
+                                                player.gain_exp(mod=bleed_mod * total_rushmod, foe_level=max(5, round(target_to_damage.level * 1.25)))
                                         for player in backup_players_list:
-                                            player.level_up(mod=(bleed_mod * total_rushmod) * 0.25, foe_level=max(1, round(target_to_damage.level * 0.25)))
-                                            
-                                        person.save()
+                                            player.gain_exp(mod=(bleed_mod * total_rushmod) * 0.25, foe_level=max(1, round(target_to_damage.level * 0.25)))
 
                                     elif target_to_damage.HP > target_to_damage.MHP:
                                         target_to_damage.HP = target_to_damage.MHP
