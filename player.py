@@ -401,7 +401,7 @@ class Player:
             self.ActionPointsPerTick -= self.ActionPointsPerTurn
             self.ActionPointsPerTurn *= 2
 
-            if len(self.ActionsPerTurn) < 6:
+            if len(self.ActionsPerTurn) < 3:
                 self.ActionsPerTurn.append("action")
             else:
                 self.MHP += 1

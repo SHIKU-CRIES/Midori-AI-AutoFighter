@@ -252,8 +252,11 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
     if themed_names[14].replace("_", " ") in source.PlayerName.lower():
         source.Type = Lightning
 
-        if source.ActionPointsPerTick <= 100:
+        if source.ActionPointsPerTick < 100:
             source.ActionPointsPerTick += 1
+
+        if source.ActionPointsPerTurn > 300:
+            source.ActionPointsPerTurn -= 1
         
         if source.EXP < source.exp_to_levelup():
             source.EXP += max(source.exp_to_levelup() * 0.01, 1)
