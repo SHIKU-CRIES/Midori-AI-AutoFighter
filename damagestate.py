@@ -74,7 +74,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
     if source.Type == Ice:
 
         if target.ActionPointsPerTurn <= 1200:
-            target.ActionPointsPerTurn += 1
+            target.ActionPointsPerTurn += 100
 
         target.gain_damage_over_time(damageovertimetype("Frozen Wound", mited_damage_dealt ** 1.05, 700, source.Type, source.PlayerName, 1), source.effecthittate())
 
