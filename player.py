@@ -398,17 +398,17 @@ class Player:
         self.ActionPoints += round(self.ActionPointsPerTick * max(mod, 1))
 
         if self.ActionPointsPerTick >= round(self.ActionPointsPerTurn * 0.1):
-            self.ActionPointsPerTick -= min(self.ActionPointsPerTurn, self.ActionPointsPerTick - 1)
+            self.ActionPointsPerTick -= min(self.ActionPointsPerTurn, self.ActionPointsPerTick / 2)
             self.ActionPointsPerTurn *= 2
 
             if len(self.ActionsPerTurn) < 3:
                 self.ActionsPerTurn.append("action")
             else:
-                self.MHP += 1
-                self.Atk += 1
-                self.Def += 1
-                self.Mitigation += 0.00001
-                self.EffectRES += 0.000001
+                self.MHP += 1000
+                self.Atk += 100
+                self.Def += 100
+                self.Mitigation += 1
+                self.EffectRES += 0.1
 
         if self.ActionPoints >= self.ActionPointsPerTurn:
             self.ActionPoints -= self.ActionPointsPerTurn
