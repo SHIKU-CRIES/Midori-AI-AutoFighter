@@ -102,6 +102,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         mited_damage_dealt = mited_damage_dealt / 2
 
     if target.Type == Ice:
+        source.gain_damage_over_time(damageovertimetype("Cold Wound", target.deal_damage(1, source.Type) ** 1.65, 700, target.Type, target.PlayerName, 1), target.effecthittate())
         mited_damage_dealt = mited_damage_dealt / 2
 
     if target.Type == Fire:
@@ -255,8 +256,8 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if source.ActionPointsPerTick < 100:
             source.ActionPointsPerTick += 1
 
-        if source.ActionPointsPerTurn > 300:
-            source.ActionPointsPerTurn -= 1
+        if source.ActionPointsPerTurn > 600:
+            source.ActionPointsPerTurn = 600
         
         if source.EXP < source.exp_to_levelup():
             source.EXP += max(source.exp_to_levelup() * 0.01, 1)
