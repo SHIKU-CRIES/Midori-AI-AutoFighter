@@ -397,8 +397,8 @@ class Player:
         
         self.ActionPoints += round(self.ActionPointsPerTick * max(mod, 1))
 
-        if self.ActionPointsPerTick >= self.ActionPointsPerTurn:
-            self.ActionPointsPerTick -= self.ActionPointsPerTurn
+        if self.ActionPointsPerTick >= round(self.ActionPointsPerTurn * 0.1):
+            self.ActionPointsPerTick -= min(self.ActionPointsPerTurn, self.ActionPointsPerTick - 1)
             self.ActionPointsPerTurn *= 2
 
             if len(self.ActionsPerTurn) < 3:
