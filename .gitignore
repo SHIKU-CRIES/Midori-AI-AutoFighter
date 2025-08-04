@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venvc
 
+# Dependency lock files
+uv.lock
+
 # Game files
 Player.dat
 past_lives/

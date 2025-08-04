@@ -1,12 +1,68 @@
 [project]
-name = "Midoris-AutoFighter"
+name = "Midori-AI-AutoFighter"
 version = "0.1.0"
-description = "Add your description here"
+description = "Panda3D rewrite scaffold for Midori AI AutoFighter"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "colorama>=0.4.6",
-    "halo>=0.0.31",
-    "pygame>=2.6.1",
-    "snakeviz>=2.2.2",
+    "panda3d>=1.10.15",
 ]
+
+[project.optional-dependencies]
+llm-cpu = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "openai",
+    "langgraph",
+    "langchain-core",
+    "langchain-openai",
+    "langchain-ollama",
+    "langchain-localai",
+    "langchain-community",
+    "langchain-huggingface",
+    "langchain-text-splitters",
+    "pillow",
+    "transformers",
+    "sentence-transformers",
+]
+
+llm-cuda = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "xformers",
+    "openai",
+    "langgraph",
+    "langchain-core",
+    "langchain-openai",
+    "langchain-ollama",
+    "langchain-localai",
+    "langchain-community",
+    "langchain-huggingface",
+    "langchain-text-splitters",
+    "pillow",
+    "transformers",
+    "sentence-transformers",
+]
+
+llm-amd = [
+    "torch",
+    "torchvision",
+    "torchaudio",
+    "openai",
+    "langgraph",
+    "langchain-core",
+    "langchain-openai",
+    "langchain-ollama",
+    "langchain-localai",
+    "langchain-community",
+    "langchain-huggingface",
+    "langchain-text-splitters",
+    "pillow",
+    "transformers",
+    "sentence-transformers",
+]
+
+[project.scripts]
+autofighter = "main:main"

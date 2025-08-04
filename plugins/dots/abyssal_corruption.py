@@ -1,0 +1,9 @@
+from autofighter.effects import DamageOverTime
+
+
+class AbyssalCorruption(DamageOverTime):
+    plugin_type = "dot"
+    id = "abyssal_corruption"
+
+    def __init__(self, damage: int, turns: int) -> None:
+        super().__init__("Abyssal Corruption", damage, turns, self.id)

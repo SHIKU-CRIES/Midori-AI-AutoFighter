@@ -1,62 +1,41 @@
-import inspect
-import logging
 import importlib.util
 
-from types import ModuleType
-from typing import Dict, Type
+from typing import Dict
 from pathlib import Path
+from types import ModuleType
+
+from plugins.event_bus import EventBus
 
 
 class PluginLoader:
-    """Load plugins from a directory and expose them by category."""
+    def __init__(self, bus: EventBus | None = None) -> None:
+        self.bus = bus
+        self._registry: Dict[str, Dict[str, type]] = {}
 
-    def __init__(self) -> None:
-        self._registry: Dict[str, Dict[str, Type]] = {}
-
-    def discover(self, plugin_dir: str) -> None:
-        """Discover plugin modules under ``plugin_dir``.
-
-        Parameters
-        ----------
-        plugin_dir:
-            Root directory containing plugin modules organised in subfolders
-            by category.
-        """
-
-        base_path = Path(plugin_dir)
-        if not base_path.exists():
-            logging.info("Plugin directory '%s' does not exist", plugin_dir)
+    def discover(self, root: str) -> None:
+        base = Path(root)
+        if not base.exists():
             return
-
-        for file_path in base_path.rglob("*.py"):
-            if file_path.name == "__init__.py":
+        for path in base.rglob("*.py"):
+            if path.name == "__init__.py":
                 continue
-            if base_path.name != "templates" and "templates" in file_path.parts:
+            if path.parent == base and base.name == "plugins":
                 continue
-
-            spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
-            if spec is None or spec.loader is None:
-                logging.warning("Could not load spec for %s", file_path)
-                continue
-
-            module = importlib.util.module_from_spec(spec)
-            try:
-                spec.loader.exec_module(module)  # type: ignore[arg-type]
-            except Exception as exc:  # noqa: BLE001
-                logging.exception("Failed loading plugin %s: %s", file_path, exc)
-                continue
-
+            module = self._import_module(path)
             self._register_module(module)
 
+    def get_plugins(self, category: str) -> Dict[str, type]:
+        return self._registry.get(category, {})
+
+    def _import_module(self, path: Path) -> ModuleType:
+        spec = importlib.util.spec_from_file_location(path.stem, path)
+        assert spec and spec.loader
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
     def _register_module(self, module: ModuleType) -> None:
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            plugin_type = getattr(obj, "plugin_type", None)
-            if plugin_type is None:
-                continue
-            plugin_id = getattr(obj, "id", obj.__name__)
-            self._registry.setdefault(plugin_type, {})[plugin_id] = obj
-
-    def get_plugins(self, plugin_type: str) -> Dict[str, Type]:
-        """Return plugins registered under ``plugin_type``."""
-
-        return self._registry.get(plugin_type, {}).copy()
+        for obj in module.__dict__.values():
+            if isinstance(obj, type) and getattr(obj, "plugin_type", None):
+                category = obj.plugin_type
+                self._registry.setdefault(category, {})[obj.id] = obj

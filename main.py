@@ -1,23 +1,45 @@
-import os
-import getpass
+from panda3d.core import WindowProperties
+from direct.showbase.ShowBase import ShowBase
 
-from gamestates import main
+from autofighter.menu import MainMenu
+from plugins.event_bus import EventBus
+from autofighter.scene import SceneManager
+from plugins.plugin_loader import PluginLoader
 
-from load_photos import cleanup_temp_dirs
 
-try:
-    os.remove("auto.pick")
-except Exception as e:
-    pass
+class AutoFighterApp(ShowBase):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.scene_manager = SceneManager(self)
+        self.event_bus = EventBus()
+        self.plugin_loader = PluginLoader(self.event_bus)
+        self.plugin_loader.discover("plugins")
+        self.plugin_loader.discover("mods")
+
+        props = WindowProperties()
+        props.set_title("Midori AI AutoFighter")
+        self.win.request_properties(props)
+
+        self.accept("window-event", self.on_window_event)
+        self.accept("escape", self.userExit)
+
+        self.task_mgr.add(self.update, "update")
+
+        self.scene_manager.switch_to(MainMenu(self))
+
+    def on_window_event(self, window) -> None:
+        if window and not window.is_open():
+            self.userExit()
+
+    def update(self, task):
+        return task.cont
+
+
+def main() -> None:
+    app = AutoFighterApp()
+    app.run()
+
 
 if __name__ == "__main__":
-    try:
-        if getpass.getuser() == "lunamidori":
-            import cProfile
-            cProfile.run('main(1)', filename='profiling_results.prof')
-        else:
-            main(1)
-        
-        cleanup_temp_dirs()
-    except Exception as error:
-        print(f"A error: {str(error)}")
+    main()
