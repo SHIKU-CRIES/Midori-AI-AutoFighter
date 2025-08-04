@@ -23,7 +23,7 @@ legacy/
 
    ```bash
    uv venv --python python3.12
-   uv pip install -U git+https://github.com/Midori-AI/Midori-AI-AutoFighter@Ver2
+   uv pip install -U git+https://github.com/Midori-AI-OSS/Midori-AI-AutoFighter@Ver2
    ```
    The `uv pip install -U` command installs the latest dependencies without editing
    `pyproject.toml`. The `Ver2` branch hosts the active Panda3D rewrite, so the
