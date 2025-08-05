@@ -43,7 +43,7 @@ Coders must check in with the reviewer or task master before marking tasks compl
 33. [ ] Save key management (`428e9823`) – derive and back up salted-password keys.
 34. [ ] Migration tooling (`72fc9ac3`) – versioned scripts for forward-compatible saves.
 35. [ ] Asset style research (`ad61da93`) – choose art direction and free model sources.
-36. [ ] Conversion workflow (`10bd22da`) – build pipeline to Panda3D formats.
+36. [x] Conversion workflow (`10bd22da`) – build pipeline to Panda3D formats.
 37. [ ] AssetManager with manifest (`d5824730`) – load and cache assets via `assets.toml`.
 38. [ ] Audio system (`7f5c8c36`) – play music and effects with volume control.
 39. [ ] UI polish and accessibility (`d6a657b0`) – dark glass theme, color-blind mode, keyboard navigation.
