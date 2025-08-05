@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from panda3d.core import LColor
+from direct.gui.DirectGui import DGG
 
+from autofighter.audio import get_audio
+from autofighter.assets import AssetManager
 from autofighter.battle_room import BattleRoom
 from autofighter.rooms.boss_patterns import get_boss_info
 
@@ -21,6 +24,7 @@ class BossRoom(BattleRoom):
         pressure: int = 0,
         loop: int = 0,
         floor_boss: bool = False,
+        assets: AssetManager | None = None,
     ) -> None:
         info = get_boss_info(boss_name)
         super().__init__(
@@ -33,23 +37,25 @@ class BossRoom(BattleRoom):
             loop=loop,
             boss=not floor_boss,
             floor_boss=floor_boss,
+            assets=assets,
         )
         self.pattern = info.attacks
         self.reward = info.reward
-        self.model_path = info.model
-        self.music_path = info.music
+        self.foe_model_name = info.model
+        self.music_name = info.music
         self._pattern_index = 0
 
     def setup(self) -> None:  # pragma: no cover - visual assets
         super().setup()
         if self.foe_model is not None:
-            self.foe_model.setColor((0.5, 0, 0, 1))
+            try:
+                self.foe_model.setColor((0.5, 0, 0, 1))
+            except Exception:
+                pass
         try:
-            self.music = self.app.loader.loadSfx(self.music_path)
-            self.music.setLoop(True)
-            self.music.play()
+            get_audio().play_music(self.music_name)
         except Exception:
-            self.music = None
+            pass
 
     def foe_attack(self) -> None:
         assert self.status_label is not None
