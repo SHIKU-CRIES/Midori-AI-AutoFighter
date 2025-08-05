@@ -1,3 +1,11 @@
+
+import pytest
+
+try:
+    from panda3d.core import loadPrcFileData
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    pytest.skip("panda3d not installed", allow_module_level=True)
+    
 import sys
 import importlib
 
