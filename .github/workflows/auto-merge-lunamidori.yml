@@ -8,6 +8,8 @@ on:
 jobs:
   auto_merge:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     if: github.event.pull_request.user.login == 'lunamidori5'
     steps:
       - name: Install GitHub CLI if missing
