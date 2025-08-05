@@ -3,6 +3,11 @@
 ## Goal
 Fully remake the Pygame-based roguelike autofighter in Panda3D with 3D-ready architecture while retaining plugin-driven combat, menus, stat screens, and a multi-room run map.
 
+## Project Lead Feedback
+- Redesign the main menu with a high-contrast grid of large icons inspired by Arknights.
+- Standardize on Lucide icons and provide clear labels for every menu item.
+- Audit Player and Settings menus for missing labels and verify UI scaling, font sizes, and DPI handling.
+
 ## 1. Project Setup
 1. Move current Pygame code into `legacy/`.
 2. Run `uv init` to create a fresh environment.
