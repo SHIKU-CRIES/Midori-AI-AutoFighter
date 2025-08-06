@@ -5,6 +5,16 @@ cube = { path = "assets/models/cube.bam", sha256 = "487bce4ac7bf045a141fdf153bd2
 [textures]
 placeholder = { path = "assets/textures/.gitkeep", sha256 = "2f73349cfc4630255319c6c8dfc1b46a8996ace9d14d8e07563b165915918ec2" }
 white = { path = "assets/textures/white.png", sha256 = "b095da84d43866f2c64982e503fcdc952361c9b2584c0009bebe79d09b9abb2d" }
+icon_play = { path = "assets/textures/icon_play.png", sha256 = "81ea58dd481d3f28a02568c38ef2ed21d3991b7f5c3310a0bd55d1f56f399101" }
+icon_folder_open = { path = "assets/textures/icon_folder_open.png", sha256 = "08d725361cf7f92c35ffc14f196e16975183f5922793107b6a172256baf3adaa" }
+icon_user = { path = "assets/textures/icon_user.png", sha256 = "7cc50c3d8ab41614a085509e13c0783bed3c6df388f56d68e9c822ae88c70f76" }
+icon_settings = { path = "assets/textures/icon_settings.png", sha256 = "14e5c98af7014c3f35b1cd91a90ef08720f5956b2a4f526a15aa5ca29d9625ca" }
+icon_message_square = { path = "assets/textures/icon_message_square.png", sha256 = "c7836cb957c8bd4cfb4df207e461e66d2b198d7069539d1e440c7b78e33da59f" }
+icon_power = { path = "assets/textures/icon_power.png", sha256 = "a2ab8f6260aaa9f9f7a5a2199194d6320d07bb6d7e800c947549dbd520ba5240" }
+icon_volume_2 = { path = "assets/textures/icon_volume_2.png", sha256 = "c786772433684482804d258bc659537c1217c6299f54c7ebf2a0e443390150a6" }
+icon_music = { path = "assets/textures/icon_music.png", sha256 = "b558b7f264ac9db5a15bf7b2e0dce7737e5412ae2a7c74612a802caf4e8dacb8" }
+icon_pause = { path = "assets/textures/icon_pause.png", sha256 = "48e3e5c45bfa4b0324e0890072dd147cde4248b31d2bf81f1637cf686686e59d" }
+icon_refresh_cw = { path = "assets/textures/icon_refresh_cw.png", sha256 = "6a43ec4fffe97e606dec342c90a45758edeaf5490736f02aa35ef995f959d309" }
 
 [audio]
 placeholder = { path = "assets/audio/.gitkeep", sha256 = "2f73349cfc4630255319c6c8dfc1b46a8996ace9d14d8e07563b165915918ec2" }

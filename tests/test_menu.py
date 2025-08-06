@@ -125,13 +125,15 @@ def test_options_menu_updates_refresh_rate() -> None:
     menu.teardown()
 
 
-def test_main_menu_buttons_stack_vertically() -> None:
+def test_main_menu_buttons_form_grid() -> None:
     app = DummyApp()
     menu = MainMenu(app)
     menu.setup()
-    zs = [btn["pos"][2] for btn in menu.buttons]
-    assert zs == sorted(zs, reverse=True)
-    assert len(set(zs)) == len(zs)
+    positions = [btn["pos"] for btn in menu.buttons]
+    xs = sorted({round(p[0], 2) for p in positions})
+    zs = sorted({round(p[2], 2) for p in positions}, reverse=True)
+    assert len(xs) == 2
+    assert len(zs) == 3
     menu.teardown()
 
 

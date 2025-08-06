@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import webbrowser
 
 from pathlib import Path
@@ -7,8 +8,13 @@ from pathlib import Path
 try:
     from direct.gui.DirectGui import DirectButton
     from direct.gui.DirectGui import DirectCheckButton
+    from direct.gui.DirectGui import DirectFrame
+    from direct.gui.DirectGui import DirectLabel
     from direct.gui.DirectGui import DirectSlider
+    from direct.gui import DirectGuiGlobals as DGG
     from direct.showbase.ShowBase import ShowBase
+    from panda3d.core import CardMaker
+    from panda3d.core import TextureStage
 except Exception:  # pragma: no cover - fallback for headless tests
     class _Widget:
         """Minimal widget stand-ins for headless tests."""
@@ -25,12 +31,24 @@ except Exception:  # pragma: no cover - fallback for headless tests
         def destroy(self) -> None:  # noqa: D401 - match Panda3D API
             """Pretend to remove the widget."""
 
+        def bind(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
+        def unbind(self, *_args: object, **_kwargs: object) -> None:
+            pass
+
     class DirectButton(_Widget):  # type: ignore[dead-code]
         pass
 
     class DirectCheckButton(_Widget):  # type: ignore[dead-code]
         def setIndicatorValue(self, value: bool, *_args: object, **_kwargs: object) -> None:
             self.options["indicatorValue"] = value
+
+    class DirectFrame(_Widget):  # type: ignore[dead-code]
+        pass
+
+    class DirectLabel(_Widget):  # type: ignore[dead-code]
+        pass
 
     class DirectSlider(_Widget):  # type: ignore[dead-code]
         def command(self) -> None:  # pragma: no cover - optional callback
@@ -41,15 +59,28 @@ except Exception:  # pragma: no cover - fallback for headless tests
     class ShowBase:  # type: ignore[dead-code]
         pass
 
-from autofighter.gui import TEXT_COLOR
+    class CardMaker:  # type: ignore[dead-code]
+        def setFrame(self, *_args: object) -> None:
+            pass
+
+        def generate(self) -> object:
+            return object()
+
+    class TextureStage:  # type: ignore[dead-code]
+        @staticmethod
+        def getDefault() -> object:
+            return object()
+
 from autofighter.gui import FRAME_COLOR
 from autofighter.gui import SLIDER_SCALE
+from autofighter.gui import TEXT_COLOR
 from autofighter.gui import WIDGET_SCALE
 from autofighter.gui import set_widget_pos
-from autofighter.save import load_run
 from autofighter.save import load_player
+from autofighter.save import load_run
 from autofighter.audio import get_audio
 from autofighter.scene import Scene
+from autofighter.assets import AssetManager
 
 
 ISSUE_URL = (
@@ -58,37 +89,100 @@ ISSUE_URL = (
 )
 
 
+ASSETS = AssetManager()
+
+
+def add_tooltip(widget: DirectFrame | DirectButton | DirectSlider | DirectCheckButton, text: str) -> None:
+    try:
+        tooltip = DirectLabel(
+            text=text,
+            text_fg=TEXT_COLOR,
+            frameColor=FRAME_COLOR,
+            scale=WIDGET_SCALE,
+            parent=widget,
+            pos=(0, 0, -0.2),
+        )
+        tooltip.hide()
+        widget.bind(DGG.ENTER, lambda *_: tooltip.show())
+        widget.bind(DGG.EXIT, lambda *_: tooltip.hide())
+    except Exception:  # pragma: no cover - headless tests
+        pass
+
+
 class MainMenu(Scene):
     def __init__(self, app: ShowBase) -> None:
         self.app = app
         self.buttons: list[DirectButton] = []
         self.index = 0
+        self.bg = None
 
-    BUTTON_SPACING = 0.25
+    BUTTON_SPACING_X = 0.6
+    BUTTON_SPACING_Y = 0.4
 
     def setup(self) -> None:
-        labels = [
-            ("New Run", self.new_run),
-            ("Load Run", self.load_run),
-            ("Edit Player", self.edit_player),
-            ("Options", self.open_options),
-            ("Give Feedback", self.give_feedback),
-            ("Quit", self.app.userExit),
+        if hasattr(self.app, "disableMouse"):
+            try:
+                self.app.disableMouse()
+            except Exception:  # pragma: no cover
+                pass
+        if hasattr(self.app, "render2d") and hasattr(self.app, "taskMgr"):
+            try:
+                tex = ASSETS.load("textures", "icon_refresh_cw")  # dummy texture for bg
+                cm = CardMaker("bg")
+                cm.setFrame(-1, 1, -1, 1)
+                self.bg = self.app.render2d.attachNewNode(cm.generate())
+                self.bg.setTexture(tex)
+                self.bg.setBin("background", 0)
+                self.bg.setDepthWrite(False)
+                self.bg.setDepthTest(False)
+                self.bg_offset = 0.0
+
+                def _animate_bg(task):
+                    self.bg_offset += 0.0005
+                    ts = TextureStage.getDefault()
+                    self.bg.setTexOffset(ts, self.bg_offset, self.bg_offset)
+                    r = 0.5 + 0.5 * math.sin(self.bg_offset)
+                    g = 0.5 + 0.5 * math.sin(self.bg_offset + 2)
+                    b = 0.5 + 0.5 * math.sin(self.bg_offset + 4)
+                    self.bg.setColorScale(r, g, b, 1)
+                    return task.cont
+
+                self.app.taskMgr.add(_animate_bg, "main-menu-bg")
+            except Exception:  # pragma: no cover - skip if Panda3D missing
+                self.bg = None
+        buttons = [
+            ("New Run", "icon_play", self.new_run),
+            ("Load Run", "icon_folder_open", self.load_run),
+            ("Edit Player", "icon_user", self.edit_player),
+            ("Options", "icon_settings", self.open_options),
+            ("Give Feedback", "icon_message_square", self.give_feedback),
+            ("Quit", "icon_power", self.app.userExit),
         ]
-        top = self.BUTTON_SPACING * (len(labels) - 1) / 2
-        for i, (text, cmd) in enumerate(labels):
+        cols = 2
+        for i, (label, icon_name, cmd) in enumerate(buttons):
+            img = ASSETS.load("textures", icon_name)
             button = DirectButton(
-                text=text,
+                text=label,
                 command=cmd,
-                scale=WIDGET_SCALE,
+                scale=WIDGET_SCALE * 1.5,
                 frameColor=FRAME_COLOR,
                 text_fg=TEXT_COLOR,
+                image=img,
+                image_scale=WIDGET_SCALE,
+                text_pos=(0, -0.12),
             )
-            set_widget_pos(button, (0, 0, top - i * self.BUTTON_SPACING))
+            col = i % cols
+            row = i // cols
+            x = (col - (cols - 1) / 2) * self.BUTTON_SPACING_X
+            y = ((len(buttons) // cols - 1) / 2 - row) * self.BUTTON_SPACING_Y
+            set_widget_pos(button, (x, 0, y))
+            add_tooltip(button, label)
             self.buttons.append(button)
         self.highlight()
         self.app.accept("arrow_up", self.prev)
         self.app.accept("arrow_down", self.next)
+        self.app.accept("arrow_left", self.left)
+        self.app.accept("arrow_right", self.right)
         self.app.accept("enter", self.activate)
 
     def teardown(self) -> None:
@@ -97,20 +191,43 @@ class MainMenu(Scene):
         self.buttons.clear()
         self.app.ignore("arrow_up")
         self.app.ignore("arrow_down")
+        self.app.ignore("arrow_left")
+        self.app.ignore("arrow_right")
         self.app.ignore("enter")
+        if self.bg is not None and hasattr(self.bg, "removeNode"):
+            self.bg.removeNode()
+        if hasattr(self.app, "taskMgr"):
+            try:
+                self.app.taskMgr.remove("main-menu-bg")
+            except Exception:  # pragma: no cover
+                pass
 
     def highlight(self) -> None:
         for i, button in enumerate(self.buttons):
             color = (0.2, 0.2, 0.2, 0.9) if i == self.index else FRAME_COLOR
             button["frameColor"] = color
 
-    def prev(self) -> None:
-        self.index = (self.index - 1) % len(self.buttons)
+    def move(self, dx: int, dy: int) -> None:
+        cols = 2
+        rows = 3
+        row = self.index // cols
+        col = self.index % cols
+        row = (row + dy) % rows
+        col = (col + dx) % cols
+        self.index = row * cols + col
         self.highlight()
 
+    def prev(self) -> None:
+        self.move(0, -1)
+
     def next(self) -> None:
-        self.index = (self.index + 1) % len(self.buttons)
-        self.highlight()
+        self.move(0, 1)
+
+    def left(self) -> None:
+        self.move(-1, 0)
+
+    def right(self) -> None:
+        self.move(1, 0)
 
     def activate(self) -> None:
         self.buttons[self.index]["command"]()
@@ -245,6 +362,23 @@ class OptionsMenu(Scene):
             frameColor=FRAME_COLOR,
             command=self.update_sfx,
         )
+        DirectFrame(
+            parent=self.sfx_slider,
+            image=ASSETS.load("textures", "icon_volume_2"),
+            frameColor=(0, 0, 0, 0),
+            scale=WIDGET_SCALE,
+            pos=(-0.7, 0, 0),
+        )
+        DirectLabel(
+            parent=self.sfx_slider,
+            text="SFX Volume",
+            text_fg=TEXT_COLOR,
+            frameColor=(0, 0, 0, 0),
+            scale=WIDGET_SCALE,
+            pos=(-0.3, 0, 0),
+        )
+        add_tooltip(self.sfx_slider, "Adjust sound effect volume.")
+
         self.music_slider = DirectSlider(
             range=(0, 1),
             value=self.music_volume,
@@ -252,6 +386,23 @@ class OptionsMenu(Scene):
             frameColor=FRAME_COLOR,
             command=self.update_music,
         )
+        DirectFrame(
+            parent=self.music_slider,
+            image=ASSETS.load("textures", "icon_music"),
+            frameColor=(0, 0, 0, 0),
+            scale=WIDGET_SCALE,
+            pos=(-0.7, 0, 0),
+        )
+        DirectLabel(
+            parent=self.music_slider,
+            text="Music Volume",
+            text_fg=TEXT_COLOR,
+            frameColor=(0, 0, 0, 0),
+            scale=WIDGET_SCALE,
+            pos=(-0.3, 0, 0),
+        )
+        add_tooltip(self.music_slider, "Adjust background music volume.")
+
         self.refresh_slider = DirectSlider(
             range=(1, 10),
             value=self.stat_refresh_rate,
@@ -259,6 +410,23 @@ class OptionsMenu(Scene):
             frameColor=FRAME_COLOR,
             command=self.update_refresh,
         )
+        DirectFrame(
+            parent=self.refresh_slider,
+            image=ASSETS.load("textures", "icon_refresh_cw"),
+            frameColor=(0, 0, 0, 0),
+            scale=WIDGET_SCALE,
+            pos=(-0.7, 0, 0),
+        )
+        DirectLabel(
+            parent=self.refresh_slider,
+            text="Refresh Rate",
+            text_fg=TEXT_COLOR,
+            frameColor=(0, 0, 0, 0),
+            scale=WIDGET_SCALE,
+            pos=(-0.3, 0, 0),
+        )
+        add_tooltip(self.refresh_slider, "Update stats every N frames.")
+
         self._pause_button = DirectCheckButton(
             text="Pause on Stat Screen",
             frameColor=FRAME_COLOR,
@@ -267,6 +435,15 @@ class OptionsMenu(Scene):
             command=self.toggle_pause,
             scale=WIDGET_SCALE,
         )
+        DirectFrame(
+            parent=self._pause_button,
+            image=ASSETS.load("textures", "icon_pause"),
+            frameColor=(0, 0, 0, 0),
+            scale=WIDGET_SCALE,
+            pos=(-1.2, 0, 0),
+        )
+        add_tooltip(self._pause_button, "Stop gameplay while viewing stats.")
+
         self._back_button = DirectButton(
             text="Back",
             frameColor=FRAME_COLOR,
@@ -274,6 +451,7 @@ class OptionsMenu(Scene):
             command=self.back,
             scale=WIDGET_SCALE,
         )
+        add_tooltip(self._back_button, "Return to main menu.")
         self.widgets = [
             self.sfx_slider,
             self.music_slider,
