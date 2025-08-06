@@ -72,9 +72,9 @@ except Exception:  # pragma: no cover - fallback for headless tests
             return object()
 
 from autofighter.gui import FRAME_COLOR
-from autofighter.gui import SLIDER_SCALE
 from autofighter.gui import TEXT_COLOR
-from autofighter.gui import WIDGET_SCALE
+from autofighter.gui import get_slider_scale
+from autofighter.gui import get_widget_scale
 from autofighter.gui import set_widget_pos
 from autofighter.save import load_run
 from autofighter.assets import get_texture
@@ -96,7 +96,7 @@ def add_tooltip(widget: DirectFrame | DirectButton | DirectSlider | DirectCheckB
             text=text,
             text_fg=TEXT_COLOR,
             frameColor=FRAME_COLOR,
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             parent=widget,
             pos=(0, 0, -0.2),
         )
@@ -162,11 +162,11 @@ class MainMenu(Scene):
             button = DirectButton(
                 text=label,
                 command=cmd,
-                scale=WIDGET_SCALE * 1.5,
+                scale=get_widget_scale() * 1.5,
                 frameColor=FRAME_COLOR,
                 text_fg=TEXT_COLOR,
                 image=img,
-                image_scale=WIDGET_SCALE,
+                image_scale=get_widget_scale(),
                 text_pos=(0, -0.12),
             )
             col = i % cols
@@ -289,7 +289,7 @@ class LoadRunMenu(Scene):
             button = DirectButton(
                 text=text,
                 command=cmd,
-                scale=WIDGET_SCALE,
+                scale=get_widget_scale(),
                 frameColor=FRAME_COLOR,
                 text_fg=TEXT_COLOR,
             )
@@ -356,7 +356,7 @@ class OptionsMenu(Scene):
         self.sfx_slider = DirectSlider(
             range=(0, 1),
             value=self.sfx_volume,
-            scale=SLIDER_SCALE,
+            scale=get_slider_scale(),
             frameColor=FRAME_COLOR,
             command=self.update_sfx,
         )
@@ -364,7 +364,7 @@ class OptionsMenu(Scene):
             parent=self.sfx_slider,
             image=get_texture("icon_volume_2"),
             frameColor=(0, 0, 0, 0),
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             pos=(-0.7, 0, 0),
         )
         DirectLabel(
@@ -372,7 +372,7 @@ class OptionsMenu(Scene):
             text="SFX Volume",
             text_fg=TEXT_COLOR,
             frameColor=(0, 0, 0, 0),
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             pos=(-0.3, 0, 0),
         )
         add_tooltip(self.sfx_slider, "Adjust sound effect volume.")
@@ -380,7 +380,7 @@ class OptionsMenu(Scene):
         self.music_slider = DirectSlider(
             range=(0, 1),
             value=self.music_volume,
-            scale=SLIDER_SCALE,
+            scale=get_slider_scale(),
             frameColor=FRAME_COLOR,
             command=self.update_music,
         )
@@ -388,7 +388,7 @@ class OptionsMenu(Scene):
             parent=self.music_slider,
             image=get_texture("icon_music"),
             frameColor=(0, 0, 0, 0),
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             pos=(-0.7, 0, 0),
         )
         DirectLabel(
@@ -396,7 +396,7 @@ class OptionsMenu(Scene):
             text="Music Volume",
             text_fg=TEXT_COLOR,
             frameColor=(0, 0, 0, 0),
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             pos=(-0.3, 0, 0),
         )
         add_tooltip(self.music_slider, "Adjust background music volume.")
@@ -404,7 +404,7 @@ class OptionsMenu(Scene):
         self.refresh_slider = DirectSlider(
             range=(1, 10),
             value=self.stat_refresh_rate,
-            scale=SLIDER_SCALE,
+            scale=get_slider_scale(),
             frameColor=FRAME_COLOR,
             command=self.update_refresh,
         )
@@ -412,7 +412,7 @@ class OptionsMenu(Scene):
             parent=self.refresh_slider,
             image=get_texture("icon_refresh_cw"),
             frameColor=(0, 0, 0, 0),
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             pos=(-0.7, 0, 0),
         )
         DirectLabel(
@@ -420,7 +420,7 @@ class OptionsMenu(Scene):
             text="Refresh Rate",
             text_fg=TEXT_COLOR,
             frameColor=(0, 0, 0, 0),
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             pos=(-0.3, 0, 0),
         )
         add_tooltip(self.refresh_slider, "Update stats every N frames.")
@@ -431,13 +431,13 @@ class OptionsMenu(Scene):
             text_fg=TEXT_COLOR,
             indicatorValue=self.pause_on_stats,
             command=self.toggle_pause,
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
         )
         DirectFrame(
             parent=self._pause_button,
             image=get_texture("icon_pause"),
             frameColor=(0, 0, 0, 0),
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
             pos=(-1.2, 0, 0),
         )
         add_tooltip(self._pause_button, "Stop gameplay while viewing stats.")
@@ -447,7 +447,7 @@ class OptionsMenu(Scene):
             frameColor=FRAME_COLOR,
             text_fg=TEXT_COLOR,
             command=self.back,
-            scale=WIDGET_SCALE,
+            scale=get_widget_scale(),
         )
         add_tooltip(self._back_button, "Return to main menu.")
         self.widgets = [
