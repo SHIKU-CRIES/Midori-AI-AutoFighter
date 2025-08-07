@@ -154,17 +154,23 @@ class MainMenu(Scene):
             self.bg = None
 
     def setup_top_bar(self) -> None:
-        """Create a frosted-glass top bar with player avatar, name, and currencies."""
+        """Create a frosted-glass top bar with player avatar, name, and currencies, parented to aspect2d."""
         try:
+            base = globals().get("base", None)
+            parent_node = getattr(base, "aspect2d", None) if base is not None else None
+            if parent_node is None:
+                parent_node = getattr(self.app, "aspect2d", None)
+            if parent_node is None:
+                parent_node = getattr(self.app, "render2d", None)
             # Frosted-glass effect with higher alpha and subtle tint
             frosted_color = (0.1, 0.1, 0.15, 0.8)
             self.top_bar = DirectFrame(
                 frameColor=frosted_color,
                 frameSize=(-1.0, 1.0, -0.08, 0.08),
                 scale=get_widget_scale(),
+                parent=parent_node,
             )
             set_widget_pos(self.top_bar, (0, 0, 0.92))
-            
             # Player avatar with rounded frame effect - fixed positioning
             try:
                 photo = get_player_photo("becca")
@@ -177,31 +183,28 @@ class MainMenu(Scene):
                 scale=get_widget_scale(),
                 parent=self.top_bar,
             )
-            set_widget_pos(self.avatar, (-0.8, 0, 0))  # Moved right from -0.9
-            
+            set_widget_pos(self.avatar, (-0.8, 0, 0))
             # Player name with reduced text scaling
             DirectLabel(
                 text="Player",
                 text_fg=(1, 1, 1, 1),
-                text_font=None,  # Use default modern font
+                text_font=None,
                 frameColor=(0, 0, 0, 0),
                 parent=self.top_bar,
-                pos=(-0.65, 0, 0),  # Adjusted to follow avatar
-                scale=0.9,  # Reduced from 1.2
-                text_scale=0.8,  # Additional text scaling
+                pos=(-0.65, 0, 0),
+                scale=0.9,
+                text_scale=0.8,
             )
-            
             # Currencies with accent highlights - reduced scaling
             DirectLabel(
                 text="Gold: 0 | Tickets: 0",
-                text_fg=(0.9, 0.9, 1, 1),  # Slight blue tint for currencies
+                text_fg=(0.9, 0.9, 1, 1),
                 frameColor=(0, 0, 0, 0),
                 parent=self.top_bar,
-                pos=(0.3, 0, 0),  # Adjusted position
-                scale=0.8,  # Reduced from 1.0
+                pos=(0.3, 0, 0),
+                scale=0.8,
                 text_scale=0.8,
             )
-            
             # Corner quick-access icons - reduced size
             for icon, pos in [
                 ("icon_message_square", (-0.95, 0, 0.85)),
@@ -209,10 +212,11 @@ class MainMenu(Scene):
             ]:
                 img = get_texture(icon)
                 btn = DirectButton(
-                    image=img, 
+                    image=img,
                     frameColor=(0.2, 0.2, 0.25, 0.7),
-                    frameSize=(-0.025, 0.025, -0.025, 0.025),  # Smaller
-                    scale=get_widget_scale() * 0.8,  # Reduced scale
+                    frameSize=(-0.025, 0.025, -0.025, 0.025),
+                    scale=get_widget_scale() * 0.8,
+                    parent=self.top_bar,
                 )
                 set_widget_pos(btn, pos)
                 self.corner_buttons.append(btn)
@@ -223,35 +227,49 @@ class MainMenu(Scene):
             self.corner_buttons = []
 
     def setup_banner(self) -> None:
-        """Create a central banner for events and announcements."""
+        """Create a central banner for events and announcements, parented to aspect2d."""
         try:
+            from direct.showbase.ShowBase import base
+            parent_node = getattr(base, "aspect2d", None)
+            if parent_node is None:
+                parent_node = getattr(self.app, "aspect2d", None)
+            if parent_node is None:
+                parent_node = getattr(self.app, "render2d", None)
             banner_tex = get_texture("menu_bg")
         except Exception:
             banner_tex = get_texture("white")
-        
+            parent_node = None
         try:
             self.banner = DirectFrame(
                 frameColor=(0.05, 0.05, 0.1, 0.6),
-                frameSize=(-0.5, 0.5, -0.1, 0.1),  # Smaller banner
+                frameSize=(-0.5, 0.5, -0.1, 0.1),
                 scale=get_widget_scale(),
+                parent=parent_node,
             )
             set_widget_pos(self.banner, (0, 0, 0.3))
-            
-            # Banner content with reduced text scaling
             DirectLabel(
                 text="Welcome to Midori AI AutoFighter",
                 text_fg=(1, 1, 1, 1),
                 frameColor=(0, 0, 0, 0),
                 parent=self.banner,
                 pos=(0, 0, 0),
-                scale=1.0,  # Reduced from 1.5
-                text_scale=0.7,  # Additional text scaling reduction
+                scale=1.0,
+                text_scale=0.7,
             )
         except Exception:  # pragma: no cover - headless tests
             self.banner = None
 
     def setup_button_grid(self) -> None:
-        """Create a 2x3 high-contrast grid of large Lucide icons anchored near the bottom."""
+        """Create a 2x3 high-contrast grid of large Lucide icons anchored near the bottom, parented to aspect2d."""
+        try:
+            from direct.showbase.ShowBase import base
+            parent_node = getattr(base, "aspect2d", None)
+            if parent_node is None:
+                parent_node = getattr(self.app, "aspect2d", None)
+            if parent_node is None:
+                parent_node = getattr(self.app, "render2d", None)
+        except Exception:
+            parent_node = None
         buttons = [
             ("New Run", "icon_play", self.new_run),
             ("Load Run", "icon_folder_open", self.load_run),
@@ -260,36 +278,29 @@ class MainMenu(Scene):
             ("Give Feedback", "icon_message_square", self.give_feedback),
             ("Quit", "icon_power", self.app.userExit),
         ]
-        
-        # Grid configuration for appropriately sized layout
         cols = 2
         rows = 3
-        button_scale = get_widget_scale() * 1.2  # Reduced from 2.0 to fix oversized text
-        icon_scale = get_widget_scale() * 0.8  # Reduced from 1.2
-        
-        # Anchor near bottom edge with generous spacing
-        x_positions = [-0.3, 0.3]  # Centered columns
-        y_base = -0.6  # Higher up from bottom
-        y_spacing = 0.2  # Generous vertical spacing
-        
+        button_scale = get_widget_scale() * 1.2
+        icon_scale = get_widget_scale() * 0.8
+        x_positions = [-0.3, 0.3]
+        y_base = -0.6
+        y_spacing = 0.2
         for i, (label, icon_name, cmd) in enumerate(buttons):
             img = get_texture(icon_name)
-            
-            # High-contrast rounded pill buttons with proper sizing
             button = DirectButton(
                 text=label,
                 command=cmd,
                 scale=button_scale,
-                frameColor=(0.15, 0.15, 0.2, 0.9),  # Dark with high contrast
-                text_fg=(1, 1, 1, 1),  # Pure white text
+                frameColor=(0.15, 0.15, 0.2, 0.9),
+                text_fg=(1, 1, 1, 1),
                 image=img,
                 image_scale=icon_scale,
-                text_pos=(0, -0.08),  # Position text below icon
-                frameSize=(-0.15, 0.15, -0.08, 0.08),  # Adjusted for proper sizing
-                text_font=None,  # Modern sans-serif
-                text_scale=0.8,  # Add explicit text scaling to reduce size
+                text_pos=(0, -0.08),
+                frameSize=(-0.15, 0.15, -0.08, 0.08),
+                text_font=None,
+                text_scale=0.8,
+                parent=parent_node,
             )
-            
             col = i % cols
             row = i // cols
             x = x_positions[col]
