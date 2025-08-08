@@ -201,33 +201,47 @@ class MainMenu(Scene):
                 parent=parent_node,
                 scale=1.0,
             )
-            # Top three circular buttons, horizontally aligned at top
+            # Three circular buttons: stacked VERTICALLY on left side with labels below each
             button_radius = 0.09
-            button_y = 0.92  # near top of left bar
-            button_spacing = 0.22  # horizontal spacing
+            button_x = 0.0  # Centered in left bar
+            start_y = 0.85  # Top position
+            button_spacing = 0.25  # Vertical spacing between buttons
             left_buttons = [
                 ("Home", self.home_button),
                 ("Pulls", self.pulls_button),
                 ("Crafting", self.crafting_button),
             ]
             for i, (label, cmd) in enumerate(left_buttons):
-                btn = DirectButton(
+                y = start_y - i * button_spacing  # Stack vertically downward
+                # Draw the visible red circle (DirectFrame)
+                circle = DirectFrame(
                     frameColor=(1, 0, 0, 1),
                     frameSize=(-button_radius, button_radius, -button_radius, button_radius),
+                    pos=(button_x, 0, y),
                     relief=None,
-                    pos=(-0.11 + i * button_spacing, 0, button_y),
+                    parent=left_bar,
+                )
+                # Overlay an invisible DirectButton for interaction
+                btn = DirectButton(
+                    frameColor=(1, 1, 1, 0),
+                    frameSize=(-button_radius, button_radius, -button_radius, button_radius),
+                    relief=None,
+                    pos=(button_x, 0, y),
                     scale=1.0,
                     parent=left_bar,
                     command=cmd,
-                    text="",  # No text on button itself
+                    text="",
+                    rolloverSound=None,
+                    clickSound=None,
                 )
-                # Add label below each button
+                # Add label directly below each button
                 DirectLabel(
-                    text=label,
+                    text=f"{label} Button",
                     text_fg=(1, 1, 1, 1),
                     frameColor=(0, 0, 0, 0),
-                    pos=(-0.11 + i * button_spacing, 0, button_y - button_radius - 0.04),
-                    scale=0.045,
+                    pos=(button_x, 0, y - button_radius - 0.08),
+                    scale=0.06,
+                    text_scale=1.0,
                     parent=left_bar,
                 )
                 add_tooltip(btn, f"{label} Button")
