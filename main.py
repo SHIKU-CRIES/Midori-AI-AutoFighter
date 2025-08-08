@@ -62,10 +62,7 @@ class AutoFighterApp(ShowBase):
 
         self.setBackgroundColor(0, 0, 0, 1)
 
-        self._placeholder = self.loader.loadModel("models/box")
-        self._placeholder.reparentTo(self.render)
-        self._placeholder.setPos(0, 10, 0)
-        logger.info("Placeholder model attached")
+        # Removed placeholder model so only the main menu UI is visible
 
         self.task_mgr.add(self.update, "update")
 

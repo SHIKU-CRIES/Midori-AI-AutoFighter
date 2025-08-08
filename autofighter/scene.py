@@ -66,11 +66,14 @@ class SceneManager:
                 self.current = None
             return True
 
+        print(f"SceneManager.switch_to: calling setup on {scene}")
         try:
             scene.setup()
-        except Exception:
+        except Exception as e:
+            print(f"Exception in scene.setup: {e}")
             logger.exception("Error setting up scene %s", scene)
             return False
+        print(f"SceneManager.switch_to: finished setup on {scene}")
         try:
             scene.transition_in()
         except Exception:
