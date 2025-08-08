@@ -19,7 +19,6 @@ This document summarizes common development practices for all services in this r
 - Use [`uv`](https://github.com/astral-sh/uv) for Python environments and running code. Avoid `python` or `pip` directly.
 - Use [`bun`](https://bun.sh/) for Node/React tooling instead of `npm` or `yarn`.
 - Split large modules into smaller ones when practical and keep documentation in `*/.codex/implementation` in sync with code.
-- Commit frequently with messages formatted `[TYPE] Title`; pull requests use the same format and include a short summary.
 - If a build retry occurs, the workflow may produce a commit titled `"Applying previous commit."` when reapplying a patch.
   This is normal and does not replace the need for your own clear `[TYPE]` commit messages.
 - Run available tests (e.g., `pytest`) before committing.
