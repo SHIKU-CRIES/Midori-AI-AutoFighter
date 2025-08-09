@@ -2,7 +2,9 @@
 
 ## Player Roster
 All legacy characters from the Pygame version have been ported as plugins.
-Each entry notes the character's `CharacterType`.
+Each entry notes the character's `CharacterType`. Players currently share
+placeholder stats of 1000 HP, 100 attack, 50 defense, 5% crit rate, 2× crit
+damage, 1% effect hit, 100 mitigation, 0 dodge, and 1 for remaining values.
 
 - **Ally** (B) – applies `ally_passive` on load to grant ally-specific bonuses.
 - **Becca** (B) – builds high attack but takes more damage from lower defense.

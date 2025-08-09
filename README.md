@@ -111,7 +111,9 @@ New runs begin by selecting up to four owned allies in a party picker before the
 ## Playable Characters
 
 The roster in `plugins/players/` currently includes and each entry lists its
-`CharacterType`:
+`CharacterType`. All players start with 1000 HP, 100 attack, 50 defense, a 5%
+crit rate, 2× crit damage, 1% effect hit rate, 100 mitigation, 0 dodge, and 1
+in all other stats:
 
 - Ally (B)
 - Becca (B)

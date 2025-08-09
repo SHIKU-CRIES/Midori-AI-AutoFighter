@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
 from game.actors import CharacterType
+from plugins.players._base import PlayerBase
 
 
 @dataclass
-class Carly:
-    plugin_type = "player"
+class Carly(PlayerBase):
     id = "carly"
     name = "Carly"
     char_type = CharacterType.B

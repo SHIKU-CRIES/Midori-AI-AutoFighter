@@ -36,7 +36,19 @@ class RunMap(Scene):
     def enter_first_room(self) -> None:
         from autofighter.battle_room import BattleRoom
 
-        battle = BattleRoom(player=self.player, party=self.party)
+        foe_cls = self.app.plugin_loader.get_plugins("player")["luna"]
+        foe = foe_cls()
+        battle = BattleRoom(
+            self.app,
+            return_scene_factory=lambda: RunMap(
+                self.app, self.player, self.party, self.seed_store_path
+            ),
+            player=self.player,
+            party=self.party,
+        )
+        battle.base_foe = foe
+        battle.foe = foe
+        battle.foes = [foe]
         self.app.scene_manager.switch_to(battle)
 
     def teardown(self) -> None:

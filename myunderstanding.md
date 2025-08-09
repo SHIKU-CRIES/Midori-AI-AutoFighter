@@ -1,8 +1,8 @@
 # Gameplay Overview
 
-When I launch the game I'm greeted by a dark, glassy main menu filled with large icons. Curious, I press **New Run** and a roster window slides in so I can browse the characters I've unlocked. I pick up to four allies, feel a little thrill, and confirm my party.
+When I launch the game I'm greeted by a dark, glassy main menu with a slim top bar showing my small avatar, name, and pull count. A frosted panel hugs the upper-left corner with a horizontal row of **Avatar**, **Pulls**, and **Crafting** buttons, each icon perched above its label. The right side pushes a vertical stack of **Run**, **Edit Player**, **Edit Team**, **Settings**, and **Quit** further to the edge so their labels sit beside their icons. Curious, I press **New Run** and a roster window slides in so I can browse the characters I've unlocked. I pick up to four allies, feel a little thrill, and confirm my party.
 
-A stylized floor map fades in, showing branching paths of room icons. Hovering over each node tells me whether it's a battle, shop, or rest room, so I plan a route and hit Enter to move.
+A stylized floor map fades in, showing branching paths of room icons. Hovering over each node tells me whether it's a battle, shop, or rest room, so I plan a route and hit Enter to move. Entering the first node starts a placeholder fight against Luna loaded from the plugin system before returning to the map.
 
 In battle rooms my team automatically trades blows with the enemy while damage numbers and status icons pop up. Shop rooms display items with prices and star ratings, letting me spend gold or reroll the stock. Rest rooms offer a calm break where I can heal or trade items before heading back to the map.
 

@@ -11,14 +11,14 @@ Reminder: list only task titles and file names—open each task file for details
 
 ## Tasks
 ### To Do
-- [ ] [Run start and map display](dc3d4f2e-run-start-map-display.md) (`dc3d4f2e`)
 - [ ] [Main menu rebuild](0d21008f-main-menu-rebuild.md) (`0d21008f`)
-- [ ] [Placeholder room](344b9c4a-placeholder-room.md) (`344b9c4a`)
+- [ ] [Run start and map display](dc3d4f2e-run-start-map-display.md) (`dc3d4f2e`)
 - [ ] [Party picker](f9c45e2e-party-picker.md) (`f9c45e2e`)
 
 ### Completed
 - [x] [Purge legacy GUI](done/97c19289-purge-old-gui.md) (`purge-old-gui`)
 - [x] [Character types](done/f20caf99-character-types.md) (`f20caf99`)
+- [x] [Placeholder room](done/344b9c4a-placeholder-room.md) (`344b9c4a`)
 
 ## Context
 Derived from the Panda3D game plan. Focus on cleaning up the main menu before expanding gameplay.

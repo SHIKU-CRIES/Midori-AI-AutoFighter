@@ -27,7 +27,7 @@ class PluginLoader:
             return
         failures: list[tuple[Path, Exception]] = []
         for path in base.rglob("*.py"):
-            if path.name == "__init__.py":
+            if path.name == "__init__.py" or path.name.startswith("_"):
                 continue
             try:
                 module = self._import_module(path)
