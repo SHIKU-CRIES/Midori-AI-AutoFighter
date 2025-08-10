@@ -62,3 +62,10 @@ def test_logs_import_errors(tmp_path, caplog) -> None:
     assert "bad.py" in caplog.text
     assert "RuntimeError: boom" in str(exc_info.value)
 
+
+def test_loader_skips_imported_base_classes() -> None:
+    loader = PluginLoader()
+    root = Path(__file__).resolve().parents[1] / "plugins" / "players"
+    loader.discover(str(root))
+    assert "PlayerBase" not in loader.get_plugins("player")
+

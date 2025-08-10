@@ -11,8 +11,8 @@ Reminder: list only task titles and file names—open each task file for details
 
 ## Tasks
 ### To Do
-- [ ] [Main menu rebuild](0d21008f-main-menu-rebuild.md) (`0d21008f`)
 - [ ] [Run start and map display](dc3d4f2e-run-start-map-display.md) (`dc3d4f2e`)
+- [ ] [Main menu rebuild](0d21008f-main-menu-rebuild.md) (`0d21008f`)
 - [ ] [Party picker](f9c45e2e-party-picker.md) (`f9c45e2e`)
 
 ### Completed

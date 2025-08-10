@@ -62,7 +62,7 @@ class AutoFighterApp(ShowBase):
 
         self.setBackgroundColor(0, 0, 0, 1)
 
-        self.main_menu = MainMenu(self.aspect2d)
+        self.main_menu = MainMenu(self.aspect2d, self)
 
         self.task_mgr.add(self.update, "update")
 

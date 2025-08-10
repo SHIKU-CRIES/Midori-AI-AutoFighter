@@ -1,6 +1,9 @@
 [models]
 placeholder = { path = "assets/models/.gitkeep", sha256 = "2f73349cfc4630255319c6c8dfc1b46a8996ace9d14d8e07563b165915918ec2" }
 cube = { path = "assets/models/cube.bam", sha256 = "487bce4ac7bf045a141fdf153bd207d6e2bda70562bd8f921a7ed6dd17f57795" }
+body_a = { path = "assets/models/body_a.egg", sha256 = "1c49ef900c6ff7f77861aa509ef456d7a2cc753159f645085c65771932537b28" }
+body_b = { path = "assets/models/body_b.egg", sha256 = "e47cedb7dccf52d73097d01007b987cbf8f1820879ca415e1a1990dce61c8dd9" }
+body_c = { path = "assets/models/body_c.egg", sha256 = "9404a72aa631422dcd4dd73977bbd9bf1d10a1c0cdef2125120d338767be7d3e" }
 
 [textures]
 placeholder = { path = "assets/textures/.gitkeep", sha256 = "2f73349cfc4630255319c6c8dfc1b46a8996ace9d14d8e07563b165915918ec2" }
@@ -15,6 +18,8 @@ icon_volume_2 = { path = "assets/textures/icon_volume_2.png", sha256 = "c7867724
 icon_music = { path = "assets/textures/icon_music.png", sha256 = "b558b7f264ac9db5a15bf7b2e0dce7737e5412ae2a7c74612a802caf4e8dacb8" }
 icon_pause = { path = "assets/textures/icon_pause.png", sha256 = "48e3e5c45bfa4b0324e0890072dd147cde4248b31d2bf81f1637cf686686e59d" }
 icon_refresh_cw = { path = "assets/textures/icon_refresh_cw.png", sha256 = "6a43ec4fffe97e606dec342c90a45758edeaf5490736f02aa35ef995f959d309" }
+roster_fade_top = { path = "assets/textures/roster_fade_top.png", sha256 = "c7ae4c1a60d41f56e95373b146a68d1f6a5161e28bc6347675d6c85315a07be5" }
+roster_fade_bottom = { path = "assets/textures/roster_fade_bottom.png", sha256 = "2e56332bf39657799c083140d6d98b8bd6dcd842d8bdcc785508aac0572a9ce2" }
 menu_bg = { path = "assets/textures/backgrounds/background_01.png", sha256 = "3923df12c9d72dbe132a45e7d033b0f76e312ea09058a4eb4c0df4d31ddfcaeb" }
 
 [audio]

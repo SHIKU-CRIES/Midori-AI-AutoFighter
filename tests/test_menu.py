@@ -15,6 +15,13 @@ from panda3d.core import loadPrcFileData
 
 from autofighter.saves import SaveManager
 from game.ui.menu import MainMenu
+import game.ui.party_picker as pp
+from plugins.plugin_loader import PluginLoader
+
+
+class AppStub:
+    def __init__(self) -> None:
+        self.scene_manager = type("SM", (), {"switch_to": lambda self, scene: setattr(self, "scene", scene)})()
 
 
 def _setup_temp_assets(tmp_path: Path) -> tuple[Path, Path]:
@@ -31,7 +38,12 @@ def test_main_menu_structure(tmp_path: Path) -> None:
     base = ShowBase()
     try:
         db_path, avatars_dir = _setup_temp_assets(tmp_path)
-        menu = MainMenu(base.aspect2d, db_path=db_path, avatars_dir=avatars_dir)
+        menu = MainMenu(
+            base.aspect2d,
+            AppStub(),
+            db_path=db_path,
+            avatars_dir=avatars_dir,
+        )
         assert len(menu.left_buttons) == 3
         assert len(menu.right_buttons) == 5
         assert menu.run_button["text"] == "Start Run"
@@ -74,11 +86,45 @@ def test_run_button_label_switch(tmp_path: Path) -> None:
         db_path, avatars_dir = _setup_temp_assets(tmp_path)
         menu = MainMenu(
             base.aspect2d,
+            AppStub(),
             has_run=True,
             db_path=db_path,
             avatars_dir=avatars_dir,
         )
         assert menu.run_button["text"] == "Load Run"
         assert menu.run_button["image"].endswith("icon_folder_open.png")
+    finally:
+        base.destroy()
+
+
+def test_main_menu_requires_app(tmp_path: Path) -> None:
+    loadPrcFileData("", "window-type none")
+    base = ShowBase()
+    try:
+        db_path, avatars_dir = _setup_temp_assets(tmp_path)
+        with pytest.raises(ValueError):
+            MainMenu(base.aspect2d, object(), db_path=db_path, avatars_dir=avatars_dir)
+    finally:
+        base.destroy()
+
+
+def test_edit_party_hides_menu(tmp_path: Path) -> None:
+    loadPrcFileData("", "window-type none")
+    base = ShowBase()
+    try:
+        db_path, avatars_dir = _setup_temp_assets(tmp_path)
+        app = AppStub()
+        app.plugin_loader = PluginLoader()
+        app.plugin_loader.discover("plugins/players")
+        menu = MainMenu(
+            base.aspect2d,
+            app,
+            db_path=db_path,
+            avatars_dir=avatars_dir,
+        )
+        app.main_menu = menu
+        menu.edit_party()
+        assert menu.root.isHidden()
+        assert isinstance(app.scene_manager.scene, pp.PartyPicker)
     finally:
         base.destroy()

@@ -1,0 +1,11 @@
+<CoordinateSystem> { Z-up }
+
+<Group> body_b {
+  <VertexPool> body_b {
+    <Vertex> 0 { -0.5 0 -0.75 }
+    <Vertex> 1 { 0.5 0 -0.75 }
+    <Vertex> 2 { 0.5 0 0.75 }
+    <Vertex> 3 { -0.5 0 0.75 }
+  }
+  <Polygon> { <Normal> {0 1 0} <VertexRef> {0 1 2 3 <Ref> {body_b}} }
+}

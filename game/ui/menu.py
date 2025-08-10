@@ -85,7 +85,7 @@ class TopLeftPanel:
         )
         self.avatar_button = DirectButton(
             parent=self.frame,
-            image="assets/textures/icon_user.png",
+            image="assets/textures/icon_diamond.png",
             scale=get_widget_scale(),
             frameColor=(1, 1, 1, 0),
             relief="flat",
@@ -127,12 +127,15 @@ class MainMenu:
     def __init__(
         self,
         parent: NodePath,
-        app: object | None = None,
+        app: object,
         *,
         has_run: bool = False,
         db_path: Path | str = DB_PATH,
         avatars_dir: Path | str = Path("assets/textures/players"),
     ) -> None:
+        if app is None or not hasattr(app, "scene_manager"):
+            raise ValueError("MainMenu requires app with scene_manager")
+
         self.app = app
         self.root = DirectFrame(
             parent=parent,
@@ -168,12 +171,12 @@ class MainMenu:
             frameColor=(1, 1, 1, buttons_bg_a),
             relief="flat",
             image_color=(1, 1, 1, 1),
-            command=self.load_run if has_run else self.start_run,
+            command=self.load_run if has_run else self.edit_party,
             **text_kwargs,
         )
         self.edit_player_button = DirectButton(
             parent=self.root,
-            image="assets/textures/icon_user.png",
+            image="assets/textures/icon_user_cog.png",
             scale=get_widget_scale(),
             frameColor=(1, 1, 1, buttons_bg_a),
             relief="flat",
@@ -183,7 +186,7 @@ class MainMenu:
         )
         self.edit_team_button = DirectButton(
             parent=self.root,
-            image="assets/textures/icon_user.png",
+            image="assets/textures/icon_users.png",
             scale=get_widget_scale(),
             frameColor=(1, 1, 1, buttons_bg_a),
             relief="flat",
@@ -249,7 +252,7 @@ class MainMenu:
         if self.app is None:  # pragma: no cover - safeguard
             return
 
-        run_map = RunMap(self.app, Stats(hp=1, max_hp=1), [], Path("used_seeds.json"))
+        run_map = RunMap(self.app, Stats(hp=1, max_hp=1), [], DB_PATH)
         self.app.scene_manager.switch_to(run_map)  # type: ignore
 
     def load_run(self) -> None:  # pragma: no cover - placeholders
@@ -259,13 +262,43 @@ class MainMenu:
         """Placeholder for editing the player."""
 
     def edit_party(self) -> None:  # pragma: no cover - placeholders
-        """Placeholder for editing the party."""
+        """Open the party picker scene."""
+        if self.app is None:  # pragma: no cover - safeguard
+            return
+        from game.ui.party_picker import PartyPicker
+
+        loader = getattr(self.app, "plugin_loader", None)
+        roster = list(loader.get_plugins("player")) if loader else []
+        # Hide the main menu so its buttons do not overlap the picker
+        try:
+            self.hide()
+        except Exception:
+            pass
+        picker = PartyPicker(self.app, Stats(hp=1, max_hp=1), roster=roster)
+        self.app.scene_manager.switch_to(picker)  # type: ignore[attr-defined]
 
     def pull_characters(self) -> None:  # pragma: no cover - placeholders
         """Placeholder for character pulls."""
 
     def options(self) -> None:  # pragma: no cover - placeholders
         """Placeholder for an options menu."""
+
+    # Visibility helpers -------------------------------------------------
+    def hide(self) -> None:
+        """Hide the main menu root frame."""
+        if self.root:
+            try:
+                self.root.hide()
+            except Exception:
+                pass
+
+    def show(self) -> None:
+        """Show the main menu root frame."""
+        if self.root:
+            try:
+                self.root.show()
+            except Exception:
+                pass
 
     def craft_items(self) -> None:  # pragma: no cover - placeholders
         """Placeholder for a crafting menu."""

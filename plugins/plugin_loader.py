@@ -66,9 +66,14 @@ class PluginLoader:
 
     def _register_module(self, module: ModuleType) -> None:
         for obj in module.__dict__.values():
-            if isinstance(obj, type) and getattr(obj, "plugin_type", None):
-                category = obj.plugin_type
-                plugin_id = getattr(obj, "id", obj.__name__)
-                self._registry.setdefault(category, {})[plugin_id] = obj
-                if self.bus is not None:
-                    setattr(obj, "bus", self.bus)
+            if not isinstance(obj, type):
+                continue
+            if getattr(obj, "plugin_type", None) is None:
+                continue
+            if getattr(obj, "__module__", "") != module.__name__:
+                continue
+            category = obj.plugin_type
+            plugin_id = getattr(obj, "id", obj.__name__)
+            self._registry.setdefault(category, {})[plugin_id] = obj
+            if self.bus is not None:
+                setattr(obj, "bus", self.bus)

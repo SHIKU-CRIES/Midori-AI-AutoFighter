@@ -10,6 +10,7 @@ from pathlib import Path
 
 from direct.gui.DirectGui import DirectLabel
 
+from autofighter.save import DB_PATH
 from autofighter.scene import Scene
 from autofighter.stats import Stats
 
@@ -22,12 +23,12 @@ class RunMap(Scene):
         app: object,
         player: Stats,
         party: list[str],
-        seed_store_path: Path,
+        seed_store_path: Path | str | None = None,
     ) -> None:
         self.app = app
         self.player = player
         self.party = party
-        self.seed_store_path = Path(seed_store_path)
+        self.seed_store_path = Path(seed_store_path) if seed_store_path else DB_PATH
         self.label: DirectLabel | None = None
 
     def setup(self) -> None:

@@ -12,7 +12,9 @@ from autofighter.gacha.vitality import vitality_bonus
 
 def count_player_plugins() -> int:
     path = Path("plugins/players")
-    return len([p for p in path.glob("*.py") if p.name != "__init__.py"])
+    return len(
+        [p for p in path.glob("*.py") if p.name != "__init__.py" and not p.name.startswith("_")]
+    )
 
 
 def test_seeded_pool_matches_plugins() -> None:

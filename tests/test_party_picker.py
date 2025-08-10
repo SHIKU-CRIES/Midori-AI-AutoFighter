@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 pp = pytest.importorskip("game.ui.party_picker")
@@ -9,6 +11,7 @@ class DummyApp:
     def __init__(self) -> None:
         self.scene_manager = type("SM", (), {"switch_to": lambda self, scene: setattr(self, "scene", scene)})()
         self.events: dict[str, object] = {}
+        self.main_menu = type("MM", (), {"show": lambda self: setattr(self, "shown", True)})()
 
     def accept(self, name: str, func) -> None:
         self.events[name] = func
@@ -67,3 +70,23 @@ def test_party_picker_excludes_unowned() -> None:
     picker.setup()
     assert picker.char_ids == roster
     picker.teardown()
+
+
+def test_party_picker_uses_fallback_icon_for_missing_image() -> None:
+    app = DummyApp()
+    stats = Stats(hp=5, max_hp=5)
+    roster = ["ally"]
+    picker = pp.PartyPicker(app, stats, roster=roster)
+    picker.setup()
+    image_path = picker.buttons["ally"]["image"]
+    assert Path(image_path).parent.name == "fallbacks"
+    picker.teardown()
+
+
+def test_home_returns_to_menu() -> None:
+    app = DummyApp()
+    stats = Stats(hp=5, max_hp=5)
+    picker = pp.PartyPicker(app, stats, roster=[])
+    picker.home()
+    assert getattr(app.scene_manager, "scene", None) is None
+    assert getattr(app.main_menu, "shown", False)

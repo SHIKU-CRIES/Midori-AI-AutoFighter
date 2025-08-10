@@ -6,6 +6,7 @@ Describes how plugins are discovered, categorized, and connected to the event bu
 - `PluginLoader` scans each directory recursively for Python files, skipping `__init__.py` and importing the rest【F:plugins/plugin_loader.py†L24-L38】
 - After loading, any categories listed as required but missing raise a runtime error【F:plugins/plugin_loader.py†L40-L48】
 - Classes defining `plugin_type` are registered under that category and assigned the event bus when provided【F:plugins/plugin_loader.py†L67-L74】
+- Imported base classes are ignored so only concrete plugin implementations appear in the registry【F:plugins/plugin_loader.py†L73-L81】
 
 ## Plugin Categories
 The following categories are bundled:
