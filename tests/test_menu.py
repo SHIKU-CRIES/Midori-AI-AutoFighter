@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import copy
 
 import pytest
+import random
 
 pytest.importorskip("direct")
 sys.modules["sqlcipher3"] = sqlite3
@@ -14,6 +15,7 @@ from direct.gui.DirectLabel import DirectLabel
 from panda3d.core import loadPrcFileData
 
 from autofighter.saves import SaveManager
+from autofighter.stats import Stats
 from game.ui.menu import MainMenu
 import game.ui.party_picker as pp
 from plugins.plugin_loader import PluginLoader
@@ -48,7 +50,7 @@ def test_main_menu_structure(tmp_path: Path) -> None:
         assert len(menu.right_buttons) == 5
         assert menu.run_button["text"] == "Start Run"
         assert menu.run_button["image"].endswith("icon_play.png")
-        assert menu.root["image"].endswith("background_01.png")
+        assert Path(menu.root["image"]).parent.name == "backgrounds"
         assert menu.top_bar.getParent() == menu.root
         assert menu.top_left_panel.getParent() == menu.root
         assert menu.top_left_panel.getPos()[0] < -1.0
@@ -108,7 +110,21 @@ def test_main_menu_requires_app(tmp_path: Path) -> None:
         base.destroy()
 
 
-def test_edit_party_hides_menu(tmp_path: Path) -> None:
+def test_main_menu_random_background(tmp_path: Path) -> None:
+    loadPrcFileData("", "window-type none")
+    base = ShowBase()
+    try:
+        db_path, avatars_dir = _setup_temp_assets(tmp_path)
+        random.seed(1)
+        menu1 = MainMenu(base.aspect2d, AppStub(), db_path=db_path, avatars_dir=avatars_dir)
+        random.seed(2)
+        menu2 = MainMenu(base.aspect2d, AppStub(), db_path=db_path, avatars_dir=avatars_dir)
+        assert menu1.root["image"] != menu2.root["image"]
+    finally:
+        base.destroy()
+
+
+def test_edit_party_hides_menu(tmp_path: Path, monkeypatch) -> None:
     loadPrcFileData("", "window-type none")
     base = ShowBase()
     try:
@@ -116,6 +132,15 @@ def test_edit_party_hides_menu(tmp_path: Path) -> None:
         app = AppStub()
         app.plugin_loader = PluginLoader()
         app.plugin_loader.discover("plugins/players")
+        app.plugin_loader.discover("plugins/damage_types")
+        stats = Stats(hp=5, max_hp=5)
+        monkeypatch.setattr(
+            "autofighter.save.load_player",
+            lambda *_, **__: ("A", "B", "C", "D", stats, {}),
+        )
+        monkeypatch.setattr(
+            "autofighter.save.load_roster", lambda *_, **__: []
+        )
         menu = MainMenu(
             base.aspect2d,
             app,

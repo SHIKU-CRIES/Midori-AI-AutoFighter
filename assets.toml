@@ -18,9 +18,32 @@ icon_volume_2 = { path = "assets/textures/icon_volume_2.png", sha256 = "c7867724
 icon_music = { path = "assets/textures/icon_music.png", sha256 = "b558b7f264ac9db5a15bf7b2e0dce7737e5412ae2a7c74612a802caf4e8dacb8" }
 icon_pause = { path = "assets/textures/icon_pause.png", sha256 = "48e3e5c45bfa4b0324e0890072dd147cde4248b31d2bf81f1637cf686686e59d" }
 icon_refresh_cw = { path = "assets/textures/icon_refresh_cw.png", sha256 = "6a43ec4fffe97e606dec342c90a45758edeaf5490736f02aa35ef995f959d309" }
+icon_circle = { path = "assets/textures/icon_circle.png", sha256 = "7d24ce882764937d02d27749777aa5ddad468b1b66d4efa87bc828c067321e67" }
+icon_flame = { path = "assets/textures/icon_flame.png", sha256 = "fc62845931c7450e7d61bd43646e1c0e07175b1a37d28382d9897cd3aa29ab16" }
+icon_moon = { path = "assets/textures/icon_moon.png", sha256 = "58fff19b961d8d6a64336fd8ca5e6b1f28c2aba99b9241a03350b24c56aa48e8" }
+icon_snowflake = { path = "assets/textures/icon_snowflake.png", sha256 = "34d2a2e9d903b5447febe95b8f1ba52d8115df2bd6e784360d9d6b0002ad8ac7" }
+icon_sun = { path = "assets/textures/icon_sun.png", sha256 = "cf37d8f0bbd40eb29fe52386c079c4a8f300dca98a4de81f4be887469a59e7e9" }
+icon_wind = { path = "assets/textures/icon_wind.png", sha256 = "4ce91fe28117415a6142c9bb66e9736e9bc85b3033ec049d257aac5a1babfa05" }
+icon_zap = { path = "assets/textures/icon_zap.png", sha256 = "eb6a1c5fcdffedcbb37ee62d8385787af0b00e3e6432f05464e2ea8b4fc3c268" }
 roster_fade_top = { path = "assets/textures/roster_fade_top.png", sha256 = "c7ae4c1a60d41f56e95373b146a68d1f6a5161e28bc6347675d6c85315a07be5" }
 roster_fade_bottom = { path = "assets/textures/roster_fade_bottom.png", sha256 = "2e56332bf39657799c083140d6d98b8bd6dcd842d8bdcc785508aac0572a9ce2" }
-menu_bg = { path = "assets/textures/backgrounds/background_01.png", sha256 = "3923df12c9d72dbe132a45e7d033b0f76e312ea09058a4eb4c0df4d31ddfcaeb" }
+background_01 = { path = "assets/textures/backgrounds/background_01.png", sha256 = "3923df12c9d72dbe132a45e7d033b0f76e312ea09058a4eb4c0df4d31ddfcaeb" }
+background_02 = { path = "assets/textures/backgrounds/background_02.png", sha256 = "0edc441de07be79a294f3041bb9e2f027287c5f0af1242c56a70602dbb1eb64b" }
+background_03 = { path = "assets/textures/backgrounds/background_03.png", sha256 = "2d181da56a774e29946358c4b4402e01d751241b7ca8d69e9e21bd6e94a9421a" }
+background_04 = { path = "assets/textures/backgrounds/background_04.png", sha256 = "668047949ea8cd0199f8247f3dbf48db7e8652574e7b92bc9add67e0c7c5fbe5" }
+background_05 = { path = "assets/textures/backgrounds/background_05.png", sha256 = "5a3937e3bd95ed124f7f4cac5f91a9f4dd2e6c71a76caea19ab980b1de132ae0" }
+background_06 = { path = "assets/textures/backgrounds/background_06.png", sha256 = "04926559f3926c0f92d4807bfa54605e3c1c5a147bfec37d34e028e15cb1272b" }
+background_07 = { path = "assets/textures/backgrounds/background_07.png", sha256 = "0dfb8f37d1c575af746146238a2b6e1c92ca8271e31ee723a42d25555b2d900c" }
+background_08 = { path = "assets/textures/backgrounds/background_08.png", sha256 = "fc297bbf4d99d8b145e46781704ddf7d3c3d242c69020c1e853b6bb5ef08d50b" }
+background_09 = { path = "assets/textures/backgrounds/background_09.png", sha256 = "111c2f80b998262387e641fb86339a96fb5e24513432ceb0a51be69b6a123bf6" }
+background_10 = { path = "assets/textures/backgrounds/background_10.png", sha256 = "7cdb3196b2fc6cffef0221fd3f6fbc196b1869c6864916c855488f85ccbb62e2" }
+background_11 = { path = "assets/textures/backgrounds/background_11.png", sha256 = "9b102b23ec5b78e56913ef1222857eb612bbbe076e66e05dc8af747f9dab31be" }
+background_12 = { path = "assets/textures/backgrounds/background_12.png", sha256 = "6b01722fdd223e89905ee80068a1fb956ad6d4d88ab7a44f39266228b78d50bc" }
+background_13 = { path = "assets/textures/backgrounds/background_13.png", sha256 = "f355f1fdc699fa39ee7b48b04b209187c9bfa76314d7173dd69120139be6cb45" }
+background_14 = { path = "assets/textures/backgrounds/background_14.png", sha256 = "c15cb0064846f5d62491cc4c53fc57f7e709ece2c37a301ecb847818e6bf4a8d" }
+background_15 = { path = "assets/textures/backgrounds/background_15.png", sha256 = "5d6a2629e5f2fce393842e8105d114125c3b902685fb8370fdf1eb6e407a4d3b" }
+background_16 = { path = "assets/textures/backgrounds/background_16.png", sha256 = "07a5387e36f4f8d01b986011384158d95ac1f3edce89626fa9c6c0c6a1e61e6f" }
+background_17 = { path = "assets/textures/backgrounds/background_17.png", sha256 = "75a52a6e430d3df0e4aa0c609c4ad146ad10e6dd106d8ccea415cea6c7e303de" }
 
 [audio]
 placeholder = { path = "assets/audio/.gitkeep", sha256 = "2f73349cfc4630255319c6c8dfc1b46a8996ace9d14d8e07563b165915918ec2" }

@@ -2,26 +2,27 @@
 
 ## Player Roster
 All legacy characters from the Pygame version have been ported as plugins.
-Each entry notes the character's `CharacterType`. Players currently share
-placeholder stats of 1000 HP, 100 attack, 50 defense, 5% crit rate, 2× crit
-damage, 1% effect hit, 100 mitigation, 0 dodge, and 1 for remaining values.
+Each entry notes the character's `CharacterType` and starting damage type.
+Players currently share placeholder stats of 1000 HP, 100 attack, 50 defense,
+5% crit rate, 2× crit damage, 1% effect hit, 100 mitigation, 0 dodge, and 1
+for remaining values.
 
-- **Ally** (B) – applies `ally_passive` on load to grant ally-specific bonuses.
-- **Becca** (B) – builds high attack but takes more damage from lower defense.
-- **Bubbles** (A) – starts with a default item and applies `bubbles_passive`.
-- **Carly** (B) – applies `carly_passive`.
-- **Chibi** (A) – gains four times the normal benefit from Vitality.
-- **Graygray** (B) – applies `graygray_passive`.
-- **Hilander** (A) – builds increased crit rate and crit damage.
-- **Kboshi** (A) – randomly changes damage type.
-- **Lady Darkness** (B) – baseline fighter themed around darkness.
-- **Lady Echo** (B) – baseline fighter themed around echoes.
-- **Lady Fire and Ice** (B) – baseline fighter themed around fire and ice.
-- **Lady Light** (B) – baseline fighter themed around light.
-- **Lady of Fire** (B) – baseline fighter themed around fire.
-- **Luna** (B) – applies `luna_passive`.
-- **Mezzy** (B) – only raises Max HP and takes less damage.
-- **Mimic** (C) – copies the player then lowers its stats by 25% on spawn.
+- **Ally** (B, random) – applies `ally_passive` on load to grant ally-specific bonuses.
+- **Becca** (B, random) – builds high attack but takes more damage from lower defense.
+- **Bubbles** (A, random) – starts with a default item and applies `bubbles_passive`.
+- **Carly** (B, Light) – applies `carly_passive`.
+- **Chibi** (A, random) – gains four times the normal benefit from Vitality.
+- **Graygray** (B, random) – applies `graygray_passive`.
+- **Hilander** (A, random) – builds increased crit rate and crit damage.
+- **Kboshi** (A, random) – randomly changes damage type.
+- **Lady Darkness** (B, Dark) – baseline fighter themed around darkness.
+- **Lady Echo** (B, Lightning) – baseline fighter themed around echoes.
+- **Lady Fire and Ice** (B, Fire or Ice) – baseline fighter themed around fire and ice.
+- **Lady Light** (B, Light) – baseline fighter themed around light.
+- **Lady of Fire** (B, Fire) – baseline fighter themed around fire.
+- **Luna** (B, Generic) – applies `luna_passive`.
+- **Mezzy** (B, random) – only raises Max HP and takes less damage.
+- **Mimic** (C, random) – copies the player then lowers its stats by 25% on spawn.
 
 ## Foe Generation
 Foes are procedurally named by pairing an adjective from `themed_ajt`

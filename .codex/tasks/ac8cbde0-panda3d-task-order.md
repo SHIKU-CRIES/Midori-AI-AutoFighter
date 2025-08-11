@@ -13,9 +13,9 @@ Reminder: list only task titles and file names—open each task file for details
 ### To Do
 - [ ] [Run start and map display](dc3d4f2e-run-start-map-display.md) (`dc3d4f2e`)
 - [ ] [Main menu rebuild](0d21008f-main-menu-rebuild.md) (`0d21008f`)
-- [ ] [Party picker](f9c45e2e-party-picker.md) (`f9c45e2e`)
-
 ### Completed
+- [x] [Party picker](f9c45e2e-party-picker.md) (`f9c45e2e`)
+
 - [x] [Purge legacy GUI](done/97c19289-purge-old-gui.md) (`purge-old-gui`)
 - [x] [Character types](done/f20caf99-character-types.md) (`f20caf99`)
 - [x] [Placeholder room](done/344b9c4a-placeholder-room.md) (`344b9c4a`)

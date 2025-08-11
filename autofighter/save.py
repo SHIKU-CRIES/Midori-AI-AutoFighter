@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+
 from typing import Any
+from pathlib import Path
+from typing import get_origin
+from dataclasses import fields
+from dataclasses import MISSING
+from typing import get_type_hints
 
 from autofighter.saves import SaveManager
 from autofighter.stats import Stats
@@ -15,6 +20,30 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "stat_refresh_rate": 5,
     "pause_on_stats": True,
 }
+
+
+def _merge_stats(data: dict[str, Any]) -> Stats:
+    """Return a ``Stats`` instance, filling missing fields with defaults."""
+    defaults: dict[str, Any] = {}
+    hints = get_type_hints(Stats)
+    for field in fields(Stats):
+        hint = hints.get(field.name, field.type)
+        if field.default is not MISSING:
+            defaults[field.name] = field.default
+        elif field.default_factory is not MISSING:  # type: ignore[attr-defined]
+            defaults[field.name] = field.default_factory()  # type: ignore[misc]
+        else:
+            origin = get_origin(hint)
+            if hint in (int, float):
+                defaults[field.name] = 0
+            elif hint is bool:
+                defaults[field.name] = False
+            elif origin is list:
+                defaults[field.name] = []
+            else:
+                defaults[field.name] = None
+    defaults.update(data)
+    return Stats(**defaults)
 
 
 def load_settings(path: Path | None = None) -> dict[str, Any]:
@@ -40,7 +69,7 @@ def load_run(source: Path | str, password: str = "", path: Path = DB_PATH) -> St
         try:
             data = json.loads(source.read_text())
             stats_data = data.get("stats", {})
-            return Stats(**stats_data)
+            return _merge_stats(stats_data)
         except Exception:
             return None
     with SaveManager(path, password) as sm:
@@ -48,7 +77,7 @@ def load_run(source: Path | str, password: str = "", path: Path = DB_PATH) -> St
     if not data:
         return None
     stats_data = data.get("stats", {})
-    return Stats(**stats_data)
+    return _merge_stats(stats_data)
 
 
 def save_run(run_id: str, stats: Stats, password: str = "", path: Path = DB_PATH) -> None:
@@ -95,7 +124,7 @@ def load_player(
     if not data:
         return None
     stats_data = data.get("stats", {})
-    stats = Stats(**stats_data)
+    stats = _merge_stats(stats_data)
     return (
         data.get("body", "Athletic"),
         data.get("hair", "Short"),

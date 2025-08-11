@@ -47,3 +47,6 @@ class PlayerBase(Stats):
     damage_types: list[str] = field(default_factory=lambda: ["Generic"])
     relics: list[str] = field(default_factory=list)
 
+    def __post_init__(self) -> None:
+        self.damage_types = [self.base_damage_type]
+

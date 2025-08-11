@@ -113,21 +113,22 @@ New runs begin by selecting up to four owned allies in a party picker before the
 The roster in `plugins/players/` currently includes and each entry lists its
 `CharacterType`. All players start with 1000 HP, 100 attack, 50 defense, a 5%
 crit rate, 2× crit damage, 1% effect hit rate, 100 mitigation, 0 dodge, and 1
-in all other stats:
+in all other stats. Listed damage types use the classic naming from the
+Pygame version:
 
-- Ally (B)
-- Becca (B)
-- Bubbles (A)
-- Carly (B)
-- Chibi (A)
-- Graygray (B)
-- Hilander (A)
-- Kboshi (A)
-- Lady Darkness (B)
-- Lady Echo (B)
-- Lady Fire and Ice (B)
-- Lady Light (B)
-- Lady of Fire (B)
-- Luna (B)
-- Mezzy (B)
-- Mimic (C)
+- Ally (B, random damage type)
+- Becca (B, random damage type)
+- Bubbles (A, random damage type)
+- Carly (B, Light)
+- Chibi (A, random damage type)
+- Graygray (B, random damage type)
+- Hilander (A, random damage type)
+- Kboshi (A, random damage type)
+- Lady Darkness (B, Dark)
+- Lady Echo (B, Lightning)
+- Lady Fire and Ice (B, Fire or Ice)
+- Lady Light (B, Light)
+- Lady of Fire (B, Fire)
+- Luna (B, Generic)
+- Mezzy (B, random damage type)
+- Mimic (C, random damage type)

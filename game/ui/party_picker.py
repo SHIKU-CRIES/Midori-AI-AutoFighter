@@ -15,28 +15,45 @@ from __future__ import annotations
 
 import random
 import subprocess
+import tempfile
 
 from pathlib import Path
+from typing import get_origin
+from dataclasses import fields
+
+from PIL import Image
+from PIL import ImageDraw
 
 try:  # pragma: no cover - fallbacks for headless tests
-    from direct.gui.DirectButton import DirectButton
+    from panda3d.core import NodePath
+    from panda3d.core import TextNode
     from direct.gui.DirectFrame import DirectFrame
+    from panda3d.core import TransparencyAttrib
     from direct.gui.DirectLabel import DirectLabel
+    from direct.gui.DirectButton import DirectButton
     from direct.gui.DirectScrolledFrame import DirectScrolledFrame
-    from panda3d.core import NodePath, TextNode, TransparencyAttrib
 except Exception:  # pragma: no cover
     DirectButton = DirectFrame = DirectLabel = DirectScrolledFrame = object  # type: ignore
     NodePath = TextNode = TransparencyAttrib = object  # type: ignore
 
-from autofighter.gui import set_widget_pos
-from autofighter.gui import get_widget_scale
-from autofighter.save import DB_PATH
+from game.ui.menu import TopBar
+from game.ui.run_map import RunMap
 from autofighter.scene import Scene
 from autofighter.stats import Stats
+from autofighter.save import DB_PATH
+from game.ui.menu import TopLeftPanel
+from autofighter.gui import set_widget_pos
+from autofighter.gui import get_widget_scale
 
-from game.ui.menu import TopBar, TopLeftPanel
-from game.ui.run_map import RunMap
-
+DT_ICONS = {
+    "Generic": "assets/textures/icon_circle.png",
+    "Light": "assets/textures/icon_sun.png",
+    "Dark": "assets/textures/icon_moon.png",
+    "Wind": "assets/textures/icon_wind.png",
+    "Lightning": "assets/textures/icon_zap.png",
+    "Fire": "assets/textures/icon_flame.png",
+    "Ice": "assets/textures/icon_snowflake.png",
+}
 
 def rebuild_models(model_dir: Path) -> None:
     """Rebuild ``.egg`` models into ``.bam`` every boot.
@@ -60,6 +77,16 @@ def rebuild_models(model_dir: Path) -> None:
             )
         except Exception:  # pragma: no cover - tool may be missing
             continue
+
+
+def _make_ring(color: tuple[int, int, int], size: int = 64) -> str:
+    """Return a temporary image path for a circular ring in ``color``."""
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.ellipse((0, 0, size - 1, size - 1), outline=color, width=6)
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    img.save(tmp.name)
+    return tmp.name
 
 
 class PickerTopLeftPanel(TopLeftPanel):
@@ -86,6 +113,8 @@ class PartyPicker(Scene):
         self.app = app
         self.player = player
         self.char_ids = list(roster or [])
+        if "player" not in self.char_ids:
+            self.char_ids.insert(0, "player")
         self.selected: list[str] = []
         self.root: DirectFrame | None = None
         self.top_left_panel: PickerTopLeftPanel | None = None
@@ -93,6 +122,10 @@ class PartyPicker(Scene):
         self.scroll: DirectScrolledFrame | None = None
         self.buttons: dict[str, DirectButton] = {}
         self.checkmarks: dict[str, DirectLabel] = {}
+        self.char_stats: dict[str, Stats] = {}
+        self.stat_labels: dict[str, DirectLabel] = {}
+        self.stat_icons: dict[str, DirectLabel] = {}
+        self.dmg_plugins: dict[str, type] = {}
         self.model = None
         self.rotation = 0.0
 
@@ -100,7 +133,15 @@ class PartyPicker(Scene):
     # UI setup
     def setup(self) -> None:
         parent = getattr(self.app, "aspect2d", NodePath("party-picker-root"))
-        self.root = DirectFrame(parent=parent)
+        bg_dir = Path("assets/textures/backgrounds")
+        choices = list(bg_dir.glob("background_*.png"))
+        bg_path = random.choice(choices) if choices else None
+        self.root = DirectFrame(
+            parent=parent,
+            frameSize=(-1, 1, -1, 1),
+            image=str(bg_path) if bg_path else None,
+            image_scale=1.7,
+        )
         self.top_bar = TopBar(self.root, DB_PATH, Path("assets/textures/players"))
         self.top_left_panel = PickerTopLeftPanel(
             self.root,
@@ -117,23 +158,98 @@ class PartyPicker(Scene):
             canvasSize=(-0.25, 0.25, -0.7 - 0.25 * len(self.char_ids), 0.7),
             pos=(-1.05, 0, 0),
             scrollBarWidth=0.05,
+            relief="flat",
+            frameColor=(1, 1, 1, 0),
+            manageScrollBars=False,
         )
+        try:
+            self.scroll.horizontalScroll.destroy()
+        except Exception:  # pragma: no cover - stubbed widgets
+            pass
+        try:
+            self.scroll.verticalScroll.setTransparency(TransparencyAttrib.MAlpha)
+        except Exception:  # pragma: no cover - stubbed widgets
+            pass
 
+        loader = getattr(self.app, "plugin_loader", None)
+        self.dmg_plugins = loader.get_plugins("damage_type") if loader else {}
+        player_plugins = loader.get_plugins("player") if loader else {}
         icons_dir = Path("assets/textures/players")
         fallback_icons = list((icons_dir / "fallbacks").glob("*.png"))
         for idx, cid in enumerate(self.char_ids):
-            icon = icons_dir / f"{cid}.png"
-            if not icon.exists() and fallback_icons:
-                icon = random.choice(fallback_icons)
-            btn = DirectButton(
+            if cid == "player":
+                icon_path = None
+                if self.top_bar:
+                    try:
+                        icon_path = self.top_bar._ensure_avatar(DB_PATH, icons_dir)
+                    except Exception:
+                        icon_path = None
+                icon = Path(icon_path) if icon_path else icons_dir / "player.png"
+                if not icon.exists():
+                    icon = Path("assets/textures/icon_user.png")
+                char_stats = self.player
+            else:
+                icon = icons_dir / f"{cid}.png"
+                if not icon.exists() and fallback_icons:
+                    icon = random.choice(fallback_icons)
+                plugin_cls = player_plugins.get(cid)
+                char_stats = plugin_cls() if plugin_cls else Stats(hp=1, max_hp=1)
+            self.char_stats[cid] = char_stats
+            colors: list[tuple[int, int, int]] = []
+            icons: list[str] = []
+            for dt in getattr(char_stats, "damage_types", []):
+                plug = self.dmg_plugins.get(dt)
+                if plug:
+                    colors.append(plug().color)
+                    icons.append(DT_ICONS.get(dt, DT_ICONS["Generic"]))
+            if colors:
+                choice = random.randrange(len(colors))
+                color = colors[choice]
+                dmg_icon_path = icons[choice]
+            else:
+                color = (255, 255, 255)
+                dmg_icon_path = DT_ICONS["Generic"]
+            ring_path = _make_ring(color)
+            ring = DirectFrame(
                 parent=self.scroll.getCanvas(),
-                image=str(icon),
+                image=ring_path,
+                frameColor=(1, 1, 1, 0),
                 relief="flat",
-                command=self.toggle,
-                extraArgs=[cid],
             )
+            ring["sortOrder"] = 0
+            ring.setScale(0.11)
+            set_widget_pos(ring, (0, 0, 0.55 - idx * 0.25))
+            ring.setTransparency(TransparencyAttrib.MAlpha)
+            if cid == "player":
+                btn = DirectButton(
+                    parent=ring,
+                    image=str(icon),
+                    relief="flat",
+                    command=lambda: self.show_stats(self.player),
+                )
+                mark = None
+            else:
+                btn = DirectButton(
+                    parent=ring,
+                    image=str(icon),
+                    relief="flat",
+                    command=self.select,
+                    extraArgs=[cid],
+                )
+                mark = DirectLabel(
+                    parent=btn,
+                    image="assets/textures/icon_diamond.png",
+                    image_color=(0, 1, 0, 1),
+                    relief="flat",
+                    pos=(0.07, 0, -0.07),
+                    scale=0.05,
+                )
+                mark.hide()
+                self.checkmarks[cid] = mark
+            btn["frameColor"] = (1, 1, 1, 0)
+            btn["sortOrder"] = 1
             btn.setScale(0.1)
-            set_widget_pos(btn, (0, 0, 0.55 - idx * 0.25))
+            btn.setTransparency(TransparencyAttrib.MAlpha)
             for state in ("image0", "image1", "image2", "image3"):
                 try:
                     node = btn.component(state)
@@ -141,17 +257,17 @@ class PartyPicker(Scene):
                     node = None
                 if node:
                     node.setTransparency(TransparencyAttrib.MAlpha)
-            mark = DirectLabel(
-                parent=btn,
-                image="assets/textures/icon_diamond.png",
-                image_color=(0, 1, 0, 1),
+            dmg_icon = DirectFrame(
+                parent=ring,
+                image=dmg_icon_path,
+                frameColor=(1, 1, 1, 0),
                 relief="flat",
-                pos=(0.07, 0, -0.07),
-                scale=0.05,
+                pos=(-0.08, 0, 0.08),
+                scale=0.04,
             )
-            mark.hide()
+            dmg_icon["sortOrder"] = 2
+            dmg_icon.setTransparency(TransparencyAttrib.MAlpha)
             self.buttons[cid] = btn
-            self.checkmarks[cid] = mark
 
         # Fade textures at top and bottom to soften the roster edges
         top_fade = DirectFrame(
@@ -202,6 +318,16 @@ class PartyPicker(Scene):
         # Tabbed stats panel on the right
         self._build_stat_panel()
 
+        self.start_button = DirectButton(
+            parent=self.root,
+            text="Start Run",
+            scale=get_widget_scale(),
+            command=self.start_run,
+            frameColor=(1, 1, 1, 0.3),
+            relief="flat",
+        )
+        set_widget_pos(self.start_button, (0.8, 0, -0.8))
+
     # ------------------------------------------------------------------
     def _layout_buttons(self) -> None:
         if not self.top_left_panel:
@@ -222,13 +348,21 @@ class PartyPicker(Scene):
             frameColor=(0, 0, 0, 0.2),
             pos=(0.7, 0, 0),
         )
-        self.stat_tabs: dict[str, DirectFrame] = {}
+        self.stat_tabs = {}
 
-        tabs = {
-            "Vitals": ["hp", "max_hp"],
-            "Combat": ["atk", "defense"],
-        }
-        for idx, (name, stats) in enumerate(tabs.items()):
+        groups: dict[str, list[str]] = {"Numbers": [], "Flags": [], "Lists": []}
+        for field in fields(Stats):
+            origin = get_origin(field.type)
+            if field.type in (int, float):
+                groups["Numbers"].append(field.name)
+            elif field.type is bool:
+                groups["Flags"].append(field.name)
+            elif origin is list:
+                groups["Lists"].append(field.name)
+
+        groups = {k: v for k, v in groups.items() if v}
+
+        for idx, (name, stats) in enumerate(groups.items()):
             btn = DirectButton(
                 parent=panel,
                 text=name,
@@ -239,26 +373,44 @@ class PartyPicker(Scene):
             btn.setScale(0.05)
             tab_frame = DirectFrame(parent=panel, frameColor=(0, 0, 0, 0))
             for s_idx, stat in enumerate(stats):
-                DirectLabel(
+                icon = DirectLabel(
                     parent=tab_frame,
                     image="assets/textures/icon_diamond.png",
                     relief="flat",
                     pos=(0, 0, 0.3 - s_idx * 0.1),
                     scale=0.05,
                 )
-                value = getattr(self.player, stat, 0)
-                DirectLabel(
+                label = DirectLabel(
                     parent=tab_frame,
-                    text=f"{stat}: {value}",
+                    text="",
                     text_align=TextNode.ALeft,
                     pos=(0.1, 0, 0.3 - s_idx * 0.1),
                     scale=0.05,
                 )
+                self.stat_icons[stat] = icon
+                self.stat_labels[stat] = label
             tab_frame.hide()
             self.stat_tabs[name] = tab_frame
 
+        self.damage_buttons: dict[str, DirectButton] = {}
+        for idx, dtype in enumerate(sorted(self.dmg_plugins)):
+            icon = DT_ICONS.get(dtype, DT_ICONS["Generic"])
+            btn = DirectButton(
+                parent=panel,
+                image=icon,
+                relief="flat",
+                command=self.set_damage_type,
+                extraArgs=[dtype],
+            )
+            btn.setScale(0.05)
+            set_widget_pos(btn, (0.1 + idx * 0.1, 0, -0.5))
+            self.damage_buttons[dtype] = btn
+
         self.stat_panel = panel
-        self.show_tab("Vitals")
+        if groups:
+            first = next(iter(groups))
+            self.show_tab(first)
+        self.show_stats(self.player)
 
     # ------------------------------------------------------------------
     def show_tab(self, name: str) -> None:
@@ -266,6 +418,25 @@ class PartyPicker(Scene):
             frame.hide()
         if name in self.stat_tabs:
             self.stat_tabs[name].show()
+
+    def show_stats(self, stats: Stats) -> None:
+        for stat, label in self.stat_labels.items():
+            value = getattr(stats, stat, 0)
+            icon = self.stat_icons.get(stat)
+            if icon:
+                icon["image"] = "assets/textures/icon_diamond.png"
+            label["text_fg"] = (1, 1, 1, 1)
+            if isinstance(value, str) and value in self.dmg_plugins:
+                if icon:
+                    icon["image"] = DT_ICONS.get(value, DT_ICONS["Generic"])
+                r, g, b = self.dmg_plugins[value]().color
+                label["text_fg"] = (r / 255, g / 255, b / 255, 1)
+            label["text"] = f"{stat}: {value}"
+
+    def set_damage_type(self, dtype: str) -> None:
+        self.player.base_damage_type = dtype
+        self.player.damage_types = [dtype]
+        self.show_stats(self.player)
 
     # ------------------------------------------------------------------
     def rotate_model(self, delta: float) -> None:
@@ -288,6 +459,15 @@ class PartyPicker(Scene):
             self.selected.append(char_id)
             if mark:
                 mark.show()
+
+    def select(self, char_id: str) -> None:
+        if char_id != "player":
+            self.toggle(char_id)
+            stats = self.char_stats.get(char_id)
+            if stats:
+                self.show_stats(stats)
+        else:
+            self.show_stats(self.player)
 
     def start_run(self) -> None:
         if self.app is None:  # pragma: no cover - safeguard
@@ -360,6 +540,12 @@ class PartyPicker(Scene):
             except Exception:
                 pass
             self.model = None
+        if hasattr(self, "start_button") and self.start_button:
+            try:
+                self.start_button.destroy()
+            except Exception:
+                pass
+            self.start_button = None
         if self.root:
             try:
                 self.root.destroy()

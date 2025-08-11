@@ -3,19 +3,20 @@
 from __future__ import annotations
 
 import random
-
 from pathlib import Path
 
 from panda3d.core import NodePath
 from panda3d.core import TextNode
-from panda3d.core import TransparencyAttrib
 from direct.gui.DirectFrame import DirectFrame
+from panda3d.core import TransparencyAttrib
 from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectButton import DirectButton
 
 from game.ui.run_map import RunMap
 from autofighter.stats import Stats
 from autofighter.save import DB_PATH
+from autofighter.save import load_player
+from autofighter.save import load_roster
 from autofighter.saves import SaveManager
 from autofighter.gui import get_widget_scale, set_widget_pos
 
@@ -93,6 +94,7 @@ class TopLeftPanel:
             text_pos=(0, -0.12),
             command=edit_avatar_cmd,
         )
+        self.avatar_button.setTransparency(TransparencyAttrib.MAlpha)
         self.pulls_button = DirectButton(
             parent=self.frame,
             image="assets/textures/icon_refresh_cw.png",
@@ -103,6 +105,7 @@ class TopLeftPanel:
             text_pos=(0, -0.12),
             command=pull_characters_cmd,
         )
+        self.pulls_button.setTransparency(TransparencyAttrib.MAlpha)
         self.crafting_button = DirectButton(
             parent=self.frame,
             image="assets/textures/icon_settings.png",
@@ -113,6 +116,7 @@ class TopLeftPanel:
             text_pos=(0, -0.12),
             command=craft_items_cmd,
         )
+        self.crafting_button.setTransparency(TransparencyAttrib.MAlpha)
 
         # Group all set_widget_pos calls together for clarity
         # Do not put the set_widget_pos for buttons / icons here, 
@@ -137,10 +141,13 @@ class MainMenu:
             raise ValueError("MainMenu requires app with scene_manager")
 
         self.app = app
+        bg_dir = Path("assets/textures/backgrounds")
+        bg_choices = list(bg_dir.glob("background_*.png"))
+        bg_path = random.choice(bg_choices) if bg_choices else None
         self.root = DirectFrame(
             parent=parent,
             frameSize=(-1, 1, -1, 1),
-            image="assets/textures/backgrounds/background_01.png",
+            image=str(bg_path) if bg_path else None,
             image_scale=1.7,
         )
 
@@ -252,7 +259,9 @@ class MainMenu:
         if self.app is None:  # pragma: no cover - safeguard
             return
 
-        run_map = RunMap(self.app, Stats(hp=1, max_hp=1), [], DB_PATH)
+        loaded = load_player()
+        stats = loaded[4] if loaded else Stats(hp=1, max_hp=1)
+        run_map = RunMap(self.app, stats, [], DB_PATH)
         self.app.scene_manager.switch_to(run_map)  # type: ignore
 
     def load_run(self) -> None:  # pragma: no cover - placeholders
@@ -267,14 +276,15 @@ class MainMenu:
             return
         from game.ui.party_picker import PartyPicker
 
-        loader = getattr(self.app, "plugin_loader", None)
-        roster = list(loader.get_plugins("player")) if loader else []
+        loaded = load_player()
+        stats = loaded[4] if loaded else Stats(hp=1, max_hp=1)
+        roster = load_roster()
         # Hide the main menu so its buttons do not overlap the picker
         try:
             self.hide()
         except Exception:
             pass
-        picker = PartyPicker(self.app, Stats(hp=1, max_hp=1), roster=roster)
+        picker = PartyPicker(self.app, stats, roster=roster)
         self.app.scene_manager.switch_to(picker)  # type: ignore[attr-defined]
 
     def pull_characters(self) -> None:  # pragma: no cover - placeholders

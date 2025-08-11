@@ -1,4 +1,5 @@
 import sys
+import json
 import types
 
 from importlib import reload
@@ -166,6 +167,20 @@ def test_roster_roundtrip(tmp_path):
     stats = Stats(hp=1, max_hp=1)
     save.save_player("A", "B", "C", "None", stats, {})
     assert save.load_roster() == ["ally", "becca"]
+
+
+def test_load_player_fills_missing_stats(tmp_path):
+    fake_module = types.SimpleNamespace(connect=lambda path: _FakeConnection(path))
+    sys.modules["sqlcipher3"] = fake_module
+    from autofighter import save
+    reload(save)
+    save.DB_PATH = tmp_path / "missing.db"
+    _FakeConnection.storage = {"runs": {}, "players": {}}
+    _FakeConnection.storage["players"]["player"] = json.dumps({"stats": {"atk": 7}})
+    loaded = save.load_player(path=save.DB_PATH)
+    assert loaded is not None
+    _, _, _, _, stats, _ = loaded
+    assert stats.hp == 0 and stats.max_hp == 0 and stats.atk == 7
 
 
 def test_migration_runner_applies_scripts(tmp_path):
