@@ -169,10 +169,10 @@ class PartyPicker(Scene):
         # Build roster list inside a vertical scroll frame on the left
         self.scroll = DirectScrolledFrame(
             parent=self.root,
-            frameSize=(-0.25, 0.25, -0.7, 0.7),
-            canvasSize=(-0.25, 0.25, -0.7 - 0.25 * len(self.char_ids), 0.7),
+            frameSize=(-0.48, 0.32, -0.9, 0.7),
+            canvasSize=(-0.48, 0.32, -0.9 - 0.25 * len(self.char_ids), 0.7),
             pos=(-1.05, 0, 0),
-            scrollBarWidth=0.05,
+            scrollBarWidth=0,
             relief="flat",
             frameColor=(1, 1, 1, 0),
             manageScrollBars=False,
