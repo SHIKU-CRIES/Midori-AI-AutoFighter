@@ -213,7 +213,7 @@ class PartyPicker(Scene):
             ring = DirectFrame(
                 parent=self.scroll.getCanvas(),
                 image=ring_path,
-                frameColor=(1, 1, 1, 0),
+                frameColor=(1, 1, 1, 0), ##### THIS IS WRONG, IT NEEDS TO BE THE COLOR OF THE PERSONS DAMAGE TYPE...
                 relief="flat",
             )
             ring["sortOrder"] = 0
@@ -225,6 +225,7 @@ class PartyPicker(Scene):
                     parent=ring,
                     image=str(icon),
                     relief="flat",
+                    scale=4,
                     command=lambda: self.show_stats(self.player),
                 )
                 mark = None
@@ -234,6 +235,7 @@ class PartyPicker(Scene):
                     image=str(icon),
                     relief="flat",
                     command=self.select,
+                    scale=1,
                     extraArgs=[cid],
                 )
                 mark = DirectLabel(
@@ -248,7 +250,7 @@ class PartyPicker(Scene):
                 self.checkmarks[cid] = mark
             btn["frameColor"] = (1, 1, 1, 0)
             btn["sortOrder"] = 1
-            btn.setScale(0.1)
+            btn.setScale(1)
             btn.setTransparency(TransparencyAttrib.MAlpha)
             for state in ("image0", "image1", "image2", "image3"):
                 try:
