@@ -12,15 +12,34 @@ if "direct" not in sys.modules:
         def destroy(self) -> None:
             pass
 
+    class DummyButton(dict):
+        def __init__(self, *args, **kwargs):
+            self.image = kwargs.get("image")
+
+        def setTransparency(self, *args, **kwargs) -> None:
+            pass
+
+        def setPos(self, *args, **kwargs) -> None:
+            pass
+
+        def setScale(self, *args, **kwargs) -> None:
+            pass
+
+        def destroy(self) -> None:
+            pass
+
     direct_mod = types.ModuleType("direct")
     gui_mod = types.ModuleType("direct.gui")
     directgui_mod = types.ModuleType("direct.gui.DirectGui")
+    directbutton_mod = types.ModuleType("direct.gui.DirectButton")
     directgui_mod.DirectLabel = (
         lambda *args, **kwargs: DummyLabel(text=kwargs.get("text", ""))
     )
+    directbutton_mod.DirectButton = DummyButton
     sys.modules["direct"] = direct_mod
     sys.modules["direct.gui"] = gui_mod
     sys.modules["direct.gui.DirectGui"] = directgui_mod
+    sys.modules["direct.gui.DirectButton"] = directbutton_mod
 
 run_map_module = pytest.importorskip("game.ui.run_map")
 
@@ -72,9 +91,8 @@ def test_run_map_enters_battle(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     )
     run_map = RunMap(app, stats, ["ally"], seed_store_path=tmp_path / "seeds.json")
     run_map.setup()
-    assert run_map.label is not None
-    assert "00:" in run_map.label["text"]
-    assert "-> 01,02,03" in run_map.label["text"]
+    assert run_map.buttons
+    assert hasattr(run_map.buttons[0], "image")
 
     run_map.enter_first_room()
     assert isinstance(app.scene_manager.scene, DummyBattle)

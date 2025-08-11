@@ -4,8 +4,9 @@ Builds a party selection scene with Panda3D DirectGUI that mirrors the main
 menu's top bar but swaps the avatar icon for a slightly smaller home button.
 The background randomly selects from `assets/textures/backgrounds` to match the
 main menu. The left side hosts a vertically scrollable roster of circular
-character icons
-that fade at the top and bottom using dedicated gradient textures so the list
+character icons, each parented to a transparent slot where a damage-type ring
+overlays the portrait so the ring fully masks any corners, including the
+player's avatar. The list fades at the top and bottom using dedicated gradient textures so the list
 doesn't hard‑cut and omits its default frame color or horizontal scrollbar for a
 clean look. Missing portraits are filled with a random
 image from `assets/textures/players/fallbacks`. Each slot shows a Lucide element
@@ -13,9 +14,10 @@ icon in its corner to denote the character's damage type. Selecting an icon
 overlays a green diamond image and adds the character to the party, capped at
 four members.
 
-The player's avatar is always pinned to the top of the roster and their stats
-populate the panel by default so a damage type can be chosen even on a fresh
-save where no other characters are owned.
+The player's avatar is always pinned to the top of the roster and clicks route
+through the same selection handler so their stats panel refreshes like any
+other character. Their stats populate the panel by default so a damage type can
+be chosen even on a fresh save where no other characters are owned.
 
 A placeholder 3D body model (`body_a`, `body_b`, or `body_c`) sits in the center
 and can be rotated left or right with the arrow keys. Models live in

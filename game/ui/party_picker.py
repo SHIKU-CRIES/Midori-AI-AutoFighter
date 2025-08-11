@@ -89,6 +89,20 @@ def _make_ring(color: tuple[int, int, int], size: int = 64) -> str:
     return tmp.name
 
 
+def _mask_icon(path: Path, size: int = 64) -> str:
+    """Return a circularly cropped copy of ``path``."""
+
+    img = Image.open(path).convert("RGBA")
+    img = img.resize((size, size))
+    mask = Image.new("L", (size, size), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, size, size), fill=255)
+    img.putalpha(mask)
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    img.save(tmp.name)
+    return tmp.name
+
+
 class PickerTopLeftPanel(TopLeftPanel):
     """Top-left panel with home, pulls, and crafting buttons."""
 
@@ -121,6 +135,7 @@ class PartyPicker(Scene):
         self.top_bar: TopBar | None = None
         self.scroll: DirectScrolledFrame | None = None
         self.buttons: dict[str, DirectButton] = {}
+        self.slots: list[DirectFrame] = []
         self.checkmarks: dict[str, DirectLabel] = {}
         self.char_stats: dict[str, Stats] = {}
         self.stat_labels: dict[str, DirectLabel] = {}
@@ -209,48 +224,25 @@ class PartyPicker(Scene):
             else:
                 color = (255, 255, 255)
                 dmg_icon_path = DT_ICONS["Generic"]
-            ring_path = _make_ring(color)
-            ring = DirectFrame(
+            slot = DirectFrame(
                 parent=self.scroll.getCanvas(),
-                image=ring_path,
-                frameColor=(1, 1, 1, 0), ##### THIS IS WRONG, IT NEEDS TO BE THE COLOR OF THE PERSONS DAMAGE TYPE...
+                frameColor=(1, 1, 1, 0),
                 relief="flat",
             )
-            ring["sortOrder"] = 0
-            ring.setScale(0.11)
-            set_widget_pos(ring, (0, 0, 0.55 - idx * 0.25))
-            ring.setTransparency(TransparencyAttrib.MAlpha)
-            if cid == "player":
-                btn = DirectButton(
-                    parent=ring,
-                    image=str(icon),
-                    relief="flat",
-                    scale=4,
-                    command=lambda: self.show_stats(self.player),
-                )
-                mark = None
-            else:
-                btn = DirectButton(
-                    parent=ring,
-                    image=str(icon),
-                    relief="flat",
-                    command=self.select,
-                    scale=1,
-                    extraArgs=[cid],
-                )
-                mark = DirectLabel(
-                    parent=btn,
-                    image="assets/textures/icon_diamond.png",
-                    image_color=(0, 1, 0, 1),
-                    relief="flat",
-                    pos=(0.07, 0, -0.07),
-                    scale=0.05,
-                )
-                mark.hide()
-                self.checkmarks[cid] = mark
+            slot.setScale(0.11)
+            set_widget_pos(slot, (0, 0, 0.55 - idx * 0.25))
+            slot.setTransparency(TransparencyAttrib.MAlpha)
+            self.slots.append(slot)
+            masked_icon = _mask_icon(icon)
+            btn = DirectButton(
+                parent=slot,
+                image=str(masked_icon),
+                relief="flat",
+                command=self.select,
+                extraArgs=[cid],
+            )
             btn["frameColor"] = (1, 1, 1, 0)
-            btn["sortOrder"] = 1
-            btn.setScale(1)
+            btn["sortOrder"] = 0
             btn.setTransparency(TransparencyAttrib.MAlpha)
             for state in ("image0", "image1", "image2", "image3"):
                 try:
@@ -259,16 +251,40 @@ class PartyPicker(Scene):
                     node = None
                 if node:
                     node.setTransparency(TransparencyAttrib.MAlpha)
+            ring_path = _make_ring(color)
+            ring = DirectFrame(
+                parent=slot,
+                image=ring_path,
+                frameColor=(1, 1, 1, 0),
+                relief="flat",
+            )
+            ring["state"] = "disabled"
+            ring["sortOrder"] = 1
+            ring.setTransparency(TransparencyAttrib.MAlpha)
             dmg_icon = DirectFrame(
-                parent=ring,
+                parent=slot,
                 image=dmg_icon_path,
                 frameColor=(1, 1, 1, 0),
                 relief="flat",
                 pos=(-0.08, 0, 0.08),
                 scale=0.04,
             )
+            dmg_icon["state"] = "disabled"
             dmg_icon["sortOrder"] = 2
             dmg_icon.setTransparency(TransparencyAttrib.MAlpha)
+            if cid != "player":
+                mark = DirectLabel(
+                    parent=slot,
+                    image="assets/textures/icon_diamond.png",
+                    image_color=(0, 1, 0, 1),
+                    relief="flat",
+                    pos=(0.07, 0, -0.07),
+                    scale=0.05,
+                )
+                mark["state"] = "disabled"
+                mark["sortOrder"] = 3
+                mark.hide()
+                self.checkmarks[cid] = mark
             self.buttons[cid] = btn
 
         # Fade textures at top and bottom to soften the roster edges
@@ -512,8 +528,14 @@ class PartyPicker(Scene):
                 mark.destroy()
             except Exception:
                 pass
+        for slot in self.slots:
+            try:
+                slot.destroy()
+            except Exception:
+                pass
         self.buttons.clear()
         self.checkmarks.clear()
+        self.slots.clear()
         if self.scroll:
             try:
                 self.scroll.destroy()

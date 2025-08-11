@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 pytest.importorskip("PIL")
+
 import game.ui.party_picker as pp
 from autofighter.stats import Stats
 from plugins.plugin_loader import PluginLoader
@@ -98,6 +99,20 @@ def test_home_returns_to_menu() -> None:
     picker.home()
     assert getattr(app.scene_manager, "scene", None) is None
     assert getattr(app.main_menu, "shown", False)
+
+
+def test_selecting_player_shows_stats() -> None:
+    app = DummyApp()
+    player_stats = Stats(hp=7, max_hp=7)
+    roster = ["ally"]
+    picker = pp.PartyPicker(app, player_stats, roster=roster)
+    picker.setup()
+    other = roster[0]
+    picker.select(other)
+    assert picker.stat_labels["hp"]["text"] == "hp: 1000"
+    picker.select("player")
+    assert picker.stat_labels["hp"]["text"] == "hp: 7"
+    picker.teardown()
 
 
 def test_party_picker_random_background() -> None:

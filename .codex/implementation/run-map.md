@@ -1,12 +1,11 @@
 # Run Map
 
-A minimal Panda3D scene that displays a placeholder floor map.
-`RunMap` shows the text `"00: -> 01,02,03"` and switches to the
-first battle room when triggered. The battle room receives a factory
-for creating a new `RunMap` so returning from the fight drops the
-player back onto the map. The first room spawns Luna via the player
-plugin system, using the plugin's baseline stats as a placeholder foe
-so combat begins immediately.
+Displays a minimal vertical list of room icons beneath `aspect2d` to represent
+the first floor layout. Each room uses a Lucide image from `assets/textures`
+(`icon_flame` for battle, `icon_folder_open` for shop, `icon_pause` for rest,
+`icon_message_square` for events, and `icon_power` for bosses). The icons are
+`DirectButton` instances so the first entry can invoke `enter_first_room`
+which builds a `BattleRoom` and swaps the scene.
 
 ## Testing
-- `uv run pytest tests/test_run_map.py::test_run_map_enters_battle` – checks map text, battle parameters, and return callback
+- `uv run pytest`
