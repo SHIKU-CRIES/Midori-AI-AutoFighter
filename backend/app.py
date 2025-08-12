@@ -72,6 +72,15 @@ async def status() -> tuple[str, int, dict[str, str]]:
     return jsonify({"status": "ok"})
 
 
+@app.after_request
+async def add_cors_headers(response):
+    # Allow frontend dev server to call backend during development
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, OPTIONS"
+    return response
+
+
 # Expose static assets (e.g., backgrounds) for simple image serving
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 
@@ -137,12 +146,20 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
     roster = []
     for name in player_plugins.__all__:
         cls = getattr(player_plugins, name)
+        inst = cls()
         roster.append(
             {
-                "id": cls.id,
-                "name": cls.name,
-                "owned": cls.id in owned,
-                "is_player": cls.id == "sample_player",
+                "id": inst.id,
+                "name": inst.name,
+                "owned": inst.id in owned,
+                "is_player": inst.id == "sample_player",
+                "element": getattr(inst, "base_damage_type", "Generic"),
+                "stats": {
+                    "hp": getattr(inst, "hp", 0),
+                    "atk": getattr(inst, "atk", 0),
+                    "defense": getattr(inst, "defense", 0),
+                    "level": getattr(inst, "level", 1),
+                },
             }
         )
     return jsonify({"players": roster})
@@ -214,15 +231,4 @@ async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
             "party": party_data,
             "foes": [],
             "action": data.get("action", ""),
-        }
-    )
-
-
-@app.post("/rooms/<run_id>/<room_id>/action")
-async def room_action(run_id: str, room_id: str) -> tuple[str, int, dict[str, str]]:
-    data = await request.get_json(silent=True) or {}
-    return jsonify({"run_id": run_id, "room_id": room_id, "action": data.get("action", "noop")})
-
-
-if __name__ == "__main__":
-    app.run(port=59002)
+      

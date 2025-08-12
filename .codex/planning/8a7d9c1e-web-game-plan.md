@@ -13,17 +13,15 @@ Status: ready for audit.
 - Keep `myunderstanding.md` current with gameplay flow updates.
 
 ## Current Issues
-- Battle, shop, and rest room flows are not exposed through the web interface.
-- The Svelte frontend does not yet drive these room interactions.
-- Party picker and run start map display remain unfinished.
-- Backend lacks tests for run state and room endpoints.
-- Python Dockerfile omits required Docker tooling.
+- Improve frontend test depth for layout and map interactions.
+- Document dev workflow using bind mounts and entrypoints.
+- Keep `myunderstanding.md` in sync as flows evolve.
 
 ## Immediate Playable Flow
-1. Expose Quart endpoints for battle, shop, and rest rooms using `save.db`.
-2. Wire the Svelte UI to call these endpoints and display results.
-3. Implement party picker and run start map display.
-4. Add backend tests for run and room flows and update the Python Dockerfile with proper tooling.
+1. Expose Quart endpoints for battle, shop, and rest rooms using `backend/save.db`. (done)
+2. Wire the Svelte UI to call these endpoints and display results. (done)
+3. Implement party picker and run start map display. (done)
+4. Add backend tests for run and room flows. (done)
 
 ## Detailed Plans
 Detailed planning documents will be written once the playable flow is in place.

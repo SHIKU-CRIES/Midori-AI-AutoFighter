@@ -27,6 +27,12 @@ stores its database at `backend/save.db` by default (override with
 `AF_DB_PATH`). Set `AF_DB_KEY` only if you’re using an encrypted database. The
 Svelte dev server listens on `59001` and the Quart backend on `59002`.
 
+### Dev Workflow
+- Code changes are reflected immediately since source is bind-mounted into the containers.
+- Frontend entrypoint runs `bun install` if `node_modules/` is missing, then starts the dev server.
+- Backend entrypoint runs `uv sync` (respects `UV_EXTRA`) and launches the Quart app with `uv run app.py`.
+- The backend serves static assets under `/assets/*` and exposes `GET /rooms/images` with room background URLs.
+
 ### Optional LLM Dependencies
 
 Install extras to experiment with local language models. Each extra bundles

@@ -32,4 +32,4 @@ RUN yay -S --noconfirm bun-bin && yay -Yccc --noconfirm
 WORKDIR /app
 EXPOSE 59001
 # Source will be bind-mounted at runtime; install deps in entrypoint
-CMD ["bash", "-lc", "/app/docker-entrypoint.sh"]
+CMD ["bash", "-lc", "bash /app/docker-entrypoint.sh"]
