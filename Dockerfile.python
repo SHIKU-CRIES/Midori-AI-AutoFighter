@@ -1,0 +1,34 @@
+FROM lunamidori5/pixelarch:quartz
+
+EXPOSE 59002
+
+ENV PYTHONOPTIMIZE=1
+ENV PYTHONUNBUFFERED=1
+
+ENV VIRTUAL_ENV=/.venv
+
+ENV UV_LINK_MODE=copy
+ENV UV_COMPILE_BYTECODE=1
+
+ARG UV_EXTRA=""
+
+# Update OS release info for clarity
+RUN sudo sed -i 's/Quartz/Backend-uv-server/g' /etc/os-release
+
+# Install uv, Docker, and Docker Compose using the system package manager
+RUN yay -Syu --noconfirm docker docker-compose uv && yay -Yccc --noconfirm
+
+# Ensure uv is on PATH
+ENV PATH="/root/.local/bin:${PATH}"
+
+WORKDIR /app
+COPY . .
+RUN sudo chown -R ${USERNAME}:${USERNAME} /app
+
+RUN sudo mkdir -p /.venv
+RUN sudo chown -R ${USERNAME}:${USERNAME} /.venv
+RUN sudo chmod -R 755 /.venv
+
+RUN uv sync ${UV_EXTRA:+--extra $UV_EXTRA}
+
+CMD ["sudo", "uv", "run", "app.py"]

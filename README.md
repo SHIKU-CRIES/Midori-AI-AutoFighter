@@ -1,42 +1,34 @@
 # Midori AI AutoFighter
 
-This repository is the starting point for a Panda3D-based rewrite of Midori AI AutoFighter.
-The previous Pygame codebase lives in `legacy/` and must remain unmodified.
+Midori AI AutoFighter is being rebuilt as a web application. A Svelte frontend
+communicates with a Python Quart backend, and Docker Compose orchestrates both
+services. The legacy Pygame prototype lives in `legacy/` and remains untouched.
 
 ## Directory Structure
 
 ```
-assets/
-  audio/
-  models/
-  textures/
-game/
-  actors/
-  ui/
-  rooms/
-  gacha/
-  saves/
-plugins/
-mods/
-llms/
-legacy/
+frontend/   # Svelte frontend
+backend/    # Quart backend and game logic
+legacy/     # Previous Pygame version (read-only)
 ```
 
 ## Setup
 
-1. Install [uv](https://github.com/astral-sh/uv).
-2. Install dependencies:
+1. Install [uv](https://github.com/astral-sh/uv) and
+   [bun](https://bun.sh/).
+2. Start both services with Docker Compose:
 
-   ```bash
-   uv sync
-   ```
+```bash
+docker compose up --build
+```
 
-   Panda3D ships prebuilt wheels.
+The Svelte dev server listens on port `59001` and the Quart backend on
+`59002`.
 
 ### Optional LLM Dependencies
 
 Install extras to experiment with local language models. Each extra bundles
-LangChain, Transformers, and a matching PyTorch build.
+LangChain, Transformers, and a matching PyTorch build:
 
 ```bash
 uv sync --extra llm-cuda  # NVIDIA GPUs (CUDA drivers required)
@@ -47,66 +39,123 @@ uv sync --extra llm-cpu   # CPU-only
 Selecting the correct extra ensures hardware acceleration when available. These
 packages are optional; the core game runs without them.
 
-3. Run the game:
+3. Run the backend directly:
 
-   ```bash
-   uv run main.py
-   ```
+```bash
+cd backend
+uv run app.py
+```
+
+The server looks for the encrypted save database using `AF_DB_PATH` (default
+`save.db` in the repository root) and decrypts it with `AF_DB_KEY`.
 
 4. Install the latest build into another project:
 
-   ```bash
-   uv add git+https://github.com/Midori-AI/Midori-AI-AutoFighter@main
-   ```
+```bash
+uv add git+https://github.com/Midori-AI/Midori-AI-AutoFighter@main
+```
+
+### Docker Compose LLM Profiles
+
+Enable optional LLM dependencies with Compose profiles:
+
+```bash
+docker compose --profile llm-cuda up --build
+docker compose --profile llm-amd up --build
+docker compose --profile llm-cpu up --build
+```
+
+## Responsive Layout
+
+The Svelte frontend targets three breakpoints:
+
+- **Desktop** – displays the party picker, player editor, and floor map around
+  the active menu so most information is visible at once.
+- **Tablet** – shows two panels side by side when space permits.
+- **Phone** – focuses on a single menu at a time for clarity on small screens.
+
+The interface adapts automatically based on viewport width.
 
 ## Publishing
 
-The package will be published to PyPI as `autofighter`. Panda3D provides platform-specific
-wheels, so native dependencies must be considered when distributing builds.
+Docker images for both services will be published to Docker Hub. Native
+dependencies are handled inside the images, so no manual wheel management is
+required.
 
 ## Testing
 
 Run the test suite before submitting changes:
 
 ```bash
+cd backend
 uv run pytest
 ```
 
 ## Plugins
 
-The game auto-discovers classes under `plugins/` and `mods/` by `plugin_type` and wires them to a shared event bus. See `.codex/implementation/plugin-system.md` for loader details and examples.
+The game auto-discovers classes under `plugins/` and `mods/` by `plugin_type`
+and wires them to a shared event bus. See
+`.codex/implementation/plugin-system.md` for loader details and examples.
 
 ## Player Creator
 
-Use the in-game editor to pick a body and hair style, choose a hair color and accessory, and distribute 100 stat points. Spending 100 of each damage type's 4★ upgrade items grants one extra stat point. The result is saved to `player.json` for new runs.
+Use the in-game editor to pick a body and hair style, choose a hair color and
+accessory, and distribute 100 stat points. Spending 100 of each damage type's
+4★ upgrade items grants one extra stat point. The result is stored in the
+encrypted `save.db` database for new runs.
 
 ## Stat Screen
 
-View grouped stats and status effects. The display refreshes every few frames and supports plugin-provided lines. Categories cover core, offense, defense, vitality, advanced data, and status lists for passives, DoTs, HoTs, damage types, and relics. When **Pause on Stat Screen** is enabled in Options, opening the screen halts gameplay until closed.
+View grouped stats and status effects. The display refreshes every few frames
+and supports plugin-provided lines. Categories cover core, offense, defense,
+vitality, advanced data, and status lists for passives, DoTs, HoTs, damage types,
+and relics. When **Pause on Stat Screen** is enabled in Options, opening the
+screen halts gameplay until closed.
 
 ## Damage and Healing Effects
 
-DoT and HoT plugins manage ongoing damage or recovery. Supported DoTs include Bleed, Celestial Atrophy, Abyssal Corruption (spreads on death), Blazing Torment (extra tick on action), Cold Wound (five-stack cap), and Impact Echo (half of the last hit each turn). HoTs cover Regeneration, Player Echo, and Player Heal.
+DoT and HoT plugins manage ongoing damage or recovery. Supported DoTs include
+Bleed, Celestial Atrophy, Abyssal Corruption (spreads on death), Blazing
+Torment (extra tick on action), Cold Wound (five-stack cap), and Impact Echo
+(half of the last hit each turn). HoTs cover Regeneration, Player Echo, and
+Player Heal.
 
 ## Battle Room
 
-Start a run in a battle scene that renders placeholder models, runs messenger-driven stat-based attacks, scales foes by floor, room, Pressure level, and loop count, shows floating damage numbers and attack effects, adds status icons, and flashes the room red and blue with an Enraged buff after 100 turns (500 for floor bosses).
+Start a run in a battle scene that renders placeholder models, runs
+messenger-driven stat-based attacks, scales foes by floor, room, Pressure level,
+and loop count, shows floating damage numbers and attack effects, adds status
+icons, and flashes the room red and blue with an Enraged buff after 100 turns
+(500 for floor bosses).
 
 ## Rest Room
 
-Recover HP or trade upgrade stones for a +5 Max HP boost. Each floor permits one rest, and map generation ensures at least two rest rooms per floor. The scene displays a brief message after the action.
+Recover HP or trade upgrade stones for a +5 Max HP boost. Each floor permits one
+rest, and map generation ensures at least two rest rooms per floor. The scene
+displays a brief message after the action.
 
 ## Shop Room
 
-Buy upgrade items or cards with star ratings. Inventory scales by floor, purchases add items to your inventory and disable the button, class-level tracking guarantees at least two shops per floor, and gold can reroll the current stock.
+Buy upgrade items or cards with star ratings. Inventory scales by floor,
+purchases add items to your inventory and disable the button, class-level
+tracking guarantees at least two shops per floor, and gold can reroll the
+current stock.
 
 ## Event and Chat Rooms
 
-Event Rooms offer text-based encounters with selectable options that use seeded randomness to modify stats or inventory. Chat Rooms let players send a single message to an LLM character, track usage per floor, and do not count toward the floor's room limit; only six chats may occur on each floor.
+Event Rooms offer text-based encounters with selectable options that use seeded
+randomness to modify stats or inventory. Chat Rooms let players send a single
+message to an LLM character, track usage per floor, and do not count toward the
+floor's room limit; only six chats may occur on each floor.
 
 ## Map Generation
 
-New runs begin by selecting up to four owned allies in a party picker before the map appears. Runs then progress through 45-room floors built by a seeded `MapGenerator`. Each floor includes at least two shops and two rest rooms, always ends in a floor boss, and can add extra rooms or boss fights as Pressure Level rises. Battle rooms may spawn chat rooms after combat without affecting room count.
+New runs begin by selecting up to four owned allies in a party picker before the
+map appears. Runs then progress through 45-room floors built by a seeded
+`MapGenerator`. Each floor includes at least two shops and two rest rooms,
+always ends in a floor boss, and can add extra rooms or boss fights as Pressure
+Level rises. Battle rooms may spawn chat rooms after combat without affecting
+room count.
 
 ## Playable Characters
 

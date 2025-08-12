@@ -2,37 +2,28 @@
 
 ## Setup
 - Uses [SQLCipher](https://www.zetetic.net/sqlcipher/) via the `sqlcipher3-binary` package.
+- The backend reads `AF_DB_PATH` for the database location (defaults to `save.db` in the repository root) and `AF_DB_KEY` for the encryption key.
 - Install dependencies with `uv add sqlcipher3-binary`.
-- Saves are stored in `autofighter/saves/encrypted_store.py` using a context-managed `SaveManager`; `autofighter/saves/key_manager.py` derives and stores the SQLCipher key when a password is supplied.
 
 ## Schema
-- Compact tables:
-  - `runs(id TEXT PRIMARY KEY, data BLOB NOT NULL)`
-  - `players(id TEXT PRIMARY KEY, data BLOB NOT NULL)`
+- `runs(id TEXT PRIMARY KEY, party TEXT, map TEXT)` stores the current run state.
+- Additional tables for players and settings will be added as features return.
 
-## SaveManager Usage
+## Usage
 ```python
+import os
 from pathlib import Path
-from autofighter.saves.encrypted_store import SaveManager
 
-with SaveManager(Path("save.db"), "password") as sm:
-    sm.queue_run('current', {'hp': 10})
-    sm.queue_player('player', {'name': 'Hero'})
-    run = sm.fetch_run('current')
-    player = sm.fetch_player('player')
+import sqlcipher3
+
+db_path = Path(os.getenv("AF_DB_PATH", "save.db"))
+key = os.getenv("AF_DB_KEY", "")
+
+conn = sqlcipher3.connect(db_path)
+conn.execute("PRAGMA key = ?", (key,))
 ```
-- `key_manager.derive_key(password, salt)` returns the hex key and salt. When a password is provided, `save_salt` and `load_salt` persist the salt next to the database as `save.key`.
-- Queued writes flush in a single transaction on context exit or `commit()`.
-- Use `key_manager.backup_key_file(src, dest)` and `key_manager.restore_key_file(src, dest)` to copy or restore the salt file.
-- High-level helpers in `autofighter/save.py` wrap `SaveManager` for run, player, and roster data.
-
-## Settings File
-
-- `autofighter/save.py` also reads and writes a plain `settings.json`.
-- `load_settings()` returns audio volumes, stat refresh rate, and pause toggle with defaults.
-- `save_settings(settings)` persists those values so Options menu changes survive restarts.
-- `save_roster(roster)` and `load_roster()` manage the player's owned character list.
+Queries on `conn` transparently read and write encrypted data.
 
 ## Recovery
-- If a session exits with an exception, pending writes roll back.
-- Lost passwords or salts require restoring from backups; without both the database cannot be decrypted.
+- Supply the same `AF_DB_KEY` to reopen the database.
+- Back up both the encrypted `save.db` and any stored key material to prevent data loss.

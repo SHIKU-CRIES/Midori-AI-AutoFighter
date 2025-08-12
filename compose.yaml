@@ -1,0 +1,40 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.js
+    ports:
+      - "59001:59001"
+  backend: &backend-base
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.python
+    ports:
+      - "59002:59002"
+  backend-llm-cuda:
+    <<: *backend-base
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.python
+      args:
+        UV_EXTRA: llm-cuda
+    profiles:
+      - llm-cuda
+  backend-llm-amd:
+    <<: *backend-base
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.python
+      args:
+        UV_EXTRA: llm-amd
+    profiles:
+      - llm-amd
+  backend-llm-cpu:
+    <<: *backend-base
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.python
+      args:
+        UV_EXTRA: llm-cpu
+    profiles:
+      - llm-cpu

@@ -1,11 +1,10 @@
 # Run Map
 
-Displays a minimal vertical list of room icons beneath `aspect2d` to represent
-the first floor layout. Each room uses a Lucide image from `assets/textures`
-(`icon_flame` for battle, `icon_folder_open` for shop, `icon_pause` for rest,
-`icon_message_square` for events, and `icon_power` for bosses). The icons are
-`DirectButton` instances so the first entry can invoke `enter_first_room`
-which builds a `BattleRoom` and swaps the scene.
+`RunMap.svelte` renders the floor layout returned by the Quart backend. The map
+prop is an array of room identifiers such as `start`, `battle`, and `boss`. The
+component displays these entries as a horizontal list of buttons and emits a
+`select` event with the chosen room. Room handling will be wired up once the
+endpoints exist.
 
 ## Testing
-- `uv run pytest`
+- `bun test frontend/tests/runmap.test.js`
