@@ -18,7 +18,7 @@ from plugins.foes.sample_foe import SampleFoe
 
 
 DB_PATH = Path(
-    os.getenv("AF_DB_PATH", Path(__file__).resolve().parents[1] / "save.db")
+    os.getenv("AF_DB_PATH", Path(__file__).resolve().parent / "save.db")
 )
 DB_KEY = os.getenv("AF_DB_KEY", "")
 

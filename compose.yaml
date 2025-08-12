@@ -5,6 +5,8 @@ services:
       dockerfile: ../Dockerfile.js
     ports:
       - "59001:59001"
+    volumes:
+      - ./frontend:/app
   backend: &backend-base
     build:
       context: ./backend
@@ -15,7 +17,7 @@ services:
       AF_DB_PATH: /app/save.db
       AF_DB_KEY: ${AF_DB_KEY}
     volumes:
-      - ./save.db:/app/save.db
+      - ./backend:/app
   backend-llm-cuda:
     <<: *backend-base
     build:

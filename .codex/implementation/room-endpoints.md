@@ -10,6 +10,9 @@ current `run_id` and returns data generated from the existing plugin system.
   - `name`: display name
   - `owned`: whether the player owns this character
   - `is_player`: true for the player's avatar
+- `GET /rooms/images` – returns a mapping of room types to background image URLs
+  served from `/assets/...`.
+- `GET /assets/<path>` – serves static assets bundled under `backend/assets/`.
 - `POST /rooms/<run_id>/battle` – loads the player's party and a sample foe
   plugin, applies each member's attack to the foe, and returns the updated foe
   HP alongside party stats.

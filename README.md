@@ -16,15 +16,16 @@ legacy/     # Previous Pygame version (read-only)
 
 1. Install [uv](https://github.com/astral-sh/uv) and
    [bun](https://bun.sh/).
-2. Start both services with Docker Compose:
+2. Start both services with Docker Compose (bind-mounted source):
 
 ```bash
-docker compose up --build
+docker compose up --build frontend backend
 ```
 
-Compose mounts `save.db` into the backend container and passes `AF_DB_KEY` so
-run data persists between restarts. The Svelte dev server listens on port
-`59001` and the Quart backend on `59002`.
+Compose bind-mounts `frontend/` and `backend/` into the containers. The backend
+stores its database at `backend/save.db` by default (override with
+`AF_DB_PATH`). Set `AF_DB_KEY` only if you’re using an encrypted database. The
+Svelte dev server listens on `59001` and the Quart backend on `59002`.
 
 ### Optional LLM Dependencies
 
@@ -40,15 +41,16 @@ uv sync --extra llm-cpu   # CPU-only
 Selecting the correct extra ensures hardware acceleration when available. These
 packages are optional; the core game runs without them.
 
-3. Run the backend directly:
+3. Run the backend directly (without Docker):
 
 ```bash
 cd backend
 uv run app.py
 ```
 
-The server looks for the encrypted save database using `AF_DB_PATH` (default
-`save.db` in the repository root) and decrypts it with `AF_DB_KEY`.
+The server uses `AF_DB_PATH` for the save database (default
+`backend/save.db`). If `AF_DB_KEY` is set, it attempts to open the database with
+that key; otherwise it opens plaintext.
 
 4. Install the latest build into another project:
 

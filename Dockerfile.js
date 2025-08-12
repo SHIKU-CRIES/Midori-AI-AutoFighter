@@ -30,7 +30,6 @@ RUN yay -Syu --noconfirm unzip && yay -Yccc --noconfirm
 RUN yay -S --noconfirm bun-bin && yay -Yccc --noconfirm
 
 WORKDIR /app
-COPY . .
-RUN bun install
 EXPOSE 59001
-CMD ["bun", "run", "dev", "--host", "0.0.0.0", "--port", "59001"]
+# Source will be bind-mounted at runtime; install deps in entrypoint
+CMD ["bash", "-lc", "/app/docker-entrypoint.sh"]
