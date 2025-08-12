@@ -12,6 +12,7 @@ from quart import jsonify
 from quart import request
 
 from plugins import players as player_plugins
+from plugins.foes.sample_foe import SampleFoe
 
 
 DB_PATH = Path(
@@ -108,22 +109,74 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
     return jsonify({"players": roster})
 
 
+def load_party(run_id: str) -> list[player_plugins.PlayerBase]:
+    conn = connect_db()
+    cur = conn.execute("SELECT party FROM runs WHERE id = ?", (run_id,))
+    row = cur.fetchone()
+    party_ids = json.loads(row[0]) if row else []
+    members: list[player_plugins.PlayerBase] = []
+    for pid in party_ids:
+        for name in player_plugins.__all__:
+            cls = getattr(player_plugins, name)
+            if cls.id == pid:
+                members.append(cls())
+                break
+    return members
+
+
 @app.post("/rooms/<run_id>/battle")
 async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
-    return jsonify({"run_id": run_id, "result": "battle", "action": data.get("action", "")})
+    party = load_party(run_id)
+    foe = SampleFoe()
+    foe_hp = 100
+    for member in party:
+        foe_hp -= member.atk
+    foes = [{"id": foe.id, "hp": max(foe_hp, 0)}]
+    party_data = [{"id": p.id, "hp": p.hp, "atk": p.atk} for p in party]
+    return jsonify(
+        {
+            "run_id": run_id,
+            "result": "battle",
+            "party": party_data,
+            "foes": foes,
+            "action": data.get("action", ""),
+        }
+    )
 
 
 @app.post("/rooms/<run_id>/shop")
 async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
-    return jsonify({"run_id": run_id, "result": "shop", "action": data.get("action", "")})
+    party = load_party(run_id)
+    party_data = [{"id": p.id, "gold": p.gold} for p in party]
+    return jsonify(
+        {
+            "run_id": run_id,
+            "result": "shop",
+            "party": party_data,
+            "foes": [],
+            "action": data.get("action", ""),
+        }
+    )
 
 
 @app.post("/rooms/<run_id>/rest")
 async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
-    return jsonify({"run_id": run_id, "result": "rest", "action": data.get("action", "")})
+    party = load_party(run_id)
+    for member in party:
+        member.hp = member.max_hp
+    party_data = [{"id": p.id, "hp": p.hp, "max_hp": p.max_hp} for p in party]
+    return jsonify(
+        {
+            "run_id": run_id,
+            "result": "rest",
+            "party": party_data,
+            "foes": [],
+            "action": data.get("action", ""),
+        }
+    )
 
 
 @app.post("/rooms/<run_id>/<room_id>/action")

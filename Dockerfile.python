@@ -6,29 +6,42 @@ ENV PYTHONOPTIMIZE=1
 ENV PYTHONUNBUFFERED=1
 
 ENV VIRTUAL_ENV=/.venv
-
 ENV UV_LINK_MODE=copy
 ENV UV_COMPILE_BYTECODE=1
 
 ARG UV_EXTRA=""
 
 # Update OS release info for clarity
+# NOTE: base image runs as a non-root user; keep sudo for system changes
 RUN sudo sed -i 's/Quartz/Backend-uv-server/g' /etc/os-release
 
-# Install uv, Docker, and Docker Compose using the system package manager
-RUN yay -Syu --noconfirm docker docker-compose uv && yay -Yccc --noconfirm
+# Install uv
+# NOTE: yay handles privilege escalation internally; do not prefix with sudo
+RUN yay -Syu --noconfirm uv && yay -Yccc --noconfirm
+
+# Install Docker
+# NOTE: yay handles privilege escalation internally; do not prefix with sudo
+RUN yay -Syu --noconfirm docker && yay -Yccc --noconfirm
+
+# Install Docker Compose
+# NOTE: yay handles privilege escalation internally; do not prefix with sudo
+RUN yay -Syu --noconfirm docker-compose && yay -Yccc --noconfirm
 
 # Ensure uv is on PATH
 ENV PATH="/root/.local/bin:${PATH}"
+ENV PYTHONPATH="/app"
 
 WORKDIR /app
 COPY . .
-RUN sudo chown -R ${USERNAME}:${USERNAME} /app
+# NOTE: do not hardcode user; pull from shell and keep sudo
+RUN sudo chown -R $(whoami):$(whoami) /app
 
 RUN sudo mkdir -p /.venv
-RUN sudo chown -R ${USERNAME}:${USERNAME} /.venv
+RUN sudo chown -R $(whoami):$(whoami) /.venv
 RUN sudo chmod -R 755 /.venv
 
+# NOTE: base image sets the user; avoid USER directives
 RUN uv sync ${UV_EXTRA:+--extra $UV_EXTRA}
 
-CMD ["sudo", "uv", "run", "app.py"]
+# Preserve PYTHONPATH when elevating to run the server
+CMD ["sudo", "-E", "uv", "run", "app.py"]

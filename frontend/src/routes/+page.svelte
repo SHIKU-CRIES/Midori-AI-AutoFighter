@@ -5,31 +5,59 @@
   import PlayerEditor from '$lib/PlayerEditor.svelte';
   import StatsPanel from '$lib/StatsPanel.svelte';
   import RunMap from '$lib/RunMap.svelte';
+  import RoomView from '$lib/RoomView.svelte';
   import { layoutForWidth } from '$lib/layout.js';
-  import { startRun, updateParty } from '$lib/api.js';
+  import {
+    startRun,
+    updateParty,
+    battleRoom,
+    shopRoom,
+    restRoom
+  } from '$lib/api.js';
 
   let width = 0;
   let runId = '';
   let currentMap = [];
   let selectedParty = ['sample_player'];
+  let roomData = null;
   let showPicker = false;
+  let pickerMode = '';
 
   function handleStart() {
+    pickerMode = 'start';
+    showPicker = true;
+  }
+
+  function handleParty() {
+    pickerMode = 'party';
     showPicker = true;
   }
 
   async function startAfterPick(event) {
     selectedParty = event.detail;
-    const data = await startRun();
-    runId = data.run_id;
-    currentMap = data.map;
-    await updateParty(runId, selectedParty);
+    if (pickerMode === 'start') {
+      const data = await startRun();
+      runId = data.run_id;
+      currentMap = data.map;
+      await updateParty(runId, selectedParty);
+    }
     showPicker = false;
+  }
+
+  async function handleRoom(room) {
+    if (!runId) return;
+    if (room === 'battle') {
+      roomData = await battleRoom(runId);
+    } else if (room === 'shop') {
+      roomData = await shopRoom(runId);
+    } else if (room === 'rest') {
+      roomData = await restRoom(runId);
+    }
   }
 
   const items = [
     { icon: Play, label: 'Run', action: handleStart },
-    { icon: Users, label: 'Party' },
+    { icon: Users, label: 'Party', action: handleParty },
     { icon: Settings, label: 'Settings' },
     { icon: SquareChartGantt, label: 'Stats' }
   ];
@@ -152,7 +180,10 @@
 {#if runId}
   <div class="run-info">
     <p data-testid="run-id">Run: {runId}</p>
-    <RunMap map={currentMap} />
+    <RunMap map={currentMap} on:select={(e) => handleRoom(e.detail)} />
+    {#if roomData}
+      <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
+    {/if}
   </div>
 {/if}
 

@@ -22,8 +22,9 @@ legacy/     # Previous Pygame version (read-only)
 docker compose up --build
 ```
 
-The Svelte dev server listens on port `59001` and the Quart backend on
-`59002`.
+Compose mounts `save.db` into the backend container and passes `AF_DB_KEY` so
+run data persists between restarts. The Svelte dev server listens on port
+`59001` and the Quart backend on `59002`.
 
 ### Optional LLM Dependencies
 
@@ -57,12 +58,14 @@ uv add git+https://github.com/Midori-AI/Midori-AI-AutoFighter@main
 
 ### Docker Compose LLM Profiles
 
-Enable optional LLM dependencies with Compose profiles:
+Enable optional LLM dependencies with Compose profiles. All profiles reuse port
+`59002` and intentionally conflict with the standard backend—only one profile
+should run at a time:
 
 ```bash
-docker compose --profile llm-cuda up --build
-docker compose --profile llm-amd up --build
-docker compose --profile llm-cpu up --build
+docker compose --profile llm-cuda up --build   # backend on 59002
+docker compose --profile llm-amd up --build    # backend on 59002
+docker compose --profile llm-cpu up --build    # backend on 59002
 ```
 
 ## Responsive Layout

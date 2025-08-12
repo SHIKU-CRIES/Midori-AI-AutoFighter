@@ -7,4 +7,5 @@ The Svelte frontend adapts the interface to three viewport ranges:
 - **Phone (<600px)** – focuses on a single menu at a time for clarity on small screens.
 
 ## Testing
+- `layoutForWidth` maps breakpoints and `panelsForWidth` lists visible panels.
 - `cd frontend && bun test`

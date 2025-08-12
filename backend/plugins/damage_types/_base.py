@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from autofighter.stats import Stats
+if TYPE_CHECKING:
+    from autofighter.stats import Stats
 
 
 @dataclass

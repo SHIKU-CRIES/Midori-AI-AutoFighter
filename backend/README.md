@@ -16,11 +16,12 @@ uv run app.py
 The root endpoint returns a simple status payload. Additional routes support
 starting runs, updating the party, retrieving floor maps, listing available
 player characters, and posting actions to battle, shop, or rest rooms. Run state
-is stored in `save.db` to persist between sessions.
+is stored in `save.db` to persist between sessions, and `compose.yaml` mounts
+that file into the container and forwards `AF_DB_KEY`.
 
 ## Docker
 
-`Dockerfile.python` installs Docker and Docker Compose in the image and exposes a `UV_EXTRA` build argument for optional extras.
+`Dockerfile.python` installs uv, Docker, and Docker Compose in separate steps and prepares the `/.venv` directory with individual RUN commands. It exposes a `UV_EXTRA` build argument for optional extras.
 
 ```bash
 docker build -f Dockerfile.python --build-arg UV_EXTRA="llm-cpu" -t autofighter-backend .

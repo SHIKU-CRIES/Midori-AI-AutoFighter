@@ -11,6 +11,11 @@ services:
       dockerfile: ../Dockerfile.python
     ports:
       - "59002:59002"
+    environment:
+      AF_DB_PATH: /app/save.db
+      AF_DB_KEY: ${AF_DB_KEY}
+    volumes:
+      - ./save.db:/app/save.db
   backend-llm-cuda:
     <<: *backend-base
     build:
@@ -18,6 +23,8 @@ services:
       dockerfile: ../Dockerfile.python
       args:
         UV_EXTRA: llm-cuda
+    ports:
+      - "59002:59002" # conflicts with default backend
     profiles:
       - llm-cuda
   backend-llm-amd:
@@ -27,6 +34,8 @@ services:
       dockerfile: ../Dockerfile.python
       args:
         UV_EXTRA: llm-amd
+    ports:
+      - "59002:59002" # conflicts with default backend
     profiles:
       - llm-amd
   backend-llm-cpu:
@@ -36,5 +45,7 @@ services:
       dockerfile: ../Dockerfile.python
       args:
         UV_EXTRA: llm-cpu
+    ports:
+      - "59002:59002" # conflicts with default backend
     profiles:
       - llm-cpu

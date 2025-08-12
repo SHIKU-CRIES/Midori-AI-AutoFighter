@@ -3,5 +3,13 @@
 export { default as PartyPicker } from './PartyPicker.svelte';
 export { default as PlayerEditor } from './PlayerEditor.svelte';
 export { default as StatsPanel } from './StatsPanel.svelte';
+export { default as RoomView } from './RoomView.svelte';
 export { layoutForWidth } from './layout.js';
-export { startRun, updateParty, fetchMap } from './api.js';
+export {
+  startRun,
+  updateParty,
+  fetchMap,
+  battleRoom,
+  shopRoom,
+  restRoom
+} from './api.js';

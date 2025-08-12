@@ -11,6 +11,8 @@ The `Stats` dataclass stores core attributes for both players and foes:
 - **Vitality & Advanced:** `vitality`, `action_points`, `damage_taken`, `damage_dealt`, `kills`
 - **Status Lists:** `passives`, `dots`, `hots`, `damage_types`, `relics`
 
+`base_damage_type` is a `DamageType` plugin instance (default `Generic`) instead of a string, allowing damage hooks.
+
 `apply_damage()` and `apply_healing()` update `hp` and track totals such as `damage_taken` and `last_damage_taken`.
 
 ## Modifiers
