@@ -29,7 +29,7 @@
 
   function handleParty() {
     pickerMode = 'party';
-    showPicker = true;
+    showPicker = false;
   }
 
   async function startAfterPick(event) {
