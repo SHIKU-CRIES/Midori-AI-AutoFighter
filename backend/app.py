@@ -231,4 +231,15 @@ async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
             "party": party_data,
             "foes": [],
             "action": data.get("action", ""),
-      
+        }
+    )
+
+
+@app.post("/rooms/<run_id>/<room_id>/action")
+async def room_action(run_id: str, room_id: str) -> tuple[str, int, dict[str, str]]:
+    data = await request.get_json(silent=True) or {}
+    return jsonify({"run_id": run_id, "room_id": room_id, "action": data.get("action", "noop")})
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=59002)
