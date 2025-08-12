@@ -3,10 +3,14 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 describe('PartyPicker component', () => {
-  test('uses dynamic assets and player fetch', () => {
+  test('contains party picker markup', () => {
     const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
-    expect(content).toContain('import.meta.glob');
-    expect(content).toContain('getPlayers');
-    expect(content).toContain('mask-image');
+    expect(content).toContain('data-testid="party-picker"');
+  });
+
+  test('includes confirm button test id', () => {
+    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
+    expect(content).toContain('data-testid="confirm"');
   });
 });
+

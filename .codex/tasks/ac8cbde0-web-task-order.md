@@ -14,8 +14,8 @@ Ordered steps for moving Midori AI AutoFighter to a Svelte frontend and a Python
  - [x] [Party picker](done/f9c45e2e-party-picker.md) (`f9c45e2e`)
  - [x] [Responsive layout for Svelte UI](done/33c77b60-responsive-layout.md) (`33c77b60`)
  - [x] [Expose battle, shop, and rest endpoints](done/b0755eeb-room-endpoints.md) (`b0755eeb`)
- - [ ] [Scaffold Quart backend](done/1faf53ba-quart-backend-scaffold.md) (`1faf53ba`)
- - [ ] [Run start and map display](done/dc3d4f2e-run-start-map-display.md) (`dc3d4f2e`)
+ - [x] [Scaffold Quart backend](done/1faf53ba-quart-backend-scaffold.md) (`1faf53ba`)
+ - [x] [Run start and map display](done/dc3d4f2e-run-start-map-display.md) (`dc3d4f2e`)
 
 ### Completed
 

@@ -15,9 +15,12 @@ uv run app.py
 
 The root endpoint returns a simple status payload. Additional routes support
 starting runs, updating the party, retrieving floor maps, listing available
-player characters, and posting actions to battle, shop, or rest rooms. Run state
+player characters, returning room background images, and posting actions to battle, shop, or rest rooms. Run state
 is stored in `save.db` to persist between sessions, and `compose.yaml` mounts
 that file into the container and forwards `AF_DB_KEY`.
+
+Static assets are served from `/assets/<path>`; for example, `GET /rooms/images`
+returns a JSON mapping of room types to background image URLs under `/assets/...`.
 
 ## Docker
 
@@ -26,4 +29,3 @@ that file into the container and forwards `AF_DB_KEY`.
 ```bash
 docker build -f Dockerfile.python --build-arg UV_EXTRA="llm-cpu" -t autofighter-backend .
 ```
-

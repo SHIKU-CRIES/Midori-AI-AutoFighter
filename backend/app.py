@@ -10,6 +10,8 @@ import sqlcipher3
 from quart import Quart
 from quart import jsonify
 from quart import request
+from quart import send_from_directory
+from quart import url_for
 
 from plugins import players as player_plugins
 from plugins.foes.sample_foe import SampleFoe
@@ -22,9 +24,25 @@ DB_KEY = os.getenv("AF_DB_KEY", "")
 
 
 def connect_db() -> sqlcipher3.Connection:
-    conn = sqlcipher3.connect(DB_PATH)
-    conn.execute(f"PRAGMA key = '{DB_KEY}'")
-    return conn
+    # Try to open with encryption key if provided; otherwise open plaintext.
+    if DB_KEY:
+        try:
+            conn = sqlcipher3.connect(DB_PATH)
+            conn.execute(f"PRAGMA key = '{DB_KEY}'")
+            # Touch the database to validate key usage
+            conn.execute("PRAGMA user_version")
+            return conn
+        except Exception:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            # Fallback to plaintext if the file is not encrypted
+            conn = sqlcipher3.connect(DB_PATH)
+            return conn
+    else:
+        # No key provided: open as plaintext
+        return sqlcipher3.connect(DB_PATH)
 
 
 def init_db() -> None:
@@ -52,6 +70,15 @@ app = Quart(__name__)
 @app.get("/")
 async def status() -> tuple[str, int, dict[str, str]]:
     return jsonify({"status": "ok"})
+
+
+# Expose static assets (e.g., backgrounds) for simple image serving
+ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+
+
+@app.get("/assets/<path:filename>")
+async def assets(filename: str):
+    return await send_from_directory(ASSETS_DIR, filename)
 
 
 @app.post("/run/start")
@@ -88,6 +115,18 @@ async def get_map(run_id: str) -> tuple[str, int, dict[str, str]]:
     if row is None:
         return jsonify({"error": "run not found"}), 404
     return jsonify({"map": json.loads(row[0])})
+
+
+@app.get("/rooms/images")
+async def room_images() -> tuple[str, int, dict[str, str]]:
+    # Basic mapping of room types to background images
+    mapping = {
+        "battle": "textures/backgrounds/background_01.png",
+        "shop": "textures/backgrounds/background_02.png",
+        "rest": "textures/backgrounds/background_03.png",
+    }
+    images = {key: f"/assets/{rel}" for key, rel in mapping.items()}
+    return jsonify({"images": images})
 
 
 @app.get("/players")
@@ -187,4 +226,3 @@ async def room_action(run_id: str, room_id: str) -> tuple[str, int, dict[str, st
 
 if __name__ == "__main__":
     app.run(port=59002)
-
