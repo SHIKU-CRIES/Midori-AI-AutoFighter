@@ -142,8 +142,18 @@
     overflow-y: auto;
   }
   @media (min-width: 1024px) {
-    .stack { flex-direction: row; }
-    .stack > section { flex: 1; }
+    .stack {
+      flex-direction: row;
+      flex: none;
+      height: auto;
+    }
+    .stack > section {
+      flex: none;
+      width: 48%;
+      height: auto;
+      max-height: none;
+      overflow: visible;
+    }
   }
   .section h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: #ddd; }
 
@@ -162,7 +172,7 @@
   /* Fixed GameViewport height */
   .viewport-wrap {
     flex: none;
-    height: 60vh;
+    height: 65vh;
     overflow: hidden;
     border: 2px solid #fff;
   }
