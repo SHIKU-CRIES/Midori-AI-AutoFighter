@@ -143,6 +143,8 @@
     padding: 0.4rem 0.75rem 0.75rem 0.75rem;
     box-sizing: border-box;
     z-index: 5; /* under top bar */
+    max-height: calc(83% - 5.2rem);
+    overflow: hidden;
   }
 
 </style>

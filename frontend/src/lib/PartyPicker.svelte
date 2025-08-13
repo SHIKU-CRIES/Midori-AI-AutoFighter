@@ -117,7 +117,7 @@
   padding: 0.5rem;
   box-sizing: border-box;
   backdrop-filter: blur(4px);
-  overflow: auto;
+  overflow: hidden;
   }
   .full > .roster {
     display: grid;
@@ -288,8 +288,8 @@
   .roster-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 0.4rem;
+    padding: 0.4rem;
     height: 100%;
     overflow-y: auto;
     justify-content: stretch;
@@ -304,8 +304,8 @@
   transition: all 0.2s ease;
   width: 100%;
   aspect-ratio: 1;
-  max-height: 120px;
-  min-height: 60px;
+  max-height: 80px;
+  min-height: 50px;
   margin: 0 auto;
   padding: 0;
   background: none;

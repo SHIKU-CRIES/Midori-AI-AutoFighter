@@ -111,8 +111,8 @@
   .menu-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.5rem;
-    padding: 0.25rem;
+    gap: 0.3rem;
+    padding: 0.2rem;
   }
 
   .cell {
@@ -121,26 +121,27 @@
     align-items: center;
     justify-content: center;
     border: 2px solid #fff;
-    padding: 0.5rem;
+    padding: 0.3rem;
     background: #111;
     color: #fff;
     cursor: pointer;
-    min-height: 60px;
+    min-height: 50px;
+    font-size: 0.85rem;
   }
 
   .cell svg {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     stroke-width: 2;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
   }
 
-  .panel { border: 2px solid #fff; padding: 0.25rem; background: #0a0a0a; }
+  .panel { border: 2px solid #fff; padding: 0.2rem; background: #0a0a0a; }
   /* Bottom panels container: fill row and hide overflow */
   .stack {
     display: flex;
     flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   /* allow panel row to size to its content */
   height: auto;
     /* ensure panels fill grid track without overflow */
@@ -160,7 +161,7 @@
       overflow: auto;
     }
   }
-  .section h3 { margin: 0 0 0.25rem 0; font-size: 0.9rem; color: #ddd; }
+  .section h3 { margin: 0 0 0.2rem 0; font-size: 0.8rem; color: #ddd; }
 
   .overlay {
     position: fixed;
