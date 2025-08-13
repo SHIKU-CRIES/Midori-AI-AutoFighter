@@ -57,9 +57,25 @@
   const items = [
     { icon: Play, label: 'Run', action: handleStart },
     { icon: Users, label: 'Party', action: handleParty },
-    { icon: Settings, label: 'Settings' },
+    { icon: Settings, label: 'Settings', action: handleSettings },
     { icon: SquareChartGantt, label: 'Stats' }
   ];
+  // Settings controls
+  let showSettings = false;
+  let soundVol = 50;
+  let musicVol = 50;
+  let voiceVol = 50;
+
+  function handleSettings() {
+    showSettings = true;
+  }
+  function confirmSettings() {
+    // TODO: apply volume settings via API or state
+    showSettings = false;
+  }
+  function cancelSettings() {
+    showSettings = false;
+  }
 
   onMount(() => {
     const update = () => (width = window.innerWidth);
@@ -109,6 +125,10 @@
 
   .panel { border: 2px solid #fff; padding: 0.75rem; background: #0a0a0a; }
   .stack { display: flex; flex-direction: column; gap: 1rem; }
+  @media (min-width: 1024px) {
+    .stack { flex-direction: row; }
+    .stack > section { flex: 1; }
+  }
   .section h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: #ddd; }
 
   .overlay {
@@ -167,4 +187,27 @@
   </div>
 {/if}
 
-<!-- Global overlay removed; picker now renders inside the 16:9 viewport during Run start -->
+<!-- Settings Panel -->
+{#if showSettings}
+  <div class="overlay">
+    <div class="panel section" style="width: 90%; max-width: 400px;">
+      <h3>Settings</h3>
+      <div>
+        <label>Sound Volume: {soundVol}%</label>
+        <input type="range" min="0" max="100" bind:value={soundVol} />
+      </div>
+      <div>
+        <label>Music Volume: {musicVol}%</label>
+        <input type="range" min="0" max="100" bind:value={musicVol} />
+      </div>
+      <div>
+        <label>Voice Volume: {voiceVol}%</label>
+        <input type="range" min="0" max="100" bind:value={voiceVol} />
+      </div>
+      <div class="stats-confirm" style="margin-top:1rem; display:flex; justify-content:flex-end; gap:0.5rem;">
+        <button class="cell" on:click={cancelSettings}>Cancel</button>
+        <button class="cell" on:click={confirmSettings}>Confirm</button>
+      </div>
+    </div>
+  </div>
+{/if}
