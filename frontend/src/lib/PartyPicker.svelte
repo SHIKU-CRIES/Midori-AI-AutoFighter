@@ -106,7 +106,7 @@
   }
   .full {
   display: grid;
-  grid-template-columns: 200px 1fr 220px;
+  grid-template-columns: 200px 1fr 350px;
   gap: 0.75rem;
   width: 100%;
   height: 100%;
@@ -213,6 +213,7 @@
   /* New stats panel styling */
   .stats-panel {
     flex: 1;
+    width: 350px;
     background: rgba(0,0,0,0.25);
     border-left: 2px solid #444;
     padding: 1rem;
@@ -304,7 +305,7 @@
   transition: all 0.2s ease;
   width: 100%;
   aspect-ratio: 1;
-  max-height: 80px;
+  max-height: 100%;
   min-height: 50px;
   margin: 0 auto;
   padding: 0;
