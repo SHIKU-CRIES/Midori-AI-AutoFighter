@@ -343,48 +343,42 @@
     align-items: center;
     justify-content: center;
     background: #000;
-    border: 2px solid currentColor;
-    color: currentColor; /* icon color drives both stroke and border */
-    stroke: currentColor;
+    border: 2px solid currentColor; 
+    color: currentColor; 
   }
-  .party-icon.fire { border-color: #e25822; color: #e25822; }
-  .party-icon.ice { border-color: #82caff; color: #82caff; }
-  .party-icon.lightning { border-color: #ffd700; color: #ffd700; }
-  .party-icon.light { border-color: #ffff99; color: #ffff99; }
-  .party-icon.dark { border-color: #8a2be2; color: #8a2be2; }
-  .party-icon.wind { border-color: #7fff7f; color: #7fff7f; }
-
-  /* ensure SVG strokes follow currentColor for proper element coloring */
-  .party-icon {
-    stroke: currentColor;
-  }
-  /* Compact mode: show only colored circle icons in a horizontal list */
+  /* Compact mode: small photo thumbnails in side panel */
   .roster.list.compact {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 1rem;
-    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+    padding: 0.5rem;
     background: transparent;
     border: none;
   }
   .roster.list.compact .char-btn {
+    border: none;
+    background: transparent;
     padding: 0;
+  }
+  .roster.list.compact .char-btn img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #fff;
   }
 </style>
 
   {#if compact}
-  <!-- compact mode: only show party icons in existing panel -->
+  <!-- compact mode: small portrait thumbnails for party side menu -->
   <div class="roster list compact" data-testid="roster">
     {#each roster.filter(c => selected.includes(c.id)) as char}
       <button
         data-testid={`choice-${char.id}`}
         class="char-btn"
-        class:selected={selected.includes(char.id)}
         on:click={() => toggle(char.id)}>
-        <svelte:component this={iconFor(char.element)}
-          class={`party-icon ${char.element.toLowerCase()}`}
-          aria-hidden="true" />
+        <img src={char.img} alt={char.name} class="compact-img" />
       </button>
     {/each}
   </div>
@@ -401,6 +395,7 @@
           on:click={() => toggle(char.id)}>
           <img src={char.img} alt={char.name} class="card-img" />
           <div class="card-overlay">
+            <!-- use default small element icon -->
             <svelte:component this={iconFor(char.element)} class="elem" aria-hidden="true" />
             <span class="card-name">{char.name}</span>
             <span class="card-level">LVL {char.stats.level}</span>

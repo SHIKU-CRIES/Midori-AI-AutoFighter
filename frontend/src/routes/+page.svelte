@@ -152,7 +152,7 @@
 
     <section class="panel section">
       <h3>Party</h3>
-      <PartyPicker compact bind:selected={selectedParty} />
+  <PartyPicker compact bind:selected={selectedParty} />
     </section>
 
     <!-- Player Editor and Stats hidden for now to simplify layout -->

@@ -117,7 +117,7 @@
   .icon-btn {
   background: rgba(255,255,255,0.10);
   border: none;
-  border-radius: 50%; /* make buttons circular */
+  border-radius: 0; /* square buttons for game UI */
   width: 2.9rem;
   height: 2.9rem;
   display: flex;
@@ -188,7 +188,7 @@
         {/if}
         {#if viewMode === 'party'}
           <div class="party-mode-surface">
-            <!-- compact circle-only party icons -->
+            <!-- compact party picker overlay: only show current party circles -->
             <PartyPicker compact bind:selected={selected} showConfirm on:confirm={handleConfirm} />
           </div>
         {/if}
