@@ -89,29 +89,35 @@
   }
   /* Fullscreen layout inside game viewport */
   .party-picker-in-viewport {
-    position: absolute;
-    top: 5rem;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: calc(100% - 5rem);
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-    z-index: 20;
+  position: absolute;
+  top: 5rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: calc(100vh - 5rem);
+  max-width: 100vw;
+  max-height: calc(100vh - 5rem);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  z-index: 20;
+  overflow: auto;
   }
   .full {
-    display: grid;
-    grid-template-columns: 240px 1fr 280px;
-    gap: 1rem;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.65);
-    border: 2px solid #777;
-    padding: 1rem;
-    box-sizing: border-box;
-    backdrop-filter: blur(4px);
+  display: grid;
+  grid-template-columns: 200px 1fr 220px;
+  gap: 0.75rem;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  background: rgba(0,0,0,0.65);
+  border: 2px solid #777;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  backdrop-filter: blur(4px);
+  overflow: auto;
   }
   .full > .roster {
     display: grid;
@@ -183,19 +189,26 @@
   }
   :global(.elem) { width: 18px; height: 18px; opacity: 0.85; }
   .preview { 
-    display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
     justify-content: center;
     padding: 1rem;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
   }
-  .preview img { 
-    max-width: 90%; 
-    max-height: 90%; 
-    object-fit: contain; 
-    border: 3px solid #555; 
-    background: #222; 
+  .preview img {
+    max-width: 40vw;
+    max-height: 40vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border: 3px solid #555;
+    background: #222;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    display: block;
+    margin: 0 auto;
   }
   /* New stats panel styling */
   .stats-panel {
@@ -255,32 +268,46 @@
     font-style: italic;
   }
   .stats-confirm {
-    display: flex;
-    justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 32px;
+  padding: 0.15rem 0;
+  margin-top: 0.25rem;
   }
   button.confirm {
-    border: 2px solid #fff;
-    background: transparent;
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    align-self: flex-end;
+  border: 1.5px solid #fff;
+  background: transparent;
+  color: #fff;
+  padding: 0.12rem 0.4rem;
+  align-self: flex-end;
+  font-size: 0.95rem;
+  min-height: 28px;
+  border-radius: 6px;
   }
   .roster-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 90px));
+    gap: 0.5rem;
     padding: 0.5rem;
+    height: 100%;
     overflow-y: auto;
-    flex: 1;
+    justify-content: center;
   }
   .char-card {
-    position: relative;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+  max-width: 72px;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  padding: 0;
+  background: none;
   }
   .char-card:hover {
     transform: translateY(-2px);
@@ -291,9 +318,12 @@
     box-shadow: 0 0 12px rgba(255,215,0,0.6);
   }
   .card-img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
+  width: 72px;
+  height: 72px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
   }
   .card-overlay {
     position: absolute;
