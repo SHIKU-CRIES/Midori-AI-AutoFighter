@@ -145,20 +145,19 @@
         <button class="icon-btn" title="Settings">
           <Settings size={22} color="#fff" />
         </button>
-          {#if viewMode === 'party'}
-            <button class="icon-btn" title="Back to Menu" on:click={() => viewMode = 'main'}>
-              <ArrowLeft size={22} color="#fff" />
-            </button>
-          {:else}
-            <button class="icon-btn" title="Party" on:click={() => viewMode = 'party'}>
-              <Users size={22} color="#fff" />
-            </button>
-          {/if}
+        {#if viewMode === 'party'}
+          <button class="icon-btn" title="Back to Menu" on:click={() => viewMode = 'main'}>
+            <ArrowLeft size={22} color="#fff" />
+          </button>
+        {/if}
       </div>
         {#if viewMode === 'main'}
           <div class="viewport-right-bar">
             <button class="icon-btn" title="Run">
               <Play size={32} color="#fff" />
+            </button>
+            <button class="icon-btn" title="Party" on:click={() => viewMode = 'party'}>
+              <Users size={32} color="#fff" />
             </button>
             <button class="icon-btn" title="Settings">
               <Settings size={32} color="#fff" />
