@@ -188,8 +188,8 @@
         {/if}
         {#if viewMode === 'party'}
           <div class="party-mode-surface">
-            <!-- compact party picker overlay: only show current party circles -->
-            <PartyPicker compact bind:selected={selected} showConfirm on:confirm={handleConfirm} />
+            <!-- full party picker overlay: show roster, preview, and stats -->
+            <PartyPicker bind:selected={selected} showConfirm on:confirm={handleConfirm} />
           </div>
         {/if}
   </div>
