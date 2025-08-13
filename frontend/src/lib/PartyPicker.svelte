@@ -198,8 +198,8 @@
     box-sizing: border-box;
   }
   .preview img {
-    max-width: 40vw;
-    max-height: 40vh;
+    max-width: 80%;
+    max-height: 80%;
     width: auto;
     height: auto;
     object-fit: contain;

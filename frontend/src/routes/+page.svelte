@@ -101,8 +101,8 @@
   /* Page split: viewport 75vh and panels auto height */
   .layout {
     display: grid;
-  /* viewport fills available space, panels auto height */
-  grid-template-rows: 1fr auto;
+    /* viewport fills available space, panels auto height */
+    grid-template-rows: 1fr auto;
     height: 100vh;
     gap: 1rem;
     padding: 1rem;
@@ -116,7 +116,7 @@
   }
 
   .cell {
-    display: flex;
+    display: auto;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -125,7 +125,6 @@
     background: #111;
     color: #fff;
     cursor: pointer;
-    min-height: 50px;
     font-size: 0.85rem;
   }
 
