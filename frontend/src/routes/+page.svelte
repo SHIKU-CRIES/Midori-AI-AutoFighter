@@ -88,14 +88,23 @@
 </script>
 
 <style>
-  :global(body) {
+  /* constrain page height and hide overflow */
+  :global(html, body) {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
     background: #000;
     color: #fff;
   }
-  .layout { display: grid; min-height: 100vh; gap: 1rem; padding: 1rem; align-items: start; }
-  @media (min-width: 1024px) { .layout { grid-template-columns: 1fr; } }
-  @media (min-width: 600px) and (max-width: 1023px) { .layout { grid-template-columns: 1fr; } }
-  @media (max-width: 599px) { .layout { grid-template-columns: 1fr; } }
+  /* layout as flex column to structure viewport and panels */
+  .layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 1rem;
+    gap: 1rem;
+  }
 
   .menu-grid {
     display: grid;
@@ -124,7 +133,14 @@
   }
 
   .panel { border: 2px solid #fff; padding: 0.75rem; background: #0a0a0a; }
-  .stack { display: flex; flex-direction: column; gap: 1rem; }
+  /* Panels grow and scroll if needed */
+  .stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+  }
   @media (min-width: 1024px) {
     .stack { flex-direction: row; }
     .stack > section { flex: 1; }
@@ -142,19 +158,29 @@
     align-items: center;
     justify-content: center;
   }
+
+  /* Fixed GameViewport height */
+  .viewport-wrap {
+    flex: none;
+    height: 60vh;
+    overflow: hidden;
+    border: 2px solid #fff;
+  }
 </style>
 
 <div class="layout">
   <!-- Left: 16:9 Game Viewport -->
-  <GameViewport
-    runId={runId}
-    roomData={roomData}
-    background={viewportBg}
-    showPicker={showPicker}
-    pickerMode={pickerMode}
-    bind:selected={selectedParty}
-    on:confirm={startAfterPick}
-  />
+  <div class="viewport-wrap">
+    <GameViewport
+      runId={runId}
+      roomData={roomData}
+      background={viewportBg}
+      showPicker={showPicker}
+      pickerMode={pickerMode}
+      bind:selected={selectedParty}
+      on:confirm={startAfterPick}
+    />
+  </div>
 
   <!-- Right: Stacked panels on desktop; full-width on tablet/phone -->
   <div class="stack">
