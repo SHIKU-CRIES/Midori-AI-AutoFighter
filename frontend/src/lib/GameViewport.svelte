@@ -6,15 +6,16 @@
   import PartyPicker from './PartyPicker.svelte';
   import { Diamond, User, Users, Settings, Play, LogOut } from 'lucide-svelte';
   import { onMount } from 'svelte';
+  import { getHourlyBackground } from './assetLoader.js';
+  
   export let runId = '';
   export let roomData = null;
   export let background = '';
   let randomBg = '';
-  const bgModules = import.meta.glob('./assets/backgrounds/*.png', { eager: true, import: 'default', query: '?url' });
-  const backgrounds = Object.values(bgModules);
+  
   onMount(() => {
     if (!background) {
-      randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      randomBg = getHourlyBackground();
     }
   });
   export let showPicker = false;
@@ -131,6 +132,19 @@
     box-shadow: 0 2px 8px 0 rgba(0,40,120,0.18);
   }
 
+  /* Party picker fullscreen container below top bar */
+  .party-mode-surface {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 5.2rem; /* below stained glass bar */
+    display: flex;
+    padding: 0.4rem 0.75rem 0.75rem 0.75rem;
+    box-sizing: border-box;
+    z-index: 5; /* under top bar */
+  }
+
 </style>
 
 <div class="viewport-wrap">
@@ -173,7 +187,7 @@
           {/if}
         {/if}
         {#if viewMode === 'party'}
-          <div class="party-picker-in-viewport">
+          <div class="party-mode-surface">
             <PartyPicker bind:selected={selected} showConfirm on:confirm={handleConfirm} />
           </div>
         {/if}

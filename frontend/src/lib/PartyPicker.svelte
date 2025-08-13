@@ -2,15 +2,10 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import { getPlayers } from './api.js';
   import { Flame, Snowflake, Zap, Sun, Moon, Wind, Circle } from 'lucide-svelte';
+  import { getCharacterImage, getHourlyBackground, getRandomFallback } from './assetLoader.js';
 
   const dispatch = createEventDispatcher();
-  const bgModules = import.meta.glob('./assets/backgrounds/*.png', { eager: true, import: 'default', query: '?url' });
-  const backgrounds = Object.values(bgModules);
-  let background = backgrounds[0];
-
-  const portraitModules = import.meta.glob('./assets/characters/*.png', { eager: true, import: 'default', query: '?url' });
-  const portraits = portraitModules;
-  const fallbackPortrait = portraits['./assets/characters/fallback.png'];
+  let background = '';
 
   let roster = [];
   let error = '';
@@ -18,22 +13,20 @@
   export let selected = [];
   export let showConfirm = false;
   export let compact = false;
+  let previewId;
 
-  function randomPortrait() {
-    const keys = Object.keys(portraits);
-    return portraits[keys[Math.floor(Math.random() * keys.length)]];
-  }
+  let activeTab = 'Core';
+  const statTabs = ['Core', 'Offense', 'Defense'];
 
   onMount(async () => {
-    background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    background = getHourlyBackground();
     try {
       const data = await getPlayers();
       roster = data.players
         .map(p => ({
           id: p.id,
           name: p.name,
-          img: (portraits[`./assets/characters/${p.id}.png`] 
-                ?? (p.is_player ? fallbackPortrait : randomPortrait())),
+          img: getCharacterImage(p.id, p.is_player) || getRandomFallback(),
           owned: p.owned,
           is_player: p.is_player,
           element: p.element ?? 'Generic',
@@ -44,6 +37,7 @@
       const player = roster.find(p => p.is_player);
       if (player) {
         selected = [player.id];
+        previewId = player.id;
       }
     } catch (e) {
       error = 'Unable to load roster. Is the backend running on 59002?';
@@ -53,6 +47,8 @@
   function toggle(id) {
     const char = roster.find(c => c.id === id);
     if (char && char.is_player) {
+      // allow preview of player but prevent toggling selection
+      previewId = id;
       return;
     }
     if (selected.includes(id)) {
@@ -60,6 +56,7 @@
     } else if (selected.length < 4) {
       selected = [...selected, id];
     }
+    previewId = id;
   }
 
   function confirm() {
@@ -93,9 +90,12 @@
   /* Fullscreen layout inside game viewport */
   .party-picker-in-viewport {
     position: absolute;
-    inset: 0;
+    top: 5rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 5rem);
     display: flex;
     align-items: stretch;
     justify-content: stretch;
@@ -103,32 +103,22 @@
   }
   .full {
     display: grid;
-    grid-template-columns: 220px 1fr 260px;
-    gap: 0.75rem;
+    grid-template-columns: 240px 1fr 280px;
+    gap: 1rem;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.55);
-    border: 2px solid #666;
-    padding: 0.75rem;
+    background: rgba(0,0,0,0.65);
+    border: 2px solid #777;
+    padding: 1rem;
     box-sizing: border-box;
+    backdrop-filter: blur(4px);
   }
   .full > .roster {
-    border-right: 2px solid #444;
-    background: rgba(0,0,0,0.25);
-    padding-right: 0.5rem;
-  }
-  .full > .preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.18);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     border-right: 2px solid #444;
     border-left: 2px solid #444;
     min-width: 0;
-  }
-  .full > .stats {
-    background: rgba(0,0,0,0.18);
-    padding-left: 0.5rem;
   }
   .panel.compact {
     width: 100%;
@@ -140,43 +130,133 @@
     max-height: 200px;
   }
   .roster {
-    max-height: 10rem;
     overflow-y: auto;
-    mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-  }
-  .panel.compact .roster { max-height: 5.5rem; }
-  .list { display: flex; flex-direction: column; gap: 0.25rem; }
-  .char-btn {
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
-    border: 2px solid #fff;
-    background: rgba(0,0,0,0.6);
+    padding: 0.5rem 0;
+    height: 100%;
+    gap: 0.75rem;
+    border: 2px solid #555;
+    background: rgba(0,0,0,0.7);
     color: #fff;
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0.75rem;
     width: 100%;
     justify-content: flex-start;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(2px);
   }
-  .panel.compact .char-btn { border-color: #777; padding: 0.15rem 0.35rem; font-size: 0.85rem; }
-  .char-btn.selected {
-    background: #fff;
-    color: #000;
+  .char-btn:hover {
+    border-color: #888;
+    background: rgba(20,20,20,0.8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .panel.compact .char-btn { 
+    border-color: #777;
+    padding: 0.15rem 0.35rem;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+    border-radius: 4px;
   }
   .char-btn img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    border: 2px solid #333;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   }
-  .panel.compact .char-btn img { width: 20px; height: 20px; }
-  .elem { width: 16px; height: 16px; opacity: 0.9; }
-  .preview { display: flex; align-items: center; justify-content: center; }
-  .preview img { max-width: 100%; max-height: 100%; object-fit: contain; border: 2px solid #333; background: #222; border-radius: 8px; }
-  .stats { display: grid; grid-template-columns: auto 1fr; column-gap: 0.5rem; row-gap: 0.25rem; }
-  .stats h4 { margin: 0 0 0.5rem 0; grid-column: 1 / -1; font-size: 1rem; color: #ddd; }
+  .char-btn.selected img {
+    border-color: #000;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  }
+  .panel.compact .char-btn img { 
+    width: 24px; 
+    height: 24px;
+    border-radius: 4px;
+    border-width: 1px;
+  }
+  :global(.elem) { width: 18px; height: 18px; opacity: 0.85; }
+  .preview { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 1rem;
+  }
+  .preview img { 
+    max-width: 90%; 
+    max-height: 90%; 
+    object-fit: contain; 
+    border: 3px solid #555; 
+    background: #222; 
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  /* New stats panel styling */
+  .stats-panel {
+    flex: 1;
+    background: rgba(0,0,0,0.25);
+    border-left: 2px solid #444;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-sizing: border-box;
+    border-radius: 8px;
+  }
+  .stats-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 0.5rem;
+  }
+  .char-name {
+    font-size: 1.2rem;
+    color: #fff;
+    flex: 1;
+  }
+  .char-level {
+    font-size: 1rem;
+    color: #ccc;
+  }
+  .type-icon {
+    width: 24px;
+    height: 24px;
+  }
+  /* Element type colors */
+  .type-icon.fire { color: #e25822; }
+  .type-icon.ice { color: #82caff; }
+  .type-icon.lightning { color: #ffd700; }
+  .type-icon.light { color: #ffff99; }
+  .type-icon.dark { color: #8a2be2; }
+  .type-icon.wind { color: #7fff7f; }
+  .stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .stats-list div {
+    display: flex;
+    justify-content: space-between;
+    color: #ddd;
+  }
+  .stats-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-style: italic;
+  }
+  .stats-confirm {
+    display: flex;
+    justify-content: flex-end;
+  }
   button.confirm {
     border: 2px solid #fff;
     background: transparent;
@@ -184,18 +264,108 @@
     padding: 0.25rem 0.5rem;
     align-self: flex-end;
   }
+  .roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    padding: 0.5rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .char-card {
+    position: relative;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+  }
+  .char-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  .char-card.selected {
+    border-color: #FFD700;
+    box-shadow: 0 0 12px rgba(255,215,0,0.6);
+  }
+  .card-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+  .card-overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.6);
+    padding: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .card-name {
+    color: #fff;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+  .card-level {
+    color: #ccc;
+    font-size: 0.75rem;
+  }
+  .stats-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .tab-btn {
+    background: rgba(255,255,255,0.1);
+    color: #ddd;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .tab-btn.active {
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+  }
+  /* Party compact icons */
+  .party-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    border: 2px solid #fff;
+    color: inherit; /* icon inherits color */
+  }
+  .party-icon.fire { border-color: #e25822; color: #e25822; }
+  .party-icon.ice { border-color: #82caff; color: #82caff; }
+  .party-icon.lightning { border-color: #ffd700; color: #ffd700; }
+  .party-icon.light { border-color: #ffff99; color: #ffff99; }
+  .party-icon.dark { border-color: #8a2be2; color: #8a2be2; }
+  .party-icon.wind { border-color: #7fff7f; color: #7fff7f; }
 </style>
 
-{#if compact}
+  {#if compact}
   <div class="panel compact" data-testid="party-picker">
     <div class="roster list" data-testid="roster">
-      {#each roster as char}
+      {#each roster.filter(c => selected.includes(c.id)) as char}
         <button
           data-testid={`choice-${char.id}`}
           class="char-btn"
           class:selected={selected.includes(char.id)}
           on:click={() => toggle(char.id)}>
-          <img src={char.img} alt={char.name} />
+          <!-- element icon with colored circle border -->
+          <svelte:component this={iconFor(char.element)}
+            class="party-icon {char.element.toLowerCase()}"
+            aria-hidden="true" />
           <span>{char.name}</span>
         </button>
       {/each}
@@ -203,24 +373,28 @@
   </div>
 {:else}
   <div class="full" data-testid="party-picker">
-    <!-- Left: Roster with element icons -->
-    <div class="roster list">
+    <!-- Left: Roster grid cards -->
+    <div class="roster-grid">
       {#each roster as char}
-        <button
+        <button type="button"
           data-testid={`choice-${char.id}`}
-          class="char-btn"
+          class="char-card"
           class:selected={selected.includes(char.id)}
           on:click={() => toggle(char.id)}>
-          <svelte:component this={iconFor(char.element)} class="elem" aria-hidden="true" />
-          <span>{char.name}</span>
+          <img src={char.img} alt={char.name} class="card-img" />
+          <div class="card-overlay">
+            <svelte:component this={iconFor(char.element)} class="elem" aria-hidden="true" />
+            <span class="card-name">{char.name}</span>
+            <span class="card-level">LVL {char.stats.level}</span>
+          </div>
         </button>
       {/each}
     </div>
 
     <!-- Center: Portrait preview of selected -->
     <div class="preview">
-      {#if selected.length}
-        {#each roster.filter(r => selected.includes(r.id)).slice(0,1) as sel}
+      {#if previewId}
+        {#each roster.filter(r => r.id === previewId) as sel}
           <img src={sel.img} alt={sel.name} />
         {/each}
       {:else}
@@ -228,29 +402,48 @@
       {/if}
     </div>
 
-    <!-- Right: Stats of highlighted/first selected -->
-    <div class="stats">
-      <h4>Stats</h4>
-      {#if selected.length}
-        {#each roster.filter(r => selected.includes(r.id)).slice(0,1) as sel}
-          <span>Element</span><span>{sel.element}</span>
-          <span>HP</span><span>{sel.stats.hp}</span>
-          <span>ATK</span><span>{sel.stats.atk}</span>
-          <span>DEF</span><span>{sel.stats.defense}</span>
-          <span>LVL</span><span>{sel.stats.level}</span>
+    <!-- Right: Character Stats -->
+    <div class="stats-panel" data-testid="stats-panel">
+      <!-- Tab buttons for stats categories -->
+      <div class="stats-tabs">
+        {#each statTabs as tab}
+          <button class="tab-btn" class:active={activeTab === tab} on:click={() => activeTab = tab}>
+            {tab}
+          </button>
+        {/each}
+      </div>
+      {#if previewId}
+        {#each roster.filter(r => r.id === previewId) as sel}
+          <div class="stats-header">
+            <span class="char-name">{sel.name}</span>
+            <span class="char-level">Lv {sel.stats.level}</span>
+            <svelte:component this={iconFor(sel.element)} class="type-icon {sel.element.toLowerCase()}" />
+          </div>
+          <div class="stats-list">
+            {#if activeTab === 'Core'}
+              <div><span>HP</span><span>{sel.stats.hp ?? '-'}</span></div>
+              <div><span>DEF</span><span>{sel.stats.defense ?? '-'}</span></div>
+              <div><span>SPD</span><span>{sel.stats.speed ?? sel.stats.spd ?? '-'}</span></div>
+              <div><span>Vitality</span><span>{sel.stats.vitality ?? sel.stats.vita ?? '-'}</span></div>
+              <div><span>Regain</span><span>{sel.stats.regain ?? sel.stats.regain_rate ?? '-'}</span></div>
+              <div><span>EXP</span><span>{sel.stats.exp ?? sel.stats.xp ?? '-'}</span></div>
+            {:else if activeTab === 'Offense'}
+              <div><span>ATK</span><span>{sel.stats.atk ?? '-'}</span></div>
+              <div><span>CRIT Rate</span><span>{(sel.stats.critRate ?? sel.stats.crit_rate ?? 0) + '%'}</span></div>
+              <div><span>CRIT DMG</span><span>{(sel.stats.critDamage ?? sel.stats.crit_dmg ?? 0) + '%'}</span></div>
+              <div><span>Effect Hit Rate</span><span>{(sel.stats.effectHit ?? sel.stats.effect_hit ?? 0) + '%'}</span></div>
+            {:else if activeTab === 'Defense'}
+              <div><span>Mitigation</span><span>{sel.stats.mitigation ?? '-'}</span></div>
+              <div><span>Dodge Odds</span><span>{sel.stats.dodge ?? sel.stats.dodgeOdds ?? '-'}</span></div>
+              <div><span>Effect Resist</span><span>{sel.stats.effectResist ?? sel.stats.effect_res ?? '-'}</span></div>
+            {/if}
+          </div>
         {/each}
       {:else}
-        <span>Element</span><span>-</span>
-        <span>HP</span><span>-</span>
-        <span>ATK</span><span>-</span>
-        <span>DEF</span><span>-</span>
-        <span>LVL</span><span>-</span>
-      {/if}
-      {#if error}
-        <small style="color:#f88; grid-column: 1 / -1;">{error}</small>
+        <div class="stats-placeholder">Select a character to view stats</div>
       {/if}
       {#if showConfirm}
-        <div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; margin-top:0.5rem;">
+        <div class="stats-confirm">
           <button class="confirm" data-testid="confirm" on:click={confirm}>Confirm</button>
         </div>
       {/if}
