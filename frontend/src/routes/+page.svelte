@@ -98,12 +98,13 @@
     color: #fff;
   }
   /* layout as flex column to structure viewport and panels */
+  /* Page split: viewport 75vh and panels auto height */
   .layout {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 75vh auto;
     height: 100vh;
-    padding: 1rem;
     gap: 1rem;
+    padding: 1rem;
   }
 
   .menu-grid {
@@ -149,7 +150,7 @@
     }
     .stack > section {
       flex: none;
-      width: 48%;
+      width: 45%;
       height: auto;
       max-height: none;
       overflow: visible;
@@ -172,8 +173,8 @@
   /* Fixed GameViewport height */
   .viewport-wrap {
     flex: none;
-    height: 65vh;
-    overflow: hidden;
+    height: 75vh;
+    overflow: visible;
     border: 2px solid #fff;
   }
 </style>
