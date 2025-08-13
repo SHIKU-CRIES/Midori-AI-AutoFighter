@@ -155,12 +155,13 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
-  .panel.compact .char-btn { 
-    border-color: #777;
-    padding: 0.15rem 0.35rem;
-    font-size: 0.85rem;
-    gap: 0.5rem;
-    border-radius: 4px;
+  .panel.compact .char-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .char-btn img {
     width: 40px;
@@ -335,15 +336,16 @@
   }
   /* Party compact icons */
   .party-icon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: #000;
-    border: 2px solid #fff;
-    color: inherit; /* icon inherits color */
+    border: 2px solid currentColor;
+    color: currentColor; /* icon color drives both stroke and border */
+    stroke: currentColor;
   }
   .party-icon.fire { border-color: #e25822; color: #e25822; }
   .party-icon.ice { border-color: #82caff; color: #82caff; }
@@ -351,28 +353,44 @@
   .party-icon.light { border-color: #ffff99; color: #ffff99; }
   .party-icon.dark { border-color: #8a2be2; color: #8a2be2; }
   .party-icon.wind { border-color: #7fff7f; color: #7fff7f; }
+
+  /* ensure SVG strokes follow currentColor for proper element coloring */
+  .party-icon {
+    stroke: currentColor;
+  }
+  /* Compact mode: show only colored circle icons in a horizontal list */
+  .roster.list.compact {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: none;
+  }
+  .roster.list.compact .char-btn {
+    padding: 0;
+  }
 </style>
 
   {#if compact}
-  <div class="panel compact" data-testid="party-picker">
-    <div class="roster list" data-testid="roster">
-      {#each roster.filter(c => selected.includes(c.id)) as char}
-        <button
-          data-testid={`choice-${char.id}`}
-          class="char-btn"
-          class:selected={selected.includes(char.id)}
-          on:click={() => toggle(char.id)}>
-          <!-- element icon with colored circle border -->
-          <svelte:component this={iconFor(char.element)}
-            class="party-icon {char.element.toLowerCase()}"
-            aria-hidden="true" />
-          <span>{char.name}</span>
-        </button>
-      {/each}
-    </div>
+  <!-- compact mode: only show party icons in existing panel -->
+  <div class="roster list compact" data-testid="roster">
+    {#each roster.filter(c => selected.includes(c.id)) as char}
+      <button
+        data-testid={`choice-${char.id}`}
+        class="char-btn"
+        class:selected={selected.includes(char.id)}
+        on:click={() => toggle(char.id)}>
+        <svelte:component this={iconFor(char.element)}
+          class={`party-icon ${char.element.toLowerCase()}`}
+          aria-hidden="true" />
+      </button>
+    {/each}
   </div>
 {:else}
   <div class="full" data-testid="party-picker">
+    <!-- Left: Roster grid cards -->
     <!-- Left: Roster grid cards -->
     <div class="roster-grid">
       {#each roster as char}
@@ -417,7 +435,9 @@
           <div class="stats-header">
             <span class="char-name">{sel.name}</span>
             <span class="char-level">Lv {sel.stats.level}</span>
-            <svelte:component this={iconFor(sel.element)} class="type-icon {sel.element.toLowerCase()}" />
+            <svelte:component this={iconFor(sel.element)}
+              class={`type-icon ${sel.element.toLowerCase()}`}
+              aria-hidden="true" />
           </div>
           <div class="stats-list">
             {#if activeTab === 'Core'}
