@@ -101,7 +101,8 @@
   /* Page split: viewport 75vh and panels auto height */
   .layout {
     display: grid;
-    grid-template-rows: 75vh auto;
+  /* viewport fills available space, panels auto height */
+  grid-template-rows: 1fr auto;
     height: 100vh;
     gap: 1rem;
     padding: 1rem;
@@ -109,7 +110,7 @@
 
   .menu-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.75rem;
     padding: 0.5rem;
   }
@@ -133,27 +134,29 @@
     margin-bottom: 0.5rem;
   }
 
-  .panel { border: 2px solid #fff; padding: 0.75rem; background: #0a0a0a; }
-  /* Panels grow and scroll if needed */
+  .panel { border: 2px solid #fff; padding: 0.05rem; background: #0a0a0a; }
+  /* Bottom panels container: fill row and hide overflow */
   .stack {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    overflow-y: auto;
+  gap: 0.75rem;
+  /* allow panel row to size to its content */
+  height: auto;
+    /* ensure panels fill grid track without overflow */
+    overflow: hidden;
   }
   @media (min-width: 1024px) {
     .stack {
       flex-direction: row;
-      flex: none;
+      /* allow shrink to content height */
       height: auto;
+      overflow: hidden;
     }
     .stack > section {
-      flex: none;
-      width: 45%;
+      flex: 1;
+      /* let section size to content and scroll internally */
       height: auto;
-      max-height: none;
-      overflow: visible;
+      overflow: auto;
     }
   }
   .section h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: #ddd; }
@@ -172,15 +175,15 @@
 
   /* Fixed GameViewport height */
   .viewport-wrap {
-    flex: none;
-    height: 75vh;
-    overflow: visible;
+    /* fill grid row height */
+    height: 100%;
+    overflow: hidden;
     border: 2px solid #fff;
   }
 </style>
 
 <div class="layout">
-  <!-- Left: 16:9 Game Viewport -->
+  <!-- Game Viewport -->
   <div class="viewport-wrap">
     <GameViewport
       runId={runId}
@@ -193,10 +196,9 @@
     />
   </div>
 
-  <!-- Right: Stacked panels on desktop; full-width on tablet/phone -->
   <div class="stack">
     <section class="panel section">
-      <h3>Menu</h3>
+      <h3>Shortcuts</h3>
       <div class="menu-grid">
         {#each items as item}
           <button type="button" class="cell" on:click={item.action}>
