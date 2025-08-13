@@ -111,8 +111,8 @@
   .menu-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.75rem;
-    padding: 0.5rem;
+    gap: 0.5rem;
+    padding: 0.25rem;
   }
 
   .cell {
@@ -121,25 +121,26 @@
     align-items: center;
     justify-content: center;
     border: 2px solid #fff;
-    padding: 1rem;
+    padding: 0.5rem;
     background: #111;
     color: #fff;
     cursor: pointer;
+    min-height: 60px;
   }
 
   .cell svg {
-    width: 48px;
-    height: 48px;
+    width: 32px;
+    height: 32px;
     stroke-width: 2;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
-  .panel { border: 2px solid #fff; padding: 0.05rem; background: #0a0a0a; }
+  .panel { border: 2px solid #fff; padding: 0.25rem; background: #0a0a0a; }
   /* Bottom panels container: fill row and hide overflow */
   .stack {
     display: flex;
     flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   /* allow panel row to size to its content */
   height: auto;
     /* ensure panels fill grid track without overflow */
@@ -159,7 +160,7 @@
       overflow: auto;
     }
   }
-  .section h3 { margin: 0 0 0.5rem 0; font-size: 1rem; color: #ddd; }
+  .section h3 { margin: 0 0 0.25rem 0; font-size: 0.9rem; color: #ddd; }
 
   .overlay {
     position: fixed;
@@ -232,16 +233,16 @@
     <div class="panel section" style="width: 90%; max-width: 400px;">
       <h3>Settings</h3>
       <div>
-        <label>Sound Volume: {soundVol}%</label>
-        <input type="range" min="0" max="100" bind:value={soundVol} />
+        <label for="sound-vol">Sound Volume: {soundVol}%</label>
+        <input id="sound-vol" type="range" min="0" max="100" bind:value={soundVol} />
       </div>
       <div>
-        <label>Music Volume: {musicVol}%</label>
-        <input type="range" min="0" max="100" bind:value={musicVol} />
+        <label for="music-vol">Music Volume: {musicVol}%</label>
+        <input id="music-vol" type="range" min="0" max="100" bind:value={musicVol} />
       </div>
       <div>
-        <label>Voice Volume: {voiceVol}%</label>
-        <input type="range" min="0" max="100" bind:value={voiceVol} />
+        <label for="voice-vol">Voice Volume: {voiceVol}%</label>
+        <input id="voice-vol" type="range" min="0" max="100" bind:value={voiceVol} />
       </div>
       <div class="stats-confirm" style="margin-top:1rem; display:flex; justify-content:flex-end; gap:0.5rem;">
         <button class="cell" on:click={cancelSettings}>Cancel</button>

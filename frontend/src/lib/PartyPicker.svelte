@@ -287,12 +287,12 @@
   }
   .roster-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 90px));
+    grid-template-columns: 1fr;
     gap: 0.5rem;
     padding: 0.5rem;
     height: 100%;
     overflow-y: auto;
-    justify-content: center;
+    justify-content: stretch;
   }
   .char-card {
   position: relative;
@@ -302,9 +302,10 @@
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   transition: all 0.2s ease;
-  max-width: 72px;
-  width: 72px;
-  height: 72px;
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 120px;
+  min-height: 60px;
   margin: 0 auto;
   padding: 0;
   background: none;
@@ -318,9 +319,9 @@
     box-shadow: 0 0 12px rgba(255,215,0,0.6);
   }
   .card-img {
-  width: 72px;
-  height: 72px;
-  aspect-ratio: 1 / 1;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
   display: block;
   margin: 0 auto;
@@ -381,22 +382,25 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    gap: 0.25rem;
+    padding: 0.25rem;
     background: transparent;
     border: none;
+    min-height: 32px;
+    height: auto;
   }
   .roster.list.compact .char-btn {
     border: none;
     background: transparent;
     padding: 0;
+    flex-shrink: 0;
   }
   .roster.list.compact .char-btn img {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
     object-fit: cover;
-    border: 2px solid #fff;
+    border: 1px solid #fff;
   }
 </style>
 
