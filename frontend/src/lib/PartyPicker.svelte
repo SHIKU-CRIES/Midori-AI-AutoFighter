@@ -10,6 +10,7 @@
 
   const portraitModules = import.meta.glob('./assets/characters/*.png', { eager: true, import: 'default', query: '?url' });
   const portraits = portraitModules;
+  const fallbackPortrait = portraits['./assets/characters/fallback.png'];
 
   let roster = [];
   let error = '';
@@ -31,7 +32,8 @@
         .map(p => ({
           id: p.id,
           name: p.name,
-          img: portraits[`./assets/characters/${p.id}.png`] ?? randomPortrait(),
+          img: (portraits[`./assets/characters/${p.id}.png`] 
+                ?? (p.is_player ? fallbackPortrait : randomPortrait())),
           owned: p.owned,
           is_player: p.is_player,
           element: p.element ?? 'Generic',
@@ -89,15 +91,44 @@
     max-height: 80vh;
   }
   /* Fullscreen layout inside game viewport */
+  .party-picker-in-viewport {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    z-index: 20;
+  }
   .full {
     display: grid;
     grid-template-columns: 220px 1fr 260px;
     gap: 0.75rem;
-    width: min(95%, 1100px);
-    height: min(85vh, 95%);
+    width: 100%;
+    height: 100%;
     background: rgba(0,0,0,0.55);
     border: 2px solid #666;
     padding: 0.75rem;
+    box-sizing: border-box;
+  }
+  .full > .roster {
+    border-right: 2px solid #444;
+    background: rgba(0,0,0,0.25);
+    padding-right: 0.5rem;
+  }
+  .full > .preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.18);
+    border-right: 2px solid #444;
+    border-left: 2px solid #444;
+    min-width: 0;
+  }
+  .full > .stats {
+    background: rgba(0,0,0,0.18);
+    padding-left: 0.5rem;
   }
   .panel.compact {
     width: 100%;
@@ -143,7 +174,7 @@
   .panel.compact .char-btn img { width: 20px; height: 20px; }
   .elem { width: 16px; height: 16px; opacity: 0.9; }
   .preview { display: flex; align-items: center; justify-content: center; }
-  .preview img { max-width: 100%; max-height: 100%; object-fit: contain; border: 2px solid #333; }
+  .preview img { max-width: 100%; max-height: 100%; object-fit: contain; border: 2px solid #333; background: #222; border-radius: 8px; }
   .stats { display: grid; grid-template-columns: auto 1fr; column-gap: 0.5rem; row-gap: 0.25rem; }
   .stats h4 { margin: 0 0 0.5rem 0; grid-column: 1 / -1; font-size: 1rem; color: #ddd; }
   button.confirm {
