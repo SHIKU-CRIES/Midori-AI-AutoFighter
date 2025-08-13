@@ -183,7 +183,7 @@ Pygame version:
 - Becca (B, random damage type)
 - Bubbles (A, random damage type)
 - Carly (B, Light)
-- Chibi (A, random damage type)
+- Chibi (A, Lightning)
 - Graygray (B, random damage type)
 - Hilander (A, random damage type)
 - Kboshi (A, random damage type)

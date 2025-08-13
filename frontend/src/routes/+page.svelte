@@ -77,7 +77,7 @@
     color: #fff;
   }
   .layout { display: grid; min-height: 100vh; gap: 1rem; padding: 1rem; align-items: start; }
-  @media (min-width: 1024px) { .layout { grid-template-columns: 3fr 1fr; } }
+  @media (min-width: 1024px) { .layout { grid-template-columns: 1fr; } }
   @media (min-width: 600px) and (max-width: 1023px) { .layout { grid-template-columns: 1fr; } }
   @media (max-width: 599px) { .layout { grid-template-columns: 1fr; } }
 
