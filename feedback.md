@@ -1,4 +1,4 @@
-Layout and key elements of the combat UI
+## Layout and key elements of the combat UI
 
 Action Order bar (left-top side) – A vertical timeline shows portraits of enemies and allies in the order they will act.  Characters move down the bar as time advances; icons can appear multiple times if passive or Ultimate abilities cause extra turns.  You can monitor upcoming turns to plan when to use skills or defensive actions.
 
@@ -13,3 +13,13 @@ Enemy information panels – Clicking the small “i” icon under an enemy’s 
 The same guide illustrates Ultimate energy costs by pointing arrows at the Energy meters beneath each character; once full, a bright glow signals that the Ultimate can be activated.
 
 Double‑speed function are enabled through the top‑right buttons.  A demonstration screenshot shows the controls while characters fight automatically in the background.
+
+
+## Frontend issues
+
+- Clicking run does not open the map, it opens placeholder text
+- Char Editor is still missing or not there
+- Map menu seems unopenable or missing
+- Settings menu does not follow the requested layout
+- Pulls menu is missing or not hooked up to the frontend
+- Missing crafting menu, its no where to be seen...
