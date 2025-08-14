@@ -42,10 +42,12 @@
   }
 
   async function openMap() {
-    if (!runId) return;
-    const data = await fetchMap(runId);
-    currentMap = data.rooms.slice(data.current).map((n) => n.room_type);
-    showMap = true;
+  if (!runId) return;
+  // show overlay immediately for feedback
+  viewMode = 'map';
+  const data = await fetchMap(runId);
+  currentMap = data.rooms.slice(data.current).map((n) => n.room_type);
+  showMap = false; // GameViewport will render map from viewMode 'map'
   }
 
   async function handleStart() {
@@ -220,6 +222,7 @@
   bind:viewMode={viewMode}
   items={items}
   editorState={editorState}
+  map={currentMap}
   on:startRun={() => { handleStart(); viewMode = 'main'; }}
   on:editorSave={(e) => { handleEditorSave(e); viewMode = 'main'; }}
     />
@@ -228,10 +231,12 @@
   <div class="stack">
   <!-- Shortcuts moved into right stained-glass sidebar inside GameViewport -->
 
+    {#if viewMode === 'main'}
     <section class="panel section">
       <h3>Party</h3>
-  <PartyPicker compact bind:selected={selectedParty} />
+      <PartyPicker compact bind:selected={selectedParty} />
     </section>
+    {/if}
 
     <!-- Player Editor and Stats hidden for now to simplify layout -->
   </div>

@@ -4,6 +4,7 @@
   import PartyPicker from './PartyPicker.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import OverlaySurface from './OverlaySurface.svelte';
+  import MapDisplay from './MapDisplay.svelte';
   import PullsMenu from './PullsMenu.svelte';
   import CraftingMenu from './CraftingMenu.svelte';
   import PlayerEditor from './PlayerEditor.svelte';
@@ -18,6 +19,7 @@
   export let background = '';
   export let viewMode = 'main'; // 'main', 'party', 'settings'
   export let editorState = {};
+  export let map = [];
   let randomBg = '';
   let speed2x = false;
   const dispatch = createEventDispatcher();
@@ -199,6 +201,11 @@
           <OverlaySurface>
             <!-- full party picker overlay: show roster, preview, and stats -->
             <PartyPicker bind:selected={selected} />
+          </OverlaySurface>
+        {/if}
+        {#if viewMode === 'map'}
+          <OverlaySurface>
+            <MapDisplay map={map} on:select={(e) => { /* parent +page listens to MapDisplay via events if needed */ viewMode = 'main'; }} />
           </OverlaySurface>
         {/if}
         {#if viewMode === 'party-start'}
