@@ -21,6 +21,7 @@
     }
   });
   export let selected = [];
+  export let items = [];
 </script>
 
 <style>
@@ -110,6 +111,34 @@
     box-shadow: 0 2px 8px 0 rgba(0,40,120,0.18);
   }
 
+  /* right stained-glass sidebar (vertical) */
+  .stained-glass-side {
+    position: absolute;
+    top: calc(var(--ui-top-offset) + 1.2rem);
+    right: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 0;
+    background:
+      linear-gradient(135deg, rgba(10,10,10,0.96) 0%, rgba(30,30,30,0.92) 100%),
+      repeating-linear-gradient(120deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 8px),
+      linear-gradient(60deg, rgba(255,255,255,0.03) 10%, rgba(0,0,0,0.45) 80%);
+    box-shadow: 0 2px 18px 0 rgba(0,0,0,0.32), 0 1.5px 0 0 rgba(255,255,255,0.02) inset;
+    border: 1.5px solid rgba(40,40,40,0.44);
+    z-index: 10;
+    backdrop-filter: blur(3.5px) saturate(1.05);
+    max-height: calc(100% - var(--ui-top-offset) - 2.4rem);
+    overflow: auto;
+    align-items: center;
+  }
+
+  .stained-glass-side .icon-btn {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+
 </style>
 
 <div class="viewport-wrap">
@@ -130,6 +159,18 @@
           </button>
         {/if}
       </div>
+        <!-- right stained-glass sidebar (mirrors top-left bar styling) -->
+        <div class="stained-glass-side">
+          {#each items as item}
+            <button class="icon-btn" title={item.label} on:click={item.action}>
+              {#if item.icon}
+                <svelte:component this={item.icon} size={20} color="#fff" />
+              {:else}
+                <span>{item.label}</span>
+              {/if}
+            </button>
+          {/each}
+        </div>
         <div class="top-right-controls">
           <button class="icon-btn" title="Toggle Speed" on:click={() => (speed2x = !speed2x)}>
             <ChevronsRight size={22} color="#fff" />

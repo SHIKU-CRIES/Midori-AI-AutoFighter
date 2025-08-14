@@ -219,24 +219,15 @@
     <GameViewport
       runId={runId}
       roomData={roomData}
-      background={viewportBg}
-      bind:selected={selectedParty}
-      bind:viewMode={viewMode}
+  background={viewportBg}
+  bind:selected={selectedParty}
+  bind:viewMode={viewMode}
+  items={items}
     />
   </div>
 
   <div class="stack">
-    <section class="panel section">
-      <h3>Shortcuts</h3>
-      <div class="menu-grid">
-        {#each items as item}
-          <button type="button" class="cell" on:click={item.action}>
-            <svelte:component this={item.icon} />
-            <span>{item.label}</span>
-          </button>
-        {/each}
-      </div>
-    </section>
+  <!-- Shortcuts moved into right stained-glass sidebar inside GameViewport -->
 
     <section class="panel section">
       <h3>Party</h3>
