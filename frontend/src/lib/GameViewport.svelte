@@ -160,17 +160,19 @@
         {/if}
       </div>
         <!-- right stained-glass sidebar (mirrors top-left bar styling) -->
-        <div class="stained-glass-side">
-          {#each items as item}
-            <button class="icon-btn" title={item.label} on:click={item.action}>
-              {#if item.icon}
-                <svelte:component this={item.icon} size={20} color="#fff" />
-              {:else}
-                <span>{item.label}</span>
-              {/if}
-            </button>
-          {/each}
-        </div>
+        {#if viewMode === 'main'}
+          <div class="stained-glass-side">
+            {#each items as item}
+              <button class="icon-btn" title={item.label} on:click={item.action}>
+                {#if item.icon}
+                  <svelte:component this={item.icon} size={20} color="#fff" />
+                {:else}
+                  <span>{item.label}</span>
+                {/if}
+              </button>
+            {/each}
+          </div>
+        {/if}
         <div class="top-right-controls">
           <button class="icon-btn" title="Toggle Speed" on:click={() => (speed2x = !speed2x)}>
             <ChevronsRight size={22} color="#fff" />
