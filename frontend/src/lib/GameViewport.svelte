@@ -7,6 +7,7 @@
   import PullsMenu from './PullsMenu.svelte';
   import CraftingMenu from './CraftingMenu.svelte';
   import PlayerEditor from './PlayerEditor.svelte';
+  import StatsPanel from './StatsPanel.svelte';
   import { createEventDispatcher } from 'svelte';
   import { Diamond, User, Settings, ChevronsRight, Pause } from 'lucide-svelte';
   import { onMount } from 'svelte';
@@ -221,7 +222,14 @@
         {/if}
         {#if viewMode === 'editor'}
           <OverlaySurface>
-            <PlayerEditor {...editorState} on:close={() => (viewMode = 'main')} on:save={(e) => dispatch('editorSave', e.detail)} />
+            <PlayerEditor {...editorState}
+              on:close={() => (viewMode = 'main')}
+              on:save={(e) => { dispatch('editorSave', e.detail); viewMode = 'main'; }} />
+          </OverlaySurface>
+        {/if}
+        {#if viewMode === 'stats'}
+          <OverlaySurface>
+            <StatsPanel on:close={() => (viewMode = 'main')} />
           </OverlaySurface>
         {/if}
         {#if viewMode === 'settings'}

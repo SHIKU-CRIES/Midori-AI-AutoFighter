@@ -100,7 +100,7 @@
     { icon: PackageOpen, label: 'Pulls', action: openPulls },
     { icon: Hammer, label: 'Craft', action: openCraft },
     { icon: Settings, label: 'Settings', action: () => (viewMode = 'settings') },
-    { icon: SquareChartGantt, label: 'Stats' }
+  { icon: SquareChartGantt, label: 'Stats', action: () => (viewMode = 'stats') }
   ];
 
   onMount(() => {
