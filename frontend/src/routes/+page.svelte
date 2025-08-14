@@ -34,15 +34,11 @@
   let roomData = null;
   let viewportBg = '';
   let viewMode = 'main';
-  let showPartyPicker = false;
   let showMap = false;
-  let showEditor = false;
-  let showPulls = false;
-  let showCraft = false;
   let editorState = { pronouns: '', damage: 'Light', hp: 0, attack: 0, defense: 0 };
 
   function openRun() {
-    showPartyPicker = true;
+  viewMode = 'party-start';
   }
 
   async function openMap() {
@@ -56,8 +52,8 @@
     const data = await startRun(selectedParty);
     runId = data.run_id;
     currentMap = data.map.rooms.slice(data.map.current).map((n) => n.room_type);
-    showPartyPicker = false;
-    showMap = true;
+  viewMode = 'main';
+  showMap = true;
   }
 
   function handleParty() {
@@ -67,7 +63,7 @@
   async function openEditor() {
     const data = await getPlayerConfig();
     editorState = data;
-    showEditor = true;
+  viewMode = 'editor';
   }
 
   function handleEditorSave(e) {
@@ -89,11 +85,11 @@
   }
 
   function openPulls() {
-    showPulls = true;
+  viewMode = 'pulls';
   }
 
   function openCraft() {
-    showCraft = true;
+  viewMode = 'craft';
   }
 
   const items = [
@@ -223,6 +219,9 @@
   bind:selected={selectedParty}
   bind:viewMode={viewMode}
   items={items}
+  editorState={editorState}
+  on:startRun={() => { handleStart(); viewMode = 'main'; }}
+  on:editorSave={(e) => { handleEditorSave(e); viewMode = 'main'; }}
     />
   </div>
 
@@ -237,40 +236,8 @@
     <!-- Player Editor and Stats hidden for now to simplify layout -->
   </div>
 </div>
-{#if showPartyPicker}
-  <div class="overlay">
-    <div>
-      <PartyPicker bind:selected={selectedParty} />
-      <button on:click={handleStart}>Start Run</button>
-      <button on:click={() => (showPartyPicker = false)}>Cancel</button>
-    </div>
-  </div>
-{/if}
-
-{#if showEditor}
-  <div class="overlay">
-    <PlayerEditor
-      {...editorState}
-      on:save={handleEditorSave}
-      on:close={() => (showEditor = false)}
-    />
-  </div>
-{/if}
-
 {#if showMap}
   <div class="overlay">
     <MapDisplay map={currentMap} on:select={(e) => { handleRoom(e.detail); showMap = false; }} />
-  </div>
-{/if}
-
-{#if showPulls}
-  <div class="overlay">
-    <PullsMenu on:close={() => (showPulls = false)} />
-  </div>
-{/if}
-
-{#if showCraft}
-  <div class="overlay">
-    <CraftingMenu on:close={() => (showCraft = false)} />
   </div>
 {/if}

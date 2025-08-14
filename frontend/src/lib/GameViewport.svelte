@@ -4,6 +4,10 @@
   import PartyPicker from './PartyPicker.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import OverlaySurface from './OverlaySurface.svelte';
+  import PullsMenu from './PullsMenu.svelte';
+  import CraftingMenu from './CraftingMenu.svelte';
+  import PlayerEditor from './PlayerEditor.svelte';
+  import { createEventDispatcher } from 'svelte';
   import { Diamond, User, Settings, ChevronsRight, Pause } from 'lucide-svelte';
   import { onMount } from 'svelte';
   import { getHourlyBackground } from './assetLoader.js';
@@ -12,8 +16,10 @@
   export let roomData = null;
   export let background = '';
   export let viewMode = 'main'; // 'main', 'party', 'settings'
+  export let editorState = {};
   let randomBg = '';
   let speed2x = false;
+  const dispatch = createEventDispatcher();
 
   onMount(() => {
     if (!background) {
@@ -192,6 +198,30 @@
           <OverlaySurface>
             <!-- full party picker overlay: show roster, preview, and stats -->
             <PartyPicker bind:selected={selected} />
+          </OverlaySurface>
+        {/if}
+        {#if viewMode === 'party-start'}
+          <OverlaySurface>
+            <PartyPicker bind:selected={selected} />
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.5rem;">
+              <button class="icon-btn" on:click={() => dispatch('startRun')}>Start Run</button>
+              <button class="icon-btn" on:click={() => (viewMode = 'main')}>Cancel</button>
+            </div>
+          </OverlaySurface>
+        {/if}
+        {#if viewMode === 'pulls'}
+          <OverlaySurface>
+            <PullsMenu on:close={() => (viewMode = 'main')} />
+          </OverlaySurface>
+        {/if}
+        {#if viewMode === 'craft'}
+          <OverlaySurface>
+            <CraftingMenu on:close={() => (viewMode = 'main')} />
+          </OverlaySurface>
+        {/if}
+        {#if viewMode === 'editor'}
+          <OverlaySurface>
+            <PlayerEditor {...editorState} on:close={() => (viewMode = 'main')} on:save={(e) => dispatch('editorSave', e.detail)} />
           </OverlaySurface>
         {/if}
         {#if viewMode === 'settings'}
