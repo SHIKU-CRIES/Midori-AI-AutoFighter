@@ -34,14 +34,6 @@
 </script>
 
 <style>
-  .top-right-controls {
-    position: absolute;
-    top: 1.2rem;
-    right: 1.2rem;
-    display: flex;
-    gap: 0.5rem;
-    z-index: 10;
-  }
   .viewport-wrap {
     width: 100%;
     height: 100%;
@@ -182,20 +174,10 @@
             {/each}
           </div>
         {/if}
-        <div class="top-right-controls">
-          <button class="icon-btn" title="Toggle Speed" on:click={() => (speed2x = !speed2x)}>
-            <ChevronsRight size={22} color="#fff" />
-          </button>
-          <button class="icon-btn" title="Pause" on:click={() => (viewMode = 'settings')}>
-            <Pause size={22} color="#fff" />
-          </button>
-        </div>
-        {#if viewMode === 'main'}
-          {#if runId && roomData}
-            <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
-          {:else if runId}
-            <div class="placeholder">Select a room on the map to begin</div>
-          {/if}
+        {#if runId && roomData}
+          <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
+        {:else if runId}
+          <div class="placeholder">Select a room on the map to begin</div>
         {/if}
         {#if viewMode === 'party'}
           <OverlaySurface>

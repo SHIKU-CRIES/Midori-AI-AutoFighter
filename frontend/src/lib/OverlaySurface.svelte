@@ -5,6 +5,8 @@
 <style>
   .surface {
     position: absolute;
+    height: 99%;
+    width: 99%;
     left: 0;
     right: 0;
     bottom: 0;

@@ -241,8 +241,3 @@
     <!-- Player Editor and Stats hidden for now to simplify layout -->
   </div>
 </div>
-{#if showMap}
-  <div class="overlay">
-    <MapDisplay map={currentMap} on:select={(e) => { handleRoom(e.detail); showMap = false; }} />
-  </div>
-{/if}

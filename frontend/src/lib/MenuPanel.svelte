@@ -6,8 +6,8 @@
   .panel {
     width: 99%;
     height: 99%;
-    max-width: 99%;
-    max-height: 99%;
+    max-width: 95%;
+    max-height: 95%;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
