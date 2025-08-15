@@ -86,18 +86,12 @@
   .full {
   display: grid;
   grid-template-columns: minmax(8rem, 22%) 1fr minmax(12rem, 26%);
-  gap: 0.75rem;
   width: 100%;
-  height: 100%;
+  height: 96%;
   max-width: 100%;
-  max-height: 100%;
-  background: rgba(0,0,0,0.65);
-  border: 2px solid #777;
-  padding: 0.5rem;
-  box-sizing: border-box;
-  backdrop-filter: blur(4px);
+  max-height: 98%;
   /* allow internal scrolling instead of clipping when content grows */
-  overflow: auto;
+  
   }
   .panel.compact {
     width: 100%;
@@ -116,15 +110,13 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.5rem 0;
-    height: 100%;
+    height: 98%;
     gap: 0.75rem;
-    border: 2px solid #555;
     background: rgba(0,0,0,0.7);
     color: #fff;
     padding: 0.5rem 0.75rem;
     width: 100%;
     justify-content: flex-start;
-    border-radius: 6px;
     transition: all 0.2s ease;
     backdrop-filter: blur(2px);
   }
