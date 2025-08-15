@@ -4,10 +4,10 @@
 
 <style>
   .panel {
-    width: 99%;
-    height: 99%;
-    max-width: 95%;
-    max-height: 95%;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;

@@ -84,19 +84,20 @@
     max-height: 80vh;
   }
   .full {
-    display: grid;
-    grid-template-columns: minmax(8rem, 22%) 1fr minmax(12rem, 26%);
-    gap: 0.75rem;
-    width: 99.5%;
-    height: 99.5%;
-    max-width: 99.5%;
-    max-height: 99.5%;
-    background: rgba(0,0,0,0.65);
-    border: 2px solid #777;
-    padding: 0.5rem;
-    box-sizing: border-box;
-    backdrop-filter: blur(4px);
-    overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(8rem, 22%) 1fr minmax(12rem, 26%);
+  gap: 0.75rem;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  background: rgba(0,0,0,0.65);
+  border: 2px solid #777;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  backdrop-filter: blur(4px);
+  /* allow internal scrolling instead of clipping when content grows */
+  overflow: auto;
   }
   .panel.compact {
     width: 100%;

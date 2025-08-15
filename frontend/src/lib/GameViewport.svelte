@@ -43,12 +43,14 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+    box-sizing: border-box;
   }
   .viewport {
     --ui-top-offset: calc(1.2rem + 2.9rem + 1.2rem);
     width: 100%;
     height: 100%;
     border: 2px solid #fff;
+    box-sizing: border-box; /* include border in element's size */
     background: #000;
     display: flex;
     align-items: center;

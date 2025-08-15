@@ -88,15 +88,26 @@
     margin: 0;
     padding: 0;
     height: 100vh;
-    overflow: hidden;
+    /* allow scrolling when content is larger than the viewport
+       (prevent content from being clipped at the right/bottom) */
+    overflow: auto;
     background: #000;
     color: #fff;
+    box-sizing: border-box;
   }
 
+  /* Make the viewport container responsive and avoid forcing a second
+     full-height which can overflow when inner elements have borders/padding. */
   .viewport-wrap {
-    width: 95vw;
-    height: 100vh;
+    width: 100%;
+    max-width: 98vw;
+    max-height: 98vh;
+    height: 100%;
     margin: 0 auto;
+    box-sizing: border-box;
+    /* allow inner UI panels to scroll if they grow beyond available space */
+    overflow: auto;
+    padding: 0 0.5rem; /* small horizontal padding so elements don't touch the edge */
   }
 </style>
 
