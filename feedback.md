@@ -1,28 +1,77 @@
-## Layout and key elements of the combat UI
+ # Feedback Log
 
-Action Order bar (left-top side) – A vertical timeline shows portraits of enemies and allies in the order they will act.  Characters move down the bar as time advances; icons can appear multiple times if passive or Ultimate abilities cause extra turns.  You can monitor upcoming turns to plan when to use skills or defensive actions.
+- Date: 2025-08-15
+- Author(s): Lead Dev, GitHub Copilot
 
-Enemy status (top‑centre) – Each enemy has a health bar (red gauge) with a toughness shield underneath and weakness icons underneath the shield.  When the toughness bar is depleted with the correct element, the enemy enters a “Break” state that delays its next turn and applies an element‑specific debuff.  Bosses may have dots above the health bar to show phase counters – each dot disappears when a health threshold is crossed.  Selecting an enemy displays a crosshair around it and shows its level and type on the top right.
+Summary:
 
-Top‑right controls (Speed and Pause) – Buttons in the upper right let you toggle 2× speed to accelerate animations or pause to open the settings menu.  These controls are often annotated in guides as “two right‑pointing arrows” (speed), the pause symbol.
+- Initial feedback entries consolidated into a single log.
 
-Special mechanics indicators – When certain passive or Ultimate effects trigger, the timeline highlights extra turns or priority jumps.  For example, the Ultimate Queue Jump shows a golden frame pushing a character’s icon up the timeline, while passive abilities like “Girl Power” highlight multiple icons to denote an upcoming extra action.  Counters or follow‑up attacks also insert new icons on the timeline.
+Details:
 
-Enemy information panels – Clicking the small “i” icon under an enemy’s toughness bar opens a side panel with tabs for description and skills; this lets you read their abilities and check weaknesses before committing your actions.
+1) UI clarity
+- Observation: The Settings panel uses three logical columns but lacks visible headings.
+- Recommendation: Add clear column titles: "Audio", "System", "Gameplay" to group related controls.
+  - Audio: SFX Volume, Music Volume, Voice Volume
+  - System: Pause on Stat Screen, Framerate
+  - Gameplay: Autocraft
 
-The same guide illustrates Ultimate energy costs by pointing arrows at the Energy meters beneath each character; once full, a bright glow signals that the Ultimate can be activated.
+2) Framerate persistence bug
+- Symptom: Selecting a framerate (controls backend polling frequency in battles) and clicking "Save" resets the value; the selection does not persist.
+- Impact: Backend polling frequency cannot be changed as expected; affects network/load behavior in battles.
+- Suggested follow-up: Investigate settings save/load path and persistence logic for framerate; reproduce and create a bug report with reproduction steps.
 
-Double‑speed function are enabled through the top‑right buttons.  A demonstration screenshot shows the controls while characters fight automatically in the background.
+3) Pause-on-Stat behaviour
+- Observation: "Pause on Stat Screen" behaves inconsistently and appears unused or janky in current builds.
+- Recommendation: Remove or rework this option; if kept, ensure consistent behavior and document its effect.
 
-The desktop layout now removes the party and stat viewers on the left side so the game viewport can fill roughly 95% of the screen.
+Notes:
+- These entries were originally recorded on 2025-08-15 by the lead developer and GitHub Copilot; consolidated to improve readability.
+- Next actions: create issues for the framerate persistence bug and UI headings, or request a patch to add headings and validate settings persistence.
+ 
+4) Player Editor save issue
+- Symptom: Modified stat values in the Player Editor (e.g., setting Attack to 100) are not persisting — values revert to 0 after saving/closing.
+- Impact: Player customization is broken and can cause confusion or lost progress when editing the player.
+- Suggested follow-up: Track the save flow for Player Editor (UI -> state store -> persistence). Add reproduction steps and capture any console/network errors when saving.
+ 
+5) Gacha pulls without tickets
+- Symptom: The Pulls UI allows performing pulls even when Tickets are 0 (e.g., Pull 1 / Pull 10 succeed with Tickets: 0 displayed).
+- Impact: Enables unintended free pulls and devalues in-game economy; potential client-side exploit.
+- Suggested follow-up: Add server-side validation for pulls to require tickets or currency, and ensure the UI reflects current currency/ticket counts. Capture network requests during a pull to verify server response handling.
+
+6) Crafting menu icons missing
+- Symptom: Crafting list displays item names and counts but icons and star-rank outlines are missing (no visual sprites displayed).
+- Impact: Harder to scan materials and identify rarities quickly; reduces UI polish and can confuse players.
+- Suggested follow-up: Verify asset paths and rendering logic for crafting items; check CSS rules that may hide background images or SVG icons. Add a fallback placeholder icon when assets fail to load.
+
+7) Party & Character picker issues
+- Symptom: Multiple UI and data inconsistencies observed:
+  - Party picker: player type is incorrect (player showing Fire instead of Light) because Player Editor settings are not persisting.
+  - DEF is currently under the Core tab; should be at the top of the Defense tab.
+  - EXP is placed at the bottom of the Core tab; should appear under HP.
+  - Character picker: type icon uses the wrong color and the character box outline color is incorrect.
+  - Character picker layout shows multiple characters per row; should display one character per row for readability.
+- Impact: Confusing stat layout, incorrect visuals, and mismatched player types can cause gameplay errors and poor UX.
+- Suggested follow-up: Reconcile Player Editor persistence first, then audit the character picker rendering and CSS (icon colors, outline colors, layout grid). Reorder stat placement in the UI and add tests to verify correct stat positions and type assignment.
+ 
+8) Remove SPD stat from UI
+- Symptom: UI shows a "SPD" stat, but the game does not implement a Speed stat.
+- Impact: Misleading and confusing to players; should be removed to avoid confusion.
+- Suggested follow-up: Remove SPD from UI components and templates. Search UI code for "spd"/"speed" usages and remove or disable them.
+
+9) Map & Battle UI issues
+- Map room scrolling:
+  - Symptom: Map requires manual scrolling to bottom to view content; players should only need to see next 4 room groups instead of full map scroll.
+  - Suggested follow-up: Implement viewport clipping or pagination to show only the next 4 room groups; reduce DOM nodes rendered for performance.
+
+- Battle UI issues (start of battle / in-battle):
+  - Missing party member icons and unknown damage types for characters — party members render without icons, likely missing asset loading or incorrect type mapping.
+  - Rewards menu appears unthemed and outside of the battle viewport; right sidebar remains visible inside battle window.
+  - Battle background not visible inside battle UI (background missing/clipped).
+  - UI layout/positioning is janky on battle start (overlapping elements, sidebar bleeding into viewport).
+  - Suggestion: Reuse party picker asset loading and type mapping; add a small shared utility to normalize character asset loading across modules.
+
+- Suggested follow-up: Capture DOM/network during battle start, compare party picker asset load sequence, and ensure battle viewport isolates/hides non-battle UI (sidebars). Create issues with reproduction steps and sample network logs.
 
 
-## Frontend issues
-- Start Run button returns to main menu; Start Run and Cancel buttons lack stained glass theme.
-- Map appears upside down and rooms do nothing when clicked.
-- Battle endpoint payload required for room clicks is undocumented.
-- Back button jumps to the home screen instead of the previous menu.
-- Home button is nonfunctional.
-- Player editor button next to Home does not open the editor.
-- No frontend check for active battles to lock other menus.
-- Item, relic, and card icons are missing; asset folders require placeholders.
+
