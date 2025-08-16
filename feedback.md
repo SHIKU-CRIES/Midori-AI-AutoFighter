@@ -8,58 +8,43 @@ Summary:
 - Initial feedback entries consolidated into a single log.
 
 Details:
-
-1) UI clarity
-- Observation: The Settings panel uses three logical columns but lacks visible headings.
-- Recommendation: Add clear column titles: "Audio", "System", "Gameplay" to group related controls.
-  - Audio: SFX Volume, Music Volume, Voice Volume
-  - System: Pause on Stat Screen, Framerate
-  - Gameplay: Autocraft
-
-2) Framerate persistence bug
-- Symptom: Selecting a framerate (controls backend polling frequency in battles) and clicking "Save" resets the value; the selection does not persist.
-- Impact: Backend polling frequency cannot be changed as expected; affects network/load behavior in battles.
-- Suggested follow-up: Investigate settings save/load path and persistence logic for framerate; reproduce and create a bug report with reproduction steps.
-
-3) Pause-on-Stat behaviour
-- Observation: "Pause on Stat Screen" behaves inconsistently and appears unused or janky in current builds.
-- Recommendation: Remove or rework this option; if kept, ensure consistent behavior and document its effect.
-
-Notes:
-- These entries were originally recorded on 2025-08-15 by the lead developer and GitHub Copilot; consolidated to improve readability.
-- Next actions: create issues for the framerate persistence bug and UI headings, or request a patch to add headings and validate settings persistence.
  
-4) Player Editor save issue
-- Symptom: Modified stat values in the Player Editor (e.g., setting Attack to 100) are not persisting — values revert to 0 after saving/closing.
-- Impact: Player customization is broken and can cause confusion or lost progress when editing the player.
-- Suggested follow-up: Track the save flow for Player Editor (UI -> state store -> persistence). Add reproduction steps and capture any console/network errors when saving.
- 
-5) Gacha pulls without tickets
+1) Gacha pulls without tickets (still bugged as of 8/16/25 @ 4:38pm)
 - Symptom: The Pulls UI allows performing pulls even when Tickets are 0 (e.g., Pull 1 / Pull 10 succeed with Tickets: 0 displayed).
 - Impact: Enables unintended free pulls and devalues in-game economy; potential client-side exploit.
 - Suggested follow-up: Add server-side validation for pulls to require tickets or currency, and ensure the UI reflects current currency/ticket counts. Capture network requests during a pull to verify server response handling.
 
-6) Crafting menu icons missing
+2) Crafting menu icons missing
 - Symptom: Crafting list displays item names and counts but icons and star-rank outlines are missing (no visual sprites displayed).
 - Impact: Harder to scan materials and identify rarities quickly; reduces UI polish and can confuse players.
 - Suggested follow-up: Verify asset paths and rendering logic for crafting items; check CSS rules that may hide background images or SVG icons. Add a fallback placeholder icon when assets fail to load.
 
-7) Party & Character picker issues
+3) Crafted items do not stack and names are janky
+- Symptom: Crafted items in the crafting menu do not stack (e.g., 8x 4-star ice items show as 8 separate entries) and names are displayed poorly.
+- Impact: Inventory is cluttered and hard to read; user cannot easily see total counts of each item.
+- Suggested follow-up: Update UI and logic to stack items by type and rarity, and improve name formatting for clarity.
+
+4) Settings wipe data does not wipe data
+- Symptom: In settings, the 'wipe data' button does not actually wipe user data.
+- Impact: Users cannot reset their progress or clear data as expected.
+- Suggested follow-up: Investigate and fix so it fully clears user data as expected. Add tests to verify data is wiped.
+
+5) Party & Character picker issues
 - Symptom: Multiple UI and data inconsistencies observed:
   - Party picker: player type is incorrect (player showing Fire instead of Light) because Player Editor settings are not persisting.
   - DEF is currently under the Core tab; should be at the top of the Defense tab.
   - EXP is placed at the bottom of the Core tab; should appear under HP.
-  - Character picker: type icon uses the wrong color and the character box outline color is incorrect.
+  - Character picker: type icon uses the wrong color (e.g., Becca's icon is white, should be damage type color) and the character box outline color is incorrect.
   - Character picker layout shows multiple characters per row; should display one character per row for readability.
 - Impact: Confusing stat layout, incorrect visuals, and mismatched player types can cause gameplay errors and poor UX.
-- Suggested follow-up: Reconcile Player Editor persistence first, then audit the character picker rendering and CSS (icon colors, outline colors, layout grid). Reorder stat placement in the UI and add tests to verify correct stat positions and type assignment.
- 
-8) Remove SPD stat from UI
+- Suggested follow-up: Reconcile Player Editor persistence first, then audit the character picker rendering and CSS (icon colors, outline colors, layout grid). Reorder stat placement in the UI and add tests to verify correct stat positions and type assignment. Fix damage type icon color for Becca and others.
+
+6) Remove SPD stat from UI
 - Symptom: UI shows a "SPD" stat, but the game does not implement a Speed stat.
 - Impact: Misleading and confusing to players; should be removed to avoid confusion.
 - Suggested follow-up: Remove SPD from UI components and templates. Search UI code for "spd"/"speed" usages and remove or disable them.
 
-9) Map & Battle UI issues
+7) Map & Battle UI issues
 - Map room scrolling:
   - Symptom: Map requires manual scrolling to bottom to view content; players should only need to see next 4 room groups instead of full map scroll.
   - Suggested follow-up: Implement viewport clipping or pagination to show only the next 4 room groups; reduce DOM nodes rendered for performance.
