@@ -10,4 +10,11 @@ Provides a simple publish/subscribe bus so plugins can communicate without engin
 Subscriber errors are caught and logged so one misbehaving plugin does not crash others.
 
 ## Events
-No global events are defined yet. Plugins may define and document their own event names.
+The core combat engine emits a few global events that plugins may subscribe to:
+
+- `damage_dealt(attacker, target, amount)`
+- `damage_taken(target, attacker, amount)`
+- `heal(healer, target, amount)`
+- `heal_received(target, healer, amount)`
+
+Plugins can define additional event names as needed.

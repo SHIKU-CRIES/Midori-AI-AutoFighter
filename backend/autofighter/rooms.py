@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import random
+import asyncio
 
 from typing import Any
 from dataclasses import asdict
@@ -16,6 +17,7 @@ from .passives import PassiveRegistry
 from autofighter.cards import apply_cards
 from autofighter.cards import card_choices
 from autofighter.relics import apply_relics
+from autofighter.effects import EffectManager
 from plugins.foes._base import FoeBase
 
 
@@ -55,16 +57,18 @@ def _choose_foe(party: Party) -> FoeBase:
 class Room:
     node: MapNode
 
-    def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
+    async def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
         raise NotImplementedError
 
 
 @dataclass
 class BattleRoom(Room):
-    def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
+    strength: float = 1.0
+
+    async def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
         registry = PassiveRegistry()
         foe = _choose_foe(party)
-        _scale_stats(foe, self.node)
+        _scale_stats(foe, self.node, self.strength)
         combat_party = Party(
             members=[copy.deepcopy(m) for m in party.members],
             gold=party.gold,
@@ -73,12 +77,53 @@ class BattleRoom(Room):
         )
         apply_cards(combat_party)
         apply_relics(combat_party)
-        for member, orig in zip(combat_party.members, party.members):
+
+        foe_effects = EffectManager(foe)
+        party_effects = [EffectManager(m) for m in combat_party.members]
+
+        registry.trigger("room_enter", foe)
+        registry.trigger("battle_start", foe)
+        for member_effect, member in zip(party_effects, combat_party.members):
             registry.trigger("room_enter", member)
             registry.trigger("battle_start", member)
-            foe.hp = max(foe.hp - member.atk, 0)
-            member.apply_damage(foe.atk)
+
+        while foe.hp > 0 and any(m.hp > 0 for m in combat_party.members):
+            for member_effect, member in zip(party_effects, combat_party.members):
+                if member.hp <= 0:
+                    continue
+                registry.trigger("turn_start", member)
+                member_effect.tick(foe_effects)
+                if member.hp <= 0:
+                    registry.trigger("turn_end", member)
+                    continue
+                member_effect.on_action()
+                dmg = foe.apply_damage(member.atk, attacker=member)
+                foe_effects.maybe_inflict_dot(member, dmg)
+                registry.trigger("turn_end", member)
+                if foe.hp <= 0:
+                    break
+                await asyncio.sleep(0.01)
+                registry.trigger("turn_start", foe)
+                foe_effects.tick(member_effect)
+                if foe.hp <= 0:
+                    registry.trigger("turn_end", foe)
+                    break
+                foe_effects.on_action()
+                dmg = member.apply_damage(foe.atk, attacker=foe)
+                member_effect.maybe_inflict_dot(foe, dmg)
+                registry.trigger("turn_end", foe)
+                await asyncio.sleep(0.01)
+            else:
+                continue
+            break
+
+        registry.trigger("battle_end", foe)
+        for member in combat_party.members:
+            registry.trigger("battle_end", member)
+
+        for member, orig in zip(combat_party.members, party.members):
             orig.hp = min(member.hp, orig.max_hp)
+
         options = card_choices(party, stars=1)
         foes = [_serialize(foe)]
         party_data = [_serialize(p) for p in combat_party.members]
@@ -86,7 +131,7 @@ class BattleRoom(Room):
             {"id": c.id, "name": c.name, "stars": c.stars} for c in options
         ]
         return {
-            "result": "battle",
+            "result": "boss" if self.strength > 1.0 else "battle",
             "party": party_data,
             "gold": party.gold,
             "relics": party.relics,
@@ -98,44 +143,12 @@ class BattleRoom(Room):
 
 @dataclass
 class BossRoom(BattleRoom):
-    def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
-        registry = PassiveRegistry()
-        foe = _choose_foe(party)
-        _scale_stats(foe, self.node, 100)
-        combat_party = Party(
-            members=[copy.deepcopy(m) for m in party.members],
-            gold=party.gold,
-            relics=party.relics,
-            cards=party.cards,
-        )
-        apply_cards(combat_party)
-        apply_relics(combat_party)
-        for member, orig in zip(combat_party.members, party.members):
-            registry.trigger("room_enter", member)
-            registry.trigger("battle_start", member)
-            foe.hp = max(foe.hp - member.atk, 0)
-            member.apply_damage(foe.atk)
-            orig.hp = min(member.hp, orig.max_hp)
-        options = card_choices(party, stars=1)
-        foes = [_serialize(foe)]
-        party_data = [_serialize(p) for p in combat_party.members]
-        choice_data = [
-            {"id": c.id, "name": c.name, "stars": c.stars} for c in options
-        ]
-        return {
-            "result": "boss",
-            "party": party_data,
-            "gold": party.gold,
-            "relics": party.relics,
-            "cards": party.cards,
-            "card_choices": choice_data,
-            "foes": foes,
-        }
+    strength: float = 100.0
 
 
 @dataclass
 class ShopRoom(Room):
-    def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
+    async def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
         registry = PassiveRegistry()
         heal = int(sum(m.max_hp for m in party.members) * 0.05)
         for member in party.members:
@@ -161,7 +174,7 @@ class ShopRoom(Room):
 
 @dataclass
 class RestRoom(Room):
-    def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
+    async def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
         registry = PassiveRegistry()
         for member in party.members:
             registry.trigger("room_enter", member)
@@ -180,7 +193,7 @@ class RestRoom(Room):
 
 @dataclass
 class ChatRoom(Room):
-    def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
+    async def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
         registry = PassiveRegistry()
         for member in party.members:
             registry.trigger("room_enter", member)

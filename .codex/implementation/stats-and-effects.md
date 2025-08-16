@@ -16,7 +16,8 @@ Characters with random base damage types store their first rolled element in the
 save database and reuse it on later loads so elements stay consistent across
 sessions.
 
-`apply_damage()` and `apply_healing()` update `hp` and track totals such as `damage_taken` and `last_damage_taken`.
+`apply_damage()` and `apply_healing()` update `hp`, fire damage and healing hooks on the attacker and target damage types, and emit
+global `damage_taken`, `damage_dealt`, `heal_received`, and `heal` events on the repository-wide event bus.
 
 ## Modifiers
 Stat changes may be applied in two ways:
@@ -27,7 +28,10 @@ Stat changes may be applied in two ways:
 Effects and passives mutate these fields directly. Percentage values are expressed as decimals (e.g., `0.05` for +5%).
 
 ## EffectManager
-`EffectManager` tracks `DamageOverTime` and `HealingOverTime` instances on a `Stats` object.
+`EffectManager` tracks `DamageOverTime` and `HealingOverTime` instances on a `Stats` object. Ticks call the target's damage type
+hooks so plugins can modify dot damage or hot healing globally. Damage types may also create new DoT effects when they land
+attacks via `maybe_inflict_dot`, which rolls the attacker's `effect_hit_rate` against the target's `effect_resistance` before
+adding the effect. The difference is clamped to zero and jittered by ±10%, and there is always at least a 1% chance to apply the status.
 
 - `add_dot(effect, max_stacks=None)` – registers a DoT; optional stack caps are enforced.
 - `add_hot(effect)` – registers a HoT.

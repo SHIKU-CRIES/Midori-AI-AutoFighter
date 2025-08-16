@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import Optional
+from dataclasses import dataclass
 
 if TYPE_CHECKING:
     from autofighter.stats import Stats
+    from autofighter.effects import DamageOverTime
 
 
 @dataclass
@@ -104,3 +106,10 @@ class DamageTypeBase:
         """Called when a party member receives HoT healing; return the modified ``heal``."""
 
         return heal
+
+    def create_dot(
+        self, damage: float, source: Stats
+    ) -> Optional["DamageOverTime"]:
+        """Return a DoT effect based on ``damage`` or ``None`` to skip."""
+
+        return None

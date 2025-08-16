@@ -10,6 +10,6 @@ class Bleed(DamageOverTime):
 
     def tick(self, target, *_):
         dmg = max(int(target.max_hp * 0.02), 1)
-        target.apply_damage(dmg)
+        target.apply_damage(dmg, attacker=self.source)
         self.turns -= 1
         return self.turns > 0

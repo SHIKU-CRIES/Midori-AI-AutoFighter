@@ -24,6 +24,5 @@ The desktop layout now removes the party and stat viewers on the left side so th
 - Back button jumps to the home screen instead of the previous menu.
 - Home button is nonfunctional.
 - Player editor button next to Home does not open the editor.
-- Settings menu is missing a voice option under audio.
 - No frontend check for active battles to lock other menus.
 - Item, relic, and card icons are missing; asset folders require placeholders.

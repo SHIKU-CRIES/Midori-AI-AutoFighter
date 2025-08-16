@@ -16,5 +16,10 @@ small screens.
 
 `startRun` in `frontend/src/lib/api.js` posts the chosen party and optional player damage type to the Quart backend's `/run/start` endpoint, which validates ownership and returns run data with passive names.
 
+Upon success, the parent page stores the `run_id` and initial map and immediately
+switches to the map view so the run can begin.
+
+The confirmation footer wraps **Start Run** and **Cancel** in a stained-glass row so these buttons match the rest of the interface.
+
 ## Testing
 - `bun test frontend/tests/partypicker.test.js`

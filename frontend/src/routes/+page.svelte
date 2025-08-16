@@ -14,7 +14,12 @@
     startRun,
     fetchMap,
     getPlayerConfig,
-    savePlayerConfig
+    savePlayerConfig,
+    battleRoom,
+    shopRoom,
+    restRoom,
+    bossRoom,
+    chooseCard
   } from '$lib/api.js';
 
   let runId = '';
@@ -23,34 +28,62 @@
   let roomData = null;
   let viewportBg = '';
   let viewMode = 'main';
+  let viewStack = [];
+
+  function setView(mode) {
+    viewStack.push(viewMode);
+    viewMode = mode;
+  }
+
+  function goBack() {
+    viewMode = viewStack.pop() || 'main';
+  }
+
+  function goHome() {
+    viewStack = [];
+    viewMode = 'main';
+  }
   let editorState = { pronouns: '', damage: 'Light', hp: 0, attack: 0, defense: 0 };
+  let battleActive = false;
 
   function openRun() {
-    viewMode = 'party-start';
+    setView('party-start');
+  }
+
+  async function checkBattle() {
+    if (!runId) return false;
+    const data = await fetchMap(runId);
+    const map = data.map;
+    currentMap = map.rooms.slice(map.current).map((n) => n.room_type);
+    battleActive = map.battle;
+    return battleActive;
   }
 
   async function openMap() {
     if (!runId) return;
-    viewMode = 'map';
-    const data = await fetchMap(runId);
-    currentMap = data.rooms.slice(data.current).map((n) => n.room_type);
+    if (await checkBattle()) return;
+    setView('map');
   }
 
   async function handleStart() {
     const data = await startRun(selectedParty);
     runId = data.run_id;
     currentMap = data.map.rooms.slice(data.map.current).map((n) => n.room_type);
-    viewMode = 'main';
+    battleActive = data.map.battle;
+    viewStack = ['main'];
+    viewMode = 'map';
   }
 
-  function handleParty() {
-    viewMode = 'party';
+  async function handleParty() {
+    if (await checkBattle()) return;
+    setView('party');
   }
 
   async function openEditor() {
+    if (await checkBattle()) return;
     const data = await getPlayerConfig();
     editorState = data;
-    viewMode = 'editor';
+    setView('editor');
   }
 
   function handleEditorSave(e) {
@@ -58,27 +91,64 @@
     savePlayerConfig(editorState);
   }
 
-  function openPulls() {
-    viewMode = 'pulls';
+  async function openPulls() {
+    if (await checkBattle()) return;
+    setView('pulls');
   }
 
-  function openCraft() {
-    viewMode = 'craft';
+  async function openCraft() {
+    if (await checkBattle()) return;
+    setView('craft');
   }
 
-  function handleTarget() {
-    viewMode = 'stats';
+  async function handleTarget() {
+    if (await checkBattle()) return;
+    setView('stats');
   }
 
-  const items = [
-    { icon: Play, label: 'Run', action: openRun },
-    { icon: Map, label: 'Map', action: openMap },
-    { icon: Users, label: 'Party', action: handleParty },
-    { icon: User, label: 'Edit', action: openEditor },
-    { icon: PackageOpen, label: 'Pulls', action: openPulls },
-    { icon: Hammer, label: 'Craft', action: openCraft },
-    { icon: Settings, label: 'Settings', action: () => (viewMode = 'settings') },
-    { icon: SquareChartGantt, label: 'Stats', action: () => (viewMode = 'stats') }
+  async function handleRoomSelect(e) {
+    if (!runId || battleActive) return;
+    const room = e.detail;
+    let data;
+    if (room.includes('battle')) {
+      battleActive = true;
+      data = await battleRoom(runId);
+    } else if (room.includes('shop')) {
+      data = await shopRoom(runId);
+    } else if (room.includes('rest')) {
+      data = await restRoom(runId);
+    } else if (room.includes('boss')) {
+      battleActive = true;
+      data = await bossRoom(runId);
+    } else {
+      return;
+    }
+    roomData = data;
+    await checkBattle();
+  }
+
+  async function handleRewardSelect(detail) {
+    if (!runId) return;
+    await chooseCard(runId, detail.id);
+    if (roomData) {
+      roomData.card_choices = [];
+    }
+  }
+  let items = [];
+  $: items = [
+    { icon: Play, label: 'Run', action: openRun, disabled: battleActive },
+    { icon: Map, label: 'Map', action: openMap, disabled: battleActive },
+    { icon: Users, label: 'Party', action: handleParty, disabled: battleActive },
+    { icon: User, label: 'Edit', action: openEditor, disabled: battleActive },
+    { icon: PackageOpen, label: 'Pulls', action: openPulls, disabled: battleActive },
+    { icon: Hammer, label: 'Craft', action: openCraft, disabled: battleActive },
+    {
+      icon: Settings,
+      label: 'Settings',
+      action: () => setView('settings'),
+      disabled: false
+    },
+    { icon: SquareChartGantt, label: 'Stats', action: handleTarget, disabled: battleActive }
   ];
 
 </script>
@@ -121,8 +191,15 @@
     items={items}
     editorState={editorState}
     map={currentMap}
-    on:startRun={() => { handleStart(); viewMode = 'main'; }}
-    on:editorSave={(e) => { handleEditorSave(e); viewMode = 'main'; }}
+    battleActive={battleActive}
+    on:startRun={handleStart}
+    on:editorSave={(e) => handleEditorSave(e)}
     on:target={handleTarget}
+    on:roomSelect={handleRoomSelect}
+    on:back={goBack}
+    on:home={goHome}
+    on:openEditor={openEditor}
+    on:settings={() => setView('settings')}
+    on:rewardSelect={(e) => handleRewardSelect(e.detail)}
   />
 </div>

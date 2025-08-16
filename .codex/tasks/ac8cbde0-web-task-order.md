@@ -9,18 +9,11 @@ Ordered steps for moving Midori AI AutoFighter to a Svelte frontend and a Python
 
 ## Tasks
 ### To Do
- - [ ] [Wire start run button to backend](d10d985e-start-run-endpoint.md) (`d10d985e`)
- - [ ] [Theme start and cancel buttons](80ac2de0-theme-start-run-button.md) (`80ac2de0`)
- - [ ] [Fix map orientation and room states](ee812dae-fix-map-orientation.md) (`ee812dae`)
- - [ ] [Send room selection to backend battle endpoint](8c01491a-room-click-backend.md) (`8c01491a`)
- - [ ] [Document battle endpoint payload](f74d328b-document-battle-payload.md) (`f74d328b`)
- - [ ] [Lock menus during active battles](38560441-battle-lock-ui.md) (`38560441`)
- - [ ] [Fix navigation buttons](f59f2c94-fix-menu-buttons.md) (`f59f2c94`)
- - [ ] [Add voice setting to audio options](6cc0b67f-add-voice-setting.md) (`6cc0b67f`)
- - [ ] [Verify unified room action route](fd1f6ffd-unified-room-route.md) (`fd1f6ffd`)
- - [ ] [Build reward overlay](1457ed34-reward-overlay.md) (`1457ed34`)
- - [ ] [Organize asset icon folders](1d6c6f08-asset-icon-structure.md) (`1d6c6f08`)
+
 ### Completed
+ - [x] [Fix map orientation and room states](done/ee812dae-fix-map-orientation.md) (`ee812dae`)
+ - [x] [Fix navigation buttons](done/f59f2c94-fix-menu-buttons.md) (`f59f2c94`)
+ - [x] [Verify unified room action route](done/fd1f6ffd-unified-room-route.md) (`fd1f6ffd`)
  - [x] [Expand game viewport to 95% and remove side viewers](done/2e26511f-expand-game-viewport.md) (`2e26511f`)
  - [x] [Refactor desktop layout with right sidebar](done/41c342ac-desktop-ui-sidebar-refactor.md) (`41c342ac`)
  - [x] [Rebuild settings panel with framerate and autocraft](done/2a4db820-settings-panel-overhaul.md) (`2a4db820`)
@@ -51,7 +44,19 @@ Ordered steps for moving Midori AI AutoFighter to a Svelte frontend and a Python
  - [x] [Add party picker endpoint for run setup](done/5ddc2157-party-picker-endpoint.md) (`5ddc2157`)
  - [x] [Add player character editor endpoint](done/6d267bac-player-character-editor-endpoint.md) (`6d267bac`)
  - [x] [Lock player stat editing during runs](done/1c7a29fa-lock-stat-editing.md) (`1c7a29fa`)
+ - [x] [Document battle endpoint payload](done/f74d328b-document-battle-payload.md) (`f74d328b`)
+ - [x] [Send room selection to backend battle endpoint](done/8c01491a-room-click-backend.md) (`8c01491a`)
+ - [x] [Wire start run button to backend](done/d10d985e-start-run-endpoint.md) (`d10d985e`)
+ - [x] [Loop battles and process status effects](done/31c94023-battle-loop-effects.md) (`31c94023`)
+ - [x] [Make battle loop async-friendly](done/2d3f9ae1-async-battle-await.md) (`2d3f9ae1`)
+ - [x] [Apply DoT chance with effect stats and emit combat events](done/9d6d4b7a-effect-hit-resist-dot.md) (`9d6d4b7a`)
+- [x] [Add voice setting to audio options](done/6cc0b67f-add-voice-setting.md) (`6cc0b67f`)
+- [x] [Lock menus during active battles](done/38560441-battle-lock-ui.md) (`38560441`)
+- [x] [Theme start and cancel buttons](done/80ac2de0-theme-start-run-button.md) (`80ac2de0`)
+- [x] [Fix navigation buttons](done/f59f2c94-fix-menu-buttons.md) (`f59f2c94`)
 
+ - [x] [Organize asset icon folders](done/1d6c6f08-asset-icon-structure.md) (`1d6c6f08`)
+ - [x] [Build reward overlay](done/1457ed34-reward-overlay.md) (`1457ed34`)
 ## Context
 Switching from Panda3D to a web-based GUI with a Quart backend managed via Docker Compose.
 

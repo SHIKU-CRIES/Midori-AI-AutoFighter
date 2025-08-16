@@ -186,7 +186,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
     run_id = str(uuid4())
     generator = MapGenerator(run_id)
     nodes = generator.generate_floor()
-    state = {"rooms": [n.to_dict() for n in nodes], "current": 1}
+    state = {"rooms": [n.to_dict() for n in nodes], "current": 1, "battle": False}
     with SAVE_MANAGER.connection() as conn:
         conn.execute(
             "INSERT INTO runs (id, party, map) VALUES (?, ?, ?)",
@@ -442,7 +442,7 @@ def load_map(run_id: str) -> tuple[dict, list[MapNode]]:
         cur = conn.execute("SELECT map FROM runs WHERE id = ?", (run_id,))
         row = cur.fetchone()
     if row is None:
-        return {"rooms": [], "current": 0}, []
+        return {"rooms": [], "current": 0, "battle": False}, []
     state = json.loads(row[0])
     rooms = [MapNode.from_dict(n) for n in state.get("rooms", [])]
     return state, rooms
@@ -478,8 +478,11 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     node = rooms[state["current"]]
     if node.room_type not in {"battle-weak", "battle-normal"}:
         return jsonify({"error": "invalid room"}), 400
+    state["battle"] = True
+    save_map(run_id, state)
     room = BattleRoom(node)
-    result = room.resolve(party, data)
+    result = await room.resolve(party, data)
+    state["battle"] = False
     state["current"] += 1
     save_map(run_id, state)
     save_party(run_id, party)
@@ -496,7 +499,7 @@ async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     if node.room_type != "shop":
         return jsonify({"error": "invalid room"}), 400
     room = ShopRoom(node)
-    result = room.resolve(party, data)
+    result = await room.resolve(party, data)
     state["current"] += 1
     save_map(run_id, state)
     save_party(run_id, party)
@@ -513,7 +516,7 @@ async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     if node.room_type != "rest":
         return jsonify({"error": "invalid room"}), 400
     room = RestRoom(node)
-    result = room.resolve(party, data)
+    result = await room.resolve(party, data)
     state["current"] += 1
     save_map(run_id, state)
     save_party(run_id, party)
@@ -530,7 +533,7 @@ async def chat_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     if node.room_type != "chat":
         return jsonify({"error": "invalid room"}), 400
     room = ChatRoom(node)
-    result = room.resolve(party, data)
+    result = await room.resolve(party, data)
     state["current"] += 1
     save_map(run_id, state)
     save_party(run_id, party)
@@ -546,8 +549,11 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     node = rooms[state["current"]]
     if node.room_type != "battle-boss-floor":
         return jsonify({"error": "invalid room"}), 400
+    state["battle"] = True
+    save_map(run_id, state)
     room = BossRoom(node)
-    result = room.resolve(party, data)
+    result = await room.resolve(party, data)
+    state["battle"] = False
     state["current"] += 1
     save_map(run_id, state)
     save_party(run_id, party)

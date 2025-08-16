@@ -55,6 +55,24 @@ export async function restRoom(runId, action = '') {
   return res.json();
 }
 
+export async function bossRoom(runId, action = '') {
+  const res = await fetch(`${API_BASE}/rooms/${runId}/boss`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action })
+  });
+  return res.json();
+}
+
+export async function chooseCard(runId, cardId) {
+  const res = await fetch(`${API_BASE}/cards/${runId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ card: cardId })
+  });
+  return res.json();
+}
+
 export async function getGacha() {
   const res = await fetch(`${API_BASE}/gacha`);
   return res.json();

@@ -13,6 +13,7 @@ export { default as BattleView } from './BattleView.svelte';
 export { default as RestRoom } from './RestRoom.svelte';
 export { default as ShopMenu } from './ShopMenu.svelte';
 export { default as CraftingMenu } from './CraftingMenu.svelte';
+export { default as RewardOverlay } from './RewardOverlay.svelte';
 export { layoutForWidth } from './layout.js';
 export {
   startRun,
@@ -20,5 +21,7 @@ export {
   fetchMap,
   battleRoom,
   shopRoom,
-  restRoom
+  restRoom,
+  bossRoom,
+  chooseCard
 } from './api.js';

@@ -1,26 +1,20 @@
-
 # Battle Rooms
 
-`BattleRoom` hosts turn-based encounters against scaled foes drawn from player plugins you haven't selected. It triggers party passives, handles attack rolls, damage display, and overtime warnings after long fights.
+`BattleRoom` resolves turn-based encounters against scaled foes drawn from player plugins you haven't selected. Passives fire on room entry, battle start, and at the beginning and end of each turn. Combat continues until either every party member or the foe is defeated. The `EffectManager` applies damage-over-time and healing-over-time ticks on each combatant before actions take place, and the async loop inserts a short await between turns so battles yield control back to the event loop.
 
-`BossRoom` extends this scene to load boss-specific models, music, and scripted attack patterns. Boss configurations live in `autofighter.rooms.boss_patterns` and expose reward data after victory.
+Each strike rolls the attacker's `effect_hit_rate` against the target's `effect_resistance`. The difference is clamped to zero, jittered by ±10%, and even a failed roll has a 1% floor chance to attach a damage-type-specific DoT scaled to the damage dealt.
 
-When the player or foe is defeated, the room exits back to the previous scene so the run map continues automatically.
+`BossRoom` subclasses `BattleRoom` but multiplies foe stats by 100× to create floor bosses.
 
-The web frontend includes a placeholder `BattleView` using `MenuPanel` to reserve space for timelines and actions.
-
-Model assets load through the shared `AssetManager`, which reads web-friendly formats through a unified loader. Tests cover setup to ensure player and foe models attach correctly when a battle begins.
+When the fight ends, the backend returns updated party stats, card choices, and foe data so the run map can advance.
 
 # Loop scaling
 
-Foe stats scale via `balance.loop.scale_stats`, which multiplies base values by floor, room, and loop counts. Floor bosses apply an extra `100×` base factor. Tuning knobs live in `balance.loop.config` for adjusting loop multipliers without touching combat logic.
+Foe stats scale via `balance.loop.scale_stats`, multiplying base values by floor, room, and loop counts. Floor bosses apply an extra `100×` base factor. Tuning knobs live in `balance.loop.config` for adjusting loop multipliers without touching combat logic.
 
 # Battle room rewards
 
-Rewards draw from a Rare Drop Rate (RDR) that starts at zero and rises with
-floor, room index, and any bonuses from relics or cards. Higher RDR increases
-the odds of rarer stars while proportionally reducing common ones. Percentages
-below reflect baseline odds at RDR&nbsp;0.
+Rewards draw from a Rare Drop Rate (RDR) that starts at zero and rises with floor, room index, and any bonuses from relics or cards. Higher RDR increases the odds of rarer stars while proportionally reducing common ones. Percentages below reflect baseline odds at RDR 0.
 
 Normal fights:
 - 5% chance to drop a relic (1★ at 98%, 2★ at 2%).
@@ -38,7 +32,3 @@ Floor bosses:
 - Guaranteed relic drop (3★ at 0.98%, 4★ at 0.02%, 5★ at 0.0002%).
 - Upgrade items: 0.8% 3★, 0.2% 4★.
 - Cards: 0.6% 3★, 0.25% 4★, 0.15% 5★.
-- Pull tickets: `min(5, 1 + pressure // 20 + loop)`.
-- Gold: `200 × loop × rand(2.05, 4.25)`.
-
-Rewards are chosen when the foe falls, and the battle scene displays a summary of the loot.

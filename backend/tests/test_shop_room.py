@@ -1,10 +1,13 @@
+import pytest
+
 from autofighter.party import Party
 from autofighter.rooms import ShopRoom
 from autofighter.mapgen import MapNode
 from plugins.players._base import PlayerBase
 
 
-def test_shop_room_heals_and_tracks_inventory():
+@pytest.mark.asyncio
+async def test_shop_room_heals_and_tracks_inventory():
     node = MapNode(room_id=1, room_type="shop", floor=1, index=1, loop=1, pressure=0)
     room = ShopRoom(node)
 
@@ -30,7 +33,7 @@ def test_shop_room_heals_and_tracks_inventory():
 
     party = Party(members=[p1, p2, p3, p4], gold=100)
 
-    room.resolve(party, {"cost": 20, "item": "amulet"})
+    await room.resolve(party, {"cost": 20, "item": "amulet"})
 
     assert [m.hp for m in party.members] == [100, 150, 50, 150]
     assert party.gold == 80

@@ -52,6 +52,7 @@ async def test_run_flow(app_with_db):
     map_data = await map_resp.get_json()
     assert map_data["map"]["current"] == 1
     assert len(map_data["map"]["rooms"]) == 45
+    assert map_data["map"]["battle"] is False
 
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
@@ -108,6 +109,9 @@ async def test_players_and_rooms(app_with_db):
     foe = battle_data["foes"][0]
     assert foe["id"] != "player"
     assert "atk" in foe
+
+    map_state = (await (await client.get(f"/map/{run_id}")).get_json())["map"]
+    assert map_state["battle"] is False
     assert "defense" in foe
     assert "atk" in battle_data["party"][0]
 

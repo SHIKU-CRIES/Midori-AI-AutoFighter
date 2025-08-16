@@ -7,11 +7,13 @@ import {
   battleRoom,
   shopRoom,
   restRoom,
+  bossRoom,
   getPlayerConfig,
   savePlayerConfig,
   getGacha,
   pullGacha,
-  setAutoCraft
+  setAutoCraft,
+  chooseCard
 } from '../src/lib/api.js';
 
 // Helper to mock fetch
@@ -33,9 +35,10 @@ describe('api calls', () => {
   });
 
   test('fetchMap retrieves map', async () => {
-    global.fetch = createFetch({ map: ['start'] });
+    const payload = { map: { rooms: ['start'], current: 0, battle: false } };
+    global.fetch = createFetch(payload);
     const result = await fetchMap('abc');
-    expect(result).toEqual({ map: ['start'] });
+    expect(result).toEqual(payload);
   });
 
   test('getPlayers retrieves roster', async () => {
@@ -60,6 +63,12 @@ describe('api calls', () => {
     global.fetch = createFetch({ result: 'rest', party: [], foes: [] });
     const result = await restRoom('abc', 'sleep');
     expect(result).toEqual({ result: 'rest', party: [], foes: [] });
+  });
+
+  test('bossRoom posts action', async () => {
+    global.fetch = createFetch({ result: 'boss', party: [], foes: [] });
+    const result = await bossRoom('abc', 'attack');
+    expect(result).toEqual({ result: 'boss', party: [], foes: [] });
   });
 
   test('getPlayerConfig fetches editor data', async () => {
@@ -91,5 +100,12 @@ describe('api calls', () => {
     global.fetch = createFetch({ status: 'ok', auto_craft: true });
     const result = await setAutoCraft(true);
     expect(result).toEqual({ status: 'ok', auto_craft: true });
+  });
+
+  test('chooseCard posts card selection', async () => {
+    const payload = { card: { id: 'c1', name: 'Card', stars: 1 }, cards: ['c1'] };
+    global.fetch = createFetch(payload);
+    const result = await chooseCard('abc', 'c1');
+    expect(result).toEqual(payload);
   });
 });

@@ -5,6 +5,9 @@
 
   export let map = [];
   const dispatch = createEventDispatcher();
+  let ordered = [];
+
+  $: ordered = [...map].reverse();
 
   function iconFor(room) {
     const r = (room || '').toLowerCase();
@@ -19,7 +22,8 @@
     return (room || '').replace(/-/g, ' ');
   }
 
-  function select(room) {
+  function select(room, i) {
+    if (i !== ordered.length - 1) return;
     dispatch('select', room);
   }
 </script>
@@ -29,9 +33,14 @@
     <h4>Map</h4>
     <div class="help">Tap a room to proceed</div>
     <ul>
-      {#each map as room}
+      {#each ordered as room, i}
         <li>
-          <button on:click={() => select(room)} data-testid={`room-${room}`}>
+          <button
+            on:click={() => select(room, i)}
+            class:current={i === ordered.length - 1}
+            disabled={i !== ordered.length - 1}
+            data-testid={`room-${room}`}
+          >
             <svelte:component this={iconFor(room)} class="icon" aria-hidden="true" />
             <span class="room-label">{labelFor(room)}</span>
           </button>
@@ -49,8 +58,8 @@
     list-style: none;
     padding: 0;
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
-    flex-wrap: wrap;
   }
   button {
     border: 2px solid #777;
@@ -61,6 +70,11 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    opacity: 0.5;
+  }
+  button.current {
+    opacity: 1;
+    border-color: #fff;
   }
   .icon {
     width: 20px;

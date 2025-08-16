@@ -1,17 +1,18 @@
 <script>
   import MenuPanel from './MenuPanel.svelte';
   import { createEventDispatcher } from 'svelte';
-  import { Volume2, Music, Pause } from 'lucide-svelte';
+  import { Volume2, Music, Mic, Pause } from 'lucide-svelte';
 
   const dispatch = createEventDispatcher();
   export let sfxVolume = 50;
   export let musicVolume = 50;
+  export let voiceVolume = 50;
   export let pauseOnStats = false;
   export let framerate = 60;
   export let autocraft = false;
 
   function save() {
-    dispatch('save', { sfxVolume, musicVolume, pauseOnStats, framerate, autocraft });
+    dispatch('save', { sfxVolume, musicVolume, voiceVolume, pauseOnStats, framerate, autocraft });
   }
 
   function close() {
@@ -32,6 +33,11 @@
         <Music />
         <label>Music Volume</label>
         <input type="range" min="0" max="100" bind:value={musicVolume} />
+      </div>
+      <div class="control" title="Adjust voice volume.">
+        <Mic />
+        <label>Voice Volume</label>
+        <input type="range" min="0" max="100" bind:value={voiceVolume} />
       </div>
     </div>
     <div class="col">
