@@ -8,28 +8,23 @@ Summary:
 - Initial feedback entries consolidated into a single log.
 
 Details:
- 
-1) Gacha pulls without tickets (still bugged as of 8/16/25 @ 4:38pm)
-- Symptom: The Pulls UI allows performing pulls even when Tickets are 0 (e.g., Pull 1 / Pull 10 succeed with Tickets: 0 displayed).
-- Impact: Enables unintended free pulls and devalues in-game economy; potential client-side exploit.
-- Suggested follow-up: Add server-side validation for pulls to require tickets or currency, and ensure the UI reflects current currency/ticket counts. Capture network requests during a pull to verify server response handling.
 
-2) Crafting menu icons missing
+2) Crafting menu icons missing (In testing)
 - Symptom: Crafting list displays item names and counts but icons and star-rank outlines are missing (no visual sprites displayed).
 - Impact: Harder to scan materials and identify rarities quickly; reduces UI polish and can confuse players.
 - Suggested follow-up: Verify asset paths and rendering logic for crafting items; check CSS rules that may hide background images or SVG icons. Add a fallback placeholder icon when assets fail to load.
 
-3) Crafted items do not stack and names are janky
+3) Crafted items do not stack and names are janky (In testing)
 - Symptom: Crafted items in the crafting menu do not stack (e.g., 8x 4-star ice items show as 8 separate entries) and names are displayed poorly.
 - Impact: Inventory is cluttered and hard to read; user cannot easily see total counts of each item.
 - Suggested follow-up: Update UI and logic to stack items by type and rarity, and improve name formatting for clarity.
 
 4) Settings wipe data does not wipe data
-- Symptom: In settings, the 'wipe data' button does not actually wipe user data.
-- Impact: Users cannot reset their progress or clear data as expected.
-- Suggested follow-up: Investigate and fix so it fully clears user data as expected. Add tests to verify data is wiped.
+- Symptom: In settings, the 'wipe data' button is unclickable or gives no feedback on the frontend if it worked...
+- Impact: Users unsure if wipe worked...
 
-5) Party & Character picker issues
+5) Party & Character picker issues (FAILED TESTING, WAS NOT WORKED ON, FIX!)
+- Symptom: Chars the player does not have due to wiping data still showing up in the party picker.
 - Symptom: Multiple UI and data inconsistencies observed:
   - Party picker: player type is incorrect (player showing Fire instead of Light) because Player Editor settings are not persisting.
   - DEF is currently under the Core tab; should be at the top of the Defense tab.
@@ -38,11 +33,6 @@ Details:
   - Character picker layout shows multiple characters per row; should display one character per row for readability.
 - Impact: Confusing stat layout, incorrect visuals, and mismatched player types can cause gameplay errors and poor UX.
 - Suggested follow-up: Reconcile Player Editor persistence first, then audit the character picker rendering and CSS (icon colors, outline colors, layout grid). Reorder stat placement in the UI and add tests to verify correct stat positions and type assignment. Fix damage type icon color for Becca and others.
-
-6) Remove SPD stat from UI
-- Symptom: UI shows a "SPD" stat, but the game does not implement a Speed stat.
-- Impact: Misleading and confusing to players; should be removed to avoid confusion.
-- Suggested follow-up: Remove SPD from UI components and templates. Search UI code for "spd"/"speed" usages and remove or disable them.
 
 7) Map & Battle UI issues
 - Map room scrolling:
