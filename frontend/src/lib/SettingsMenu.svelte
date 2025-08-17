@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { Volume2, Music, Mic, Power, Trash2, Download, Upload } from 'lucide-svelte';
   import { endRun, wipeData, exportSave, importSave } from './api.js';
-  import { clearSettings } from './settingsStorage.js';
+  import { clearSettings, clearAllClientData } from './settingsStorage.js';
 
   const dispatch = createEventDispatcher();
   export let sfxVolume = 50;
@@ -34,18 +34,25 @@
   async function handleWipe() {
     wipeStatus = '';
     if (!confirm('This will erase all save data. Continue?')) return;
+    let ok = true;
     try {
       await wipeData();
+    } catch (e) {
+      ok = false;
+    } finally {
+      // Always clear client state and reload, even if backend wipe fails
       clearSettings();
+      await clearAllClientData();
       sfxVolume = 50;
       musicVolume = 50;
       voiceVolume = 50;
       framerate = 60;
       autocraft = false;
       runId = '';
-      wipeStatus = 'Save data wiped.';
-    } catch (e) {
-      wipeStatus = 'Failed to wipe data.';
+      wipeStatus = ok ? 'Save data wiped. Reloading…' : 'Backend wipe failed; cleared local data. Reloading…';
+      setTimeout(() => {
+        try { window.location.reload(); } catch {}
+      }, 50);
     }
   }
 
@@ -193,4 +200,3 @@
     font-size: 0.8rem;
   }
 </style>
-

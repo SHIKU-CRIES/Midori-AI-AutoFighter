@@ -15,7 +15,7 @@
   import { createEventDispatcher } from 'svelte';
   import { Diamond, User, Settings, ChevronsRight } from 'lucide-svelte';
   import { onMount } from 'svelte';
-  import { getHourlyBackground } from './assetLoader.js';
+  import { getRandomBackground } from './assetLoader.js';
   import { loadSettings, saveSettings } from './settingsStorage.js';
   import { getPlayers } from './api.js';
 
@@ -41,7 +41,7 @@
 
   onMount(async () => {
     if (!background) {
-      randomBg = getHourlyBackground();
+      randomBg = getRandomBackground();
     }
     const saved = loadSettings();
     if (saved.sfxVolume !== undefined) sfxVolume = saved.sfxVolume;
@@ -327,4 +327,3 @@
   </div>
   
 </div>
-

@@ -36,3 +36,10 @@ pulls art from `.codex/downloads` and lets the player pick one before
 continuing.
 
 Placeholder icons for items, relics, and cards live under `src/lib/assets/{items,relics,cards}`. Each damage type or star rank has its own folder with 24×24 colored placeholders so artists can replace them later.
+
+## Settings: Wipe Save Data
+- The Wipe button calls the backend wipe endpoint and also clears all client storage and caches (localStorage, sessionStorage, IndexedDB, CacheStorage) and unregisters service workers. After completion it forces a full page reload to prevent stale roster or party selections from persisting.
+
+## Asset Loading
+- Backgrounds: a random image is selected from `src/lib/assets/backgrounds` whenever the viewport initializes.
+- Character portraits: if `src/lib/assets/characters/<name>.png` exists it is used; otherwise if a folder `src/lib/assets/characters/<name>/` exists, a random `.png` inside that folder is used. If neither exists, a random fallback from `src/lib/assets/characters/fallbacks` is used, falling back to the Midori AI logo as a last resort.

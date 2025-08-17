@@ -32,6 +32,7 @@ The Options submenu lets players adjust audio levels, system behaviour, and game
   - Lucide icon: `trash-2`
   - Label: `Wipe Save Data`
   - Tooltip: `Clear all save data.`
+  - Behavior: also clears all frontend client storage (localStorage, sessionStorage, IndexedDB), deletes CacheStorage entries, unregisters service workers, and then forces a full page reload so stale roster or party data cannot persist.
 
 - **Backup Save Data**
   - Button that downloads an encrypted snapshot of save tables.
@@ -60,4 +61,3 @@ The Options submenu lets players adjust audio levels, system behaviour, and game
 
 - Each control must include its Lucide icon, visible label, and hover tooltip.
 - Changes take effect immediately and should persist between sessions.
-

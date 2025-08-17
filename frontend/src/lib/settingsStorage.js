@@ -29,3 +29,45 @@ export function clearSettings() {
     // ignore clear errors
   }
 }
+
+// Best‑effort client wipe: local/session storage, caches, SW, and IndexedDB
+export async function clearAllClientData() {
+  // Local + session storage
+  try { localStorage.clear(); } catch {}
+  try { sessionStorage && sessionStorage.clear && sessionStorage.clear(); } catch {}
+
+  // CacheStorage
+  try {
+    if (typeof caches !== 'undefined' && caches?.keys) {
+      const names = await caches.keys();
+      await Promise.all(names.map((n) => caches.delete(n)));
+    }
+  } catch {}
+
+  // Service workers
+  try {
+    if (typeof navigator !== 'undefined' && navigator.serviceWorker?.getRegistrations) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+  } catch {}
+
+  // IndexedDB (supported in Chromium via indexedDB.databases())
+  try {
+    if (typeof indexedDB !== 'undefined' && indexedDB?.databases) {
+      const dbs = await indexedDB.databases();
+      await Promise.all(
+        (dbs || [])
+          .map((db) => db?.name)
+          .filter(Boolean)
+          .map(
+            (name) =>
+              new Promise((resolve) => {
+                const req = indexedDB.deleteDatabase(name);
+                req.onsuccess = req.onerror = req.onblocked = () => resolve();
+              })
+          )
+      );
+    }
+  } catch {}
+}

@@ -19,12 +19,12 @@ export async function updateParty(runId, party) {
 }
 
 export async function fetchMap(runId) {
-  const res = await fetch(`${API_BASE}/map/${runId}`);
+  const res = await fetch(`${API_BASE}/map/${runId}`, { cache: 'no-store' });
   return res.json();
 }
 
 export async function getPlayers() {
-  const res = await fetch(`${API_BASE}/players`);
+  const res = await fetch(`${API_BASE}/players`, { cache: 'no-store' });
   return res.json();
 }
 
@@ -48,7 +48,7 @@ export async function chooseCard(runId, cardId) {
 }
 
 export async function getGacha() {
-  const res = await fetch(`${API_BASE}/gacha`);
+  const res = await fetch(`${API_BASE}/gacha`, { cache: 'no-store' });
   return res.json();
 }
 
@@ -80,7 +80,7 @@ export async function craftItems() {
 }
 
 export async function getPlayerConfig() {
-  const res = await fetch(`${API_BASE}/player/editor`);
+  const res = await fetch(`${API_BASE}/player/editor`, { cache: 'no-store' });
   return res.json();
 }
 
@@ -104,7 +104,7 @@ export async function wipeData() {
 }
 
 export async function exportSave() {
-  const res = await fetch(`${API_BASE}/save/backup`);
+  const res = await fetch(`${API_BASE}/save/backup`, { cache: 'no-store' });
   return res.blob();
 }
 
