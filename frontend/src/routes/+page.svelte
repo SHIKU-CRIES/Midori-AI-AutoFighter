@@ -139,7 +139,10 @@
 
   async function handleRewardSelect(detail) {
     if (!runId) return;
-    await chooseCard(runId, detail.id);
+    const res = await chooseCard(runId, detail.id);
+    if (res && res.next_room) {
+      nextRoom = res.next_room;
+    }
     if (roomData) {
       roomData.card_choices = [];
     }

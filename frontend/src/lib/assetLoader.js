@@ -2,49 +2,48 @@
 
 import { Flame, Snowflake, Zap, Sun, Moon, Wind, Circle } from 'lucide-svelte';
 
-function toUrl(src) {
+// Safely normalize a URL string coming from Vite globs
+function normalizeUrl(src) {
+  if (!src) return '';
+  // If Vite already gave us an absolute or root-relative path, use it as-is.
+  if (
+    typeof src === 'string' &&
+    (src.startsWith('http') || src.startsWith('blob:') || src.startsWith('data:') || src.startsWith('/'))
+  ) {
+    return src;
+  }
   return new URL(src, import.meta.url).href;
 }
 
 // Load all character images (including folders and fallbacks)
-const characterModules =
-  typeof import.meta.glob === 'function'
-    ? Object.fromEntries(
-        Object.entries(
-          import.meta.glob('./assets/characters/**/*.png', {
-            eager: true,
-            import: 'default',
-            query: '?url'
-          })
-        ).map(([p, src]) => [p, toUrl(src)])
-      )
-    : {};
+// Note: do NOT guard import.meta.glob with typeof checks — Vite must
+// statically analyze these calls to inline the module map at build time.
+const characterModules = Object.fromEntries(
+  Object.entries(
+    import.meta.glob('./assets/characters/**/*.png', {
+      eager: true,
+      as: 'url'
+    })
+  ).map(([p, src]) => [p, normalizeUrl(src)])
+);
 
-const fallbackModules =
-  typeof import.meta.glob === 'function'
-    ? Object.fromEntries(
-        Object.entries(
-          import.meta.glob('./assets/characters/fallbacks/*.png', {
-            eager: true,
-            import: 'default',
-            query: '?url'
-          })
-        ).map(([p, src]) => [p, toUrl(src)])
-      )
-    : {};
+const fallbackModules = Object.fromEntries(
+  Object.entries(
+    import.meta.glob('./assets/characters/fallbacks/*.png', {
+      eager: true,
+      as: 'url'
+    })
+  ).map(([p, src]) => [p, normalizeUrl(src)])
+);
 
-const backgroundModules =
-  typeof import.meta.glob === 'function'
-    ? Object.fromEntries(
-        Object.entries(
-          import.meta.glob('./assets/backgrounds/*.png', {
-            eager: true,
-            import: 'default',
-            query: '?url'
-          })
-        ).map(([p, src]) => [p, toUrl(src)])
-      )
-    : {};
+const backgroundModules = Object.fromEntries(
+  Object.entries(
+    import.meta.glob('./assets/backgrounds/*.png', {
+      eager: true,
+      as: 'url'
+    })
+  ).map(([p, src]) => [p, normalizeUrl(src)])
+);
 
 const ELEMENT_ICONS = {
   fire: Flame,
@@ -70,7 +69,7 @@ const ELEMENT_COLORS = {
 const characterAssets = {};
 const fallbackAssets = Object.values(fallbackModules);
 const backgroundAssets = Object.values(backgroundModules);
-const defaultFallback = toUrl('./assets/midoriai-logo.png');
+const defaultFallback = normalizeUrl('./assets/midoriai-logo.png');
 
 // Organize character assets by character ID (folder or single file)
 Object.keys(characterModules).forEach(p => {
@@ -109,20 +108,30 @@ function getHourSeed() {
 
 // Get random image from character folder or fallback
 export function getCharacterImage(characterId, _isPlayer = false) {
-  // Check if character has dedicated images
+  // Stable selection per character so portraits don't flicker on re-render
+  if (!characterId) return defaultFallback;
+  const cached = characterImageCache.get(characterId);
+  if (cached) return cached;
+
+  // Dedicated images
   if (characterAssets[characterId] && characterAssets[characterId].length > 0) {
     const images = characterAssets[characterId];
-    const randomIndex = Math.floor(Math.random() * images.length);
-    return images[randomIndex];
+    const idx = stringHashIndex(characterId, images.length);
+    const chosen = images[idx];
+    characterImageCache.set(characterId, chosen);
+    return chosen;
   }
-  
-  // Use fallback images
+
+  // Fallback images (stable per id)
   if (fallbackAssets.length > 0) {
-    const randomIndex = Math.floor(Math.random() * fallbackAssets.length);
-    return fallbackAssets[randomIndex];
+    const idx = stringHashIndex(characterId, fallbackAssets.length);
+    const chosen = fallbackAssets[idx];
+    characterImageCache.set(characterId, chosen);
+    return chosen;
   }
-  
-  // Final fallback - use repository logo
+
+  // Final fallback - repository logo
+  characterImageCache.set(characterId, defaultFallback);
   return defaultFallback;
 }
 
@@ -166,3 +175,20 @@ export function getElementColor(element) {
 
 // Export assets for debugging
 export { characterAssets, fallbackAssets, backgroundAssets };
+
+// Internal: cache and helpers for stable image selection
+const characterImageCache = new Map();
+
+function stringHashIndex(str, modulo) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  const idx = Math.abs(h) % Math.max(modulo, 1);
+  return idx;
+}
+
+export function clearCharacterImageCache() {
+  characterImageCache.clear();
+}
