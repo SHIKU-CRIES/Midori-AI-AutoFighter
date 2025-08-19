@@ -1,1 +1,0 @@
-Expanded task file with additional references to tests, clarified layout verification against screenshot, detailed polling interval expectations, and reinforced async refactor requirements for backend.
