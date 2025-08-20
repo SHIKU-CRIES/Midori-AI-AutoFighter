@@ -26,6 +26,12 @@ describe('BattleView layout and polling', () => {
     expect(content).toContain('foe-column');
   });
 
+  test('wraps stats in stained-glass containers', () => {
+    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
+    expect(content).toContain('party-column stained-glass-panel');
+    expect(content).toContain('foe-column stained-glass-panel');
+  });
+
   test('party column precedes foe column', () => {
     const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
     const partyIndex = content.indexOf('class="party-column"');

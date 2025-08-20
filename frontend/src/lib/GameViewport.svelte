@@ -172,13 +172,10 @@
     gap: 0.5rem;
     padding: 0.5rem 0.7rem;
     border-radius: 0;
-    background:
-      linear-gradient(135deg, rgba(10,10,10,0.96) 0%, rgba(30,30,30,0.92) 100%),
-      repeating-linear-gradient(120deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 8px),
-      linear-gradient(60deg, rgba(255,255,255,0.06) 10%, rgba(0,0,0,0.38) 80%);
-    box-shadow: 0 2px 18px 0 rgba(0,0,0,0.32), 0 1.5px 0 0 rgba(255,255,255,0.04) inset;
-    border: 1.5px solid rgba(40,40,40,0.44);
-    backdrop-filter: blur(3.5px) saturate(1.05);
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
     opacity: 0.99;
   }
   .icon-btn {
@@ -205,13 +202,10 @@
     gap: 0.4rem;
     padding: 0.5rem 0.7rem;
     border-radius: 0;
-    background:
-      linear-gradient(135deg, rgba(10,10,10,0.96) 0%, rgba(30,30,30,0.92) 100%),
-      repeating-linear-gradient(120deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 8px),
-      linear-gradient(60deg, rgba(255,255,255,0.06) 10%, rgba(0,0,0,0.38) 80%);
-    box-shadow: 0 2px 18px 0 rgba(0,0,0,0.32), 0 1.5px 0 0 rgba(255,255,255,0.04) inset;
-    border: 1.5px solid rgba(40,40,40,0.44);
-    backdrop-filter: blur(3.5px) saturate(1.05);
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
     opacity: 0;
     transition: opacity 0.2s;
   }
@@ -243,13 +237,10 @@
     justify-content: flex-end;
     margin-top: 0.5rem;
     padding: 0.5rem 0.7rem;
-    background:
-      linear-gradient(135deg, rgba(10,10,10,0.96) 0%, rgba(30,30,30,0.92) 100%),
-      repeating-linear-gradient(120deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 8px),
-      linear-gradient(60deg, rgba(255,255,255,0.06) 10%, rgba(0,0,0,0.38) 80%);
-    box-shadow: 0 2px 18px 0 rgba(0,0,0,0.32), 0 1.5px 0 0 rgba(255,255,255,0.04) inset;
-    border: 1.5px solid rgba(40,40,40,0.44);
-    backdrop-filter: blur(3.5px) saturate(1.05);
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
   }
 
   /* right stained-glass sidebar (vertical) */
@@ -262,14 +253,11 @@
     gap: 0.6rem;
     padding: 0.6rem 0.5rem;
     border-radius: 0;
-    background:
-      linear-gradient(135deg, rgba(10,10,10,0.96) 0%, rgba(30,30,30,0.92) 100%),
-      repeating-linear-gradient(120deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 8px),
-      linear-gradient(60deg, rgba(255,255,255,0.03) 10%, rgba(0,0,0,0.45) 80%);
-    box-shadow: 0 2px 18px 0 rgba(0,0,0,0.32), 0 1.5px 0 0 rgba(255,255,255,0.02) inset;
-    border: 1.5px solid rgba(40,40,40,0.44);
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
     z-index: 10;
-    backdrop-filter: blur(3.5px) saturate(1.05);
+    backdrop-filter: var(--glass-filter);
     max-height: calc(100% - var(--ui-top-offset) - 2.4rem);
     overflow: auto;
     align-items: center;
@@ -343,6 +331,10 @@
           <OverlaySurface>
             <!-- full party picker overlay: show roster, preview, and stats -->
             <PartyPicker bind:selected={selected} />
+            <div class="stained-glass-row">
+              <button class="icon-btn" on:click={() => dispatch('saveParty')}>Save Party</button>
+              <button class="icon-btn" on:click={() => dispatch('back')}>Cancel</button>
+            </div>
           </OverlaySurface>
         {/if}
         {#if viewMode === 'party-start'}

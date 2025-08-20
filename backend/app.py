@@ -292,6 +292,18 @@ async def update_party(run_id: str) -> tuple[str, int, dict[str, str]]:
     gold = data.get("gold", 0)
     relics = data.get("relics", [])
     cards = data.get("cards", [])
+    if (
+        "player" not in members
+        or not 1 <= len(members) <= 5
+        or len(set(members)) != len(members)
+    ):
+        return jsonify({"error": "invalid party"}), 400
+    with SAVE_MANAGER.connection() as conn:
+        cur = conn.execute("SELECT id FROM owned_players")
+        owned = {row[0] for row in cur.fetchall()}
+    for mid in members:
+        if mid != "player" and mid not in owned:
+            return jsonify({"error": "unowned character"}), 400
     party = {
         "members": members,
         "gold": gold,
@@ -305,17 +317,19 @@ async def update_party(run_id: str) -> tuple[str, int, dict[str, str]]:
             "UPDATE runs SET party = ? WHERE id = ?",
             (json.dumps(party), run_id),
         )
-    return jsonify({"status": "ok"})
+    return jsonify({"party": members})
 
 
 @app.get("/map/<run_id>")
 async def get_map(run_id: str) -> tuple[str, int, dict[str, str]]:
     with SAVE_MANAGER.connection() as conn:
-        cur = conn.execute("SELECT map FROM runs WHERE id = ?", (run_id,))
+        cur = conn.execute("SELECT map, party FROM runs WHERE id = ?", (run_id,))
         row = cur.fetchone()
     if row is None:
         return jsonify({"error": "run not found"}), 404
-    return jsonify({"map": json.loads(row[0])})
+    map_state = json.loads(row[0])
+    party_state = json.loads(row[1]) if row[1] else {}
+    return jsonify({"map": map_state, "party": party_state.get("members", [])})
 
 
 @app.delete("/run/<run_id>")

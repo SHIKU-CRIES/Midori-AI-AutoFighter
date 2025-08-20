@@ -28,6 +28,12 @@ describe('GameViewport battle lock', () => {
     expect(content).toContain('Cancel');
   });
 
+  test('saves party through overlay controls', () => {
+    const content = readFileSync(join(import.meta.dir, '../src/lib/GameViewport.svelte'), 'utf8');
+    expect(content).toContain("dispatch('saveParty')");
+    expect(content).toContain('Save Party');
+  });
+
   test('wires top navigation events', () => {
     const content = readFileSync(join(import.meta.dir, '../src/lib/GameViewport.svelte'), 'utf8');
     expect(content).toContain("dispatch('home')");

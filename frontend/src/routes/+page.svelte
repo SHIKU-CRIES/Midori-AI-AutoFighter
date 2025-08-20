@@ -19,7 +19,8 @@
     chooseCard,
     chooseRelic,
     advanceRoom,
-    getMap
+    getMap,
+    updateParty
   } from '$lib/api.js';
   import { FEEDBACK_URL } from '$lib/constants.js';
 
@@ -64,6 +65,7 @@
         const { runId: storedId } = JSON.parse(saved);
         const data = await getMap(storedId);
         runId = storedId;
+        selectedParty = data.party || selectedParty;
         nextRoom = data.map.rooms[data.map.current].room_type;
         await enterRoom();
       } catch {
@@ -103,6 +105,13 @@
   async function handleParty() {
     if (battleActive) return;
     setView('party');
+  }
+
+  async function handlePartySave() {
+    if (runId) {
+      await updateParty(runId, selectedParty);
+    }
+    goBack();
   }
 
   async function openEditor() {
@@ -190,6 +199,9 @@
     }
     const data = await roomAction(runId, endpoint);
     roomData = data;
+    if (data.party) {
+      selectedParty = data.party.map((p) => p.id);
+    }
     nextRoom = data.next_room || '';
     saveRunState();
     if (endpoint === 'battle') {
@@ -277,6 +289,14 @@
 </script>
 
 <style>
+  :global(:root) {
+    --glass-bg: linear-gradient(135deg, rgba(10,10,10,0.96) 0%, rgba(30,30,30,0.92) 100%),
+      repeating-linear-gradient(120deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 8px),
+      linear-gradient(60deg, rgba(255,255,255,0.06) 10%, rgba(0,0,0,0.38) 80%);
+    --glass-border: 1.5px solid rgba(40,40,40,0.44);
+    --glass-shadow: 0 2px 18px 0 rgba(0,0,0,0.32), 0 1.5px 0 0 rgba(255,255,255,0.04) inset;
+    --glass-filter: blur(3.5px) saturate(1.05);
+  }
   :global(html, body) {
     margin: 0;
     padding: 0;
@@ -331,5 +351,6 @@
     on:restLeave={handleRestLeave}
     on:nextRoom={handleNextRoom}
     on:endRun={handleRunEnd}
+    on:saveParty={handlePartySave}
   />
 </div>

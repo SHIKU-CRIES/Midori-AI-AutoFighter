@@ -139,7 +139,7 @@
   style={`background-image: url(${bg}); --flash-duration: ${flashDuration}s`}
   data-testid="battle-view"
 >
-  <div class="party-column">
+  <div class="party-column stained-glass-panel">
     {#each party as member (member.id)}
       <div class="combatant">
         <div class="portrait-wrap">
@@ -197,7 +197,7 @@
       </div>
     {/each}
   </div>
-  <div class="foe-column">
+  <div class="foe-column stained-glass-panel">
     {#each foes as foe (foe.id)}
       <div class="combatant">
         <div class="stats left">
@@ -290,6 +290,14 @@
     flex-direction: column;
     justify-content: center;
     gap: 0.5rem;
+  }
+
+  .stained-glass-panel {
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
+    padding: 0.25rem;
   }
 
   .party-column {

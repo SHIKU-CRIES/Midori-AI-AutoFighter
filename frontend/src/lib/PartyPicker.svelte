@@ -35,8 +35,10 @@
       selected = selected.filter((id) => roster.some((c) => c.id === id));
       const player = roster.find((p) => p.is_player);
       if (player) {
-        selected = [player.id];
-        previewId = player.id;
+        if (selected.length === 0) {
+          selected = [player.id];
+        }
+        previewId = selected[0] ?? player.id;
       }
     } catch (e) {
       error = 'Unable to load roster. Is the backend running on 59002?';
