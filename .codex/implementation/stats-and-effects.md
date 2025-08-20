@@ -47,6 +47,9 @@ adding the effect. The difference is clamped to zero and jittered by ±10%, and 
 
 Active effect names are mirrored in the `Stats` lists (`dots`, `hots`) for UI display. Plugins can extend base `DamageOverTime` and `HealingOverTime` classes to implement custom behavior or additional stat modifications.
 
+## Critical Boost
+Stackable effect granting +0.5% `crit_rate` and +5% `crit_damage` per stack. All stacks are removed when the affected unit takes damage.
+
 ## Aftertaste
 The Aftertaste effect deals direct damage based on a small potency roll. Each hit
 calculates `25 * random(0.1, 1.5)` and cards or relics may request multiple hits
