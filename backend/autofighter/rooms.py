@@ -34,12 +34,23 @@ console = Console()
 
 
 def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
-    mult = strength * node.floor * node.index * node.loop
-    mult *= 1 + 0.05 * node.pressure
+    base_mult = strength * node.floor * node.index * node.loop
+    base_mult *= 1 + 0.05 * node.pressure
+    # Apply a small per-room variation of +/-10% per stat to foes to avoid sameness.
+    # Each numeric stat gets its own independent variation, applied once when the foe is created.
     for field in fields(type(obj)):
         value = getattr(obj, field.name, None)
         if isinstance(value, (int, float)):
-            setattr(obj, field.name, type(value)(value * mult))
+            per_stat_variation = 1.0 + random.uniform(-0.10, 0.10)
+            total = value * base_mult * per_stat_variation
+            setattr(obj, field.name, type(value)(total))
+    # Safety: foes should never have crit_damage below 2.0 (i.e., +100%).
+    try:
+        cd = getattr(obj, "crit_damage", None)
+        if isinstance(cd, (int, float)):
+            setattr(obj, "crit_damage", type(cd)(max(float(cd), 2.0)))
+    except Exception:
+        pass
 
 
 def _normalize_damage_type(dt: Any) -> str:
@@ -129,10 +140,14 @@ def _choose_foe(party: Party) -> FoeBase:
         candidates = [foe_plugins.Slime]
     foe_cls = random.choice(candidates)
     foe = foe_cls()
-    # Assign a non-generic damage type to foes unless explicitly Luna-flavored
+    # Assign damage type to foes. Slimes get a random element.
     try:
         label = getattr(foe, "name", None) or getattr(foe, "id", "")
-        chosen = get_damage_type(str(label))
+        # Slimes use a random element among the core set
+        if "slime" in str(label).lower():
+            chosen = random.choice(["Fire", "Ice", "Lightning", "Light", "Dark", "Wind"])  # type: ignore[assignment]
+        else:
+            chosen = get_damage_type(str(label))
         if "luna" in str(label).lower():
             chosen = "Generic"
         foe.base_damage_type = chosen
@@ -196,6 +211,7 @@ class BattleRoom(Room):
         base_foe_atk = foe.atk
         enrage_active = False
         enrage_stacks = 0
+        enrage_bleed_applies = 0  # how many times we've applied enrage bleed
         threshold = ENRAGE_TURNS_BOSS if isinstance(self, BossRoom) else ENRAGE_TURNS_NORMAL
         exp_reward = 0
         turn = 0
@@ -238,6 +254,24 @@ class BattleRoom(Room):
                     f"[light_red]{member.id} hits {foe.id} for {dmg}[/]"
                 )
                 foe_effects.maybe_inflict_dot(member, dmg)
+                # Apply escalating enrage bleed every 10 enrage turns: add (1 + n) stacks
+                # where n is the number of prior applications. Each stack lasts 10 turns.
+                if enrage_active:
+                    turns_since_enrage = max(enrage_stacks, 0)
+                    next_trigger = (enrage_bleed_applies + 1) * 10
+                    if turns_since_enrage >= next_trigger:
+                        stacks_to_add = 1 + enrage_bleed_applies
+                        from autofighter.effects import DamageOverTime
+                        # Apply to each party member
+                        for mgr in party_effects:
+                            for _ in range(stacks_to_add):
+                                dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.02)
+                                mgr.add_dot(DamageOverTime("Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"))
+                        # Apply to the foe
+                        for _ in range(stacks_to_add):
+                            dmg_per_tick = int(max(foe.max_hp, 1) * 0.02)
+                            foe_effects.add_dot(DamageOverTime("Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"))
+                        enrage_bleed_applies += 1
                 registry.trigger("turn_end", member)
                 if progress is not None:
                     await progress(
@@ -250,6 +284,16 @@ class BattleRoom(Room):
                     )
                 if foe.hp <= 0:
                     exp_reward += foe.level * 12 + 5 * self.node.index
+                    # Slime kill bonus: grant +0.025 exp rate to all party members
+                    try:
+                        label = (getattr(foe, "name", None) or getattr(foe, "id", "")).lower()
+                        if "slime" in label:
+                            for m in combat_party.members:
+                                m.exp_multiplier += 0.025
+                            for m in party.members:
+                                m.exp_multiplier += 0.025
+                    except Exception:
+                        pass
                     elapsed = time.perf_counter() - turn_start
                     if elapsed < 0.5:
                         await asyncio.sleep(0.5 - elapsed)
@@ -272,6 +316,16 @@ class BattleRoom(Room):
                 if foe.hp <= 0:
                     registry.trigger("turn_end", foe)
                     exp_reward += foe.level * 12 + 5 * self.node.index
+                    # Slime kill bonus: grant +0.025 exp rate to all party members
+                    try:
+                        label = (getattr(foe, "name", None) or getattr(foe, "id", "")).lower()
+                        if "slime" in label:
+                            for m in combat_party.members:
+                                m.exp_multiplier += 0.025
+                            for m in party.members:
+                                m.exp_multiplier += 0.025
+                    except Exception:
+                        pass
                     elapsed = time.perf_counter() - turn_start
                     if elapsed < 0.5:
                         await asyncio.sleep(0.5 - elapsed)

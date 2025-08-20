@@ -52,17 +52,17 @@
 
   function pctRatio(val) {
     if (typeof val !== 'number' || !isFinite(val)) return '0%';
-    return `${Math.round(val * 100)}%`;
+    return `${(val * 100).toFixed(2)}%`;
   }
 
   function pctOdds(val) {
     if (typeof val !== 'number' || !isFinite(val)) return '0%';
-    return `${Math.round(val * 100)}%`;
+    return `${(val * 100).toFixed(2)}%`;
   }
 
   function pctFromMultiplier(mult) {
     if (typeof mult !== 'number' || !isFinite(mult)) return '0%';
-    return `${Math.round((mult - 1) * 100)}%`;
+    return `${((mult - 1) * 100).toFixed(2)}%`;
   }
 
   function formatMitigation(val) {
@@ -73,6 +73,11 @@
     }
     // If value is already a small multiplier (e.g., 1.0), show directly.
     return `x${val.toFixed(2)}`;
+  }
+
+  function fmt2(val) {
+    if (typeof val !== 'number' || !isFinite(val)) return '0.00';
+    return Number(val).toFixed(2);
   }
 
   function guessElementFromId(id) {
@@ -136,10 +141,6 @@
             }
           }
           let resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name || FOE_DEFAULT_ELEMENT);
-          // Special-case: slimes get a stable random damage type
-          if (isSlimeId(f.id)) {
-            resolved = pickSlimeElement(f.id);
-          }
           return { ...f, element: resolved };
         });
         if (differs(enrichedFoes, foes)) foes = enrichedFoes;
@@ -208,8 +209,9 @@
           </div>
         </div>
         <div class="stats right stained-glass-panel">
-          <div class="name">{member.name ?? member.id}</div>
+          <div class="name">{(member.name ?? member.id)} ({member.level ?? 1})</div>
           <div class="row"><span class="k">HP</span> <span class="v">{member.hp}/{member.max_hp}</span></div>
+          <div class="row"><span class="k">VIT</span> <span class="v">{fmt2(member.vitality ?? 0)}</span></div>
           <div class="row"><span class="k">ATK</span> <span class="v">{member.atk}</span></div>
           <div class="row"><span class="k">DEF</span> <span class="v">{member.defense}</span></div>
           <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(member.mitigation)}</span></div>
@@ -232,8 +234,9 @@
     {#each foes as foe (foe.id)}
       <div class="combatant">
         <div class="stats left stained-glass-panel">
-          <div class="name">{foe.name ?? foe.id}</div>
+          <div class="name">{(foe.name ?? foe.id)} ({foe.level ?? 1})</div>
           <div class="row"><span class="k">HP</span> <span class="v">{foe.hp}/{foe.max_hp}</span></div>
+          <div class="row"><span class="k">VIT</span> <span class="v">{fmt2(foe.vitality ?? 0)}</span></div>
           <div class="row"><span class="k">ATK</span> <span class="v">{foe.atk}</span></div>
           <div class="row"><span class="k">DEF</span> <span class="v">{foe.defense}</span></div>
           <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(foe.mitigation)}</span></div>

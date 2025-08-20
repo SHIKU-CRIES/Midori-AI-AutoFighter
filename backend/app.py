@@ -603,6 +603,7 @@ def load_party(run_id: str) -> Party:
     snapshot = data.get("player", {})
     exp_map: dict[str, int] = data.get("exp", {})
     level_map: dict[str, int] = data.get("level", {})
+    exp_mult_map: dict[str, float] = data.get("exp_multiplier", {})
     members: list[PlayerBase] = []
     for pid in data.get("members", []):
         for name in player_plugins.__all__:
@@ -610,14 +611,33 @@ def load_party(run_id: str) -> Party:
             if cls.id == pid:
                 inst = cls()
                 if inst.id == "player":
-                    inst.base_damage_type = snapshot.get(
-                        "damage_type", inst.base_damage_type
-                    )
+                    # Prefer latest saved player damage type from DB over the run snapshot,
+                    # so edits in the editor take effect mid-run.
+                    with SAVE_MANAGER.connection() as conn:
+                        row = conn.execute(
+                            "SELECT type FROM damage_types WHERE id = ?", ("player",)
+                        ).fetchone()
+                    if row and row[0]:
+                        inst.base_damage_type = row[0]
+                    else:
+                        inst.base_damage_type = snapshot.get(
+                            "damage_type", inst.base_damage_type
+                        )
                     _apply_player_stats(inst, snapshot.get("stats", {}))
                 else:
                     _assign_damage_type(inst)
-                inst.exp = exp_map.get(pid, 0)
-                inst.level = level_map.get(pid, 1)
+                # Rebuild stats for current level so growth persists across loads
+                target_level = int(level_map.get(pid, 1) or 1)
+                if target_level > 1:
+                    for _ in range(target_level - 1):
+                        inst._on_level_up()
+                inst.level = target_level
+                inst.exp = int(exp_map.get(pid, 0) or 0)
+                # Restore exp multiplier buffs (e.g., slime bonus)
+                try:
+                    inst.exp_multiplier = float(exp_mult_map.get(pid, inst.exp_multiplier))
+                except Exception:
+                    pass
                 members.append(inst)
                 break
     party = Party(
@@ -677,6 +697,7 @@ def save_party(run_id: str, party: Party) -> None:
             "cards": party.cards,
             "exp": {m.id: m.exp for m in party.members},
             "level": {m.id: m.level for m in party.members},
+            "exp_multiplier": {m.id: m.exp_multiplier for m in party.members},
             "player": snapshot,
         }
         conn.execute(
@@ -735,6 +756,20 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
     action = data.get("action", "")
     party = await asyncio.to_thread(load_party, run_id)
+    # Ensure the player's damage type reflects the latest saved setting
+    # even if the run snapshot is stale.
+    try:
+        with SAVE_MANAGER.connection() as conn:
+            row = conn.execute(
+                "SELECT type FROM damage_types WHERE id = ?", ("player",)
+            ).fetchone()
+        if row and row[0]:
+            for m in party.members:
+                if m.id == "player":
+                    m.base_damage_type = row[0]
+                    break
+    except Exception:
+        pass
     state, rooms = await asyncio.to_thread(load_map, run_id)
     node = rooms[state["current"]]
     if node.room_type not in {"battle-weak", "battle-normal"}:
