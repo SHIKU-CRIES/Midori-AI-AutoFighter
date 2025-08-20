@@ -20,6 +20,16 @@
     background = getHourlyBackground();
     try {
       const data = await getPlayers();
+      function resolveElement(p) {
+        let e = p?.element;
+        if (e && typeof e !== 'string') e = e.id || e.name;
+        if (!e || /generic/i.test(String(e))) {
+          let b = p?.base_damage_type;
+          if (b && typeof b !== 'string') b = b.id || b.name;
+          e = b || 'Generic';
+        }
+        return e || 'Generic';
+      }
       roster = data.players
         .map((p) => ({
           id: p.id,
@@ -27,7 +37,7 @@
           img: getCharacterImage(p.id, p.is_player) || getRandomFallback(),
           owned: p.owned,
           is_player: p.is_player,
-          element: p.element?.name ?? p.element ?? 'Generic',
+          element: resolveElement(p),
           stats: p.stats ?? { hp: 0, atk: 0, defense: 0, level: 1 }
         }))
         .filter((p) => p.owned || p.is_player)

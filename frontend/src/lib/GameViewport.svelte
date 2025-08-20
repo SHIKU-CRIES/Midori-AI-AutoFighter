@@ -60,7 +60,17 @@
     if (saved.reducedMotion !== undefined) reducedMotion = saved.reducedMotion;
     try {
       const data = await getPlayers();
-      roster = data.players.map(p => ({ id: p.id, element: p.element?.name ?? p.element ?? 'Generic' }));
+      function resolveElement(p) {
+        let e = p?.element;
+        if (e && typeof e !== 'string') e = e.id || e.name;
+        if (!e || /generic/i.test(String(e))) {
+          let b = p?.base_damage_type;
+          if (b && typeof b !== 'string') b = b.id || b.name;
+          e = b || 'Generic';
+        }
+        return e || 'Generic';
+      }
+      roster = data.players.map(p => ({ id: p.id, element: resolveElement(p) }));
     } catch (e) {
       roster = [];
     }
@@ -305,7 +315,7 @@
         </div>
         <div class="snapshot-panel" class:active={snapshotLoading}>
           <div class="spinner"></div>
-          <span>Updating...</span>
+          <span>Syncing...</span>
         </div>
       </div>
         <!-- right stained-glass sidebar (mirrors top-left bar styling) -->

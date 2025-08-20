@@ -14,6 +14,31 @@
   $: pollDelay = 1000 / framerate;
   let bg = getRandomBackground();
   $: flashDuration = reducedMotion ? 20 : 10;
+  
+  // Foe element defaults and slime randomization
+  const FOE_DEFAULT_ELEMENT = 'Light';
+  const SLIME_ELEMENT_POOL = ['Fire', 'Ice', 'Lightning', 'Light', 'Dark', 'Wind'];
+  const slimeElementMap = new Map(); // stable per foe.id within session
+
+  function isSlimeId(id) {
+    return typeof id === 'string' && /slime/i.test(id);
+  }
+
+  function hashIndex(str, modulo) {
+    let h = 0;
+    for (let i = 0; i < String(str).length; i++) {
+      h = (h << 5) - h + String(str).charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h) % Math.max(1, modulo);
+  }
+
+  function pickSlimeElement(id) {
+    if (slimeElementMap.has(id)) return slimeElementMap.get(id);
+    const pick = SLIME_ELEMENT_POOL[hashIndex(id, SLIME_ELEMENT_POOL.length)] || FOE_DEFAULT_ELEMENT;
+    slimeElementMap.set(id, pick);
+    return pick;
+  }
 
   function differs(a, b) {
     return JSON.stringify(a) !== JSON.stringify(b);
@@ -77,8 +102,8 @@
     dispatch('snapshot-start');
     try {
       const snap = await roomAction(runId, 'battle', 'snapshot');
-      if (snap.party && differs(snap.party, party)) party = snap.party;
-      if (snap.foes && differs(snap.foes, foes)) foes = snap.foes;
+      // Do not overwrite party/foes directly; we enrich below to preserve
+      // existing per-entity element data and avoid regressions.
       if (snap.enrage && differs(snap.enrage, enrage)) enrage = snap.enrage;
       if (snap.party) {
         const prevById = new Map((party || []).map(p => [p.id, p]));
@@ -106,10 +131,15 @@
             if (prev && (prev.element || prev.base_damage_type)) {
               elem = prev.element || prev.base_damage_type;
             } else {
-              elem = guessElementFromId(f.id);
+              // Default foes to Light unless explicitly set
+              elem = FOE_DEFAULT_ELEMENT;
             }
           }
-          const resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name || 'Generic');
+          let resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name || FOE_DEFAULT_ELEMENT);
+          // Special-case: slimes get a stable random damage type
+          if (isSlimeId(f.id)) {
+            resolved = pickSlimeElement(f.id);
+          }
           return { ...f, element: resolved };
         });
         if (differs(enrichedFoes, foes)) foes = enrichedFoes;
@@ -139,7 +169,7 @@
   style={`background-image: url(${bg}); --flash-duration: ${flashDuration}s`}
   data-testid="battle-view"
 >
-  <div class="party-column stained-glass-panel">
+  <div class="party-column">
     {#each party as member (member.id)}
       <div class="combatant">
         <div class="portrait-wrap">
@@ -177,7 +207,8 @@
             {/each}
           </div>
         </div>
-        <div class="stats right">
+        <div class="stats right stained-glass-panel">
+          <div class="name">{member.name ?? member.id}</div>
           <div class="row"><span class="k">HP</span> <span class="v">{member.hp}/{member.max_hp}</span></div>
           <div class="row"><span class="k">ATK</span> <span class="v">{member.atk}</span></div>
           <div class="row"><span class="k">DEF</span> <span class="v">{member.defense}</span></div>
@@ -197,10 +228,11 @@
       </div>
     {/each}
   </div>
-  <div class="foe-column stained-glass-panel">
+  <div class="foe-column">
     {#each foes as foe (foe.id)}
       <div class="combatant">
-        <div class="stats left">
+        <div class="stats left stained-glass-panel">
+          <div class="name">{foe.name ?? foe.id}</div>
           <div class="row"><span class="k">HP</span> <span class="v">{foe.hp}/{foe.max_hp}</span></div>
           <div class="row"><span class="k">ATK</span> <span class="v">{foe.atk}</span></div>
           <div class="row"><span class="k">DEF</span> <span class="v">{foe.defense}</span></div>
@@ -311,6 +343,8 @@
     display: flex;
     align-items: center;
   }
+  /* Ensure clear spacing on the foe side where layout is reversed */
+  .foe-column .combatant { gap: 8px; }
   .foe-column .combatant {
     flex-direction: row-reverse;
   }
@@ -343,6 +377,14 @@
   .stats {
     font-size: 0.7rem;
     width: 6rem;
+    flex: 0 0 6rem; /* prevent overlap/shrink under portrait */
+  }
+  .stats .name {
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .row { display: flex; justify-content: space-between; gap: 0.25rem; }
   .row.small { font-size: 0.65rem; }
@@ -350,14 +392,8 @@
   .v { font-variant-numeric: tabular-nums; }
   .badge { display: none; }
   details.advanced { margin-top: 0.15rem; }
-  .stats.right {
-    margin-left: 0.25rem;
-    text-align: left;
-  }
-  .stats.left {
-    margin-right: 0.25rem;
-    text-align: right;
-  }
+  .stats.right { margin-left: 4px; text-align: left; }
+  .stats.left { margin-right: 8px; text-align: right; }
   .effects {
     display: flex;
     gap: 0.2rem;
