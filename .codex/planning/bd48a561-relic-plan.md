@@ -6,7 +6,8 @@ Parent: [Web Game Plan](8a7d9c1e-web-game-plan.md)
 - Relics are permanent passives that trigger automatically once obtained.
 - Multiple copies can be collected and their effects stack without cap.
 - Strength follows star rank just like cards: low stars give tiny boosts; high stars can reshape entire runs.
-- *Aftertaste* is a damage FX with a base pot of 25 and a random 0.1–1.5 modifier; several relics reference this effect.
+- *Aftertaste* is a damage FX with a base pot of 25 and a random 0.1–1.5 modifier; several relics / cards reference this effect.
+- *Critical Boost* grants +0.5% Crit Rate and +5% Crit Damage per stack but vanishes when the unit is hit.
 
 ## 1★ Relics
 - **Rusty Buckle** – At the start of combat, the ally with the lowest Max HP gains a self-inflicted bleed for 1% of their Max HP plus 1% per stack. Every 10% HP lost triggers 5 hits of Aftertaste to all foes, each hit equal to 0.5% of the total HP lost. Each additional copy adds 3 hits.

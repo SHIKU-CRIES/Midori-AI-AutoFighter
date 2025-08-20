@@ -5,6 +5,8 @@ Parent: [Web Game Plan](8a7d9c1e-web-game-plan.md)
 ## Guiding Principles
 - Cards are unique rewards with a single copy each.
 - Strength scales by star rank: 1★ offers tiny bonuses, while 5★ radically changes how battles play out.
+- *Aftertaste* is a damage FX with a base pot of 25 and a random 0.1–1.5 modifier; several relics / cards reference this effect.
+- *Critical Boost* grants +0.5% Crit Rate and +5% Crit Damage per stack but vanishes when the unit is hit.
 
 ## 1★ Cards
 - **Micro Blade** – +3% ATK.
