@@ -36,10 +36,16 @@ class Dark(DamageTypeBase):
         return True
 
     def on_party_dot_damage_taken(self, damage, attacker, target) -> float:
-        if getattr(attacker, "base_damage_type", None) is self and ShadowSiphon.id in target.dots:
-            percent = damage / target.max_hp
-            attacker.atk *= 1 + percent
-            attacker.defense *= 1 + percent
+        # When a DoT ticks on a party member and the source is Dark, grant
+        # an extremely small scaling bonus to the attacker.
+        try:
+            if getattr(attacker, "base_damage_type", None) is self and ShadowSiphon.id in target.dots:
+                percent = max(float(damage) / max(float(target.max_hp), 1.0), 0.0)
+                scale = 1.0 + percent * 0.05  # 0.05% per percent of max HP
+                attacker.atk = int(attacker.atk * scale) if hasattr(attacker, "atk") else attacker.atk
+                attacker.defense = int(attacker.defense * scale) if hasattr(attacker, "defense") else attacker.defense
+        except Exception:
+            pass
         return damage
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:

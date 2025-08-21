@@ -31,8 +31,18 @@
     return artMap.get(card.id);
   }
 
+  function titleForItem(item) {
+    if (!item) return '';
+    if (item.name) return item.name;
+    if (item.id === 'ticket') return 'Gacha Ticket';
+    const id = String(item.id || '').toLowerCase();
+    const cap = id.charAt(0).toUpperCase() + id.slice(1);
+    const stars = Number.isFinite(item.stars) ? `${item.stars}★` : '';
+    return stars ? `${cap} Upgrade (${stars})` : `${cap} Upgrade`;
+  }
+
   let selected = null;
-  $: remaining = cards.length + relics.length + items.length;
+  $: remaining = cards.length + relics.length;
 
   function show(type, entry) {
     selected = { type, data: entry };
@@ -145,16 +155,13 @@
     </div>
   {/if}
   {#if items.length}
-    <h3>Choose an Item</h3>
-    <div class="choices">
-      {#each items as item}
-        <button class="choice" on:click={() => show('item', item)}>
-          <div class="art" style="--star-color: #708090">
-            <img src={getRewardArt('item', item.id)} alt={item.name} />
-            <div class="label">{item.name}</div>
-          </div>
-        </button>
-      {/each}
+    <h3>Drops</h3>
+    <div class="status">
+      <ul>
+        {#each items as item}
+          <li>{titleForItem(item)}</li>
+        {/each}
+      </ul>
     </div>
   {/if}
   {#if selected}

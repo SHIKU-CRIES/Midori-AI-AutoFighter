@@ -408,6 +408,7 @@
               gold={roomData.loot?.gold || 0}
               cards={roomData.card_choices || []}
               relics={roomData.relic_choices || []}
+              items={roomData.loot?.items || []}
               on:select={(e) => dispatch('rewardSelect', e.detail)}
               on:next={() => dispatch('nextRoom')}
             />
