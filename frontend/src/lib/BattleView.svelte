@@ -9,6 +9,7 @@
   export let reducedMotion = false;
   let foes = [];
   let timer;
+  let initialLogged = false;
   const dispatch = createEventDispatcher();
   let pollDelay = 1000 / framerate;
   $: pollDelay = 1000 / framerate;
@@ -92,7 +93,14 @@
   }
 
   function elementOf(obj) {
-    // Prefer explicit element alias if present
+    // Prefer primary from damage_types when available
+    if (obj && Array.isArray(obj.damage_types) && obj.damage_types.length > 0) {
+      const primary = obj.damage_types[0];
+      if (typeof primary === 'string' && primary.length) return primary;
+      const id = primary?.id || primary?.name;
+      if (id) return id;
+    }
+    // Next prefer explicit element alias if present
     const elem = obj?.element;
     if (typeof elem === 'string' && elem.length) return elem;
     // Fallback to base_damage_type
@@ -102,18 +110,70 @@
     return dt.id || dt.name || guessElementFromId(obj?.id);
   }
 
+  // Removed hover debug; logging is now triggered by Enter key
+
+  function toBaseStr(val) {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    return val?.id || val?.name || String(val);
+  }
+
+  function summarizeEntity(e) {
+    return {
+      id: e?.id,
+      name: e?.name,
+      element: e?.element,
+      base_damage_type: toBaseStr(e?.base_damage_type),
+      damage_types: Array.isArray(e?.damage_types) ? e.damage_types.join(',') : '',
+      char_type: e?.char_type,
+      level: e?.level,
+      hp: `${e?.hp}/${e?.max_hp}`,
+      atk: e?.atk,
+      defense: e?.defense,
+      mitigation: e?.mitigation,
+      crit_rate: e?.crit_rate,
+      crit_damage: e?.crit_damage,
+      effect_hit_rate: e?.effect_hit_rate,
+      effect_resistance: e?.effect_resistance,
+    };
+  }
+
+  function logBattleDebug() {
+    try {
+      // Compose current party + foes using local state
+      const p = Array.isArray(party) ? party : [];
+      const f = Array.isArray(foes) ? foes : [];
+      // Print compact tables + raw objects for full inspection
+      console.group('Battle fighters');
+      console.table(p.map(summarizeEntity));
+      console.table(f.map(summarizeEntity));
+      console.log('Party raw:', p);
+      console.log('Foes raw:', f);
+      console.groupEnd();
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function onKeydown(e) {
+    if (e.key === 'Enter') {
+      logBattleDebug();
+    }
+  }
+
   async function fetchSnapshot() {
     const start = performance.now();
     dispatch('snapshot-start');
     try {
       const snap = await roomAction(runId, 'battle', 'snapshot');
+      // removed console logging to avoid snapshot/round-trip spam
       // Do not overwrite party/foes directly; we enrich below to preserve
       // existing per-entity element data and avoid regressions.
       if (snap.enrage && differs(snap.enrage, enrage)) enrage = snap.enrage;
       if (snap.party) {
         const prevById = new Map((party || []).map(p => [p.id, p]));
         const enriched = (snap.party || []).map(m => {
-          let elem = m.element || m.base_damage_type || '';
+          let elem = (Array.isArray(m.damage_types) && m.damage_types[0]) || m.element || m.base_damage_type || '';
           if (!elem || /generic/i.test(String(elem))) {
             const prev = prevById.get(m.id);
             if (prev && (prev.element || prev.base_damage_type)) {
@@ -130,8 +190,8 @@
       if (snap.foes) {
         const prevById = new Map((foes || []).map(f => [f.id, f]));
         const enrichedFoes = (snap.foes || []).map(f => {
-          // Prefer backend-provided element/base_damage_type.
-          let elem = f.element || f.base_damage_type;
+          // Prefer primary from damage_types; then backend element/base_damage_type.
+          let elem = (Array.isArray(f.damage_types) && f.damage_types[0]) || f.element || f.base_damage_type;
           let resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name);
           if (!resolved) {
             // Fall back to previously known element if available; otherwise leave empty
@@ -147,16 +207,17 @@
     } finally {
       const duration = performance.now() - start;
       dispatch('snapshot-end', { duration });
-      console.log(`snapshot ${duration.toFixed(1)}ms`);
       timer = setTimeout(fetchSnapshot, Math.max(0, pollDelay - duration));
     }
   }
 
   onMount(() => {
+    window.addEventListener('keydown', onKeydown);
     fetchSnapshot();
   });
 
   onDestroy(() => {
+    window.removeEventListener('keydown', onKeydown);
     clearTimeout(timer);
   });
 </script>
@@ -267,13 +328,13 @@
               src={getCharacterImage(foe.id)}
               alt=""
               class="portrait"
-              style={`border-color: ${getElementColor(foe.element)}`}
+              style={`border-color: ${getElementColor(elementOf(foe))}`}
             />
             <div class="element-chip">
               <svelte:component
-                this={getElementIcon(foe.element)}
+                this={getElementIcon(elementOf(foe))}
                 class="element-icon"
-                style={`color: ${getElementColor(foe.element)}`}
+                style={`color: ${getElementColor(elementOf(foe))}`}
                 aria-hidden="true" />
             </div>
           </div>

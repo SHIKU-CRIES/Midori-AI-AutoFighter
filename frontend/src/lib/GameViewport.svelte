@@ -448,7 +448,6 @@
               on:snapshot-start={() => (snapshotLoading = true)}
               on:snapshot-end={e => {
                 snapshotLoading = false;
-                console.log(`round-trip ${e.detail.duration.toFixed(1)}ms`);
               }}
             />
           </div>

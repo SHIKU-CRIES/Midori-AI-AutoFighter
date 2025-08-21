@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 import copy
 import random
+import math
 import asyncio
 
 from dataclasses import asdict
@@ -39,31 +40,38 @@ ELEMENTS = [e.lower() for e in ALL_DAMAGE_TYPES]
 
 
 def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
-    base_mult = strength * node.floor * node.index * node.loop
-    base_mult *= 1 + 0.05 * node.pressure
-    # Apply a small per-room variation of +/-10% per stat to foes to avoid sameness.
+    # Gentler growth across the run: small multiplicative bumps per axis
+    floor_mult = 1.0 + 0.08 * max(node.floor - 1, 0)
+    index_mult = 1.0 + 0.10 * max(node.index - 1, 0)
+    loop_mult = 1.0 + 0.20 * max(node.loop - 1, 0)
+    pressure_mult = 1.0 * max(node.pressure, 1) ## This is user controlled, do not change this...
+    base_mult = strength * floor_mult * index_mult * loop_mult * pressure_mult
+
+    # Apply a small per-room variation of +/-5% per stat to foes to avoid sameness.
     # Each numeric stat gets its own independent variation, applied once when the foe is created.
     for field in fields(type(obj)):
+        if field.name in {"exp", "level", "exp_multiplier"}:
+            continue
         value = getattr(obj, field.name, None)
         if isinstance(value, (int, float)):
-            per_stat_variation = 1.0 + random.uniform(-0.10, 0.10)
+            per_stat_variation = 1.0 + random.uniform(-0.05, 0.05)
             total = value * base_mult * per_stat_variation
             setattr(obj, field.name, type(value)(total))
 
-    # Ensure foe level scales with room progression (room index as proxy).
+    # Ensure foe level increases slowly with room progression (roughly every 2 rooms).
     try:
         room_num = max(int(node.index), 1)
-        obj.level = int(max(getattr(obj, "level", 1), room_num))
+        desired = max(1, math.ceil(room_num / 2))
+        obj.level = int(max(getattr(obj, "level", 1), desired))
     except Exception:
         pass
 
-    # Buff foe HP so it's not less than 1000 × room ±15%.
-    # Pick a target within [85%, 115%] of (1000 * room) and clamp to at least that.
+    # Soften the HP floor: aim for ~700 × room with slight variance, not 1000 × room.
     try:
         room_num = max(int(node.index), 1)
-        base_hp = 1000 * room_num
+        base_hp = 700 * room_num
         low = int(base_hp * 0.85)
-        high = int(base_hp * 1.15)
+        high = int(base_hp * 1.10)
         target = random.randint(low, max(high, low + 1))
         current_max = int(getattr(obj, "max_hp", 1))
         new_max = max(current_max, target)
@@ -229,27 +237,40 @@ def _choose_foe(party: Party) -> FoeBase:
         candidates = [foe_plugins.Slime]
     foe_cls = random.choice(candidates)
     foe = foe_cls()
-    # Assign damage type to foes. Slimes get a random element.
+    # Assign damage type to foes similar to players:
+    # - If the foe's default is Generic or it's a Slime, roll a random element each encounter.
+    # - If it is Luna, force Generic.
+    # - Otherwise, keep the class-defined element (e.g., LadyOfFire stays Fire).
     try:
-        label = getattr(foe, "name", None) or getattr(foe, "id", "")
-        # Slimes use a random element among the core set
-        if "slime" in str(label).lower():
-            chosen = random.choice(["Fire", "Ice", "Lightning", "Light", "Dark", "Wind"])  # type: ignore[assignment]
-        else:
-            chosen = get_damage_type(str(label))
-        if "luna" in str(label).lower():
+        label = str(getattr(foe, "name", None) or getattr(foe, "id", ""))
+
+        def _as_str(t: object) -> str:
+            try:
+                if isinstance(t, str):
+                    return t
+                ident = getattr(t, "id", None) or getattr(t, "name", None)
+                if ident:
+                    return str(ident)
+            except Exception:
+                pass
+            return "Generic"
+
+        current = _as_str(getattr(foe, "base_damage_type", "Generic"))
+        chosen: str | None = None
+        low = label.lower()
+        if "luna" in low:
             chosen = "Generic"
-        # Safety: Only Luna may be Generic. For any other foe, force a non-generic element.
-        if str(chosen).lower() == "generic" and "luna" not in str(label).lower():
+        elif "slime" in low or current.lower() == "generic":
             chosen = random.choice(ALL_DAMAGE_TYPES)
-        foe.base_damage_type = chosen
-        # Keep related views consistent
+        # apply selection or normalize existing
+        final = chosen or current
+        foe.base_damage_type = final
         try:
-            foe.damage_types = [chosen]
+            foe.damage_types = [final]
         except Exception:
             pass
         try:
-            setattr(foe, "element", chosen)
+            setattr(foe, "element", final)
         except Exception:
             pass
     except Exception:
