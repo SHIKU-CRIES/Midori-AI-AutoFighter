@@ -130,17 +130,14 @@
       if (snap.foes) {
         const prevById = new Map((foes || []).map(f => [f.id, f]));
         const enrichedFoes = (snap.foes || []).map(f => {
-          let elem = f.element || f.base_damage_type || '';
-          if (!elem || /generic/i.test(String(elem))) {
+          // Prefer backend-provided element/base_damage_type, including 'Generic'.
+          let elem = f.element || f.base_damage_type;
+          let resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name);
+          if (!resolved) {
+            // As a last resort, fall back to previous known element or guess by id.
             const prev = prevById.get(f.id);
-            if (prev && (prev.element || prev.base_damage_type)) {
-              elem = prev.element || prev.base_damage_type;
-            } else {
-              // Default foes to Light unless explicitly set
-              elem = FOE_DEFAULT_ELEMENT;
-            }
+            resolved = prev?.element || prev?.base_damage_type || guessElementFromId(f.id);
           }
-          let resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name || FOE_DEFAULT_ELEMENT);
           return { ...f, element: resolved };
         });
         if (differs(enrichedFoes, foes)) foes = enrichedFoes;

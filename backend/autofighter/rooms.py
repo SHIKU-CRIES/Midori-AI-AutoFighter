@@ -239,6 +239,9 @@ def _choose_foe(party: Party) -> FoeBase:
             chosen = get_damage_type(str(label))
         if "luna" in str(label).lower():
             chosen = "Generic"
+        # Safety: Only Luna may be Generic. For any other foe, force a non-generic element.
+        if str(chosen).lower() == "generic" and "luna" not in str(label).lower():
+            chosen = random.choice(ALL_DAMAGE_TYPES)
         foe.base_damage_type = chosen
         # Keep related views consistent
         try:
