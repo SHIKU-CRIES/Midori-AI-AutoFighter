@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { roomAction } from './api.js';
-  import { getCharacterImage, getRandomBackground, getElementColor, getElementIcon } from './assetLoader.js';
+  import { getCharacterImage, getRandomBackground, getElementColor, getElementIcon, getDotImage } from './assetLoader.js';
   export let runId = '';
   export let framerate = 60;
   export let party = [];
@@ -200,6 +200,7 @@
             {/each}
             {#each groupEffects(member.dots) as [name, count]}
               <span class="dot" title={name}>
+                <img class="dot-img" src={getDotImage(name)} alt={name} />
                 {#if count > 1}<span class="stack">{count}</span>{/if}
               </span>
             {/each}
@@ -279,6 +280,7 @@
             {/each}
             {#each groupEffects(foe.dots) as [name, count]}
               <span class="dot" title={name}>
+                <img class="dot-img" src={getDotImage(name)} alt={name} />
                 {#if count > 1}<span class="stack">{count}</span>{/if}
               </span>
             {/each}
@@ -399,17 +401,24 @@
     gap: 0.2rem;
     margin-top: 0.15rem;
   }
-  .effects span {
-    position: relative;
-  }
-  .hot,
-  .dot {
-    width: 6px;
-    height: 6px;
+  .effects span { position: relative; }
+  /* HoTs keep simple green dots for now */
+  .hot {
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
+    background: #0f0;
   }
-  .hot { background: #0f0; }
-  .dot { background: #f00; }
+  /* DoTs use themed images from assets/dots */
+  .dot { display: inline-block; }
+  .dot-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+  }
   .stack {
     position: absolute;
     bottom: -2px;

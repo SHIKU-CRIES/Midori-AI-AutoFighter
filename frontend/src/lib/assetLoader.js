@@ -45,6 +45,16 @@ const backgroundModules = Object.fromEntries(
   ).map(([p, src]) => [p, normalizeUrl(src)])
 );
 
+// Load DoT icons by element folder (e.g., ./assets/dots/fire/*.png)
+const dotModules = Object.fromEntries(
+  Object.entries(
+    import.meta.glob('./assets/dots/*/*.png', {
+      eager: true,
+      as: 'url'
+    })
+  ).map(([p, src]) => [p, normalizeUrl(src)])
+);
+
 const ELEMENT_ICONS = {
   fire: Flame,
   ice: Snowflake,
@@ -70,6 +80,7 @@ const characterAssets = {};
 const fallbackAssets = Object.values(fallbackModules);
 const backgroundAssets = Object.values(backgroundModules);
 const defaultFallback = normalizeUrl('./assets/midoriai-logo.png');
+const DOT_DEFAULT = normalizeUrl('./assets/dots/generic/generic1.png');
 
 // Organize character assets by character ID (folder or single file)
 Object.keys(characterModules).forEach(p => {
@@ -171,6 +182,45 @@ export function getElementIcon(element) {
 
 export function getElementColor(element) {
   return ELEMENT_COLORS[(element || '').toLowerCase()] || '#aaa';
+}
+
+// Build DoT assets map: { fire: [urls...], ice: [...], ... }
+const dotAssets = (() => {
+  const map = {
+    fire: [],
+    ice: [],
+    lightning: [],
+    light: [],
+    dark: [],
+    wind: [],
+    generic: []
+  };
+  for (const [p, url] of Object.entries(dotModules)) {
+    const m = p.match(/\.\/assets\/dots\/(\w+)\//);
+    const key = (m?.[1] || 'generic').toLowerCase();
+    if (!map[key]) map[key] = [];
+    map[key].push(url);
+  }
+  return map;
+})();
+
+// Choose a DoT icon based on id text (e.g., "fire_dot", "blazing_torment")
+// Falls back to generic if no themed match is found.
+export function getDotImage(idOrName) {
+  const key = String(idOrName || '').toLowerCase();
+  const element =
+    (key.includes('fire') && 'fire') ||
+    (key.includes('ice') && 'ice') ||
+    (key.includes('lightning') && 'lightning') ||
+    // ensure 'lightning' check runs before 'light'
+    (key.includes('light') && 'light') ||
+    (key.includes('dark') && 'dark') ||
+    (key.includes('wind') && 'wind') ||
+    'generic';
+  const list = dotAssets[element] || dotAssets.generic || [];
+  if (list.length === 0) return DOT_DEFAULT || defaultFallback;
+  const idx = stringHashIndex(key || element, list.length);
+  return list[idx] || DOT_DEFAULT || defaultFallback;
 }
 
 // Export assets for debugging
