@@ -273,11 +273,16 @@
                 style={`color: ${getElementColor(elementOf(member))}`}
                 aria-hidden="true" />
             </div>
-          </div>
           <div class="effects">
             {#each groupEffects(member.hots) as [name, count]}
               <span class="hot" title={name}>
-                {#if count > 1}<span class="stack">{count}</span>{/if}
+                <img
+                  class="dot-img"
+                  src={getDotImage(name)}
+                  alt={name}
+                  style={`border-color: ${getElementColor(getDotElement(name))}`}
+                />
+                <span class="hot-plus">+</span>
               </span>
             {/each}
             {#each groupEffects(member.dots) as [name, count]}
@@ -288,9 +293,10 @@
                   alt={name}
                   style={`border-color: ${getElementColor(getDotElement(name))}`}
                 />
-                {#if count > 1}<span class="stack">{count}</span>{/if}
+                {#if count > 1}<span class="stack inside">{count}</span>{/if}
               </span>
             {/each}
+          </div>
           </div>
         </div>
         <div class="stats right stained-glass-panel">
@@ -358,11 +364,16 @@
                 style={`color: ${getElementColor(elementOf(foe))}`}
                 aria-hidden="true" />
             </div>
-          </div>
           <div class="effects">
             {#each groupEffects(foe.hots) as [name, count]}
               <span class="hot" title={name}>
-                {#if count > 1}<span class="stack">{count}</span>{/if}
+                <img
+                  class="dot-img"
+                  src={getDotImage(name)}
+                  alt={name}
+                  style={`border-color: ${getElementColor(getDotElement(name))}`}
+                />
+                <span class="hot-plus">+</span>
               </span>
             {/each}
             {#each groupEffects(foe.dots) as [name, count]}
@@ -373,9 +384,10 @@
                   alt={name}
                   style={`border-color: ${getElementColor(getDotElement(name))}`}
                 />
-                {#if count > 1}<span class="stack">{count}</span>{/if}
+                {#if count > 1}<span class="stack inside">{count}</span>{/if}
               </span>
             {/each}
+          </div>
           </div>
         </div>
       </div>
@@ -415,7 +427,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.8rem; /* add a bit more space so effects don't crowd */
   }
 
   .stained-glass-panel {
@@ -489,18 +501,31 @@
   .stats.right { margin-left: 4px; text-align: left; }
   .stats.left { margin-right: 8px; text-align: right; }
   .effects {
+    position: absolute;
+    left: 2px;
+    bottom: 2px;
+    width: calc(var(--portrait-size) - 4px);
     display: flex;
     gap: 0.2rem;
-    margin-top: 0.3rem; /* nudge the row down a bit */
-    align-self: flex-start; /* start at left edge, not centered */
+    flex-wrap: wrap;
+    align-items: center;
+    pointer-events: none; /* avoid layout shift and pointer capture */
   }
-  .effects span { position: relative; }
-  /* HoTs keep simple green dots for now */
-  .hot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #0f0;
+  .effects span { position: relative; display: inline-block; }
+  /* HoTs use element-themed tile with a + overlay (no stacks) */
+  .hot .hot-plus {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    color: #fff;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 0 2px;
+    border-radius: 2px;
+    background: rgba(0,0,0,0.55);
+    pointer-events: none;
   }
   /* DoTs use themed images from assets/dots */
   .dot { display: inline-block; }
@@ -513,11 +538,17 @@
     border: 2px solid #555; /* color overridden inline per element */
     box-shadow: 0 0 0 1px rgba(0,0,0,0.25);
   }
-  .stack {
+  .stack.inside {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    font-size: 0.5rem;
+    bottom: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+    line-height: 1;
+    padding: 0 2px;
+    border-radius: 2px;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    pointer-events: none;
   }
 
   @media (max-width: 600px) {

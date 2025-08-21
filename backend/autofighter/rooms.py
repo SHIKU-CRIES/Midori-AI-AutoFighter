@@ -371,12 +371,28 @@ class BattleRoom(Room):
                         await asyncio.sleep(0.5 - elapsed)
                     continue
                 proceed = await member_effect.on_action()
-                if proceed:
-                    proceed = await member.base_damage_type.on_action(
+                if proceed is None:
+                    proceed = True
+                # Ensure damage type object is instantiated before calling on_action
+                try:
+                    dt = getattr(member, "base_damage_type", None)
+                    if isinstance(dt, str):
+                        import importlib
+                        module = importlib.import_module(f"plugins.damage_types.{dt.lower()}")
+                        member.base_damage_type = getattr(module, dt)()
+                        dt = member.base_damage_type
+                except Exception:
+                    dt = getattr(member, "base_damage_type", None)
+                if proceed and hasattr(dt, "on_action"):
+                    res = await dt.on_action(
                         member,
                         combat_party.members,
                         [foe],
                     )
+                    if res is None:
+                        proceed = True
+                    else:
+                        proceed = bool(res)
                 if not proceed:
                     registry.trigger("turn_end", member)
                     if progress is not None:
@@ -414,11 +430,11 @@ class BattleRoom(Room):
                         # Apply to each party member
                         for mgr in party_effects:
                             for _ in range(stacks_to_add):
-                                dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.02)
+                                dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.05)
                                 mgr.add_dot(DamageOverTime("Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"))
                         # Apply to the foe
                         for _ in range(stacks_to_add):
-                            dmg_per_tick = int(max(foe.max_hp, 1) * 0.02)
+                            dmg_per_tick = int(max(foe.max_hp, 1) * 0.05)
                             foe_effects.add_dot(DamageOverTime("Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"))
                         enrage_bleed_applies += 1
                 registry.trigger("turn_end", member)
@@ -481,12 +497,28 @@ class BattleRoom(Room):
                         await asyncio.sleep(0.5 - elapsed)
                     break
                 proceed = await foe_effects.on_action()
-                if proceed:
-                    proceed = await foe.base_damage_type.on_action(
+                if proceed is None:
+                    proceed = True
+                # Ensure foe damage type is instantiated before calling on_action
+                try:
+                    dt = getattr(foe, "base_damage_type", None)
+                    if isinstance(dt, str):
+                        import importlib
+                        module = importlib.import_module(f"plugins.damage_types.{dt.lower()}")
+                        foe.base_damage_type = getattr(module, dt)()
+                        dt = foe.base_damage_type
+                except Exception:
+                    dt = getattr(foe, "base_damage_type", None)
+                if proceed and hasattr(dt, "on_action"):
+                    res = await dt.on_action(
                         foe,
                         [foe],
                         combat_party.members,
                     )
+                    if res is None:
+                        proceed = True
+                    else:
+                        proceed = bool(res)
                 if not proceed:
                     registry.trigger("turn_end", foe)
                     if progress is not None:
