@@ -15,6 +15,27 @@
   $: pollDelay = 1000 / framerate;
   let bg = getRandomBackground();
   $: flashDuration = reducedMotion ? 20 : 10;
+
+  // Dynamic sizing per side based on fighter counts
+  $: partyCount = Array.isArray(party) ? party.length : 0;
+  $: foeCount = Array.isArray(foes) ? foes.length : 0;
+  function sizeForParty(n) {
+    if (n <= 1) return 9.5; // bigger when solo
+    if (n <= 2) return 8.5;
+    if (n <= 3) return 8.0;
+    if (n <= 4) return 7.5;
+    return 7.0; // 5 max party, a bit bigger than old 6rem
+  }
+  function sizeForFoes(n) {
+    if (n <= 1) return 8.0;
+    if (n <= 2) return 7.5;
+    if (n <= 4) return 7.25;
+    if (n <= 6) return 6.75;
+    if (n <= 8) return 6.25;
+    return 6.0; // keep current size so 10 foes fit
+  }
+  $: partyPortraitSize = `${sizeForParty(partyCount)}rem`;
+  $: foePortraitSize = `${sizeForFoes(foeCount)}rem`;
   
   // Foe element defaults and slime randomization
   const FOE_DEFAULT_ELEMENT = 'Light';
@@ -228,7 +249,7 @@
   style={`background-image: url(${bg}); --flash-duration: ${flashDuration}s`}
   data-testid="battle-view"
 >
-  <div class="party-column">
+  <div class="party-column" style={`--portrait-size: ${partyPortraitSize}` }>
     {#each party as member (member.id)}
       <div class="combatant">
         <div class="portrait-wrap">
@@ -294,7 +315,7 @@
       </div>
     {/each}
   </div>
-  <div class="foe-column">
+  <div class="foe-column" style={`--portrait-size: ${foePortraitSize}` }>
     {#each foes as foe (foe.id)}
       <div class="combatant">
         <div class="stats left stained-glass-panel">
@@ -427,7 +448,7 @@
     align-items: center;
   }
   .hp-bar {
-    width: 6rem;
+    width: var(--portrait-size);
     height: 0.5rem;
     border: 1px solid #000;
     background: #333;
@@ -437,7 +458,7 @@
     height: 100%;
     background: #0f0;
   }
-  .portrait-frame { position: relative; width: 6rem; height: 6rem; }
+  .portrait-frame { position: relative; width: var(--portrait-size); height: var(--portrait-size); }
   .portrait {
     width: 100%;
     height: 100%;
@@ -449,8 +470,8 @@
   .element-icon { width: 16px; height: 16px; display: block; }
   .stats {
     font-size: 0.7rem;
-    width: 6rem;
-    flex: 0 0 6rem; /* prevent overlap/shrink under portrait */
+    width: var(--portrait-size);
+    flex: 0 0 var(--portrait-size); /* prevent overlap/shrink under portrait */
   }
   .stats .name {
     font-weight: 600;

@@ -76,8 +76,16 @@ async def add_cors_headers(response):
     # Allow frontend dev server to call backend during development
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
+
+
+@app.before_request
+async def handle_cors_preflight():
+    # Ensure browsers can preflight DELETE/other methods successfully
+    if request.method == "OPTIONS":
+        # Empty 204 with CORS headers added in after_request
+        return "", 204
 
 
 # Expose static assets (e.g., backgrounds) for simple image serving
