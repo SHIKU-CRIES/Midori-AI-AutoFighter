@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { roomAction } from './api.js';
-  import { getCharacterImage, getRandomBackground, getElementColor, getElementIcon, getDotImage } from './assetLoader.js';
+  import { getCharacterImage, getRandomBackground, getElementColor, getElementIcon, getDotImage, getDotElement } from './assetLoader.js';
   export let runId = '';
   export let framerate = 60;
   export let party = [];
@@ -200,7 +200,12 @@
             {/each}
             {#each groupEffects(member.dots) as [name, count]}
               <span class="dot" title={name}>
-                <img class="dot-img" src={getDotImage(name)} alt={name} />
+                <img
+                  class="dot-img"
+                  src={getDotImage(name)}
+                  alt={name}
+                  style={`border-color: ${getElementColor(getDotElement(name))}`}
+                />
                 {#if count > 1}<span class="stack">{count}</span>{/if}
               </span>
             {/each}
@@ -280,7 +285,12 @@
             {/each}
             {#each groupEffects(foe.dots) as [name, count]}
               <span class="dot" title={name}>
-                <img class="dot-img" src={getDotImage(name)} alt={name} />
+                <img
+                  class="dot-img"
+                  src={getDotImage(name)}
+                  alt={name}
+                  style={`border-color: ${getElementColor(getDotElement(name))}`}
+                />
                 {#if count > 1}<span class="stack">{count}</span>{/if}
               </span>
             {/each}
@@ -399,7 +409,8 @@
   .effects {
     display: flex;
     gap: 0.2rem;
-    margin-top: 0.15rem;
+    margin-top: 0.3rem; /* nudge the row down a bit */
+    align-self: flex-start; /* start at left edge, not centered */
   }
   .effects span { position: relative; }
   /* HoTs keep simple green dots for now */
@@ -417,7 +428,8 @@
     border-radius: 4px;
     object-fit: cover;
     display: block;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+    border: 2px solid #555; /* color overridden inline per element */
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.25);
   }
   .stack {
     position: absolute;

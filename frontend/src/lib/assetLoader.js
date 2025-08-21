@@ -204,19 +204,28 @@ const dotAssets = (() => {
   return map;
 })();
 
+// Internal helper to infer an element from a DoT id/name
+function inferElementFromKey(key) {
+  const k = String(key || '').toLowerCase();
+  if (k.includes('lightning')) return 'lightning';
+  if (k.includes('fire')) return 'fire';
+  if (k.includes('ice')) return 'ice';
+  if (k.includes('light')) return 'light';
+  if (k.includes('dark')) return 'dark';
+  if (k.includes('wind')) return 'wind';
+  return 'generic';
+}
+
+// Public: return inferred element for a DoT name/id
+export function getDotElement(idOrName) {
+  return inferElementFromKey(idOrName);
+}
+
 // Choose a DoT icon based on id text (e.g., "fire_dot", "blazing_torment")
 // Falls back to generic if no themed match is found.
 export function getDotImage(idOrName) {
   const key = String(idOrName || '').toLowerCase();
-  const element =
-    (key.includes('fire') && 'fire') ||
-    (key.includes('ice') && 'ice') ||
-    (key.includes('lightning') && 'lightning') ||
-    // ensure 'lightning' check runs before 'light'
-    (key.includes('light') && 'light') ||
-    (key.includes('dark') && 'dark') ||
-    (key.includes('wind') && 'wind') ||
-    'generic';
+  const element = inferElementFromKey(key);
   const list = dotAssets[element] || dotAssets.generic || [];
   if (list.length === 0) return DOT_DEFAULT || defaultFallback;
   const idx = stringHashIndex(key || element, list.length);
