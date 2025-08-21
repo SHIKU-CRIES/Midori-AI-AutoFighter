@@ -531,10 +531,38 @@ class BattleRoom(Room):
                 continue
             break
 
+        # Determine outcome before distributing rewards
+        party_alive = any(m.hp > 0 for m in combat_party.members)
+        foe_alive = foe.hp > 0
+
         registry.trigger("battle_end", foe)
         console.log("Battle end")
         for member in combat_party.members:
             registry.trigger("battle_end", member)
+        # On defeat, skip rewards and end the run cleanly after returning the snapshot
+        if not party_alive and foe_alive:
+            foes = [_serialize(foe)]
+            party_data = [_serialize(p) for p in combat_party.members]
+            # Ensure original party reflects current HP lost
+            for member, orig in zip(combat_party.members, party.members):
+                orig.hp = min(member.hp, orig.max_hp)
+            return {
+                "result": "defeat",
+                "party": party_data,
+                "gold": party.gold,
+                "relics": party.relics,
+                "cards": party.cards,
+                "card_choices": [],
+                "relic_choices": [],
+                # Provide an empty loot object so the frontend poll stops without showing RewardOverlay
+                "loot": {"gold": 0, "items": []},
+                "foes": foes,
+                "room_number": self.node.index,
+                "exp_reward": 0,
+                "enrage": {"active": enrage_active, "stacks": enrage_stacks},
+                "rdr": party.rdr,
+            }
+
         for member, orig in zip(combat_party.members, party.members):
             orig.gain_exp(exp_reward)
             orig.hp = min(member.hp, orig.max_hp)
