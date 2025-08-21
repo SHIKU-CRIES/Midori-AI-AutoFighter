@@ -86,10 +86,13 @@
   }
 
   function handleRunEnd() {
+    stopBattlePoll();
     runId = '';
     roomData = null;
     nextRoom = '';
     battleActive = false;
+    viewStack = [];
+    viewMode = 'main';
     clearRunState();
   }
 
@@ -194,9 +197,7 @@
     if (endpoint.includes('battle')) {
       endpoint = nextRoom.includes('boss') ? 'boss' : 'battle';
     }
-    if (endpoint === 'battle') {
-      battleActive = true;
-    }
+    // Fetch first, then decide whether to show rewards or start battle polling.
     const data = await roomAction(runId, endpoint);
     roomData = data;
     if (data.party) {
@@ -205,6 +206,26 @@
     nextRoom = data.next_room || '';
     saveRunState();
     if (endpoint === 'battle') {
+      const hasRewards = Boolean(data?.loot) || (data?.card_choices?.length > 0) || (data?.relic_choices?.length > 0);
+      if (hasRewards) {
+        battleActive = false;
+        return;
+      }
+      const noFoes = !Array.isArray(data?.foes) || data.foes.length === 0;
+      if (noFoes) {
+        // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
+        try {
+          const snap = await roomAction(runId, 'battle', 'snapshot');
+          const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
+          if (snapHasRewards) {
+            roomData = snap;
+            battleActive = false;
+            nextRoom = snap.next_room || nextRoom;
+            return;
+          }
+        } catch {}
+      }
+      battleActive = true;
       pollBattle();
     } else {
       battleActive = false;

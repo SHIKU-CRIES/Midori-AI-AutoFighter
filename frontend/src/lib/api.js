@@ -110,7 +110,8 @@ export async function savePlayerConfig(config) {
 }
 
 export async function endRun(runId) {
-  await fetch(`${API_BASE}/run/${runId}`, { method: 'DELETE' });
+  const res = await fetch(`${API_BASE}/run/${runId}`, { method: 'DELETE' });
+  return res.ok;
 }
 
 export async function wipeData() {

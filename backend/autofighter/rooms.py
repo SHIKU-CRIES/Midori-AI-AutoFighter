@@ -49,6 +49,29 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
             per_stat_variation = 1.0 + random.uniform(-0.10, 0.10)
             total = value * base_mult * per_stat_variation
             setattr(obj, field.name, type(value)(total))
+
+    # Ensure foe level scales with room progression (room index as proxy).
+    try:
+        room_num = max(int(node.index), 1)
+        obj.level = int(max(getattr(obj, "level", 1), room_num))
+    except Exception:
+        pass
+
+    # Buff foe HP so it's not less than 1000 × room ±15%.
+    # Pick a target within [85%, 115%] of (1000 * room) and clamp to at least that.
+    try:
+        room_num = max(int(node.index), 1)
+        base_hp = 1000 * room_num
+        low = int(base_hp * 0.85)
+        high = int(base_hp * 1.15)
+        target = random.randint(low, max(high, low + 1))
+        current_max = int(getattr(obj, "max_hp", 1))
+        new_max = max(current_max, target)
+        setattr(obj, "max_hp", new_max)
+        setattr(obj, "hp", new_max)
+    except Exception:
+        pass
+
     # Safety: foes should never have crit_damage below 2.0 (i.e., +100%).
     try:
         cd = getattr(obj, "crit_damage", None)
@@ -255,8 +278,6 @@ class BattleRoom(Room):
         foe = _choose_foe(party)
         # TODO: Extend to support battles with multiple foes and target selection.
         _scale_stats(foe, self.node, self.strength)
-        foe.hp = 1
-        foe.max_hp = 1
         combat_party = Party(
             members=[copy.deepcopy(m) for m in party.members],
             gold=party.gold,

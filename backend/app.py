@@ -337,6 +337,14 @@ async def get_map(run_id: str) -> tuple[str, int, dict[str, str]]:
 
 @app.delete("/run/<run_id>")
 async def end_run(run_id: str) -> tuple[str, int, dict[str, str]]:
+    # Cancel any in-flight battle task and clear snapshots to avoid stale state
+    task = battle_tasks.pop(run_id, None)
+    try:
+        if task is not None and not task.done():
+            task.cancel()
+    except Exception:
+        pass
+    battle_snapshots.pop(run_id, None)
     with SAVE_MANAGER.connection() as conn:
         cur = conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
         if cur.rowcount == 0:
@@ -788,8 +796,12 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "awaiting next"}), 400
     # If player needs to choose a reward, don't start another battle.
     if state.get("awaiting_card") or state.get("awaiting_relic"):
-        # Provide a richer snapshot using the common serializer so the frontend
-        # can access fields like base_damage_type for element coloring.
+        # Return the last saved battle snapshot (which includes loot and choices)
+        # so the frontend can render the reward overlay even after a refresh.
+        snap = battle_snapshots.get(run_id)
+        if snap is not None:
+            return jsonify(snap)
+        # Fallback: provide a minimal snapshot so UI still shows party state.
         party_data = [_serialize(m) for m in party.members]
         return jsonify(
             {
