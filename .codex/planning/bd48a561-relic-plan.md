@@ -41,4 +41,6 @@ Parent: [Web Game Plan](8a7d9c1e-web-game-plan.md)
   - [x] **Timekeeper's Hourglass** – At the start of each turn, there is a 10% chance plus 1% per stack for all allies to take an additional turn.
 
 ## 5★ Relics
-
+- **Paradox Hourglass** – At the start of combat there is a 60% chance, reduced as allies are missing (0% if only one remains), to kill 1 random ally plus 1 per stack. Survivors gain 200% to all stats plus 100% per stack, and all foes lose 4× DEF plus 1× per stack down to a minimum of 100 total DEF.
+- **Soul Prism** – After combat and at the start of a new round, revive fallen allies at 1% HP but reduce their Max HP by 75% for the rest of the run; buff their DEF and mitigation by 5%. Each additional copy reduces the penalty by 5% and adds 2% to the buffs.
+- **Omega Core** – At the start of combat, all allies gain +500% to all stats; after 10 turns the party begins taking 1% HP damage each turn, increasing by 1% per extra turn. Each stack adds 2 turns before the damage begins.
