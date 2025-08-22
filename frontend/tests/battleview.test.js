@@ -2,67 +2,65 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-describe('BattleView enrage effect', () => {
-  test('adds enraged class and animation', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain('class:enraged');
-    expect(content).toContain('@keyframes enrage-bg');
-    expect(content).toContain('--flash-duration');
+const battleView = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
+const enrageIndicator = readFileSync(join(import.meta.dir, '../src/lib/battle/EnrageIndicator.svelte'), 'utf8');
+const statusIcons = readFileSync(join(import.meta.dir, '../src/lib/battle/StatusIcons.svelte'), 'utf8');
+const fighterPortrait = readFileSync(join(import.meta.dir, '../src/lib/battle/FighterPortrait.svelte'), 'utf8');
+
+describe('BattleView enrage handling', () => {
+  test('uses EnrageIndicator component', () => {
+    expect(battleView).toContain('EnrageIndicator');
+  });
+  test('enrage indicator defines animation', () => {
+    expect(enrageIndicator).toContain('@keyframes enrage-bg');
+    expect(enrageIndicator).toContain('--flash-duration');
   });
 });
 
 describe('BattleView enrage state', () => {
   test('updates enrage from snapshot', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain('snap.enrage && differs(snap.enrage, enrage)');
+    expect(battleView).toContain('snap.enrage && differs(snap.enrage, enrage)');
   });
 });
 
 describe('BattleView layout and polling', () => {
   test('renders party and foe columns', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain('party-column');
-    expect(content).toContain('foe-column');
+    expect(battleView).toContain('party-column');
+    expect(battleView).toContain('foe-column');
   });
 
   test('wraps stat blocks with stained-glass styling', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain('class="stats right stained-glass-panel"');
-    expect(content).toContain('class="stats left stained-glass-panel"');
+    expect(battleView).toContain('class="stats right stained-glass-panel"');
+    expect(battleView).toContain('class="stats left stained-glass-panel"');
   });
 
   test('party column precedes foe column', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    const partyIndex = content.indexOf('class="party-column"');
-    const foeIndex = content.indexOf('class="foe-column"');
+    const partyIndex = battleView.indexOf('class="party-column"');
+    const foeIndex = battleView.indexOf('class="foe-column"');
     expect(partyIndex).toBeGreaterThan(-1);
     expect(foeIndex).toBeGreaterThan(-1);
     expect(partyIndex).toBeLessThan(foeIndex);
   });
 
   test('polls backend for snapshots', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain("roomAction(runId, 'battle', 'snapshot')");
+    expect(battleView).toContain("roomAction(runId, 'battle', 'snapshot')");
   });
 
   test('shows hp bars and core stats', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain('hp-bar');
-    expect(content).toContain('<span class="k">DEF</span>');
-    expect(content).toContain('CRate');
-    expect(content).toContain('CDmg');
+    expect(fighterPortrait).toContain('hp-bar');
+    expect(battleView).toContain('<span class="k">DEF</span>');
+    expect(battleView).toContain('CRate');
+    expect(battleView).toContain('CDmg');
   });
 
   test('groups duplicate effects with stack counts', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain('groupEffects');
-    expect(content).toContain('stack');
+    expect(statusIcons).toContain('groupEffects');
+    expect(statusIcons).toContain('stack inside');
   });
 
-  test('uses normalized element for foe portrait', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/BattleView.svelte'), 'utf8');
-    expect(content).toContain('getElementIcon(foe.element)');
-    expect(content).toContain('getElementColor(foe.element)');
+  test('uses normalized element for portraits', () => {
+    expect(fighterPortrait).toContain('getElementIcon(fighter.element)');
+    expect(fighterPortrait).toContain('getElementColor(fighter.element)');
   });
 
   test('polling respects framerate settings', async () => {
@@ -102,27 +100,5 @@ describe('BattleView layout and polling', () => {
     const interval120 = await measure(120);
     expect(interval120).toBeGreaterThanOrEqual(8.3 * 0.9);
     expect(interval120).toBeLessThanOrEqual(8.3 * 1.2);
-  });
-});
-
-describe('BattleView damage_type fallback', () => {
-  test('elementOf resolves singular damage_type', () => {
-    function elementOf(obj) {
-      if (obj && Array.isArray(obj.damage_types) && obj.damage_types.length > 0) {
-        const primary = obj.damage_types[0];
-        if (typeof primary === 'string' && primary.length) return primary;
-        const id = primary?.id || primary?.name;
-        if (id) return id;
-      }
-      const single = obj?.damage_type;
-      if (typeof single === 'string' && single.length) return single;
-      const singleId = single?.id || single?.name;
-      if (singleId) return singleId;
-      const elem = obj?.element;
-      if (typeof elem === 'string' && elem.length) return elem;
-      return 'Generic';
-    }
-    const fighter = { id: 'hero', damage_type: 'Fire' };
-    expect(elementOf(fighter)).toBe('Fire');
   });
 });
