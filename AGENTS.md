@@ -42,6 +42,11 @@ This document summarizes common development practices for all services in this r
      from langchain_text_splitters import RecursiveCharacterTextSplitter
      ```
 
+## File Size and Readability (Repository-wide Rule)
+- Aim for ~300 lines or fewer per file.
+- Split monolithic modules into smaller units when they grow beyond this threshold.
+- Keep code well commented and organized for readability.
+
 ---
 
 ## Contributor Modes
