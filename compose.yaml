@@ -18,6 +18,8 @@ services:
       AF_DB_KEY: ${AF_DB_KEY}
     volumes:
       - ./backend:/app
+      # Mount user's cache into container so backend and LLM variants can reuse cached models/files
+      - ${HOME}/.cache:/root/.cache:delegated
   backend-llm-cuda:
     <<: *backend-base
     build:

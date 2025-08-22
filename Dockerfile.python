@@ -28,9 +28,17 @@ RUN yay -Syu --noconfirm uv && yay -Yccc --noconfirm
 ENV PATH="/root/.local/bin:${PATH}"
 ENV PYTHONPATH="/app"
 
+# UV cache directory for uv to store downloaded models/caches
+ENV UV_CACHE_DIR="/root/.cache/uv"
+
 WORKDIR /app
+
 # NOTE: do not hardcode user; pull from shell and keep sudo
 RUN sudo chown -R $(whoami):$(whoami) /app
+
+RUN sudo mkdir -p ${UV_CACHE_DIR}
+RUN sudo chown -R $(whoami):$(whoami) ${UV_CACHE_DIR} 
+RUN sudo chmod -R 755 ${UV_CACHE_DIR}
 
 RUN sudo mkdir -p /.venv
 RUN sudo chown -R $(whoami):$(whoami) /.venv
