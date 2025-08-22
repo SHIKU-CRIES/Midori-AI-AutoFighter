@@ -1,7 +1,7 @@
 <script>
   import GameViewport from '$lib/GameViewport.svelte';
   import { onMount } from 'svelte';
-  import { getPlayerConfig, savePlayerConfig } from '$lib/api.js';
+  import { getPlayerConfig, savePlayerConfig, getBackendFlavor } from '$lib/api.js';
   import {
     startRun,
     roomAction,
@@ -17,6 +17,7 @@
   import { openOverlay, backOverlay, homeOverlay } from '$lib/OverlayController.js';
 
   let runId = '';
+  let backendFlavor = '';
   let selectedParty = ['sample_player'];
   let roomData = null;
   // Track map state to render room/floor context in battle header
@@ -30,6 +31,8 @@
   let battleActive = false;
 
   onMount(async () => {
+    backendFlavor = await getBackendFlavor();
+    window.backendFlavor = backendFlavor;
     const saved = loadRunState();
     if (saved) {
       try {
