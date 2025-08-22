@@ -1,7 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`PartyPicker component roster layout snapshot 1`] = `
-"<script>
+<script>
   import { getElementIcon, getElementColor } from './assetLoader.js';
 
   /**
@@ -27,7 +24,7 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
 <div class="roster list compact" data-testid="roster">
   {#each roster.filter(c => selected.includes(c.id)) as char}
     <button
-      data-testid={\`choice-\${char.id}\`}
+      data-testid={`choice-${char.id}`}
       class="char-btn"
       on:click={() => select(char.id)}>
       <img src={char.img} alt={char.name} class="compact-img" />
@@ -39,17 +36,17 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
   {#each roster as char}
     <button
       type="button"
-      data-testid={\`choice-\${char.id}\`}
+      data-testid={`choice-${char.id}`}
       class="char-row"
       class:selected={selected.includes(char.id)}
       on:click={() => select(char.id)}
-      style={\`border-color: \${getElementColor(char.element)}\`}> 
+      style={`border-color: ${getElementColor(char.element)}`}> 
       <img src={char.img} alt={char.name} class="row-img" />
       <span class="row-name">{char.name}</span>
       <svelte:component
         this={getElementIcon(char.element)}
         class="row-type"
-        style={\`color: \${getElementColor(char.element)}\`}
+        style={`color: ${getElementColor(char.element)}`}
         aria-hidden="true" />
     </button>
   {/each}
@@ -127,5 +124,3 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
   border: 1px solid #fff;
 }
 </style>
-"
-`;
