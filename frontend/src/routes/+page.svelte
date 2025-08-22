@@ -23,6 +23,7 @@
     updateParty
   } from '$lib/api.js';
   import { FEEDBACK_URL } from '$lib/constants.js';
+  import { openOverlay, backOverlay, homeOverlay } from '$lib/OverlayController.js';
 
   let runId = '';
   let selectedParty = ['sample_player'];
@@ -32,8 +33,6 @@
   let currentIndex = 0;
   let currentRoomType = '';
   let viewportBg = '';
-  let viewMode = 'main';
-  let viewStack = [];
   let nextRoom = '';
 
   function saveRunState() {
@@ -46,19 +45,6 @@
     localStorage.removeItem('runState');
   }
 
-  function setView(mode) {
-    viewStack.push(viewMode);
-    viewMode = mode;
-  }
-
-  function goBack() {
-    viewMode = viewStack.pop() || 'main';
-  }
-
-  function goHome() {
-    viewStack = [];
-    viewMode = 'main';
-  }
   let editorState = { pronouns: '', damageType: 'Light', hp: 0, attack: 0, defense: 0 };
   let battleActive = false;
 
@@ -83,12 +69,12 @@
 
   function openRun() {
     if (runId) {
-      viewMode = 'main';
+      homeOverlay();
       if (!battleActive && nextRoom) {
         enterRoom();
       }
     } else {
-      setView('party-start');
+      openOverlay('party-start');
     }
   }
 
@@ -98,8 +84,7 @@
     roomData = null;
     nextRoom = '';
     battleActive = false;
-    viewStack = [];
-    viewMode = 'main';
+    homeOverlay();
     clearRunState();
   }
 
@@ -110,21 +95,20 @@
     currentIndex = data.map.current || 0;
     nextRoom = mapRooms[currentIndex]?.room_type || '';
     currentRoomType = nextRoom || '';
-    viewStack = ['main'];
-    viewMode = 'main';
+    homeOverlay();
     await enterRoom();
   }
 
   async function handleParty() {
     if (battleActive) return;
-    setView('party');
+    openOverlay('party');
   }
 
   async function handlePartySave() {
     if (runId) {
       await updateParty(runId, selectedParty);
     }
-    goBack();
+    backOverlay();
   }
 
   async function openEditor() {
@@ -137,7 +121,7 @@
       attack: data.attack,
       defense: data.defense,
     };
-    setView('editor');
+    openOverlay('editor');
   }
 
   async function handleEditorSave(e) {
@@ -158,12 +142,12 @@
 
   async function openPulls() {
     if (battleActive) return;
-    setView('pulls');
+    openOverlay('pulls');
   }
 
   async function openCraft() {
     if (battleActive) return;
-    setView('craft');
+    openOverlay('craft');
   }
 
   function openFeedback() {
@@ -172,7 +156,7 @@
 
   async function openInventory() {
     if (battleActive) return;
-    setView('inventory');
+    openOverlay('inventory');
   }
 
   let battleTimer;
@@ -319,7 +303,7 @@
     {
       icon: Settings,
       label: 'Settings',
-      action: () => setView('settings'),
+      action: () => openOverlay('settings'),
       disabled: false
     },
     { icon: MessageSquare, label: 'Feedback', action: openFeedback, disabled: false },
@@ -374,17 +358,16 @@
     currentIndex={currentIndex}
     currentRoomType={currentRoomType}
     bind:selected={selectedParty}
-    bind:viewMode={viewMode}
     items={items}
     editorState={editorState}
     battleActive={battleActive}
     on:startRun={handleStart}
     on:editorSave={(e) => handleEditorSave(e)}
     on:target={openInventory}
-    on:back={goBack}
-    on:home={goHome}
+    on:back={backOverlay}
+    on:home={homeOverlay}
     on:openEditor={openEditor}
-    on:settings={() => setView('settings')}
+    on:settings={() => openOverlay('settings')}
     on:rewardSelect={(e) => handleRewardSelect(e.detail)}
     on:shopBuy={(e) => handleShopBuy(e.detail)}
     on:shopReroll={handleShopReroll}

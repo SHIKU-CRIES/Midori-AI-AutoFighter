@@ -13,7 +13,7 @@ Foe portraits show the element reported by the backend. If a foe lacks both an `
 Snapshots from the backend are polled once per frame-rate tick rather than on a
 fixed interval and the polling delay honors 30/60/120 fps settings without a
 50 ms floor. Each request dispatches events with the round-trip time so
-`GameViewport` can log performance and show a stained-glass status panel with a
+`NavBar` shows a stained-glass status panel with a
 spinner while updates are in flight. Incoming party and foe arrays are compared
 to the previous snapshot to avoid unnecessary re-renders.
 

@@ -4,7 +4,7 @@ import { describe, test, expect } from 'bun:test';
 
 describe('non-battle room routing', () => {
   test('renders shop and rest overlays', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/GameViewport.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/OverlayHost.svelte'), 'utf8');
     expect(content).toContain("roomData && roomData.result === 'shop'");
     expect(content).toContain('ShopMenu');
     expect(content).toContain("roomData && roomData.result === 'rest'");

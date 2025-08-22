@@ -20,7 +20,7 @@ can call `/rooms/{run_id}/{room_id}/action`, which simply echoes the provided
 `action`. The backend auto-resolves fights
 until either the party or the foe falls, handling passives, cards, relics, and
 status-effect ticks before returning updated party stats, card choices, and
-foes. When `card_choices` are present, `GameViewport` opens a reward overlay so
+foes. When `card_choices` are present, `OverlayHost` opens a reward overlay so
 players can pick one option before advancing.
 
 Every menu opener checks `/map/{run_id}` for an active `battle` flag. When a

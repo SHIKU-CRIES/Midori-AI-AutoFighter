@@ -3,9 +3,9 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 describe('Framerate persistence', () => {
-  test('GameViewport loads saved framerate', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/GameViewport.svelte'), 'utf8');
-    expect(content).toContain('if (saved.framerate !== undefined) framerate = Number(saved.framerate);');
+  test('viewportState loads saved framerate', () => {
+    const content = readFileSync(join(import.meta.dir, '../src/lib/viewportState.js'), 'utf8');
+    expect(content).toContain('Number(saved.framerate)');
   });
 
   test('SettingsMenu exposes 30/60/120 fps options', () => {
