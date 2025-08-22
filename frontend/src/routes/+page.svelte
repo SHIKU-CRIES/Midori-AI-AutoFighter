@@ -1,27 +1,18 @@
 <script>
-  import {
-    Play,
-    Users,
-    User,
-    Settings,
-    Package,
-    PackageOpen,
-    Hammer,
-    MessageSquare
-  } from 'lucide-svelte';
   import GameViewport from '$lib/GameViewport.svelte';
   import { onMount } from 'svelte';
+  import { getPlayerConfig, savePlayerConfig } from '$lib/api.js';
   import {
     startRun,
-    getPlayerConfig,
-    savePlayerConfig,
     roomAction,
     chooseCard,
     chooseRelic,
     advanceRoom,
     getMap,
     updateParty
-  } from '$lib/api.js';
+  } from '$lib/runApi.js';
+  import { loadRunState, saveRunState, clearRunState } from '$lib/runState.js';
+  import { buildRunMenu } from '$lib/RunButtons.svelte';
   import { FEEDBACK_URL } from '$lib/constants.js';
   import { openOverlay, backOverlay, homeOverlay } from '$lib/OverlayController.js';
 
@@ -35,26 +26,15 @@
   let viewportBg = '';
   let nextRoom = '';
 
-  function saveRunState() {
-    if (runId) {
-      localStorage.setItem('runState', JSON.stringify({ runId, nextRoom }));
-    }
-  }
-
-  function clearRunState() {
-    localStorage.removeItem('runState');
-  }
-
   let editorState = { pronouns: '', damageType: 'Light', hp: 0, attack: 0, defense: 0 };
   let battleActive = false;
 
   onMount(async () => {
-    const saved = localStorage.getItem('runState');
+    const saved = loadRunState();
     if (saved) {
       try {
-        const { runId: storedId } = JSON.parse(saved);
-        const data = await getMap(storedId);
-        runId = storedId;
+        const data = await getMap(saved.runId);
+        runId = saved.runId;
         selectedParty = data.party || selectedParty;
         mapRooms = data.map.rooms || [];
         currentIndex = data.map.current || 0;
@@ -202,8 +182,8 @@
     // Keep map-derived indices and current room type in sync when available
     if (typeof data.current_index === 'number') currentIndex = data.current_index;
     if (data.current_room) currentRoomType = data.current_room;
-    nextRoom = data.next_room || '';
-    saveRunState();
+      nextRoom = data.next_room || '';
+      saveRunState(runId, nextRoom);
     if (endpoint === 'battle') {
       const hasRewards = Boolean(data?.loot) || (data?.card_choices?.length > 0) || (data?.relic_choices?.length > 0);
       if (hasRewards) {
@@ -294,21 +274,19 @@
     await enterRoom();
   }
   let items = [];
-  $: items = [
-    { icon: Play, label: 'Run', action: openRun, disabled: false },
-    { icon: Users, label: 'Party', action: handleParty, disabled: battleActive },
-    { icon: User, label: 'Edit', action: openEditor, disabled: battleActive },
-    { icon: PackageOpen, label: 'Pulls', action: openPulls, disabled: battleActive },
-    { icon: Hammer, label: 'Craft', action: openCraft, disabled: battleActive },
+  $: items = buildRunMenu(
     {
-      icon: Settings,
-      label: 'Settings',
-      action: () => openOverlay('settings'),
-      disabled: false
+      openRun,
+      handleParty,
+      openEditor,
+      openPulls,
+      openCraft,
+      openFeedback,
+      openInventory,
+      openSettings: () => openOverlay('settings')
     },
-    { icon: MessageSquare, label: 'Feedback', action: openFeedback, disabled: false },
-    { icon: Package, label: 'Inventory', action: openInventory, disabled: battleActive }
-  ];
+    battleActive
+  );
 
 </script>
 
