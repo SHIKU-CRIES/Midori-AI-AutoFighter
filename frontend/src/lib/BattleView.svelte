@@ -1,6 +1,6 @@
 <script>
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import { roomAction } from './api.js';
+  import { roomAction } from '$lib';
   import { getRandomBackground } from './assetLoader.js';
   import FighterPortrait from './battle/FighterPortrait.svelte';
   import EnrageIndicator from './battle/EnrageIndicator.svelte';
