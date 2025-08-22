@@ -210,14 +210,17 @@ def test_lucky_button_missed_crit():
     party = Party()
     a = PlayerBase()
     a.crit_rate = 0.1
+    a.crit_damage = 2.0
     party.members.append(a)
     award_relic(party, "lucky_button")
     apply_relics(party)
     BUS.emit("crit_missed", a, None)
     BUS.emit("turn_start")
-    assert isclose(a.crit_rate, 0.1 * 1.03 + 0.03, rel_tol=1e-4)
+    assert isclose(a.crit_rate, 0.1 * 1.03 + 0.005, rel_tol=1e-4)
+    assert isclose(a.crit_damage, 2.0 + 0.05, rel_tol=1e-4)
     BUS.emit("turn_end")
     assert isclose(a.crit_rate, 0.1 * 1.03, rel_tol=1e-4)
+    assert isclose(a.crit_damage, 2.0, rel_tol=1e-4)
 
 
 def test_old_coin_gold_and_discount():
