@@ -1,5 +1,16 @@
 import asyncio
+import pytest
 
+import plugins.event_bus as event_bus_module
+
+from math import isclose
+from autofighter.party import Party
+from autofighter.stats import BUS
+from autofighter.stats import Stats
+from autofighter.relics import award_relic
+from autofighter.relics import apply_relics
+from plugins.players._base import PlayerBase
+from plugins.effects.aftertaste import Aftertaste
 from math import isclose
 
 import plugins.event_bus as event_bus_module
@@ -305,18 +316,57 @@ def test_echo_bell_repeats_first_action():
     assert b.hp == 100 - 20 - int(20 * 0.15) - 20
 
 
-def test_frost_sigil_applies_chill():
+@pytest.mark.asyncio
+async def test_frost_sigil_applies_chill(monkeypatch):
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
     b = PlayerBase()
-    b.hp = 100
+    b.hp = b.max_hp = 100
     a.atk = 100
     party.members.append(a)
     award_relic(party, "frost_sigil")
     apply_relics(party)
+
+    monkeypatch.setattr(Aftertaste, "rolls", lambda self: [self.base_pot] * self.hits)
+
+    async def fake_apply_damage(self, amount, attacker=None):
+        self.hp -= amount
+        return amount
+
+    monkeypatch.setattr(Stats, "apply_damage", fake_apply_damage, raising=False)
+
     BUS.emit("hit_landed", a, b, 10)
+    await asyncio.sleep(0)
+
     assert b.hp == 100 - int(100 * 0.05)
+
+
+@pytest.mark.asyncio
+async def test_frost_sigil_stacks(monkeypatch):
+    event_bus_module.bus._subs.clear()
+    party = Party()
+    a = PlayerBase()
+    b = PlayerBase()
+    b.hp = b.max_hp = 100
+    a.atk = 100
+    party.members.append(a)
+    award_relic(party, "frost_sigil")
+    award_relic(party, "frost_sigil")
+    apply_relics(party)
+
+    monkeypatch.setattr(Aftertaste, "rolls", lambda self: [self.base_pot] * self.hits)
+
+    async def fake_apply_damage(self, amount, attacker=None):
+        self.hp -= amount
+        return amount
+
+    monkeypatch.setattr(Stats, "apply_damage", fake_apply_damage, raising=False)
+
+    BUS.emit("hit_landed", a, b, 10)
+    await asyncio.sleep(0)
+
+    assert b.hp == 100 - int(100 * 0.05) * 2
 
 
 def test_killer_instinct_grants_extra_turn():
