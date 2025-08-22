@@ -22,3 +22,16 @@ from .boss import BossRoom  # noqa: E402
 from .rest import RestRoom  # noqa: E402
 from .shop import ShopRoom  # noqa: E402
 from .chat import ChatRoom  # noqa: E402
+from .utils import _build_foes, _scale_stats, _serialize  # noqa: E402
+
+__all__ = [
+    'Room',
+    'BattleRoom',
+    'BossRoom',
+    'RestRoom',
+    'ShopRoom',
+    'ChatRoom',
+    '_build_foes',
+    '_scale_stats',
+    '_serialize',
+]

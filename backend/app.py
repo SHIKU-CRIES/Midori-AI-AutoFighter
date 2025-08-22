@@ -11,20 +11,20 @@ from routes.rewards import bp as rewards_bp
 from routes.rooms import bp as rooms_bp
 from routes.runs import bp as runs_bp
 
-from game import FERNET
-from game import GachaManager  # re-export for tests
-from game import SAVE_MANAGER
-from game import _apply_player_stats
-from game import _assign_damage_type
-from game import _load_player_customization
-from game import _passive_names
-from game import _run_battle
-from game import battle_snapshots
-from game import battle_tasks
-from game import load_map
-from game import load_party
-from game import save_map
-from game import save_party
+from game import FERNET  # noqa: F401
+from game import GachaManager  # noqa: F401  # re-export for tests
+from game import SAVE_MANAGER  # noqa: F401
+from game import _apply_player_stats  # noqa: F401
+from game import _assign_damage_type  # noqa: F401
+from game import _load_player_customization  # noqa: F401
+from game import _passive_names  # noqa: F401
+from game import _run_battle  # noqa: F401
+from game import battle_snapshots  # noqa: F401
+from game import battle_tasks  # noqa: F401
+from game import load_map  # noqa: F401
+from game import load_party  # noqa: F401
+from game import save_map  # noqa: F401
+from game import save_party  # noqa: F401
 
 app = Quart(__name__)
 app.register_blueprint(assets_bp)
@@ -52,3 +52,7 @@ async def add_cors_headers(response):
 async def handle_cors_preflight():
     if request.method == "OPTIONS":
         return "", 204
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=59002)

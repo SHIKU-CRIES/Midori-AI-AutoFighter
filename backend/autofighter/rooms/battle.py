@@ -1,30 +1,30 @@
 from __future__ import annotations
 
-import asyncio
 import copy
-import random
 import time
+import random
+import asyncio
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
 from rich.console import Console
 
-from ..party import Party
-from ..passives import PassiveRegistry
-from ..stats import BUS, Stats
-from autofighter.cards import apply_cards, card_choices
-from autofighter.effects import EffectManager
-from autofighter.relics import apply_relics, relic_choices
-
 from . import Room
+from ..party import Party
+from ..stats import BUS, Stats
+from ..passives import PassiveRegistry
+from autofighter.effects import EffectManager
+from plugins.damage_types import ALL_DAMAGE_TYPES
+from autofighter.cards import apply_cards, card_choices
 from .utils import _build_foes, _scale_stats, _serialize
+from autofighter.relics import apply_relics, relic_choices
 
 ENRAGE_TURNS_NORMAL = 100
 ENRAGE_TURNS_BOSS = 500
 
 console = Console()
 
-ELEMENTS = [e.lower() for e in BUS.damage_types]
+ELEMENTS = [e.lower() for e in ALL_DAMAGE_TYPES]
 
 
 def _pick_card_stars(room: Room) -> int:
