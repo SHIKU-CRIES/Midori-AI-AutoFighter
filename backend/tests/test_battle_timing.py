@@ -2,7 +2,7 @@ import time
 import pytest
 
 from autofighter.party import Party
-from autofighter.rooms import BattleRoom
+from autofighter.rooms.battle import BattleRoom
 from autofighter.stats import Stats
 from autofighter.mapgen import MapNode
 
@@ -17,7 +17,7 @@ async def test_turn_pacing():
     foe.id = "f1"
     party = Party(members=[player])
 
-    import autofighter.rooms as rooms_module
+    import autofighter.rooms.utils as rooms_module
     original = rooms_module._choose_foe
     rooms_module._choose_foe = lambda _party: foe
     start = time.perf_counter()

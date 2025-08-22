@@ -2,8 +2,8 @@ import pytest
 
 from autofighter.mapgen import MapNode
 from autofighter.party import Party
-from autofighter.rooms import BattleRoom
-from autofighter.rooms import _build_foes
+from autofighter.rooms.battle import BattleRoom
+from autofighter.rooms.utils import _build_foes
 from autofighter.stats import Stats
 
 
@@ -50,6 +50,6 @@ async def test_multi_foe_battle(monkeypatch) -> None:
             foes.append(f)
         return foes
 
-    monkeypatch.setattr("autofighter.rooms._build_foes", build)
+    monkeypatch.setattr("autofighter.rooms.utils._build_foes", build)
     result = await room.resolve(party, {})
     assert len(result["foes"]) == 3

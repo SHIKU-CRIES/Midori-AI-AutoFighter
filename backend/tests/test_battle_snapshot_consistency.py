@@ -44,7 +44,7 @@ async def test_foe_element_stable_across_snapshots(app_with_db, monkeypatch):
         foe.hp = foe.max_hp = 1
         return foe
 
-    import autofighter.rooms as rooms_module
+    import autofighter.rooms.utils as rooms_module
 
     monkeypatch.setattr(rooms_module, "_choose_foe", choose_foe)
     monkeypatch.setattr(app_module, "_scale_stats", lambda *args, **kwargs: None)
