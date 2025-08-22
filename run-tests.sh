@@ -25,20 +25,27 @@ run_test() {
   fi
 }
 
+# High-level start message
+echo "Starting test run"
+
 # Backend tests
 cd backend
+echo "Starting backend tests..."
 for file in $(find tests -maxdepth 1 -name "test_*.py" -type f -printf "%f\n" | sort); do
   echo "Running backend test: $file"
   run_test "uv run pytest tests/$file" "backend tests/$file"
 done
+echo "Finished backend tests"
 cd "$ROOT_DIR"
 
 # Frontend tests
 cd frontend
+echo "Starting frontend tests..."
 for file in $(find tests -maxdepth 1 -name "*.test.js" -type f -printf "%f\n" | sort); do
   echo "Running frontend test: $file"
   run_test "bun test tests/$file" "frontend tests/$file"
 done
+echo "Finished frontend tests"
 cd "$ROOT_DIR"
 
 # Summary
@@ -57,6 +64,13 @@ else
       echo "  $t"
     done
   fi
+fi
+
+# Final summary message
+if [ $status -eq 0 ]; then
+  echo "Test run complete: success"
+else
+  echo "Test run complete: failure"
 fi
 
 exit $status
