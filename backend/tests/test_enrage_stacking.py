@@ -36,4 +36,4 @@ async def test_enrage_stacks(monkeypatch):
     assert result["enrage"]["stacks"] == 3
     foe = result["foes"][0]
     assert foe["atk"] == 11
-    assert "Enraged" in foe["passives"]
+    assert any(p["id"] == "Enraged" for p in foe["passives"])

@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import math
 import random
-from dataclasses import asdict, fields
+
 from typing import Any
+from collections import Counter
+from dataclasses import asdict, fields
 
 from ..mapgen import MapNode
 from ..party import Party
@@ -125,6 +127,39 @@ def _serialize(obj: Stats) -> dict[str, Any]:
         data["name"] = obj.name
     if hasattr(obj, "char_type"):
         data["char_type"] = getattr(obj.char_type, "value", obj.char_type)
+
+    data.pop("dots", None)
+    data.pop("hots", None)
+    counts = Counter(data.pop("passives", []))
+    data["passives"] = [{"id": pid, "stacks": count} for pid, count in counts.items()]
+
+    mgr = getattr(obj, "effect_manager", None)
+    dots = []
+    hots = []
+    if mgr is not None:
+        def pack(effects, key):
+            grouped: dict[str, dict[str, Any]] = {}
+            for eff in effects:
+                entry = grouped.setdefault(
+                    eff.id,
+                    {
+                        "id": eff.id,
+                        "name": eff.name,
+                        key: getattr(eff, key),
+                        "turns": eff.turns,
+                        "source": getattr(getattr(eff, "source", None), "id", None),
+                        "stacks": 0,
+                    },
+                )
+                entry["turns"] = max(entry["turns"], eff.turns)
+                entry["stacks"] += 1
+            return list(grouped.values())
+
+        dots = pack(mgr.dots, "damage")
+        hots = pack(mgr.hots, "healing")
+
+    data["dots"] = dots
+    data["hots"] = hots
     return data
 
 
