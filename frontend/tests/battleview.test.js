@@ -120,10 +120,7 @@ describe('BattleView damage_type fallback', () => {
       if (singleId) return singleId;
       const elem = obj?.element;
       if (typeof elem === 'string' && elem.length) return elem;
-      const dt = obj?.base_damage_type;
-      if (!dt) return 'Generic';
-      if (typeof dt === 'string' && dt.length) return dt;
-      return dt.id || dt.name || 'Generic';
+      return 'Generic';
     }
     const fighter = { id: 'hero', damage_type: 'Fire' };
     expect(elementOf(fighter)).toBe('Fire');

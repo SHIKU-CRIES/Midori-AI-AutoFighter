@@ -131,27 +131,17 @@
     // Next prefer explicit element alias if present
     const elem = obj?.element;
     if (typeof elem === 'string' && elem.length) return elem;
-    // Fallback to base_damage_type
-    const dt = obj?.base_damage_type;
-    if (!dt) return guessElementFromId(obj?.id);
-    if (typeof dt === 'string' && dt.length) return dt;
-    return dt.id || dt.name || guessElementFromId(obj?.id);
+    // Final fallback: guess from id
+    return guessElementFromId(obj?.id);
   }
 
   // Removed hover debug; logging is now triggered by Enter key
-
-  function toBaseStr(val) {
-    if (!val) return '';
-    if (typeof val === 'string') return val;
-    return val?.id || val?.name || String(val);
-  }
 
   function summarizeEntity(e) {
     return {
       id: e?.id,
       name: e?.name,
       element: e?.element,
-      base_damage_type: toBaseStr(e?.base_damage_type),
       damage_types: Array.isArray(e?.damage_types) ? e.damage_types.join(',') : '',
       char_type: e?.char_type,
       level: e?.level,
@@ -206,12 +196,11 @@
             (Array.isArray(m.damage_types) && m.damage_types[0]) ||
             m.damage_type ||
             m.element ||
-            m.base_damage_type ||
             '';
           if (!elem || /generic/i.test(String(elem))) {
             const prev = prevById.get(m.id);
-            if (prev && (prev.element || prev.base_damage_type || prev.damage_type)) {
-              elem = prev.element || prev.base_damage_type || prev.damage_type;
+            if (prev && (prev.element || prev.damage_type)) {
+              elem = prev.element || prev.damage_type;
             } else {
               elem = guessElementFromId(m.id);
             }
@@ -224,17 +213,16 @@
       if (snap.foes) {
         const prevById = new Map((foes || []).map(f => [f.id, f]));
         const enrichedFoes = (snap.foes || []).map(f => {
-          // Prefer primary from damage_types; then singular damage_type, element, or base_damage_type.
+          // Prefer primary from damage_types; then singular damage_type or element.
           let elem =
             (Array.isArray(f.damage_types) && f.damage_types[0]) ||
             f.damage_type ||
-            f.element ||
-            f.base_damage_type;
+            f.element;
           let resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name);
           if (!resolved) {
             // Fall back to previously known element if available; otherwise leave empty
             const prev = prevById.get(f.id);
-            resolved = prev?.element || prev?.base_damage_type || prev?.damage_type || '';
+            resolved = prev?.element || prev?.damage_type || '';
           }
           return { ...f, element: resolved };
         });

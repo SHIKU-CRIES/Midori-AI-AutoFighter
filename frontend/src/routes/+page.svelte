@@ -27,6 +27,10 @@
   let runId = '';
   let selectedParty = ['sample_player'];
   let roomData = null;
+  // Track map state to render room/floor context in battle header
+  let mapRooms = [];
+  let currentIndex = 0;
+  let currentRoomType = '';
   let viewportBg = '';
   let viewMode = 'main';
   let viewStack = [];
@@ -66,7 +70,10 @@
         const data = await getMap(storedId);
         runId = storedId;
         selectedParty = data.party || selectedParty;
-        nextRoom = data.map.rooms[data.map.current].room_type;
+        mapRooms = data.map.rooms || [];
+        currentIndex = data.map.current || 0;
+        nextRoom = mapRooms[currentIndex]?.room_type || '';
+        currentRoomType = nextRoom || '';
         await enterRoom();
       } catch {
         clearRunState();
@@ -99,7 +106,10 @@
   async function handleStart() {
     const data = await startRun(selectedParty);
     runId = data.run_id;
-    nextRoom = data.map.rooms[data.map.current].room_type;
+    mapRooms = data.map.rooms || [];
+    currentIndex = data.map.current || 0;
+    nextRoom = mapRooms[currentIndex]?.room_type || '';
+    currentRoomType = nextRoom || '';
     viewStack = ['main'];
     viewMode = 'main';
     await enterRoom();
@@ -182,6 +192,8 @@
         roomData = snap;
         battleActive = false;
         nextRoom = snap.next_room || nextRoom;
+        if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
+        if (snap.current_room) currentRoomType = snap.current_room;
         return;
       }
     } catch {
@@ -203,6 +215,9 @@
     if (data.party) {
       selectedParty = data.party.map((p) => p.id);
     }
+    // Keep map-derived indices and current room type in sync when available
+    if (typeof data.current_index === 'number') currentIndex = data.current_index;
+    if (data.current_room) currentRoomType = data.current_room;
     nextRoom = data.next_room || '';
     saveRunState();
     if (endpoint === 'battle') {
@@ -221,10 +236,14 @@
             roomData = snap;
             battleActive = false;
             nextRoom = snap.next_room || nextRoom;
+            if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
+            if (snap.current_room) currentRoomType = snap.current_room;
             return;
           }
         } catch {}
       }
+      // If the snapshot didn't include current room type yet, fall back to pre-room value
+      if (!currentRoomType) currentRoomType = endpoint.includes('boss') ? 'battle-boss-floor' : 'battle-normal';
       battleActive = true;
       pollBattle();
     } else {
@@ -351,6 +370,9 @@
     runId={runId}
     roomData={roomData}
     background={viewportBg}
+    mapRooms={mapRooms}
+    currentIndex={currentIndex}
+    currentRoomType={currentRoomType}
     bind:selected={selectedParty}
     bind:viewMode={viewMode}
     items={items}

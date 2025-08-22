@@ -34,6 +34,10 @@
   export let autocraft = false;
   export let reducedMotion = false;
   export let battleActive = false;
+  // Map context for battle header
+  export let mapRooms = [];
+  export let currentIndex = 0;
+  export let currentRoomType = '';
   let randomBg = '';
   let speed2x = false;
   let roster = [];
@@ -65,12 +69,7 @@
       function resolveElement(p) {
         let e = p?.element;
         if (e && typeof e !== 'string') e = e.id || e.name;
-        if (!e || /generic/i.test(String(e))) {
-          let b = p?.base_damage_type;
-          if (b && typeof b !== 'string') b = b.id || b.name;
-          e = b || 'Generic';
-        }
-        return e || 'Generic';
+        return e && !/generic/i.test(String(e)) ? e : 'Generic';
       }
       roster = data.players.map(p => ({ id: p.id, element: resolveElement(p) }));
     } catch (e) {
@@ -123,6 +122,32 @@
   onDestroy(() => {
     stopGameMusic();
   });
+
+  // Header label helpers
+  function roomLabel(type) {
+    switch (String(type || '')) {
+      case 'battle-weak':
+        return 'Weak Battle';
+      case 'battle-normal':
+        return 'Normal Battle';
+      case 'battle-boss-floor':
+        return 'Floor Boss';
+      case 'shop':
+        return 'Shop';
+      case 'rest':
+        return 'Rest';
+      case 'start':
+        return 'Start';
+      default:
+        if (!type) return 'Battle';
+        // Fallback: prettify hyphenated types
+        return String(type).replace(/\b\w/g, c => c.toUpperCase()).replaceAll('-', ' ');
+    }
+  }
+  $: roomNumber = mapRooms?.[currentIndex]?.index ?? currentIndex ?? 0;
+  $: floorNumber = mapRooms?.[currentIndex]?.floor ?? 1;
+  $: currentType = currentRoomType || roomData?.current_room || '';
+  $: nextType = mapRooms?.[currentIndex + 1]?.room_type || (roomData?.next_room ?? '');
 </script>
 
 <style>
@@ -178,6 +203,29 @@
     gap: 0.5rem;
     z-index: 10;
   }
+
+  /* top-center stained-glass header */
+  .top-center-header {
+    position: absolute;
+    top: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+  }
+  .title-chip {
+    padding: 0.45rem 0.75rem;
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
+    border-radius: 0;
+    font-size: 0.95rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .arrow { margin: 0 0.5rem; opacity: 0.9; }
 
   .stained-glass-bar {
     display: flex;
@@ -320,6 +368,17 @@
           <span>Syncing...</span>
         </div>
       </div>
+      {#if battleActive}
+        <div class="top-center-header">
+          <div class="title-chip">
+            Room {roomNumber} / Floor {floorNumber} / {roomLabel(currentType)}
+          </div>
+          <div class="arrow">→</div>
+          <div class="title-chip">
+            {roomLabel(nextType) || 'Unknown'}
+          </div>
+        </div>
+      {/if}
         <!-- right stained-glass sidebar (mirrors top-left bar styling) -->
         {#if viewMode === 'main' && !battleActive}
           <div class="stained-glass-side">

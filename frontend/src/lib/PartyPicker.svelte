@@ -23,12 +23,7 @@
       function resolveElement(p) {
         let e = p?.element;
         if (e && typeof e !== 'string') e = e.id || e.name;
-        if (!e || /generic/i.test(String(e))) {
-          let b = p?.base_damage_type;
-          if (b && typeof b !== 'string') b = b.id || b.name;
-          e = b || 'Generic';
-        }
-        return e || 'Generic';
+        return e && !/generic/i.test(String(e)) ? e : 'Generic';
       }
       roster = data.players
         .map((p) => ({
