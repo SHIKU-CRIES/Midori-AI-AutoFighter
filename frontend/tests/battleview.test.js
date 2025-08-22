@@ -53,8 +53,8 @@ describe('BattleView layout and polling', () => {
     expect(battleView).toContain('CDmg');
   });
 
-  test('groups duplicate effects with stack counts', () => {
-    expect(statusIcons).toContain('groupEffects');
+  test('renders effect details with stack counts', () => {
+    expect(statusIcons).toContain('formatTooltip');
     expect(statusIcons).toContain('stack inside');
   });
 

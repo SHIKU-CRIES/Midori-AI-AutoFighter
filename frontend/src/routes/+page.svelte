@@ -30,6 +30,26 @@
   let editorState = { pronouns: '', damageType: 'Light', hp: 0, attack: 0, defense: 0 };
   let battleActive = false;
 
+  // Normalize status fields so downstream components can rely on
+  // `passives`, `dots`, and `hots` arrays of objects on each fighter.
+  function mapStatuses(snapshot) {
+    if (!snapshot) return snapshot;
+    function map(list = []) {
+      return list.map((f) => {
+        const status = f.status || {};
+        return {
+          ...f,
+          passives: status.passives || f.passives || [],
+          dots: status.dots || f.dots || [],
+          hots: status.hots || f.hots || []
+        };
+      });
+    }
+    if (Array.isArray(snapshot.party)) snapshot.party = map(snapshot.party);
+    if (Array.isArray(snapshot.foes)) snapshot.foes = map(snapshot.foes);
+    return snapshot;
+  }
+
   onMount(async () => {
     backendFlavor = await getBackendFlavor();
     window.backendFlavor = backendFlavor;
@@ -154,7 +174,7 @@
   async function pollBattle() {
     if (!battleActive) return;
     try {
-      const snap = await roomAction(runId, 'battle', 'snapshot');
+      const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
       if (snap?.loot) {
         roomData = snap;
         battleActive = false;
@@ -177,7 +197,7 @@
       endpoint = nextRoom.includes('boss') ? 'boss' : 'battle';
     }
     // Fetch first, then decide whether to show rewards or start battle polling.
-    const data = await roomAction(runId, endpoint);
+    const data = mapStatuses(await roomAction(runId, endpoint));
     roomData = data;
     if (data.party) {
       selectedParty = data.party.map((p) => p.id);
@@ -197,7 +217,7 @@
       if (noFoes) {
         // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
         try {
-          const snap = await roomAction(runId, 'battle', 'snapshot');
+          const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
           const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
           if (snapHasRewards) {
             roomData = snap;
