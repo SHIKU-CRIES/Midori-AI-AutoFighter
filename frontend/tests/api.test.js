@@ -1,18 +1,20 @@
 import { describe, expect, test, mock } from 'bun:test';
 import {
-  startRun,
-  updateParty,
   getPlayers,
-  roomAction,
   getPlayerConfig,
   savePlayerConfig,
   getGacha,
   pullGacha,
   setAutoCraft,
-  chooseCard,
-  chooseRelic,
   wipeData
 } from '../src/lib/api.js';
+import {
+  startRun,
+  updateParty,
+  roomAction,
+  chooseCard,
+  chooseRelic
+} from '../src/lib/runApi.js';
 
 // Helper to mock fetch
 function createFetch(response, ok = true, status = 200) {

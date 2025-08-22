@@ -4,9 +4,10 @@ import { join } from 'path';
 
 describe('Viewport modularization', () => {
   test('sidebar disables items during battle', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/GameViewport.svelte'), 'utf8');
-    expect(content).toContain('battleActive');
-    expect(content).toContain('disabled={item.disabled}');
+    const menu = readFileSync(join(import.meta.dir, '../src/lib/MainMenu.svelte'), 'utf8');
+    const viewport = readFileSync(join(import.meta.dir, '../src/lib/GameViewport.svelte'), 'utf8');
+    expect(viewport).toContain('battleActive');
+    expect(menu).toContain('disabled={item.disabled}');
   });
 
   test('NavBar switches icon during combat', () => {
