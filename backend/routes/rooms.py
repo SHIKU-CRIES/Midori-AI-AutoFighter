@@ -20,14 +20,14 @@ from autofighter.rooms import _serialize
 
 from plugins.damage_types import load_damage_type
 
-from ..game import load_map
-from ..game import save_map
-from ..game import load_party
-from ..game import save_party
-from ..game import _run_battle
-from ..game import battle_tasks
-from ..game import SAVE_MANAGER
-from ..game import battle_snapshots
+from game import load_map
+from game import save_map
+from game import load_party
+from game import save_party
+from game import _run_battle
+from game import battle_tasks
+from game import SAVE_MANAGER
+from game import battle_snapshots
 
 bp = Blueprint("rooms", __name__)
 

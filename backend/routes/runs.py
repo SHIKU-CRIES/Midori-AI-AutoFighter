@@ -14,17 +14,17 @@ from quart import request
 from plugins import players as player_plugins
 from autofighter.mapgen import MapGenerator
 
-from ..game import FERNET
-from ..game import load_map
-from ..game import save_map
-from ..game import load_party
-from ..game import save_party
-from ..game import battle_tasks
-from ..game import SAVE_MANAGER
-from ..game import _passive_names
-from ..game import battle_snapshots
-from ..game import _assign_damage_type
-from ..game import _load_player_customization
+from game import FERNET
+from game import load_map
+from game import save_map
+from game import load_party
+from game import save_party
+from game import battle_tasks
+from game import SAVE_MANAGER
+from game import _passive_names
+from game import battle_snapshots
+from game import _assign_damage_type
+from game import _load_player_customization
 
 bp = Blueprint("runs", __name__)
 

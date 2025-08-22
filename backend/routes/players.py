@@ -12,10 +12,10 @@ from autofighter.stats import apply_status_hooks
 
 from plugins import players as player_plugins
 
-from ..game import SAVE_MANAGER
-from ..game import _apply_player_stats
-from ..game import _assign_damage_type
-from ..game import _load_player_customization
+from game import SAVE_MANAGER
+from game import _apply_player_stats
+from game import _assign_damage_type
+from game import _load_player_customization
 
 bp = Blueprint("players", __name__)
 

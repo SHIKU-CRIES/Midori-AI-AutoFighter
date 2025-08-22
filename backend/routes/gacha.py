@@ -8,7 +8,7 @@ from quart import request
 
 from autofighter.gacha import GachaManager
 
-from ..game import SAVE_MANAGER
+from game import SAVE_MANAGER
 
 bp = Blueprint("gacha", __name__)
 

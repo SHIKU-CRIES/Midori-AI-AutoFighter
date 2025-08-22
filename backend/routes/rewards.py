@@ -7,10 +7,10 @@ from quart import request
 from autofighter.cards import award_card
 from autofighter.relics import award_relic
 
-from ..game import load_map
-from ..game import load_party
-from ..game import save_map
-from ..game import save_party
+from game import load_map
+from game import load_party
+from game import save_map
+from game import save_party
 
 bp = Blueprint("rewards", __name__)
 
