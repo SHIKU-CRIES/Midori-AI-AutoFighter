@@ -7,9 +7,9 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Wind(DamageTypeBase):
-    id = "Wind"
-    weakness = "Lightning"
-    color = (0, 255, 0)
+    id: str = "Wind"
+    weakness: str = "Lightning"
+    color: tuple[int, int, int] = (0, 255, 0)
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         dot = GaleErosion(int(damage * 0.25), 3)

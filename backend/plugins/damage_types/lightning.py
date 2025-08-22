@@ -8,9 +8,9 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Lightning(DamageTypeBase):
-    id = "Lightning"
-    weakness = "Wind"
-    color = (255, 255, 0)
+    id: str = "Lightning"
+    weakness: str = "Wind"
+    color: tuple[int, int, int] = (255, 255, 0)
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         dot = ChargedDecay(int(damage * 0.25), 3)

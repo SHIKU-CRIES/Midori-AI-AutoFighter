@@ -8,9 +8,9 @@ from plugins.hots.radiant_regeneration import RadiantRegeneration
 
 @dataclass
 class Light(DamageTypeBase):
-    id = "Light"
-    weakness = "Dark"
-    color = (255, 255, 255)
+    id: str = "Light"
+    weakness: str = "Dark"
+    color: tuple[int, int, int] = (255, 255, 255)
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         dot = CelestialAtrophy(int(damage * 0.3), 3)
