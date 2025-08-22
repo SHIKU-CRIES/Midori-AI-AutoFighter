@@ -1,11 +1,14 @@
+import asyncio
+
 from math import isclose
 
+import plugins.event_bus as event_bus_module
+
 from autofighter.party import Party
+from autofighter.stats import BUS
 from autofighter.relics import apply_relics
 from autofighter.relics import award_relic
-from autofighter.stats import BUS
 from plugins.players._base import PlayerBase
-import plugins.event_bus as event_bus_module
 
 
 def test_award_relics_stack():
@@ -260,11 +263,15 @@ def test_pocket_manual_tenth_hit():
     party.members.append(a)
     award_relic(party, "pocket_manual")
     apply_relics(party)
-    for i in range(9):
-        BUS.emit("hit_landed", a, b, 10)
-    assert b.hp == 100 - 0
-    BUS.emit("hit_landed", a, b, 10)
-    assert b.hp == 100 - int(10 * 0.03)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    for _ in range(9):
+        BUS.emit("hit_landed", a, b, 100)
+        loop.run_until_complete(asyncio.sleep(0))
+    assert b.hp == 100
+    BUS.emit("hit_landed", a, b, 100)
+    loop.run_until_complete(asyncio.sleep(0))
+    assert b.hp == 99
 
 
 def test_arcane_flask_shields():
