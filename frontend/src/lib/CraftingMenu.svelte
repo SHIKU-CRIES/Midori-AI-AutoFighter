@@ -30,16 +30,28 @@
   }
 
   function getIcon(key) {
-    const [element, rank] = key.split('_');
-    return (
-      iconModules[`./assets/items/${element}/generic${rank}.png`] ||
-      iconModules[`./assets/items/generic/generic${rank}.png`] ||
-      fallbackIcon
-    );
+    const [rawElement, rawRank] = String(key).split('_');
+    const element = String(rawElement || '').toLowerCase();
+    const rank = String(rawRank || '').replace(/[^0-9]/g, '') || '1';
+
+    // 1) Prefer a rank-specific file in the element folder: `${rank}.png`
+    const rankPath = `./assets/items/${element}/${rank}.png`;
+    if (iconModules[rankPath]) return iconModules[rankPath];
+
+    // 2) Otherwise, use any file from the element folder (prefer `generic{rank}.png`)
+    const elementPrefix = `./assets/items/${element}/`;
+    const elementKeys = Object.keys(iconModules).filter((p) => p.startsWith(elementPrefix));
+    const genericRankPath = `${elementPrefix}generic${rank}.png`;
+    if (iconModules[genericRankPath]) return iconModules[genericRankPath];
+    if (elementKeys.length > 0) return iconModules[elementKeys[0]];
+
+    // 3) Finally, try the generic rank file, then the static fallback icon
+    const genericPath = `./assets/items/generic/generic${rank}.png`;
+    return iconModules[genericPath] || fallbackIcon;
   }
 
   function getStarColor(key) {
-    const rank = parseInt(key.split('_')[1]);
+    const rank = parseInt(String(key).split('_')[1]);
     return starColors[rank] || starColors.fallback;
   }
 
@@ -72,12 +84,13 @@
 <MenuPanel data-testid="crafting-menu">
   <h3>Crafting</h3>
   <div class="content">
-    <ul class="item-list">
+    <div class="items-grid">
       {#each Object.entries(items) as [key, value]}
-        <li
-          class="item"
+        <button
+          class="grid-item"
           style={`--star-color: ${getStarColor(key)}`}
           on:click={() => (selected = key)}
+          title={formatName(key)}
         >
           <img
             class="item-icon"
@@ -85,11 +98,10 @@
             alt={key}
             on:error={onIconError}
           />
-          <span class="label">{formatName(key)}</span>
-          <span class="count">{value}</span>
-        </li>
+          <span class="badge">{value}</span>
+        </button>
       {/each}
-    </ul>
+    </div>
     <div class="detail">
       {#if selected}
         <img
@@ -117,51 +129,78 @@
 </MenuPanel>
 
 <style>
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 0.5rem 0;
-  }
   .content {
     display: grid;
-    grid-template-columns: 80% 18%;
-    gap: 2%;
+    grid-template-columns: 1fr 220px; /* grid fills left; fixed detail width */
+    gap: 0.75rem;
     align-items: start;
   }
-  .item {
-    display: flex;
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .grid-item {
+    position: relative;
+    display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    font-size: 0.85rem;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: transparent;
+    border: none;
+    padding: 0;
     cursor: pointer;
   }
+
   .item-icon {
-    width: 24px;
-    height: 24px;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     border: 2px solid var(--star-color, #708090);
     box-shadow: 0 0 0 1px var(--star-color, #708090);
+    background: #000;
   }
+
+  .badge {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 0 0.25rem;
+    font-size: 0.7rem;
+    line-height: 1.1rem;
+  }
+
   .detail {
     border: 2px solid #fff;
-    padding: 0.25rem;
+    padding: 0.5rem;
     text-align: center;
-    min-height: 60px;
+    min-height: 80px;
   }
   .detail-icon {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     border: 2px solid var(--star-color, #708090);
     box-shadow: 0 0 0 1px var(--star-color, #708090);
     margin-bottom: 0.25rem;
+    background: #000;
   }
+  .detail-name { font-size: 0.9rem; margin-bottom: 0.15rem; }
+  .detail-count { font-size: 0.8rem; color: #ddd; }
   .placeholder {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #ccc;
   }
   .actions {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    margin-top: 0.5rem;
   }
   button {
     border: 2px solid #fff;

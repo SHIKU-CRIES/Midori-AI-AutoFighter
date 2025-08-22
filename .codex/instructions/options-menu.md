@@ -54,6 +54,7 @@ The Options submenu lets players adjust audio levels, system behaviour, and game
   - Toggle that automatically crafts materials when possible.
   - Label: `Autocraft`
   - Tooltip: `Automatically craft materials when possible.`
+  - Behavior: updates the backend via `/gacha/auto-craft` and stays in sync with the Crafting menu toggle.
 
 - **End Run**
   - Button that terminates the active run.

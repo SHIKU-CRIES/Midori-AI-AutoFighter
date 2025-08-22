@@ -1,7 +1,7 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { Volume2, Music, Mic, Power, Trash2, Download, Upload } from 'lucide-svelte';
-  import { endRun, wipeData, exportSave, importSave } from './api.js';
+  import { endRun, wipeData, exportSave, importSave, setAutoCraft, getGacha } from './api.js';
   import { saveSettings, clearSettings, clearAllClientData } from './settingsStorage.js';
 
   const dispatch = createEventDispatcher();
@@ -16,6 +16,21 @@
   let saveStatus = '';
   let saveTimeout;
   let resetTimeout;
+
+  // Keep autocraft in sync with backend flag so this toggle
+  // mirrors the Crafting menu's auto-craft behavior.
+  onMount(async () => {
+    try {
+      const state = await getGacha();
+      if (typeof state?.auto_craft === 'boolean') {
+        autocraft = state.auto_craft;
+        // Persist locally and notify parent so UI reflects server state
+        save();
+      }
+    } catch {
+      /* ignore network/backend issues; leave local state */
+    }
+  });
 
   function save() {
     saveSettings({
@@ -44,6 +59,13 @@
   function scheduleSave() {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(save, 300);
+  }
+
+  async function handleAutocraftToggle() {
+    // Save locally and notify parent
+    scheduleSave();
+    // Update backend to match
+    try { await setAutoCraft(autocraft); } catch { /* ignore */ }
   }
 
 
@@ -157,7 +179,7 @@
       <h4>Gameplay</h4>
       <div class="control" title="Automatically craft materials when possible.">
         <label>Autocraft</label>
-        <input type="checkbox" bind:checked={autocraft} on:change={scheduleSave} />
+        <input type="checkbox" bind:checked={autocraft} on:change={handleAutocraftToggle} />
       </div>
       <div class="control" title="End the current run.">
         <Power />
