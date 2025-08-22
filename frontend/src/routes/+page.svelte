@@ -339,8 +339,9 @@
     height: 100%;
     margin: 0 auto;
     box-sizing: border-box;
-    /* allow inner UI panels to scroll if they grow beyond available space */
-    overflow: auto;
+    /* avoid horizontal scrollbar; allow vertical scrolling */
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: 0 0.5rem; /* small horizontal padding so elements don't touch the edge */
   }
 </style>

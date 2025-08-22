@@ -406,7 +406,7 @@
         {/if}
         {#if rewardOpen}
           <OverlaySurface>
-            <PopupWindow title="Battle Rewards" on:close={() => { roomData = null; dispatch('nextRoom'); }}>
+            <PopupWindow title="Battle Rewards" maxWidth="640px" maxHeight="92vh" on:close={() => { roomData = null; dispatch('nextRoom'); }}>
               <RewardOverlay
                 gold={roomData.loot?.gold || 0}
                 cards={roomData.card_choices || []}

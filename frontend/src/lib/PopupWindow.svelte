@@ -7,6 +7,9 @@
 
   export let title = '';
   export let padding = '0.5rem';
+  // Constrain popup size (useful for reward overlay)
+  export let maxWidth = '820px';
+  export let maxHeight = '85vh';
 
   function close() {
     dispatch('close');
@@ -14,6 +17,7 @@
 </script>
 
 <OverlaySurface>
+  <div class="box" style={`--max-w: ${maxWidth}; --max-h: ${maxHeight}` }>
   <MenuPanel {padding}>
     {#if title}
       <header class="head">
@@ -23,6 +27,7 @@
     {/if}
     <slot />
   </MenuPanel>
+  </div>
 </OverlaySurface>
 
 <style>
@@ -48,5 +53,14 @@
     font-size: 0.7rem;
     padding: 0.25rem 0.45rem;
     cursor: pointer;
+  }
+
+  .box {
+    /* center within overlay */
+    margin: auto;
+    width: min(var(--max-w), 90%);
+    max-height: var(--max-h);
+    display: flex;
+    flex-direction: column;
   }
 </style>

@@ -13,8 +13,9 @@
   padding: var(--padding);
   box-sizing: border-box;
   z-index: 5;
-  /* allow overlay content to scroll instead of being clipped */
-  overflow: auto;
+  /* allow vertical scrolling; hide stray horizontal scrollbars */
+  overflow-x: hidden;
+  overflow-y: auto;
   }
 </style>
 
