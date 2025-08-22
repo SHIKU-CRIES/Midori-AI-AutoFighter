@@ -111,7 +111,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
         pass
 
     # Reduce growth rate for high mitigation values (foes only):
-    # Beyond 2.0, slow progressively: every +0.1 over 2.0 increases the
+    # Beyond 5, slow progressively: every +1 over 5 increases the
     # slowdown by +1× starting from 5×.
     try:
         if isinstance(obj, FoeBase):
