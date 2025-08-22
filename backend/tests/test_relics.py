@@ -1,5 +1,4 @@
 import asyncio
-
 import pytest
 
 import plugins.event_bus as event_bus_module
@@ -12,6 +11,15 @@ from autofighter.relics import award_relic
 from autofighter.relics import apply_relics
 from plugins.players._base import PlayerBase
 from plugins.effects.aftertaste import Aftertaste
+from math import isclose
+
+import plugins.event_bus as event_bus_module
+
+from autofighter.party import Party
+from autofighter.stats import BUS
+from autofighter.relics import apply_relics
+from autofighter.relics import award_relic
+from plugins.players._base import PlayerBase
 
 
 def test_award_relics_stack():
@@ -216,14 +224,17 @@ def test_lucky_button_missed_crit():
     party = Party()
     a = PlayerBase()
     a.crit_rate = 0.1
+    a.crit_damage = 2.0
     party.members.append(a)
     award_relic(party, "lucky_button")
     apply_relics(party)
     BUS.emit("crit_missed", a, None)
     BUS.emit("turn_start")
-    assert isclose(a.crit_rate, 0.1 * 1.03 + 0.03, rel_tol=1e-4)
+    assert isclose(a.crit_rate, 0.1 * 1.03 + 0.005, rel_tol=1e-4)
+    assert isclose(a.crit_damage, 2.0 + 0.05, rel_tol=1e-4)
     BUS.emit("turn_end")
     assert isclose(a.crit_rate, 0.1 * 1.03, rel_tol=1e-4)
+    assert isclose(a.crit_damage, 2.0, rel_tol=1e-4)
 
 
 def test_old_coin_gold_and_discount():
@@ -263,11 +274,15 @@ def test_pocket_manual_tenth_hit():
     party.members.append(a)
     award_relic(party, "pocket_manual")
     apply_relics(party)
-    for i in range(9):
-        BUS.emit("hit_landed", a, b, 10)
-    assert b.hp == 100 - 0
-    BUS.emit("hit_landed", a, b, 10)
-    assert b.hp == 100 - int(10 * 0.03)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    for _ in range(9):
+        BUS.emit("hit_landed", a, b, 100)
+        loop.run_until_complete(asyncio.sleep(0))
+    assert b.hp == 100
+    BUS.emit("hit_landed", a, b, 100)
+    loop.run_until_complete(asyncio.sleep(0))
+    assert b.hp == 99
 
 
 def test_arcane_flask_shields():

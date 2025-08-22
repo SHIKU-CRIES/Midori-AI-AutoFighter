@@ -1,8 +1,11 @@
+import asyncio
+
 from dataclasses import dataclass
 from dataclasses import field
 
-from plugins.relics._base import RelicBase
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
+from plugins.effects.aftertaste import Aftertaste
 
 
 @dataclass
@@ -24,7 +27,12 @@ class PocketManual(RelicBase):
             pid = id(attacker)
             counts[pid] = counts.get(pid, 0) + 1
             if counts[pid] % 10 == 0:
-                target.hp -= int(amount * 0.03)
+                base = int(amount * 0.03)
+                if base > 0:
+                    effect = Aftertaste(base_pot=base)
+                    asyncio.get_event_loop().create_task(
+                        effect.apply(attacker, target)
+                    )
 
         BUS.subscribe("hit_landed", _hit)
 
