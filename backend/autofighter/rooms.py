@@ -40,11 +40,12 @@ ELEMENTS = [e.lower() for e in ALL_DAMAGE_TYPES]
 
 def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     # Gentler growth across the run: small multiplicative bumps per axis
-    floor_mult = 1.0 + 0.08 * max(node.floor - 1, 0)
-    index_mult = 1.0 + 0.10 * max(node.index - 1, 0)
-    loop_mult = 1.0 + 0.20 * max(node.loop - 1, 0)
+    starter_int = 1.0 + random.uniform(-0.05, 0.05)
+    floor_mult = starter_int + 0.08 * max(node.floor - 1, 0)
+    index_mult = starter_int + 0.10 * max(node.index - 1, 0)
+    loop_mult = starter_int + 0.20 * max(node.loop - 1, 0)
     pressure_mult = 1.0 * max(node.pressure, 1) ## This is user controlled, do not change this...
-    base_mult = strength * floor_mult * index_mult * loop_mult * pressure_mult
+    base_mult = max(strength * floor_mult * index_mult * loop_mult * pressure_mult, 0.5)
 
     # Apply a small per-room variation of +/-5% per stat to foes to avoid sameness.
     # Each numeric stat gets its own independent variation, applied once when the foe is created.
@@ -84,6 +85,47 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
         cd = getattr(obj, "crit_damage", None)
         if isinstance(cd, (int, float)):
             setattr(obj, "crit_damage", type(cd)(max(float(cd), 2.0)))
+    except Exception:
+        pass
+
+    # Reduce growth rate for high vitality values (foes only):
+    # Beyond 2.0, slow progressively: every +0.25 over 2.0 increases the
+    # slowdown by +1× starting from 5×. This preserves monotonic growth
+    # without hard caps while increasingly compressing high values.
+    try:
+        if isinstance(obj, FoeBase):
+            vit = getattr(obj, "vitality", None)
+            if isinstance(vit, (int, float)):
+                thr = 0.5
+                step = 0.25
+                base_slow = 5.0
+                fvit = float(vit)
+                if fvit > thr:
+                    excess = fvit - thr
+                    steps = int(excess // step)
+                    factor = base_slow + steps
+                    fvit = thr + (excess / factor)
+                    setattr(obj, "vitality", type(vit)(fvit))
+    except Exception:
+        pass
+
+    # Reduce growth rate for high mitigation values (foes only):
+    # Beyond 2.0, slow progressively: every +0.1 over 2.0 increases the
+    # slowdown by +1× starting from 5×.
+    try:
+        if isinstance(obj, FoeBase):
+            mit = getattr(obj, "mitigation", None)
+            if isinstance(mit, (int, float)):
+                thr = 0.25
+                step = 0.1
+                base_slow = 5.0
+                fmit = float(mit)
+                if fmit > thr:
+                    excess = fmit - thr
+                    steps = int(excess // step)
+                    factor = base_slow + steps
+                    fmit = thr + (excess / factor)
+                    setattr(obj, "mitigation", type(mit)(fmit))
     except Exception:
         pass
 
