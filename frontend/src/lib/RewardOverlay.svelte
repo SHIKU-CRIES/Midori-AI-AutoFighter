@@ -37,7 +37,7 @@
     if (item.id === 'ticket') return 'Gacha Ticket';
     const id = String(item.id || '').toLowerCase();
     const cap = id.charAt(0).toUpperCase() + id.slice(1);
-    const stars = Number.isFinite(item.stars) ? `${item.stars}★` : '';
+    const stars = Number.isFinite(item.stars) ? String(item.stars) : '';
     return stars ? `${cap} Upgrade (${stars})` : `${cap} Upgrade`;
   }
 
@@ -59,8 +59,8 @@
 <style>
   .layout {
     display: grid;
-    grid-template-columns: 1fr minmax(180px, 220px);
-    gap: 1rem;
+    grid-template-columns: 1fr minmax(240px, 360px);
+    gap: 0.8rem;
     align-items: flex-start;
   }
 
@@ -74,7 +74,7 @@
     grid-template-columns: repeat(3, 72px);
     grid-auto-rows: 96px;
     gap: 0.5rem;
-    justify-content: center;
+    justify-content: start;
   }
   .choice {
     background: none;
@@ -114,7 +114,14 @@
   }
   .status {
     margin-top: 0.5rem;
-    text-align: center;
+    text-align: left;
+  }
+
+  /* Ensure drop list is left-aligned and tight */
+  .status ul {
+    margin: 0.25rem 0;
+    padding-left: 1rem;
+    text-align: left;
   }
 
   .stats {
