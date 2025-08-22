@@ -9,7 +9,7 @@ describe('PartyPicker component', () => {
   });
 
   test('includes add/remove control', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/StatTabs.svelte'), 'utf8');
     expect(content).toContain('Add to party');
   });
 
@@ -21,7 +21,7 @@ describe('PartyPicker component', () => {
   });
 
   test('orders stats correctly', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/StatTabs.svelte'), 'utf8');
     const coreStart = content.indexOf("{#if activeTab === 'Core'}");
     const coreEnd = content.indexOf("{:else if activeTab === 'Offense'}");
     const coreSection = content.slice(coreStart, coreEnd);
@@ -34,15 +34,14 @@ describe('PartyPicker component', () => {
   });
 
   test('uses element colors for icon and outline', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
-    expect(content).toContain('style={`border-color: ${getElementColor(char.element)}`}');
-    expect(content).toContain('style={`color: ${getElementColor(char.element)}`}');
+    const rosterContent = readFileSync(join(import.meta.dir, '../src/lib/PartyRoster.svelte'), 'utf8');
+    expect(rosterContent).toContain('style={`border-color: ${getElementColor(char.element)}`}');
+    expect(rosterContent).toContain('style={`color: ${getElementColor(char.element)}`}');
   });
 
   test('roster layout snapshot', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
-    const snippet = content.split('<!-- Left: Roster list -->')[1].split('<!-- Center: Portrait preview of selected -->')[0];
-    expect(snippet.trim()).toMatchSnapshot();
+    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyRoster.svelte'), 'utf8');
+    expect(content).toMatchSnapshot();
   });
 });
 
