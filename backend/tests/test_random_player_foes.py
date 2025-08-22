@@ -8,7 +8,7 @@ from plugins import players
 from plugins import themedadj
 from autofighter.party import Party
 from plugins.players import Player
-from autofighter.rooms import _choose_foe
+from autofighter.rooms.utils import _choose_foe
 
 
 def test_random_player_foes() -> None:

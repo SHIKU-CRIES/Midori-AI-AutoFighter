@@ -4,7 +4,7 @@ import pytest
 
 from autofighter.party import Party
 from autofighter.stats import Stats
-from autofighter.rooms import BattleRoom
+from autofighter.rooms.battle import BattleRoom
 from autofighter.mapgen import MapNode
 from plugins.foes._base import FoeBase
 from plugins.players import player as player_mod
@@ -26,8 +26,8 @@ async def test_battle_room_awards_exp(monkeypatch):
     foe = DummyFoe()
     foe.hp = 1
     foe.level = 3
-    monkeypatch.setattr("autofighter.rooms._choose_foe", lambda p: foe)
-    monkeypatch.setattr("autofighter.rooms._scale_stats", lambda *args, **kwargs: None)
+    monkeypatch.setattr("autofighter.rooms.utils._choose_foe", lambda p: foe)
+    monkeypatch.setattr("autofighter.rooms.utils._scale_stats", lambda *args, **kwargs: None)
     result = await room.resolve(party, {})
     assert party.members[0].level == 3
     assert party.members[0].exp == 160
@@ -51,8 +51,8 @@ async def test_level_up_persists_hp(monkeypatch):
     foe = DummyFoe()
     foe.hp = 1
     foe.level = 3
-    monkeypatch.setattr("autofighter.rooms._choose_foe", lambda p: foe)
-    monkeypatch.setattr("autofighter.rooms._scale_stats", lambda *args, **kwargs: None)
+    monkeypatch.setattr("autofighter.rooms.utils._choose_foe", lambda p: foe)
+    monkeypatch.setattr("autofighter.rooms.utils._scale_stats", lambda *args, **kwargs: None)
     await room.resolve(party, {})
     assert party.members[0].level > 1
     assert party.members[0].hp == 500

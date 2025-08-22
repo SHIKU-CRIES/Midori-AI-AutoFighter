@@ -4,7 +4,7 @@ import pytest
 import sqlcipher3
 
 import autofighter.cards as cards_module
-import autofighter.rooms as rooms_module
+import autofighter.rooms.battle as rooms_module
 
 from pathlib import Path
 from autofighter.cards import award_card

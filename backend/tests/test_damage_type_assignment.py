@@ -3,7 +3,7 @@ import pytest
 
 from autofighter.party import Party
 from autofighter.mapgen import MapNode
-from autofighter.rooms import BattleRoom
+from autofighter.rooms.battle import BattleRoom
 from plugins.foes._base import FoeBase
 from plugins.foes.slime import Slime
 from plugins.players._base import PlayerBase
