@@ -1,6 +1,6 @@
 import pytest
 
-import autofighter.rooms as rooms_module
+import autofighter.rooms.battle as rooms_module
 from autofighter.party import Party
 from autofighter.stats import Stats
 from autofighter.mapgen import MapNode

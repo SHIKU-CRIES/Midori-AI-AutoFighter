@@ -1,0 +1,155 @@
+from __future__ import annotations
+
+import math
+import random
+from dataclasses import asdict, fields
+from typing import Any
+
+from ..mapgen import MapNode
+from ..party import Party
+from ..stats import Stats
+from plugins import foes as foe_plugins
+from plugins import players as player_plugins
+from plugins.foes._base import FoeBase
+
+
+def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
+    """Scale foe stats based on room metadata.
+
+    Foes grow stronger with floor, room index, loop count, and user-set pressure.
+    Small per-stat variation keeps battles from feeling identical.
+    """
+    starter_int = 1.0 + random.uniform(-0.05, 0.05)
+    floor_mult = starter_int + 0.08 * max(node.floor - 1, 0)
+    index_mult = starter_int + 0.10 * max(node.index - 1, 0)
+    loop_mult = starter_int + 0.20 * max(node.loop - 1, 0)
+    pressure_mult = 1.0 * max(node.pressure, 1)
+    base_mult = max(strength * floor_mult * index_mult * loop_mult * pressure_mult, 0.5)
+
+    for field in fields(type(obj)):
+        if field.name in {"exp", "level", "exp_multiplier"}:
+            continue
+        value = getattr(obj, field.name, None)
+        if isinstance(value, (int, float)):
+            per_stat_variation = 1.0 + random.uniform(-0.05, 0.05)
+            total = value * base_mult * per_stat_variation
+            setattr(obj, field.name, type(value)(total))
+
+    try:
+        room_num = max(int(node.index), 1)
+        desired = max(1, math.ceil(room_num / 2))
+        obj.level = int(max(getattr(obj, "level", 1), desired))
+    except Exception:
+        pass
+
+    try:
+        room_num = max(int(node.index), 1)
+        base_hp = 700 * room_num
+        low = int(base_hp * 0.85)
+        high = int(base_hp * 1.10)
+        target = random.randint(low, max(high, low + 1))
+        current_max = int(getattr(obj, "max_hp", 1))
+        new_max = max(current_max, target)
+        setattr(obj, "max_hp", new_max)
+        setattr(obj, "hp", new_max)
+    except Exception:
+        pass
+
+    try:
+        cd = getattr(obj, "crit_damage", None)
+        if isinstance(cd, (int, float)):
+            setattr(obj, "crit_damage", type(cd)(max(float(cd), 2.0)))
+    except Exception:
+        pass
+
+    try:
+        if isinstance(obj, FoeBase):
+            vit = getattr(obj, "vitality", None)
+            if isinstance(vit, (int, float)):
+                thr = 0.5
+                step = 0.25
+                base_slow = 5.0
+                fvit = float(vit)
+                if fvit > thr:
+                    excess = fvit - thr
+                    steps = int(excess // step)
+                    factor = base_slow + steps
+                    fvit = thr + (excess / factor)
+                    fvit = max(fvit, 0.25)
+                    setattr(obj, "vitality", type(vit)(fvit))
+    except Exception:
+        pass
+
+    try:
+        if isinstance(obj, FoeBase):
+            mit = getattr(obj, "mitigation", None)
+            if isinstance(mit, (int, float)):
+                thr = 5
+                step = 1
+                base_slow = 5.0
+                fmit = float(mit)
+                if fmit > thr:
+                    excess = fmit - thr
+                    steps = int(excess // step)
+                    factor = base_slow + steps
+                    fmit = thr + (excess / factor)
+                    fmit = max(fmit, 10)
+                    setattr(obj, "mitigation", type(mit)(fmit))
+    except Exception:
+        pass
+
+
+def _normalize_damage_type(dt: Any) -> str:
+    """Return a simple identifier for a damage type or element."""
+    try:
+        if isinstance(dt, str):
+            return dt
+        ident = getattr(dt, "id", None) or getattr(dt, "name", None)
+        if ident:
+            return str(ident)
+        if isinstance(dt, dict):
+            return str(dt.get("id") or dt.get("name") or "Generic")
+    except Exception:
+        pass
+    return "Generic"
+
+
+def _serialize(obj: Stats) -> dict[str, Any]:
+    """Convert a stat object into a plain serializable dictionary."""
+    data = asdict(obj)
+    norm = _normalize_damage_type(getattr(obj, "damage_type", None))
+    data["damage_type"] = norm
+    data["element"] = norm
+    data["id"] = obj.id
+    if hasattr(obj, "name"):
+        data["name"] = obj.name
+    if hasattr(obj, "char_type"):
+        data["char_type"] = getattr(obj.char_type, "value", obj.char_type)
+    return data
+
+
+def _choose_foe(party: Party) -> FoeBase:
+    """Select a foe class not already in the party."""
+    party_ids = {p.id for p in party.members}
+    candidates = [
+        getattr(foe_plugins, name)
+        for name in getattr(foe_plugins, "__all__", [])
+        if getattr(foe_plugins, name).id not in party_ids
+    ]
+    for name in getattr(player_plugins, "__all__", []):
+        player_cls = getattr(player_plugins, name)
+        if player_cls.id in party_ids:
+            continue
+        foe_cls = foe_plugins.PLAYER_FOES.get(player_cls.id)
+        if foe_cls and foe_cls not in candidates:
+            candidates.append(foe_cls)
+    if not candidates:
+        candidates = [foe_plugins.Slime]
+    foe_cls = random.choice(candidates)
+    return foe_cls()
+
+
+def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
+    """Build a list of foes for the given room node."""
+    count = min(10, 1 + node.pressure // 5)
+    return [_choose_foe(party) for _ in range(count)]

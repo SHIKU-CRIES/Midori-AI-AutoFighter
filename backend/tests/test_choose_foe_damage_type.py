@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from autofighter.party import Party
 from plugins.players import Player
-from autofighter.rooms import _choose_foe
+from autofighter.rooms.utils import _choose_foe
 from plugins.damage_types._base import DamageTypeBase
 
 
