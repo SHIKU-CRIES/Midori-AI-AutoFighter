@@ -1,153 +1,69 @@
+<!--
+  GameViewport.svelte
+  Orchestrates high-level state for the game view. Navigation and
+  overlays are delegated to NavBar and OverlayHost, while run helpers
+  live in viewportState.js.
+-->
 <script>
-  import { ArrowLeft } from 'lucide-svelte';
-  import { Diamond, User, Settings, ChevronsRight, Swords } from 'lucide-svelte';
-  import { createEventDispatcher } from 'svelte';
   import { onMount, onDestroy } from 'svelte';
-
+  import { createEventDispatcher } from 'svelte';
   import RoomView from './RoomView.svelte';
-  import PartyPicker from './PartyPicker.svelte';
-  import SettingsMenu from './SettingsMenu.svelte';
-  import OverlaySurface from './OverlaySurface.svelte';
-  import PopupWindow from './PopupWindow.svelte';
-  import BattleView from './BattleView.svelte';
-  import PullsMenu from './PullsMenu.svelte';
-  import CraftingMenu from './CraftingMenu.svelte';
-  import RewardOverlay from './RewardOverlay.svelte';
-  import PlayerEditor from './PlayerEditor.svelte';
-  import InventoryPanel from './InventoryPanel.svelte';
-  import ShopMenu from './ShopMenu.svelte';
-  import RestRoom from './RestRoom.svelte';
+  import NavBar from './NavBar.svelte';
+  import OverlayHost from './OverlayHost.svelte';
   import { getRandomBackground } from './assetLoader.js';
-  import { loadSettings, saveSettings } from './settingsStorage.js';
-  import { getPlayers } from './api.js';
-  import { getRandomMusicTrack } from './music.js';
+  import {
+    loadInitialState,
+    mapSelectedParty,
+    roomLabel,
+    roomInfo,
+    startGameMusic,
+    applyMusicVolume,
+    stopGameMusic,
+  } from './viewportState.js';
+  import { overlayView } from './OverlayController.js';
 
   export let runId = '';
   export let roomData = null;
   export let background = '';
-  export let viewMode = 'main'; // 'main', 'party', 'settings', 'inventory'
-  export let editorState = {};
-  export let sfxVolume = 50;
-  export let musicVolume = 50;
-  export let voiceVolume = 50;
-  export let framerate = 60;
-  export let autocraft = false;
-  export let reducedMotion = false;
-  export let battleActive = false;
-  // Map context for battle header
+  export let items = [];
   export let mapRooms = [];
   export let currentIndex = 0;
   export let currentRoomType = '';
-  let randomBg = '';
-  let speed2x = false;
-  let roster = [];
+  export let editorState = {};
+  export let battleActive = false;
   export let selected = [];
-  export let items = [];
-  let selectedParty = [];
-  let rewardOpen = false;
-  const dispatch = createEventDispatcher();
 
-  let gameAudio;
-  let volumeTimer;
+  let randomBg = '';
+  let roster = [];
+  let sfxVolume = 50;
+  let musicVolume = 50;
+  let voiceVolume = 50;
+  let framerate = 60;
+  let autocraft = false;
+  let reducedMotion = false;
+  let selectedParty = [];
   let snapshotLoading = false;
-  $: if (battleActive) snapshotLoading = true;
-  $: rewardOpen = !!(roomData && roomData.result === 'battle' && !battleActive);
+
+  const dispatch = createEventDispatcher();
 
   onMount(async () => {
     if (!background) {
       randomBg = getRandomBackground();
     }
-    const saved = loadSettings();
-    if (saved.sfxVolume !== undefined) sfxVolume = saved.sfxVolume;
-    if (saved.musicVolume !== undefined) musicVolume = saved.musicVolume;
-    if (saved.voiceVolume !== undefined) voiceVolume = saved.voiceVolume;
-    if (saved.framerate !== undefined) framerate = Number(saved.framerate);
-    if (saved.autocraft !== undefined) autocraft = saved.autocraft;
-    if (saved.reducedMotion !== undefined) reducedMotion = saved.reducedMotion;
-    try {
-      const data = await getPlayers();
-      function resolveElement(p) {
-        let e = p?.element;
-        if (e && typeof e !== 'string') e = e.id || e.name;
-        return e && !/generic/i.test(String(e)) ? e : 'Generic';
-      }
-      roster = data.players.map(p => ({ id: p.id, element: resolveElement(p) }));
-    } catch (e) {
-      roster = [];
-    }
-    startGameMusic();
+    const init = await loadInitialState();
+    ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } =
+      init.settings);
+    roster = init.roster;
+    startGameMusic(musicVolume);
   });
-
-  $: selectedParty = selected.map(id => {
-    const info = roster.find(r => r.id === id);
-    return { id, element: info?.element || 'Generic' };
-  });
-  function startGameMusic() {
-    stopGameMusic();
-    const src = getRandomMusicTrack();
-    if (!src) return;
-    gameAudio = new Audio(src);
-    applyMusicVolume();
-    gameAudio.addEventListener('ended', startGameMusic);
-    gameAudio.play().catch(() => {});
-    volumeTimer = setInterval(() => {
-      const saved = loadSettings();
-      if (saved.musicVolume !== undefined) {
-        musicVolume = saved.musicVolume;
-      }
-      applyMusicVolume();
-    }, 500);
-  }
-
-  function applyMusicVolume() {
-    if (gameAudio) {
-      gameAudio.volume = musicVolume / 100;
-    }
-  }
-
-  $: applyMusicVolume();
-
-  function stopGameMusic() {
-    if (volumeTimer) {
-      clearInterval(volumeTimer);
-      volumeTimer = null;
-    }
-    if (gameAudio) {
-      gameAudio.removeEventListener('ended', startGameMusic);
-      gameAudio.pause();
-      gameAudio = null;
-    }
-  }
 
   onDestroy(() => {
     stopGameMusic();
   });
 
-  // Header label helpers
-  function roomLabel(type) {
-    switch (String(type || '')) {
-      case 'battle-weak':
-        return 'Weak Battle';
-      case 'battle-normal':
-        return 'Normal Battle';
-      case 'battle-boss-floor':
-        return 'Floor Boss';
-      case 'shop':
-        return 'Shop';
-      case 'rest':
-        return 'Rest';
-      case 'start':
-        return 'Start';
-      default:
-        if (!type) return 'Battle';
-        // Fallback: prettify hyphenated types
-        return String(type).replace(/\b\w/g, c => c.toUpperCase()).replaceAll('-', ' ');
-    }
-  }
-  $: roomNumber = mapRooms?.[currentIndex]?.index ?? currentIndex ?? 0;
-  $: floorNumber = mapRooms?.[currentIndex]?.floor ?? 1;
-  $: currentType = currentRoomType || roomData?.current_room || '';
-  $: nextType = mapRooms?.[currentIndex + 1]?.room_type || (roomData?.next_room ?? '');
+  $: selectedParty = mapSelectedParty(roster, selected);
+  $: applyMusicVolume(musicVolume);
+  $: info = roomInfo(mapRooms, currentIndex, currentRoomType, roomData);
 </script>
 
 <style>
@@ -162,7 +78,7 @@
     width: 100%;
     height: 100%;
     border: 2px solid #fff;
-    box-sizing: border-box; /* include border in element's size */
+    box-sizing: border-box;
     background: #000;
     display: flex;
     align-items: center;
@@ -180,7 +96,7 @@
     backdrop-filter: blur(2px);
     background: rgba(0,0,0,0.35);
     padding: 0.5rem 0.75rem;
-  border-radius: 0;
+    border-radius: 0;
   }
   .overlay-inset {
     position: absolute;
@@ -194,17 +110,6 @@
   @media (max-width: 599px) {
     .viewport { aspect-ratio: auto; min-height: 240px; }
   }
-
-  .nav-wrapper {
-    position: absolute;
-    top: 1.2rem;
-    left: 1.2rem;
-    display: flex;
-    gap: 0.5rem;
-    z-index: 10;
-  }
-
-  /* top-center stained-glass header */
   .top-center-header {
     position: absolute;
     top: 1.2rem;
@@ -226,84 +131,6 @@
     white-space: nowrap;
   }
   .arrow { margin: 0 0.5rem; opacity: 0.9; }
-
-  .stained-glass-bar {
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem 0.7rem;
-    border-radius: 0;
-    background: var(--glass-bg);
-    box-shadow: var(--glass-shadow);
-    border: var(--glass-border);
-    backdrop-filter: var(--glass-filter);
-    opacity: 0.99;
-  }
-  .icon-btn {
-  background: rgba(255,255,255,0.10);
-  border: none;
-  border-radius: 0; /* square buttons for game UI */
-  width: 2.9rem;
-  height: 2.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.18s, box-shadow 0.18s;
-  box-shadow: 0 1px 4px 0 rgba(0,40,120,0.10);
-  }
-  .icon-btn:hover {
-    background: rgba(120,180,255,0.22);
-    box-shadow: 0 2px 8px 0 rgba(0,40,120,0.18);
-  }
-
-  .snapshot-panel {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 0.7rem;
-    border-radius: 0;
-    background: var(--glass-bg);
-    box-shadow: var(--glass-shadow);
-    border: var(--glass-border);
-    backdrop-filter: var(--glass-filter);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .snapshot-panel.active {
-    opacity: 0.99;
-  }
-
-  .spinner {
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid #fff;
-    border-right-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  .icon-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .stained-glass-row {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.7rem;
-    background: var(--glass-bg);
-    box-shadow: var(--glass-shadow);
-    border: var(--glass-border);
-    backdrop-filter: var(--glass-filter);
-  }
-
-  /* right stained-glass sidebar (vertical) */
   .stained-glass-side {
     position: absolute;
     top: calc(var(--ui-top-offset) + 1.2rem);
@@ -322,202 +149,99 @@
     overflow: auto;
     align-items: center;
   }
-
   .stained-glass-side .icon-btn {
     width: 3.2rem;
     height: 3.2rem;
   }
-
+  .icon-btn {
+    background: rgba(255,255,255,0.10);
+    border: none;
+    border-radius: 0;
+    width: 2.9rem;
+    height: 2.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 4px 0 rgba(0,40,120,0.10);
+  }
+  .icon-btn:hover {
+    background: rgba(120,180,255,0.22);
+    box-shadow: 0 2px 8px 0 rgba(0,40,120,0.18);
+  }
 </style>
 
 <div class="viewport-wrap">
   <div class="viewport" style={`--bg: url(${background || randomBg})`}>
-      <div class="nav-wrapper">
-        <div class="stained-glass-bar">
-        {#if battleActive}
-          <button class="icon-btn" title="Battle">
-            <Swords size={22} color="#fff" />
-          </button>
-        {:else}
-          <button
-            class="icon-btn"
-            title="Home"
-            on:click={() => dispatch('home')}
-          >
-            <Diamond size={22} color="#fff" />
-          </button>
-        {/if}
-        <button
-          class="icon-btn"
-          title="Player Editor"
-          on:click={() => dispatch('openEditor')}
-        >
-          <User size={22} color="#fff" />
-        </button>
-        <button class="icon-btn" title="Settings" on:click={() => dispatch('settings')}>
-          <Settings size={22} color="#fff" />
-        </button>
-        {#if viewMode !== 'main'}
-          <button class="icon-btn" title="Back" on:click={() => dispatch('back')}>
-            <ArrowLeft size={22} color="#fff" />
-          </button>
-        {/if}
+    <NavBar
+      {battleActive}
+      viewMode={$overlayView}
+      {snapshotLoading}
+      on:home={() => dispatch('home')}
+      on:openEditor={() => dispatch('openEditor')}
+      on:settings={() => dispatch('settings')}
+      on:back={() => dispatch('back')}
+    />
+    {#if battleActive}
+      <div class="top-center-header">
+        <div class="title-chip">
+          Room {info.roomNumber} / Floor {info.floorNumber} / {roomLabel(info.currentType)}
         </div>
-        <div class="snapshot-panel" class:active={snapshotLoading}>
-          <div class="spinner"></div>
-          <span>Syncing...</span>
+        <div class="arrow">→</div>
+        <div class="title-chip">
+          {roomLabel(info.nextType) || 'Unknown'}
         </div>
       </div>
-      {#if battleActive}
-        <div class="top-center-header">
-          <div class="title-chip">
-            Room {roomNumber} / Floor {floorNumber} / {roomLabel(currentType)}
-          </div>
-          <div class="arrow">→</div>
-          <div class="title-chip">
-            {roomLabel(nextType) || 'Unknown'}
-          </div>
-        </div>
-      {/if}
-        <!-- right stained-glass sidebar (mirrors top-left bar styling) -->
-        {#if viewMode === 'main' && !battleActive}
-          <div class="stained-glass-side">
-            {#each items as item}
-              <button class="icon-btn" title={item.label} on:click={item.action} disabled={item.disabled}>
-                {#if item.icon}
-                  <svelte:component this={item.icon} size={20} color="#fff" />
-                {:else}
-                  <span>{item.label}</span>
-                {/if}
-              </button>
-            {/each}
-          </div>
-        {/if}
-        {#if runId && roomData && !(roomData.result === 'battle' && !battleActive)}
-          <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
-        {:else if runId}
-          <div class="placeholder">Awaiting next room...</div>
-        {/if}
-        {#if viewMode === 'party'}
-          <OverlaySurface>
-            <!-- full party picker overlay: show roster, preview, and stats -->
-            <PartyPicker bind:selected={selected} />
-            <div class="stained-glass-row">
-              <button class="icon-btn" on:click={() => dispatch('saveParty')}>Save Party</button>
-              <button class="icon-btn" on:click={() => dispatch('back')}>Cancel</button>
-            </div>
-          </OverlaySurface>
-        {/if}
-        {#if viewMode === 'party-start'}
-          <OverlaySurface>
-            <PartyPicker bind:selected={selected} />
-            <div class="stained-glass-row">
-              <button class="icon-btn" on:click={() => dispatch('startRun')}>Start Run</button>
-              <button class="icon-btn" on:click={() => dispatch('back')}>Cancel</button>
-            </div>
-          </OverlaySurface>
-        {/if}
-        {#if viewMode === 'pulls'}
-          <OverlaySurface>
-            <PullsMenu on:close={() => dispatch('back')} />
-          </OverlaySurface>
-        {/if}
-        {#if viewMode === 'craft'}
-          <OverlaySurface>
-            <CraftingMenu on:close={() => dispatch('back')} />
-          </OverlaySurface>
-        {/if}
-        {#if viewMode === 'editor'}
-          <OverlaySurface>
-            <PlayerEditor
-              {...editorState}
-              on:close={() => dispatch('back')}
-              on:save={(e) => {
-                dispatch('editorSave', e.detail);
-                dispatch('back');
-              }}
-            />
-          </OverlaySurface>
-        {/if}
-        {#if viewMode === 'inventory'}
-          <PopupWindow title="Inventory" padding="0.75rem" on:close={() => dispatch('back')}>
-            <InventoryPanel cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
-          </PopupWindow>
-        {/if}
-        {#if viewMode === 'settings'}
-          <PopupWindow title="Settings" on:close={() => dispatch('back')}>
-            <SettingsMenu
-              {sfxVolume}
-              {musicVolume}
-              {voiceVolume}
-              {framerate}
-              {autocraft}
-              {reducedMotion}
-              {runId}
-              on:save={(e) => {
-                ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } = e.detail);
-                // Child component persists via saveSettings with debounced autosave.
-                // Keep local state in sync without closing the menu.
-              }}
-              on:endRun={() => dispatch('endRun')}
-            />
-          </PopupWindow>
-        {/if}
-        {#if rewardOpen}
-          <OverlaySurface>
-            <PopupWindow title="Battle Rewards" maxWidth="880px" maxHeight="95vh" on:close={() => { roomData = null; dispatch('nextRoom'); }}>
-              <RewardOverlay
-                gold={roomData.loot?.gold || 0}
-                cards={roomData.card_choices || []}
-                relics={roomData.relic_choices || []}
-                items={roomData.loot?.items || []}
-                partyStats={roomData.party || []}
-                on:select={(e) => dispatch('rewardSelect', e.detail)}
-                on:next={() => { roomData = null; dispatch('nextRoom'); }}
-              />
-            </PopupWindow>
-          </OverlaySurface>
-        {/if}
-        {#if roomData && roomData.result === 'shop'}
-          <OverlaySurface>
-            <ShopMenu
-              items={roomData.items || []}
-              gold={roomData.gold}
-              reducedMotion={reducedMotion}
-              on:buy={(e) => dispatch('shopBuy', e.detail)}
-              on:reroll={() => dispatch('shopReroll')}
-              on:close={() => dispatch('shopLeave')}
-            />
-          </OverlaySurface>
-        {/if}
-        {#if roomData && roomData.result === 'rest'}
-          <OverlaySurface>
-            <RestRoom
-              gold={roomData.gold}
-              reducedMotion={reducedMotion}
-              on:pull={() => dispatch('restPull')}
-              on:swap={() => dispatch('restSwap')}
-              on:craft={() => dispatch('restCraft')}
-              on:close={() => dispatch('restLeave')}
-            />
-          </OverlaySurface>
-        {/if}
-        {#if roomData && roomData.result === 'battle' && (battleActive || rewardOpen) && viewMode === 'main'}
-          <div class="overlay-inset">
-            <BattleView
-              runId={runId}
-              framerate={framerate}
-              party={selectedParty}
-              enrage={roomData?.enrage}
-              reducedMotion={reducedMotion}
-              active={battleActive}
-              on:snapshot-start={() => (snapshotLoading = true)}
-              on:snapshot-end={e => {
-                snapshotLoading = false;
-              }}
-            />
-          </div>
-        {/if}
+    {/if}
+    {#if $overlayView === 'main' && !battleActive}
+      <div class="stained-glass-side">
+        {#each items as item}
+          <button class="icon-btn" title={item.label} on:click={item.action} disabled={item.disabled}>
+            {#if item.icon}
+              <svelte:component this={item.icon} size={20} color="#fff" />
+            {:else}
+              <span>{item.label}</span>
+            {/if}
+          </button>
+        {/each}
+      </div>
+    {/if}
+    {#if runId && roomData && !(roomData.result === 'battle' && !battleActive)}
+      <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
+    {:else if runId}
+      <div class="placeholder">Awaiting next room...</div>
+    {/if}
+    <OverlayHost
+      bind:selected
+      {runId}
+      {roomData}
+      {editorState}
+      {sfxVolume}
+      {musicVolume}
+      {voiceVolume}
+      {framerate}
+      {autocraft}
+      {reducedMotion}
+      {selectedParty}
+      {battleActive}
+      on:saveParty={() => dispatch('saveParty')}
+      on:startRun={() => dispatch('startRun')}
+      on:back={() => dispatch('back')}
+      on:rewardSelect={(e) => dispatch('rewardSelect', e.detail)}
+      on:nextRoom={() => dispatch('nextRoom')}
+      on:editorSave={(e) => dispatch('editorSave', e.detail)}
+      on:saveSettings={(e) => ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } = e.detail)}
+      on:endRun={() => dispatch('endRun')}
+      on:shopBuy={(e) => dispatch('shopBuy', e.detail)}
+      on:shopReroll={() => dispatch('shopReroll')}
+      on:shopLeave={() => dispatch('shopLeave')}
+      on:restPull={() => dispatch('restPull')}
+      on:restSwap={() => dispatch('restSwap')}
+      on:restCraft={() => dispatch('restCraft')}
+      on:restLeave={() => dispatch('restLeave')}
+      on:snapshot-start={() => (snapshotLoading = true)}
+      on:snapshot-end={() => (snapshotLoading = false)}
+    />
   </div>
-  
 </div>

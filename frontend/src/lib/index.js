@@ -22,3 +22,20 @@ export {
   chooseCard,
   chooseRelic
 } from './api.js';
+export { default as NavBar } from './NavBar.svelte';
+export { default as OverlayHost } from './OverlayHost.svelte';
+export {
+  overlayView,
+  openOverlay,
+  backOverlay,
+  homeOverlay
+} from './OverlayController.js';
+export {
+  loadInitialState,
+  mapSelectedParty,
+  roomLabel,
+  roomInfo,
+  startGameMusic,
+  applyMusicVolume,
+  stopGameMusic
+} from './viewportState.js';
