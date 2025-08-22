@@ -24,8 +24,9 @@ include = ["autofighter", "plugins"]
 [project.optional-dependencies]
 llm-cpu = [
     "torch",
-    "torchvision",
     "torchaudio",
+    "torchvision",
+    "chatterbox-tts",
     "openai",
     "langgraph",
     "langchain-core",
@@ -42,8 +43,9 @@ llm-cpu = [
 
 llm-cuda = [
     "torch",
-    "torchvision",
     "torchaudio",
+    "torchvision",
+    "chatterbox-tts",
     "xformers",
     "openai",
     "langgraph",
@@ -61,8 +63,9 @@ llm-cuda = [
 
 llm-amd = [
     "torch",
-    "torchvision",
     "torchaudio",
+    "torchvision",
+    "chatterbox-tts",
     "openai",
     "langgraph",
     "langchain-core",
