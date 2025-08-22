@@ -7,9 +7,9 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Ice(DamageTypeBase):
-    id = "Ice"
-    weakness = "Fire"
-    color = (0, 255, 255)
+    id: str = "Ice"
+    weakness: str = "Fire"
+    color: tuple[int, int, int] = (0, 255, 255)
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         dot = FrozenWound(int(damage * 0.25), 3)

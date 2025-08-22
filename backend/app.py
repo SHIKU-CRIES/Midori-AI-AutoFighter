@@ -22,8 +22,9 @@ from quart import send_from_directory
 
 from cryptography.fernet import Fernet
 
-from plugins import passives as passive_plugins
 from plugins import players as player_plugins
+from plugins import passives as passive_plugins
+from plugins.damage_types import load_damage_type
 from autofighter.cards import award_card
 from autofighter.relics import award_relic
 from autofighter.party import Party
@@ -113,7 +114,7 @@ def _assign_damage_type(player: PlayerBase) -> None:
         cur = conn.execute("SELECT type FROM damage_types WHERE id = ?", (player.id,))
         row = cur.fetchone()
         if row:
-            player.damage_type = row[0]
+            player.damage_type = load_damage_type(row[0])
         else:
             conn.execute(
                 "INSERT INTO damage_types (id, type) VALUES (?, ?)",
@@ -245,7 +246,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
             ("player",),
         )
         row = cur.fetchone()
-    player_type = row[0] if row else player_plugins.player.Player().damage_type
+    player_type = row[0] if row else player_plugins.player.Player().element_id
     snapshot = {
         "pronouns": pronouns,
         "damage_type": player_type,
@@ -640,10 +641,10 @@ def load_party(run_id: str) -> Party:
                             "SELECT type FROM damage_types WHERE id = ?", ("player",)
                         ).fetchone()
                     if row and row[0]:
-                        inst.damage_type = row[0]
+                        inst.damage_type = load_damage_type(row[0])
                     else:
-                        inst.damage_type = snapshot.get(
-                            "damage_type", inst.damage_type
+                        inst.damage_type = load_damage_type(
+                            snapshot.get("damage_type", inst.element_id)
                         )
                     _apply_player_stats(inst, snapshot.get("stats", {}))
                 else:
@@ -838,7 +839,7 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         if row and row[0]:
             for m in party.members:
                 if m.id == "player":
-                    m.damage_type = row[0]
+                    m.damage_type = load_damage_type(row[0])
                     break
     except Exception:
         pass

@@ -5,6 +5,8 @@ from dataclasses import field
 
 from autofighter.stats import Stats
 from autofighter.character import CharacterType
+from plugins.damage_types import random_damage_type
+from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class PlayerBase(Stats):
@@ -26,6 +28,7 @@ class PlayerBase(Stats):
     crit_rate: float = 0.05
     crit_damage: float = 2
     effect_hit_rate: float = 0.01
+    damage_type: DamageTypeBase = field(default_factory=random_damage_type)
 
     mitigation: int = 100
     regain: int = 1

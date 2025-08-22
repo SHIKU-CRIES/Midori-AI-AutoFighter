@@ -1,5 +1,9 @@
 # Player and Foe Reference
 
+Player and Foe base classes assign a random damage type when one is not
+provided, and battle rooms respect these preset elements without selecting new
+types.
+
 ## Player Roster
 All legacy characters from the Pygame version have been ported as plugins.
 Each entry notes the character's `CharacterType` and starting damage type.

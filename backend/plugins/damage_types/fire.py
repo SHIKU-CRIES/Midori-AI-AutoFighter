@@ -8,9 +8,9 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Fire(DamageTypeBase):
-    id = "Fire"
-    weakness = "Ice"
-    color = (255, 0, 0)
+    id: str = "Fire"
+    weakness: str = "Ice"
+    color: tuple[int, int, int] = (255, 0, 0)
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         dot = BlazingTorment(int(damage * 0.5), 3)

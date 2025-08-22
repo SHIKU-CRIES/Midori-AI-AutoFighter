@@ -276,52 +276,7 @@ def _choose_foe(party: Party) -> FoeBase:
     if not candidates:
         candidates = [foe_plugins.Slime]
     foe_cls = random.choice(candidates)
-    foe = foe_cls()
-    # Assign damage type to foes similar to players:
-    # - If the foe's default is Generic or it's a Slime, roll a random element each encounter.
-    # - If it is Luna, force Generic.
-    # - Otherwise, keep the class-defined element (e.g., LadyOfFire stays Fire).
-    try:
-        label = str(getattr(foe, "name", None) or getattr(foe, "id", ""))
-
-        def _as_str(t: object) -> str:
-            try:
-                if isinstance(t, str):
-                    return t
-                ident = getattr(t, "id", None) or getattr(t, "name", None)
-                if ident:
-                    return str(ident)
-            except Exception:
-                pass
-            return "Generic"
-
-        current = _as_str(getattr(foe, "damage_type", "Generic"))
-        chosen: str | None = None
-        low = label.lower()
-        if "luna" in low:
-            chosen = "Generic"
-        elif "slime" in low or current.lower() == "generic":
-            chosen = random.choice(ALL_DAMAGE_TYPES)
-        # Apply selection or normalize existing and instantiate plugin
-        final = chosen or current
-        try:
-            import importlib
-
-            module = importlib.import_module(
-                f"plugins.damage_types.{final.lower()}"
-            )
-            foe.damage_type = getattr(module, final)()
-            final = getattr(foe.damage_type, "id", final)
-        except Exception:
-            foe.damage_type = final
-        try:
-            setattr(foe, "element", final)
-        except Exception:
-            pass
-    except Exception:
-        # Best-effort; leave default if anything goes wrong
-        pass
-    return foe
+    return foe_cls()
 
 
 def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
@@ -431,18 +386,7 @@ class BattleRoom(Room):
                 foe_idx = random.choice(alive_foe_idxs)
                 foe = foes[foe_idx]
                 foe_mgr = foe_effects[foe_idx]
-                # Ensure damage type object is instantiated before effect ticking
-                try:
-                    dt = getattr(member, "damage_type", None)
-                    if isinstance(dt, str):
-                        import importlib
-                        module = importlib.import_module(
-                            f"plugins.damage_types.{dt.lower()}"
-                        )
-                        member.damage_type = getattr(module, dt)()
-                        dt = member.damage_type
-                except Exception:
-                    dt = getattr(member, "damage_type", None)
+                dt = getattr(member, "damage_type", None)
                 await member_effect.tick(foe_mgr)
                 if member.hp <= 0:
                     registry.trigger("turn_end", member)
@@ -578,18 +522,7 @@ class BattleRoom(Room):
                 registry.trigger("turn_start", foe)
                 console.log(f"{foe.id} turn start targeting {target.id}")
                 await foe.maybe_regain(turn)
-                # Ensure foe damage type is instantiated before effect ticking
-                try:
-                    dt = getattr(foe, "damage_type", None)
-                    if isinstance(dt, str):
-                        import importlib
-                        module = importlib.import_module(
-                            f"plugins.damage_types.{dt.lower()}"
-                        )
-                        foe.damage_type = getattr(module, dt)()
-                        dt = foe.damage_type
-                except Exception:
-                    dt = getattr(foe, "damage_type", None)
+                dt = getattr(foe, "damage_type", None)
                 await foe_mgr.tick(target_effect)
                 if foe.hp <= 0:
                     registry.trigger("turn_end", foe)

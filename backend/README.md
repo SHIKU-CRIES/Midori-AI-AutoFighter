@@ -29,6 +29,9 @@ names. Run state is stored through the `SaveManager` in `backend/save.db` by
 default; `compose.yaml` bind-mounts the `backend/` directory so the database is
 persisted on the host.
 
+Player and foe base classes assign a random damage type when none is
+specified, and battles respect these preset elements without rolling new ones.
+
 Battle resolution awards experience to all party members. Characters below
 level 1000 receive a 10× boost to earned experience, and level-ups are synced
 back to the run along with updated stats.
