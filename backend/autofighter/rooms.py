@@ -302,9 +302,18 @@ def _choose_foe(party: Party) -> FoeBase:
             chosen = "Generic"
         elif "slime" in low or current.lower() == "generic":
             chosen = random.choice(ALL_DAMAGE_TYPES)
-        # apply selection or normalize existing
+        # Apply selection or normalize existing and instantiate plugin
         final = chosen or current
-        foe.damage_type = final
+        try:
+            import importlib
+
+            module = importlib.import_module(
+                f"plugins.damage_types.{final.lower()}"
+            )
+            foe.damage_type = getattr(module, final)()
+            final = getattr(foe.damage_type, "id", final)
+        except Exception:
+            foe.damage_type = final
         try:
             setattr(foe, "element", final)
         except Exception:
@@ -422,17 +431,7 @@ class BattleRoom(Room):
                 foe_idx = random.choice(alive_foe_idxs)
                 foe = foes[foe_idx]
                 foe_mgr = foe_effects[foe_idx]
-                await member_effect.tick(foe_mgr)
-                if member.hp <= 0:
-                    registry.trigger("turn_end", member)
-                    elapsed = time.perf_counter() - turn_start
-                    if elapsed < 0.5:
-                        await asyncio.sleep(0.5 - elapsed)
-                    continue
-                proceed = await member_effect.on_action()
-                if proceed is None:
-                    proceed = True
-                # Ensure damage type object is instantiated before calling on_action
+                # Ensure damage type object is instantiated before effect ticking
                 try:
                     dt = getattr(member, "damage_type", None)
                     if isinstance(dt, str):
@@ -444,6 +443,16 @@ class BattleRoom(Room):
                         dt = member.damage_type
                 except Exception:
                     dt = getattr(member, "damage_type", None)
+                await member_effect.tick(foe_mgr)
+                if member.hp <= 0:
+                    registry.trigger("turn_end", member)
+                    elapsed = time.perf_counter() - turn_start
+                    if elapsed < 0.5:
+                        await asyncio.sleep(0.5 - elapsed)
+                    continue
+                proceed = await member_effect.on_action()
+                if proceed is None:
+                    proceed = True
                 if proceed and hasattr(dt, "on_action"):
                     res = await dt.on_action(
                         member,
@@ -569,6 +578,18 @@ class BattleRoom(Room):
                 registry.trigger("turn_start", foe)
                 console.log(f"{foe.id} turn start targeting {target.id}")
                 await foe.maybe_regain(turn)
+                # Ensure foe damage type is instantiated before effect ticking
+                try:
+                    dt = getattr(foe, "damage_type", None)
+                    if isinstance(dt, str):
+                        import importlib
+                        module = importlib.import_module(
+                            f"plugins.damage_types.{dt.lower()}"
+                        )
+                        foe.damage_type = getattr(module, dt)()
+                        dt = foe.damage_type
+                except Exception:
+                    dt = getattr(foe, "damage_type", None)
                 await foe_mgr.tick(target_effect)
                 if foe.hp <= 0:
                     registry.trigger("turn_end", foe)
@@ -590,18 +611,6 @@ class BattleRoom(Room):
                 proceed = await foe_mgr.on_action()
                 if proceed is None:
                     proceed = True
-                # Ensure foe damage type is instantiated before calling on_action
-                try:
-                    dt = getattr(foe, "damage_type", None)
-                    if isinstance(dt, str):
-                        import importlib
-                        module = importlib.import_module(
-                            f"plugins.damage_types.{dt.lower()}"
-                        )
-                        foe.damage_type = getattr(module, dt)()
-                        dt = foe.damage_type
-                except Exception:
-                    dt = getattr(foe, "damage_type", None)
                 if proceed and hasattr(dt, "on_action"):
                     res = await dt.on_action(
                         foe,
