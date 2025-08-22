@@ -21,7 +21,7 @@ export {
   roomAction,
   chooseCard,
   chooseRelic
-} from './api.js';
+} from './runApi.js';
 export { default as NavBar } from './NavBar.svelte';
 export { default as OverlayHost } from './OverlayHost.svelte';
 export {
