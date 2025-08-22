@@ -9,4 +9,6 @@ Each relic plugin exposes an `about` string and a `describe(stacks)` method so t
 UI can show stack-aware, number-rich descriptions.
 
 ## Testing
-- `uv run pytest backend/tests/test_relics.py`
+- `uv run pytest backend/tests/test_relic_awards.py`
+- `uv run pytest backend/tests/test_relic_effects.py`
+- `uv run pytest backend/tests/test_relic_effects_advanced.py`
