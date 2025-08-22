@@ -47,7 +47,7 @@ adding the effect. The difference is clamped to zero and jittered by ±10%, and 
 - `tick(others=None)` – advances all effects, applying damage or healing and removing expired ones. DoT names are removed from `stats.dots` when finished. If `others` is provided, effects with `on_death` hooks may spread on target death.
 - `on_action()` – triggers `on_action` hooks for effects that react when the target performs an action.
 
-Active effect names are mirrored in the `Stats` lists (`dots`, `hots`) for UI display. Plugins can extend base `DamageOverTime` and `HealingOverTime` classes to implement custom behavior or additional stat modifications.
+Active effect names are mirrored in the `Stats` lists (`dots`, `hots`) for UI display. Battle snapshots aggregate effect details from each fighter's `effect_manager`, grouping DoTs and HoTs by ID with entries exposing `id`, `name`, `damage` or `healing`, remaining `turns`, the source's ID, and stack counts. Passive IDs are similarly collapsed into `{id, stacks}` objects in the serialized snapshot.
 
 ## Lightning Pop
 Lightning attacks trigger an extra pass over the target's active DoTs. Each effect deals 25% of its damage immediately while leaving remaining turns and stack counts untouched.
