@@ -13,7 +13,7 @@ uv sync
 uv run app.py
 ```
 
-The root endpoint returns a simple status payload. Additional routes support
+The root endpoint returns a simple status payload including the configured flavor. Set `UV_EXTRA` (default `"default"`) to label this instance. Additional routes support
 starting runs with a seeded 45-room map, updating the party, retrieving floor
 maps, listing available player characters, returning room background images,
 editing player pronouns and starting stats, and posting actions to battle, shop,

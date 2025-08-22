@@ -1,5 +1,6 @@
 import json
 import importlib.util
+import sys
 
 from pathlib import Path
 
@@ -12,6 +13,9 @@ def app_with_db(tmp_path, monkeypatch):
     db_path = tmp_path / "save.db"
     monkeypatch.setenv("AF_DB_PATH", str(db_path))
     monkeypatch.setenv("AF_DB_KEY", "testkey")
+    monkeypatch.setenv("UV_EXTRA", "test")
+    if "game" in sys.modules:
+        del sys.modules["game"]
     monkeypatch.syspath_prepend(Path(__file__).resolve().parents[1])
     spec = importlib.util.spec_from_file_location(
         "app", Path(__file__).resolve().parents[1] / "app.py",
@@ -30,7 +34,7 @@ async def test_status_endpoint(app_with_db):
     response = await client.get("/")
     assert response.status_code == 200
     data = await response.get_json()
-    assert data == {"status": "ok"}
+    assert data == {"status": "ok", "flavor": "test"}
 
 
 @pytest.mark.asyncio

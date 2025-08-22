@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from quart import Quart
 from quart import jsonify
 from quart import request
@@ -34,10 +36,12 @@ app.register_blueprint(runs_bp)
 app.register_blueprint(rooms_bp)
 app.register_blueprint(rewards_bp)
 
+BACKEND_FLAVOR = os.getenv("UV_EXTRA", "default")
+
 
 @app.get("/")
 async def status() -> tuple[str, int, dict[str, str]]:
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok", "flavor": BACKEND_FLAVOR})
 
 
 @app.after_request

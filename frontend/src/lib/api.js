@@ -1,5 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:59002';
 
+export async function getBackendFlavor() {
+  const res = await fetch(`${API_BASE}/`, { cache: 'no-store' });
+  const data = await res.json();
+  return data.flavor;
+}
+
 export async function getPlayers() {
   const res = await fetch(`${API_BASE}/players`, { cache: 'no-store' });
   return res.json();
