@@ -110,6 +110,8 @@
         relics={roomData.relic_choices || []}
         items={roomData.loot?.items || []}
         partyStats={roomData.party || []}
+        ended={Boolean(roomData?.ended)}
+        nextRoom={roomData?.next_room}
         on:select={(e) => dispatch('rewardSelect', e.detail)}
         on:next={() => dispatch('nextRoom')}
       />
@@ -143,7 +145,7 @@
   </OverlaySurface>
 {/if}
 
-{#if roomData && roomData.result === 'battle' && (battleActive || rewardOpen) && $overlayView === 'main'}
+{#if roomData && (roomData.result === 'battle' || roomData.result === 'boss') && (battleActive || rewardOpen) && $overlayView === 'main'}
   <div class="overlay-inset">
     <BattleView
       {runId}

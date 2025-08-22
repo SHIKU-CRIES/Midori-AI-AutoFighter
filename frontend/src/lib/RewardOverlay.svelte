@@ -16,6 +16,8 @@
   export let items = [];
   export let gold = 0;
   export let partyStats = [];
+  export let ended = false;
+  export let nextRoom = '';
 
   const dispatch = createEventDispatcher();
   const artMap = new Map();
@@ -214,7 +216,9 @@
       <div class="status">Gold +{gold}</div>
     {/if}
     <div class="status">
-      <button on:click={() => dispatch('next')} disabled={remaining > 0}>Next Room</button>
+      <button on:click={() => dispatch('next')} disabled={remaining > 0}>
+        {ended ? 'End Run' : 'Next Room'}
+      </button>
     </div>
   </div>
   <div class="stats">

@@ -67,7 +67,8 @@ export function roomInfo(mapRooms, currentIndex, currentRoomType, roomData) {
 }
 
 export function rewardOpen(roomData, battleActive) {
-  return !!(roomData && roomData.result === 'battle' && !battleActive);
+  const isBattle = roomData && (roomData.result === 'battle' || roomData.result === 'boss');
+  return !!(isBattle && !battleActive);
 }
 
 let gameAudio;

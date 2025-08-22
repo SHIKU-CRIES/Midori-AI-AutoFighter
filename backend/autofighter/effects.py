@@ -142,3 +142,19 @@ class EffectManager:
                 if result is False:
                     return False
         return True
+
+    async def cleanup(self, target: Optional[Stats] = None) -> None:
+        """Clear remaining effects and detach status names from the stats.
+
+        Battle resolution calls this to ensure we don't leak stacked effects
+        into post-battle state snapshots.
+        """
+        # Remove references to effect instances
+        self.dots.clear()
+        self.hots.clear()
+        # Clear status name lists on the stats object
+        try:
+            self.stats.dots = []
+            self.stats.hots = []
+        except Exception:
+            pass

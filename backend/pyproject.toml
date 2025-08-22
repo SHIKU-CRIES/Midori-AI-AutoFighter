@@ -46,7 +46,6 @@ llm-cuda = [
     "torchaudio",
     "torchvision",
     "chatterbox-tts",
-    "xformers",
     "openai",
     "langgraph",
     "langchain-core",

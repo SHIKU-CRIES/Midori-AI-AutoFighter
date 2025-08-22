@@ -175,7 +175,12 @@
     if (!battleActive) return;
     try {
       const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
-      if (snap?.loot) {
+      const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
+      const snapCompleted = Boolean(snap?.awaiting_next) || Boolean(snap?.ended) || Boolean(snap?.next_room);
+      const partyDead = Array.isArray(snap?.party) && snap.party.length > 0 && snap.party.every(m => (m?.hp ?? 1) <= 0);
+      const foesDead = Array.isArray(snap?.foes) && snap.foes.length > 0 && snap.foes.every(f => (f?.hp ?? 1) <= 0);
+      const combatOver = partyDead || foesDead;
+      if (snapHasRewards || snapCompleted || combatOver) {
         roomData = snap;
         battleActive = false;
         nextRoom = snap.next_room || nextRoom;
@@ -207,7 +212,7 @@
     if (data.current_room) currentRoomType = data.current_room;
       nextRoom = data.next_room || '';
       saveRunState(runId, nextRoom);
-    if (endpoint === 'battle') {
+    if (endpoint === 'battle' || endpoint === 'boss') {
       const hasRewards = Boolean(data?.loot) || (data?.card_choices?.length > 0) || (data?.relic_choices?.length > 0);
       if (hasRewards) {
         battleActive = false;
@@ -293,7 +298,15 @@
 
   async function handleNextRoom() {
     if (!runId) return;
-    await advanceRoom(runId);
+    if (roomData?.ended) {
+      // Run has ended (defeat). Clear local state and return to main.
+      handleRunEnd();
+      return;
+    }
+    const res = await advanceRoom(runId);
+    if (res && res.next_room) {
+      nextRoom = res.next_room;
+    }
     await enterRoom();
   }
   let items = [];

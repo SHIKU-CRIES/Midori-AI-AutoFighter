@@ -159,7 +159,7 @@
     {#if $overlayView === 'main' && !battleActive}
       <MainMenu {items} />
     {/if}
-    {#if runId && roomData && !(roomData.result === 'battle' && !battleActive)}
+    {#if runId && roomData && !(((roomData.result === 'battle') || (roomData.result === 'boss')) && !battleActive)}
       <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
     {:else if runId}
       <div class="placeholder">Awaiting next room...</div>
