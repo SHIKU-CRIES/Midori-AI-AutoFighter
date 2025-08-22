@@ -4,6 +4,9 @@
   import StatusIcons from './StatusIcons.svelte';
 
   export let fighter = {};
+  $: passiveTip = (fighter.passives || [])
+    .map((p) => `${p.id}${p.stacks > 1 ? ` x${p.stacks}` : ''}`)
+    .join(', ');
 </script>
 
 <div class="portrait-wrap">
@@ -13,7 +16,7 @@
       style={`width: ${fighter.max_hp ? (100 * fighter.hp) / fighter.max_hp : 0}%`}
     ></div>
   </div>
-  <div class="portrait-frame">
+  <div class="portrait-frame" title={passiveTip}>
     <img
       src={getCharacterImage(fighter.id)}
       alt=""

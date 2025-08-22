@@ -4,7 +4,7 @@ import fs from 'fs';
 if (typeof import.meta.glob !== 'function') {
   test('asset loader unsupported', () => {});
 } else {
-  const { getCharacterImage, getElementColor, getElementIcon } = await import('../src/lib/assetLoader.js');
+  const { getCharacterImage, getElementColor, getElementIcon, getDotImage } = await import('../src/lib/assetLoader.js');
 
   describe('asset loader', () => {
     test('returns fallback string for unknown character', () => {
@@ -26,6 +26,11 @@ if (typeof import.meta.glob !== 'function') {
     test('provides damage type color and icon', () => {
       expect(getElementColor('fire')).toBe('#e25822');
       const icon = getElementIcon('light');
+      expect(icon).toBeTruthy();
+    });
+
+    test('resolves dot icon from effect object', () => {
+      const icon = getDotImage({ id: 'burning' });
       expect(icon).toBeTruthy();
     });
   });

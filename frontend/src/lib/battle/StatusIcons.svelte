@@ -5,35 +5,39 @@
   export let hots = [];
   export let dots = [];
 
-  // Collapse duplicate effect names and track stacks.
-  function groupEffects(list) {
-    const counts = {};
-    for (const e of list || []) counts[e] = (counts[e] || 0) + 1;
-    return Object.entries(counts);
+  function formatTooltip(effect, isHot = false) {
+    if (!effect) return '';
+    const parts = [effect.name || effect.id];
+    if (isHot && effect.healing) parts.push(`Heal: ${effect.healing}`);
+    if (!isHot && effect.damage) parts.push(`Dmg: ${effect.damage}`);
+    if (effect.turns) parts.push(`Turns: ${effect.turns}`);
+    if (effect.source) parts.push(`Src: ${effect.source}`);
+    return parts.join(' | ');
   }
 </script>
 
 <div class="effects">
-  {#each groupEffects(hots) as [name]}
-    <span class="hot" title={name}>
+  {#each hots as hot}
+    <span class="hot" title={formatTooltip(hot, true)}>
       <img
         class="dot-img"
-        src={getDotImage(name)}
-        alt={name}
-        style={`border-color: ${getElementColor(getDotElement(name))}`}
+        src={getDotImage(hot)}
+        alt={hot.name || hot.id}
+        style={`border-color: ${getElementColor(getDotElement(hot))}`}
       />
       <span class="hot-plus">+</span>
+      {#if hot.stacks > 1}<span class="stack inside">{hot.stacks}</span>{/if}
     </span>
   {/each}
-  {#each groupEffects(dots) as [name, count]}
-    <span class="dot" title={name}>
+  {#each dots as dot}
+    <span class="dot" title={formatTooltip(dot)}>
       <img
         class="dot-img"
-        src={getDotImage(name)}
-        alt={name}
-        style={`border-color: ${getElementColor(getDotElement(name))}`}
+        src={getDotImage(dot)}
+        alt={dot.name || dot.id}
+        style={`border-color: ${getElementColor(getDotElement(dot))}`}
       />
-      {#if count > 1}<span class="stack inside">{count}</span>{/if}
+      {#if dot.stacks > 1}<span class="stack inside">{dot.stacks}</span>{/if}
     </span>
   {/each}
 </div>

@@ -216,15 +216,16 @@ function inferElementFromKey(key) {
   return 'generic';
 }
 
-// Public: return inferred element for a DoT name/id
-export function getDotElement(idOrName) {
-  return inferElementFromKey(idOrName);
+// Public: return inferred element for a DoT effect object or id
+export function getDotElement(effect) {
+  const key = typeof effect === 'object' ? effect?.id : effect;
+  return inferElementFromKey(key);
 }
 
-// Choose a DoT icon based on id text (e.g., "fire_dot", "blazing_torment")
+// Choose a DoT icon based on an effect object or id
 // Falls back to generic if no themed match is found.
-export function getDotImage(idOrName) {
-  const key = String(idOrName || '').toLowerCase();
+export function getDotImage(effect) {
+  const key = String((typeof effect === 'object' ? effect?.id : effect) || '').toLowerCase();
   const element = inferElementFromKey(key);
   const list = dotAssets[element] || dotAssets.generic || [];
   if (list.length === 0) return DOT_DEFAULT || defaultFallback;
