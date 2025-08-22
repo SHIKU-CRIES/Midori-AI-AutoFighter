@@ -18,9 +18,15 @@ services:
       AF_DB_KEY: ${AF_DB_KEY}
     volumes:
       - ./backend:/app
-      # Mount user's cache into container so backend and LLM variants can reuse cached models/files
-      - ${HOME}/.cache:/root/.cache:delegated
+      - ${HOME}/.cache:/.cache
   backend-llm-cuda:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     <<: *backend-base
     build:
       context: ./backend
@@ -29,6 +35,8 @@ services:
         UV_EXTRA: llm-cuda
     ports:
       - "59002:59002" # conflicts with default backend
+    environment:
+      - UV_EXTRA=llm-cuda
     profiles:
       - llm-cuda
   backend-llm-amd:
@@ -40,6 +48,8 @@ services:
         UV_EXTRA: llm-amd
     ports:
       - "59002:59002" # conflicts with default backend
+    environment:
+      - UV_EXTRA=llm-amd
     profiles:
       - llm-amd
   backend-llm-cpu:
@@ -51,5 +61,7 @@ services:
         UV_EXTRA: llm-cpu
     ports:
       - "59002:59002" # conflicts with default backend
+    environment:
+      - UV_EXTRA=llm-cpu
     profiles:
       - llm-cpu

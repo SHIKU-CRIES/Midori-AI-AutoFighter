@@ -29,7 +29,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 ENV PYTHONPATH="/app"
 
 # UV cache directory for uv to store downloaded models/caches
-ENV UV_CACHE_DIR="/root/.cache/uv"
+ENV UV_CACHE_DIR="/.cache"
 
 WORKDIR /app
 
