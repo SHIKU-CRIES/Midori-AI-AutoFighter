@@ -1,1 +1,1 @@
-export const FEEDBACK_URL = 'https://github.com/Midori-AI/Midori-AI-AutoFighter/issues/new?title=Feedback&body=...';
+export const FEEDBACK_URL = 'https://github.com/Midori-AI-OSS/Midori-AI-AutoFighter/issues/new';

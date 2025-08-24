@@ -17,7 +17,7 @@ describe('layoutForWidth', () => {
 
   test('feedback URL points to repository issues', () => {
     expect(FEEDBACK_URL).toBe(
-      'https://github.com/Midori-AI/Midori-AI-AutoFighter/issues/new?title=Feedback&body=...'
+      'https://github.com/Midori-AI-OSS/Midori-AI-AutoFighter/issues/new'
     );
   });
 });
