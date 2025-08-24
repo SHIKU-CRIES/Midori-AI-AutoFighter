@@ -6,6 +6,7 @@
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';
   import StatTabs from './StatTabs.svelte';
+  import { browser, dev } from '$app/environment';
 
   let background = '';
   let roster = [];
@@ -44,7 +45,10 @@
         previewId = selected[0] ?? player.id;
       }
     } catch (e) {
-      console.error('Unable to load roster. Is the backend running on 59002?');
+      if (dev || !browser) {
+        const { error } = await import('$lib/logger.js');
+        error('Unable to load roster. Is the backend running on 59002?');
+      }
     }
   });
 
