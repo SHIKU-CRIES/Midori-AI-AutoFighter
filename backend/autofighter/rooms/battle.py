@@ -363,6 +363,23 @@ class BattleRoom(Room):
                 elapsed = time.perf_counter() - turn_start
                 if elapsed < 0.5:
                     await asyncio.sleep(0.5 - elapsed)
+        # Signal completion as soon as the loop ends to help UIs stop polling
+        # immediately, even before rewards are fully computed.
+        if progress is not None:
+            try:
+                await progress(
+                    {
+                        "result": "battle",
+                        "party": [_serialize(m) for m in combat_party.members],
+                        "foes": [_serialize(f) for f in foes],
+                        "enrage": {"active": enrage_active, "stacks": enrage_stacks},
+                        "rdr": party.rdr,
+                        "ended": True,
+                    }
+                )
+            except Exception:
+                pass
+
         for member, mgr in zip(combat_party.members, party_effects):
             await mgr.cleanup(member)
         for foe_obj, mgr in zip(foes, foe_effects):
@@ -395,13 +412,9 @@ class BattleRoom(Room):
                 "enrage": {"active": enrage_active, "stacks": enrage_stacks},
                 "rdr": party.rdr,
             }
-        card_opts = [
-            c
-            for c in card_choices(
-                [_pick_card_stars(self) for _ in range(3)],
-                {_serialize(p)["id"] for p in party.members},
-            )
-        ]
+        # Pick a star rank and fetch up to 3 unique card options the party doesn't own
+        card_star = _pick_card_stars(self)
+        card_opts = card_choices(combat_party, card_star, count=3)
         choice_data = [
             {
                 "id": c.id,
@@ -413,9 +426,8 @@ class BattleRoom(Room):
         ]
         relic_opts = []
         if _roll_relic_drop(self, party.rdr):
-            relic_opts = [
-                relic_choices([_apply_rdr_to_stars(_pick_relic_stars(self), party.rdr)])[0]
-            ]
+            relic_star = _apply_rdr_to_stars(_pick_relic_stars(self), party.rdr)
+            relic_opts = relic_choices(combat_party, relic_star, count=1)
         relic_choice_data = [
             {
                 "id": r.id,

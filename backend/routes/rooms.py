@@ -135,10 +135,18 @@ async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "invalid room"}), 400
     room = ShopRoom(node)
     party = load_party(run_id)
-    result = room.resolve(party, data)
+    # resolve is async; must await to get the result dict
+    result = await room.resolve(party, data)
+    # Mark room as completable and expose the next room type for the UI
+    state["awaiting_next"] = True
+    next_type = (
+        rooms[state["current"] + 1].room_type
+        if state["current"] + 1 < len(rooms)
+        else None
+    )
     save_map(run_id, state)
     save_party(run_id, party)
-    return jsonify(result)
+    return jsonify({**result, "next_room": next_type})
 
 
 @bp.post("/rooms/<run_id>/rest")
@@ -150,10 +158,18 @@ async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "invalid room"}), 400
     room = RestRoom(node)
     party = load_party(run_id)
-    result = room.resolve(party, data)
+    # resolve is async; must await to get the result dict
+    result = await room.resolve(party, data)
+    # Mark room as completable and expose the next room type for the UI
+    state["awaiting_next"] = True
+    next_type = (
+        rooms[state["current"] + 1].room_type
+        if state["current"] + 1 < len(rooms)
+        else None
+    )
     save_map(run_id, state)
     save_party(run_id, party)
-    return jsonify(result)
+    return jsonify({**result, "next_room": next_type})
 
 
 @bp.post("/rooms/<run_id>/chat")
@@ -166,9 +182,16 @@ async def chat_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     room = ChatRoom(node)
     party = load_party(run_id)
     result = await room.resolve(party, data)
+    # Chat rooms should also be leaveable
+    state["awaiting_next"] = True
+    next_type = (
+        rooms[state["current"] + 1].room_type
+        if state["current"] + 1 < len(rooms)
+        else None
+    )
     save_map(run_id, state)
     save_party(run_id, party)
-    return jsonify(result)
+    return jsonify({**result, "next_room": next_type})
 
 
 @bp.post("/rooms/<run_id>/boss")

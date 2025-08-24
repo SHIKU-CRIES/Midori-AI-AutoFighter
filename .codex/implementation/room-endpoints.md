@@ -37,9 +37,13 @@ echoed in responses for parity across room types.
   party by 5% of its total max HP, deducts the provided `cost` from the shared
   gold pool, and appends any purchased `item` to a shared relic list. The request
   accepts `{ "action": "" }` and responses include updated `gold`, `relics`, and
-  `cards` values. The pointer only advances after `POST /run/<run_id>/next`.
+  `cards` values. On success the server marks the run as ready to advance and
+  includes `next_room` in the response; the pointer advances when the client
+  calls `POST /run/<run_id>/next`.
 - `POST /rooms/<run_id>/rest` – validates the next node is a rest room and allows
-  gacha pulls or party swaps. The pointer only advances after `POST /run/<run_id>/next`.
+  gacha pulls or party swaps. On success the server marks the run as ready to
+  advance and includes `next_room` in the response. The pointer advances when
+  the client calls `POST /run/<run_id>/next`.
 - `POST /rooms/<run_id>/boss` – validates the next node is a `battle-boss-floor`
   room and runs a high-powered battle. The request accepts `{ "action": "" }`
   and responses mirror normal battles but scale foe stats heavily and offer

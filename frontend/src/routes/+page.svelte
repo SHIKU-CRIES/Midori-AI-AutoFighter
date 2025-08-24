@@ -62,8 +62,8 @@
         selectedParty = data.party || selectedParty;
         mapRooms = data.map.rooms || [];
         currentIndex = data.map.current || 0;
-        nextRoom = mapRooms[currentIndex]?.room_type || '';
-        currentRoomType = nextRoom || '';
+        currentRoomType = mapRooms[currentIndex]?.room_type || '';
+        nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
         await enterRoom();
       } catch {
         clearRunState();
@@ -74,7 +74,7 @@
   function openRun() {
     if (runId) {
       homeOverlay();
-      if (!battleActive && nextRoom) {
+      if (!battleActive) {
         enterRoom();
       }
     } else {
@@ -97,8 +97,8 @@
     runId = data.run_id;
     mapRooms = data.map.rooms || [];
     currentIndex = data.map.current || 0;
-    nextRoom = mapRooms[currentIndex]?.room_type || '';
-    currentRoomType = nextRoom || '';
+    currentRoomType = mapRooms[currentIndex]?.room_type || '';
+    nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
     homeOverlay();
     await enterRoom();
   }
@@ -179,7 +179,7 @@
     try {
       const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
       const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
-      const snapCompleted = Boolean(snap?.awaiting_next) || Boolean(snap?.ended) || Boolean(snap?.next_room);
+      const snapCompleted = Boolean(snap?.awaiting_next) || Boolean(snap?.next_room) || (snap?.ended && snap?.result === 'defeat');
       const partyDead = Array.isArray(snap?.party) && snap.party.length > 0 && snap.party.every(m => (m?.hp ?? 1) <= 0);
       const foesDead = Array.isArray(snap?.foes) && snap.foes.length > 0 && snap.foes.every(f => (f?.hp ?? 1) <= 0);
       const combatOver = partyDead || foesDead;
@@ -220,10 +220,13 @@
 
   async function enterRoom() {
     stopBattlePoll();
-    if (!runId || !nextRoom) return;
-    let endpoint = nextRoom;
+    if (!runId) return;
+    // Ensure header reflects the room we are entering now
+    currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType || nextRoom;
+    if (!currentRoomType) return;
+    let endpoint = currentRoomType;
     if (endpoint.includes('battle')) {
-      endpoint = nextRoom.includes('boss') ? 'boss' : 'battle';
+      endpoint = currentRoomType.includes('boss') ? 'boss' : 'battle';
     }
     // Fetch first, then decide whether to show rewards or start battle polling.
     const data = mapStatuses(await roomAction(runId, endpoint));
@@ -234,8 +237,8 @@
     // Keep map-derived indices and current room type in sync when available
     if (typeof data.current_index === 'number') currentIndex = data.current_index;
     if (data.current_room) currentRoomType = data.current_room;
-      nextRoom = data.next_room || '';
-      saveRunState(runId, nextRoom);
+    nextRoom = data.next_room || (mapRooms?.[currentIndex + 1]?.room_type || nextRoom || '');
+    saveRunState(runId, nextRoom);
     if (endpoint === 'battle' || endpoint === 'boss') {
       const hasRewards = Boolean(data?.loot) || (data?.card_choices?.length > 0) || (data?.relic_choices?.length > 0);
       if (hasRewards) {
@@ -259,7 +262,8 @@
         } catch {}
       }
       // If the snapshot didn't include current room type yet, fall back to pre-room value
-      if (!currentRoomType) currentRoomType = endpoint.includes('boss') ? 'battle-boss-floor' : 'battle-normal';
+      // Actively set a sensible type for header during combat
+      if (!currentRoomType) currentRoomType = mapRooms?.[currentIndex]?.room_type || (endpoint.includes('boss') ? 'battle-boss-floor' : 'battle-normal');
       battleActive = true;
       pollBattle();
     } else {
@@ -293,6 +297,10 @@
     if (!runId) return;
     await roomAction(runId, 'shop', 'leave');
     const res = await advanceRoom(runId);
+    if (res && typeof res.current_index === 'number') {
+      currentIndex = res.current_index;
+      currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+    }
     if (res && res.next_room) {
       nextRoom = res.next_room;
     }
@@ -314,6 +322,10 @@
     if (!runId) return;
     await roomAction(runId, 'rest', 'leave');
     const res = await advanceRoom(runId);
+    if (res && typeof res.current_index === 'number') {
+      currentIndex = res.current_index;
+      currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+    }
     if (res && res.next_room) {
       nextRoom = res.next_room;
     }
@@ -328,6 +340,10 @@
       return;
     }
     const res = await advanceRoom(runId);
+    if (res && typeof res.current_index === 'number') {
+      currentIndex = res.current_index;
+      currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+    }
     if (res && res.next_room) {
       nextRoom = res.next_room;
     }

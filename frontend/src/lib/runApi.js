@@ -28,10 +28,11 @@ export async function updateParty(runId, party) {
 }
 
 export async function roomAction(runId, type, action = '') {
+  const payload = (action && typeof action === 'object') ? action : { action };
   const res = await fetch(`${API_BASE}/rooms/${runId}/${type}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action })
+    body: JSON.stringify(payload)
   });
   if (!res.ok) throw new Error(`HTTP error ${res.status}`);
   return res.json();
