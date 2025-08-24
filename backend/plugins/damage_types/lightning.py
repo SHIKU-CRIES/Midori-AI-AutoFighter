@@ -1,9 +1,12 @@
 import asyncio
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
 
 from autofighter.effects import DamageOverTime
-from plugins.dots.charged_decay import ChargedDecay
 from plugins.damage_types._base import DamageTypeBase
+
+if TYPE_CHECKING:
+    from plugins.dots.charged_decay import ChargedDecay
 
 
 @dataclass
@@ -13,6 +16,8 @@ class Lightning(DamageTypeBase):
     color: tuple[int, int, int] = (255, 255, 0)
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
+        from plugins.dots.charged_decay import ChargedDecay
+
         dot = ChargedDecay(int(damage * 0.25), 3)
         dot.source = source
         return dot
