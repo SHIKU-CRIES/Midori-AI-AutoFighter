@@ -23,5 +23,9 @@ settings.json
 # Node lock files
 package-lock.json
 
-# Frontend logs
+# logs
+logs/
+backend/logs/
 frontend/logs/
+
+
