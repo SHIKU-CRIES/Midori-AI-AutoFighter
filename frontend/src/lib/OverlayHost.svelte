@@ -145,7 +145,7 @@
   </OverlaySurface>
 {/if}
 
-{#if roomData && (roomData.result === 'battle' || roomData.result === 'boss') && (battleActive || rewardOpen) && $overlayView === 'main'}
+{#if roomData && (roomData.result === 'battle' || roomData.result === 'boss') && (battleActive || rewardOpen)}
   <div class="overlay-inset">
     <BattleView
       {runId}
@@ -161,6 +161,15 @@
 {/if}
 
 <style>
+  .overlay-inset {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
   .stained-glass-row {
     display: flex;
     gap: 0.5rem;
