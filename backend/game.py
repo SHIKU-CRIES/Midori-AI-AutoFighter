@@ -232,7 +232,14 @@ async def _run_battle(
         except Exception as exc:
             state["battle"] = False
             log.exception("Battle resolution failed for %s", run_id)
-            battle_snapshots[run_id] = {"error": str(exc), "awaiting_next": False}
+            battle_snapshots[run_id] = {
+                "result": "error",
+                "error": str(exc),
+                "ended": True,
+                "party": [],
+                "foes": [],
+                "awaiting_next": False,
+            }
             try:
                 await asyncio.to_thread(save_map, run_id, state)
                 await asyncio.to_thread(save_party, run_id, party)
@@ -313,9 +320,12 @@ async def _run_battle(
         except Exception as exc:
             log.exception("Battle processing failed for %s", run_id)
             battle_snapshots[run_id] = {
-                "result": result.get("result"),
+                "result": "error",
                 "loot": result.get("loot"),
                 "error": str(exc),
+                "ended": True,
+                "party": [],
+                "foes": [],
                 "awaiting_next": False,
             }
     finally:

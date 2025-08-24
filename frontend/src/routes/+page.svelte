@@ -178,6 +178,12 @@
     if (!battleActive) return;
     try {
       const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
+      if (snap?.error) {
+        roomData = snap;
+        battleActive = false;
+        stalledTicks = 0;
+        return;
+      }
       const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
       const snapCompleted = Boolean(snap?.awaiting_next) || Boolean(snap?.next_room) || (snap?.ended && snap?.result === 'defeat');
       const partyDead = Array.isArray(snap?.party) && snap.party.length > 0 && snap.party.every(m => (m?.hp ?? 1) <= 0);
