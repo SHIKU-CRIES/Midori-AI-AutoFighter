@@ -397,11 +397,17 @@
 
   async function handleNextRoom() {
     if (!runId) return;
+    // Ensure syncing is enabled when advancing to the next room
+    haltSync = false;
+    if (typeof window !== 'undefined') window.afHaltSync = false;
     // If rewards are still present, don't attempt to advance.
     // Only block if there are still selectable choices (cards/relics).
     if ((roomData?.card_choices?.length || 0) > 0 || (roomData?.relic_choices?.length || 0) > 0) {
       return;
     }
+    // Close reward overlay and unmount previous BattleView immediately
+    roomData = null;
+    battleActive = false;
     if (roomData?.ended) {
       // Run has ended (defeat). Clear state, return to main, and show popup.
       handleDefeat();
