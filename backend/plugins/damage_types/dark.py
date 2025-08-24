@@ -1,10 +1,13 @@
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
 
 from autofighter.stats import BUS
 from autofighter.effects import DamageOverTime
-from plugins.dots.shadow_siphon import ShadowSiphon
-from plugins.dots.abyssal_corruption import AbyssalCorruption
 from plugins.damage_types._base import DamageTypeBase
+
+if TYPE_CHECKING:
+    from plugins.dots.shadow_siphon import ShadowSiphon
+    from plugins.dots.abyssal_corruption import AbyssalCorruption
 
 
 @dataclass
@@ -16,6 +19,8 @@ class Dark(DamageTypeBase):
     _cleanup_registered: bool = False
 
     async def on_action(self, actor, allies, enemies) -> bool:
+        from plugins.dots.shadow_siphon import ShadowSiphon
+
         for member in allies:
             mgr = getattr(member, "effect_manager", None)
             if mgr is not None:
@@ -24,6 +29,8 @@ class Dark(DamageTypeBase):
 
         if not self._cleanup_registered:
             def _clear(_):
+                from plugins.dots.shadow_siphon import ShadowSiphon
+
                 for member in allies:
                     member.dots = [d for d in member.dots if d != ShadowSiphon.id]
                     mgr = getattr(member, "effect_manager", None)
@@ -52,6 +59,8 @@ class Dark(DamageTypeBase):
             # Preconditions: source must be Dark and the target must have Shadow Siphon.
             if getattr(attacker, "damage_type", None) is not self:
                 return damage
+            from plugins.dots.shadow_siphon import ShadowSiphon
+
             if ShadowSiphon.id not in getattr(target, "dots", []):
                 return damage
 
@@ -73,6 +82,8 @@ class Dark(DamageTypeBase):
         return damage
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
+        from plugins.dots.abyssal_corruption import AbyssalCorruption
+
         dot = AbyssalCorruption(int(damage * 0.4), 3)
         dot.source = source
         return dot
