@@ -3,6 +3,7 @@
   import { createEventDispatcher } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
   import { getGacha, pullGacha } from './api.js';
+  import { browser, dev } from '$app/environment';
   const dispatch = createEventDispatcher();
   let pity = 0;
   let items = {};
@@ -21,7 +22,10 @@
       items = data.items;
       results = data.results || [];
     } catch (err) {
-      console.error('pull failed', err);
+      if (dev || !browser) {
+        const { error } = await import('$lib/logger.js');
+        error('pull failed', err);
+      }
       alert('Not enough tickets');
     }
     loading = false;

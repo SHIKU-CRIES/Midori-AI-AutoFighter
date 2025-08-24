@@ -15,6 +15,7 @@
   import { buildRunMenu } from '$lib/RunButtons.svelte';
   import { FEEDBACK_URL } from '$lib/constants.js';
   import { openOverlay, backOverlay, homeOverlay } from '$lib/OverlayController.js';
+  import { browser, dev } from '$app/environment';
 
   let runId = '';
   let backendFlavor = '';
@@ -202,7 +203,10 @@
         if (stalledTicks > STALL_TICKS) {
           battleActive = false;
           roomData = { ...snap, error: 'Battle results could not be fetched.' };
-          console.warn('Battle results could not be fetched.');
+          if (dev || !browser) {
+            const { warn } = await import('$lib/logger.js');
+            warn('Battle results could not be fetched.');
+          }
           return;
         }
       } else {
