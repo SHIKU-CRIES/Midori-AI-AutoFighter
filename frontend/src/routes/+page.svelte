@@ -56,8 +56,10 @@
     window.backendFlavor = backendFlavor;
     const saved = loadRunState();
     if (saved) {
-      try {
-        const data = await getMap(saved.runId);
+      const data = await getMap(saved.runId);
+      if (!data) {
+        clearRunState();
+      } else {
         runId = saved.runId;
         selectedParty = data.party || selectedParty;
         mapRooms = data.map.rooms || [];
@@ -65,8 +67,6 @@
         currentRoomType = mapRooms[currentIndex]?.room_type || '';
         nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
         await enterRoom();
-      } catch {
-        clearRunState();
       }
     }
   });
@@ -334,20 +334,34 @@
 
   async function handleNextRoom() {
     if (!runId) return;
+    // If rewards are still present, don't attempt to advance.
+    if ((roomData?.card_choices?.length || 0) > 0 || (roomData?.relic_choices?.length || 0) > 0) {
+      return;
+    }
     if (roomData?.ended) {
       // Run has ended (defeat). Clear local state and return to main.
       handleRunEnd();
       return;
     }
-    const res = await advanceRoom(runId);
-    if (res && typeof res.current_index === 'number') {
-      currentIndex = res.current_index;
-      currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+    try {
+      const res = await advanceRoom(runId);
+      if (res && typeof res.current_index === 'number') {
+        currentIndex = res.current_index;
+        currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+      }
+      if (res && res.next_room) {
+        nextRoom = res.next_room;
+      }
+      await enterRoom();
+    } catch (e) {
+      // If not ready (e.g., server 400), refresh snapshot so rewards remain visible.
+      try {
+        const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
+        roomData = snap;
+      } catch {
+        /* no-op */
+      }
     }
-    if (res && res.next_room) {
-      nextRoom = res.next_room;
-    }
-    await enterRoom();
   }
   let items = [];
   $: items = buildRunMenu(

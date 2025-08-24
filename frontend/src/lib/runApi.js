@@ -14,6 +14,7 @@ export async function startRun(party, damageType = '') {
 
 export async function getMap(runId) {
   const res = await fetch(`${API_BASE}/map/${runId}`, { cache: 'no-store' });
+  if (res.status === 404) return null;
   if (!res.ok) throw new Error(`HTTP error ${res.status}`);
   return res.json();
 }
