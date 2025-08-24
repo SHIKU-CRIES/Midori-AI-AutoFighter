@@ -21,6 +21,7 @@ from game import _assign_damage_type  # noqa: F401
 from game import _load_player_customization  # noqa: F401
 from game import _passive_names  # noqa: F401
 from game import _run_battle  # noqa: F401
+from game import _scale_stats  # noqa: F401
 from game import battle_snapshots  # noqa: F401
 from game import battle_tasks  # noqa: F401
 from game import load_map  # noqa: F401
