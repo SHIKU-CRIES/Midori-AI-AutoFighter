@@ -1,31 +1,69 @@
 // Lightweight wrappers for run-related API calls.
 // Each helper talks to the backend and returns JSON payloads.
 
+import { openOverlay } from './OverlayController.js';
+
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:59002';
 
+async function handleFetch(url, options = {}) {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      let data;
+      try { data = await res.json(); } catch {}
+      const message = data?.message || `HTTP error ${res.status}`;
+      const traceback = data?.traceback || '';
+      openOverlay('error', { message, traceback });
+      const err = new Error(message);
+      err.overlayShown = true;
+      throw err;
+    }
+    return res.json();
+  } catch (e) {
+    if (!e.overlayShown) {
+      openOverlay('error', { message: e.message, traceback: e.stack || '' });
+    }
+    throw e;
+  }
+}
+
 export async function startRun(party, damageType = '') {
-  const res = await fetch(`${API_BASE}/run/start`, {
+  return handleFetch(`${API_BASE}/run/start`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ party, damage_type: damageType })
   });
-  return res.json();
 }
 
 export async function getMap(runId) {
-  const res = await fetch(`${API_BASE}/map/${runId}`, { cache: 'no-store' });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/map/${runId}`, { cache: 'no-store' });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      let data;
+      try { data = await res.json(); } catch {}
+      const message = data?.message || `HTTP error ${res.status}`;
+      const traceback = data?.traceback || '';
+      openOverlay('error', { message, traceback });
+      const err = new Error(message);
+      err.overlayShown = true;
+      throw err;
+    }
+    return res.json();
+  } catch (e) {
+    if (!e.overlayShown) {
+      openOverlay('error', { message: e.message, traceback: e.stack || '' });
+    }
+    throw e;
+  }
 }
 
 export async function updateParty(runId, party) {
-  const res = await fetch(`${API_BASE}/party/${runId}`, {
+  return handleFetch(`${API_BASE}/party/${runId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ party })
   });
-  return res.json();
 }
 
 export async function roomAction(runId, type, action = '') {
@@ -37,35 +75,29 @@ export async function roomAction(runId, type, action = '') {
       return {};
     }
   } catch {}
-  const res = await fetch(`${API_BASE}/rooms/${runId}/${type}`, {
+  return handleFetch(`${API_BASE}/rooms/${runId}/${type}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-  return res.json();
 }
 
 export async function advanceRoom(runId) {
-  const res = await fetch(`${API_BASE}/run/${runId}/next`, { method: 'POST' });
-  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-  return res.json();
+  return handleFetch(`${API_BASE}/run/${runId}/next`, { method: 'POST' });
 }
 
 export async function chooseCard(runId, cardId) {
-  const res = await fetch(`${API_BASE}/cards/${runId}`, {
+  return handleFetch(`${API_BASE}/cards/${runId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ card: cardId })
   });
-  return res.json();
 }
 
 export async function chooseRelic(runId, relicId) {
-  const res = await fetch(`${API_BASE}/relics/${runId}`, {
+  return handleFetch(`${API_BASE}/relics/${runId}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ relic: relicId })
   });
-  return res.json();
 }

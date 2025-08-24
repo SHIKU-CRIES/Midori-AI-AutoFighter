@@ -518,5 +518,6 @@
     on:nextRoom={handleNextRoom}
     on:endRun={handleRunEnd}
     on:saveParty={handlePartySave}
+    on:error={(e) => openOverlay('error', e.detail)}
   />
 </div>

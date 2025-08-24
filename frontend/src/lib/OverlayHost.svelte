@@ -4,7 +4,7 @@
   and forwards user actions to the parent GameViewport.
 -->
 <script>
-  import { overlayView } from './OverlayController.js';
+  import { overlayView, overlayData } from './OverlayController.js';
   import { createEventDispatcher } from 'svelte';
   import OverlaySurface from './OverlaySurface.svelte';
   import PopupWindow from './PopupWindow.svelte';
@@ -18,6 +18,7 @@
   import ShopMenu from './ShopMenu.svelte';
   import RestRoom from './RestRoom.svelte';
   import BattleView from './BattleView.svelte';
+  import ErrorOverlay from './ErrorOverlay.svelte';
   import { rewardOpen as computeRewardOpen } from './viewportState.js';
 
   export let selected = [];
@@ -57,6 +58,14 @@
       </div>
     </div>
   </PopupWindow>
+{/if}
+
+{#if $overlayView === 'error'}
+  <ErrorOverlay
+    message={$overlayData.message || 'An unexpected error occurred.'}
+    traceback={$overlayData.traceback || ''}
+    on:close={() => dispatch('back')}
+  />
 {/if}
 
 {#if $overlayView === 'party-start'}
