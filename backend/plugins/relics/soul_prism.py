@@ -36,8 +36,10 @@ class SoulPrism(RelicBase):
                 member._soul_prism_hp = base
                 member.max_hp = int(base * multiplier)
                 member.hp = max(1, int(member.max_hp * 0.01))
-                member.defense = int(member.defense * (1 + buff))
-                member.mitigation *= 1 + buff
+                new_def = int(member.defense * (1 + buff))
+                member.adjust_stat_on_gain("defense", new_def - member.defense)
+                new_mit = member.mitigation * (1 + buff)
+                member.adjust_stat_on_gain("mitigation", new_mit - member.mitigation)
 
         BUS.subscribe("battle_end", _battle_end)
 

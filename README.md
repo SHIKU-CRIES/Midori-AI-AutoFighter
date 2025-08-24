@@ -244,7 +244,7 @@ Pygame version:
 - Ally (B, random damage type)
 - Becca (B, random damage type)
 - Bubbles (A, random damage type)
-- Carly (B, Light)
+- Carly (B, Light) – converts attack growth into defense
 - Chibi (A, Lightning)
 - Graygray (B, random damage type)
 - Hilander (A, random damage type)

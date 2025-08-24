@@ -49,6 +49,17 @@ class FoeBase(Stats):
     dots: list[str] = field(default_factory=list)
     hots: list[str] = field(default_factory=list)
 
+    stat_gain_map: dict[str, str] = field(default_factory=dict)
+    stat_loss_map: dict[str, str] = field(default_factory=dict)
+
+    def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
+        target = self.stat_gain_map.get(stat_name, stat_name)
+        super().adjust_stat_on_gain(target, amount)
+
+    def adjust_stat_on_loss(self, stat_name: str, amount: int) -> None:
+        target = self.stat_loss_map.get(stat_name, stat_name)
+        super().adjust_stat_on_loss(target, amount)
+
     async def maybe_regain(self, turn: int) -> None:  # noqa: D401
         """Regain a fraction of HP every other turn."""
         if turn % 2 != 0:
@@ -61,5 +72,5 @@ class FoeBase(Stats):
     def _on_level_up(self) -> None:  # noqa: D401
         """Apply base bonuses then boost mitigation and vitality."""
         super()._on_level_up()
-        self.mitigation += 0.0001
-        self.vitality += 0.0001
+        self.adjust_stat_on_gain("mitigation", 0.0001)
+        self.adjust_stat_on_gain("vitality", 0.0001)

@@ -46,6 +46,18 @@ class Stats:
     dots: list[str] = field(default_factory=list)
     hots: list[str] = field(default_factory=list)
 
+    level_up_gains: dict[str, int] = field(
+        default_factory=lambda: {"max_hp": 10, "atk": 5, "defense": 3}
+    )
+
+    def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
+        current = getattr(self, stat_name, 0)
+        setattr(self, stat_name, current + amount)
+
+    def adjust_stat_on_loss(self, stat_name: str, amount: int) -> None:
+        current = getattr(self, stat_name, 0)
+        setattr(self, stat_name, current - amount)
+
     @property
     def element_id(self) -> str:
         dt = getattr(self, "damage_type", Generic())
@@ -74,10 +86,9 @@ class Stats:
             if isinstance(value, (int, float)):
                 new_val = value * (1 + inc)
                 setattr(self, f.name, type(value)(new_val))
-        self.max_hp += 10 * self.level
+        for stat, base in self.level_up_gains.items():
+            self.adjust_stat_on_gain(stat, base * self.level)
         self.hp = self.max_hp
-        self.atk += 5 * self.level
-        self.defense += 3 * self.level
 
     def gain_exp(self, amount: int) -> None:
         if self.level < 1000:

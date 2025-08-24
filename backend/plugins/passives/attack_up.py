@@ -10,4 +10,4 @@ class AttackUp:
     amount = 5
 
     def apply(self, target) -> None:
-        target.atk += self.amount
+        target.adjust_stat_on_gain("atk", self.amount)

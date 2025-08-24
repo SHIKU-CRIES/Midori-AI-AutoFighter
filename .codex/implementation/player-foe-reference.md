@@ -19,7 +19,7 @@ to support future character-specific prompts.
 - **Ally** (B, random) – applies `ally_passive` on load to grant ally-specific bonuses.
 - **Becca** (B, random) – builds high attack but takes more damage from lower defense.
 - **Bubbles** (A, random) – starts with a default item and applies `bubbles_passive`.
-- **Carly** (B, Light) – applies `carly_passive`.
+- **Carly** (B, Light) – applies `carly_passive` and converts attack gains into defense.
 - **Chibi** (A, random) – gains four times the normal benefit from Vitality.
 - **Graygray** (B, random) – applies `graygray_passive`.
 - **Hilander** (A, random) – builds increased crit rate and crit damage.

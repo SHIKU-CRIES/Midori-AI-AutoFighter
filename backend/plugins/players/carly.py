@@ -13,4 +13,7 @@ class Carly(PlayerBase):
     char_type = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Light)
+    stat_gain_map: dict[str, str] = field(
+        default_factory=lambda: {"atk": "defense"}
+    )
 

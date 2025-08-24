@@ -36,15 +36,15 @@ class TravelersCharm(RelicBase):
                 member = next((m for m in party.members if id(m) == pid), None)
                 if member is None:
                     continue
-                member.defense += bdef
-                member.mitigation += bmit
+                member.adjust_stat_on_gain("defense", bdef)
+                member.adjust_stat_on_gain("mitigation", bmit)
                 active[pid] = (member, bdef, bmit)
             pending.clear()
 
         def _turn_end() -> None:
             for pid, (member, bdef, bmit) in list(active.items()):
-                member.defense -= bdef
-                member.mitigation -= bmit
+                member.adjust_stat_on_loss("defense", bdef)
+                member.adjust_stat_on_loss("mitigation", bmit)
             active.clear()
 
         BUS.subscribe("damage_taken", _hit)

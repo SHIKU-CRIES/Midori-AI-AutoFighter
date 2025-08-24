@@ -47,3 +47,14 @@ class PlayerBase(Stats):
     dots: list[str] = field(default_factory=list)
     hots: list[str] = field(default_factory=list)
 
+    stat_gain_map: dict[str, str] = field(default_factory=dict)
+    stat_loss_map: dict[str, str] = field(default_factory=dict)
+
+    def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
+        target = self.stat_gain_map.get(stat_name, stat_name)
+        super().adjust_stat_on_gain(target, amount)
+
+    def adjust_stat_on_loss(self, stat_name: str, amount: int) -> None:
+        target = self.stat_loss_map.get(stat_name, stat_name)
+        super().adjust_stat_on_loss(target, amount)
+
