@@ -240,6 +240,9 @@ async def _run_battle(
         result["items"] = items
         state["battle"] = False
         if result.get("result") == "defeat":
+            state["awaiting_card"] = False
+            state["awaiting_relic"] = False
+            state["awaiting_next"] = False
             try:
                 await asyncio.to_thread(save_map, run_id, state)
                 await asyncio.to_thread(save_party, run_id, party)

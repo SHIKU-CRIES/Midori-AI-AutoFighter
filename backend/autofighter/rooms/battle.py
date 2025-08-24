@@ -373,6 +373,28 @@ class BattleRoom(Room):
         party.cards = combat_party.cards
         party_data = [_serialize(p) for p in party.members]
         foes_data = [_serialize(f) for f in foes]
+        if all(m.hp <= 0 for m in combat_party.members):
+            loot = {
+                "gold": 0,
+                "card_choices": [],
+                "relic_choices": [],
+                "items": [],
+            }
+            return {
+                "result": "defeat",
+                "party": party_data,
+                "gold": party.gold,
+                "relics": party.relics,
+                "cards": party.cards,
+                "card_choices": [],
+                "relic_choices": [],
+                "loot": loot,
+                "foes": foes_data,
+                "room_number": self.node.index,
+                "exp_reward": exp_reward,
+                "enrage": {"active": enrage_active, "stacks": enrage_stacks},
+                "rdr": party.rdr,
+            }
         card_opts = [
             c
             for c in card_choices(

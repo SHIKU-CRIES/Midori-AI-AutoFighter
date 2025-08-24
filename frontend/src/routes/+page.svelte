@@ -180,13 +180,21 @@
       const partyDead = Array.isArray(snap?.party) && snap.party.length > 0 && snap.party.every(m => (m?.hp ?? 1) <= 0);
       const foesDead = Array.isArray(snap?.foes) && snap.foes.length > 0 && snap.foes.every(f => (f?.hp ?? 1) <= 0);
       const combatOver = partyDead || foesDead;
-      if (snapHasRewards || snapCompleted || combatOver) {
+      if (snapHasRewards || snapCompleted) {
+        // Stop only when rewards or completion flags arrive
         roomData = snap;
-        battleActive = false;
-        nextRoom = snap.next_room || nextRoom;
-        if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
-        if (snap.current_room) currentRoomType = snap.current_room;
-        return;
+        const rewardsReady = Boolean(roomData?.loot) || (roomData?.card_choices?.length > 0) || (roomData?.relic_choices?.length > 0);
+        if (rewardsReady || snapCompleted) {
+          battleActive = false;
+          nextRoom = snap.next_room || nextRoom;
+          if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
+          if (snap.current_room) currentRoomType = snap.current_room;
+          return;
+        }
+      }
+      if (combatOver) {
+        // Update snapshot but keep polling until rewards are available
+        roomData = snap;
       }
     } catch {
       /* ignore */
