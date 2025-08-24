@@ -7,10 +7,10 @@ import asyncio
 import hashlib
 import logging
 
-from pathlib import Path
 from typing import Any
-from typing import Awaitable
 from typing import Callable
+from typing import Awaitable
+from pathlib import Path
 
 from cryptography.fernet import Fernet
 
@@ -23,11 +23,13 @@ from autofighter.gacha import GachaManager
 from autofighter.mapgen import MapNode
 from autofighter.party import Party
 from autofighter.rooms import BattleRoom
-from autofighter.rooms import _build_foes
-from autofighter.rooms import _scale_stats
-from autofighter.rooms import _serialize
+from autofighter.rooms import _build_foes  # noqa: F401
+from autofighter.rooms import _scale_stats  # noqa: F401
+from autofighter.rooms import _serialize  # noqa: F401
 from autofighter.save_manager import SaveManager
 from autofighter.stats import Stats
+
+log = logging.getLogger(__name__)
 
 SAVE_MANAGER = SaveManager.from_env()
 SAVE_MANAGER.migrate(Path(__file__).resolve().parent / "migrations")
@@ -298,7 +300,7 @@ async def _run_battle(
             )
             battle_snapshots[run_id] = result
         except Exception as exc:
-            logging.exception("Battle processing failed for %s", run_id)
+            log.exception("Battle processing failed for %s", run_id)
             battle_snapshots[run_id] = {
                 "result": result.get("result"),
                 "loot": result.get("loot"),
