@@ -398,11 +398,10 @@
   async function handleNextRoom() {
     if (!runId) return;
     // If rewards are still present, don't attempt to advance.
-    if (hasRewards(roomData)) {
+    // Only block if there are still selectable choices (cards/relics).
+    if ((roomData?.card_choices?.length || 0) > 0 || (roomData?.relic_choices?.length || 0) > 0) {
       return;
     }
-    // Clear any stale loot container locally to prevent keeping reward overlay open
-    if (roomData?.loot) roomData.loot = { gold: 0, items: [] };
     if (roomData?.ended) {
       // Run has ended (defeat). Clear state, return to main, and show popup.
       handleDefeat();
