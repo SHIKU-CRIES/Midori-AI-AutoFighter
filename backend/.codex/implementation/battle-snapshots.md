@@ -8,6 +8,10 @@ poll for results:
 - Reward processing is wrapped in a `try/except`. If an exception occurs, the
   snapshot is populated with any available loot, an `error` message, and
   `awaiting_next` set to `false` so clients are not blocked waiting for results.
+- The call to `room.resolve` is wrapped in a `try/except` to guard against
+  crashes. On failure the battle flag is cleared, map and party data are saved,
+  and the snapshot records the `error` with `awaiting_next` set to `false` so
+  runs do not hang.
 
 These snapshots are stored in `game.battle_snapshots` and polled by the
 frontend during combat.
