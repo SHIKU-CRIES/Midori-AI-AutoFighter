@@ -4,18 +4,23 @@
 import { writable, get } from 'svelte/store';
 
 export const overlayView = writable('main');
+export const overlayData = writable({});
 const stack = [];
 
-export function openOverlay(view) {
-  stack.push(get(overlayView));
+export function openOverlay(view, data = {}) {
+  stack.push({ view: get(overlayView), data: get(overlayData) });
   overlayView.set(view);
+  overlayData.set(data);
 }
 
 export function backOverlay() {
-  overlayView.set(stack.pop() || 'main');
+  const prev = stack.pop() || { view: 'main', data: {} };
+  overlayView.set(prev.view);
+  overlayData.set(prev.data);
 }
 
 export function homeOverlay() {
   stack.length = 0;
   overlayView.set('main');
+  overlayData.set({});
 }
