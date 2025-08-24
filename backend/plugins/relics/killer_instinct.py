@@ -23,7 +23,7 @@ class KillerInstinct(RelicBase):
 
         def _ultimate(user) -> None:
             bonus = int(user.atk * 0.75)
-            user.atk += bonus
+            user.adjust_stat_on_gain("atk", bonus)
             buffs[id(user)] = (user, bonus)
 
         def _damage(target, attacker, amount) -> None:
@@ -32,7 +32,7 @@ class KillerInstinct(RelicBase):
 
         def _turn_end() -> None:
             for _, (member, bonus) in list(buffs.items()):
-                member.atk -= bonus
+                member.adjust_stat_on_loss("atk", bonus)
             buffs.clear()
 
         BUS.subscribe("ultimate_used", _ultimate)

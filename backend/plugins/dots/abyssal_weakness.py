@@ -11,9 +11,10 @@ class AbyssalWeakness(DamageOverTime):
 
     def tick(self, target, *_):
         if not self._applied:
-            target.defense = max(target.defense - 1, 0)
+            target.adjust_stat_on_loss("defense", 1)
+            target.defense = max(target.defense, 0)
             self._applied = True
         alive = super().tick(target)
         if not alive:
-            target.defense += 1
+            target.adjust_stat_on_gain("defense", 1)
         return alive

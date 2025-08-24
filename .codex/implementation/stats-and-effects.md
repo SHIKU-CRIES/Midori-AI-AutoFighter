@@ -23,6 +23,12 @@ Experience feeds into `exp` and triggers a level-up when it meets or exceeds
 normal rate to accelerate early progression. Level-ups increase core stats but
 no longer restore HP, preserving damage taken.
 
+Direct stat adjustments route through `adjust_stat_on_gain` and
+`adjust_stat_on_loss`. These helpers make it possible for subclasses to
+redirect bonuses or penalties to different attributes. `_on_level_up` iterates
+through a `level_up_gains` map so plugins can remap growth by overriding the
+dictionary or the adjust methods themselves.
+
 `apply_damage()` and `apply_healing()` update `hp`, fire damage and healing hooks on the attacker and target damage types, and emit
 global `damage_taken`, `damage_dealt`, `heal_received`, and `heal` events on the repository-wide event bus. Fire's `on_damage` hook multiplies outgoing damage by `1 + (1 - hp/max_hp)`, doubling attacks at zero HP.
 
