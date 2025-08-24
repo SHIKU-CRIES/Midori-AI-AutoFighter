@@ -163,6 +163,8 @@
   }
 
   let battleTimer;
+  const STALL_TICKS = 60 * 3;
+  let stalledTicks = 0;
 
   function stopBattlePoll() {
     if (battleTimer) {
@@ -189,12 +191,22 @@
           nextRoom = snap.next_room || nextRoom;
           if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
           if (snap.current_room) currentRoomType = snap.current_room;
+          stalledTicks = 0;
           return;
         }
       }
       if (combatOver) {
         // Update snapshot but keep polling until rewards are available
         roomData = snap;
+        stalledTicks += 1;
+        if (stalledTicks > STALL_TICKS) {
+          battleActive = false;
+          roomData = { ...snap, error: 'Battle results could not be fetched.' };
+          console.warn('Battle results could not be fetched.');
+          return;
+        }
+      } else {
+        stalledTicks = 0;
       }
     } catch {
       /* ignore */

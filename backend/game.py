@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-import asyncio
-import base64
-import hashlib
 import json
+import base64
 import random
+import asyncio
+import hashlib
+import logging
 
 from pathlib import Path
 from typing import Any
@@ -225,74 +226,84 @@ async def _run_battle(
 ) -> None:
     try:
         result = await room.resolve(party, data, progress, foes)
-        loot_items = result.get("loot", {}).get("items", [])
-        manager = GachaManager(SAVE_MANAGER)
-        items = manager._get_items()
-        for entry in loot_items:
-            if entry.get("id") == "ticket":
-                items["ticket"] = items.get("ticket", 0) + 1
-            else:
-                key = f"{entry['id']}_{entry['stars']}"
-                items[key] = items.get(key, 0) + 1
-        if manager._get_auto_craft():
-            manager._auto_craft(items)
-        manager._set_items(items)
-        result["items"] = items
         state["battle"] = False
-        if result.get("result") == "defeat":
-            state["awaiting_card"] = False
-            state["awaiting_relic"] = False
-            state["awaiting_next"] = False
-            try:
-                await asyncio.to_thread(save_map, run_id, state)
-                await asyncio.to_thread(save_party, run_id, party)
-                result.update(
-                    {
-                        "run_id": run_id,
-                        "current_room": rooms[state["current"]].room_type,
-                        "current_index": state["current"],
-                        "awaiting_card": False,
-                        "awaiting_relic": False,
-                        "awaiting_next": False,
-                        "next_room": None,
-                        "ended": True,
-                    }
-                )
-                battle_snapshots[run_id] = result
-            finally:
+        try:
+            loot_items = result.get("loot", {}).get("items", [])
+            manager = GachaManager(SAVE_MANAGER)
+            items = manager._get_items()
+            for entry in loot_items:
+                if entry.get("id") == "ticket":
+                    items["ticket"] = items.get("ticket", 0) + 1
+                else:
+                    key = f"{entry['id']}_{entry['stars']}"
+                    items[key] = items.get(key, 0) + 1
+            if manager._get_auto_craft():
+                manager._auto_craft(items)
+            manager._set_items(items)
+            result["items"] = items
+            if result.get("result") == "defeat":
+                state["awaiting_card"] = False
+                state["awaiting_relic"] = False
+                state["awaiting_next"] = False
                 try:
-                    with SAVE_MANAGER.connection() as conn:
-                        conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
-                except Exception:
-                    pass
-            return
-        has_card_choices = bool(result.get("card_choices"))
-        has_relic_choices = bool(result.get("relic_choices"))
-        if has_card_choices or has_relic_choices:
-            state["awaiting_card"] = has_card_choices
-            state["awaiting_relic"] = has_relic_choices
-            state["awaiting_next"] = False
-            next_type = None
-        else:
-            state["awaiting_next"] = True
-            next_type = (
-                rooms[state["current"] + 1].room_type
-                if state["current"] + 1 < len(rooms)
-                else None
+                    await asyncio.to_thread(save_map, run_id, state)
+                    await asyncio.to_thread(save_party, run_id, party)
+                    result.update(
+                        {
+                            "run_id": run_id,
+                            "current_room": rooms[state["current"]].room_type,
+                            "current_index": state["current"],
+                            "awaiting_card": False,
+                            "awaiting_relic": False,
+                            "awaiting_next": False,
+                            "next_room": None,
+                            "ended": True,
+                        }
+                    )
+                    battle_snapshots[run_id] = result
+                finally:
+                    try:
+                        with SAVE_MANAGER.connection() as conn:
+                            conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
+                    except Exception:
+                        pass
+                return
+            has_card_choices = bool(result.get("card_choices"))
+            has_relic_choices = bool(result.get("relic_choices"))
+            if has_card_choices or has_relic_choices:
+                state["awaiting_card"] = has_card_choices
+                state["awaiting_relic"] = has_relic_choices
+                state["awaiting_next"] = False
+                next_type = None
+            else:
+                state["awaiting_next"] = True
+                next_type = (
+                    rooms[state["current"] + 1].room_type
+                    if state["current"] + 1 < len(rooms)
+                    else None
+                )
+            await asyncio.to_thread(save_map, run_id, state)
+            await asyncio.to_thread(save_party, run_id, party)
+            result.update(
+                {
+                    "run_id": run_id,
+                    "action": data.get("action", ""),
+                    "next_room": next_type,
+                    "current_room": rooms[state["current"]].room_type,
+                    "current_index": state["current"],
+                    "awaiting_card": state.get("awaiting_card", False),
+                    "awaiting_relic": state.get("awaiting_relic", False),
+                    "awaiting_next": state.get("awaiting_next", False),
+                }
             )
-        await asyncio.to_thread(save_map, run_id, state)
-        await asyncio.to_thread(save_party, run_id, party)
-        result.update(
-            {
-                "run_id": run_id,
-                "action": data.get("action", ""),
-                "next_room": next_type,
-                "current_room": rooms[state["current"]].room_type,
-                "current_index": state["current"],
-                "awaiting_card": state.get("awaiting_card", False),
-                "awaiting_relic": state.get("awaiting_relic", False),
+            battle_snapshots[run_id] = result
+        except Exception as exc:
+            logging.exception("Battle processing failed for %s", run_id)
+            battle_snapshots[run_id] = {
+                "result": result.get("result"),
+                "loot": result.get("loot"),
+                "error": str(exc),
+                "awaiting_next": False,
             }
-        )
-        battle_snapshots[run_id] = result
     finally:
         battle_tasks.pop(run_id, None)
