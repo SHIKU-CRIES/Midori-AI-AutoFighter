@@ -227,7 +227,18 @@ async def _run_battle(
     progress: Callable[[dict[str, Any]], Awaitable[None]],
 ) -> None:
     try:
-        result = await room.resolve(party, data, progress, foes)
+        try:
+            result = await room.resolve(party, data, progress, foes)
+        except Exception as exc:
+            state["battle"] = False
+            log.exception("Battle resolution failed for %s", run_id)
+            battle_snapshots[run_id] = {"error": str(exc), "awaiting_next": False}
+            try:
+                await asyncio.to_thread(save_map, run_id, state)
+                await asyncio.to_thread(save_party, run_id, party)
+            except Exception:
+                pass
+            return
         state["battle"] = False
         try:
             loot_items = result.get("loot", {}).get("items", [])
