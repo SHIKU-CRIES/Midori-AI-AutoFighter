@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import logging
+import traceback
 
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
@@ -77,6 +78,18 @@ async def add_cors_headers(response):
 async def handle_cors_preflight():
     if request.method == "OPTIONS":
         return "", 204
+
+
+@app.errorhandler(Exception)
+async def handle_exception(e: Exception):
+    log.exception(e)
+    tb = traceback.format_exc()
+    response = jsonify({"error": str(e), "traceback": tb})
+    response.status_code = 500
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
 
 
 if __name__ == "__main__":
