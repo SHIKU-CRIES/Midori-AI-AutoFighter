@@ -88,7 +88,7 @@
   }
 
   async function fetchSnapshot() {
-    if (!active) return;
+    if (!active || !runId) return;
     const start = performance.now();
     dispatch('snapshot-start');
     try {
@@ -143,7 +143,7 @@
     } finally {
       const duration = performance.now() - start;
       dispatch('snapshot-end', { duration });
-      if (active) {
+      if (active && runId) {
         timer = setTimeout(fetchSnapshot, Math.max(0, pollDelay - duration));
       }
     }

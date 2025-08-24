@@ -37,15 +37,38 @@ class Dark(DamageTypeBase):
         return True
 
     def on_party_dot_damage_taken(self, damage, attacker, target) -> float:
-        # When a DoT ticks on a party member and the source is Dark, grant
-        # an extremely small scaling bonus to the attacker.
+        """Grant a tiny scaling bonus when Dark DoTs tick on allies.
+
+        If the ticking DoT comes from a Dark attacker and the target is
+        currently affected by Shadow Siphon, increase the attacker's
+        offensive and defensive stats by a factor proportional to the
+        damage dealt as a fraction of the target's max HP.
+
+        The incoming ``damage`` value is returned unchanged; only the
+        attacker is adjusted.
+        """
+
         try:
-            if getattr(attacker, "damage_type", None) is self and ShadowSiphon.id in target.dots:
-                percent = max(float(damage) / max(float(target.max_hp), 1.0), 0.0)
-                scale = 1.0 + percent * 0.05  # 0.05% per percent of max HP
-                attacker.atk = int(attacker.atk * scale) if hasattr(attacker, "atk") else attacker.atk
-                attacker.defense = int(attacker.defense * scale) if hasattr(attacker, "defense") else attacker.defense
+            # Preconditions: source must be Dark and the target must have Shadow Siphon.
+            if getattr(attacker, "damage_type", None) is not self:
+                return damage
+            if ShadowSiphon.id not in getattr(target, "dots", []):
+                return damage
+
+            # Compute damage as a fraction of max HP (guard against div-by-zero).
+            max_hp = max(float(getattr(target, "max_hp", 0) or 0.0), 1.0)
+            percent_of_max = max(float(damage) / max_hp, 0.0)
+
+            # 0.05 per 1.0 (i.e., +5% when DoT equals 100% of max HP).
+            scale = 1.0 + percent_of_max * 0.05
+
+            # Apply scale to common stats if present on attacker.
+            if hasattr(attacker, "atk"):
+                attacker.atk = int(attacker.atk * scale) + 1
+            if hasattr(attacker, "defense"):
+                attacker.defense = int(attacker.defense * scale)
         except Exception:
+            # Intentionally swallow errors to avoid breaking combat flow.
             pass
         return damage
 

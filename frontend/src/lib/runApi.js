@@ -30,6 +30,13 @@ export async function updateParty(runId, party) {
 
 export async function roomAction(runId, type, action = '') {
   const payload = (action && typeof action === 'object') ? action : { action };
+  // Short-circuit snapshot polling when global sync is halted (e.g., defeat popup)
+  try {
+    const halted = typeof window !== 'undefined' && window.afHaltSync === true;
+    if (halted && type === 'battle' && String(payload?.action || '') === 'snapshot') {
+      return {};
+    }
+  } catch {}
   const res = await fetch(`${API_BASE}/rooms/${runId}/${type}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

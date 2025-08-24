@@ -30,6 +30,8 @@
 
   let editorState = { pronouns: '', damageType: 'Light', hp: 0, attack: 0, defense: 0 };
   let battleActive = false;
+  // When true, suppress backend syncing/polling (e.g., during defeat popup)
+  let haltSync = false;
 
   // Normalize status fields so downstream components can rely on
   // `passives`, `dots`, and `hots` arrays of objects on each fighter.
@@ -54,6 +56,8 @@
   onMount(async () => {
     backendFlavor = await getBackendFlavor();
     window.backendFlavor = backendFlavor;
+    // Ensure sync is not halted on load
+    if (typeof window !== 'undefined') window.afHaltSync = false;
     const saved = loadRunState();
     if (saved) {
       const data = await getMap(saved.runId);
@@ -94,12 +98,16 @@
 
   function handleDefeat() {
     // Clear run state, go to main menu, and show a defeat popup
+    haltSync = true;
+    if (typeof window !== 'undefined') window.afHaltSync = true;
     handleRunEnd();
     // Open a lightweight popup informing the player
     openOverlay('defeat');
   }
 
   async function handleStart() {
+    haltSync = false;
+    if (typeof window !== 'undefined') window.afHaltSync = false;
     const data = await startRun(selectedParty);
     runId = data.run_id;
     mapRooms = data.map.rooms || [];
@@ -191,7 +199,7 @@
   }
 
   async function pollBattle() {
-    if (!battleActive) return;
+    if (!battleActive || haltSync || !runId) return;
     try {
       const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
       if (snap?.error) {
@@ -241,11 +249,14 @@
     } catch {
       /* ignore */
     }
-    battleTimer = setTimeout(pollBattle, 1000 / 60);
+    if (battleActive && !haltSync && runId) {
+      battleTimer = setTimeout(pollBattle, 1000 / 60);
+    }
   }
 
   async function enterRoom() {
     stopBattlePoll();
+    if (haltSync) return;
     if (!runId) return;
     // Ensure header reflects the room we are entering now
     currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType || nextRoom;
@@ -258,6 +269,11 @@
       // Fetch first, then decide whether to show rewards or start battle polling.
       const data = mapStatuses(await roomAction(runId, endpoint));
       roomData = data;
+      // If this response indicates a defeated run, stop syncing and show popup.
+      if (data?.ended && data?.result === 'defeat') {
+        handleDefeat();
+        return;
+      }
       if (data.party) {
         selectedParty = data.party.map((p) => p.id);
       }
@@ -276,6 +292,7 @@
         if (noFoes) {
           // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
           try {
+            if (haltSync || !runId) return;
             const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
             const snapHasRewards = hasRewards(snap);
             if (snapHasRewards) {
@@ -298,6 +315,7 @@
       }
     } catch (e) {
       try {
+        if (haltSync || !runId) return;
         const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
         roomData = snap;
         battleActive = false;
@@ -403,6 +421,7 @@
     } catch (e) {
       // If not ready (e.g., server 400), refresh snapshot so rewards remain visible.
       try {
+        if (haltSync || !runId) return;
         const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
         roomData = snap;
       } catch {
