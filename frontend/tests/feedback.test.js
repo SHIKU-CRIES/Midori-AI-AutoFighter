@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { FEEDBACK_URL } from '../src/lib/constants.js';
 
 describe('Feedback button', () => {
   test('page provides a feedback link', () => {
@@ -10,5 +11,8 @@ describe('Feedback button', () => {
     expect(page).toContain('openFeedback');
     expect(page).toContain('FEEDBACK_URL');
     expect(page).toContain("window.open(FEEDBACK_URL, '_blank', 'noopener')");
+    expect(FEEDBACK_URL).toBe(
+      'https://github.com/Midori-AI-OSS/Midori-AI-AutoFighter/issues/new'
+    );
   });
 });
