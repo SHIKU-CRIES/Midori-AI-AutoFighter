@@ -228,46 +228,65 @@
     if (endpoint.includes('battle')) {
       endpoint = currentRoomType.includes('boss') ? 'boss' : 'battle';
     }
-    // Fetch first, then decide whether to show rewards or start battle polling.
-    const data = mapStatuses(await roomAction(runId, endpoint));
-    roomData = data;
-    if (data.party) {
-      selectedParty = data.party.map((p) => p.id);
-    }
-    // Keep map-derived indices and current room type in sync when available
-    if (typeof data.current_index === 'number') currentIndex = data.current_index;
-    if (data.current_room) currentRoomType = data.current_room;
-    nextRoom = data.next_room || (mapRooms?.[currentIndex + 1]?.room_type || nextRoom || '');
-    saveRunState(runId, nextRoom);
-    if (endpoint === 'battle' || endpoint === 'boss') {
-      const hasRewards = Boolean(data?.loot) || (data?.card_choices?.length > 0) || (data?.relic_choices?.length > 0);
-      if (hasRewards) {
+    try {
+      // Fetch first, then decide whether to show rewards or start battle polling.
+      const data = mapStatuses(await roomAction(runId, endpoint));
+      roomData = data;
+      if (data.party) {
+        selectedParty = data.party.map((p) => p.id);
+      }
+      // Keep map-derived indices and current room type in sync when available
+      if (typeof data.current_index === 'number') currentIndex = data.current_index;
+      if (data.current_room) currentRoomType = data.current_room;
+      nextRoom = data.next_room || (mapRooms?.[currentIndex + 1]?.room_type || nextRoom || '');
+      saveRunState(runId, nextRoom);
+      if (endpoint === 'battle' || endpoint === 'boss') {
+        const hasRewards = Boolean(data?.loot) || (data?.card_choices?.length > 0) || (data?.relic_choices?.length > 0);
+        if (hasRewards) {
+          battleActive = false;
+          return;
+        }
+        const noFoes = !Array.isArray(data?.foes) || data.foes.length === 0;
+        if (noFoes) {
+          // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
+          try {
+            const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
+            const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
+            if (snapHasRewards) {
+              roomData = snap;
+              battleActive = false;
+              nextRoom = snap.next_room || nextRoom;
+              if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
+              if (snap.current_room) currentRoomType = snap.current_room;
+              return;
+            }
+          } catch {}
+        }
+        // If the snapshot didn't include current room type yet, fall back to pre-room value
+        // Actively set a sensible type for header during combat
+        if (!currentRoomType) currentRoomType = mapRooms?.[currentIndex]?.room_type || (endpoint.includes('boss') ? 'battle-boss-floor' : 'battle-normal');
+        battleActive = true;
+        pollBattle();
+      } else {
         battleActive = false;
-        return;
       }
-      const noFoes = !Array.isArray(data?.foes) || data.foes.length === 0;
-      if (noFoes) {
-        // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
-        try {
-          const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
-          const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
-          if (snapHasRewards) {
-            roomData = snap;
-            battleActive = false;
-            nextRoom = snap.next_room || nextRoom;
-            if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
-            if (snap.current_room) currentRoomType = snap.current_room;
-            return;
-          }
-        } catch {}
+    } catch (e) {
+      try {
+        const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
+        roomData = snap;
+        battleActive = false;
+        nextRoom = snap.next_room || nextRoom;
+        if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
+        if (snap.current_room) currentRoomType = snap.current_room;
+        saveRunState(runId, nextRoom);
+        if (browser) alert('Failed to enter room. Restored latest battle state.');
+      } catch {
+        if (browser) alert('Failed to enter room.');
+        if (dev || !browser) {
+          const { error } = await import('$lib/logger.js');
+          error('Failed to enter room.', e);
+        }
       }
-      // If the snapshot didn't include current room type yet, fall back to pre-room value
-      // Actively set a sensible type for header during combat
-      if (!currentRoomType) currentRoomType = mapRooms?.[currentIndex]?.room_type || (endpoint.includes('boss') ? 'battle-boss-floor' : 'battle-normal');
-      battleActive = true;
-      pollBattle();
-    } else {
-      battleActive = false;
     }
   }
 
