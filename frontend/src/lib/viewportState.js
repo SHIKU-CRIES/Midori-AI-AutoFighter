@@ -66,9 +66,13 @@ export function roomInfo(mapRooms, currentIndex, currentRoomType, roomData) {
   };
 }
 
-export function rewardOpen(roomData, battleActive) {
-  const isBattle = roomData && (roomData.result === 'battle' || roomData.result === 'boss');
-  return !!(isBattle && !battleActive);
+export function rewardOpen(roomData, _battleActive) {
+  if (!roomData) return false;
+  const hasCards = (roomData?.card_choices?.length || 0) > 0;
+  const hasRelics = (roomData?.relic_choices?.length || 0) > 0;
+  const hasLootItems = (roomData?.loot?.items?.length || 0) > 0;
+  const hasLootGold = (roomData?.loot?.gold || 0) > 0;
+  return Boolean(hasCards || hasRelics || hasLootItems || hasLootGold);
 }
 
 let gameAudio;

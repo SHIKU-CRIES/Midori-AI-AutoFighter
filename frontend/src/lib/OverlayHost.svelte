@@ -47,6 +47,18 @@
   </OverlaySurface>
 {/if}
 
+{#if $overlayView === 'defeat'}
+  <PopupWindow title="Defeat" on:close={() => dispatch('back')}>
+    <div style="padding: 0.5rem 0.25rem; line-height: 1.4;">
+      <p>Your party was defeated.</p>
+      <p>You have been returned to the main menu.</p>
+      <div class="stained-glass-row" style="justify-content: flex-end; margin-top: 0.75rem;">
+        <button class="icon-btn" on:click={() => dispatch('back')}>OK</button>
+      </div>
+    </div>
+  </PopupWindow>
+{/if}
+
 {#if $overlayView === 'party-start'}
   <OverlaySurface>
     <PartyPicker bind:selected />

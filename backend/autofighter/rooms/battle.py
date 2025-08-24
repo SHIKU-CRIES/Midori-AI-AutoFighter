@@ -200,6 +200,18 @@ class BattleRoom(Room):
                     enrage_stacks = turn - threshold
                     for i, f in enumerate(foes):
                         f.atk = int(base_atks[i] * (1 + 0.4 * enrage_stacks))
+                    # After 1000 total turns, apply escalating enrage damage each tick
+                    # Damage equals 100 * turns-in-enrage and uses normal mitigation
+                    if turn > 1000:
+                        turns_in_enrage = max(enrage_stacks, 0)
+                        extra_damage = 100 * turns_in_enrage
+                        # Apply to both sides to mirror existing enrage bleed behavior
+                        for m in combat_party.members:
+                            if m.hp > 0 and extra_damage > 0:
+                                await m.apply_damage(extra_damage)
+                        for f in foes:
+                            if f.hp > 0 and extra_damage > 0:
+                                await f.apply_damage(extra_damage)
                 turn_start = time.perf_counter()
                 registry.trigger("turn_start", member)
                 console.log(f"{member.id} turn start")

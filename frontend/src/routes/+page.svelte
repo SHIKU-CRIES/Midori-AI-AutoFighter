@@ -92,6 +92,13 @@
     clearRunState();
   }
 
+  function handleDefeat() {
+    // Clear run state, go to main menu, and show a defeat popup
+    handleRunEnd();
+    // Open a lightweight popup informing the player
+    openOverlay('defeat');
+  }
+
   async function handleStart() {
     const data = await startRun(selectedParty);
     runId = data.run_id;
@@ -167,6 +174,15 @@
   const STALL_TICKS = 60 * 3;
   let stalledTicks = 0;
 
+  function hasRewards(snap) {
+    if (!snap) return false;
+    const cards = (snap?.card_choices?.length || 0) > 0;
+    const relics = (snap?.relic_choices?.length || 0) > 0;
+    const lootItems = (snap?.loot?.items?.length || 0) > 0;
+    const lootGold = (snap?.loot?.gold || 0) > 0;
+    return cards || relics || lootItems || lootGold;
+  }
+
   function stopBattlePoll() {
     if (battleTimer) {
       clearTimeout(battleTimer);
@@ -184,7 +200,7 @@
         stalledTicks = 0;
         return;
       }
-      const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
+      const snapHasRewards = hasRewards(snap);
       const snapCompleted = Boolean(snap?.awaiting_next) || Boolean(snap?.next_room) || (snap?.ended && snap?.result === 'defeat');
       const partyDead = Array.isArray(snap?.party) && snap.party.length > 0 && snap.party.every(m => (m?.hp ?? 1) <= 0);
       const foesDead = Array.isArray(snap?.foes) && snap.foes.length > 0 && snap.foes.every(f => (f?.hp ?? 1) <= 0);
@@ -192,13 +208,17 @@
       if (snapHasRewards || snapCompleted) {
         // Stop only when rewards or completion flags arrive
         roomData = snap;
-        const rewardsReady = Boolean(roomData?.loot) || (roomData?.card_choices?.length > 0) || (roomData?.relic_choices?.length > 0);
+        const rewardsReady = hasRewards(roomData);
         if (rewardsReady || snapCompleted) {
           battleActive = false;
           nextRoom = snap.next_room || nextRoom;
           if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
           if (snap.current_room) currentRoomType = snap.current_room;
           stalledTicks = 0;
+          // If run ended in defeat, immediately return home and show defeat popup
+          if (snap?.ended && snap?.result === 'defeat') {
+            handleDefeat();
+          }
           return;
         }
       }
@@ -247,8 +267,8 @@
       nextRoom = data.next_room || (mapRooms?.[currentIndex + 1]?.room_type || nextRoom || '');
       saveRunState(runId, nextRoom);
       if (endpoint === 'battle' || endpoint === 'boss') {
-        const hasRewards = Boolean(data?.loot) || (data?.card_choices?.length > 0) || (data?.relic_choices?.length > 0);
-        if (hasRewards) {
+        const gotRewards = hasRewards(data);
+        if (gotRewards) {
           battleActive = false;
           return;
         }
@@ -257,7 +277,7 @@
           // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
           try {
             const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
-            const snapHasRewards = Boolean(snap?.loot) || (snap?.card_choices?.length > 0) || (snap?.relic_choices?.length > 0);
+            const snapHasRewards = hasRewards(snap);
             if (snapHasRewards) {
               roomData = snap;
               battleActive = false;
@@ -360,12 +380,14 @@
   async function handleNextRoom() {
     if (!runId) return;
     // If rewards are still present, don't attempt to advance.
-    if ((roomData?.card_choices?.length || 0) > 0 || (roomData?.relic_choices?.length || 0) > 0) {
+    if (hasRewards(roomData)) {
       return;
     }
+    // Clear any stale loot container locally to prevent keeping reward overlay open
+    if (roomData?.loot) roomData.loot = { gold: 0, items: [] };
     if (roomData?.ended) {
-      // Run has ended (defeat). Clear local state and return to main.
-      handleRunEnd();
+      // Run has ended (defeat). Clear state, return to main, and show popup.
+      handleDefeat();
       return;
     }
     try {
