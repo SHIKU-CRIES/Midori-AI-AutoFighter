@@ -17,31 +17,66 @@
     if (effect.source) parts.push(`Src: ${effect.source}`);
     return parts.join(' | ');
   }
+  // internal state for bar layout paging
+  let startIndex = 0;
+  const pageSize = 3;
+  $: effects = [
+    ...(Array.isArray(hots) ? hots.map((e) => ({ type: 'hot', data: e })) : []),
+    ...(Array.isArray(dots) ? dots.map((e) => ({ type: 'dot', data: e })) : [])
+  ];
+  $: total = effects.length;
+  $: showArrows = layout === 'bar' && total > pageSize;
+  $: visible = layout === 'bar' ? effects.slice(startIndex, Math.min(total, startIndex + pageSize)) : [];
+  function next() { if (startIndex + pageSize < total) startIndex += 1; }
+  function prev() { if (startIndex > 0) startIndex -= 1; }
+  $: if (startIndex + pageSize > total) startIndex = Math.max(0, total - pageSize);
 </script>
 
 <div class="effects" class:overlay={layout !== 'bar'} class:bar={layout === 'bar'}>
-  {#each hots as hot}
-    <span class="hot" title={formatTooltip(hot, true)}>
-      <img
-        class="dot-img"
-        src={getDotImage(hot)}
-        alt={hot.name || hot.id}
-        style={`border-color: ${getElementColor(getDotElement(hot))}`}
-      />
-      {#if hot.stacks > 1}<span class="stack inside">{hot.stacks}</span>{/if}
-    </span>
-  {/each}
-  {#each dots as dot}
-    <span class="dot" title={formatTooltip(dot)}>
-      <img
-        class="dot-img"
-        src={getDotImage(dot)}
-        alt={dot.name || dot.id}
-        style={`border-color: ${getElementColor(getDotElement(dot))}`}
-      />
-      {#if dot.stacks > 1}<span class="stack inside">{dot.stacks}</span>{/if}
-    </span>
-  {/each}
+  {#if layout === 'bar'}
+    {#if showArrows}
+      <button class="nav left" on:click={prev} disabled={startIndex === 0} aria-label="Previous buffs">‹</button>
+    {/if}
+    <div class="icons">
+      {#each visible as eff}
+        <span class={eff.type} title={formatTooltip(eff.data, eff.type === 'hot')}>
+          <img
+            class="dot-img"
+            src={getDotImage(eff.data)}
+            alt={eff.data.name || eff.data.id}
+            style={`border-color: ${getElementColor(getDotElement(eff.data))}`}
+          />
+          {#if eff.data.stacks > 1}<span class="stack inside">{eff.data.stacks}</span>{/if}
+        </span>
+      {/each}
+    </div>
+    {#if showArrows}
+      <button class="nav right" on:click={next} disabled={startIndex + pageSize >= total} aria-label="Next buffs">›</button>
+    {/if}
+  {:else}
+    {#each hots as hot}
+      <span class="hot" title={formatTooltip(hot, true)}>
+        <img
+          class="dot-img"
+          src={getDotImage(hot)}
+          alt={hot.name || hot.id}
+          style={`border-color: ${getElementColor(getDotElement(hot))}`}
+        />
+        {#if hot.stacks > 1}<span class="stack inside">{hot.stacks}</span>{/if}
+      </span>
+    {/each}
+    {#each dots as dot}
+      <span class="dot" title={formatTooltip(dot)}>
+        <img
+          class="dot-img"
+          src={getDotImage(dot)}
+          alt={dot.name || dot.id}
+          style={`border-color: ${getElementColor(getDotElement(dot))}`}
+        />
+        {#if dot.stacks > 1}<span class="stack inside">{dot.stacks}</span>{/if}
+      </span>
+    {/each}
+  {/if}
 </div>
 
 <style>
@@ -60,11 +95,34 @@
   /* Bar layout: horizontal row (Buff Bar) */
   .effects.bar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
     align-items: center;
     width: 100%;
     justify-content: center;
+    gap: 0.25rem;
+    pointer-events: auto; /* allow nav buttons to be clicked */
+  }
+  .effects.bar .icons {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .effects.bar .nav {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    line-height: 1;
+    border-radius: 2px;
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+  }
+  .effects.bar .nav:disabled {
+    opacity: 0.35;
+    cursor: default;
   }
   .effects span { position: relative; display: inline-block; }
   .dot-img {
