@@ -117,8 +117,58 @@ def _normalize_damage_type(dt: Any) -> str:
 
 
 def _serialize(obj: Stats) -> dict[str, Any]:
-    """Convert a stat object into a plain serializable dictionary."""
-    data = asdict(obj)
+    """Convert a stat object into a plain serializable dictionary.
+
+    This function is intentionally defensive: if an unexpected object is
+    encountered (e.g., ``None``), it returns a minimal fallback to keep the
+    battle snapshot and UI resilient instead of raising.
+    """
+    if obj is None:
+        return {
+            "id": "unknown",
+            "name": "Unknown",
+            "hp": 0,
+            "max_hp": 0,
+            "passives": [],
+            "dots": [],
+            "hots": [],
+            "damage_type": "Generic",
+            "element": "Generic",
+            "level": 1,
+            "atk": 0,
+            "defense": 0,
+            "mitigation": 100,
+            "crit_rate": 0.0,
+            "crit_damage": 2.0,
+            "effect_hit_rate": 0.0,
+            "effect_resistance": 0.0,
+        }
+
+    try:
+        data = asdict(obj)
+    except Exception:
+        # Non-dataclass object or serialization issue: build a minimal view
+        norm = _normalize_damage_type(getattr(obj, "damage_type", None))
+        return {
+            "id": getattr(obj, "id", "unknown"),
+            "name": getattr(obj, "name", getattr(obj, "id", "Unknown")),
+            "hp": int(getattr(obj, "hp", 0) or 0),
+            "max_hp": int(getattr(obj, "max_hp", 0) or 0),
+            "passives": [],
+            "dots": [],
+            "hots": [],
+            "damage_type": norm,
+            "element": norm,
+            "level": int(getattr(obj, "level", 1) or 1),
+            "atk": int(getattr(obj, "atk", 0) or 0),
+            "defense": int(getattr(obj, "defense", 0) or 0),
+            "mitigation": getattr(obj, "mitigation", 100) or 100,
+            "crit_rate": float(getattr(obj, "crit_rate", 0.0) or 0.0),
+            "crit_damage": float(getattr(obj, "crit_damage", 2.0) or 2.0),
+            "effect_hit_rate": float(getattr(obj, "effect_hit_rate", 0.0) or 0.0),
+            "effect_resistance": float(getattr(obj, "effect_resistance", 0.0) or 0.0),
+        }
+
     norm = _normalize_damage_type(getattr(obj, "damage_type", None))
     data["damage_type"] = norm
     data["element"] = norm
@@ -140,6 +190,14 @@ def _serialize(obj: Stats) -> dict[str, Any]:
         def pack(effects, key):
             grouped: dict[str, dict[str, Any]] = {}
             for eff in effects:
+                # Determine the elemental type for this effect from its source or attached type
+                elem = "Generic"
+                try:
+                    src = getattr(eff, "source", None)
+                    dtype = getattr(eff, "damage_type", None) or getattr(src, "damage_type", None)
+                    elem = _normalize_damage_type(dtype)
+                except Exception:
+                    pass
                 entry = grouped.setdefault(
                     eff.id,
                     {
@@ -148,6 +206,7 @@ def _serialize(obj: Stats) -> dict[str, Any]:
                         key: getattr(eff, key),
                         "turns": eff.turns,
                         "source": getattr(getattr(eff, "source", None), "id", None),
+                        "element": elem,
                         "stacks": 0,
                     },
                 )

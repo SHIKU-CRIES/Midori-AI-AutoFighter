@@ -90,5 +90,5 @@
       </div>
     {/each}
   </div>
-  <p>{result}</p>
+  <!-- Removed bottom result text to avoid showing raw errors in the view. -->
 </div>

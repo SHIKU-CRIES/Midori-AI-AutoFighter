@@ -218,6 +218,12 @@ function inferElementFromKey(key) {
 
 // Public: return inferred element for a DoT effect object or id
 export function getDotElement(effect) {
+  try {
+    if (effect && typeof effect === 'object') {
+      const candidate = effect.element || effect.damage_type || effect.type;
+      if (candidate) return String(candidate).toLowerCase();
+    }
+  } catch {}
   const key = typeof effect === 'object' ? effect?.id : effect;
   return inferElementFromKey(key);
 }
@@ -226,7 +232,13 @@ export function getDotElement(effect) {
 // Falls back to generic if no themed match is found.
 export function getDotImage(effect) {
   const key = String((typeof effect === 'object' ? effect?.id : effect) || '').toLowerCase();
-  const element = inferElementFromKey(key);
+  let element = '';
+  try {
+    if (effect && typeof effect === 'object') {
+      element = String(effect.element || effect.damage_type || effect.type || '').toLowerCase();
+    }
+  } catch {}
+  if (!element) element = inferElementFromKey(key);
   const list = dotAssets[element] || dotAssets.generic || [];
   if (list.length === 0) return DOT_DEFAULT || defaultFallback;
   const idx = stringHashIndex(key || element, list.length);

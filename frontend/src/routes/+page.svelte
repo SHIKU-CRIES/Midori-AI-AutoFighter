@@ -206,6 +206,8 @@
         roomData = snap;
         battleActive = false;
         stalledTicks = 0;
+        // Surface backend-declared errors via popup
+        try { openOverlay('error', { message: snap.error, traceback: '' }); } catch {}
         return;
       }
       const snapHasRewards = hasRewards(snap);
@@ -269,6 +271,11 @@
       // Fetch first, then decide whether to show rewards or start battle polling.
       const data = mapStatuses(await roomAction(runId, endpoint));
       roomData = data;
+      if (data?.error) {
+        // Show error popup for successful-but-error payloads
+        try { openOverlay('error', { message: data.error, traceback: '' }); } catch {}
+        return;
+      }
       // If this response indicates a defeated run, stop syncing and show popup.
       if (data?.ended && data?.result === 'defeat') {
         handleDefeat();
