@@ -56,6 +56,17 @@ registered plugin class.
 
 Templates in `plugins/templates/` provide starting points for new plugins.
 
+## Logging
+Plugins must use the standard logging module instead of `print`.
+
+```python
+import logging
+
+log = logging.getLogger(__name__)
+```
+
+Log messages are captured by the backend's buffered logger and written to `backend/logs/backend.log` roughly every 15 seconds. See `backend/.codex/implementation/logging.md` for more details and examples.
+
 ## Adding a New Plugin
 1. Copy a template into the target category folder, e.g. `plugins/weapons/`.
 2. Set `plugin_type` to match the category and provide a unique `id` string.
