@@ -4,25 +4,24 @@ import copy
 import time
 import random
 import asyncio
+import logging
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable
 
-from rich.console import Console
-
 from . import Room
+from .utils import _build_foes, _scale_stats, _serialize
 from ..party import Party
 from ..stats import BUS, Stats
 from ..passives import PassiveRegistry
-from autofighter.effects import EffectManager
-from plugins.damage_types import ALL_DAMAGE_TYPES
 from autofighter.cards import apply_cards, card_choices
-from .utils import _build_foes, _scale_stats, _serialize
+from autofighter.effects import EffectManager
 from autofighter.relics import apply_relics, relic_choices
+from plugins.damage_types import ALL_DAMAGE_TYPES
+
+log = logging.getLogger(__name__)
 
 ENRAGE_TURNS_NORMAL = 100
 ENRAGE_TURNS_BOSS = 500
-
-console = Console()
 
 ELEMENTS = [e.lower() for e in ALL_DAMAGE_TYPES]
 
@@ -161,8 +160,10 @@ class BattleRoom(Room):
         for f in foes:
             BUS.emit("battle_start", f)
             registry.trigger("battle_start", f)
-        console.log(
-            f"Battle start: {[f.id for f in foes]} vs {[m.id for m in combat_party.members]}"
+        log.info(
+            "Battle start: %s vs %s",
+            [f.id for f in foes],
+            [m.id for m in combat_party.members],
         )
         for member_effect, member in zip(party_effects, combat_party.members):
             BUS.emit("battle_start", member)
@@ -196,7 +197,7 @@ class BattleRoom(Room):
                         enrage_active = True
                         for f in foes:
                             f.passives.append("Enraged")
-                        console.log("Enrage activated")
+                        log.info("Enrage activated")
                     enrage_stacks = turn - threshold
                     for i, f in enumerate(foes):
                         f.atk = int(base_atks[i] * (1 + 0.4 * enrage_stacks))
@@ -214,7 +215,7 @@ class BattleRoom(Room):
                                 await f.apply_damage(extra_damage)
                 turn_start = time.perf_counter()
                 registry.trigger("turn_start", member)
-                console.log(f"{member.id} turn start")
+                log.debug("%s turn start", member.id)
                 await member.maybe_regain(turn)
                 alive_foe_idxs = [i for i, f in enumerate(foes) if f.hp > 0]
                 foe_idx = random.choice(alive_foe_idxs)
@@ -258,9 +259,10 @@ class BattleRoom(Room):
                         await asyncio.sleep(0.5 - elapsed)
                     continue
                 dmg = await foe.apply_damage(member.atk, attacker=member)
-                console.log(
-                    f"[light_red]{member.id} hits {foe.id} for {dmg}[/]"
-                )
+                if dmg <= 0:
+                    log.info("%s's attack was dodged by %s", member.id, foe.id)
+                else:
+                    log.info("%s hits %s for %s", member.id, foe.id, dmg)
                 foe_mgr.maybe_inflict_dot(member, dmg)
                 if getattr(member.damage_type, "id", "").lower() == "wind":
                     for extra_idx, extra_foe in enumerate(foes):
@@ -269,9 +271,19 @@ class BattleRoom(Room):
                         extra_dmg = await extra_foe.apply_damage(
                             member.atk, attacker=member
                         )
-                        console.log(
-                            f"[light_red]{member.id} hits {extra_foe.id} for {extra_dmg}[/]"
-                        )
+                        if extra_dmg <= 0:
+                            log.info(
+                                "%s's attack was dodged by %s",
+                                member.id,
+                                extra_foe.id,
+                            )
+                        else:
+                            log.info(
+                                "%s hits %s for %s",
+                                member.id,
+                                extra_foe.id,
+                                extra_dmg,
+                            )
                         foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                         if extra_foe.hp <= 0:
                             exp_reward += extra_foe.level * 12 + 5 * self.node.index
@@ -347,7 +359,7 @@ class BattleRoom(Room):
                 )[0]
                 target_effect = party_effects[idx]
                 registry.trigger("turn_start", foe)
-                console.log(f"{foe.id} turn start targeting {target.id}")
+                log.debug("%s turn start targeting %s", foe.id, target.id)
                 await foe.maybe_regain(turn)
                 dt = getattr(foe, "damage_type", None)
                 await foe_mgr.tick(target_effect)
@@ -367,9 +379,10 @@ class BattleRoom(Room):
                         await asyncio.sleep(0.5 - elapsed)
                     continue
                 dmg = await target.apply_damage(foe.atk, attacker=foe)
-                console.log(
-                    f"[light_blue]{foe.id} hits {target.id} for {dmg}[/]"
-                )
+                if dmg <= 0:
+                    log.info("%s's attack was dodged by %s", foe.id, target.id)
+                else:
+                    log.info("%s hits %s for %s", foe.id, target.id, dmg)
                 target_effect.maybe_inflict_dot(foe, dmg)
                 registry.trigger("turn_end", foe)
                 elapsed = time.perf_counter() - turn_start
@@ -481,6 +494,13 @@ class BattleRoom(Room):
             "relic_choices": relic_choice_data,
             "items": items,
         }
+        log.info(
+            "Battle rewards: gold=%s cards=%s relics=%s items=%s",
+            loot["gold"],
+            [c["id"] for c in choice_data],
+            [r["id"] for r in relic_choice_data],
+            items,
+        )
         return {
             "result": "boss" if self.strength > 1.0 else "battle",
             "party": party_data,

@@ -1,17 +1,18 @@
-import importlib
 import random
+import logging
+import importlib
 
-from dataclasses import dataclass
-from dataclasses import field
-from dataclasses import fields
 from typing import Callable
 from typing import Optional
-
-from rich.console import Console
+from dataclasses import field
+from dataclasses import fields
+from dataclasses import dataclass
 
 from plugins.event_bus import EventBus
-from plugins.damage_types.generic import Generic
 from plugins.damage_types._base import DamageTypeBase
+from plugins.damage_types.generic import Generic
+
+log = logging.getLogger(__name__)
 
 @dataclass
 class Stats:
@@ -111,17 +112,32 @@ class Stats:
                 obj.damage_type = dt
             return dt
 
+        critical = False
         if attacker is not None:
+            if random.random() < self.dodge_odds:
+                log.info(
+                    "%s dodges attack from %s",
+                    self.id,
+                    getattr(attacker, "id", "unknown"),
+                )
+                return 0
             atk_type = _ensure(attacker)
             atk_type.on_hit(attacker, self)
+            if random.random() < attacker.crit_rate:
+                critical = True
+                amount *= attacker.crit_damage
             amount = atk_type.on_damage(amount, attacker, self)
         self_type = _ensure(self)
         amount = self_type.on_damage_taken(amount, attacker, self)
         amount = self_type.on_party_damage_taken(amount, attacker, self)
         src_vit = attacker.vitality if attacker is not None else 1.0
         defense_term = max(self.defense ** 5, 1)
-        amount = ((amount ** 2) * src_vit) / (defense_term * self.vitality * self.mitigation)
+        amount = ((amount ** 2) * src_vit) / (
+            defense_term * self.vitality * self.mitigation
+        )
         amount = max(int(amount), 1)
+        if critical and attacker is not None:
+            log.info("Critical hit! %s -> %s for %s", attacker.id, self.id, amount)
         self.last_damage_taken = amount
         self.damage_taken += amount
         self.hp = max(self.hp - amount, 0)
@@ -161,23 +177,18 @@ StatusHook = Callable[["Stats"], None]
 STATUS_HOOKS: list[StatusHook] = []
 BUS = EventBus()
 
-console = Console()
-
-
 def _log_damage_taken(
     target: "Stats", attacker: Optional["Stats"], amount: int
 ) -> None:
     attacker_id = getattr(attacker, "id", "unknown")
-    console.log(
-        f"[light_red]{target.id} takes {amount} from {attacker_id}[/]"
-    )
+    log.info("%s takes %s from %s", target.id, amount, attacker_id)
 
 
 def _log_heal_received(
     target: "Stats", healer: Optional["Stats"], amount: int
 ) -> None:
     healer_id = getattr(healer, "id", "unknown")
-    console.log(f"[green]{target.id} heals {amount} from {healer_id}[/]")
+    log.info("%s heals %s from %s", target.id, amount, healer_id)
 
 
 BUS.subscribe("damage_taken", _log_damage_taken)
