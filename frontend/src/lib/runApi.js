@@ -13,8 +13,11 @@ async function handleFetch(url, options = {}) {
       try { data = await res.json(); } catch {}
       const message = data?.message || `HTTP error ${res.status}`;
       const traceback = data?.traceback || '';
-      openOverlay('error', { message, traceback });
+      if (res.status !== 404) {
+        openOverlay('error', { message, traceback });
+      }
       const err = new Error(message);
+      err.status = res.status;
       err.overlayShown = true;
       throw err;
     }

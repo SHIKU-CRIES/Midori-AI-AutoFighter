@@ -248,8 +248,11 @@
       } else {
         stalledTicks = 0;
       }
-    } catch {
-      /* ignore */
+    } catch (err) {
+      if (err?.message?.includes('run ended') || err?.status === 404) {
+        handleRunEnd();
+        return;
+      }
     }
     if (battleActive && !haltSync && runId) {
       battleTimer = setTimeout(pollBattle, 1000 / 60);
