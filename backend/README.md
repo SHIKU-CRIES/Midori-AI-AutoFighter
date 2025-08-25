@@ -15,7 +15,12 @@ uv run app.py
 
 ## Logging
 
-Logs write to `logs/backend.log` using a buffered rotating file handler. The buffer flushes roughly every 15 seconds and a Rich handler keeps console output colorful.
+The backend uses a queued, buffered logging pipeline:
+
+- A `QueueHandler` forwards records to a `QueueListener`.
+- A `TimedMemoryHandler` buffers messages and flushes them to disk roughly every 15 seconds.
+- Records land in a rotating log file at `logs/backend.log`.
+- A `RichHandler` remains attached for colorful console output.
 
 The root endpoint returns a simple status payload including the configured flavor. Set `UV_EXTRA` (default `"default"`) to label this instance. Additional routes support
 starting runs with a seeded 45-room map, updating the party, retrieving floor
