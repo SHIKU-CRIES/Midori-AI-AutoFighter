@@ -1,12 +1,7 @@
-from typing import TYPE_CHECKING
 from dataclasses import dataclass
-
 from autofighter.effects import DamageOverTime
+from plugins import damage_effects
 from plugins.damage_types._base import DamageTypeBase
-
-if TYPE_CHECKING:
-    from plugins.dots.celestial_atrophy import CelestialAtrophy
-    from plugins.hots.radiant_regeneration import RadiantRegeneration
 
 
 @dataclass
@@ -16,17 +11,15 @@ class Light(DamageTypeBase):
     color: tuple[int, int, int] = (255, 255, 255)
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
-        from plugins.dots.celestial_atrophy import CelestialAtrophy
-
-        dot = CelestialAtrophy(int(damage * 0.3), 3)
-        dot.source = source
-        return dot
+        return damage_effects.create_dot(self.id, damage, source)
 
     async def on_action(self, actor, allies, enemies):
-        from plugins.hots.radiant_regeneration import RadiantRegeneration
-
         for ally in allies:
-            ally.effect_manager.add_hot(RadiantRegeneration())
+            mgr = getattr(ally, "effect_manager", None)
+            if mgr is not None:
+                hot = damage_effects.create_hot(self.id, actor)
+                if hot is not None:
+                    mgr.add_hot(hot)
         for ally in allies:
             if ally.hp > 0 and ally.hp / ally.max_hp < 0.25:
                 await ally.apply_healing(actor.atk, healer=actor)

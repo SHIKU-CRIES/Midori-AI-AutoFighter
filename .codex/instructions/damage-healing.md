@@ -13,6 +13,9 @@ Plugins under `plugins/dots/` and `plugins/hots/` subclass the base effect class
 Lightning damage pops all active DoTs on hit, applying 25% of each effect's damage immediately without reducing remaining turns.
 Fire damage scales with missing HP, multiplying outgoing damage by `1 + (1 - hp/max_hp)` so attacks double at zero health.
 
+### Damage Effects Module
+`plugins/damage_effects.py` maps each damage type to its DoT and HoT factories so plugins can request effects without importing one another. This central mapping prevents circular imports and allows relics or cards to override effect creation.
+
 ## Supported DoTs
 - Bleed – deals 2% of Max HP each turn.
 - Celestial Atrophy – reduces Attack every tick.
@@ -32,4 +35,4 @@ Fire damage scales with missing HP, multiplying outgoing damage by `1 + (1 - hp/
 - PlayerName's Heal – applies an instant heal and 1% Max HP per turn.
 
 ## Testing
-- Run `uv run pytest` to validate DoT and HoT behaviors.
+- Run `./run-tests.sh` to validate DoT and HoT behaviors.
