@@ -30,8 +30,15 @@
         style={`color: ${getElementColor(fighter.element)}`}
         aria-hidden="true" />
     </div>
-    <StatusIcons hots={fighter.hots} dots={fighter.dots} />
   </div>
+  {#if ((Array.isArray(fighter.hots) ? fighter.hots.length : 0) + (Array.isArray(fighter.dots) ? fighter.dots.length : 0)) > 0}
+    <!-- Buff Bar: shows current HoT/DoT effects under the portrait. -->
+    <!-- This bar is intentionally styled with a stained-glass look, matching
+         the stats panels and top bars. Keep this comment to clarify purpose. -->
+    <div class="buff-bar">
+      <StatusIcons hots={fighter.hots} dots={fighter.dots} layout="bar" />
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -67,4 +74,15 @@
     pointer-events: none;
   }
   .element-icon { width: 16px; height: 16px; display: block; }
+
+  /* Buff Bar (stained-glass style) */
+  .buff-bar {
+    width: calc(var(--portrait-size) - 0.75rem); /* slightly narrower than portrait (left/right smaller) */
+    margin: 0.5rem auto 0; /* add a bit more space from portrait and center it */
+    padding: 0.25rem;
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
+  }
 </style>

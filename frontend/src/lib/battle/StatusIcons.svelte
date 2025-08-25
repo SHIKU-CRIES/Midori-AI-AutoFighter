@@ -4,6 +4,9 @@
 
   export let hots = [];
   export let dots = [];
+  // layout: 'overlay' positions icons inside the portrait frame.
+  // layout: 'bar' renders a horizontal bar (used by the Buff Bar under portraits).
+  export let layout = 'overlay';
 
   function formatTooltip(effect, isHot = false) {
     if (!effect) return '';
@@ -16,7 +19,7 @@
   }
 </script>
 
-<div class="effects">
+<div class="effects" class:overlay={layout !== 'bar'} class:bar={layout === 'bar'}>
   {#each hots as hot}
     <span class="hot" title={formatTooltip(hot, true)}>
       <img
@@ -25,7 +28,6 @@
         alt={hot.name || hot.id}
         style={`border-color: ${getElementColor(getDotElement(hot))}`}
       />
-      <span class="hot-plus">+</span>
       {#if hot.stacks > 1}<span class="stack inside">{hot.stacks}</span>{/if}
     </span>
   {/each}
@@ -43,32 +45,28 @@
 </div>
 
 <style>
-  .effects {
+  .effects { pointer-events: none; }
+  /* Overlay layout: inside portrait frame */
+  .effects.overlay {
     position: absolute;
     left: 2px;
     bottom: 2px;
     width: calc(var(--portrait-size) - 4px);
     display: flex;
-    gap: 0.2rem;
+    gap: 0.25rem;
     flex-wrap: wrap;
     align-items: center;
-    pointer-events: none;
+  }
+  /* Bar layout: horizontal row (Buff Bar) */
+  .effects.bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
   }
   .effects span { position: relative; display: inline-block; }
-  .hot .hot-plus {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    color: #fff;
-    font-weight: 800;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    font-size: 0.9rem;
-    line-height: 1;
-    padding: 0 2px;
-    border-radius: 2px;
-    background: rgba(0,0,0,0.55);
-    pointer-events: none;
-  }
   .dot-img {
     width: 30px;
     height: 30px;
@@ -80,14 +78,16 @@
   }
   .stack.inside {
     position: absolute;
-    bottom: 2px;
-    right: 2px;
-    font-size: 0.6rem;
+    bottom: 1px;
+    right: 1px;
+    font-size: 0.9rem; /* Enlarged DoT/HoT stack numbers */
+    font-weight: 800;
     line-height: 1;
-    padding: 0 2px;
+    padding: 0 3px;
     border-radius: 2px;
-    background: rgba(0,0,0,0.65);
+    background: rgba(0,0,0,0.72);
     color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     pointer-events: none;
   }
 </style>
