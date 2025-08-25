@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from dataclasses import dataclass
 from dataclasses import field
 
@@ -7,6 +9,10 @@ from autofighter.stats import Stats
 from autofighter.character import CharacterType
 from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
+
+
+log = logging.getLogger(__name__)
+
 
 @dataclass
 class PlayerBase(Stats):
@@ -52,9 +58,20 @@ class PlayerBase(Stats):
 
     def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
         target = self.stat_gain_map.get(stat_name, stat_name)
+        log.debug(
+            "%s gaining %s: %s",
+            getattr(self, "id", type(self).__name__),
+            target,
+            amount,
+        )
         super().adjust_stat_on_gain(target, amount)
 
     def adjust_stat_on_loss(self, stat_name: str, amount: int) -> None:
         target = self.stat_loss_map.get(stat_name, stat_name)
+        log.debug(
+            "%s losing %s: %s",
+            getattr(self, "id", type(self).__name__),
+            target,
+            amount,
+        )
         super().adjust_stat_on_loss(target, amount)
-

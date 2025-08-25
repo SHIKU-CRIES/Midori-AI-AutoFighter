@@ -1,7 +1,12 @@
+import logging
+
 from dataclasses import dataclass
 from dataclasses import field
 
 from plugins.relics._base import RelicBase
+
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
