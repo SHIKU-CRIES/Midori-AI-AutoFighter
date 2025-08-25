@@ -14,6 +14,26 @@ from plugins.damage_types.generic import Generic
 
 log = logging.getLogger(__name__)
 
+# Global enrage percentage applied during battles.
+# Set by battle rooms when enrage is active, used in damage/heal calculations.
+_ENRAGE_PERCENT: float = 0.0
+
+
+def set_enrage_percent(value: float) -> None:
+    """Set global enrage percent (e.g., 0.15 for +15% damage taken, -15% healing).
+
+    This is applied uniformly to all entities during damage/heal resolution.
+    """
+    global _ENRAGE_PERCENT
+    try:
+        _ENRAGE_PERCENT = max(float(value), 0.0)
+    except Exception:
+        _ENRAGE_PERCENT = 0.0
+
+
+def get_enrage_percent() -> float:
+    return _ENRAGE_PERCENT
+
 @dataclass
 class Stats:
     hp: int = 1000
@@ -101,7 +121,7 @@ class Stats:
             self.level += 1
             self._on_level_up()
 
-    async def apply_damage(self, amount: int, attacker: Optional["Stats"] = None) -> int:
+    async def apply_damage(self, amount: float, attacker: Optional["Stats"] = None) -> int:
         def _ensure(obj: "Stats") -> DamageTypeBase:
             dt = getattr(obj, "damage_type", Generic())
             if isinstance(dt, str):
@@ -135,6 +155,10 @@ class Stats:
         amount = ((amount ** 2) * src_vit) / (
             defense_term * self.vitality * self.mitigation
         )
+        # Enrage: increase damage taken globally by N% per enrage stack
+        enr = get_enrage_percent()
+        if enr > 0:
+            amount *= (1.0 + enr)
         amount = max(int(amount), 1)
         if critical and attacker is not None:
             log.info("Critical hit! %s -> %s for %s", attacker.id, self.id, amount)
@@ -165,7 +189,12 @@ class Stats:
         amount = self_type.on_heal_received(amount, healer, self)
         src_vit = healer.vitality if healer is not None else 1.0
         # Healing is amplified by both source and target vitality
-        amount = int(amount * src_vit * self.vitality)
+        amount = amount * src_vit * self.vitality
+        # Enrage: reduce healing output globally by N% per enrage stack
+        enr = get_enrage_percent()
+        if enr > 0:
+            amount *= max(1.0 - enr, 0.0)
+        amount = int(amount)
         self.hp = min(self.hp + amount, self.max_hp)
         BUS.emit("heal_received", self, healer, amount)
         if healer is not None:

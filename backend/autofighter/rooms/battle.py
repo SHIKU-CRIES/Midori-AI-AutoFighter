@@ -11,7 +11,7 @@ from typing import Any, Awaitable, Callable
 from . import Room
 from .utils import _build_foes, _scale_stats, _serialize
 from ..party import Party
-from ..stats import BUS, Stats
+from ..stats import BUS, Stats, set_enrage_percent
 from ..passives import PassiveRegistry
 from autofighter.cards import apply_cards, card_choices
 from autofighter.effects import EffectManager
@@ -172,6 +172,8 @@ class BattleRoom(Room):
         enrage_active = False
         enrage_stacks = 0
         enrage_bleed_applies = 0
+        # Ensure enrage percent starts at 0 for this battle
+        set_enrage_percent(0.0)
         threshold = ENRAGE_TURNS_BOSS if isinstance(self, BossRoom) else ENRAGE_TURNS_NORMAL
         exp_reward = 0
         turn = 0
@@ -199,20 +201,24 @@ class BattleRoom(Room):
                             f.passives.append("Enraged")
                         log.info("Enrage activated")
                     enrage_stacks = turn - threshold
+                    # Each enrage stack adds +1% damage taken and -1% healing dealt globally
+                    set_enrage_percent(0.01 * max(enrage_stacks, 0))
+                    # Keep prior enrage behavior: scale foe ATK and apply escalating
+                    # flat damage to both sides after very long fights.
                     for i, f in enumerate(foes):
                         f.atk = int(base_atks[i] * (1 + 0.4 * enrage_stacks))
-                    # After 1000 total turns, apply escalating enrage damage each tick
-                    # Damage equals 100 * turns-in-enrage and uses normal mitigation
                     if turn > 1000:
                         turns_in_enrage = max(enrage_stacks, 0)
                         extra_damage = 100 * turns_in_enrage
-                        # Apply to both sides to mirror existing enrage bleed behavior
                         for m in combat_party.members:
                             if m.hp > 0 and extra_damage > 0:
                                 await m.apply_damage(extra_damage)
                         for f in foes:
                             if f.hp > 0 and extra_damage > 0:
                                 await f.apply_damage(extra_damage)
+                else:
+                    # Not enraged yet; ensure percent is zero
+                    set_enrage_percent(0.0)
                 turn_start = time.perf_counter()
                 registry.trigger("turn_start", member)
                 log.debug("%s turn start", member.id)
@@ -299,6 +305,8 @@ class BattleRoom(Room):
                                         m.exp_multiplier += 0.025
                             except Exception:
                                 pass
+                # Keep prior enrage bleed: every 10 stacks since activation,
+                # add increasing stacks of a %max HP DoT to both sides.
                 if enrage_active:
                     turns_since_enrage = max(enrage_stacks, 0)
                     next_trigger = (enrage_bleed_applies + 1) * 10
@@ -308,7 +316,11 @@ class BattleRoom(Room):
                         for mgr in party_effects:
                             for _ in range(stacks_to_add):
                                 dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.05)
-                                mgr.add_dot(DamageOverTime("Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"))
+                                mgr.add_dot(
+                                    DamageOverTime(
+                                        "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
+                                    )
+                                )
                         for mgr, foe_obj in zip(foe_effects, foes):
                             for _ in range(stacks_to_add):
                                 dmg_per_tick = int(max(foe_obj.max_hp, 1) * 0.05)
@@ -409,6 +421,11 @@ class BattleRoom(Room):
             await mgr.cleanup(member)
         for foe_obj, mgr in zip(foes, foe_effects):
             await mgr.cleanup(foe_obj)
+        # Reset enrage percent after battle ends to avoid leaking to other battles.
+        try:
+            set_enrage_percent(0.0)
+        except Exception:
+            pass
         party.members = combat_party.members
         party.gold = combat_party.gold
         party.relics = combat_party.relics
