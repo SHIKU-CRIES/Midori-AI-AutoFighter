@@ -87,11 +87,11 @@
   }
 
   function handleRunEnd() {
-    stopBattlePoll();
     runId = '';
     roomData = null;
     nextRoom = '';
     battleActive = false;
+    stopBattlePoll();
     homeOverlay();
     clearRunState();
   }
@@ -205,6 +205,7 @@
       if (snap?.error) {
         roomData = snap;
         battleActive = false;
+        stopBattlePoll();
         stalledTicks = 0;
         // Surface backend-declared errors via popup
         try { openOverlay('error', { message: snap.error, traceback: '' }); } catch {}
@@ -221,6 +222,7 @@
         const rewardsReady = hasRewards(roomData);
         if (rewardsReady || snapCompleted) {
           battleActive = false;
+          stopBattlePoll();
           nextRoom = snap.next_room || nextRoom;
           if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
           if (snap.current_room) currentRoomType = snap.current_room;
@@ -238,6 +240,7 @@
         stalledTicks += 1;
         if (stalledTicks > STALL_TICKS) {
           battleActive = false;
+          stopBattlePoll();
           roomData = { ...snap, error: 'Battle results could not be fetched.' };
           if (dev || !browser) {
             const { warn } = await import('$lib/logger.js');
@@ -296,6 +299,7 @@
         const gotRewards = hasRewards(data);
         if (gotRewards) {
           battleActive = false;
+          stopBattlePoll();
           return;
         }
         const noFoes = !Array.isArray(data?.foes) || data.foes.length === 0;
@@ -308,6 +312,7 @@
             if (snapHasRewards) {
               roomData = snap;
               battleActive = false;
+              stopBattlePoll();
               nextRoom = snap.next_room || nextRoom;
               if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
               if (snap.current_room) currentRoomType = snap.current_room;
@@ -322,6 +327,7 @@
         pollBattle();
       } else {
         battleActive = false;
+        stopBattlePoll();
       }
     } catch (e) {
       try {
@@ -329,6 +335,7 @@
         const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
         roomData = snap;
         battleActive = false;
+        stopBattlePoll();
         nextRoom = snap.next_room || nextRoom;
         if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
         if (snap.current_room) currentRoomType = snap.current_room;
@@ -428,6 +435,7 @@
     // Close reward overlay and unmount previous BattleView immediately
     roomData = null;
     battleActive = false;
+    stopBattlePoll();
     try {
       const res = await advanceRoom(runId);
       if (res && typeof res.current_index === 'number') {
