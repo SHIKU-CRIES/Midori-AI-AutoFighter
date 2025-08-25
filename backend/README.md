@@ -13,6 +13,10 @@ uv sync
 uv run app.py
 ```
 
+## Logging
+
+Logs write to `logs/backend.log` using a buffered rotating file handler. The buffer flushes roughly every 15 seconds and a Rich handler keeps console output colorful.
+
 The root endpoint returns a simple status payload including the configured flavor. Set `UV_EXTRA` (default `"default"`) to label this instance. Additional routes support
 starting runs with a seeded 45-room map, updating the party, retrieving floor
 maps, listing available player characters, returning room background images,

@@ -4,19 +4,9 @@ import os
 import logging
 import traceback
 
-from pathlib import Path
-from logging.handlers import RotatingFileHandler
-
 from quart import Quart
 from quart import jsonify
 from quart import request
-
-from routes.runs import bp as runs_bp
-from routes.gacha import bp as gacha_bp
-from routes.rooms import bp as rooms_bp
-from routes.assets import bp as assets_bp
-from routes.players import bp as players_bp
-from routes.rewards import bp as rewards_bp
 
 from game import FERNET  # noqa: F401
 from game import GachaManager  # noqa: F401  # re-export for tests
@@ -33,20 +23,15 @@ from game import load_map  # noqa: F401
 from game import load_party  # noqa: F401
 from game import save_map  # noqa: F401
 from game import save_party  # noqa: F401
+from routes.runs import bp as runs_bp
+from routes.gacha import bp as gacha_bp
+from routes.rooms import bp as rooms_bp
+from routes.assets import bp as assets_bp
+from logging_config import configure_logging
+from routes.players import bp as players_bp
+from routes.rewards import bp as rewards_bp
 
-LOG_DIR = Path(__file__).resolve().parent / "logs"
-LOG_DIR.mkdir(exist_ok=True)
-
-file_handler = RotatingFileHandler(
-    LOG_DIR / "backend.log", maxBytes=1_048_576, backupCount=5
-)
-file_handler.setFormatter(
-    logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
-)
-
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-root_logger.addHandler(file_handler)
+configure_logging()
 
 log = logging.getLogger(__name__)
 
