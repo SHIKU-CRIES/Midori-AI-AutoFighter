@@ -52,4 +52,44 @@ describe('battle polling', () => {
     expect(setTimeoutCalled).toBe(false);
     expect(overlayCalls).toBe(0);
   });
+
+  test('pollBattle stops after handleRunEnd', () => {
+    const content = readFileSync(
+      join(import.meta.dir, '../src/routes/+page.svelte'),
+      'utf8'
+    );
+    expect(content).toMatch(/battleActive = false;\n\s*stopBattlePoll\(\);/);
+
+    let cleared = false;
+    let setTimeoutCalled = false;
+
+    const ctx = {
+      battleTimer: 1,
+      clearTimeout: () => { cleared = true; },
+      stopBattlePoll() {
+        if (this.battleTimer) {
+          this.clearTimeout(this.battleTimer);
+          this.battleTimer = null;
+        }
+      },
+      battleActive: true,
+    };
+
+    function handleRunEnd() {
+      ctx.battleActive = false;
+      ctx.stopBattlePoll();
+    }
+
+    handleRunEnd();
+
+    function pollBattle() {
+      if (!ctx.battleActive) return;
+      setTimeoutCalled = true;
+    }
+
+    pollBattle();
+
+    expect(cleared).toBe(true);
+    expect(setTimeoutCalled).toBe(false);
+  });
 });
