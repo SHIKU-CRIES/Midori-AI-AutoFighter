@@ -223,7 +223,12 @@ class BattleRoom(Room):
                 registry.trigger("turn_start", member)
                 log.debug("%s turn start", member.id)
                 await member.maybe_regain(turn)
+                # If all foes died earlier in this round, stop taking actions
+                if not any(f.hp > 0 for f in foes):
+                    break
                 alive_foe_idxs = [i for i, f in enumerate(foes) if f.hp > 0]
+                if not alive_foe_idxs:
+                    break
                 foe_idx = random.choice(alive_foe_idxs)
                 foe = foes[foe_idx]
                 foe_mgr = foe_effects[foe_idx]
@@ -360,11 +365,16 @@ class BattleRoom(Room):
                     if all(f.hp <= 0 for f in foes):
                         break
                     continue
+                # If party wiped during this turn, stop taking actions
+                if not any(m.hp > 0 for m in combat_party.members):
+                    break
                 alive = [
                     (idx, m)
                     for idx, m in enumerate(combat_party.members)
                     if m.hp > 0
                 ]
+                if not alive:
+                    break
                 idx, target = random.choices(
                     alive,
                     weights=[m.defense * m.mitigation for _, m in alive],
