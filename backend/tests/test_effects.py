@@ -81,3 +81,24 @@ def test_dot_has_minimum_chance(monkeypatch):
     manager.maybe_inflict_dot(attacker, 10)
     assert target.dots
 
+
+@pytest.mark.asyncio
+async def test_stat_modifier_applies_and_expires():
+    stats = Stats(atk=10, defense=20)
+    stats.id = "s"
+    manager = EffectManager(stats)
+    mod = effects.create_stat_buff(
+        stats,
+        name="rally",
+        turns=1,
+        atk=5,
+        defense_mult=2,
+    )
+    manager.add_modifier(mod)
+    assert stats.atk == 15
+    assert stats.defense == 40
+    await manager.tick()
+    assert stats.atk == 10
+    assert stats.defense == 20
+    assert not stats.mods
+
