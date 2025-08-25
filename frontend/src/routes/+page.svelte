@@ -323,9 +323,14 @@
         if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
         if (snap.current_room) currentRoomType = snap.current_room;
         saveRunState(runId, nextRoom);
-        if (browser) alert('Failed to enter room. Restored latest battle state.');
+        // Show a popup error instead of a blocking alert
+        openOverlay('error', {
+          message: 'Failed to enter room. Restored latest battle state.',
+          traceback: (e && e.stack) || ''
+        });
       } catch {
-        if (browser) alert('Failed to enter room.');
+        // Surface error via overlay for consistency
+        openOverlay('error', { message: 'Failed to enter room.', traceback: '' });
         if (dev || !browser) {
           const { error } = await import('$lib/logger.js');
           error('Failed to enter room.', e);

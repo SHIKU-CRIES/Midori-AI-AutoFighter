@@ -400,6 +400,16 @@ class BattleRoom(Room):
         party.gold = combat_party.gold
         party.relics = combat_party.relics
         party.cards = combat_party.cards
+        # Award experience to all surviving party members on victory before
+        # serializing party state so level/EXP changes are reflected in the
+        # response and persisted by save_party.
+        if any(m.hp > 0 for m in party.members) and exp_reward > 0:
+            for member in party.members:
+                try:
+                    member.gain_exp(exp_reward)
+                except Exception:
+                    # Do not let EXP calculation break battle resolution
+                    pass
         party_data = [_serialize(p) for p in party.members]
         foes_data = [_serialize(f) for f in foes]
         if all(m.hp <= 0 for m in combat_party.members):

@@ -4,6 +4,7 @@
   import MenuPanel from './MenuPanel.svelte';
   import { getGacha, pullGacha } from './api.js';
   import { browser, dev } from '$app/environment';
+  import { openOverlay } from './OverlayController.js';
   const dispatch = createEventDispatcher();
   let pity = 0;
   let items = {};
@@ -26,7 +27,7 @@
         const { error } = await import('$lib/logger.js');
         error('pull failed', err);
       }
-      alert('Not enough tickets');
+      openOverlay('error', { message: 'Not enough tickets', traceback: err?.stack || '' });
     }
     loading = false;
   }
