@@ -3,12 +3,88 @@ from __future__ import annotations
 import random
 
 from dataclasses import dataclass
+from dataclasses import field
+from typing import Dict
 from typing import List
 from typing import Optional
 
 from rich.console import Console
 
 from autofighter.stats import Stats
+
+
+@dataclass
+class StatModifier:
+    """Temporarily adjust stats via additive or multiplicative changes."""
+
+    stats: Stats
+    name: str
+    turns: int
+    id: str
+    deltas: Dict[str, float] | None = None
+    multipliers: Dict[str, float] | None = None
+    _originals: Dict[str, float] = field(init=False, default_factory=dict)
+
+    def apply(self) -> None:
+        """Apply configured modifiers to the stats object."""
+
+        for name, value in (self.deltas or {}).items():
+            current = getattr(self.stats, name, 0)
+            self._originals.setdefault(name, current)
+            setattr(self.stats, name, current + value)
+        for name, value in (self.multipliers or {}).items():
+            current = getattr(self.stats, name, 0)
+            self._originals.setdefault(name, current)
+            setattr(self.stats, name, type(current)(current * value))
+
+    def remove(self) -> None:
+        """Restore original stat values."""
+
+        for name, value in self._originals.items():
+            setattr(self.stats, name, value)
+
+    def tick(self) -> bool:
+        """Decrement remaining turns and remove when expired."""
+
+        self.turns -= 1
+        if self.turns <= 0:
+            self.remove()
+            return False
+        return True
+
+
+def create_stat_buff(
+    stats: Stats,
+    *,
+    name: str = "buff",
+    turns: int = 1,
+    id: Optional[str] = None,
+    **modifiers: float,
+) -> StatModifier:
+    """Create and apply a :class:`StatModifier` to ``stats``.
+
+    Keyword arguments ending with ``_mult`` are treated as multipliers for the
+    corresponding stat; others are additive deltas. The new modifier is applied
+    immediately and returned for tracking in an :class:`EffectManager`.
+    """
+
+    deltas: Dict[str, float] = {}
+    mults: Dict[str, float] = {}
+    for key, value in modifiers.items():
+        if key.endswith("_mult"):
+            mults[key[:-5]] = float(value)
+        else:
+            deltas[key] = float(value)
+    effect = StatModifier(
+        stats=stats,
+        name=name,
+        turns=turns,
+        id=id or name,
+        deltas=deltas or None,
+        multipliers=mults or None,
+    )
+    effect.apply()
+    return effect
 
 
 @dataclass
@@ -76,6 +152,7 @@ class EffectManager:
         self.stats = stats
         self.dots: List[DamageOverTime] = []
         self.hots: List[HealingOverTime] = []
+        self.mods: List[StatModifier] = []
         self._console = Console()
 
     def add_dot(self, effect: DamageOverTime, max_stacks: Optional[int] = None) -> None:
@@ -103,6 +180,12 @@ class EffectManager:
         self.hots.append(effect)
         self.stats.hots.append(effect.id)
 
+    def add_modifier(self, effect: StatModifier) -> None:
+        """Attach a stat modifier to the tracked stats."""
+
+        self.mods.append(effect)
+        self.stats.mods.append(effect.id)
+
     def maybe_inflict_dot(self, attacker: Stats, damage: int) -> None:
         dot = attacker.damage_type.create_dot(damage, attacker)
         if dot is None:
@@ -120,15 +203,23 @@ class EffectManager:
             expired: List[object] = []
             for eff in collection:
                 color = "green" if isinstance(eff, HealingOverTime) else "light_red"
-                self._console.log(
-                    f"[{color}]{self.stats.id} {eff.name} tick[/]"
-                )
+                self._console.log(f"[{color}]{self.stats.id} {eff.name} tick[/]")
                 if not await eff.tick(self.stats):
                     expired.append(eff)
             for eff in expired:
                 collection.remove(eff)
                 if eff.id in names:
                     names.remove(eff.id)
+
+        expired_mods: List[StatModifier] = []
+        for mod in self.mods:
+            self._console.log(f"[yellow]{self.stats.id} {mod.name} tick[/]")
+            if not mod.tick():
+                expired_mods.append(mod)
+        for mod in expired_mods:
+            self.mods.remove(mod)
+            if mod.id in self.stats.mods:
+                self.stats.mods.remove(mod.id)
         if self.stats.hp <= 0 and others is not None:
             for eff in list(self.dots):
                 on_death = getattr(eff, "on_death", None)
@@ -161,9 +252,11 @@ class EffectManager:
         # Remove references to effect instances
         self.dots.clear()
         self.hots.clear()
+        self.mods.clear()
         # Clear status name lists on the stats object
         try:
             self.stats.dots = []
             self.stats.hots = []
+            self.stats.mods = []
         except Exception:
             pass

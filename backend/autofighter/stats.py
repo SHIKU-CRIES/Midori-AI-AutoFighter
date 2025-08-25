@@ -66,6 +66,7 @@ class Stats:
     passives: list[str] = field(default_factory=list)
     dots: list[str] = field(default_factory=list)
     hots: list[str] = field(default_factory=list)
+    mods: list[str] = field(default_factory=list)
 
     level_up_gains: dict[str, int] = field(
         default_factory=lambda: {"max_hp": 10, "atk": 5, "defense": 3}
