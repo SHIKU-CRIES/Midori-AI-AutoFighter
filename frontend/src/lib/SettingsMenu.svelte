@@ -71,8 +71,13 @@
 
   async function handleEndRun() {
     if (runId) {
-      await endRun(runId);
-      dispatch('endRun');
+      try {
+        await endRun(runId);
+      } catch (e) {
+        console.error('Failed to end run', e);
+      } finally {
+        dispatch('endRun');
+      }
     }
   }
 

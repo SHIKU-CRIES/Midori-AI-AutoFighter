@@ -20,4 +20,22 @@ describe('SettingsMenu component', () => {
     expect(content).not.toContain('Save</button>');
     expect(content).not.toContain('alert(');
   });
+
+  test('dispatches endRun even if API call fails', async () => {
+    const source = readFileSync(join(import.meta.dir, '../src/lib/SettingsMenu.svelte'), 'utf8');
+    const start = source.indexOf('async function handleEndRun');
+    const brace = source.indexOf('{', start);
+    let depth = 1;
+    let i = brace + 1;
+    while (depth > 0 && i < source.length) {
+      if (source[i] === '{') depth++;
+      else if (source[i] === '}') depth--;
+      i++;
+    }
+    const body = source.slice(brace + 1, i - 1);
+    let fired = false;
+    const handler = new Function('runId', 'endRun', 'dispatch', `return (async () => {${body}})();`);
+    await handler('abc', async () => { throw new Error('fail'); }, () => { fired = true; });
+    expect(fired).toBe(true);
+  });
 });
