@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from typing import Callable, Dict, Optional
 
 from autofighter.effects import DamageOverTime, HealingOverTime
@@ -13,7 +15,11 @@ from plugins.dots.shadow_siphon import ShadowSiphon
 from plugins.hots.radiant_regeneration import RadiantRegeneration
 
 
+log = logging.getLogger(__name__)
+
+
 def _set_source(effect: DamageOverTime | HealingOverTime, source) -> object:
+    log.debug("Setting source %s on effect %s", source, effect.id)
     effect.source = source
     return effect
 
@@ -36,19 +42,23 @@ SHADOW_SIPHON_ID = ShadowSiphon.id
 
 
 def create_shadow_siphon(damage: int, source) -> DamageOverTime:
+    log.info("Creating Shadow Siphon with %s damage", damage)
     return _set_source(ShadowSiphon(damage), source)
 
 
 def create_dot(damage_type: str, damage: float, source) -> Optional[DamageOverTime]:
+    log.debug("Creating DoT for type %s with damage %s", damage_type, damage)
     factory = DOT_FACTORIES.get(damage_type)
     if factory is None:
+        log.debug("No DoT factory for type %s", damage_type)
         return None
     return factory(damage, source)
 
 
 def create_hot(damage_type: str, source) -> Optional[HealingOverTime]:
+    log.debug("Creating HoT for type %s", damage_type)
     factory = HOT_FACTORIES.get(damage_type)
     if factory is None:
+        log.debug("No HoT factory for type %s", damage_type)
         return None
     return factory(source)
-
