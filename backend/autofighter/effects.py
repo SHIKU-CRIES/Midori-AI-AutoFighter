@@ -23,7 +23,9 @@ class DamageOverTime:
 
     async def tick(self, target: Stats, *_: object) -> bool:
         attacker = self.source or target
-        dtype = getattr(self, "damage_type", None) or target.damage_type
+        dtype = getattr(self, "damage_type", None)
+        if dtype is None:
+            dtype = getattr(attacker, "damage_type", target.damage_type)
         dmg = dtype.on_dot_damage_taken(
             self.damage,
             attacker,
@@ -54,7 +56,9 @@ class HealingOverTime:
 
     async def tick(self, target: Stats, *_: object) -> bool:
         healer = self.source or target
-        dtype = getattr(self, "damage_type", None) or target.damage_type
+        dtype = getattr(self, "damage_type", None)
+        if dtype is None:
+            dtype = getattr(healer, "damage_type", target.damage_type)
         heal = dtype.on_hot_heal_received(self.healing, healer, target)
         heal = dtype.on_party_hot_heal_received(heal, healer, target)
         source_type = getattr(healer, "damage_type", None)

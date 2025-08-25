@@ -1,12 +1,9 @@
 from autofighter.effects import DamageOverTime
-from plugins.damage_types.generic import Generic
-from plugins.damage_types._base import DamageTypeBase
 
 
 class Bleed(DamageOverTime):
     plugin_type = "dot"
     id = "bleed"
-    damage_type: DamageTypeBase = Generic()
 
     def __init__(self, damage: int, turns: int) -> None:
         super().__init__("Bleed", damage, turns, self.id)

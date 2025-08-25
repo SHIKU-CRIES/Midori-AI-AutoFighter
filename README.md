@@ -144,7 +144,7 @@ types.
 
 ## Damage and Healing Effects
 
-Elemental damage types hook into attacks:
+Elemental damage types hook into attacks. The `plugins/damage_effects.py` module maps each element to its DoT and HoT factories so plugins can request effects without importing one another:
 
 - **[Fire](backend/plugins/damage_types/fire.py)** – Damage scales with missing HP and applies [Blazing Torment](backend/plugins/dots/blazing_torment.py), a stackable DoT that ticks again when the target acts.
 - **[Ice](backend/plugins/damage_types/ice.py)** – Inflicts [Frozen Wound](backend/plugins/dots/frozen_wound.py), which lowers the victim's actions per turn and adds a 1% miss chance per stack. Some skills use [Cold Wound](backend/plugins/dots/cold_wound.py) with a five-stack limit.
