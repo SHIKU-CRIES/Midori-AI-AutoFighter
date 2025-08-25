@@ -410,14 +410,14 @@
     if ((roomData?.card_choices?.length || 0) > 0 || (roomData?.relic_choices?.length || 0) > 0) {
       return;
     }
-    // Close reward overlay and unmount previous BattleView immediately
-    roomData = null;
-    battleActive = false;
+    // If the run has ended (defeat), clear state and show defeat popup immediately
     if (roomData?.ended) {
-      // Run has ended (defeat). Clear state, return to main, and show popup.
       handleDefeat();
       return;
     }
+    // Close reward overlay and unmount previous BattleView immediately
+    roomData = null;
+    battleActive = false;
     try {
       const res = await advanceRoom(runId);
       if (res && typeof res.current_index === 'number') {
