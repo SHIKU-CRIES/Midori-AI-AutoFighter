@@ -55,13 +55,13 @@
         {:else if activeTab === 'Offense'}
           <div><span>ATK</span><span>{sel.stats.atk ?? '-'}</span></div>
           <div><span>CRIT Rate</span><span>{(sel.stats.critRate ?? sel.stats.crit_rate ?? 0) + '%'}</span></div>
-          <div><span>CRIT DMG</span><span>{(sel.stats.critDamage ?? sel.stats.crit_dmg ?? 0) + '%'}</span></div>
-          <div><span>Effect Hit Rate</span><span>{(sel.stats.effectHit ?? sel.stats.effect_hit ?? 0) + '%'}</span></div>
+          <div><span>CRIT DMG</span><span>{(sel.stats.critDamage ?? sel.stats.crit_damage ?? 0) + '%'}</span></div>
+          <div><span>Effect Hit Rate</span><span>{(sel.stats.effectHit ?? sel.stats.effect_hit_rate ?? 0) + '%'}</span></div>
         {:else if activeTab === 'Defense'}
           <div><span>DEF</span><span>{sel.stats.defense ?? '-'}</span></div>
           <div><span>Mitigation</span><span>{sel.stats.mitigation ?? '-'}</span></div>
-          <div><span>Dodge Odds</span><span>{sel.stats.dodge ?? sel.stats.dodgeOdds ?? '-'}</span></div>
-          <div><span>Effect Resist</span><span>{sel.stats.effectResist ?? sel.stats.effect_res ?? '-'}</span></div>
+          <div><span>Dodge Odds</span><span>{sel.stats.dodge_odds ?? '-'}</span></div>
+          <div><span>Effect Resist</span><span>{sel.stats.effectResist ?? sel.stats.effect_resistance ?? '-'}</span></div>
         {/if}
       </div>
     {/each}

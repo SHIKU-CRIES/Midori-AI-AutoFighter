@@ -13,6 +13,14 @@ describe('PartyPicker component', () => {
     expect(content).toContain('Add to party');
   });
 
+  test('references updated stat keys', () => {
+    const content = readFileSync(join(import.meta.dir, '../src/lib/StatTabs.svelte'), 'utf8');
+    expect(content).toContain('crit_damage');
+    expect(content).toContain('effect_hit_rate');
+    expect(content).toContain('dodge_odds');
+    expect(content).toContain('effect_resistance');
+  });
+
   test('filters unowned characters and normalizes element names', () => {
     const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
     expect(content).toContain('filter((p) => p.owned || p.is_player)');
