@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from plugins.relics._base import RelicBase
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -23,7 +24,8 @@ class TatteredFlag(RelicBase):
                 return
             for member in party.members:
                 if member is not target and member.hp > 0:
-                    member.atk = int(member.atk * 1.03)
+                    mod = create_stat_buff(member, name=f"{self.id}_buff", atk_mult=1.03, turns=9999)
+                    member.effect_manager.add_modifier(mod)
 
         BUS.subscribe("damage_taken", _fallen)
 

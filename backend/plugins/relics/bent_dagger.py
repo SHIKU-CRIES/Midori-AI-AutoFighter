@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from plugins.relics._base import RelicBase
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -22,7 +23,8 @@ class BentDagger(RelicBase):
             if target in party.members or target.hp > 0:
                 return
             for member in party.members:
-                member.atk = int(member.atk * 1.01)
+                mod = create_stat_buff(member, name=f"{self.id}_kill", atk_mult=1.01, turns=9999)
+                member.effect_manager.add_modifier(mod)
 
         BUS.subscribe("damage_taken", _on_death)
 

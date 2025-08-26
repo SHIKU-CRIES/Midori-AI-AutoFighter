@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from plugins.relics._base import RelicBase
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
 from plugins.players._base import PlayerBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -20,7 +21,7 @@ class TravelersCharm(RelicBase):
         super().apply(party)
 
         pending: dict[int, tuple[int, int]] = {}
-        active: dict[int, tuple[PlayerBase, int, int]] = {}
+        active: dict[int, tuple[PlayerBase, object]] = {}
 
         def _hit(target, attacker, amount) -> None:
             if target not in party.members:
@@ -36,15 +37,24 @@ class TravelersCharm(RelicBase):
                 member = next((m for m in party.members if id(m) == pid), None)
                 if member is None:
                     continue
-                member.adjust_stat_on_gain("defense", bdef)
-                member.adjust_stat_on_gain("mitigation", bmit)
-                active[pid] = (member, bdef, bmit)
+                mod = create_stat_buff(
+                    member,
+                    name=f"{self.id}_{pid}",
+                    turns=1,
+                    defense=bdef,
+                    mitigation=bmit,
+                )
+                member.effect_manager.add_modifier(mod)
+                active[pid] = (member, mod)
             pending.clear()
 
         def _turn_end() -> None:
-            for pid, (member, bdef, bmit) in list(active.items()):
-                member.adjust_stat_on_loss("defense", bdef)
-                member.adjust_stat_on_loss("mitigation", bmit)
+            for pid, (member, mod) in list(active.items()):
+                mod.remove()
+                if mod in member.effect_manager.mods:
+                    member.effect_manager.mods.remove(mod)
+                if mod.id in member.mods:
+                    member.mods.remove(mod.id)
             active.clear()
 
         BUS.subscribe("damage_taken", _hit)

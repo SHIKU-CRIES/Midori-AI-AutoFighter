@@ -3,6 +3,7 @@ from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -32,10 +33,16 @@ class NullLantern(RelicBase):
 
             if isinstance(entity, FoeBase):
                 mult = 1 + 1.5 * state["cleared"]
-                entity.atk = int(entity.atk * mult)
-                entity.defense = int(entity.defense * mult)
-                entity.max_hp = int(entity.max_hp * mult)
-                entity.hp = entity.max_hp
+                mod = create_stat_buff(
+                    entity,
+                    name=f"{self.id}_foe_{state['cleared']}",
+                    turns=9999,
+                    atk_mult=mult,
+                    defense_mult=mult,
+                    max_hp_mult=mult,
+                    hp_mult=mult,
+                )
+                entity.effect_manager.add_modifier(mod)
 
         def _battle_end(entity) -> None:
             from plugins.foes._base import FoeBase
