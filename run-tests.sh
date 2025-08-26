@@ -30,6 +30,10 @@ echo "Starting test run"
 
 # Backend tests
 cd backend
+
+# Set up Python environment once
+uv venv && uv sync
+
 echo "Starting backend tests..."
 for file in $(find tests -maxdepth 1 -name "test_*.py" -type f -printf "%f\n" | sort); do
   echo "Running backend test: $file"
@@ -40,6 +44,10 @@ cd "$ROOT_DIR"
 
 # Frontend tests
 cd frontend
+
+# Install Node dependencies
+bun install
+
 echo "Starting frontend tests..."
 for file in $(find tests -maxdepth 1 -name "*.test.js" -type f -printf "%f\n" | sort); do
   echo "Running frontend test: $file"
