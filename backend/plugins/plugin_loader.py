@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import logging
 import importlib.util
 
@@ -58,9 +59,30 @@ class PluginLoader:
         return self._registry[category]
 
     def _import_module(self, path: Path) -> ModuleType:
-        spec = importlib.util.spec_from_file_location(path.stem, path)
+        parts = path.with_suffix("").parts
+        try:
+            idx = parts.index("plugins")
+            module_name = ".".join(parts[idx:])
+        except ValueError:
+            module_name = path.stem
+
+        spec = importlib.util.spec_from_file_location(module_name, path)
         assert spec and spec.loader
         module = importlib.util.module_from_spec(spec)
+        parent = module_name.rpartition(".")[0]
+        if parent:
+            pkg_path = path.parent
+            pkg_name = parent
+            parents: list[tuple[str, Path]] = []
+            while pkg_name and pkg_name not in sys.modules:
+                parents.append((pkg_name, pkg_path))
+                pkg_name, pkg_path = pkg_name.rpartition(".")[0], pkg_path.parent
+            for name, pth in reversed(parents):
+                pkg = ModuleType(name)
+                pkg.__path__ = [str(pth)]
+                sys.modules[name] = pkg
+            module.__package__ = parent
+        sys.modules[module_name] = module
         spec.loader.exec_module(module)
         return module
 
