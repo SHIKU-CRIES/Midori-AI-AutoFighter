@@ -4,6 +4,11 @@ Player and Foe base classes assign a random damage type when one is not
 provided, and battle rooms respect these preset elements without selecting new
 types.
 
+Each instance initializes its own LangChain ChromaDB memory tied to the current
+run. Use `send_lrm_message` to interact with the LRM and `receive_lrm_message`
+to log replies. Conversations remain isolated between combatants and reset for
+new runs.
+
 ## Player Roster
 All legacy characters from the Pygame version have been ported as plugins.
 Each entry notes the character's `CharacterType` and starting damage type.

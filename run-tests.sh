@@ -32,7 +32,11 @@ echo "Starting test run"
 cd backend
 
 # Set up Python environment once
-uv venv && uv sync
+if [ -n "${UV_EXTRA:-}" ]; then
+  uv venv && uv sync --extra "$UV_EXTRA"
+else
+  uv venv && uv sync
+fi
 
 echo "Starting backend tests..."
 for file in $(find tests -maxdepth 1 -name "test_*.py" -type f -printf "%f\n" | sort); do
