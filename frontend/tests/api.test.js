@@ -6,7 +6,10 @@ import {
   getGacha,
   pullGacha,
   setAutoCraft,
-  wipeData
+  wipeData,
+  getLrmConfig,
+  setLrmModel,
+  testLrmModel
 } from '../src/lib/api.js';
 import {
   startRun,
@@ -105,5 +108,24 @@ describe('api calls', () => {
   test('wipeData throws on HTTP error', async () => {
     global.fetch = createFetch({}, false, 500);
     await expect(wipeData()).rejects.toThrow('HTTP error 500');
+  });
+
+  test('getLrmConfig fetches config', async () => {
+    const payload = { current_model: 'deepseek', available_models: [] };
+    global.fetch = createFetch(payload);
+    const result = await getLrmConfig();
+    expect(result).toEqual(payload);
+  });
+
+  test('setLrmModel posts selection', async () => {
+    global.fetch = createFetch({ current_model: 'gemma' });
+    const result = await setLrmModel('gemma');
+    expect(result).toEqual({ current_model: 'gemma' });
+  });
+
+  test('testLrmModel posts prompt', async () => {
+    global.fetch = createFetch({ response: 'ok' });
+    const result = await testLrmModel('hi');
+    expect(result).toEqual({ response: 'ok' });
   });
 });

@@ -7,6 +7,7 @@ export function loadSettings() {
     const data = JSON.parse(raw);
     if (data.framerate !== undefined) data.framerate = Number(data.framerate);
     if (data.reducedMotion !== undefined) data.reducedMotion = Boolean(data.reducedMotion);
+    if (data.lrmModel !== undefined) data.lrmModel = String(data.lrmModel);
     return data;
   } catch {
     return {};

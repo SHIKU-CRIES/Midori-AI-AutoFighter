@@ -24,12 +24,13 @@ from game import _assign_damage_type  # noqa: F401
 from game import _load_player_customization  # noqa: F401
 from game import _apply_player_customization  # noqa: F401
 from routes.runs import bp as runs_bp
-from routes.gacha import bp as gacha_bp
 from routes.rooms import bp as rooms_bp
+from routes.gacha import bp as gacha_bp
 from routes.assets import bp as assets_bp
-from logging_config import configure_logging
+from routes.config import bp as config_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp
+from logging_config import configure_logging
 
 configure_logging()
 
@@ -42,6 +43,7 @@ app.register_blueprint(players_bp)
 app.register_blueprint(runs_bp)
 app.register_blueprint(rooms_bp)
 app.register_blueprint(rewards_bp)
+app.register_blueprint(config_bp)
 
 BACKEND_FLAVOR = os.getenv("UV_EXTRA", "default")
 

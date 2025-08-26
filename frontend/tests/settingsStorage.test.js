@@ -39,6 +39,12 @@ describe('settings storage', () => {
     expect(typeof result.framerate).toBe('number');
   });
 
+  test('persists lrm model selection', () => {
+    saveSettings({ lrmModel: 'deepseek' });
+    const result = loadSettings();
+    expect(result.lrmModel).toBe('deepseek');
+  });
+
   test('clearSettings removes stored values', () => {
     saveSettings({ sfxVolume: 40 });
     clearSettings();
