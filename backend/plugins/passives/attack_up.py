@@ -9,5 +9,5 @@ class AttackUp:
     trigger = "battle_start"
     amount = 5
 
-    def apply(self, target) -> None:
+    async def apply(self, target) -> None:
         target.adjust_stat_on_gain("atk", self.amount)

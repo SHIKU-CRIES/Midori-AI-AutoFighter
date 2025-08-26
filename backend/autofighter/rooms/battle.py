@@ -159,7 +159,7 @@ class BattleRoom(Room):
 
         for f in foes:
             BUS.emit("battle_start", f)
-            registry.trigger("battle_start", f)
+            await registry.trigger("battle_start", f)
         log.info(
             "Battle start: %s vs %s",
             [f.id for f in foes],
@@ -167,7 +167,7 @@ class BattleRoom(Room):
         )
         for member_effect, member in zip(party_effects, combat_party.members):
             BUS.emit("battle_start", member)
-            registry.trigger("battle_start", member)
+            await registry.trigger("battle_start", member)
 
         enrage_active = False
         enrage_stacks = 0
@@ -220,7 +220,7 @@ class BattleRoom(Room):
                     # Not enraged yet; ensure percent is zero
                     set_enrage_percent(0.0)
                 turn_start = time.perf_counter()
-                registry.trigger("turn_start", member)
+                await registry.trigger("turn_start", member)
                 log.debug("%s turn start", member.id)
                 await member.maybe_regain(turn)
                 # If all foes died earlier in this round, stop taking actions
@@ -235,7 +235,7 @@ class BattleRoom(Room):
                 dt = getattr(member, "damage_type", None)
                 await member_effect.tick(foe_mgr)
                 if member.hp <= 0:
-                    registry.trigger("turn_end", member)
+                    await registry.trigger("turn_end", member)
                     elapsed = time.perf_counter() - turn_start
                     if elapsed < 0.5:
                         await asyncio.sleep(0.5 - elapsed)
@@ -251,7 +251,7 @@ class BattleRoom(Room):
                     )
                     proceed = True if res is None else bool(res)
                 if not proceed:
-                    registry.trigger("turn_end", member)
+                    await registry.trigger("turn_end", member)
                     if progress is not None:
                         await progress(
                             {
@@ -335,7 +335,7 @@ class BattleRoom(Room):
                                     )
                                 )
                         enrage_bleed_applies += 1
-                registry.trigger("turn_end", member)
+                await registry.trigger("turn_end", member)
                 if progress is not None:
                     await progress(
                         {
@@ -380,13 +380,13 @@ class BattleRoom(Room):
                     weights=[m.defense * m.mitigation for _, m in alive],
                 )[0]
                 target_effect = party_effects[idx]
-                registry.trigger("turn_start", foe)
+                await registry.trigger("turn_start", foe)
                 log.debug("%s turn start targeting %s", foe.id, target.id)
                 await foe.maybe_regain(turn)
                 dt = getattr(foe, "damage_type", None)
                 await foe_mgr.tick(target_effect)
                 if foe.hp <= 0:
-                    registry.trigger("turn_end", foe)
+                    await registry.trigger("turn_end", foe)
                     continue
                 proceed = await foe_mgr.on_action()
                 if proceed is None:
@@ -395,7 +395,7 @@ class BattleRoom(Room):
                     res = await dt.on_action(foe, foes, combat_party.members)
                     proceed = True if res is None else bool(res)
                 if not proceed:
-                    registry.trigger("turn_end", foe)
+                    await registry.trigger("turn_end", foe)
                     elapsed = time.perf_counter() - turn_start
                     if elapsed < 0.5:
                         await asyncio.sleep(0.5 - elapsed)
@@ -406,7 +406,7 @@ class BattleRoom(Room):
                 else:
                     log.info("%s hits %s for %s", foe.id, target.id, dmg)
                 target_effect.maybe_inflict_dot(foe, dmg)
-                registry.trigger("turn_end", foe)
+                await registry.trigger("turn_end", foe)
                 elapsed = time.perf_counter() - turn_start
                 if elapsed < 0.5:
                     await asyncio.sleep(0.5 - elapsed)

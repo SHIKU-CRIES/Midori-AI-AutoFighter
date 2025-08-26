@@ -18,7 +18,7 @@ class ShopRoom(Room):
         registry = PassiveRegistry()
         heal = int(sum(m.max_hp for m in party.members) * 0.05)
         for member in party.members:
-            registry.trigger("room_enter", member)
+            await registry.trigger("room_enter", member)
             await member.apply_healing(heal)
         cost = int(data.get("cost", 0))
         item = data.get("item")
