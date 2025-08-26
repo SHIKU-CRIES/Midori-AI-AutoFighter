@@ -9,6 +9,11 @@ from transformers import pipeline
 from langchain_huggingface import HuggingFacePipeline
 from langchain_community.llms import LlamaCpp
 
+from .safety import ensure_ram
+from .safety import pick_device
+from .safety import gguf_strategy
+from .safety import model_memory_requirements
+
 
 class SupportsStream(Protocol):
     async def generate_stream(self, text: str) -> AsyncIterator[str]:
@@ -33,17 +38,46 @@ class _LangChainWrapper:
 def load_llm(model: str | None = None, *, gguf_path: str | None = None) -> SupportsStream:
     name = model or os.getenv("AF_LLM_MODEL", ModelName.DEEPSEEK.value)
     if name == ModelName.DEEPSEEK.value:
-        pipe = pipeline("text-generation", model=ModelName.DEEPSEEK.value)
+        min_ram, _ = model_memory_requirements(name)
+        ensure_ram(min_ram)
+        device = pick_device()
+        if device == 0:
+            pipe = pipeline(
+                "text-generation",
+                model=ModelName.DEEPSEEK.value,
+                device_map="auto",
+            )
+        else:
+            pipe = pipeline(
+                "text-generation",
+                model=ModelName.DEEPSEEK.value,
+                device=device,
+            )
         return _LangChainWrapper(HuggingFacePipeline(pipeline=pipe))
     if name == ModelName.GEMMA.value:
-        pipe = pipeline("text-generation", model=ModelName.GEMMA.value)
+        min_ram, _ = model_memory_requirements(name)
+        ensure_ram(min_ram)
+        device = pick_device()
+        if device == 0:
+            pipe = pipeline(
+                "text-generation",
+                model=ModelName.GEMMA.value,
+                device_map="auto",
+            )
+        else:
+            pipe = pipeline(
+                "text-generation",
+                model=ModelName.GEMMA.value,
+                device=device,
+            )
         return _LangChainWrapper(HuggingFacePipeline(pipeline=pipe))
     if name == ModelName.GGUF.value:
         path = gguf_path or os.getenv("AF_GGUF_PATH")
         if path is None:
             msg = "GGUF model path must be provided via argument or AF_GGUF_PATH"
             raise ValueError(msg)
-        return _LangChainWrapper(LlamaCpp(model_path=path))
+        kwargs = gguf_strategy(path)
+        return _LangChainWrapper(LlamaCpp(model_path=path, **kwargs))
     msg = f"Unsupported model: {name}"
     raise ValueError(msg)
 

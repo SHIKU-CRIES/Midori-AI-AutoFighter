@@ -1,5 +1,4 @@
 import asyncio
-
 import pytest
 
 from llms.loader import ModelName
@@ -33,8 +32,12 @@ async def _collect(llm) -> str:
 
 @pytest.mark.asyncio
 async def test_deepseek_loader(monkeypatch: pytest.MonkeyPatch) -> None:
-    def fake_pipeline(task: str, *, model: str) -> FakePipeline:
+    monkeypatch.setattr("llms.loader.model_memory_requirements", lambda name: (0, 0))
+    monkeypatch.setattr("llms.loader.ensure_ram", lambda required: None)
+    monkeypatch.setattr("llms.loader.pick_device", lambda: -1)
+    def fake_pipeline(task: str, *, model: str, **kwargs: object) -> FakePipeline:
         assert model == ModelName.DEEPSEEK.value
+        assert kwargs.get("device") == -1
         return FakePipeline(" ds")
 
     monkeypatch.setattr("llms.loader.pipeline", fake_pipeline)
@@ -45,8 +48,12 @@ async def test_deepseek_loader(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.asyncio
 async def test_gemma_loader(monkeypatch: pytest.MonkeyPatch) -> None:
-    def fake_pipeline(task: str, *, model: str) -> FakePipeline:
+    monkeypatch.setattr("llms.loader.model_memory_requirements", lambda name: (0, 0))
+    monkeypatch.setattr("llms.loader.ensure_ram", lambda required: None)
+    monkeypatch.setattr("llms.loader.pick_device", lambda: -1)
+    def fake_pipeline(task: str, *, model: str, **kwargs: object) -> FakePipeline:
         assert model == ModelName.GEMMA.value
+        assert kwargs.get("device") == -1
         return FakePipeline(" gm")
 
     monkeypatch.setattr("llms.loader.pipeline", fake_pipeline)
@@ -57,6 +64,9 @@ async def test_gemma_loader(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.asyncio
 async def test_gguf_loader(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("llms.loader.model_memory_requirements", lambda name: (0, 0))
+    monkeypatch.setattr("llms.loader.ensure_ram", lambda required: None)
+    monkeypatch.setattr("llms.loader.pick_device", lambda: -1)
     monkeypatch.setattr("llms.loader.LlamaCpp", FakeLlama)
     llm = load_llm(ModelName.GGUF.value, gguf_path="path/to/model.gguf")
     result = await _collect(llm)
