@@ -13,9 +13,9 @@ from autofighter.stats import apply_status_hooks
 from plugins import players as player_plugins
 
 from game import SAVE_MANAGER
-from game import _apply_player_stats
 from game import _assign_damage_type
 from game import _load_player_customization
+from game import _apply_player_customization
 
 bp = Blueprint("players", __name__)
 
@@ -47,7 +47,7 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
         inst = cls()
         _assign_damage_type(inst)
         if inst.id == "player":
-            _apply_player_stats(inst)
+            _apply_player_customization(inst)
         stats = asdict(inst)
         stats["char_type"] = inst.char_type.name
         stats["damage_type"] = inst.element_id
@@ -69,7 +69,7 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
     refresh = _get_stat_refresh_rate()
     player = player_plugins.player.Player()
     _assign_damage_type(player)
-    _apply_player_stats(player)
+    _apply_player_customization(player)
     apply_status_hooks(player)
     stats = {
         "core": {

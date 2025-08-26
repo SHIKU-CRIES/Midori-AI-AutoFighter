@@ -19,6 +19,7 @@ from plugins import players as player_plugins
 from plugins.damage_types import load_damage_type
 from plugins.players._base import PlayerBase
 
+from autofighter.effects import create_stat_buff
 from autofighter.gacha import GachaManager
 from autofighter.mapgen import MapNode
 from autofighter.party import Party
@@ -82,19 +83,34 @@ def _load_player_customization() -> tuple[str, dict[str, int]]:
                 pass
     return pronouns, stats
 
-def _apply_player_stats(
+def _apply_player_customization(
     player: PlayerBase,
-    stats: dict[str, int] | None = None,
+    effect: dict[str, object] | None = None,
 ) -> None:
     _, loaded = _load_player_customization()
-    if stats is None:
-        stats = loaded
-    hp_mod = 1 + stats.get("hp", 0) * 0.01
-    atk_mod = 1 + stats.get("attack", 0) * 0.01
-    def_mod = 1 + stats.get("defense", 0) * 0.01
-    player.max_hp = player.hp = int(player.hp * hp_mod)
-    player.atk = int(player.atk * atk_mod)
-    player.defense = int(player.defense * def_mod)
+    if effect is None:
+        multipliers = {
+            "max_hp_mult": 1 + loaded.get("hp", 0) * 0.01,
+            "atk_mult": 1 + loaded.get("attack", 0) * 0.01,
+            "defense_mult": 1 + loaded.get("defense", 0) * 0.01,
+        }
+    else:
+        mults = effect.get("multipliers", {})
+        multipliers = {
+            "max_hp_mult": mults.get("max_hp", 1),
+            "atk_mult": mults.get("atk", 1),
+            "defense_mult": mults.get("defense", 1),
+        }
+    if all(v == 1 for v in multipliers.values()):
+        return
+    mod = create_stat_buff(
+        player,
+        name="customization",
+        turns=10**9,
+        id="player_custom",
+        **multipliers,
+    )
+    player.mods.append(mod.id)
 
 def _assign_damage_type(player: PlayerBase) -> None:
     with SAVE_MANAGER.connection() as conn:
@@ -136,7 +152,7 @@ def load_party(run_id: str) -> Party:
                         inst.damage_type = load_damage_type(
                             snapshot.get("damage_type", inst.element_id)
                         )
-                    _apply_player_stats(inst, snapshot.get("stats", {}))
+                    _apply_player_customization(inst, snapshot.get("custom", {}))
                 else:
                     _assign_damage_type(inst)
                 target_level = int(level_map.get(pid, 1) or 1)
@@ -188,15 +204,19 @@ def save_party(run_id: str, party: Party) -> None:
     for member in party.members:
         if member.id == "player":
             base = player_plugins.player.Player()
-            stats = {
-                "hp": int(round((member.max_hp / base.max_hp - 1) * 100)),
-                "attack": int(round((member.atk / base.atk - 1) * 100)),
-                "defense": int(round((member.defense / base.defense - 1) * 100)),
+            custom = {
+                "id": "player_custom",
+                "turns": -1,
+                "multipliers": {
+                    "max_hp": member.max_hp / base.max_hp,
+                    "atk": member.atk / base.atk,
+                    "defense": member.defense / base.defense,
+                },
             }
             snapshot = {
                 **snapshot,
                 "damage_type": member.element_id,
-                "stats": stats,
+                "custom": custom,
             }
             break
     with SAVE_MANAGER.connection() as conn:

@@ -16,3 +16,7 @@ manager.add_modifier(mod)
 
 `EffectManager.tick()` decrements modifier durations alongside damage and
 healing effects, removing and restoring stats once turns reach zero.
+
+Player customization applies a long-lived `StatModifier` rather than modifying
+baseline stats. The customization parameters are persisted separately so the
+effect can be recreated when loading a run.

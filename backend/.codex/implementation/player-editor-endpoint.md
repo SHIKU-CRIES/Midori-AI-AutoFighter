@@ -10,5 +10,9 @@ even if a run is active; when a new run begins the current pronouns, damage
 type, and stat distribution are snapshot into the run so later edits do not
 affect the active session.
 
+These allocations persist as an effect descriptor rather than by mutating the
+player's base stats. When a run loads, the saved parameters rebuild a
+long-lived `StatModifier` to apply the chosen multipliers.
+
 ## Testing
 - `uv run pytest backend/tests/test_player_editor.py`
