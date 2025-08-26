@@ -38,3 +38,4 @@ Placeholder icons for items, relics, and cards live under `src/lib/assets/{items
 ## Asset Loading
 - Backgrounds: a random image is selected from `src/lib/assets/backgrounds` whenever the viewport initializes.
 - Character portraits: if `src/lib/assets/characters/<name>.png` exists it is used; otherwise if a folder `src/lib/assets/characters/<name>/` exists, a random `.png` inside that folder is used. If neither exists, a random fallback from `src/lib/assets/characters/fallbacks` is used, falling back to the Midori AI logo as a last resort.
+- Battle effects: `.efkefc` files under `src/lib/assets/effects` power runtime animations. The current mapping expects `HitEffect.efkefc`, `Fire1.efkefc`, `Poison.efkefc`, and `HealOne1.efkefc` to be present.
