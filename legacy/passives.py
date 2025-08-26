@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from plugins.passives.base import PassivePlugin
 from plugins.plugin_loader import PluginLoader
@@ -11,7 +11,7 @@ def get_passive(
     *,
     plugin_dir: str = "plugins",
     **kwargs: Any,
-) -> PassivePlugin | None:
+) -> Optional[PassivePlugin]:
     """Return a passive plugin instance if available."""
 
     loader = PluginLoader()

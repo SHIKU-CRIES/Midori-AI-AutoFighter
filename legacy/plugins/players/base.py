@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Protocol
+from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from player import Player
@@ -14,6 +13,6 @@ class PlayerPlugin(Protocol):
     id: str
     name: str
 
-    def build(self, **kwargs) -> Player:
+    def build(self, **kwargs) -> "Player":
         """Construct and return a Player instance."""
         ...

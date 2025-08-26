@@ -1,6 +1,11 @@
 line-length = 88
 target-version = "py312"
 
+# Exclude legacy folder from all linting
+exclude = [
+    "legacy/**",
+]
+
 [lint]
 # Start with basic linting rules and gradually expand
 select = [
@@ -16,9 +21,6 @@ select = [
 
 # For stricter linting on backend only
 [lint.per-file-ignores]
-# Legacy code has relaxed rules
-"legacy/**" = ["E701", "E702", "N801", "N803", "N806", "SIM102", "SIM103", "PTH100", "PTH103", "PTH107", "PTH110", "PTH113", "PTH118", "PTH119", "PTH120", "PTH123", "PTH208", "UP006", "UP015", "UP018", "UP034", "UP035", "UP037", "UP039", "UP045", "RUF010", "RUF046", "RUF100", "RET505", "RET507", "SIM114", "SIM300"]
-
 # Test files can have additional flexibility
 "**/tests/**" = ["N802", "N803", "N806", "B010"]
 "**/test_*.py" = ["N802", "N803", "N806", "B010"]

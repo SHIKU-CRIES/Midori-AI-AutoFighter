@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Protocol
+from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from player import Player

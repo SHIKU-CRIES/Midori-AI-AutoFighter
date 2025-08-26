@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import Dict, Tuple, Type
+
 from plugins.plugin_loader import PluginLoader
 from plugins.weapons.base import WeaponPlugin
-
 
 class WeaponType:
     """Represents a weapon type with its attributes and passive effect."""
@@ -23,10 +24,10 @@ class WeaponType:
         self.accuracy = accuracy
         self.critical_chance = critical_chance
         self.game_obj = game_str
-        self.position: tuple[int, int] = (0, 0)  # type: ignore
+        self.position: Tuple[int, int] = (0, 0)  # type: ignore
 
 
-DEFAULT_WEAPONS: dict[str, WeaponType] = {
+DEFAULT_WEAPONS: Dict[str, WeaponType] = {
     "sword": WeaponType("Sword", 1, 1.0, 0.0, "Sword"),
 }
 
@@ -36,7 +37,7 @@ def get_weapon(weapon_id: str) -> WeaponPlugin | WeaponType | None:
 
     loader = PluginLoader()
     loader.discover("plugins")
-    weapon_cls: type[WeaponPlugin] | None = loader.get_plugins("weapon").get(weapon_id)
+    weapon_cls: Type[WeaponPlugin] | None = loader.get_plugins("weapon").get(weapon_id)
     if weapon_cls is not None:
         return weapon_cls()
     return DEFAULT_WEAPONS.get(weapon_id)

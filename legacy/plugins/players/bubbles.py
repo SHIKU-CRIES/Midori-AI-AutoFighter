@@ -1,10 +1,10 @@
 """Player plugin for Bubbles."""
 
 from items import ItemType
-from passives import get_passive
 from player import Player
-
+from passives import get_passive
 from plugins.players.base import PlayerPlugin
+
 
 
 class Bubbles(PlayerPlugin):

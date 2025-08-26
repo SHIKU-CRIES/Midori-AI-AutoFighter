@@ -13,6 +13,7 @@ loaded at runtime. Player passives live in dedicated plugins under
 from __future__ import annotations
 
 import random
+
 from typing import TYPE_CHECKING
 
 from themedstuff import themed_ajt
@@ -29,7 +30,7 @@ def player_stat_picker(player: Player) -> int:
 
     if themed_names[1] in player.PlayerName.lower():
         return random.choice([2, 2, 2, 2, 2, 2, 2, 2, 9])
-
+        
     if themed_names[2] in player.PlayerName.lower():
         return random.choice([1, 3, 5, 6, 9])
 
@@ -67,34 +68,35 @@ def build_foe_stats(player: Player) -> None:
 
 def _apply_high_level_lady(player: Player) -> None:
     """Boost high-level "Lady" foes with extra stats."""
-    if player.level > 2500 and "lady" in player.PlayerName.lower():
+    if player.level > 2500:
+        if "lady" in player.PlayerName.lower():
 
-        if "light" in player.PlayerName.lower():
-            player.Regain *= 2
-            player.Mitigation += 4
+            if "light" in player.PlayerName.lower():
+                player.Regain *= 2
+                player.Mitigation += 4
+                player.Vitality *= 1.5
+
+            if "dark" in player.PlayerName.lower():
+                player.Regain /= 2
+                player.Mitigation /= 5
+                player.Vitality *= 2.5
+
+            if "fire" in player.PlayerName.lower():
+                player.Regain /= 2
+                player.Mitigation *= 2
+                player.Atk *= 4
+
+            if "ice" in player.PlayerName.lower():
+                player.Regain *= 2
+                player.Mitigation *= 5
+                player.Vitality *= 2.5
+
+            player.MHP *= 10
+            player.Atk *= 2
+            player.Def *= 2
+            player.Mitigation = max(player.Mitigation, 1)
             player.Vitality *= 1.5
-
-        if "dark" in player.PlayerName.lower():
-            player.Regain /= 2
-            player.Mitigation /= 5
-            player.Vitality *= 2.5
-
-        if "fire" in player.PlayerName.lower():
-            player.Regain /= 2
-            player.Mitigation *= 2
-            player.Atk *= 4
-
-        if "ice" in player.PlayerName.lower():
-            player.Regain *= 2
-            player.Mitigation *= 5
-            player.Vitality *= 2.5
-
-        player.MHP *= 10
-        player.Atk *= 2
-        player.Def *= 2
-        player.Mitigation = max(player.Mitigation, 1)
-        player.Vitality *= 1.5
-        player.EffectRES += 2
+            player.EffectRES += 2
 
 
 def _apply_themed_name_modifiers(player: Player) -> None:
@@ -103,7 +105,7 @@ def _apply_themed_name_modifiers(player: Player) -> None:
         dodge_buff = 0.35
         max_hp_debuff = player.MHP / 4
 
-        while max_hp_debuff < player.MHP:
+        while player.MHP > max_hp_debuff:
             dodge_buff = dodge_buff + (0.001 * player.Vitality)
             player.MHP = player.MHP - 1
 
@@ -128,7 +130,7 @@ def _apply_themed_name_modifiers(player: Player) -> None:
             item_buff += random.uniform(0.01, 0.3)
             player.Vitality = player.Vitality - 0.001
 
-        while max_hp_debuff < player.MHP:
+        while player.MHP > max_hp_debuff:
             player.Def += player.check_base_stats(player.Def, def_to_add)
             player.MHP = player.MHP - 1
 
@@ -147,16 +149,16 @@ def _apply_themed_name_modifiers(player: Player) -> None:
         player.Atk = int(player.Atk) + 1
         player.Def += player.check_base_stats(player.Def, int(player.Def * player.level) + 1)
 
-        player.gain_crit_damage(0.0002 * player.level)
+        player.gain_crit_damage((0.0002 * player.level))
 
         while player.Def > 25000:
             item_buff += random.uniform(0.05, 0.25)
             player.Def = player.Def - 5
-
+        
         for item in player.Items:
             item.name = "Carly\'s Blessing of Defense"
             item.power += player.level * item_buff
-
+        
     if themed_names[2] in player.PlayerName.lower():
         player.MHP = int(player.MHP * 15)
         player.Atk = int(player.Atk * 8)

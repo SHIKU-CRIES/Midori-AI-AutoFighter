@@ -4,21 +4,19 @@ This module governs player-only stat logic during combat. Enemy passives are
 handled separately in :mod:`foe_passive_builder` when foes load at runtime.
 """
 
+import math
 import random
 
-from colorama import Fore
-from colorama import Style
-from damage_over_time import dot as damageovertimetype
-from damagetypes import Dark
-from damagetypes import Fire
-from damagetypes import Generic
-from damagetypes import Ice
-from damagetypes import Light
-from damagetypes import Lightning
-from damagetypes import Wind
-from healing_over_time import hot as healingovertimetype
 from player import Player
+
+from damage_over_time import dot as damageovertimetype
+from healing_over_time import hot as healingovertimetype
+
+from colorama import Fore, Style
+
 from themedstuff import themed_names
+
+from damagetypes import Light, Dark, Wind, Lightning, Fire, Ice, Generic
 
 red = Fore.RED
 green = Fore.GREEN
@@ -32,11 +30,11 @@ def log(color, text):
 def debug_log(text):
     with open("debug_log.txt", "a") as f:
         f.write(f"\n{text}")
-
+    
     return text
 
 def check_damage_type_passive(alllist: list[Player], source: Player, target: Player, mited_damage_dealt: float):
-
+        
     if source.Type == Light:
         mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) + 2)
 
@@ -49,7 +47,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                 light_dot = damageovertimetype("Celestial Atrophy", mited_damage_dealt ** 1.5, 50000, source.Type, source.PlayerName, 1)
                 light_dot.max_turns = 500000000
                 player.gain_damage_over_time(light_dot, source.effecthittate())
-
+    
     if source.Type == Dark:
         target.gain_damage_over_time(damageovertimetype("Abyssal Corruption", mited_damage_dealt ** 1.65, 325, source.Type, source.PlayerName, 1), source.effecthittate())
 
@@ -63,22 +61,22 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
                         source.above_threshold_ticks += 1
                         player.gain_damage_over_time(damageovertimetype("Abyssal Weakness", source.above_threshold_ticks ** 1.05, round(55 * source.above_threshold_ticks), source.Type, source.PlayerName, 1), source.above_threshold_ticks ** 0.55)
                         source.Atk += source.check_base_stats(source.Atk, random.randint(95, 105) * source.above_threshold_ticks)
-
+    
     if source.Type == Wind:
         target.gain_damage_over_time(damageovertimetype("Gale Erosion", mited_damage_dealt ** 1.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
-
+        
         for dot in target.DOTS:
             dot.damage = (dot.damage * 1.001)
-
+        
         target.damage_over_time()
-
+    
     if source.Type == Lightning:
 
         if source.ActionPointsPerTick <= 150:
             source.ActionPointsPerTick += 1
 
         target.gain_damage_over_time(damageovertimetype("Charged Decay", mited_damage_dealt ** 1.05, 325, source.Type, source.PlayerName, 1), source.effecthittate())
-
+    
     if source.Type == Ice:
 
         if target.ActionPointsPerTurn <= 1200:
@@ -90,7 +88,7 @@ def check_damage_type_passive(alllist: list[Player], source: Player, target: Pla
         for player in alllist:
             if source.isplayer != player.isplayer:
                 player.gain_damage_over_time(damageovertimetype("Blazing Torment", mited_damage_dealt ** 1.5, 325, source.Type, source.PlayerName, 1), source.effecthittate())
-
+    
     if source.Type == Generic:
         for player in alllist:
             if source.isplayer == player.isplayer:
@@ -129,12 +127,12 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         target (Player): The Player object receiving the damage.
         fight_env_list (list): A list of unchangeable outside vars to impact damage.
     """
-
+        
     alllist: list[Player] = []
-
+    
     for player in foelist:
         alllist.append(player)
-
+    
     for player in playerlist:
         alllist.append(player)
 
@@ -158,7 +156,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
             source.HP += 500 * source.above_threshold_ticks
             source.Atk += 50 * source.above_threshold_ticks
             source.Def += 1 * source.above_threshold_ticks
-
+        
         if source.Mitigation > 1:
             source.DodgeOdds += 0.001 * source.above_threshold_ticks
             source.Mitigation -= 0.001 * source.above_threshold_ticks
@@ -168,20 +166,20 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
         if themed_names[0] in target.PlayerName.lower():
             if random.random() > 0.999:
                 log(random.choice([red, green, blue]), f"{source.PlayerName} tried to hit {target.PlayerName}! {random.choice([red, green, blue])}Why would I hit myself user... {random.choice([red, green, blue])}you think I am dumb?")
-
+            
             mited_damage_dealt = mited_damage_dealt / 4
         else:
             if source.HP > source.MHP * 0.25:
                 hp_diff = source.HP - source.MHP * 0.25
                 reduction_factor = hp_diff / (source.MHP * 0.75)
-
+                
                 scaled_reduction = reduction_factor ** 0.65 * 0.05
 
                 # Introduce a multiplier that increases with time above 25% HP
                 source.above_threshold_ticks += 1
-
-                multiplier = 1 + (source.above_threshold_ticks ** 0.5) * 0.01
-
+                
+                multiplier = 1 + (source.above_threshold_ticks ** 0.5) * 0.01 
+                
                 source.HP -= round(source.MHP * scaled_reduction * multiplier)
 
                 mited_damage_dealt = mited_damage_dealt * (((source.MHP - source.HP) + 1) * 4)
@@ -222,10 +220,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
         if hp_percentage < 0.25:
             mited_damage_dealt = carly_mit_adder(target, mited_damage_dealt)
-
+        
         if mited_damage_dealt > 100:
             mited_damage_dealt = 100
-
+            
     if themed_names[2] in source.PlayerName.lower():
         for player in alllist:
             if source.isplayer == player.isplayer:
@@ -233,7 +231,7 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                     if player.HP < source.MHP * 0.55:
                         player.heal_damage(source.Atk * 0.005)
                         player.gain_healing_over_time(healingovertimetype(f"{source.PlayerName}\'s Heal", round(player.MHP * 0.01), 5, player.Type, source.PlayerName, 1))
-
+                    
                     if len(player.DOTS) > 0:
                         to_be_moved = random.choice(player.DOTS)
 
@@ -241,9 +239,10 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
                         random.choice(foelist).gain_damage_over_time(to_be_moved, source.effecthittate())
 
-    if themed_names[3] in source.PlayerName.lower() and target.MHP > source.MHP:
-        source.MHP += random.randint(5, 15)
-        target.MHP -= 1
+    if themed_names[3] in source.PlayerName.lower():
+        if target.MHP > source.MHP:
+            source.MHP += random.randint(5, 15)
+            target.MHP -= 1
 
     if themed_names[4] in source.PlayerName.lower():
         pass
@@ -277,17 +276,17 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
 
         if source.ActionPointsPerTurn > 600:
             source.ActionPointsPerTurn = 600
-
-        if source.exp_to_levelup() > source.EXP:
+        
+        if source.EXP < source.exp_to_levelup():
             source.EXP += max(source.exp_to_levelup() * 0.01, 1)
 
         if source.EffectHitRate <= 200:
             source.EffectHitRate += 0.25
-
+        
         if len(source.DOTS) > 0:
             for dot in source.DOTS:
                 dot.turns -= 1
-
+            
     if themed_names[15] in source.PlayerName.lower():
 
         if random.random() > 0.95:
@@ -299,9 +298,9 @@ def check_passive_mod(foelist: list[Player], playerlist: list[Player], source: P
                     if source.Def > 1000:
                         player.Def += 10
                         source.Def -= 1
-
+    
     mited_damage_dealt = check_damage_type_passive(alllist, source, target, mited_damage_dealt)
-
+    
     return max(mited_damage_dealt, 1)
 
 def carly_mit_adder(target: Player, mited_damage_dealt: float):
@@ -310,20 +309,20 @@ def carly_mit_adder(target: Player, mited_damage_dealt: float):
             continue
         try:
             mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
-        except Exception:
+        except Exception as error:
             continue
-
+    
     return mited_damage_dealt
 
 def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt: float):
-
+        
         for item in source.Items:
             if not item:
                 continue
             try:
                 mited_damage_dealt = item.on_damage_dealt(mited_damage_dealt)
                 source.DamageDealt += int(mited_damage_dealt)
-            except Exception:
+            except Exception as error:
                 continue
 
         for item in target.Items:
@@ -332,7 +331,7 @@ def apply_damage_item_effects(source: Player, target: Player, mited_damage_dealt
             try:
                 mited_damage_dealt = item.on_damage_taken(mited_damage_dealt)
                 target.DamageTaken += int(mited_damage_dealt)
-            except Exception:
+            except Exception as error:
                 continue
 
         return mited_damage_dealt
@@ -348,5 +347,5 @@ def take_damage(foelist: list[Player], playerlist: list[Player], source: Player,
         target (Player): The Player object receiving the damage.
         fight_env_list (list): A list of unchangeable outside vars to impact damage.
     """
-
+    
     return check_passive_mod(foelist, playerlist, source, target, mited_damage_dealt)

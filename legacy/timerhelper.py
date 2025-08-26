@@ -36,8 +36,9 @@ class timmer:
                 print(f"Timeout duration :: {duration}")
                 self.printed = True
             return duration
-        return 0.0
-
+        else:
+            return 0.0
+    
     def get_total_ticks(self):
         return self.total_ticks
 

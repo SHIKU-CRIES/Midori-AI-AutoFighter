@@ -1,11 +1,13 @@
 import os
-import platform
+import sys
 import random
 import shutil
-import sys
 import tempfile
+import platform
 
 from halo import Halo
+
+from typing import Optional, List
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
 
@@ -35,7 +37,7 @@ def resource_path(relative_path: str) -> str:
             temp_dir = tempfile.mkdtemp(prefix="resource_", dir="/dev/shm")
         else:
             temp_dir = tempfile.mkdtemp(prefix="resource_")
-
+        
         TEMP_DIRS.append(temp_dir) # Store temp dir for cleanup
 
         resource_name = os.path.basename(relative_path)
@@ -61,7 +63,7 @@ def cleanup_temp_dirs():
             shutil.rmtree(temp_dir)
         except OSError as e:
             spinner.fail(text=f"Failed to clean up temporary directory {temp_dir}: {e}")
-
+    
     spinner.succeed(text="Successfully cleaned up temporary directorys")
 
 def set_photo(photo: str) -> str:
@@ -77,9 +79,10 @@ def set_photo(photo: str) -> str:
     photo_path = resource_path(os.path.join("photos", f"{photo}.png"))
     if os.path.exists(photo_path):
         return photo_path
-    fallback_dir = resource_path(os.path.join("photos", "fallbacks"))
-    photos = os.listdir(fallback_dir)
-    return resource_path(os.path.join(fallback_dir, random.choice(photos)))
+    else:
+        fallback_dir = resource_path(os.path.join("photos", "fallbacks"))
+        photos = os.listdir(fallback_dir)
+        return resource_path(os.path.join(fallback_dir, random.choice(photos)))
 
 def set_themed_photo(photo: str) -> str:
     """
@@ -91,7 +94,7 @@ def set_themed_photo(photo: str) -> str:
     Returns:
         The absolute path to a randomly chosen themed photo, or a fallback photo if no themed photos are found.
     """
-    photos: list[str] = []
+    photos: List[str] = []
 
     for root, _, files in os.walk(resource_path("photos")):
         for f in files:
@@ -100,9 +103,10 @@ def set_themed_photo(photo: str) -> str:
 
     if photos:
         return random.choice(photos)
-    fallback_dir = resource_path(os.path.join("photos", "fallbacks"))
-    photos = os.listdir(fallback_dir)
-    return resource_path(os.path.join(fallback_dir, random.choice(photos)))
+    else:
+        fallback_dir = resource_path(os.path.join("photos", "fallbacks"))
+        photos = os.listdir(fallback_dir)
+        return resource_path(os.path.join(fallback_dir, random.choice(photos)))
 
 def set_themed_dot_photo(photo: str) -> str:
     """
@@ -114,8 +118,8 @@ def set_themed_dot_photo(photo: str) -> str:
     Returns:
         The absolute path to a randomly chosen themed photo, or a fallback photo if no themed photos are found.
     """
-    photos: list[str] = []
-
+    photos: List[str] = []
+        
     for root, _, files in os.walk(resource_path(os.path.join("photos", "dots", photo))):
         for f in files:
             if photo in f and f.endswith(".png"):
@@ -123,9 +127,10 @@ def set_themed_dot_photo(photo: str) -> str:
 
     if photos:
         return random.choice(photos)
-    fallback_dir = resource_path(os.path.join("photos", "fallbacks"))
-    photos = os.listdir(fallback_dir)
-    return resource_path(os.path.join(fallback_dir, random.choice(photos)))
+    else:
+        fallback_dir = resource_path(os.path.join("photos", "fallbacks"))
+        photos = os.listdir(fallback_dir)
+        return resource_path(os.path.join(fallback_dir, random.choice(photos)))
 
 def set_bg_photo() -> str:
     """

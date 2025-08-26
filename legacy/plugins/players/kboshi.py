@@ -1,8 +1,8 @@
 """Player plugin for Kboshi."""
 
 from player import Player
-
 from plugins.players.base import PlayerPlugin
+
 
 
 class Kboshi(PlayerPlugin):

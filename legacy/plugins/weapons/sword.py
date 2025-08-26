@@ -1,7 +1,6 @@
 """Example weapon plugin."""
 
 from player import Player
-
 from plugins.weapons.base import WeaponPlugin
 
 

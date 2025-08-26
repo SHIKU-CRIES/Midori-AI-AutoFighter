@@ -1,8 +1,8 @@
 """Player plugin for Mezzy."""
 
 from player import Player
-
 from plugins.players.base import PlayerPlugin
+
 
 
 class Mezzy(PlayerPlugin):

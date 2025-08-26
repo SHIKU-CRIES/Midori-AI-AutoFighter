@@ -1,8 +1,8 @@
 """Player plugin for Lady Darkness."""
 
 from player import Player
-
 from plugins.players.base import PlayerPlugin
+
 
 
 class LadyDarkness(PlayerPlugin):

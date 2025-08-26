@@ -1,8 +1,8 @@
 """Player plugin for Chibi."""
 
 from player import Player
-
 from plugins.players.base import PlayerPlugin
+
 
 
 class Chibi(PlayerPlugin):
