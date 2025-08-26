@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from dataclasses import field
+import asyncio
 
-from plugins.relics._base import RelicBase
+from dataclasses import field
+from dataclasses import dataclass
+
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
 
 
 @dataclass
@@ -19,7 +21,8 @@ class VengefulPendant(RelicBase):
         def _reflect(target, attacker, amount) -> None:
             if attacker is None or target not in party.members:
                 return
-            attacker.hp = max(attacker.hp - int(amount * 0.15), 0)
+            dmg = int(amount * 0.15)
+            asyncio.create_task(attacker.apply_damage(dmg, attacker=target))
         BUS.subscribe("damage_taken", _reflect)
 
     def describe(self, stacks: int) -> str:

@@ -38,7 +38,8 @@ class RustyBuckle(RelicBase):
             if state["ally"] is None and party.members:
                 ally = min(party.members, key=lambda m: m.max_hp)
                 bleed = int(ally.max_hp * 0.01 * stacks)
-                ally.hp = max(ally.hp - bleed, 1)
+                dmg = min(bleed, max(ally.hp - 1, 0))
+                asyncio.create_task(ally.apply_damage(dmg, attacker=ally))
                 state["ally"] = ally
                 state["triggers"] = 0
 

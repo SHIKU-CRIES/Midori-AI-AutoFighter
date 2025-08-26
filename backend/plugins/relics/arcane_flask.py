@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from dataclasses import field
+import asyncio
 
-from plugins.relics._base import RelicBase
+from dataclasses import field
+from dataclasses import dataclass
+
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
 
 
 @dataclass
@@ -19,7 +21,8 @@ class ArcaneFlask(RelicBase):
         super().apply(party)
 
         def _ultimate(user) -> None:
-            user.hp = min(user.max_hp, user.hp + int(user.max_hp * 0.2))
+            shield = int(user.max_hp * 0.2)
+            asyncio.create_task(user.apply_healing(shield))
 
         BUS.subscribe("ultimate_used", _ultimate)
 
