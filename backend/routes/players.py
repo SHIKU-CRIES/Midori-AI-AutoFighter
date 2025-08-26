@@ -58,6 +58,7 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
         if inst.id == "player":
             await asyncio.to_thread(_apply_player_customization, inst)
         stats = asdict(inst)
+        stats.pop("lrm_memory", None)
         stats["char_type"] = inst.char_type.name
         stats["damage_type"] = inst.element_id
         roster.append(

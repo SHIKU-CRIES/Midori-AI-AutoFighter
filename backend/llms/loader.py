@@ -5,9 +5,19 @@ from enum import Enum
 from typing import Protocol
 from collections.abc import AsyncIterator
 
-from transformers import pipeline
-from langchain_community.llms import llamacpp
-from langchain_huggingface import HuggingFacePipeline
+try:
+    import torch
+    from transformers import pipeline
+    from langchain_huggingface import HuggingFacePipeline
+    from langchain_community.llms import llamacpp as LlamaCpp
+except Exception as err:
+    torch = None
+    LlamaCpp = None
+    HuggingFacePipeline = None
+    pipeline = None
+    _IMPORT_ERROR = err
+else:
+    _IMPORT_ERROR = None
 
 from .safety import ensure_ram
 from .safety import pick_device
@@ -36,6 +46,11 @@ class _LangChainWrapper:
 
 
 def load_llm(model: str | None = None, *, gguf_path: str | None = None) -> SupportsStream:
+    if _IMPORT_ERROR is not None:
+        msg = (
+            "LLM dependencies are not installed. Install extras to enable LLM features."
+        )
+        raise RuntimeError(msg) from _IMPORT_ERROR
     name = model or os.getenv("AF_LLM_MODEL", ModelName.DEEPSEEK.value)
     if name == ModelName.DEEPSEEK.value:
         min_ram, _ = model_memory_requirements(name)
@@ -77,7 +92,7 @@ def load_llm(model: str | None = None, *, gguf_path: str | None = None) -> Suppo
             msg = "GGUF model path must be provided via argument or AF_GGUF_PATH"
             raise ValueError(msg)
         kwargs = gguf_strategy(path)
-        return _LangChainWrapper(llamacpp(model_path=path, **kwargs))
+        return _LangChainWrapper(LlamaCpp(model_path=path, **kwargs))
     msg = f"Unsupported model: {name}"
     raise ValueError(msg)
 

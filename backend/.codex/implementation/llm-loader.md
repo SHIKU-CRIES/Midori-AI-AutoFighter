@@ -13,6 +13,11 @@ The loader in `backend/llms/loader.py` wraps several LangChain-compatible backen
 
 `load_llm()` returns an object exposing `async generate_stream(text: str) -> AsyncIterator[str]`.
 
+Optional dependencies such as PyTorch and Transformers are imported lazily. If
+these packages are absent, `load_llm()` raises a `RuntimeError` when called
+instead of failing during module import, allowing the rest of the backend to
+run without LLM features.
+
 ## Resource Checks
 
 `backend/llms/safety.py` inspects available system memory and GPU VRAM before

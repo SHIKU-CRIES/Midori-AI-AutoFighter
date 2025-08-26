@@ -1,6 +1,10 @@
+import sys
 import asyncio
+from pathlib import Path
+
 import pytest
 
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 from llms.loader import ModelName
 from llms.loader import load_llm
 
@@ -25,6 +29,14 @@ class FakeLlama:
         return f"{prompt} llama"
 
 
+class DummyHF:
+    def __init__(self, pipeline):
+        self._pipeline = pipeline
+
+    def invoke(self, text: str) -> str:
+        return self._pipeline(text)[0]["generated_text"]
+
+
 async def _collect(llm) -> str:
     chunks = [chunk async for chunk in llm.generate_stream("hi")]
     return "".join(chunks)
@@ -32,6 +44,7 @@ async def _collect(llm) -> str:
 
 @pytest.mark.asyncio
 async def test_deepseek_loader(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("llms.loader._IMPORT_ERROR", None)
     monkeypatch.setattr("llms.loader.model_memory_requirements", lambda name: (0, 0))
     monkeypatch.setattr("llms.loader.ensure_ram", lambda required: None)
     monkeypatch.setattr("llms.loader.pick_device", lambda: -1)
@@ -40,6 +53,14 @@ async def test_deepseek_loader(monkeypatch: pytest.MonkeyPatch) -> None:
         assert kwargs.get("device") == -1
         return FakePipeline(" ds")
 
+    class DummyHF:
+        def __init__(self, pipeline):
+            self._pipeline = pipeline
+
+        def invoke(self, text: str) -> str:
+            return self._pipeline(text)[0]["generated_text"]
+
+    monkeypatch.setattr("llms.loader.HuggingFacePipeline", lambda *, pipeline: DummyHF(pipeline))
     monkeypatch.setattr("llms.loader.pipeline", fake_pipeline)
     llm = load_llm(ModelName.DEEPSEEK.value)
     result = await _collect(llm)
@@ -48,6 +69,7 @@ async def test_deepseek_loader(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.asyncio
 async def test_gemma_loader(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("llms.loader._IMPORT_ERROR", None)
     monkeypatch.setattr("llms.loader.model_memory_requirements", lambda name: (0, 0))
     monkeypatch.setattr("llms.loader.ensure_ram", lambda required: None)
     monkeypatch.setattr("llms.loader.pick_device", lambda: -1)
@@ -56,6 +78,7 @@ async def test_gemma_loader(monkeypatch: pytest.MonkeyPatch) -> None:
         assert kwargs.get("device") == -1
         return FakePipeline(" gm")
 
+    monkeypatch.setattr("llms.loader.HuggingFacePipeline", lambda *, pipeline: DummyHF(pipeline))
     monkeypatch.setattr("llms.loader.pipeline", fake_pipeline)
     llm = load_llm(ModelName.GEMMA.value)
     result = await _collect(llm)
@@ -64,9 +87,11 @@ async def test_gemma_loader(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.asyncio
 async def test_gguf_loader(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("llms.loader._IMPORT_ERROR", None)
     monkeypatch.setattr("llms.loader.model_memory_requirements", lambda name: (0, 0))
     monkeypatch.setattr("llms.loader.ensure_ram", lambda required: None)
     monkeypatch.setattr("llms.loader.pick_device", lambda: -1)
+    monkeypatch.setattr("llms.loader.gguf_strategy", lambda path: {})
     monkeypatch.setattr("llms.loader.LlamaCpp", FakeLlama)
     llm = load_llm(ModelName.GGUF.value, gguf_path="path/to/model.gguf")
     result = await _collect(llm)
