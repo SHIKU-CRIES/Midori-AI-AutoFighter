@@ -13,6 +13,16 @@ uv sync
 uv run app.py
 ```
 
+## LLM Loader
+
+`backend/llms/loader.py` provides a LangChain-based loader for local models. Select a backend with `AF_LLM_MODEL`:
+
+- `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B`
+- `google/gemma-3-4b-it`
+- `gguf` (requires `AF_GGUF_PATH` pointing to the model file)
+
+`load_llm()` returns an object exposing an asynchronous `generate_stream` method.
+
 ## Logging
 
 The backend uses a queued, buffered logging pipeline:
