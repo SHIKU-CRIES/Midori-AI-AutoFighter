@@ -152,10 +152,16 @@ class Stats:
         amount = self_type.on_damage_taken(amount, attacker, self)
         amount = self_type.on_party_damage_taken(amount, attacker, self)
         src_vit = attacker.vitality if attacker is not None else 1.0
+        # Guard against division by zero if vitality/mitigation are driven to 0 by effects
         defense_term = max(self.defense ** 5, 1)
-        amount = ((amount ** 2) * src_vit) / (
-            defense_term * self.vitality * self.mitigation
-        )
+        vit = float(self.vitality) if isinstance(self.vitality, (int, float)) else 1.0
+        mit = float(self.mitigation) if isinstance(self.mitigation, (int, float)) else 1.0
+        # Clamp to a tiny positive epsilon to avoid zero/NaN
+        EPS = 1e-6
+        vit = vit if vit > EPS else EPS
+        mit = mit if mit > EPS else EPS
+        denom = defense_term * vit * mit
+        amount = ((amount ** 2) * src_vit) / denom
         # Enrage: increase damage taken globally by N% per enrage stack
         enr = get_enrage_percent()
         if enr > 0:
