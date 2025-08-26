@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import asyncio
 import random
 
 from dataclasses import dataclass
@@ -200,17 +199,52 @@ class EffectManager:
         if random.random() < chance:
             self.add_dot(dot)
 
-    async def tick(self, others: Optional[EffectManager] = None) -> None:
+    async def tick(self, others: Optional["EffectManager"] = None) -> None:
         for collection, names in (
             (self.hots, self.stats.hots),
             (self.dots, self.stats.dots),
         ):
             expired: List[object] = []
-            for eff in collection:
-                color = "green" if isinstance(eff, HealingOverTime) else "light_red"
-                self._console.log(f"[{color}]{self.stats.id} {eff.name} tick[/]")
-                if not await eff.tick(self.stats):
-                    expired.append(eff)
+            
+            # Batch logging for performance when many effects are present
+            if len(collection) > 10:
+                effect_type = "HoT" if (collection and isinstance(collection[0], HealingOverTime)) else "DoT"
+                color = "green" if effect_type == "HoT" else "light_red"
+                self._console.log(f"[{color}]{self.stats.id} processing {len(collection)} {effect_type} effects[/]")
+            
+            # Process effects in parallel for better async performance when many are present
+            if len(collection) > 20:
+                # Parallel processing for large collections
+                async def tick_effect(eff):
+                    if len(collection) <= 10:
+                        color = "green" if isinstance(eff, HealingOverTime) else "light_red"
+                        self._console.log(f"[{color}]{self.stats.id} {eff.name} tick[/]")
+                    return await eff.tick(self.stats), eff
+                
+                # Process in batches to avoid overwhelming the event loop
+                batch_size = 50
+                for i in range(0, len(collection), batch_size):
+                    batch = collection[i:i + batch_size]
+                    results = await asyncio.gather(*[tick_effect(eff) for eff in batch])
+                    for still_active, eff in results:
+                        if not still_active:
+                            expired.append(eff)
+                    # Early termination: if target dies, stop processing remaining effects
+                    if self.stats.hp <= 0:
+                        break
+            else:
+                # Sequential processing for smaller collections
+                for eff in collection:
+                    # Only log individual effects if there are few of them
+                    if len(collection) <= 10:
+                        color = "green" if isinstance(eff, HealingOverTime) else "light_red"
+                        self._console.log(f"[{color}]{self.stats.id} {eff.name} tick[/]")
+                    if not await eff.tick(self.stats):
+                        expired.append(eff)
+                    # Early termination: if target dies, stop processing remaining effects
+                    if self.stats.hp <= 0:
+                        break
+            
             for eff in expired:
                 collection.remove(eff)
                 if eff.id in names:
