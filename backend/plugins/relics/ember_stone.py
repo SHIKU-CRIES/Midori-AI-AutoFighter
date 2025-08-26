@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from dataclasses import field
+import asyncio
 
-from plugins.relics._base import RelicBase
+from dataclasses import field
+from dataclasses import dataclass
+
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
 
 
 @dataclass
@@ -20,7 +22,8 @@ class EmberStone(RelicBase):
             if attacker is None or target not in party.members:
                 return
             if target.hp <= target.max_hp * 0.25:
-                attacker.hp = max(attacker.hp - int(target.atk * 0.5), 0)
+                dmg = int(target.atk * 0.5)
+                asyncio.create_task(attacker.apply_damage(dmg, attacker=target))
         BUS.subscribe("damage_taken", _burn)
 
     def describe(self, stacks: int) -> str:

@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+import asyncio
+
 from dataclasses import field
+from dataclasses import dataclass
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
@@ -34,7 +36,8 @@ class GreedEngine(RelicBase):
 
             def _drain() -> None:
                 for member in party.members:
-                    member.hp = max(member.hp - int(member.max_hp * state["loss"]), 0)
+                    dmg = int(member.max_hp * state["loss"])
+                    asyncio.create_task(member.apply_damage(dmg))
 
             BUS.subscribe("gold_earned", _gold)
             BUS.subscribe("turn_start", _drain)

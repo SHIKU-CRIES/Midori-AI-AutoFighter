@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from dataclasses import field
+import asyncio
 
-from plugins.relics._base import RelicBase
+from dataclasses import field
+from dataclasses import dataclass
+
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
 
 
 @dataclass
@@ -28,7 +30,8 @@ class EchoBell(RelicBase):
             if pid in used:
                 return
             used.add(pid)
-            target.hp -= int(amount * 0.15)
+            dmg = int(amount * 0.15)
+            asyncio.create_task(target.apply_damage(dmg, attacker=actor))
 
         BUS.subscribe("battle_start", lambda: _battle_start())
         BUS.subscribe("action_used", _action)

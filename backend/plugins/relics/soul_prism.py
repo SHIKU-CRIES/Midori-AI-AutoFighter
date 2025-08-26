@@ -1,9 +1,11 @@
-from dataclasses import dataclass
+import asyncio
+
 from dataclasses import field
+from dataclasses import dataclass
 
 from autofighter.stats import BUS
-from plugins.relics._base import RelicBase
 from autofighter.effects import create_stat_buff
+from plugins.relics._base import RelicBase
 
 
 @dataclass
@@ -35,16 +37,28 @@ class SoulPrism(RelicBase):
                     continue
                 base = getattr(member, "_soul_prism_hp", member.max_hp)
                 member._soul_prism_hp = base
-                member.max_hp = int(base * multiplier)
-                member.hp = max(1, int(member.max_hp * 0.01))
+                mod_id = f"{self.id}_{id(member)}"
+                existing = next(
+                    (m for m in member.effect_manager.mods if m.id == mod_id),
+                    None,
+                )
+                if existing:
+                    existing.remove()
+                    member.effect_manager.mods.remove(existing)
+                    if existing.id in member.mods:
+                        member.mods.remove(existing.id)
                 mod = create_stat_buff(
                     member,
-                    name=f"{self.id}_{id(member)}",
+                    name=mod_id,
+                    id=mod_id,
+                    max_hp_mult=multiplier,
                     defense_mult=1 + buff,
                     mitigation_mult=1 + buff,
                     turns=9999,
                 )
                 member.effect_manager.add_modifier(mod)
+                heal = max(1, int(member.max_hp * 0.01))
+                asyncio.create_task(member.apply_healing(heal))
 
         BUS.subscribe("battle_end", _battle_end)
 

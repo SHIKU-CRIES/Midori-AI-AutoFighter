@@ -1,8 +1,10 @@
-from dataclasses import dataclass
-from dataclasses import field
+import asyncio
 
-from plugins.relics._base import RelicBase
+from dataclasses import field
+from dataclasses import dataclass
+
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
 
 
 @dataclass
@@ -19,7 +21,7 @@ class HerbalCharm(RelicBase):
         def _heal(*_) -> None:
             for member in party.members:
                 heal = int(member.max_hp * 0.005)
-                member.hp = min(member.hp + heal, member.max_hp)
+                asyncio.create_task(member.apply_healing(heal))
 
         BUS.subscribe("turn_start", _heal)
 

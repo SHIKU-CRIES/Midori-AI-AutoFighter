@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+import asyncio
+
 from dataclasses import field
+from dataclasses import dataclass
 
 from plugins.relics._base import RelicBase
 
@@ -18,7 +20,8 @@ class ThreadbareCloak(RelicBase):
         super().apply(party)
 
         for member in party.members:
-            member.hp += int(member.max_hp * 0.03)
+            shield = int(member.max_hp * 0.03)
+            asyncio.create_task(member.apply_healing(shield))
 
     def describe(self, stacks: int) -> str:
         pct = 3 * stacks
