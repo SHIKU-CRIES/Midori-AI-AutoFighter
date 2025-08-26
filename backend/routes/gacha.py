@@ -8,14 +8,14 @@ from quart import request
 
 from autofighter.gacha import GachaManager
 
-from game import SAVE_MANAGER
+from game import get_save_manager
 
 bp = Blueprint("gacha", __name__)
 
 
 @bp.get("/gacha")
 async def gacha_state() -> tuple[str, int, dict[str, object]]:
-    manager = GachaManager(SAVE_MANAGER)
+    manager = GachaManager(get_save_manager())
     return jsonify(manager.get_state())
 
 
@@ -23,7 +23,7 @@ async def gacha_state() -> tuple[str, int, dict[str, object]]:
 async def gacha_pull() -> tuple[str, int, dict[str, object]]:
     data = await request.get_json(silent=True) or {}
     count = int(data.get("count", 1))
-    manager = GachaManager(SAVE_MANAGER)
+    manager = GachaManager(get_save_manager())
     try:
         results = manager.pull(count)
     except ValueError:
@@ -39,13 +39,13 @@ async def gacha_pull() -> tuple[str, int, dict[str, object]]:
 async def gacha_auto_craft() -> tuple[str, int, dict[str, object]]:
     data = await request.get_json(silent=True) or {}
     enabled = bool(data.get("enabled"))
-    manager = GachaManager(SAVE_MANAGER)
+    manager = GachaManager(get_save_manager())
     manager.set_auto_craft(enabled)
     return jsonify({"status": "ok", "auto_craft": enabled})
 
 
 @bp.post("/gacha/craft")
 async def gacha_craft() -> tuple[str, int, dict[str, object]]:
-    manager = GachaManager(SAVE_MANAGER)
+    manager = GachaManager(get_save_manager())
     items = manager.craft()
     return jsonify({"status": "ok", "items": items})

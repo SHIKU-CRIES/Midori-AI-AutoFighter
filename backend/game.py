@@ -32,21 +32,41 @@ from autofighter.stats import Stats
 
 log = logging.getLogger(__name__)
 
-SAVE_MANAGER = SaveManager.from_env()
-SAVE_MANAGER.migrate(Path(__file__).resolve().parent / "migrations")
-with SAVE_MANAGER.connection() as conn:
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS damage_types (id TEXT PRIMARY KEY, type TEXT)"
-    )
-    count = conn.execute("SELECT COUNT(*) FROM owned_players").fetchone()[0]
-    if count == 1:
-        persona = random.choice(["lady_darkness", "lady_light"])
-        conn.execute("INSERT INTO owned_players (id) VALUES (?)", (persona,))
+SAVE_MANAGER: SaveManager | None = None
+FERNET: Fernet | None = None
 
-FERNET_KEY = base64.urlsafe_b64encode(
-    hashlib.sha256((SAVE_MANAGER.key or "plaintext").encode()).digest()
-)
-FERNET = Fernet(FERNET_KEY)
+
+def get_save_manager() -> SaveManager:
+    global SAVE_MANAGER
+    global FERNET
+
+    if SAVE_MANAGER is None:
+        manager = SaveManager.from_env()
+        manager.migrate(Path(__file__).resolve().parent / "migrations")
+        with manager.connection() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS damage_types (id TEXT PRIMARY KEY, type TEXT)"
+            )
+            count = conn.execute("SELECT COUNT(*) FROM owned_players").fetchone()[0]
+            if count == 1:
+                persona = random.choice(["lady_darkness", "lady_light"])
+                conn.execute("INSERT INTO owned_players (id) VALUES (?)", (persona,))
+
+        SAVE_MANAGER = manager
+
+        key = base64.urlsafe_b64encode(
+            hashlib.sha256((manager.key or "plaintext").encode()).digest()
+        )
+        FERNET = Fernet(key)
+
+    return SAVE_MANAGER
+
+
+def get_fernet() -> Fernet:
+    if FERNET is None:
+        get_save_manager()
+    assert FERNET is not None
+    return FERNET
 
 battle_tasks: dict[str, asyncio.Task] = {}
 battle_snapshots: dict[str, dict[str, Any]] = {}
@@ -64,7 +84,7 @@ def _passive_names(ids: list[str]) -> list[str]:
 def _load_player_customization() -> tuple[str, dict[str, int]]:
     pronouns = ""
     stats: dict[str, int] = {"hp": 0, "attack": 0, "defense": 0}
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
         )
@@ -113,7 +133,7 @@ def _apply_player_customization(
     player.mods.append(mod.id)
 
 def _assign_damage_type(player: PlayerBase) -> None:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT type FROM damage_types WHERE id = ?", (player.id,))
         row = cur.fetchone()
         if row:
@@ -125,7 +145,7 @@ def _assign_damage_type(player: PlayerBase) -> None:
             )
 
 def load_party(run_id: str) -> Party:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT party FROM runs WHERE id = ?", (run_id,))
         row = cur.fetchone()
     data = json.loads(row[0]) if row else {}
@@ -142,7 +162,7 @@ def load_party(run_id: str) -> Party:
             if cls.id == pid:
                 inst = cls()
                 if inst.id == "player":
-                    with SAVE_MANAGER.connection() as conn:
+                    with get_save_manager().connection() as conn:
                         row = conn.execute(
                             "SELECT type FROM damage_types WHERE id = ?", ("player",)
                         ).fetchone()
@@ -179,7 +199,7 @@ def load_party(run_id: str) -> Party:
     return party
 
 def load_map(run_id: str) -> tuple[dict, list[MapNode]]:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT map FROM runs WHERE id = ?", (run_id,))
         row = cur.fetchone()
     if row is None:
@@ -189,14 +209,14 @@ def load_map(run_id: str) -> tuple[dict, list[MapNode]]:
     return state, rooms
 
 def save_map(run_id: str, state: dict) -> None:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute(
             "UPDATE runs SET map = ? WHERE id = ?",
             (json.dumps(state), run_id),
         )
 
 def save_party(run_id: str, party: Party) -> None:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT party FROM runs WHERE id = ?", (run_id,))
         row = cur.fetchone()
     existing = json.loads(row[0]) if row else {}
@@ -219,7 +239,7 @@ def save_party(run_id: str, party: Party) -> None:
                 "custom": custom,
             }
             break
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         data = {
             "members": [m.id for m in party.members],
             "gold": party.gold,
@@ -269,7 +289,7 @@ async def _run_battle(
         state["battle"] = False
         try:
             loot_items = result.get("loot", {}).get("items", [])
-            manager = GachaManager(SAVE_MANAGER)
+            manager = GachaManager(get_save_manager())
             items = manager._get_items()
             for entry in loot_items:
                 if entry.get("id") == "ticket":
@@ -303,7 +323,7 @@ async def _run_battle(
                     battle_snapshots[run_id] = result
                 finally:
                     try:
-                        with SAVE_MANAGER.connection() as conn:
+                        with get_save_manager().connection() as conn:
                             conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
                     except Exception:
                         pass

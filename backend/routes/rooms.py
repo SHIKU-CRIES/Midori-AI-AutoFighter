@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import copy
-import time
 
 from quart import Blueprint
 from quart import jsonify
@@ -26,7 +25,7 @@ from game import load_party
 from game import save_party
 from game import _run_battle
 from game import battle_tasks
-from game import SAVE_MANAGER
+from game import get_save_manager
 from game import battle_snapshots
 
 bp = Blueprint("rooms", __name__)
@@ -34,7 +33,6 @@ bp = Blueprint("rooms", __name__)
 
 @bp.post("/rooms/<run_id>/battle")
 async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
-    start = time.perf_counter()
     data = await request.get_json(silent=True) or {}
     action = data.get("action", "")
     if action == "snapshot":
@@ -44,7 +42,7 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         return jsonify(snap)
     party = await asyncio.to_thread(load_party, run_id)
     try:
-        with SAVE_MANAGER.connection() as conn:
+        with get_save_manager().connection() as conn:
             row = conn.execute(
                 "SELECT type FROM damage_types WHERE id = ?", ("player",)
             ).fetchone()

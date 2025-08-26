@@ -2,6 +2,10 @@
 
 Wrapper around SQLCipher connections and database migrations.
 
+Use `get_save_manager()` from `game.py` to obtain an initialized instance. The
+function lazily constructs the manager, runs migrations, and performs initial
+setup so tests can override `AF_DB_PATH` and `AF_DB_KEY` before the first call.
+
 ## Migration safety
 - Migration filenames must start with a numeric prefix (`NNN_description.sql`).
 - Non-numeric prefixes are ignored to prevent executing unexpected scripts.

@@ -12,7 +12,7 @@ from autofighter.stats import apply_status_hooks
 
 from plugins import players as player_plugins
 
-from game import SAVE_MANAGER
+from game import get_save_manager
 from game import _assign_damage_type
 from game import _load_player_customization
 from game import _apply_player_customization
@@ -21,7 +21,7 @@ bp = Blueprint("players", __name__)
 
 
 def _get_stat_refresh_rate() -> int:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
         )
@@ -38,7 +38,7 @@ def _get_stat_refresh_rate() -> int:
 
 @bp.get("/players")
 async def get_players() -> tuple[str, int, dict[str, str]]:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT id FROM owned_players")
         owned = {row[0] for row in cur.fetchall()}
     roster = []
@@ -145,7 +145,7 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "invalid damage type"}), 400
     if total > 100:
         return jsonify({"error": "over-allocation"}), 400
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
         )

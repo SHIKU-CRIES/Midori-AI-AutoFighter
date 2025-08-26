@@ -8,7 +8,7 @@ from quart import Quart
 from quart import jsonify
 from quart import request
 
-from game import FERNET  # noqa: F401
+from game import get_fernet  # noqa: F401
 from game import load_map  # noqa: F401
 from game import save_map  # noqa: F401
 from game import load_party  # noqa: F401
@@ -16,7 +16,7 @@ from game import save_party  # noqa: F401
 from game import _run_battle  # noqa: F401
 from game import battle_tasks  # noqa: F401
 from game import GachaManager  # noqa: F401  # re-export for tests
-from game import SAVE_MANAGER  # noqa: F401
+from game import get_save_manager  # noqa: F401
 from game import _scale_stats  # noqa: F401
 from game import _passive_names  # noqa: F401
 from game import battle_snapshots  # noqa: F401

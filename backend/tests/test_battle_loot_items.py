@@ -77,7 +77,7 @@ async def test_battle_loot_items_update_inventory(app_with_db, monkeypatch):
     loot_items = data["loot"]["items"]
     assert loot_items
 
-    manager = app_module.GachaManager(app_module.SAVE_MANAGER)
+    manager = app_module.GachaManager(app_module.get_save_manager())
     items = manager._get_items()
 
     expected: dict[str, int] = {}
