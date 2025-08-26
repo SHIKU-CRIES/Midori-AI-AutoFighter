@@ -1,10 +1,10 @@
-from __future__ import annotations
-
+import sys
 import importlib.util
 from pathlib import Path
 
 import pytest
 
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 from llms.loader import ModelName
 
 
@@ -49,7 +49,7 @@ async def test_lrm_config_endpoints(app_with_db, monkeypatch):
         calls["model"] = model
         return FakeLLM()
 
-    monkeypatch.setattr("routes.config.load_llm", fake_loader)
+    monkeypatch.setattr("llms.loader.load_llm", fake_loader)
     resp = await client.post("/config/lrm/test", json={"prompt": "hi"})
     data = await resp.get_json()
     assert data["response"] == "echo:hi"

@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import json
 
-from quart import Blueprint
 from quart import jsonify
 from quart import request
+from quart import Blueprint
 
-from llms.loader import ModelName
-from llms.loader import load_llm
 from options import get_option
 from options import set_option
+from llms.loader import ModelName
 
 bp = Blueprint("config", __name__, url_prefix="/config")
 
@@ -35,6 +34,8 @@ async def set_lrm_model() -> tuple[str, int, dict[str, str]]:
 
 @bp.post("/lrm/test")
 async def test_lrm_model() -> tuple[str, int, dict[str, str]]:
+    from llms.loader import load_llm
+
     data = await request.get_json()
     prompt = data.get("prompt", "")
     model = get_option(_OPTION_KEY, ModelName.DEEPSEEK.value)
