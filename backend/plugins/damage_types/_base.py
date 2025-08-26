@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import logging
-
 from dataclasses import dataclass
+import logging
 from typing import TYPE_CHECKING
-from typing import Optional
 
 if TYPE_CHECKING:
-    from autofighter.stats import Stats
     from autofighter.effects import DamageOverTime
+    from autofighter.stats import Stats
 
 
 log = logging.getLogger(__name__)
@@ -44,7 +42,7 @@ class DamageTypeBase:
         return incoming_damage
 
     async def on_action(
-        self, actor: "Stats", allies: list["Stats"], enemies: list["Stats"]
+        self, actor: Stats, allies: list[Stats], enemies: list[Stats]
     ) -> bool:
         """Called before ``actor`` takes an action.
 
@@ -178,7 +176,7 @@ class DamageTypeBase:
             pass
         return heal
 
-    def create_dot(self, damage: float, source: Stats) -> Optional["DamageOverTime"]:
+    def create_dot(self, damage: float, source: Stats) -> DamageOverTime | None:
         """Return a DoT effect based on ``damage`` or ``None`` to skip."""
 
         log.debug("%s create_dot %s", self.id, damage)

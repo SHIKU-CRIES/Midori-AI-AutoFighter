@@ -1,15 +1,14 @@
-import os
 import asyncio
-
-from enum import Enum
-from typing import Protocol
 from collections.abc import AsyncIterator
+from enum import Enum
+import os
+from typing import Protocol
 
 try:
+    from langchain_community.llms import llamacpp as LlamaCpp
+    from langchain_huggingface import HuggingFacePipeline
     import torch
     from transformers import pipeline
-    from langchain_huggingface import HuggingFacePipeline
-    from langchain_community.llms import llamacpp as LlamaCpp
 except Exception as err:
     torch = None
     LlamaCpp = None
@@ -20,9 +19,9 @@ else:
     _IMPORT_ERROR = None
 
 from .safety import ensure_ram
-from .safety import pick_device
 from .safety import gguf_strategy
 from .safety import model_memory_requirements
+from .safety import pick_device
 
 
 class SupportsStream(Protocol):
@@ -97,4 +96,4 @@ def load_llm(model: str | None = None, *, gguf_path: str | None = None) -> Suppo
     raise ValueError(msg)
 
 
-__all__ = ["ModelName", "load_llm", "SupportsStream"]
+__all__ = ["ModelName", "SupportsStream", "load_llm"]

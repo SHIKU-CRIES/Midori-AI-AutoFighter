@@ -1,15 +1,13 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+from dataclasses import field
 import logging
 
-from dataclasses import field
-from dataclasses import dataclass
-
-from autofighter.stats import Stats
 from autofighter.character import CharacterType
+from autofighter.stats import Stats
 from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
-
 
 log = logging.getLogger(__name__)
 
@@ -60,9 +58,9 @@ class FoeBase(Stats):
 
     def __post_init__(self) -> None:
         try:
-            from langchain_community.vectorstores import Chroma
-            from langchain_community.embeddings import HuggingFaceEmbeddings
             from langchain.memory import VectorStoreRetrieverMemory
+            from langchain_community.embeddings import HuggingFaceEmbeddings
+            from langchain_community.vectorstores import Chroma
         except (ImportError, ModuleNotFoundError):
             try:
                 from langchain.memory import ConversationBufferMemory
@@ -103,7 +101,7 @@ class FoeBase(Stats):
                 collection_name=collection,
                 embedding_function=embeddings,
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             from langchain.memory import ConversationBufferMemory
 
             self.lrm_memory = ConversationBufferMemory()
@@ -136,7 +134,7 @@ class FoeBase(Stats):
     async def send_lrm_message(self, message: str) -> str:
         try:
             from llms.loader import load_llm
-        except Exception:  # noqa: BLE001
+        except Exception:
             class _LLM:
                 async def generate_stream(self, text: str):
                     yield ""
@@ -156,7 +154,7 @@ class FoeBase(Stats):
     async def receive_lrm_message(self, message: str) -> None:
         self.lrm_memory.save_context({"input": ""}, {"output": message})
 
-    async def maybe_regain(self, turn: int) -> None:  # noqa: D401
+    async def maybe_regain(self, turn: int) -> None:
         """Regain a fraction of HP every other turn."""
         if turn % 2 != 0:
             return
@@ -171,7 +169,7 @@ class FoeBase(Stats):
         )
         await self.apply_healing(heal)
 
-    def _on_level_up(self) -> None:  # noqa: D401
+    def _on_level_up(self) -> None:
         """Apply base bonuses then boost mitigation and vitality."""
         log.info(
             "%s leveled up to %s",

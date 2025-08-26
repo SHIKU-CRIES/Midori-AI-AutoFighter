@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import sys
-import logging
+from collections.abc import Iterable
 import importlib.util
-
+import logging
+from pathlib import Path
+import sys
 from types import ModuleType
 from typing import TYPE_CHECKING
-from pathlib import Path
-from collections.abc import Iterable
 
 if TYPE_CHECKING:
     from plugins.event_bus import EventBus
@@ -98,4 +97,4 @@ class PluginLoader:
             plugin_id = getattr(obj, "id", obj.__name__)
             self._registry.setdefault(category, {})[plugin_id] = obj
             if self.bus is not None:
-                setattr(obj, "bus", self.bus)
+                obj.bus = self.bus

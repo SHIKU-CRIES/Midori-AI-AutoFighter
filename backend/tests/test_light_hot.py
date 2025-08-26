@@ -1,7 +1,7 @@
 import pytest
 
-from autofighter.stats import Stats
 from autofighter.effects import EffectManager
+from autofighter.stats import Stats
 from plugins.damage_types.light import Light
 
 

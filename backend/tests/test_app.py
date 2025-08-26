@@ -1,8 +1,7 @@
-import json
 import importlib.util
-import sys
-
+import json
 from pathlib import Path
+import sys
 
 import pytest
 import sqlcipher3

@@ -24,7 +24,7 @@ class LunaPassive(PassivePlugin):
         dodge_buff = 0.35
         max_hp_debuff = player.MHP / 4
 
-        while player.MHP > max_hp_debuff:
+        while max_hp_debuff < player.MHP:
             dodge_buff += 0.001 * player.Vitality
             player.MHP -= 1
 

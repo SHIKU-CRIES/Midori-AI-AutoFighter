@@ -1,12 +1,11 @@
-import random
 import asyncio
-
-from dataclasses import field
 from dataclasses import dataclass
+from dataclasses import field
+import random
 
 from autofighter.stats import BUS
-from plugins.relics._base import RelicBase
 from plugins.effects.aftertaste import Aftertaste
+from plugins.relics._base import RelicBase
 
 
 @dataclass
@@ -16,7 +15,7 @@ class RustyBuckle(RelicBase):
     id: str = "rusty_buckle"
     name: str = "Rusty Buckle"
     stars: int = 1
-    effects: dict[str, float] = field(default_factory=lambda: {})
+    effects: dict[str, float] = field(default_factory=dict)
     about: str = (
         "Bleeds the weakest ally and unleashes growing Aftertaste blasts as they suffer."
     )

@@ -1,22 +1,19 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import asdict
 import json
 
-from dataclasses import asdict
-
+from game import _apply_player_customization
+from game import _assign_damage_type
+from game import _load_player_customization
+from game import get_save_manager
 from quart import Blueprint
 from quart import jsonify
 from quart import request
 
 from autofighter.stats import apply_status_hooks
-
 from plugins import players as player_plugins
-
-from game import get_save_manager
-from game import _assign_damage_type
-from game import _load_player_customization
-from game import _apply_player_customization
 
 bp = Blueprint("players", __name__)
 
@@ -31,7 +28,7 @@ def _get_stat_refresh_rate() -> int:
                 "SELECT value FROM options WHERE key = ?", ("stat_refresh_rate",)
             )
             return cur.fetchone()
-    
+
     try:
         # This function is called synchronously from sync endpoints for now
         # Could be made async in the future if needed
@@ -48,7 +45,7 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
         with get_save_manager().connection() as conn:
             cur = conn.execute("SELECT id FROM owned_players")
             return {row[0] for row in cur.fetchall()}
-    
+
     owned = await asyncio.to_thread(get_owned_players)
     roster = []
     for name in player_plugins.__all__:
@@ -155,7 +152,7 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "invalid damage type"}), 400
     if total > 100:
         return jsonify({"error": "over-allocation"}), 400
-    
+
     def update_player_data():
         with get_save_manager().connection() as conn:
             conn.execute(
@@ -177,6 +174,6 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
                     "INSERT OR REPLACE INTO damage_types (id, type) VALUES (?, ?)",
                     ("player", damage_type),
                 )
-    
+
     await asyncio.to_thread(update_player_data)
     return jsonify({"status": "ok"})

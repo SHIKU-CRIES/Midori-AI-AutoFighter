@@ -1,10 +1,11 @@
-import sys
 from pathlib import Path
+import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from autofighter.stats import Stats
-from plugins.themedadj import Atrocious, loader
+from plugins.themedadj import Atrocious
+from plugins.themedadj import loader
 
 
 def test_themed_adjectives_import_and_decorate() -> None:

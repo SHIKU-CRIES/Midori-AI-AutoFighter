@@ -8,7 +8,9 @@ in asyncio.to_thread() calls, preventing blocking of the event loop.
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any
+from typing import TypeVar
 
 from autofighter.save_manager import SaveManager
 
@@ -21,43 +23,42 @@ async def async_db_operation(
 ) -> T:
     """
     Execute a database operation asynchronously.
-    
+
     Args:
         save_manager: The SaveManager instance
         operation: A callable that takes a database connection and returns a result
-        
+
     Returns:
         The result of the operation
     """
     def db_wrapper():
         with save_manager.connection() as conn:
             return operation(conn)
-    
+
     return await asyncio.to_thread(db_wrapper)
 
 
 async def async_query(
-    save_manager: SaveManager, 
-    query: str, 
+    save_manager: SaveManager,
+    query: str,
     params: tuple | None = None
 ) -> list[tuple]:
     """
     Execute a SELECT query asynchronously.
-    
+
     Args:
         save_manager: The SaveManager instance
         query: SQL query string
         params: Optional query parameters
-        
+
     Returns:
         List of result tuples
     """
     def execute_query(conn):
         if params:
             return conn.execute(query, params).fetchall()
-        else:
-            return conn.execute(query).fetchall()
-    
+        return conn.execute(query).fetchall()
+
     return await async_db_operation(save_manager, execute_query)
 
 
@@ -68,21 +69,20 @@ async def async_execute(
 ) -> int:
     """
     Execute an INSERT/UPDATE/DELETE query asynchronously.
-    
+
     Args:
         save_manager: The SaveManager instance
         query: SQL query string
         params: Optional query parameters
-        
+
     Returns:
         Number of affected rows
     """
     def execute_query(conn):
         if params:
             return conn.execute(query, params).rowcount
-        else:
-            return conn.execute(query).rowcount
-    
+        return conn.execute(query).rowcount
+
     return await async_db_operation(save_manager, execute_query)
 
 

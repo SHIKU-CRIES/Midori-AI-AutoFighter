@@ -1,9 +1,11 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
-from damagetypes import Generic
 from damagetypes import DamageType
+from damagetypes import Generic
+
 from plugins.hots.base import HotPlugin
 from plugins.plugin_loader import PluginLoader
+
 
 class hot:
     """
@@ -21,7 +23,7 @@ class hot:
     Raises:
         ValueError: If 'turns' is not a integer.
     """
-    def __init__(self, name: str, healing: int, turns: int, healing_type: DamageType = Generic, source: Optional[str] = None, tick_interval: int = 1, metadata: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, name: str, healing: int, turns: int, healing_type: DamageType = Generic, source: str | None = None, tick_interval: int = 1, metadata: dict[str, Any] | None = None) -> None:
         if not isinstance(turns, int):
             raise ValueError("Turns must be a integer.")
 
@@ -29,8 +31,8 @@ class hot:
         self.healing: int = healing
         self.turns: int = turns
         self.healing_type: DamageType = healing_type
-        self.source: Optional[str] = source
-        self.metadata: Optional[Dict[str, Any]] = metadata
+        self.source: str | None = source
+        self.metadata: dict[str, Any] | None = metadata
         self.tick_interval: int = tick_interval
 
     def __repr__(self) -> str:
@@ -46,7 +48,7 @@ class hot:
         if self.turns > 0:
             self.turns -= 1
             return self.healing
-        
+
         return 0
 
     def is_active(self) -> bool:

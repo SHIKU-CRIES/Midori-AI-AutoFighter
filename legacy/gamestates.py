@@ -1,35 +1,27 @@
-import os
-import sys
 import json
-import pygame
+import os
 import random
+import sys
 import threading
 
-from halo import Halo
-
-from screendata import Screen
-
-from timerhelper import timmer
-
+from colorama import Fore
+from colorama import Style
+from damage_over_time import dot as damageovertimetype
 from damagestate import check_passive_mod
-
-from load_photos import set_bg_photo
-from load_photos import set_bg_music
+from damagetypes import Generic
+from damagetypes import all_damage_types
+from halo import Halo
 from load_photos import resource_path
-
+from load_photos import set_bg_music
+from load_photos import set_bg_photo
+import pygame
+from screendata import Screen
 from themedstuff import themed_ajt
 from themedstuff import themed_names
-
-from damagetypes import all_damage_types, Generic
-
-from typing import Tuple
-
-from colorama import Fore, Style
-
-from damage_over_time import dot as damageovertimetype
+from timerhelper import timmer
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
-    
+
 red = Fore.RED
 green = Fore.GREEN
 blue = Fore.BLUE
@@ -52,7 +44,7 @@ def log(color, text):
 def debug_log(filename, text):
     with open(filename, "a") as f:
         f.write(f"\n{text}")
-    
+
     return text
 
 def kill_person(dead, killer):
@@ -64,7 +56,7 @@ def kill_person(dead, killer):
 
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"{killer.PlayerName} killed {dead.PlayerName}, Below are stats for both...")
 
-    debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Dead Person")
+    debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), "Dead Person")
 
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Name: {dead.PlayerName}")
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Level: {dead.level}")
@@ -77,8 +69,8 @@ def kill_person(dead, killer):
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Crit Rate: {dead.CritRate}")
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Crit Damage Modifier: {dead.CritDamageMod}")
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Dodge Odds: {dead.DodgeOdds}")
-    
-    debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Killer")
+
+    debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), "Killer")
 
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Name: {killer.PlayerName}")
     debug_log(os.path.join("logs", f"{dead.PlayerName.lower()}.txt"), f"Level: {killer.level}")
@@ -95,11 +87,11 @@ def kill_person(dead, killer):
 def load_config():
     """Loads the configuration from config.json."""
     try:
-        with open(CONFIG_FILE, "r") as f:
+        with open(CONFIG_FILE) as f:
             config = json.load(f)
         return config
     except FileNotFoundError:
-        print(f"Config file not found. Using default settings.")
+        print("Config file not found. Using default settings.")
         return {"preferred_allies": []}  # Default empty list
     except json.JSONDecodeError:
         print(f"Error decoding JSON from {CONFIG_FILE}. Using default settings.")
@@ -136,14 +128,13 @@ def main(level):
                     preferred_themed_names.pop(0)
                     break
 
-    spinner.start(text=f"Loading Players, please wait...")
+    spinner.start(text="Loading Players, please wait...")
 
     for item in themed_names:
         if "mimic".lower() in item.lower():
             continue
-        else:
-            temp_themed_names.append(item)
-    
+        temp_themed_names.append(item)
+
     themed_name = "Player"
 
     player = Player(themed_name)
@@ -154,7 +145,7 @@ def main(level):
     player.isplayer = True
 
     playerlist.append(player)
-        
+
     while len(playerlist) < 5:
         if random.random() < starting_spawn_rate:
             if len(preferred_players_list) > 0:
@@ -189,7 +180,7 @@ def main(level):
         player.isplayer = True
 
         backup_players_list.append(player)
-        
+
     threads = []
 
     for player in playerlist:
@@ -208,15 +199,15 @@ def main(level):
         thread.join()
 
     del threads
-    
-    spinner.succeed(text=f"Players: Fully Loaded")
+
+    spinner.succeed(text="Players: Fully Loaded")
 
     pygame.init()
 
     screen = Screen(SCREEN_WIDTH, SCREEN_HEIGHT).screen
-    icon = pygame.image.load(resource_path(os.path.join("photos", f"midoriai-logo.png")))
+    icon = pygame.image.load(resource_path(os.path.join("photos", "midoriai-logo.png")))
     pygame.display.set_icon(icon)
-    
+
     pygame.display.set_caption("Midori AI Auto Fighter", "Welcome to the fighting zone!")
 
     clock = pygame.time.Clock()
@@ -229,7 +220,7 @@ def main(level):
     background_image.set_alpha(128)
 
     pygame.mixer.music.set_volume(0.05 / 2)
-    music = pygame.mixer.music.load(set_bg_music())
+    pygame.mixer.music.load(set_bg_music())
     pygame.mixer.music.play(-1)  # -1 means loop the music indefinitely
 
     screen.fill((0, 0, 0))
@@ -248,7 +239,7 @@ def main(level):
         wave_number += 1
         foelist: list[Player] = []
         backup_foes_list: list[Player] = []
-        
+
         spinner.start(text=f"Wave :: {wave_number} :: Loading...")
 
         for player in playerlist:
@@ -271,7 +262,7 @@ def main(level):
 
         for item in themed_names:
             temp_foe_themed_names.append(item)
-        
+
         random.shuffle(temp_foe_themed_names)
 
         if level < 1000:
@@ -293,9 +284,9 @@ def main(level):
 
             foe = Player(f"{foe_pre_name}")
             foe.set_photo(themed_name.lower())
-            
+
             foelist.append(foe)
-        
+
         while len(temp_foe_themed_names) > 0:
             themed_name = random.choice(temp_foe_themed_names).capitalize()
             temp_foe_themed_names.remove(themed_name.lower())
@@ -353,7 +344,7 @@ def main(level):
                 foe.photodata = pygame.transform.scale(foe.photodata, (photo_size, photo_size))
             except FileNotFoundError as e:
                 print(f"Error loading image: {e}")
-        
+
         spinner.succeed(text=f"Wave :: {wave_number} :: Fully Loaded")
 
         player.HP = player.MHP
@@ -367,21 +358,21 @@ def main(level):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_d: 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
                     is_deading = True
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_b:  
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                     for player in foelist:
                         player.Atk += round(player.HP * 0.35) + 1000
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     for player in playerlist:
                         if player.PlayerName.lower() == "player":
                             player.Type = random.choice(all_damage_types)
 
             enrage_timer.tick()
             enrage_timer.check_timeout()
-            
+
             fps = clock.get_fps()
 
             enrage_mod = enrage_timer.get_timeout_duration()
@@ -402,40 +393,38 @@ def main(level):
 
             if bleed_mod > 1.2:
                 def_mod = max(1, (bleed_mod * 0.002) + (bleed_mod * 0.002) + (bleed_mod * 0.001) + 1)
-            
+
             if bleed_mod > 2:
                 def_mod = max(1, (bleed_mod * 0.004) + (bleed_mod * 0.004) + (bleed_mod * 0.002) + 1)
-            
+
             if is_deading:
                 for player in playerlist:
                     player.save_past_life()
                     playerlist.remove(player)
-            
+
             for player in playerlist:
                 if player.HP < 1:
                     player.save_past_life()
                     playerlist.remove(player)
-            
+
             for foe in foelist:
                 if foe.HP < 1:
                     foelist.remove(foe)
 
-            if len(playerlist) < 5:
-                if len(backup_players_list) > 1:
-                    new_player = random.choice(backup_players_list)
-                    backup_players_list.remove(new_player)
-                    playerlist.append(new_player)
+            if len(playerlist) < 5 and len(backup_players_list) > 1:
+                new_player = random.choice(backup_players_list)
+                backup_players_list.remove(new_player)
+                playerlist.append(new_player)
 
-            if len(foelist) < 5:
-                if len(backup_foes_list) > 0:
-                    new_player = random.choice(backup_foes_list)
-                    backup_foes_list.remove(new_player)
-                    foelist.append(new_player)
+            if len(foelist) < 5 and len(backup_foes_list) > 0:
+                new_player = random.choice(backup_foes_list)
+                backup_foes_list.remove(new_player)
+                foelist.append(new_player)
 
             enrage_dot = damageovertimetype("Enrage Bleed", min(5000, (bleed_mod ** 5) * level), max(300, min(6000, round(25 * bleed_mod))), Generic, "Enrage Mech", 1)
 
             fps_cap = 65
-    
+
             # Render the screen
             screen.fill((0, 0, 0))
             screen.blit(background_image, (0, 0))
@@ -448,7 +437,7 @@ def main(level):
             item_total_size = photo_size - (photo_size / 4)
             player_size = (item_total_size * srink_setting, item_total_size * srink_setting)
             foe_size = (item_total_size * srink_setting, item_total_size * srink_setting)
-            
+
             if len(foelist) > 0:
                 for i, foe in enumerate(foelist):
                     if foe.HP > 1:
@@ -457,8 +446,8 @@ def main(level):
 
                     if foe.tick(bleed_mod):
                         for foe_action in foe.ActionsPerTurn:
-                            dt = clock.tick(fps_cap) / 1000
-                        
+                            clock.tick(fps_cap)
+
                             if bleed_mod > 1.5:
                                 foe.RushStat = 0
                                 foe.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
@@ -478,7 +467,7 @@ def main(level):
 
                                     if target_to_damage.HP > 0:
                                         target_to_damage.take_damage(bleed_mod, check_passive_mod(foelist, playerlist, foe, target_to_damage, foe.deal_damage(bleed_mod, target_to_damage.Type)))
-                                    
+
                                     if target_to_damage.HP < 1:
                                         target_to_damage.save_past_life()
                                         kill_person(target_to_damage, foe)
@@ -496,8 +485,8 @@ def main(level):
 
                     if person.tick(bleed_mod):
                         for turn in person.ActionsPerTurn:
-                            dt = clock.tick(fps_cap) / 1000
-                        
+                            clock.tick(fps_cap)
+
                             if bleed_mod > 1.5:
                                 person.gain_damage_over_time(enrage_dot, 1.1 * bleed_mod)
 
@@ -543,11 +532,11 @@ def main(level):
                     if person.HP > person.MHP:
                         person.HP = person.MHP
             else:
-                spinner.fail(text=f"You lost!")
+                spinner.fail(text="You lost!")
                 log(red, "you lose... restart game to load a new buffed save file")
                 pygame.quit()
                 exit()
-                
+
             if enrage_timer.timed_out:
                 fps_stat = font.render(f"FPT: {int(fps)}", True, (255, 255, 255))
                 fps_rect = fps_stat.get_rect(center=((SCREEN_WIDTH // 8) + 600, (SCREEN_HEIGHT // 2) - 0))

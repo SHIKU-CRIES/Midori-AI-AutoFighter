@@ -1,7 +1,8 @@
 """Player plugin for Ally."""
 
-from player import Player
 from passives import get_passive
+from player import Player
+
 from plugins.players.base import PlayerPlugin
 
 

@@ -1,10 +1,9 @@
 import asyncio
-
-from dataclasses import field
 from dataclasses import dataclass
+from dataclasses import field
 
-from autofighter.stats import BUS
 from autofighter.effects import create_stat_buff
+from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
 
 

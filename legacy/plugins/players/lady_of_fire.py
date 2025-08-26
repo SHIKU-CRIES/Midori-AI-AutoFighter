@@ -1,8 +1,8 @@
 """Player plugin for Lady Of Fire."""
 
 from player import Player
-from plugins.players.base import PlayerPlugin
 
+from plugins.players.base import PlayerPlugin
 
 
 class LadyOfFire(PlayerPlugin):

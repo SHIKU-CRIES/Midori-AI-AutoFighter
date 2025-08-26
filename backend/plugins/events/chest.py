@@ -1,8 +1,8 @@
 import random
 
-from autofighter.stats import Stats
 from autofighter.events import Event
 from autofighter.events import EventOption
+from autofighter.stats import Stats
 
 
 class ChestEvent:

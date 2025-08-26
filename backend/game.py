@@ -1,23 +1,17 @@
 from __future__ import annotations
 
-import json
-import base64
-import random
 import asyncio
+import base64
+from collections.abc import Awaitable
+from collections.abc import Callable
 import hashlib
+import json
 import logging
-
-from typing import Any
-from typing import Callable
-from typing import Awaitable
 from pathlib import Path
+import random
+from typing import Any
 
 from cryptography.fernet import Fernet
-
-from plugins import passives as passive_plugins
-from plugins import players as player_plugins
-from plugins.damage_types import load_damage_type
-from plugins.players._base import PlayerBase
 
 from autofighter.effects import create_stat_buff
 from autofighter.gacha import GachaManager
@@ -29,6 +23,10 @@ from autofighter.rooms import _scale_stats  # noqa: F401
 from autofighter.rooms import _serialize  # noqa: F401
 from autofighter.save_manager import SaveManager
 from autofighter.stats import Stats
+from plugins import passives as passive_plugins
+from plugins import players as player_plugins
+from plugins.damage_types import load_damage_type
+from plugins.players._base import PlayerBase
 
 log = logging.getLogger(__name__)
 

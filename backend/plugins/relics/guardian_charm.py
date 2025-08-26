@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from plugins.relics._base import RelicBase
 from autofighter.effects import create_stat_buff
+from plugins.relics._base import RelicBase
 
 
 @dataclass

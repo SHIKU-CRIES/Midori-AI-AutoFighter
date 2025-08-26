@@ -1,10 +1,7 @@
 import asyncio
-import random
-
 from dataclasses import dataclass
 from dataclasses import field
-from typing import Dict
-from typing import List
+import random
 from typing import Optional
 
 from rich.console import Console
@@ -20,9 +17,9 @@ class StatModifier:
     name: str
     turns: int
     id: str
-    deltas: Dict[str, float] | None = None
-    multipliers: Dict[str, float] | None = None
-    _originals: Dict[str, float] = field(init=False, default_factory=dict)
+    deltas: dict[str, float] | None = None
+    multipliers: dict[str, float] | None = None
+    _originals: dict[str, float] = field(init=False, default_factory=dict)
 
     def apply(self) -> None:
         """Apply configured modifiers to the stats object."""
@@ -57,7 +54,7 @@ def create_stat_buff(
     *,
     name: str = "buff",
     turns: int = 1,
-    id: Optional[str] = None,
+    id: str | None = None,
     **modifiers: float,
 ) -> StatModifier:
     """Create and apply a :class:`StatModifier` to ``stats``.
@@ -67,8 +64,8 @@ def create_stat_buff(
     immediately and returned for tracking in an :class:`EffectManager`.
     """
 
-    deltas: Dict[str, float] = {}
-    mults: Dict[str, float] = {}
+    deltas: dict[str, float] = {}
+    mults: dict[str, float] = {}
     for key, value in modifiers.items():
         if key.endswith("_mult"):
             mults[key[:-5]] = float(value)
@@ -94,7 +91,7 @@ class DamageOverTime:
     damage: int
     turns: int
     id: str
-    source: Optional[Stats] = None
+    source: Stats | None = None
 
     async def tick(self, target: Stats, *_: object) -> bool:
         attacker = self.source or target
@@ -127,7 +124,7 @@ class HealingOverTime:
     healing: int
     turns: int
     id: str
-    source: Optional[Stats] = None
+    source: Stats | None = None
 
     async def tick(self, target: Stats, *_: object) -> bool:
         healer = self.source or target
@@ -149,9 +146,9 @@ class EffectManager:
 
     def __init__(self, stats: Stats) -> None:
         self.stats = stats
-        self.dots: List[DamageOverTime] = []
-        self.hots: List[HealingOverTime] = []
-        self.mods: List[StatModifier] = []
+        self.dots: list[DamageOverTime] = []
+        self.hots: list[HealingOverTime] = []
+        self.mods: list[StatModifier] = []
         self._console = Console()
         for eff in getattr(stats, "_pending_mods", []):
             self.mods.append(eff)
@@ -159,7 +156,7 @@ class EffectManager:
         if hasattr(stats, "_pending_mods"):
             delattr(stats, "_pending_mods")
 
-    def add_dot(self, effect: DamageOverTime, max_stacks: Optional[int] = None) -> None:
+    def add_dot(self, effect: DamageOverTime, max_stacks: int | None = None) -> None:
         """Attach a DoT instance to the tracked stats.
 
         DoTs with the same ``id`` stack independently, allowing multiple
@@ -204,14 +201,14 @@ class EffectManager:
             (self.hots, self.stats.hots),
             (self.dots, self.stats.dots),
         ):
-            expired: List[object] = []
-            
+            expired: list[object] = []
+
             # Batch logging for performance when many effects are present
             if len(collection) > 10:
                 effect_type = "HoT" if (collection and isinstance(collection[0], HealingOverTime)) else "DoT"
                 color = "green" if effect_type == "HoT" else "light_red"
                 self._console.log(f"[{color}]{self.stats.id} processing {len(collection)} {effect_type} effects[/]")
-            
+
             # Process effects in parallel for better async performance when many are present
             if len(collection) > 20:
                 # Parallel processing for large collections
@@ -220,7 +217,7 @@ class EffectManager:
                         color = "green" if isinstance(eff, HealingOverTime) else "light_red"
                         self._console.log(f"[{color}]{self.stats.id} {eff.name} tick[/]")
                     return await eff.tick(self.stats), eff
-                
+
                 # Process in batches to avoid overwhelming the event loop
                 batch_size = 50
                 for i in range(0, len(collection), batch_size):
@@ -244,13 +241,13 @@ class EffectManager:
                     # Early termination: if target dies, stop processing remaining effects
                     if self.stats.hp <= 0:
                         break
-            
+
             for eff in expired:
                 collection.remove(eff)
                 if eff.id in names:
                     names.remove(eff.id)
 
-        expired_mods: List[StatModifier] = []
+        expired_mods: list[StatModifier] = []
         for mod in self.mods:
             self._console.log(f"[yellow]{self.stats.id} {mod.name} tick[/]")
             if not mod.tick():
@@ -282,7 +279,7 @@ class EffectManager:
                     return False
         return True
 
-    async def cleanup(self, target: Optional[Stats] = None) -> None:
+    async def cleanup(self, target: Stats | None = None) -> None:
         """Clear remaining effects and detach status names from the stats.
 
         Battle resolution calls this to ensure we don't leak stacked effects

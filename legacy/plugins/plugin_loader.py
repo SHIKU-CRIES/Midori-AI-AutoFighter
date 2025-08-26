@@ -1,17 +1,15 @@
+import importlib.util
 import inspect
 import logging
-import importlib.util
-
-from types import ModuleType
-from typing import Dict, Type
 from pathlib import Path
+from types import ModuleType
 
 
 class PluginLoader:
     """Load plugins from a directory and expose them by category."""
 
     def __init__(self) -> None:
-        self._registry: Dict[str, Dict[str, Type]] = {}
+        self._registry: dict[str, dict[str, type]] = {}
 
     def discover(self, plugin_dir: str) -> None:
         """Discover plugin modules under ``plugin_dir``.
@@ -44,7 +42,7 @@ class PluginLoader:
             module = importlib.util.module_from_spec(spec)
             try:
                 spec.loader.exec_module(module)  # type: ignore[arg-type]
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logging.exception("Failed loading plugin %s: %s", file_path, exc)
                 continue
 
@@ -58,7 +56,7 @@ class PluginLoader:
             plugin_id = getattr(obj, "id", obj.__name__)
             self._registry.setdefault(plugin_type, {})[plugin_id] = obj
 
-    def get_plugins(self, plugin_type: str) -> Dict[str, Type]:
+    def get_plugins(self, plugin_type: str) -> dict[str, type]:
         """Return plugins registered under ``plugin_type``."""
 
         return self._registry.get(plugin_type, {}).copy()

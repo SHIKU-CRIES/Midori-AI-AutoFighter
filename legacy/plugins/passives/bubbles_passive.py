@@ -16,7 +16,7 @@ class BubblesPassive(PassivePlugin):
     def __init__(self) -> None:
         super().__init__(self.name)
 
-    def on_apply(self, player) -> None:  # noqa: D401
+    def on_apply(self, player) -> None:
         """Rename items and boost their power."""
         for item in player.Items:
             item.name = "Bubbles's Blessing of Damage, Defense, and Utility"

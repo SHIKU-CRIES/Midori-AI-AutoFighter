@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from plugins.relics._base import RelicBase
 from autofighter.stats import BUS
 from plugins.players._base import PlayerBase
+from plugins.relics._base import RelicBase
 
 
 @dataclass

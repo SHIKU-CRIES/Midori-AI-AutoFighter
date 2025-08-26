@@ -2,14 +2,14 @@ import asyncio
 import random
 
 import pytest
-import plugins.event_bus as event_bus_module
 
 from autofighter.party import Party
-from autofighter.stats import BUS
-from autofighter.stats import Stats
 from autofighter.relics import apply_relics
 from autofighter.relics import award_relic
+from autofighter.stats import BUS
+from autofighter.stats import Stats
 from plugins.effects.aftertaste import Aftertaste
+import plugins.event_bus as event_bus_module
 from plugins.players._base import PlayerBase
 
 

@@ -1,8 +1,8 @@
 """Player plugin for Becca."""
 
 from player import Player
-from plugins.players.base import PlayerPlugin
 
+from plugins.players.base import PlayerPlugin
 
 
 class Becca(PlayerPlugin):

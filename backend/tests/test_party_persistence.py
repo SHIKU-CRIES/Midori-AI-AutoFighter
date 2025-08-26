@@ -1,5 +1,4 @@
 import pytest
-
 from test_app import app_with_db as _app_with_db  # reuse fixture  # noqa: F401
 
 

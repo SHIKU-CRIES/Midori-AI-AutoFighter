@@ -1,7 +1,6 @@
 import asyncio
-
-from dataclasses import field
 from dataclasses import dataclass
+from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
@@ -14,7 +13,7 @@ class EchoingDrum(RelicBase):
     id: str = "echoing_drum"
     name: str = "Echoing Drum"
     stars: int = 3
-    effects: dict[str, float] = field(default_factory=lambda: {})
+    effects: dict[str, float] = field(default_factory=dict)
     about: str = "First attack each battle repeats at 25% power per stack."
 
     def apply(self, party) -> None:

@@ -1,16 +1,16 @@
-import sys
 from pathlib import Path
+import sys
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from plugins import PluginLoader
-from autofighter.stats import BUS
-from plugins.players.player import Player
 from autofighter.passives import PassiveRegistry
+from autofighter.stats import BUS
 from autofighter.stats import set_enrage_percent
+from plugins import PluginLoader
 from plugins.passives.room_heal import RoomHeal
+from plugins.players.player import Player
 
 
 def test_passive_discovery():

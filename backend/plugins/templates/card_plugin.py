@@ -1,10 +1,8 @@
-import logging
-
 from dataclasses import dataclass
 from dataclasses import field
+import logging
 
 from plugins.cards._base import CardBase
-
 
 log = logging.getLogger(__name__)
 

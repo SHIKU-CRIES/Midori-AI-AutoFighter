@@ -18,7 +18,7 @@ class CarlyPassive(PassivePlugin):
     def __init__(self) -> None:
         super().__init__(self.name)
 
-    def on_apply(self, player) -> None:  # noqa: D401
+    def on_apply(self, player) -> None:
         """Shift attack into defense and grant a defensive blessing."""
         max_atk_stat = 0
         item_buff = 0.0

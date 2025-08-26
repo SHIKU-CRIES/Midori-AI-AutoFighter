@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from llms.loader import ModelName
+from options import set_option
 import pytest
 
-from options import set_option
-from llms.loader import ModelName
 from autofighter.party import Party
-from autofighter.stats import Stats
 from autofighter.rooms.chat import ChatRoom
+from autofighter.stats import Stats
 
 
 class FakeLLM:

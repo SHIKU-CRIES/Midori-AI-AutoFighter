@@ -2,4 +2,46 @@ line-length = 88
 target-version = "py312"
 
 [lint]
-select = ["F"]
+# Start with basic linting rules and gradually expand
+select = [
+    "F",    # Pyflakes errors (critical errors)
+    "E4",   # Critical pycodestyle errors (syntax issues)
+    "E7",   # Statement errors
+    "E9",   # Runtime errors
+    "W291", # Trailing whitespace
+    "W292", # Missing newline at end of file
+    "W293", # Blank line contains whitespace
+    "I001", # Import sorting
+]
+
+# For stricter linting on backend only
+[lint.per-file-ignores]
+# Legacy code has relaxed rules
+"legacy/**" = ["E701", "E702", "N801", "N803", "N806", "SIM102", "SIM103", "PTH100", "PTH103", "PTH107", "PTH110", "PTH113", "PTH118", "PTH119", "PTH120", "PTH123", "PTH208", "UP006", "UP015", "UP018", "UP034", "UP035", "UP037", "UP039", "UP045", "RUF010", "RUF046", "RUF100", "RET505", "RET507", "SIM114", "SIM300"]
+
+# Test files can have additional flexibility
+"**/tests/**" = ["N802", "N803", "N806", "B010"]
+"**/test_*.py" = ["N802", "N803", "N806", "B010"]
+
+# Backend has more comprehensive rules
+backend = [
+    "F",    # Pyflakes errors
+    "E",    # pycodestyle errors  
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP006", # non-pep585-annotation
+    "UP015", # redundant-open-modes
+    "UP018", # native-literals
+    "UP034", # extraneous-parentheses
+    "UP037", # quoted-annotation
+    "UP039", # unnecessary-class-parentheses
+    "UP045", # non-pep604-annotation-optional
+    "RUF010", # explicit-f-string-type-conversion
+    "RUF046", # unnecessary-cast-to-int
+    "RUF100", # unused-noqa
+]
+
+[lint.isort]
+known-first-party = ["autofighter", "plugins"]
+force-single-line = true
+force-sort-within-sections = true

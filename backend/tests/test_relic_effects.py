@@ -1,13 +1,11 @@
 import asyncio
-
 from math import isclose
 
-import plugins.event_bus as event_bus_module
-
 from autofighter.party import Party
-from autofighter.stats import BUS
 from autofighter.relics import apply_relics
 from autofighter.relics import award_relic
+from autofighter.stats import BUS
+import plugins.event_bus as event_bus_module
 from plugins.players._base import PlayerBase
 
 

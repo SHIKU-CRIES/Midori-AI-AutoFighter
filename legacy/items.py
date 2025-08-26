@@ -7,7 +7,7 @@ item_mods = ["Powerful", "Strong", "Enhanced", "Fortified", "Empowered", "Reinfo
 #item_types = ["damage", "defense", "utility", "blocking", "healing", "passive"]
 item_types = ["damage", "defense", "utility"]
 
-class ItemType():
+class ItemType:
     def __init__(self):
         """Initialises an Item object."""
         self.type = [random.choice(item_types)]
@@ -22,13 +22,13 @@ class ItemType():
             self.power += temp_math * 0.0001
 
         except Exception as error:
-            print(f"The Item ({self.name}) errored: `{str(error)}`")
-    
+            print(f"The Item ({self.name}) errored: `{error!s}`")
+
     def check_mods(self, temp_power: float):
         for index, item_mod in enumerate(item_mods):
             if item_mod.lower() in self.name.lower():
                 return temp_power + (index * 0.0005)
-        
+
         return max(temp_power, 1)
 
     def on_damage_taken(self, pre_damage_taken: float):
@@ -47,7 +47,7 @@ class ItemType():
         """This function is called when the player deals damage.
         If the item type is "damage", this function will handle the damage-related functionality."""
         total_output = 0
-        
+
         if "damage" in str(self.name).lower():
             total_output += float(damage_delt * self.power)
         else:
@@ -66,7 +66,7 @@ class ItemType():
             total_output = float(desired_increase)
 
         return total_output
-    
+
     def on_passive_use(self, desired_increase: float):
         total_output = 0
 
@@ -80,7 +80,7 @@ class ItemType():
 
 def on_damage_taken(items: list[ItemType], pre_damage_taken: float):
     total_output = pre_damage_taken
-    
+
     for item in items:
         try:
             total_output = item.on_damage_taken(total_output)
@@ -91,7 +91,7 @@ def on_damage_taken(items: list[ItemType], pre_damage_taken: float):
 
 def on_damage_dealt(items: list[ItemType], damage_delt: float):
     total_output = damage_delt
-    
+
     for item in items:
         try:
             total_output = item.on_damage_dealt(total_output)
@@ -102,7 +102,7 @@ def on_damage_dealt(items: list[ItemType], damage_delt: float):
 
 def on_stat_gain(items: list[ItemType], desired_increase: float):
     total_output = desired_increase
-    
+
     for item in items:
         try:
             total_output = item.stat_gain(total_output)
@@ -113,7 +113,7 @@ def on_stat_gain(items: list[ItemType], desired_increase: float):
 
 def on_passive_use(items: list[ItemType], desired_increase: float):
     total_output = desired_increase
-    
+
     for item in items:
         try:
             total_output = item.on_passive_use(total_output)

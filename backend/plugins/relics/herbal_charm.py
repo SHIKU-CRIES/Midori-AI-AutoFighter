@@ -1,7 +1,6 @@
 import asyncio
-
-from dataclasses import field
 from dataclasses import dataclass
+from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
@@ -14,7 +13,7 @@ class HerbalCharm(RelicBase):
     id: str = "herbal_charm"
     name: str = "Herbal Charm"
     stars: int = 1
-    effects: dict[str, float] = field(default_factory=lambda: {})
+    effects: dict[str, float] = field(default_factory=dict)
     about: str = "Heals all allies for 0.5% Max HP at the start of each turn per stack."
 
     def apply(self, party) -> None:

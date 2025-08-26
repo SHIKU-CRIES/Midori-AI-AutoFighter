@@ -24,6 +24,7 @@ This document summarizes common development practices for all services in this r
   This is normal and does not replace the need for your own clear `[TYPE]` commit messages.
 - Run available tests (e.g., `pytest`) before committing.
 - Any test running longer than 25 seconds is automatically aborted.
+- **Linting is mandatory**: Run `ruff check . --fix` before every commit on Python code. All pull requests must pass linting checks in CI. See `.codex/implementation/linting-standards.md` for comprehensive guidelines.
 - For Python style:
    - Place each import on its own line.
    - Sort imports within each group (standard library, third-party, project modules) from shortest to longest.

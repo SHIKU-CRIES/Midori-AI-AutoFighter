@@ -1,33 +1,22 @@
-import os
-import sys
 import math
-import uuid
-import random
-
+import os
 import pickle
-
-from halo import Halo
-
-from items import ItemType
-
-from damagetypes import DamageType
-from damagetypes import get_damage_type
-from damagetypes import Light, Dark, Wind, Lightning, Fire, Ice, Generic
-
-from items import on_stat_gain
-from items import on_passive_use
-from items import on_damage_dealt
-from items import on_damage_taken
-
-from weapons import WeaponType
-
-from foe_passive_builder import player_stat_picker
+import random
+import uuid
 
 from damage_over_time import dot as damageovertimetype
+from damagetypes import DamageType
+from damagetypes import get_damage_type
+from foe_passive_builder import player_stat_picker
+from halo import Halo
 from healing_over_time import hot as healingovertimetype
-
-from load_photos import resource_path
+from items import ItemType
+from items import on_damage_dealt
+from items import on_damage_taken
+from items import on_stat_gain
 from load_photos import set_themed_photo
+from weapons import WeaponType
+
 from plugins.plugin_loader import PluginLoader
 
 spinner = Halo(text='Loading', spinner='dots', color='green')
@@ -77,7 +66,7 @@ class Player:
         self.HOTS: list[healingovertimetype] = []
         self.photo: str = "player.png"
         self.photodata = ""
-        
+
     def save(self):
         temp_data = self.photodata
         self.photodata = "No Photo Data"
@@ -146,11 +135,9 @@ class Player:
 
                     can_load = False
 
-                    if self.PlayerName.lower() in past_life_data['PlayerName'].lower():
+                    if self.PlayerName.lower() in past_life_data['PlayerName'].lower() or self.PlayerName.lower() == "player".lower():
                         can_load = True
-                    elif self.PlayerName.lower() == "player".lower():
-                        can_load = True
-                    
+
                     if can_load:
                         self.MHP: int = self.MHP + self.check_base_stats(self.MHP, int(past_life_data['MHP'] * total_items) + 1000)
                         self.HP: int = self.MHP
@@ -178,19 +165,19 @@ class Player:
                             os.remove(filepath)
                             continue
 
-                        elif past_life_data['Vitality'] > 1.0000001:
+                        if past_life_data['Vitality'] > 1.0000001:
                             temp_past_life_vitality = past_life_data['Vitality'] - 1
                             while temp_past_life_vitality > 0:
                                 bonus = max(0.001, self.Vitality - 1)
-                                
+
                                 scaling_factor = 0.95
-                                
+
                                 vit_gain = (bonus * scaling_factor)
-                                
+
                                 self.gain_vit(vit_gain)
 
                                 temp_past_life_vitality -= vit_gain
-                        
+
                         self.check_stats()
 
                         self.EXPMod += 1
@@ -207,10 +194,10 @@ class Player:
                         self.Atk: int = self.Atk + self.check_base_stats(self.Atk, int(past_life_data['Atk']) + 100)
 
                 except Exception as e:
-                    spinner.fail(text=f"Past Lifes ({self.PlayerName}): {filepath} failed to load ({str(e)}. Deleting past life file.)")
+                    spinner.fail(text=f"Past Lifes ({self.PlayerName}): {filepath} failed to load ({e!s}. Deleting past life file.)")
                     os.remove(filepath)
                     continue
-        
+
         spinner.succeed(text=f"Past Lifes ({self.PlayerName}): Fully Loaded")
 
     def save_past_life(self):
@@ -233,7 +220,7 @@ class Player:
                 pickle.dump(self.__dict__, f)
             print(f"({self.PlayerName}) Saved past life :: {past_life_filename}")
         except Exception as e:
-            print(f"Error saving past life: {str(e)}")
+            print(f"Error saving past life: {e!s}")
 
         try:
             os.remove(os.path.join(lives_folder, f'{self.PlayerName}.dat'))
@@ -266,10 +253,8 @@ class Player:
         """
         to_be_lowered_by = 2500
         desired_increase = 0
-        
-        if self.CritRate > 1:
-            desired_increase = points / ((to_be_lowered_by * (self.CritRate * 2)) + 1)
-        elif points > 0.25:
+
+        if self.CritRate > 1 or points > 0.25:
             desired_increase = points / ((to_be_lowered_by * (self.CritRate * 2)) + 1)
         else:
             desired_increase = points
@@ -289,8 +274,8 @@ class Player:
         else:
             desired_increase = points
 
-        self.CritDamageMod += desired_increase 
-    
+        self.CritDamageMod += desired_increase
+
     def check_base_stats(self, stat_total: int, stat_gain: int):
         stats_to_start_lower = 50
         to_be_lowered_by = 10 + (stat_total // 1000)
@@ -315,7 +300,7 @@ class Player:
                 break
 
         return max(min(int(desired_increase), 1000), 1)
-    
+
     def gain_vit(self, points):
         """
         Increases the player's Vitality stat based on the input points, applying diminishing returns
@@ -375,14 +360,14 @@ class Player:
 
         if self.CritRate > max_crit_rate:
             self.CritRate = max_crit_rate
-        
+
         if def_up > 1:
             def_up = self.check_base_stats(self.Def, def_up)
             self.Def = self.Def + def_up
-        
+
         if self.Def < 5:
             self.Def = 5
-        
+
         if self.Regain > self.MHP * 0.0005:
             self.Vitality *= 1.01
             self.Regain *= 0.99
@@ -390,14 +375,14 @@ class Player:
         if self.Vitality < 0.001:
             print("Warning Vitality is way too low... fixing...")
             self.Vitality = 1
-        
+
         if self.MHP > 2000000000:
             self.MHP = 2000000000
-    
+
     def tick(self, mod):
         if self.HP < 1:
             return False
-        
+
         self.ActionPoints += round(self.ActionPointsPerTick * max(mod, 1))
 
         if self.ActionPointsPerTick >= round(self.ActionPointsPerTurn * 0.1):
@@ -416,14 +401,13 @@ class Player:
         if self.ActionPoints >= self.ActionPointsPerTurn:
             self.ActionPoints -= self.ActionPointsPerTurn
             return True
-        else:
-            return False
+        return False
 
     def do_pre_turn(self):
         self.regain_hp()
         self.heal_over_time()
         self.damage_over_time()
-    
+
     def heal_damage(self, input_healing: float):
         self.HP += round(input_healing)
         if self.HP > self.MHP: self.HP = self.MHP
@@ -436,7 +420,7 @@ class Player:
     def take_damage_nododge(self, input_damage_mod: float, input_damage: float):
         total_damage = on_damage_taken(self.Items, self.damage_mitigation(input_damage * input_damage_mod))
         self.HP -= round(total_damage / 4)
-    
+
     def deal_damage(self, input_damage_mod: float, input_damage_type: DamageType):
         damage_dealt = on_damage_dealt(self.Items, ((self.Atk * self.Vitality) * 0.05))
 
@@ -448,16 +432,16 @@ class Player:
 
     def damage_mitigation(self, damage_pre: float):
         return max(damage_pre / (self.mitigation_buff() * self.Def), 1 / self.Def)
-    
+
     def mitigation_buff(self):
         return max(0.1, self.Mitigation * self.Vitality)
-    
+
     def effectres(self):
         return max(0.1, self.EffectRES * self.Vitality)
-    
+
     def effecthittate(self):
         return max(0.1, self.EffectHitRate * self.Vitality)
-    
+
     def regain_hp(self):
         self.heal_damage(min(self.MHP, (self.Regain * self.Vitality) ** 1.25))
 
@@ -503,7 +487,7 @@ class Player:
             random.choice(self.HOTS).healing += HOT.healing
             random.choice(self.HOTS).tick_interval += HOT.tick_interval
             random.choice(self.HOTS).turns += HOT.turns
-    
+
     def damage_over_time(self):
         for dot in self.DOTS:
             if dot.is_active():
@@ -514,7 +498,7 @@ class Player:
                         self.take_damage_nododge(1, self.Type.damage_mod(dot_damage / 2, dot.damage_type))
                     else:
                         self.take_damage(1, self.Type.damage_mod(dot_damage, dot.damage_type))
-                
+
                 if self.damage_mitigation(dot.damage) > self.MHP * 0.05:
                     dot.damage = (dot.damage * 0.99)
             else:
@@ -526,7 +510,7 @@ class Player:
                 hot_healing = hot.tick()
                 for i in range(hot.tick_interval):
                     self.heal_damage(self.Type.damage_mod(hot_healing, hot.healing_type))
-                
+
                 if hot.healing > self.MHP * 0.25:
                     hot.healing = round(hot.healing * 0.75)
             else:
@@ -534,28 +518,24 @@ class Player:
 
     def crit_damage_mod(self, damage_pre: float):
         return damage_pre * self.CritDamageMod * max(1, self.CritRate)
-    
+
     def check_dodge(self, enrage_buff: float):
         if self.DodgeOdds / enrage_buff >= random.random():
             # Cant be hit
             return False
-        else:
-            # Can be hit
-            return True
-    
+        # Can be hit
+        return True
+
     def check_crit(self):
-        if self.CritRate >= random.random():
-            return True
-        else:
-            return False
-    
-    def gain_exp(self, mod=float(1), foe_level=int(1)):
+        return self.CritRate >= random.random()
+
+    def gain_exp(self, mod=float(1), foe_level=1):
 
         EXP_to_levelup = self.exp_to_levelup()
 
         int_mod_novit = max(round(((mod * 0.85) + 1) * (self.level / 1000) * (self.level / 1000)), 1)
 
-        if self.EXP >= EXP_to_levelup * 15:
+        if EXP_to_levelup * 15 <= self.EXP:
             self.EXP += min(max(round((foe_level ** 0.0015) * int_mod_novit), round(foe_level  ** 0.0035)) + 1, EXP_to_levelup * 2)
         else:
             self.EXP += min(max(round(((foe_level * 4) ** 0.55) * int_mod_novit), round((foe_level * 4) ** 0.75)) + 1, EXP_to_levelup * 5)
@@ -563,7 +543,7 @@ class Player:
     def exp_to_levelup(self):
         return min(max((self.level ** 1.55) / (self.EXPMod ** 0.55), 1), 10 ** 10)
 
-    def level_up(self, mod=float(1), foe_level=int(1)):
+    def level_up(self, mod=float(1), foe_level=1):
         """
         Levels up the player.
         """
@@ -571,12 +551,12 @@ class Player:
         mod_fixed = on_stat_gain(self.Items, (mod * 0.35) + 1) * self.Vitality * (self.level / 1000)
         int_mod = max(round(mod_fixed * (self.level / 100)), 1)
 
-        while self.EXP >= self.exp_to_levelup():
+        while self.exp_to_levelup() <= self.EXP:
 
             self.level += 1
 
             self.EXP = max(self.EXP - (self.exp_to_levelup()), 0)
-            
+
             hp_up: int = random.randint(5, 10 * int_mod)
             def_up: int = random.randint(2, 5 * int_mod)
             atk_up: int = random.randint(2, 5 * int_mod)
@@ -642,7 +622,7 @@ class Player:
                     self.gain_crit_rate(critrate_up)
                     self.gain_crit_damage(critdamage_up)
                     self.gain_dodgeodds_rate(dodgeodds_up)
-                    
+
                     if len(self.Items) < starting_max_blessing:
                         self.Items.append(ItemType())
                     else:
@@ -657,7 +637,7 @@ class Player:
                 self.EffectHitRate += 0.000001
 
         self.check_stats()
-    
+
     def set_level(self, level):
         top_level = 1000
         top_level_full = top_level * 2
@@ -676,7 +656,7 @@ class Player:
         if level > top_level:
             hp_up = hp_up + (2 * level)
             atk_up = atk_up + (4 * level)
-            
+
             # Apply bonus every xyz levels past top_level
             xyz = 5
             bonus_levels = (level - top_level) // xyz
@@ -708,7 +688,7 @@ class Player:
         self.MHP = int((self.MHP + hp_up) * min((level / top_level), (25)) * post_temp_vit) + 5
         self.Atk = int((self.Atk + atk_up) * min((level / top_level), (5)) * post_temp_vit) + 5
         self.Def = int((self.Def + def_up) * min((level / (top_level * 4)), (2))) + 5
-    
+
         self.gain_crit_rate(0.0002 * (level / top_level_full))
         self.gain_dodgeodds_rate(dodgeodds_up * (level / (top_level_full * 15)))
 
@@ -765,7 +745,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
         dot_icon = pygame.transform.scale(dot_icon, dot_icon_size)
         dot_rect = dot_icon.get_rect(bottomleft=(x + dot_x_offset + (i * (dot_icon_size[0] + dot_x_offset)), y + height))
         screen.blit(dot_icon, dot_rect)
-        
+
     icon_rect = pygame.Rect(player_rect.x, player_rect.y, width, height)
 
     mouse_pos = pygame.mouse.get_pos()
@@ -812,7 +792,7 @@ def render_player_obj(pygame, player: Player, player_profile_pic, screen, enrage
             stat_data.append(("Blessings:", f"{len(player.Items)}"))
 
         num_stats = len(stat_data)
-        
+
         available_height = 250
         min_font_size = 12
         max_font_size = 24
@@ -853,4 +833,4 @@ def create_player(player_id: str, name: str | None = None, **kwargs) -> Player:
     player.isplayer = True
     return player
 
-                
+
