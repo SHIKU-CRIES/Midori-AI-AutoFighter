@@ -5,6 +5,7 @@
   import FighterPortrait from './battle/FighterPortrait.svelte';
   import EnrageIndicator from './battle/EnrageIndicator.svelte';
   import BattleLog from './battle/BattleLog.svelte';
+  import BattleEffects from './effects/BattleEffects.svelte';
   export let runId = '';
   export let framerate = 60;
   export let party = [];
@@ -14,10 +15,30 @@
   let foes = [];
   let timer;
   let logs = [];
+  const logAnimations = {
+    damage: 'HitEffect',
+    burn: 'Fire1',
+    poison: 'Poison',
+    heal: 'HealOne1'
+  };
+  let effectCue = '';
   const dispatch = createEventDispatcher();
   let pollDelay = 1000 / framerate;
   $: pollDelay = 1000 / framerate;
   let bg = getRandomBackground();
+  function logToEvent(line) {
+    if (typeof line !== 'string') return null;
+    const l = line.toLowerCase();
+    if (l.includes('burn')) return 'burn';
+    if (l.includes('poison')) return 'poison';
+    if (l.includes('heal')) return 'heal';
+    if (l.includes('damage')) return 'damage';
+    return null;
+  }
+  $: if (logs.length) {
+    const evt = logToEvent(logs[logs.length - 1]);
+    if (evt && logAnimations[evt]) effectCue = logAnimations[evt];
+  }
   $: flashDuration = reducedMotion ? 20 : 10;
   $: if (!active) clearTimeout(timer);
 
@@ -164,6 +185,7 @@
   data-testid="battle-view"
 >
   <EnrageIndicator active={enrage?.active} {flashDuration} />
+  <BattleEffects cue={effectCue} />
   <div class="party-column" style={`--portrait-size: ${partyPortraitSize}` }>
     {#each party as member (member.id)}
       <div class="combatant">
