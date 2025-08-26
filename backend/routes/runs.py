@@ -14,11 +14,11 @@ from quart import request
 from plugins import players as player_plugins
 from autofighter.mapgen import MapGenerator
 
-from game import FERNET
+from game import get_fernet
 from game import load_map
 from game import save_map
 from game import battle_tasks
-from game import SAVE_MANAGER
+from game import get_save_manager
 from game import _passive_names
 from game import battle_snapshots
 from game import _assign_damage_type
@@ -38,7 +38,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
         or len(set(members)) != len(members)
     ):
         return jsonify({"error": "invalid party"}), 400
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT id FROM owned_players")
         owned = {row[0] for row in cur.fetchall()}
     for mid in members:
@@ -48,7 +48,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
         allowed = {"Light", "Dark", "Wind", "Lightning", "Fire", "Ice"}
         if damage_type not in allowed:
             return jsonify({"error": "invalid damage type"}), 400
-        with SAVE_MANAGER.connection() as conn:
+        with get_save_manager().connection() as conn:
             conn.execute(
                 "INSERT OR REPLACE INTO damage_types (id, type) VALUES (?, ?)",
                 ("player", damage_type),
@@ -65,7 +65,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
         "awaiting_next": False,
     }
     pronouns, stats = _load_player_customization()
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute(
             "SELECT type FROM damage_types WHERE id = ?",
             ("player",),
@@ -77,7 +77,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
         "damage_type": player_type,
         "stats": stats,
     }
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute(
             "INSERT INTO runs (id, party, map) VALUES (?, ?, ?)",
             (
@@ -133,7 +133,7 @@ async def update_party(run_id: str) -> tuple[str, int, dict[str, object]]:
         or len(set(members)) != len(members)
     ):
         return jsonify({"error": "invalid party"}), 400
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT id FROM owned_players")
         owned = {row[0] for row in cur.fetchall()}
     for mid in members:
@@ -148,7 +148,7 @@ async def update_party(run_id: str) -> tuple[str, int, dict[str, object]]:
         "level": {pid: 1 for pid in members},
         "rdr": rdr,
     }
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute(
             "UPDATE runs SET party = ? WHERE id = ?",
             (json.dumps(party), run_id),
@@ -158,7 +158,7 @@ async def update_party(run_id: str) -> tuple[str, int, dict[str, object]]:
 
 @bp.get("/map/<run_id>")
 async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT map, party FROM runs WHERE id = ?", (run_id,))
         row = cur.fetchone()
     if row is None:
@@ -181,7 +181,7 @@ async def end_run(run_id: str) -> tuple[str, int, dict[str, str]]:
     except Exception:
         pass
     battle_snapshots.pop(run_id, None)
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         cur = conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
         if cur.rowcount == 0:
             return jsonify({"error": "run not found"}), 404
@@ -206,10 +206,11 @@ async def advance_room(run_id: str) -> tuple[str, int, dict[str, object]]:
 
 @bp.post("/save/wipe")
 async def wipe_save() -> tuple[str, int, dict[str, str]]:
-    SAVE_MANAGER.db_path.unlink(missing_ok=True)
-    SAVE_MANAGER.migrate(Path(__file__).resolve().parent / "migrations")
+    manager = get_save_manager()
+    manager.db_path.unlink(missing_ok=True)
+    manager.migrate(Path(__file__).resolve().parent / "migrations")
     persona = random.choice(["lady_darkness", "lady_light"])
-    with SAVE_MANAGER.connection() as conn:
+    with manager.connection() as conn:
         conn.execute("INSERT INTO owned_players (id) VALUES (?)", (persona,))
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
@@ -222,7 +223,7 @@ async def wipe_save() -> tuple[str, int, dict[str, str]]:
 
 @bp.get("/save/backup")
 async def backup_save() -> tuple[bytes, int, dict[str, str]]:
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
         )
@@ -236,7 +237,7 @@ async def backup_save() -> tuple[bytes, int, dict[str, str]]:
     data = json.dumps(payload)
     digest = hashlib.sha256(data.encode()).hexdigest()
     package = json.dumps({"hash": digest, "data": data}).encode()
-    token = FERNET.encrypt(package)
+    token = get_fernet().encrypt(package)
     headers = {
         "Content-Type": "application/octet-stream",
         "Content-Disposition": "attachment; filename=backup.afsave",
@@ -248,7 +249,7 @@ async def backup_save() -> tuple[bytes, int, dict[str, str]]:
 async def restore_save() -> tuple[str, int, dict[str, str]]:
     blob = await request.get_data()
     try:
-        package = FERNET.decrypt(blob)
+        package = get_fernet().decrypt(blob)
         obj = json.loads(package)
     except Exception:
         return jsonify({"error": "invalid backup"}), 400
@@ -257,7 +258,7 @@ async def restore_save() -> tuple[str, int, dict[str, str]]:
     if hashlib.sha256(data.encode()).hexdigest() != digest:
         return jsonify({"error": "hash mismatch"}), 400
     payload = json.loads(data)
-    with SAVE_MANAGER.connection() as conn:
+    with get_save_manager().connection() as conn:
         conn.execute("DELETE FROM runs")
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"

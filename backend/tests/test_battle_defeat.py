@@ -57,7 +57,7 @@ async def test_run_battle_handles_defeat_cleanup(app_with_db, monkeypatch):
     task = app_module.battle_tasks[run_id]
     await task
 
-    with app_module.SAVE_MANAGER.connection() as conn:
+    with app_module.get_save_manager().connection() as conn:
         row = conn.execute("SELECT id FROM runs WHERE id = ?", (run_id,)).fetchone()
     assert row is None
     assert app_module.battle_snapshots[run_id]["ended"] is True

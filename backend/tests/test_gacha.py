@@ -19,7 +19,7 @@ def app_with_db(tmp_path, monkeypatch):
     assert spec.loader is not None
     spec.loader.exec_module(app_module)
     app_module.app.testing = True
-    manager = app_module.GachaManager(app_module.SAVE_MANAGER)
+    manager = app_module.GachaManager(app_module.get_save_manager())
     manager._set_items({"ticket": 1})
     return app_module.app, db_path
 
