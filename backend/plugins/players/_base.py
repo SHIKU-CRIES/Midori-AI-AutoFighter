@@ -36,7 +36,7 @@ class PlayerBase(Stats):
     effect_hit_rate: float = 0.01
     damage_type: DamageTypeBase = field(default_factory=random_damage_type)
 
-    mitigation: int = 100
+    mitigation: float = 1.0
     regain: int = 1
     dodge_odds: float = 0
     effect_resistance: float = 1.0
