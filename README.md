@@ -227,6 +227,13 @@ profiles are installed, let players send a single message to an LLM character,
 track usage per floor, and do not count toward the floor's room limit; only six
 chats may occur on each floor.
 
+## Per-instance Memory
+
+Each player and foe instance now maintains its own LangChain ChromaDB memory.
+Use `send_lrm_message` to converse with the LRM and `receive_lrm_message` to
+record incoming replies. Histories are scoped to the current run so dialogs stay
+isolated between combatants.
+
 ## Map Generation
 
 New runs begin by selecting up to four owned allies in a party picker before the

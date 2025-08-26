@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import dataclass
 
 from autofighter.stats import Stats
 from autofighter.character import CharacterType
@@ -56,6 +56,62 @@ class FoeBase(Stats):
 
     stat_gain_map: dict[str, str] = field(default_factory=dict)
     stat_loss_map: dict[str, str] = field(default_factory=dict)
+    lrm_memory: object | None = field(default=None, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        try:
+            from langchain_community.vectorstores import Chroma
+            from langchain_community.embeddings import HuggingFaceEmbeddings
+            from langchain.memory import VectorStoreRetrieverMemory
+        except (ImportError, ModuleNotFoundError):
+            try:
+                from langchain.memory import ConversationBufferMemory
+            except (ImportError, ModuleNotFoundError):
+                class ConversationBufferMemory:  # type: ignore[override]
+                    def __init__(self) -> None:
+                        self._history: list[tuple[str, str]] = []
+
+                    def save_context(
+                        self,
+                        inputs: dict[str, str],
+                        outputs: dict[str, str],
+                    ) -> None:
+                        self._history.append(
+                            (inputs.get("input", ""), outputs.get("output", ""))
+                        )
+
+                    def load_memory_variables(self, _: dict[str, str]) -> dict[str, str]:
+                        lines: list[str] = []
+                        for human, ai in self._history:
+                            if human:
+                                lines.append(f"Human: {human}")
+                            if ai:
+                                lines.append(f"AI: {ai}")
+                        return {"history": "\n".join(lines)}
+
+            self.lrm_memory = ConversationBufferMemory()
+            return
+
+        run = getattr(self, "run_id", "run")
+        ident = getattr(self, "id", type(self).__name__)
+        collection = f"{run}-{ident}"
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+        )
+        try:
+            store = Chroma(
+                collection_name=collection,
+                embedding_function=embeddings,
+            )
+        except Exception:  # noqa: BLE001
+            from langchain.memory import ConversationBufferMemory
+
+            self.lrm_memory = ConversationBufferMemory()
+            return
+
+        self.lrm_memory = VectorStoreRetrieverMemory(
+            retriever=store.as_retriever()
+        )
 
     def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
         target = self.stat_gain_map.get(stat_name, stat_name)
@@ -76,6 +132,29 @@ class FoeBase(Stats):
             amount,
         )
         super().adjust_stat_on_loss(target, amount)
+
+    async def send_lrm_message(self, message: str) -> str:
+        try:
+            from llms.loader import load_llm
+        except Exception:  # noqa: BLE001
+            class _LLM:
+                async def generate_stream(self, text: str):
+                    yield ""
+
+            llm = _LLM()
+        else:
+            llm = load_llm()
+        context = self.lrm_memory.load_memory_variables({}).get("history", "")
+        prompt = f"{context}\n{message}".strip()
+        chunks: list[str] = []
+        async for chunk in llm.generate_stream(prompt):
+            chunks.append(chunk)
+        response = "".join(chunks)
+        self.lrm_memory.save_context({"input": message}, {"output": response})
+        return response
+
+    async def receive_lrm_message(self, message: str) -> None:
+        self.lrm_memory.save_context({"input": ""}, {"output": message})
 
     async def maybe_regain(self, turn: int) -> None:  # noqa: D401
         """Regain a fraction of HP every other turn."""
