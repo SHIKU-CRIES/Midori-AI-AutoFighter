@@ -75,13 +75,16 @@ def test_killer_instinct_grants_extra_turn():
     party.members.append(a)
     award_relic(party, "killer_instinct")
     apply_relics(party)
+    base = a.atk
     BUS.emit("ultimate_used", a)
+    assert a.atk > base
     turns: list[PlayerBase] = []
     BUS.subscribe("extra_turn", lambda m: turns.append(m))
     b.hp = 0
     BUS.emit("damage_taken", b, a, 10)
     BUS.emit("turn_end")
     assert turns == [a]
+    assert a.atk == base
 
 
 def test_travelers_charm_buff():

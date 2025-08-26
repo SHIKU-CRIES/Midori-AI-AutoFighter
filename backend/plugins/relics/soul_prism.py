@@ -3,6 +3,7 @@ from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -36,10 +37,14 @@ class SoulPrism(RelicBase):
                 member._soul_prism_hp = base
                 member.max_hp = int(base * multiplier)
                 member.hp = max(1, int(member.max_hp * 0.01))
-                new_def = int(member.defense * (1 + buff))
-                member.adjust_stat_on_gain("defense", new_def - member.defense)
-                new_mit = member.mitigation * (1 + buff)
-                member.adjust_stat_on_gain("mitigation", new_mit - member.mitigation)
+                mod = create_stat_buff(
+                    member,
+                    name=f"{self.id}_{id(member)}",
+                    defense_mult=1 + buff,
+                    mitigation_mult=1 + buff,
+                    turns=9999,
+                )
+                member.effect_manager.add_modifier(mod)
 
         BUS.subscribe("battle_end", _battle_end)
 

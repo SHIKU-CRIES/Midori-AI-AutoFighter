@@ -5,6 +5,7 @@ from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -26,39 +27,36 @@ class OmegaCore(RelicBase):
         stacks = party.relics.count(self.id)
         delay = 10 + 2 * (stacks - 1)
         mult = 6.0 + (stacks - 1)
-        state = {"bases": {}, "turn": 0}
+        state = {"mods": {}, "turn": 0}
 
         def _battle_start(entity) -> None:
             from plugins.foes._base import FoeBase
 
-            if isinstance(entity, FoeBase) or state["bases"]:
+            if isinstance(entity, FoeBase) or state["mods"]:
                 return
             for member in party.members:
-                state["bases"][id(member)] = {
-                    "atk": member.atk,
-                    "defense": member.defense,
-                    "max_hp": member.max_hp,
-                    "crit_rate": member.crit_rate,
-                    "crit_damage": member.crit_damage,
-                    "effect_hit_rate": member.effect_hit_rate,
-                    "effect_resistance": member.effect_resistance,
-                    "vitality": member.vitality,
-                    "mitigation": member.mitigation,
-                }
-                member.atk = int(member.atk * mult)
-                member.defense = int(member.defense * mult)
-                member.max_hp = int(member.max_hp * mult)
+                mod = create_stat_buff(
+                    member,
+                    name=f"{self.id}_{id(member)}",
+                    turns=9999,
+                    atk_mult=mult,
+                    defense_mult=mult,
+                    max_hp_mult=mult,
+                    hp_mult=mult,
+                    crit_rate_mult=mult,
+                    crit_damage_mult=mult,
+                    effect_hit_rate_mult=mult,
+                    effect_resistance_mult=mult,
+                    vitality_mult=mult,
+                    mitigation_mult=mult,
+                )
+                member.effect_manager.add_modifier(mod)
                 member.hp = member.max_hp
-                member.crit_rate *= mult
-                member.crit_damage *= mult
-                member.effect_hit_rate *= mult
-                member.effect_resistance *= mult
-                member.vitality *= mult
-                member.mitigation *= mult
+                state["mods"][id(member)] = mod
             state["turn"] = 0
 
         def _turn_start() -> None:
-            if not state["bases"]:
+            if not state["mods"]:
                 return
             state["turn"] += 1
             if state["turn"] <= delay:
@@ -74,19 +72,14 @@ class OmegaCore(RelicBase):
             if not isinstance(entity, FoeBase):
                 return
             for member in party.members:
-                base = state["bases"].get(id(member))
-                if base:
-                    member.atk = base["atk"]
-                    member.defense = base["defense"]
-                    member.max_hp = base["max_hp"]
-                    member.hp = min(member.hp, member.max_hp)
-                    member.crit_rate = base["crit_rate"]
-                    member.crit_damage = base["crit_damage"]
-                    member.effect_hit_rate = base["effect_hit_rate"]
-                    member.effect_resistance = base["effect_resistance"]
-                    member.vitality = base["vitality"]
-                    member.mitigation = base["mitigation"]
-            state["bases"].clear()
+                mod = state["mods"].pop(id(member), None)
+                if mod:
+                    mod.remove()
+                    if mod in member.effect_manager.mods:
+                        member.effect_manager.mods.remove(mod)
+                    if mod.id in member.mods:
+                        member.mods.remove(mod.id)
+            state["mods"].clear()
 
         BUS.subscribe("battle_start", _battle_start)
         BUS.subscribe("turn_start", _turn_start)

@@ -183,6 +183,8 @@ def test_shiny_pebble_stacks():
     apply_relics(party)
     BUS.emit("damage_taken", ally, enemy, 10)
     assert isclose(ally.mitigation, 112.36, rel_tol=1e-4)
+    BUS.emit("turn_start")
+    assert isclose(ally.mitigation, 100)
 
 
 def test_threadbare_cloak_shield_stacks():

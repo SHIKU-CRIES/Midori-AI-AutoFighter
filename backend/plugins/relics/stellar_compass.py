@@ -3,6 +3,7 @@ from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -27,7 +28,13 @@ class StellarCompass(RelicBase):
                 if attacker not in party.members:
                     return
                 copies = party.relics.count(self.id)
-                attacker.atk = int(attacker.atk * (1.015 ** copies))
+                mod = create_stat_buff(
+                    attacker,
+                    name=f"{self.id}_crit",
+                    atk_mult=1.015 ** copies,
+                    turns=9999,
+                )
+                attacker.effect_manager.add_modifier(mod)
                 state["gold"] += 0.015 * copies
 
             def _gold(amount: int) -> None:

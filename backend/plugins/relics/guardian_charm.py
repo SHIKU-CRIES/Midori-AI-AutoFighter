@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from dataclasses import field
 
 from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -15,10 +16,12 @@ class GuardianCharm(RelicBase):
     about: str = "At battle start, grants +20% DEF to the lowest-HP ally per stack."
 
     def apply(self, party) -> None:
+        super().apply(party)
         if not party.members:
             return
         member = min(party.members, key=lambda m: m.hp)
-        member.defense = int(member.defense * 1.2)
+        mod = create_stat_buff(member, name=self.id, defense_mult=1.2, turns=9999)
+        member.effect_manager.add_modifier(mod)
 
     def describe(self, stacks: int) -> str:
         pct = 20 * stacks

@@ -6,6 +6,7 @@ from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -33,8 +34,15 @@ class ParadoxHourglass(RelicBase):
             if isinstance(entity, FoeBase):
                 base_def = entity.defense
                 div = 4 + (stacks - 1)
-                entity.defense = max(100, int(base_def / div))
-                state["foe"][id(entity)] = base_def
+                new_def = max(100, int(base_def / div))
+                mod = create_stat_buff(
+                    entity,
+                    name=f"{self.id}_foe_{id(entity)}",
+                    defense=new_def - base_def,
+                    turns=9999,
+                )
+                entity.effect_manager.add_modifier(mod)
+                state["foe"][id(entity)] = mod
                 return
 
             if state.get("done"):
@@ -54,53 +62,47 @@ class ParadoxHourglass(RelicBase):
             survivors = [m for m in party.members if m.hp > 0]
             mult = 3 + (stacks - 1)
             for m in survivors:
-                state["buffs"][id(m)] = {
-                    "atk": m.atk,
-                    "defense": m.defense,
-                    "max_hp": m.max_hp,
-                    "crit_rate": m.crit_rate,
-                    "crit_damage": m.crit_damage,
-                    "effect_hit_rate": m.effect_hit_rate,
-                    "effect_resistance": m.effect_resistance,
-                    "vitality": m.vitality,
-                    "mitigation": m.mitigation,
-                }
-                m.atk = int(m.atk * mult)
-                m.defense = int(m.defense * mult)
-                m.max_hp = int(m.max_hp * mult)
+                mod = create_stat_buff(
+                    m,
+                    name=f"{self.id}_ally_{id(m)}",
+                    turns=9999,
+                    atk_mult=mult,
+                    defense_mult=mult,
+                    max_hp_mult=mult,
+                    hp_mult=mult,
+                    crit_rate_mult=mult,
+                    crit_damage_mult=mult,
+                    effect_hit_rate_mult=mult,
+                    effect_resistance_mult=mult,
+                    vitality_mult=mult,
+                    mitigation_mult=mult,
+                )
+                m.effect_manager.add_modifier(mod)
                 m.hp = m.max_hp
-                m.crit_rate *= mult
-                m.crit_damage *= mult
-                m.effect_hit_rate *= mult
-                m.effect_resistance *= mult
-                m.vitality *= mult
-                m.mitigation *= mult
+                state["buffs"][id(m)] = mod
 
         def _battle_end(entity) -> None:
             from plugins.foes._base import FoeBase
 
             if isinstance(entity, FoeBase):
-                base = state["foe"].pop(id(entity), None)
-                if base is not None:
-                    entity.defense = base
+                mod = state["foe"].pop(id(entity), None)
+                if mod:
+                    mod.remove()
+                    if mod in entity.effect_manager.mods:
+                        entity.effect_manager.mods.remove(mod)
+                    if mod.id in entity.mods:
+                        entity.mods.remove(mod.id)
                 return
 
-            if state.get("buffs"):
-                for member in party.members:
-                    base = state["buffs"].get(id(member))
-                    if base:
-                        member.atk = base["atk"]
-                        member.defense = base["defense"]
-                        member.max_hp = base["max_hp"]
-                        member.hp = min(member.hp, member.max_hp)
-                        member.crit_rate = base["crit_rate"]
-                        member.crit_damage = base["crit_damage"]
-                        member.effect_hit_rate = base["effect_hit_rate"]
-                        member.effect_resistance = base["effect_resistance"]
-                        member.vitality = base["vitality"]
-                        member.mitigation = base["mitigation"]
-                state["buffs"].clear()
-                state.pop("done", None)
+            for member in party.members:
+                mod = state["buffs"].pop(id(member), None)
+                if mod:
+                    mod.remove()
+                    if mod in member.effect_manager.mods:
+                        member.effect_manager.mods.remove(mod)
+                    if mod.id in member.mods:
+                        member.mods.remove(mod.id)
+            state.pop("done", None)
 
         BUS.subscribe("battle_start", _battle_start)
         BUS.subscribe("battle_end", _battle_end)
