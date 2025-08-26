@@ -12,7 +12,7 @@ class PassiveRegistry:
             for name in getattr(passive_plugins, "__all__", [])
         }
 
-    def trigger(self, event: str, target) -> None:
+    async def trigger(self, event: str, target) -> None:
         counts = Counter(target.passives)
         for pid, count in counts.items():
             cls = self._registry.get(pid)
@@ -20,4 +20,4 @@ class PassiveRegistry:
                 continue
             stacks = min(count, getattr(cls, "max_stacks", count))
             for _ in range(stacks):
-                cls().apply(target)
+                await cls().apply(target)

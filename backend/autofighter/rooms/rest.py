@@ -17,8 +17,8 @@ class RestRoom(Room):
     async def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
         registry = PassiveRegistry()
         for member in party.members:
-            registry.trigger("room_enter", member)
-            member.hp = member.max_hp
+            await registry.trigger("room_enter", member)
+            await member.apply_healing(member.max_hp)
         party_data = [_serialize(p) for p in party.members]
         return {
             "result": "rest",

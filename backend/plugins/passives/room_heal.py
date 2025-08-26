@@ -9,5 +9,5 @@ class RoomHeal:
     trigger = "battle_end"
     amount = 1
 
-    def apply(self, target) -> None:
-        target.hp = min(target.hp + self.amount, target.max_hp)
+    async def apply(self, target) -> None:
+        await target.apply_healing(self.amount)
