@@ -154,6 +154,11 @@ class EffectManager:
         self.hots: List[HealingOverTime] = []
         self.mods: List[StatModifier] = []
         self._console = Console()
+        for eff in getattr(stats, "_pending_mods", []):
+            self.mods.append(eff)
+            self.stats.mods.append(eff.id)
+        if hasattr(stats, "_pending_mods"):
+            delattr(stats, "_pending_mods")
 
     def add_dot(self, effect: DamageOverTime, max_stacks: Optional[int] = None) -> None:
         """Attach a DoT instance to the tracked stats.
