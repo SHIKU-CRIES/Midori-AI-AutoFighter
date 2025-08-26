@@ -6,8 +6,8 @@ from typing import Protocol
 from collections.abc import AsyncIterator
 
 from transformers import pipeline
+from langchain_community.llms import llamacpp
 from langchain_huggingface import HuggingFacePipeline
-from langchain_community.llms import LlamaCpp
 
 from .safety import ensure_ram
 from .safety import pick_device
@@ -77,7 +77,7 @@ def load_llm(model: str | None = None, *, gguf_path: str | None = None) -> Suppo
             msg = "GGUF model path must be provided via argument or AF_GGUF_PATH"
             raise ValueError(msg)
         kwargs = gguf_strategy(path)
-        return _LangChainWrapper(LlamaCpp(model_path=path, **kwargs))
+        return _LangChainWrapper(llamacpp(model_path=path, **kwargs))
     msg = f"Unsupported model: {name}"
     raise ValueError(msg)
 
