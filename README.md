@@ -96,6 +96,19 @@ Docker images for both services will be published to Docker Hub. Native
 dependencies are handled inside the images, so no manual wheel management is
 required.
 
+## Desktop Builds
+
+Scripts under `desktop-builder/` package the app for Windows and Linux. Each
+script builds a Docker image that compiles the Python backend with PyInstaller
+and bundles the Svelte frontend with Tauri.
+
+```bash
+./desktop-builder/build-windows.sh   # outputs .exe to desktop-dist/windows
+./desktop-builder/build-linux.sh     # outputs .AppImage and .tar.gz to desktop-dist/linux
+```
+
+See `.codex/instructions/building-desktop.md` for details.
+
 ## Testing
 
 Run the test suites before submitting changes with the helper script:
