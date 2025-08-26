@@ -5,17 +5,28 @@ import time
 import random
 import asyncio
 import logging
+
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable
+from typing import Any
+from typing import Awaitable
+from typing import Callable
 
 from . import Room
-from .utils import _build_foes, _scale_stats, _serialize
+from .utils import _build_foes
+from .utils import _scale_stats
+from .utils import _serialize
 from ..party import Party
-from ..stats import BUS, Stats, set_enrage_percent
+from ..stats import BUS
+from ..stats import Stats
+from ..stats import set_enrage_percent
 from ..passives import PassiveRegistry
-from autofighter.cards import apply_cards, card_choices
+from autofighter.cards import apply_cards
+from autofighter.cards import card_choices
+from autofighter.effects import StatModifier
 from autofighter.effects import EffectManager
-from autofighter.relics import apply_relics, relic_choices
+from autofighter.effects import create_stat_buff
+from autofighter.relics import apply_relics
+from autofighter.relics import relic_choices
 from plugins.damage_types import ALL_DAMAGE_TYPES
 
 log = logging.getLogger(__name__)
@@ -132,7 +143,6 @@ class BattleRoom(Room):
             foes = foe if isinstance(foe, list) else [foe]
         for f in foes:
             _scale_stats(f, self.node, self.strength)
-        base_atks = [f.atk for f in foes]
         foe = foes[0]
         combat_party = Party(
             members=[copy.deepcopy(m) for m in party.members],
@@ -150,6 +160,7 @@ class BattleRoom(Room):
             mgr = EffectManager(f)
             f.effect_manager = mgr
             foe_effects.append(mgr)
+        enrage_mods: list[StatModifier | None] = [None for _ in foes]
 
         party_effects = []
         for member in combat_party.members:
@@ -200,13 +211,23 @@ class BattleRoom(Room):
                         for f in foes:
                             f.passives.append("Enraged")
                         log.info("Enrage activated")
-                    enrage_stacks = turn - threshold
+                    new_stacks = turn - threshold
                     # Each enrage stack adds +1% damage taken and -1% healing dealt globally
-                    set_enrage_percent(0.01 * max(enrage_stacks, 0))
-                    # Keep prior enrage behavior: scale foe ATK and apply escalating
-                    # flat damage to both sides after very long fights.
-                    for i, f in enumerate(foes):
-                        f.atk = int(base_atks[i] * (1 + 0.4 * enrage_stacks))
+                    set_enrage_percent(0.01 * max(new_stacks, 0))
+                    mult = 1 + 0.4 * new_stacks
+                    for i, (f, mgr) in enumerate(zip(foes, foe_effects)):
+                        if enrage_mods[i] is not None:
+                            enrage_mods[i].remove()
+                            try:
+                                mgr.mods.remove(enrage_mods[i])
+                                if enrage_mods[i].id in f.mods:
+                                    f.mods.remove(enrage_mods[i].id)
+                            except ValueError:
+                                pass
+                        mod = create_stat_buff(f, name="enrage_atk", atk_mult=mult, turns=9999)
+                        mgr.add_modifier(mod)
+                        enrage_mods[i] = mod
+                    enrage_stacks = new_stacks
                     if turn > 1000:
                         turns_in_enrage = max(enrage_stacks, 0)
                         extra_damage = 100 * turns_in_enrage
@@ -427,6 +448,9 @@ class BattleRoom(Room):
             except Exception:
                 pass
 
+        for mod in enrage_mods:
+            if mod is not None:
+                mod.remove()
         for member, mgr in zip(combat_party.members, party_effects):
             await mgr.cleanup(member)
         for foe_obj, mgr in zip(foes, foe_effects):
