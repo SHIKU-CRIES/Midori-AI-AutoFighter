@@ -86,8 +86,8 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
         if isinstance(obj, FoeBase):
             mit = getattr(obj, "mitigation", None)
             if isinstance(mit, (int, float)):
-                thr = 5
-                step = 1
+                thr = 0.2
+                step = 0.01
                 base_slow = 5.0
                 fmit = float(mit)
                 if fmit > thr:
@@ -95,7 +95,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
                     steps = int(excess // step)
                     factor = base_slow + steps
                     fmit = thr + (excess / factor)
-                    fmit = max(fmit, 10)
+                    fmit = max(fmit, 0.2)
                     setattr(obj, "mitigation", type(mit)(fmit))
     except Exception:
         pass
