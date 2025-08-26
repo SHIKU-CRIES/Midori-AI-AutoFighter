@@ -6,11 +6,6 @@ from autofighter.effects import create_stat_buff
 from plugins import PluginLoader
 
 
-loader = PluginLoader()
-loader.discover(str(Path(__file__).resolve().parent))
-_plugins = loader.get_plugins("themedadj")
-
-
 def stat_buff(cls):
     """Wrap adjective apply methods to attach a lasting stat buff."""
 
@@ -53,6 +48,10 @@ def stat_buff(cls):
     cls.apply = apply
     return cls
 
+
+loader = PluginLoader()
+loader.discover(str(Path(__file__).resolve().parent))
+_plugins = loader.get_plugins("themedadj")
 
 for cls in _plugins.values():
     globals()[cls.__name__] = cls
