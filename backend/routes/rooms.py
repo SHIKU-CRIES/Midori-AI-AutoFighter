@@ -127,12 +127,12 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
 @bp.post("/rooms/<run_id>/shop")
 async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
-    state, rooms = load_map(run_id)
+    state, rooms = await asyncio.to_thread(load_map, run_id)
     node = rooms[state["current"]]
     if node.room_type != "shop":
         return jsonify({"error": "invalid room"}), 400
     room = ShopRoom(node)
-    party = load_party(run_id)
+    party = await asyncio.to_thread(load_party, run_id)
     # resolve is async; must await to get the result dict
     result = await room.resolve(party, data)
     # Mark room as completable and expose the next room type for the UI
@@ -142,20 +142,20 @@ async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         if state["current"] + 1 < len(rooms)
         else None
     )
-    save_map(run_id, state)
-    save_party(run_id, party)
+    await asyncio.to_thread(save_map, run_id, state)
+    await asyncio.to_thread(save_party, run_id, party)
     return jsonify({**result, "next_room": next_type})
 
 
 @bp.post("/rooms/<run_id>/rest")
 async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
-    state, rooms = load_map(run_id)
+    state, rooms = await asyncio.to_thread(load_map, run_id)
     node = rooms[state["current"]]
     if node.room_type != "rest":
         return jsonify({"error": "invalid room"}), 400
     room = RestRoom(node)
-    party = load_party(run_id)
+    party = await asyncio.to_thread(load_party, run_id)
     # resolve is async; must await to get the result dict
     result = await room.resolve(party, data)
     # Mark room as completable and expose the next room type for the UI
@@ -165,20 +165,20 @@ async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         if state["current"] + 1 < len(rooms)
         else None
     )
-    save_map(run_id, state)
-    save_party(run_id, party)
+    await asyncio.to_thread(save_map, run_id, state)
+    await asyncio.to_thread(save_party, run_id, party)
     return jsonify({**result, "next_room": next_type})
 
 
 @bp.post("/rooms/<run_id>/chat")
 async def chat_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
-    state, rooms = load_map(run_id)
+    state, rooms = await asyncio.to_thread(load_map, run_id)
     node = rooms[state["current"]]
     if node.room_type != "chat":
         return jsonify({"error": "invalid room"}), 400
     room = ChatRoom(node)
-    party = load_party(run_id)
+    party = await asyncio.to_thread(load_party, run_id)
     result = await room.resolve(party, data)
     # Chat rooms should also be leaveable
     state["awaiting_next"] = True
@@ -187,8 +187,8 @@ async def chat_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         if state["current"] + 1 < len(rooms)
         else None
     )
-    save_map(run_id, state)
-    save_party(run_id, party)
+    await asyncio.to_thread(save_map, run_id, state)
+    await asyncio.to_thread(save_party, run_id, party)
     return jsonify({**result, "next_room": next_type})
 
 
@@ -203,7 +203,7 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
             return jsonify({"error": "no battle"}), 404
         return jsonify(snap)
 
-    state, rooms = load_map(run_id)
+    state, rooms = await asyncio.to_thread(load_map, run_id)
     node = rooms[state["current"]]
     if node.room_type != "battle-boss-floor":
         return jsonify({"error": "invalid room"}), 400
@@ -213,7 +213,7 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return jsonify(snap)
-        party = load_party(run_id)
+        party = await asyncio.to_thread(load_party, run_id)
         party_data = [_serialize(m) for m in party.members]
         return jsonify(
             {
@@ -231,9 +231,9 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
 
     # Mirror battle flow: prime snapshot, then resolve in background task
     state["battle"] = True
-    save_map(run_id, state)
+    await asyncio.to_thread(save_map, run_id, state)
     room = BossRoom(node)
-    party = load_party(run_id)
+    party = await asyncio.to_thread(load_party, run_id)
     foes = _build_foes(node, party)
     for f in foes:
         _scale_stats(f, node, room.strength)
@@ -257,7 +257,7 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         "rdr": party.rdr,
     }
     state["battle"] = False
-    save_map(run_id, state)
+    await asyncio.to_thread(save_map, run_id, state)
 
     async def progress(snapshot: dict[str, dict | list]) -> None:
         battle_snapshots[run_id] = snapshot

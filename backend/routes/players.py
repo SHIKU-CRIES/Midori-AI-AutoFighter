@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 
 from dataclasses import asdict
@@ -21,15 +22,20 @@ bp = Blueprint("players", __name__)
 
 
 def _get_stat_refresh_rate() -> int:
-    with get_save_manager().connection() as conn:
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
-        )
-        cur = conn.execute(
-            "SELECT value FROM options WHERE key = ?", ("stat_refresh_rate",)
-        )
-        row = cur.fetchone()
+    def get_rate():
+        with get_save_manager().connection() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
+            )
+            cur = conn.execute(
+                "SELECT value FROM options WHERE key = ?", ("stat_refresh_rate",)
+            )
+            return cur.fetchone()
+    
     try:
+        # This function is called synchronously from sync endpoints for now
+        # Could be made async in the future if needed
+        row = get_rate()
         rate = int(row[0]) if row else 5
     except (TypeError, ValueError):
         rate = 5
@@ -38,16 +44,19 @@ def _get_stat_refresh_rate() -> int:
 
 @bp.get("/players")
 async def get_players() -> tuple[str, int, dict[str, str]]:
-    with get_save_manager().connection() as conn:
-        cur = conn.execute("SELECT id FROM owned_players")
-        owned = {row[0] for row in cur.fetchall()}
+    def get_owned_players():
+        with get_save_manager().connection() as conn:
+            cur = conn.execute("SELECT id FROM owned_players")
+            return {row[0] for row in cur.fetchall()}
+    
+    owned = await asyncio.to_thread(get_owned_players)
     roster = []
     for name in player_plugins.__all__:
         cls = getattr(player_plugins, name)
         inst = cls()
-        _assign_damage_type(inst)
+        await asyncio.to_thread(_assign_damage_type, inst)
         if inst.id == "player":
-            _apply_player_customization(inst)
+            await asyncio.to_thread(_apply_player_customization, inst)
         stats = asdict(inst)
         stats["char_type"] = inst.char_type.name
         stats["damage_type"] = inst.element_id
@@ -68,8 +77,8 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
 async def player_stats() -> tuple[str, int, dict[str, object]]:
     refresh = _get_stat_refresh_rate()
     player = player_plugins.player.Player()
-    _assign_damage_type(player)
-    _apply_player_customization(player)
+    await asyncio.to_thread(_assign_damage_type, player)
+    await asyncio.to_thread(_apply_player_customization, player)
     apply_status_hooks(player)
     stats = {
         "core": {
@@ -113,8 +122,8 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
 @bp.get("/player/editor")
 async def get_player_editor() -> tuple[str, int, dict[str, object]]:
     player = player_plugins.player.Player()
-    _assign_damage_type(player)
-    pronouns, stats = _load_player_customization()
+    await asyncio.to_thread(_assign_damage_type, player)
+    pronouns, stats = await asyncio.to_thread(_load_player_customization)
     return jsonify(
         {
             "pronouns": pronouns,
@@ -145,24 +154,28 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "invalid damage type"}), 400
     if total > 100:
         return jsonify({"error": "over-allocation"}), 400
-    with get_save_manager().connection() as conn:
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
-        )
-        conn.execute(
-            "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-            ("player_pronouns", pronouns),
-        )
-        conn.execute(
-            "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-            (
-                "player_stats",
-                json.dumps({"hp": hp, "attack": attack, "defense": defense}),
-            ),
-        )
-        if damage_type:
+    
+    def update_player_data():
+        with get_save_manager().connection() as conn:
             conn.execute(
-                "INSERT OR REPLACE INTO damage_types (id, type) VALUES (?, ?)",
-                ("player", damage_type),
+                "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
             )
+            conn.execute(
+                "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
+                ("player_pronouns", pronouns),
+            )
+            conn.execute(
+                "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
+                (
+                    "player_stats",
+                    json.dumps({"hp": hp, "attack": attack, "defense": defense}),
+                ),
+            )
+            if damage_type:
+                conn.execute(
+                    "INSERT OR REPLACE INTO damage_types (id, type) VALUES (?, ?)",
+                    ("player", damage_type),
+                )
+    
+    await asyncio.to_thread(update_player_data)
     return jsonify({"status": "ok"})
