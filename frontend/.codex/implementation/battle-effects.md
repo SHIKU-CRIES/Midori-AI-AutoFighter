@@ -9,9 +9,11 @@ counts and tooltips showing effect details.
 
 ## Animation Pipeline
 
-`BattleEffects.svelte` wraps the `@zaniar/effekseer-webgl-wasm` runtime.
-It creates a full-screen canvas, initializes the WebGL context, and loads
-`.efkefc` files from `src/lib/assets/effects`. `BattleView.svelte`
+`BattleEffects.svelte` is currently disabled (no-op) behind an internal
+feature flag while we stabilize the runtime integration. When enabled, it
+wraps the `@zaniar/effekseer-webgl-wasm` runtime. It creates a full-screen
+canvas, initializes the WebGL context, and loads `.efkefc` files from
+`src/lib/assets/effects`. `BattleView.svelte`
 watches incoming battle log lines, maps keywords like `damage`, `burn`,
 `poison`, and `heal` to effect names, and passes the result to the
 component so the matching animation plays. `vite.config.js` copies the

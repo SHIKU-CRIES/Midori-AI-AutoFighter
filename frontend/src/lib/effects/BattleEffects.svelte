@@ -1,6 +1,9 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
-  import effekseer from '@zaniar/effekseer-webgl-wasm/effekseer.min.js';
+  // Feature flag to disable effects for now
+  const EFFEKSEER_ENABLED = false;
+  // Dynamically import Effekseer only when enabled
+  let effekseerApi;
 
   export let cue = '';
 
@@ -10,21 +13,37 @@
   let frame;
 
   async function init() {
+    if (!EFFEKSEER_ENABLED) return;
+    if (!effekseerApi) {
+      const mod = await import('@zaniar/effekseer-webgl-wasm/effekseer.min.js');
+      // Try common shapes: default export, named, or global
+      effekseerApi = mod?.default || mod?.effekseer || globalThis.effekseer;
+    }
+    if (!effekseerApi) return; // silently skip when unavailable
     await new Promise((resolve, reject) => {
-      effekseer.initRuntime('/effekseer.wasm', resolve, reject);
+      effekseerApi.initRuntime('/effekseer.wasm', resolve, reject);
     });
-    context = effekseer.createContext();
-    context.init(canvas);
+    context = effekseerApi.createContext();
+    // Create a WebGL context from the canvas
+    const gl =
+      canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true }) ||
+      canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true }) ||
+      canvas.getContext('experimental-webgl');
+    if (!gl) throw new Error('WebGL not supported');
+    context.init(gl);
     loop();
   }
 
   function loop() {
-    if (context) context.update();
+    if (context) {
+      context.update();
+      context.draw();
+    }
     frame = requestAnimationFrame(loop);
   }
 
   async function playEffect(name) {
-    if (!context || !name) return;
+    if (!EFFEKSEER_ENABLED || !context || !name) return;
     let effect = loaded.get(name);
     if (!effect) {
       const url = new URL(`../assets/effects/${name}.efkefc`, import.meta.url).href;
