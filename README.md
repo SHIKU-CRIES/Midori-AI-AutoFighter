@@ -102,10 +102,13 @@ Run the test suites before submitting changes with the helper script:
 ./run-tests.sh
 ```
 
-The script runs each backend `pytest` module via `uv` and then executes the
-frontend `bun test` files. Each test is given a 15-second timeout, and all tests
-are run regardless of failures. The script prints a summary of any failing or
-timed-out tests and exits with the first non-zero status code encountered.
+The script prepares the environments by creating and syncing a Python virtual
+environment in `backend/` (`uv venv && uv sync`) and installing frontend
+dependencies with `bun install` in `frontend/`. It then runs each backend
+`pytest` module via `uv` and executes the frontend `bun test` files. Each test
+is given a 15-second timeout, and all tests are run regardless of failures. The
+script prints a summary of any failing or timed-out tests and exits with the
+first non-zero status code encountered.
 
 ## Loot and Rare Drop Rate
 
