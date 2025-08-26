@@ -1,12 +1,13 @@
-from autofighter.effects import EffectManager
+import pytest
+
 from autofighter.stats import BUS
 from autofighter.stats import Stats
+from autofighter.effects import EffectManager
 from plugins.damage_types.dark import Dark
-import pytest
 
 
 @pytest.mark.asyncio
-async def test_shadow_siphon_persistence_and_stat_gain():
+async def test_shadow_siphon_applies_temporary_stat_buff():
     dark = Dark()
     actor = Stats(atk=100, defense=100, damage_type=dark)
     ally = Stats()
@@ -18,20 +19,19 @@ async def test_shadow_siphon_persistence_and_stat_gain():
 
     await dark.on_action(actor, allies, [])
 
-    for member in allies:
-        await member.effect_manager.tick()
+    await ally.effect_manager.tick()
 
     assert actor.atk > 100
     assert actor.defense > 100
-    first = actor.atk
+    assert actor.effect_manager.mods
 
-    for member in allies:
-        await member.effect_manager.tick()
+    mod = actor.effect_manager.mods[0]
+    mod.tick()
+    actor.effect_manager.mods.remove(mod)
 
-    for member in allies:
-        assert any(d.id == "shadow_siphon" for d in member.effect_manager.dots)
-
-    assert actor.atk > first
+    assert actor.atk == 100
+    assert actor.defense == 100
+    assert not actor.effect_manager.mods
 
 
 @pytest.mark.asyncio

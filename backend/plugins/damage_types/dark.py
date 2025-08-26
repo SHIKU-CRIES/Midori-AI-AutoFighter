@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
-from autofighter.effects import DamageOverTime
-from autofighter.stats import BUS
 from plugins import damage_effects
+from autofighter.stats import BUS
+from autofighter.effects import create_stat_buff
+from autofighter.effects import DamageOverTime
 from plugins.damage_types._base import DamageTypeBase
 
 
@@ -63,11 +64,18 @@ class Dark(DamageTypeBase):
             # 0.05 per 1.0 (i.e., +5% when DoT equals 100% of max HP).
             scale = 1.0 + percent_of_max * 0.05
 
-            # Apply scale to common stats if present on attacker.
+            # Apply scale to common stats via a temporary buff.
+            mgr = getattr(attacker, "effect_manager", None)
+            changes: dict[str, float] = {}
             if hasattr(attacker, "atk"):
-                attacker.atk = int(attacker.atk * scale) + 1
+                changes["atk_mult"] = scale
+                changes["atk"] = 1
             if hasattr(attacker, "defense"):
-                attacker.defense = int(attacker.defense * scale)
+                changes["defense_mult"] = scale
+                changes["defense"] = 1
+            if mgr is not None and changes:
+                mod = create_stat_buff(attacker, turns=1, **changes)
+                mgr.add_modifier(mod)
         except Exception:
             # Intentionally swallow errors to avoid breaking combat flow.
             pass
