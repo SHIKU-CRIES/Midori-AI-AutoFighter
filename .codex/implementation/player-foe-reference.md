@@ -47,7 +47,8 @@ from `plugins/themedadj` to a player name. Adjective plugins are
 auto-discovered based on files in that directory, so adding a new adjective
 requires only dropping a file into the folder. Each adjective class applies its own
 stat changes derived from the legacy project—for example, **Atrocious** boosts
-max HP by 90% and attack by 10%.
+max HP by 90% and attack by 10%. These adjustments are applied as persistent
+`StatModifier` buffs so base stats return to normal once the foe is defeated.
 
 Example: **Atrocious Luna** applies the adjective's stat bonuses to the base
 player stats and prefixes the foe's name, yielding a combatant whose title

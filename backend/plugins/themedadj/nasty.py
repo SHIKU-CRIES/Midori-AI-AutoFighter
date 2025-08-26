@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 
+from . import stat_buff
 
+
+@stat_buff
 @dataclass
 class Nasty:
     plugin_type = "themedadj"
