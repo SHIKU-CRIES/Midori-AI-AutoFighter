@@ -1,21 +1,21 @@
-import sys
-import random
 from pathlib import Path
+import random
+import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from autofighter.party import Party
+from autofighter.rooms.utils import _choose_foe
 from plugins import players
 from plugins import themedadj
-from autofighter.party import Party
 from plugins.players import Player
-from autofighter.rooms.utils import _choose_foe
 
 
 def test_random_player_foes() -> None:
     random.seed(0)
     party = Party(members=[Player()])
     player_ids = {
-        getattr(getattr(players, name), "id") for name in getattr(players, "__all__", [])
+        getattr(players, name).id for name in getattr(players, "__all__", [])
     }
     seen = [_choose_foe(party) for _ in range(20)]
     ids = {foe.id for foe in seen}

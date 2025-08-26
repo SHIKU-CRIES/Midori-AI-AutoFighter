@@ -1,8 +1,8 @@
 import pytest
 
+from autofighter.effects import EffectManager
 from autofighter.stats import BUS
 from autofighter.stats import Stats
-from autofighter.effects import EffectManager
 from plugins.damage_types.dark import Dark
 
 

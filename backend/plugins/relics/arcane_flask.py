@@ -1,7 +1,6 @@
 import asyncio
-
-from dataclasses import field
 from dataclasses import dataclass
+from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
@@ -15,7 +14,7 @@ class ArcaneFlask(RelicBase):
     name: str = "Arcane Flask"
     stars: int = 2
     effects: dict[str, float] = field(default_factory=dict)
-    about: str = "After an Ultimate, grant a shield equal to 20% Max HP." 
+    about: str = "After an Ultimate, grant a shield equal to 20% Max HP."
 
     def apply(self, party) -> None:
         super().apply(party)

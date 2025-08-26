@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from dataclasses import field
 
-from plugins.relics._base import RelicBase
 from autofighter.stats import BUS
+from plugins.relics._base import RelicBase
 
 
 @dataclass

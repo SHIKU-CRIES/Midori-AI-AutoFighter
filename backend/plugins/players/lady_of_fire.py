@@ -2,9 +2,10 @@ from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.character import CharacterType
-from plugins.damage_types.fire import Fire
 from plugins.damage_types._base import DamageTypeBase
+from plugins.damage_types.fire import Fire
 from plugins.players._base import PlayerBase
+
 
 @dataclass
 class LadyOfFire(PlayerBase):

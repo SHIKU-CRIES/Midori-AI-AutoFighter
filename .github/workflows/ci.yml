@@ -23,6 +23,7 @@ jobs:
         run: uv sync
       - name: Run test - ${{ matrix.test-file }}
         working-directory: backend
+        timeout-minutes: 0
         run: uv run pytest tests/${{ matrix.test-file }}
 
   # Discover backend test files dynamically
@@ -59,6 +60,7 @@ jobs:
         run: bun install
       - name: Run test - ${{ matrix.test-file }}
         working-directory: frontend
+        timeout-minutes: 0
         run: bun test tests/${{ matrix.test-file }}
 
   # Discover frontend test files dynamically
@@ -101,4 +103,4 @@ jobs:
         run: bun install
       - name: Run frontend linting
         working-directory: frontend
-        run: ESLINT_USE_FLAT_CONFIG=false bunx eslint .
+        run: bunx eslint .

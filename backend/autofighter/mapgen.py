@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict
+from dataclasses import dataclass
 from random import Random
 from typing import ClassVar
 
@@ -18,7 +19,7 @@ class MapNode:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict) -> "MapNode":
+    def from_dict(cls, data: dict) -> MapNode:
         return cls(**data)
 
 

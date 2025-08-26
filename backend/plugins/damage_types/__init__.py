@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from random import choice
 from importlib import import_module
+from random import choice
 
 from plugins.damage_types._base import DamageTypeBase
 
@@ -21,7 +21,7 @@ def _load_cls(name: str) -> type[DamageTypeBase]:
         return getattr(module, name)
     except Exception:
         module = import_module("plugins.damage_types.generic")
-        return getattr(module, "Generic")
+        return module.Generic
 
 
 def random_damage_type() -> DamageTypeBase:
@@ -44,7 +44,7 @@ def load_damage_type(name: str) -> DamageTypeBase:
 
 __all__ = [
     "ALL_DAMAGE_TYPES",
-    "random_damage_type",
     "get_damage_type",
     "load_damage_type",
+    "random_damage_type",
 ]

@@ -10,6 +10,7 @@ For contributors actively writing, refactoring, or reviewing code. Coder Mode em
 
 ## Guidelines
 - Follow all repository coding standards, style guides, and best practices.
+- **MANDATORY**: Run linting before every commit. For backend Python code: `ruff check . --fix` and address any remaining issues manually. See `.codex/implementation/linting-standards.md` for details.
 - Regularly review the root `.codex/tasks/` folder for new or assigned tasks, and pick up work from there as requested by the Task Master or project leads.
 - Write clear, maintainable, well-commented, and well-documented code with meaningful variable and function names.
 - Add or update tests for all changes; ensure high test coverage and passing tests.
@@ -23,12 +24,14 @@ For contributors actively writing, refactoring, or reviewing code. Coder Mode em
 
 ## Typical Actions
 - Review the root `.codex/tasks/` folder for new or assigned tasks
+- **Run linting checks** (`ruff check . --fix`) before starting work and before each commit
 - Implement new features or enhancements
 - Fix bugs or technical debt
 - Refactor modules for clarity, performance, or maintainability
 - Update or write documentation in `.codex/implementation/` or `.codex/instructions/` in the relevant service
 - Review code from others and provide constructive feedback
 - Write or update tests
+- **Ensure all linting issues are resolved** before submitting pull requests
 
 ## Prohibited Actions
 **Do NOT edit audit or planning files.**

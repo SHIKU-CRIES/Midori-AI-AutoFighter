@@ -5,7 +5,6 @@ from typing import Any
 
 from ..party import Party
 from ..passives import PassiveRegistry
-
 from . import Room
 from .utils import _serialize
 

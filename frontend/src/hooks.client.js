@@ -8,10 +8,8 @@ export function handleError({ error, event }) {
     const message = error?.message ?? String(error ?? 'Unknown error');
     const traceback = error?.stack ?? '';
     openOverlay('error', { message, traceback });
-    // eslint-disable-next-line no-console
     console.error('Client error:', message, '\n', traceback, '\nAt:', event?.url?.href);
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error('Failed to open error overlay', e);
   }
   return { message: error?.message ?? 'An unexpected error occurred.' };

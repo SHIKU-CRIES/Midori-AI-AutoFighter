@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from autofighter.effects import DamageOverTime
 from autofighter.stats import Stats
 from plugins import damage_effects

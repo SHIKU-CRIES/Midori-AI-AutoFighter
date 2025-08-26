@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from plugins import damage_effects
-from autofighter.stats import BUS
-from autofighter.effects import create_stat_buff
 from autofighter.effects import DamageOverTime
+from autofighter.effects import create_stat_buff
+from autofighter.stats import BUS
+from plugins import damage_effects
 from plugins.damage_types._base import DamageTypeBase
 
 

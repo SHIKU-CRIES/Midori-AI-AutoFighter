@@ -1,7 +1,7 @@
 import pytest
 
-from autofighter.stats import Stats
 from autofighter.effects import DamageOverTime
+from autofighter.stats import Stats
 
 
 @pytest.mark.asyncio

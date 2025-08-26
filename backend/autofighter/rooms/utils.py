@@ -1,18 +1,19 @@
 from __future__ import annotations
 
+from collections import Counter
+from dataclasses import asdict
+from dataclasses import fields
 import math
 import random
-
 from typing import Any
-from collections import Counter
-from dataclasses import asdict, fields
+
+from plugins import foes as foe_plugins
+from plugins import players as player_plugins
+from plugins.foes._base import FoeBase
 
 from ..mapgen import MapNode
 from ..party import Party
 from ..stats import Stats
-from plugins import foes as foe_plugins
-from plugins import players as player_plugins
-from plugins.foes._base import FoeBase
 
 
 def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
@@ -52,15 +53,15 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
         target = random.randint(low, max(high, low + 1))
         current_max = int(getattr(obj, "max_hp", 1))
         new_max = max(current_max, target)
-        setattr(obj, "max_hp", new_max)
-        setattr(obj, "hp", new_max)
+        obj.max_hp = new_max
+        obj.hp = new_max
     except Exception:
         pass
 
     try:
         cd = getattr(obj, "crit_damage", None)
         if isinstance(cd, (int, float)):
-            setattr(obj, "crit_damage", type(cd)(max(float(cd), 2.0)))
+            obj.crit_damage = type(cd)(max(float(cd), 2.0))
     except Exception:
         pass
 
@@ -78,7 +79,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
                     factor = base_slow + steps
                     fvit = thr + (excess / factor)
                     fvit = max(fvit, 0.25)
-                    setattr(obj, "vitality", type(vit)(fvit))
+                    obj.vitality = type(vit)(fvit)
     except Exception:
         pass
 
@@ -96,7 +97,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
                     factor = base_slow + steps
                     fmit = thr + (excess / factor)
                     fmit = max(fmit, 0.2)
-                    setattr(obj, "mitigation", type(mit)(fmit))
+                    obj.mitigation = type(mit)(fmit)
     except Exception:
         pass
 

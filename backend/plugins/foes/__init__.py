@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import random
 
-from .slime import Slime
-from ._base import FoeBase
-from plugins import themedadj as adj_plugins
 from plugins import players as player_plugins
+from plugins import themedadj as adj_plugins
+
+from ._base import FoeBase
+from .slime import Slime
 
 ADJ_CLASSES = [
     getattr(adj_plugins, name)

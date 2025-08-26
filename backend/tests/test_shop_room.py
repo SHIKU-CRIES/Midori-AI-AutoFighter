@@ -1,8 +1,8 @@
 import pytest
 
+from autofighter.mapgen import MapNode
 from autofighter.party import Party
 from autofighter.rooms.shop import ShopRoom
-from autofighter.mapgen import MapNode
 from plugins.players._base import PlayerBase
 
 

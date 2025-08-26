@@ -1,7 +1,6 @@
 import pytest
 
 import autofighter.effects as effects
-
 from autofighter.effects import EffectManager
 from autofighter.stats import Stats
 from plugins.damage_types.fire import Fire

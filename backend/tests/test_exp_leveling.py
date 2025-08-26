@@ -2,10 +2,10 @@ import random
 
 import pytest
 
-from autofighter.party import Party
-from autofighter.stats import Stats
-from autofighter.rooms.battle import BattleRoom
 from autofighter.mapgen import MapNode
+from autofighter.party import Party
+from autofighter.rooms.battle import BattleRoom
+from autofighter.stats import Stats
 from plugins.foes._base import FoeBase
 from plugins.players import player as player_mod
 

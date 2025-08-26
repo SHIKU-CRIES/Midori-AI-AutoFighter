@@ -1,8 +1,7 @@
-import logging
-
 from collections import defaultdict
+from collections.abc import Callable
+import logging
 from typing import Any
-from typing import Callable
 
 try:
     from rich.logging import RichHandler

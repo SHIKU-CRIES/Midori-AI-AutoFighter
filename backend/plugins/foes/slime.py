@@ -15,7 +15,7 @@ class Slime(FoeBase):
     about: str = "Foe description placeholder"
     damage_type: DamageTypeBase = field(default_factory=random_damage_type)
 
-    def __post_init__(self) -> None:  # noqa: D401 - short init
+    def __post_init__(self) -> None:
         for f in fields(FoeBase):
             value = getattr(self, f.name)
             if isinstance(value, (int, float)):

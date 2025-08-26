@@ -1,15 +1,13 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+from dataclasses import field
 import logging
 
-from dataclasses import field
-from dataclasses import dataclass
-
-from autofighter.stats import Stats
 from autofighter.character import CharacterType
+from autofighter.stats import Stats
 from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
-
 
 log = logging.getLogger(__name__)
 
@@ -59,9 +57,9 @@ class PlayerBase(Stats):
 
     def __post_init__(self) -> None:
         try:
-            from langchain_community.vectorstores import Chroma
-            from langchain_community.embeddings import HuggingFaceEmbeddings
             from langchain.memory import VectorStoreRetrieverMemory
+            from langchain_community.embeddings import HuggingFaceEmbeddings
+            from langchain_community.vectorstores import Chroma
         except (ImportError, ModuleNotFoundError):
             try:
                 from langchain.memory import ConversationBufferMemory
@@ -102,7 +100,7 @@ class PlayerBase(Stats):
                 collection_name=collection,
                 embedding_function=embeddings,
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             from langchain.memory import ConversationBufferMemory
 
             self.lrm_memory = ConversationBufferMemory()
@@ -135,7 +133,7 @@ class PlayerBase(Stats):
     async def send_lrm_message(self, message: str) -> str:
         try:
             from llms.loader import load_llm
-        except Exception:  # noqa: BLE001
+        except Exception:
             class _LLM:
                 async def generate_stream(self, text: str):
                     yield ""

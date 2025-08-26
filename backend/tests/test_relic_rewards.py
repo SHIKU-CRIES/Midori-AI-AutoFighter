@@ -1,7 +1,8 @@
 import pytest
-import autofighter.rooms.battle as rooms_module
+
 from autofighter.mapgen import MapNode
 from autofighter.party import Party
+import autofighter.rooms.battle as rooms_module
 from autofighter.stats import Stats
 from plugins.relics.threadbare_cloak import ThreadbareCloak
 

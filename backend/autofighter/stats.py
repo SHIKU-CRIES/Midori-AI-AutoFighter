@@ -1,16 +1,15 @@
-import random
-import logging
-import importlib
-
-from typing import Callable
-from typing import Optional
+from collections.abc import Callable
+from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
-from dataclasses import dataclass
+import importlib
+import logging
+import random
+from typing import Optional
 
-from plugins.event_bus import EventBus
 from plugins.damage_types._base import DamageTypeBase
 from plugins.damage_types.generic import Generic
+from plugins.event_bus import EventBus
 
 log = logging.getLogger(__name__)
 

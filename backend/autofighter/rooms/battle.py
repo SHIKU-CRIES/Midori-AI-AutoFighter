@@ -1,33 +1,33 @@
 from __future__ import annotations
 
-import copy
-import time
-import random
 import asyncio
-import logging
-
+from collections.abc import Awaitable
+from collections.abc import Callable
+import copy
 from dataclasses import dataclass
+import logging
+import random
+import time
 from typing import Any
-from typing import Awaitable
-from typing import Callable
 
-from . import Room
-from .utils import _build_foes
-from .utils import _scale_stats
-from .utils import _serialize
-from ..party import Party
-from ..stats import BUS
-from ..stats import Stats
-from ..stats import set_enrage_percent
-from ..passives import PassiveRegistry
 from autofighter.cards import apply_cards
 from autofighter.cards import card_choices
-from autofighter.effects import StatModifier
 from autofighter.effects import EffectManager
+from autofighter.effects import StatModifier
 from autofighter.effects import create_stat_buff
 from autofighter.relics import apply_relics
 from autofighter.relics import relic_choices
 from plugins.damage_types import ALL_DAMAGE_TYPES
+
+from ..party import Party
+from ..passives import PassiveRegistry
+from ..stats import BUS
+from ..stats import Stats
+from ..stats import set_enrage_percent
+from . import Room
+from .utils import _build_foes
+from .utils import _scale_stats
+from .utils import _serialize
 
 log = logging.getLogger(__name__)
 
@@ -176,7 +176,7 @@ class BattleRoom(Room):
             [f.id for f in foes],
             [m.id for m in combat_party.members],
         )
-        for member_effect, member in zip(party_effects, combat_party.members):
+        for member_effect, member in zip(party_effects, combat_party.members, strict=False):
             BUS.emit("battle_start", member)
             await registry.trigger("battle_start", member)
 
@@ -201,7 +201,7 @@ class BattleRoom(Room):
         while any(f.hp > 0 for f in foes) and any(
             m.hp > 0 for m in combat_party.members
         ):
-            for member_effect, member in zip(party_effects, combat_party.members):
+            for member_effect, member in zip(party_effects, combat_party.members, strict=False):
                 if member.hp <= 0:
                     continue
                 turn += 1
@@ -215,7 +215,7 @@ class BattleRoom(Room):
                     # Each enrage stack adds +1% damage taken and -1% healing dealt globally
                     set_enrage_percent(0.01 * max(new_stacks, 0))
                     mult = 1 + 0.4 * new_stacks
-                    for i, (f, mgr) in enumerate(zip(foes, foe_effects)):
+                    for i, (f, mgr) in enumerate(zip(foes, foe_effects, strict=False)):
                         if enrage_mods[i] is not None:
                             enrage_mods[i].remove()
                             try:
@@ -347,7 +347,7 @@ class BattleRoom(Room):
                                         "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
                                     )
                                 )
-                        for mgr, foe_obj in zip(foe_effects, foes):
+                        for mgr, foe_obj in zip(foe_effects, foes, strict=False):
                             for _ in range(stacks_to_add):
                                 dmg_per_tick = int(max(foe_obj.max_hp, 1) * 0.05)
                                 mgr.add_dot(
@@ -451,9 +451,9 @@ class BattleRoom(Room):
         for mod in enrage_mods:
             if mod is not None:
                 mod.remove()
-        for member, mgr in zip(combat_party.members, party_effects):
+        for member, mgr in zip(combat_party.members, party_effects, strict=False):
             await mgr.cleanup(member)
-        for foe_obj, mgr in zip(foes, foe_effects):
+        for foe_obj, mgr in zip(foes, foe_effects, strict=False):
             await mgr.cleanup(foe_obj)
         # Reset enrage percent after battle ends to avoid leaking to other battles.
         try:

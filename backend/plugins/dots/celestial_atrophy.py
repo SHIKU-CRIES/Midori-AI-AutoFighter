@@ -1,7 +1,6 @@
-from typing import List
 
-from autofighter.effects import StatModifier
 from autofighter.effects import DamageOverTime
+from autofighter.effects import StatModifier
 from autofighter.effects import create_stat_buff
 
 
@@ -11,7 +10,7 @@ class CelestialAtrophy(DamageOverTime):
 
     def __init__(self, damage: int, turns: int) -> None:
         super().__init__("Celestial Atrophy", damage, turns, self.id)
-        self._mods: List[StatModifier] = []
+        self._mods: list[StatModifier] = []
 
     async def tick(self, target, *_):
         manager = getattr(target, "effect_manager", None)

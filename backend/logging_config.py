@@ -1,12 +1,11 @@
-import queue
 import logging
-import threading
-
-from pathlib import Path
-from logging.handlers import QueueHandler
 from logging.handlers import MemoryHandler
+from logging.handlers import QueueHandler
 from logging.handlers import QueueListener
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
+import queue
+import threading
 
 from rich.logging import RichHandler
 

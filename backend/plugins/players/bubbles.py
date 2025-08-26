@@ -6,6 +6,7 @@ from plugins.damage_types import get_damage_type
 from plugins.damage_types._base import DamageTypeBase
 from plugins.players._base import PlayerBase
 
+
 @dataclass
 class Bubbles(PlayerBase):
     id = "bubbles"

@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from dataclasses import field
 
+from autofighter.effects import create_stat_buff
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
-from autofighter.effects import create_stat_buff
 
 
 @dataclass
@@ -13,7 +13,7 @@ class NullLantern(RelicBase):
     id: str = "null_lantern"
     name: str = "Null Lantern"
     stars: int = 4
-    effects: dict[str, float] = field(default_factory=lambda: {})
+    effects: dict[str, float] = field(default_factory=dict)
     about: str = "Shops and rest rooms vanish; each fight grants extra pulls."
 
     def apply(self, party) -> None:

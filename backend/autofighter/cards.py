@@ -1,5 +1,5 @@
-import random
 from pathlib import Path
+import random
 
 from plugins import PluginLoader
 from plugins.cards._base import CardBase

@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 import json
 import random
-
-from dataclasses import dataclass
 from typing import Any
 
 from plugins import players as player_plugins

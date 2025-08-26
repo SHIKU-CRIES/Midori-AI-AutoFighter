@@ -1,11 +1,10 @@
 import asyncio
-
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
-from plugins.relics._base import RelicBase
 from plugins.effects.aftertaste import Aftertaste
+from plugins.relics._base import RelicBase
 
 
 @dataclass

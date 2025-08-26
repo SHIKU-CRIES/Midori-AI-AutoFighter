@@ -1,5 +1,5 @@
-import random
 from pathlib import Path
+import random
 
 from plugins import PluginLoader
 from plugins.relics._base import RelicBase

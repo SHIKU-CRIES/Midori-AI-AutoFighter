@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import os
-import hashlib
-from pathlib import Path
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Iterator
+import hashlib
+import os
+from pathlib import Path
 
 import sqlcipher3
 
@@ -20,7 +20,7 @@ class SaveManager:
         self.key = key
 
     @classmethod
-    def from_env(cls) -> "SaveManager":
+    def from_env(cls) -> SaveManager:
         db_path = Path(
             os.getenv("AF_DB_PATH", Path(__file__).resolve().parent.parent / "save.db")
         )

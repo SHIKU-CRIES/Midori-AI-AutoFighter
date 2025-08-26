@@ -1,36 +1,35 @@
 from __future__ import annotations
 
-import os
 import logging
+import os
 import traceback
 
+from game import GachaManager  # noqa: F401  # re-export for tests
+from game import _apply_player_customization  # noqa: F401
+from game import _assign_damage_type  # noqa: F401
+from game import _load_player_customization  # noqa: F401
+from game import _passive_names  # noqa: F401
+from game import _run_battle  # noqa: F401
+from game import _scale_stats  # noqa: F401
+from game import battle_snapshots  # noqa: F401
+from game import battle_tasks  # noqa: F401
+from game import get_fernet  # noqa: F401
+from game import get_save_manager  # noqa: F401
+from game import load_map  # noqa: F401
+from game import load_party  # noqa: F401
+from game import save_map  # noqa: F401
+from game import save_party  # noqa: F401
+from logging_config import configure_logging
 from quart import Quart
 from quart import jsonify
 from quart import request
-
-from game import get_fernet  # noqa: F401
-from game import load_map  # noqa: F401
-from game import save_map  # noqa: F401
-from game import load_party  # noqa: F401
-from game import save_party  # noqa: F401
-from game import _run_battle  # noqa: F401
-from game import battle_tasks  # noqa: F401
-from game import GachaManager  # noqa: F401  # re-export for tests
-from game import get_save_manager  # noqa: F401
-from game import _scale_stats  # noqa: F401
-from game import _passive_names  # noqa: F401
-from game import battle_snapshots  # noqa: F401
-from game import _assign_damage_type  # noqa: F401
-from game import _load_player_customization  # noqa: F401
-from game import _apply_player_customization  # noqa: F401
-from routes.runs import bp as runs_bp
-from routes.rooms import bp as rooms_bp
-from routes.gacha import bp as gacha_bp
 from routes.assets import bp as assets_bp
 from routes.config import bp as config_bp
+from routes.gacha import bp as gacha_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp
-from logging_config import configure_logging
+from routes.rooms import bp as rooms_bp
+from routes.runs import bp as runs_bp
 
 configure_logging()
 

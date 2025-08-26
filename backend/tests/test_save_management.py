@@ -1,14 +1,12 @@
-import json
 import base64
 import hashlib
 import importlib.util
-
+import json
 from pathlib import Path
 
+from cryptography.fernet import Fernet
 import pytest
 import sqlcipher3
-
-from cryptography.fernet import Fernet
 
 
 @pytest.fixture()
