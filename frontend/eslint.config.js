@@ -4,6 +4,9 @@ import globals from "globals";
 export default [
   js.configs.recommended,
   {
+    ignores: ["tests/**"]
+  },
+  {
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -12,7 +15,6 @@ export default [
         ...globals.node
       }
     },
-    ignores: ["tests/**"],
     rules: {
       "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
       "no-empty": ["error", { "allowEmptyCatch": true }]

@@ -103,4 +103,4 @@ jobs:
         run: bun install
       - name: Run frontend linting
         working-directory: frontend
-        run: ESLINT_USE_FLAT_CONFIG=false bunx eslint .
+        run: bunx eslint .
