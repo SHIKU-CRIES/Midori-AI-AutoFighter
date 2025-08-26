@@ -10,14 +10,16 @@ async function handleFetch(url, options = {}, parser = (r) => r.json()) {
       try { data = await res.json(); } catch {}
       const message = data?.message || `HTTP error ${res.status}`;
       const traceback = data?.traceback || '';
-      openOverlay('error', { message, traceback });
+      if (!options?.noOverlay) {
+        openOverlay('error', { message, traceback });
+      }
       const err = new Error(message);
       err.overlayShown = true;
       throw err;
     }
     return await parser(res);
   } catch (e) {
-    if (!e.overlayShown) {
+    if (!e.overlayShown && !options?.noOverlay) {
       openOverlay('error', { message: e.message, traceback: e.stack || '' });
     }
     throw e;
@@ -25,8 +27,14 @@ async function handleFetch(url, options = {}, parser = (r) => r.json()) {
 }
 
 export async function getBackendFlavor() {
-  const data = await handleFetch(`${API_BASE}/`, { cache: 'no-store' });
-  return data.flavor;
+  try {
+    const data = await handleFetch(`${API_BASE}/`, { cache: 'no-store', noOverlay: true });
+    return data.flavor;
+  } catch (e) {
+    // Show a dedicated overlay when the backend isn't reachable/ready
+    openOverlay('backend-not-ready', { apiBase: API_BASE, message: e?.message || 'Backend unavailable' });
+    throw e;
+  }
 }
 
 export async function getPlayers() {

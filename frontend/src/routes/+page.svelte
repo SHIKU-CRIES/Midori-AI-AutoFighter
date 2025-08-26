@@ -54,8 +54,13 @@
   }
 
   onMount(async () => {
-    backendFlavor = await getBackendFlavor();
-    window.backendFlavor = backendFlavor;
+    try {
+      backendFlavor = await getBackendFlavor();
+      window.backendFlavor = backendFlavor;
+    } catch (e) {
+      // Dedicated overlay opened in getBackendFlavor; halt further init until backend is ready
+      return;
+    }
     // Ensure sync is not halted on load
     if (typeof window !== 'undefined') window.afHaltSync = false;
     const saved = loadRunState();

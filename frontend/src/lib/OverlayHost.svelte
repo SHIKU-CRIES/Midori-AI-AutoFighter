@@ -19,6 +19,7 @@
   import RestRoom from './RestRoom.svelte';
   import BattleView from './BattleView.svelte';
   import ErrorOverlay from './ErrorOverlay.svelte';
+  import BackendNotReady from './BackendNotReady.svelte';
   import { rewardOpen as computeRewardOpen } from './viewportState.js';
 
   export let selected = [];
@@ -64,6 +65,14 @@
   <ErrorOverlay
     message={$overlayData.message || 'An unexpected error occurred.'}
     traceback={$overlayData.traceback || ''}
+    on:close={() => dispatch('back')}
+  />
+{/if}
+
+{#if $overlayView === 'backend-not-ready'}
+  <BackendNotReady
+    apiBase={$overlayData.apiBase || ''}
+    message={$overlayData.message || 'Backend is not ready yet.'}
     on:close={() => dispatch('back')}
   />
 {/if}
