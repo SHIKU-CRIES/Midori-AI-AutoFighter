@@ -109,3 +109,23 @@ export async function importSave(file) {
     body: await file.arrayBuffer()
   });
 }
+
+export async function getLrmConfig() {
+  return handleFetch(`${API_BASE}/config/lrm`, { cache: 'no-store' });
+}
+
+export async function setLrmModel(model) {
+  return handleFetch(`${API_BASE}/config/lrm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model })
+  });
+}
+
+export async function testLrmModel(prompt) {
+  return handleFetch(`${API_BASE}/config/lrm/test`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+}

@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
   import { Volume2, Music, Mic, Power, Trash2, Download, Upload } from 'lucide-svelte';
-  import { endRun, wipeData, exportSave, importSave, setAutoCraft, getGacha } from './api.js';
+  import { endRun, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel } from './api.js';
   import { saveSettings, clearSettings, clearAllClientData } from './settingsStorage.js';
 
   const dispatch = createEventDispatcher();
@@ -11,11 +11,14 @@
   export let framerate = 60;
   export let autocraft = false;
   export let reducedMotion = false;
+  export let lrmModel = '';
   export let runId = '';
 
   let saveStatus = '';
   let saveTimeout;
   let resetTimeout;
+  let lrmOptions = [];
+  let testReply = '';
 
   // Keep autocraft in sync with backend flag so this toggle
   // mirrors the Crafting menu's auto-craft behavior.
@@ -29,6 +32,14 @@
       }
     } catch {
       /* ignore network/backend issues; leave local state */
+    }
+    try {
+      const cfg = await getLrmConfig();
+      lrmOptions = cfg?.available_models || [];
+      lrmModel = cfg?.current_model || lrmModel;
+      saveSettings({ lrmModel });
+    } catch {
+      /* ignore */
     }
   });
 
@@ -66,6 +77,22 @@
     scheduleSave();
     // Update backend to match
     try { await setAutoCraft(autocraft); } catch { /* ignore */ }
+  }
+
+  function handleModelChange() {
+    saveSettings({ lrmModel });
+    dispatch('save', { lrmModel });
+    setLrmModel(lrmModel).catch(() => {});
+  }
+
+  async function handleTestModel() {
+    testReply = '';
+    try {
+      const res = await testLrmModel('Say hello');
+      testReply = res?.response || '';
+    } catch {
+      testReply = 'Error';
+    }
   }
 
 
@@ -161,6 +188,21 @@
         <label>Reduced Motion</label>
         <input type="checkbox" bind:checked={reducedMotion} on:change={scheduleSave} />
       </div>
+      <div class="control" title="Select language reasoning model.">
+        <label>LRM Model</label>
+        <select bind:value={lrmModel} on:change={handleModelChange}>
+          {#each lrmOptions as opt}
+            <option value={opt}>{opt}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="control" title="Send a sample prompt to the selected model.">
+        <label>Test Model</label>
+        <button on:click={handleTestModel}>Test</button>
+      </div>
+      {#if testReply}
+        <p class="status" data-testid="lrm-test-reply">{testReply}</p>
+      {/if}
       <div class="control" title="Clear all save data.">
         <Trash2 />
         <label>Wipe Save Data</label>

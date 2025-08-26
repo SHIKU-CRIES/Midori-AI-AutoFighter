@@ -48,6 +48,8 @@ uv sync --extra llm-cpu   # CPU-only
 Selecting the correct extra ensures hardware acceleration when available. These
 packages are optional; the core game runs without them.
 
+The backend exposes `/config/lrm` to retrieve and set the active LRM. A companion `/config/lrm/test` endpoint runs the chosen model on a stateless prompt. The frontend settings menu surfaces these options so players can switch between DeepSeek, Gemma, and GGUF models and test responses.
+
 3. Run the backend directly (without Docker):
 
 ```bash

@@ -23,6 +23,10 @@ uv run app.py
 
 `load_llm()` returns an object exposing an asynchronous `generate_stream` method.
 
+## LRM Configuration
+
+`GET /config/lrm` returns the current model and available `ModelName` values. `POST /config/lrm` saves a new choice in the `options` table, and `POST /config/lrm/test` runs the stored model on a stateless prompt and returns its raw reply. Chat rooms load the persisted model and forward the party context and user message, returning the LRM's response alongside existing room fields.
+
 ## Logging
 
 The backend uses a queued, buffered logging pipeline:
