@@ -115,13 +115,14 @@ async def test_battle_offers_choices_and_applies_effect(app_with_db, monkeypatch
 
 
 @pytest.mark.parametrize("card_id,effects", NEW_CARDS)
-def test_award_and_apply_new_cards(card_id, effects):
+@pytest.mark.asyncio
+async def test_award_and_apply_new_cards(card_id, effects):
     member = Stats()
     member.id = "m1"
     party = Party(members=[member])
     baseline = {attr: getattr(member, attr) for attr in effects}
     assert award_card(party, card_id) is not None
-    cards_module.apply_cards(party)
+    await cards_module.apply_cards(party)
     for attr, pct in effects.items():
         value = getattr(member, attr)
         expected = type(baseline[attr])(baseline[attr] * (1 + pct))
