@@ -8,7 +8,16 @@
 
 ## Schema
 - `runs(id TEXT PRIMARY KEY, party TEXT, map TEXT)` stores the current run state.
+- `options(key TEXT PRIMARY KEY, value TEXT)` stores player customization and settings.
 - Additional tables for players and settings will be added as features return.
+
+## Player Customization Storage
+Player customization values are stored in the `options` table under the `player_stats` key as JSON:
+```json
+{"hp": 20, "attack": 30, "defense": 50}
+```
+
+These values are applied directly to base stats during player instantiation rather than as temporary modifiers, ensuring consistent stats across save/load cycles and preventing exponential growth bugs.
 
 ## Usage
 ```python

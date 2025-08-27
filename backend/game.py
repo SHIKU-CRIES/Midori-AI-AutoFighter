@@ -105,8 +105,20 @@ def _apply_player_customization(
     player: PlayerBase,
     effect: dict[str, object] | None = None,
 ) -> None:
-    _, loaded = _load_player_customization()
+    """Apply player customization effects.
+    
+    For the base player (id="player"), customization is now applied during instantiation
+    so this function only handles saved effects from old save files for backwards compatibility.
+    For other players, this still applies mods as before.
+    """
+    if player.id == "player" and effect is None:
+        # Base player customization is now handled during instantiation
+        log.debug("Skipping mod-based customization for base player (already applied during instantiation)")
+        return
+        
+    # Handle saved effects for backwards compatibility or other players
     if effect is None:
+        _, loaded = _load_player_customization()
         multipliers = {
             "max_hp_mult": 1 + loaded.get("hp", 0) * 0.01,
             "atk_mult": 1 + loaded.get("attack", 0) * 0.01,
@@ -122,8 +134,9 @@ def _apply_player_customization(
     
     # Debug logging to help identify issues
     log.debug(
-        "Applying player customization: loaded=%s, multipliers=%s",
-        loaded,
+        "Applying player customization: player_id=%s, loaded_effect=%s, multipliers=%s",
+        player.id,
+        effect is not None,
         multipliers,
     )
     
@@ -243,21 +256,14 @@ def save_party(run_id: str, party: Party) -> None:
     snapshot = existing.get("player", {})
     for member in party.members:
         if member.id == "player":
-            base = player_plugins.player.Player()
-            custom = {
-                "id": "player_custom",
-                "turns": -1,
-                "multipliers": {
-                    "max_hp": member.max_hp / base.max_hp,
-                    "atk": member.atk / base.atk,
-                    "defense": member.defense / base.defense,
-                },
-            }
+            # Since customization is now built into base stats, we don't need to save custom multipliers
+            # Just preserve damage type and other non-stat data
             snapshot = {
                 **snapshot,
                 "damage_type": member.element_id,
-                "custom": custom,
             }
+            # Remove any old custom multipliers to prevent backwards compatibility issues
+            snapshot.pop("custom", None)
             break
     with get_save_manager().connection() as conn:
         data = {
