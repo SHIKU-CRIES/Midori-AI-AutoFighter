@@ -35,6 +35,21 @@
     }
     dispatch('select', detail);
   }
+
+  // Auto-advance when there are no selectable rewards and no visible loot/gold.
+  // This avoids showing an empty rewards popup in loot-consumed cases.
+  let autoTimer;
+  $: {
+    clearTimeout(autoTimer);
+    const noChoices = remaining === 0;
+    const noLoot = (!gold || gold <= 0) && (!Array.isArray(items) || items.length === 0);
+    if (noChoices && noLoot) {
+      autoTimer = setTimeout(() => dispatch('next'), 5000);
+    }
+  }
+  // Cleanup timer on unmount
+  import { onDestroy } from 'svelte';
+  onDestroy(() => clearTimeout(autoTimer));
 </script>
 
 <style>
