@@ -37,7 +37,13 @@
   export let battleActive = false;
 
   const dispatch = createEventDispatcher();
-  $: rewardOpen = computeRewardOpen(roomData, battleActive);
+  // Hide overlay if loot already consumed to avoid blank popups
+  $: rewardOpen = computeRewardOpen(
+    lootConsumed && roomData
+      ? { ...roomData, loot: { gold: 0, items: [] }, card_choices: roomData.card_choices, relic_choices: roomData.relic_choices }
+      : roomData,
+    battleActive
+  );
 
   function titleForItem(item) {
     if (!item) return '';

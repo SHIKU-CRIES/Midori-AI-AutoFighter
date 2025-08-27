@@ -170,6 +170,8 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "effect_resistance": float(getattr(obj, "effect_resistance", 0.0) or 0.0),
         }
 
+    # Remove non-serializable fields introduced by plugins (e.g., runtime memory)
+    data.pop("lrm_memory", None)
     norm = _normalize_damage_type(getattr(obj, "damage_type", None))
     data["damage_type"] = norm
     data["element"] = norm

@@ -9,6 +9,9 @@ from autofighter.stats import Stats
 from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
 
+# Module-level cache to avoid repeatedly loading SentenceTransformer
+_EMBEDDINGS: object | None = None
+
 log = logging.getLogger(__name__)
 
 
@@ -57,54 +60,55 @@ class FoeBase(Stats):
     lrm_memory: object | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
+        # Minimal, dependency-light memory to avoid LangChain deprecation warnings
+        class _SimpleConversationMemory:  # type: ignore[override]
+            def __init__(self) -> None:
+                self._history: list[tuple[str, str]] = []
+
+            def save_context(
+                self,
+                inputs: dict[str, str],
+                outputs: dict[str, str],
+            ) -> None:
+                self._history.append(
+                    (inputs.get("input", ""), outputs.get("output", ""))
+                )
+
+            def load_memory_variables(self, _: dict[str, str]) -> dict[str, str]:
+                lines: list[str] = []
+                for human, ai in self._history:
+                    if human:
+                        lines.append(f"Human: {human}")
+                    if ai:
+                        lines.append(f"AI: {ai}")
+                return {"history": "\n".join(lines)}
+
         try:
             from langchain.memory import VectorStoreRetrieverMemory
             from langchain_community.embeddings import HuggingFaceEmbeddings
-            from langchain_community.vectorstores import Chroma
+            from langchain_chroma import Chroma
         except (ImportError, ModuleNotFoundError):
-            try:
-                from langchain.memory import ConversationBufferMemory
-            except (ImportError, ModuleNotFoundError):
-                class ConversationBufferMemory:  # type: ignore[override]
-                    def __init__(self) -> None:
-                        self._history: list[tuple[str, str]] = []
-
-                    def save_context(
-                        self,
-                        inputs: dict[str, str],
-                        outputs: dict[str, str],
-                    ) -> None:
-                        self._history.append(
-                            (inputs.get("input", ""), outputs.get("output", ""))
-                        )
-
-                    def load_memory_variables(self, _: dict[str, str]) -> dict[str, str]:
-                        lines: list[str] = []
-                        for human, ai in self._history:
-                            if human:
-                                lines.append(f"Human: {human}")
-                            if ai:
-                                lines.append(f"AI: {ai}")
-                        return {"history": "\n".join(lines)}
-
-            self.lrm_memory = ConversationBufferMemory()
+            # Fall back to simple in-process memory without deprecations
+            self.lrm_memory = _SimpleConversationMemory()
             return
 
         run = getattr(self, "run_id", "run")
         ident = getattr(self, "id", type(self).__name__)
         collection = f"{run}-{ident}"
-        embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-        )
+        global _EMBEDDINGS
+        if _EMBEDDINGS is None:
+            _EMBEDDINGS = HuggingFaceEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2",
+            )
+        embeddings = _EMBEDDINGS
         try:
             store = Chroma(
                 collection_name=collection,
                 embedding_function=embeddings,
             )
         except Exception:
-            from langchain.memory import ConversationBufferMemory
-
-            self.lrm_memory = ConversationBufferMemory()
+            # If vector store init fails, use simple memory
+            self.lrm_memory = _SimpleConversationMemory()
             return
 
         self.lrm_memory = VectorStoreRetrieverMemory(

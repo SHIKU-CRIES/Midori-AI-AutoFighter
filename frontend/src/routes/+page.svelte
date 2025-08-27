@@ -374,6 +374,12 @@
     if (res && res.next_room) {
       nextRoom = res.next_room;
     }
+    // If all selectable rewards are consumed, advance automatically
+    const hasCards = (roomData?.card_choices?.length || 0) > 0;
+    const hasRelics = (roomData?.relic_choices?.length || 0) > 0;
+    if (!hasCards && !hasRelics) {
+      await handleNextRoom();
+    }
   }
   async function handleShopBuy(item) {
     if (!runId) return;
