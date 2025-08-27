@@ -37,13 +37,10 @@
   export let battleActive = false;
 
   const dispatch = createEventDispatcher();
-  // Hide overlay if loot already consumed to avoid blank popups
-  $: rewardOpen = computeRewardOpen(
-    lootConsumed && roomData
-      ? { ...roomData, loot: { gold: 0, items: [] }, card_choices: roomData.card_choices, relic_choices: roomData.relic_choices }
-      : roomData,
-    battleActive
-  );
+  // Determine whether to show rewards overlay based on raw room data.
+  // Floating loot messages are suppressed after first display via `lootConsumed`,
+  // but the overlay should remain visible until the player advances.
+  $: rewardOpen = computeRewardOpen(roomData, battleActive);
 
   function titleForItem(item) {
     if (!item) return '';
