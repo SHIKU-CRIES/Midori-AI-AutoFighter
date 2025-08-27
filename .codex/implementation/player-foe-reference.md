@@ -4,10 +4,27 @@ Player and Foe base classes assign a random damage type when one is not
 provided, and battle rooms respect these preset elements without selecting new
 types.
 
+# Player and Foe Reference
+
+Player and Foe base classes assign a random damage type when one is not
+provided, and battle rooms respect these preset elements without selecting new
+types.
+
 Each instance initializes its own LangChain ChromaDB memory tied to the current
 run. Use `send_lrm_message` to interact with the LRM and `receive_lrm_message`
 to log replies. Conversations remain isolated between combatants and reset for
 new runs.
+
+## LLM Integration
+
+Both players and foes support LLM interactions through their `lrm_memory` system:
+
+- **Memory System**: Uses ChromaDB vector storage with HuggingFace embeddings when LLM dependencies are available, falls back to simple in-memory conversation history otherwise
+- **Async LLM Loading**: The `send_lrm_message()` method now loads LLMs using `asyncio.to_thread()` to prevent blocking the event loop during model downloads/initialization
+- **Torch Dependencies**: Uses the centralized torch availability checker to gracefully handle missing LLM dependencies
+- **Fallback Behavior**: When LLM dependencies are unavailable, returns empty responses without errors
+
+The LLM system is fully optional - players and foes function normally without LLM dependencies installed.
 
 ## Player Roster
 All legacy characters from the Pygame version have been ported as plugins.

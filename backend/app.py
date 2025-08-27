@@ -4,6 +4,9 @@ import logging
 import os
 import traceback
 
+# Import torch checker early to perform the one-time check
+from llms.torch_checker import is_torch_available
+
 from game import GachaManager  # noqa: F401  # re-export for tests
 from game import _apply_player_customization  # noqa: F401
 from game import _assign_damage_type  # noqa: F401
@@ -34,6 +37,9 @@ from routes.runs import bp as runs_bp
 configure_logging()
 
 log = logging.getLogger(__name__)
+
+# Log torch availability status on startup
+log.info("Torch availability check: %s", "available" if is_torch_available() else "not available")
 
 app = Quart(__name__)
 app.register_blueprint(assets_bp)
