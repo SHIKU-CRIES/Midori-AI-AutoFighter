@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import fields
+import copy
 import logging
 
 from autofighter.character import CharacterType
@@ -13,6 +15,25 @@ from plugins.damage_types._base import DamageTypeBase
 _EMBEDDINGS: object | None = None
 
 log = logging.getLogger(__name__)
+
+
+class SimpleConversationMemory:
+    """Lightweight, dependency-free memory used as a safe default."""
+
+    def __init__(self) -> None:
+        self._history: list[tuple[str, str]] = []
+
+    def save_context(self, inputs: dict[str, str], outputs: dict[str, str]) -> None:
+        self._history.append((inputs.get("input", ""), outputs.get("output", "")))
+
+    def load_memory_variables(self, _: dict[str, str]) -> dict[str, str]:
+        lines: list[str] = []
+        for human, ai in self._history:
+            if human:
+                lines.append(f"Human: {human}")
+            if ai:
+                lines.append(f"AI: {ai}")
+        return {"history": "\n".join(lines)}
 
 
 @dataclass
@@ -61,35 +82,13 @@ class FoeBase(Stats):
 
     def __post_init__(self) -> None:
         # Minimal, dependency-light memory to avoid LangChain deprecation warnings
-        class _SimpleConversationMemory:  # type: ignore[override]
-            def __init__(self) -> None:
-                self._history: list[tuple[str, str]] = []
-
-            def save_context(
-                self,
-                inputs: dict[str, str],
-                outputs: dict[str, str],
-            ) -> None:
-                self._history.append(
-                    (inputs.get("input", ""), outputs.get("output", ""))
-                )
-
-            def load_memory_variables(self, _: dict[str, str]) -> dict[str, str]:
-                lines: list[str] = []
-                for human, ai in self._history:
-                    if human:
-                        lines.append(f"Human: {human}")
-                    if ai:
-                        lines.append(f"AI: {ai}")
-                return {"history": "\n".join(lines)}
-
         try:
             from langchain.memory import VectorStoreRetrieverMemory
             from langchain_community.embeddings import HuggingFaceEmbeddings
             from langchain_chroma import Chroma
         except (ImportError, ModuleNotFoundError):
             # Fall back to simple in-process memory without deprecations
-            self.lrm_memory = _SimpleConversationMemory()
+            self.lrm_memory = SimpleConversationMemory()
             return
 
         run = getattr(self, "run_id", "run")
@@ -108,12 +107,26 @@ class FoeBase(Stats):
             )
         except Exception:
             # If vector store init fails, use simple memory
-            self.lrm_memory = _SimpleConversationMemory()
+            self.lrm_memory = SimpleConversationMemory()
             return
 
         self.lrm_memory = VectorStoreRetrieverMemory(
             retriever=store.as_retriever()
         )
+
+    def __deepcopy__(self, memo):  # type: ignore[override]
+        """Custom deepcopy that skips copying non-serializable memory bindings."""
+        cls = type(self)
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for f in fields(cls):
+            name = f.name
+            if name == "lrm_memory":
+                setattr(result, name, SimpleConversationMemory())
+                continue
+            val = getattr(self, name)
+            setattr(result, name, copy.deepcopy(val, memo))
+        return result
 
     def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
         target = self.stat_gain_map.get(stat_name, stat_name)

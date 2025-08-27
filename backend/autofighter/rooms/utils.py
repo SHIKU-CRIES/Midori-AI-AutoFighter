@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import asdict
 from dataclasses import fields
 import math
 import random
@@ -145,8 +144,22 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "effect_resistance": 0.0,
         }
 
+    # Build a dict without dataclasses.asdict to avoid deepcopy of complex fields
     try:
-        data = asdict(obj)
+        data: dict[str, Any] = {}
+        for f in fields(type(obj)):
+            name = f.name
+            if name == "lrm_memory":
+                continue
+            value = getattr(obj, name, None)
+            if isinstance(value, (int, float, bool, str)) or value is None:
+                data[name] = value
+            elif isinstance(value, list):
+                data[name] = list(value)
+            elif isinstance(value, dict):
+                data[name] = dict(value)
+            else:
+                data[name] = str(value)
     except Exception:
         # Non-dataclass object or serialization issue: build a minimal view
         norm = _normalize_damage_type(getattr(obj, "damage_type", None))
