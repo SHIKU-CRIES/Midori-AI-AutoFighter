@@ -59,6 +59,8 @@
   let items = {};
   let autoCraft = false;
   let selected = null;
+  let craftable = false;
+  let selectedRequirement = 0;
 
   onMount(async () => {
     const state = await getGacha();
@@ -79,6 +81,20 @@
   function close() {
     dispatch('close');
   }
+
+  function getRequirement(key) {
+    const rank = parseInt(String(key).split('_')[1]);
+    if (rank >= 1 && rank <= 3) return 125;
+    if (rank === 4) return 10;
+    return 0;
+  }
+
+  $: craftable = Object.entries(items).some(([key, count]) => {
+    const req = getRequirement(key);
+    return req > 0 && count >= req;
+  });
+
+  $: selectedRequirement = selected ? getRequirement(selected) : 0;
 </script>
 
 <MenuPanel data-testid="crafting-menu">
@@ -112,7 +128,9 @@
           on:error={onIconError}
         />
         <div class="detail-name">{formatName(selected)}</div>
-        <div class="detail-count">x{items[selected]}</div>
+        <div class="detail-count">
+          x{items[selected]}{#if selectedRequirement} / {selectedRequirement}{/if}
+        </div>
       {:else}
         <p class="placeholder">Select an item</p>
       {/if}
@@ -123,7 +141,7 @@
       <input type="checkbox" bind:checked={autoCraft} on:change={toggleAuto} />
       Auto-craft
     </label>
-    <button on:click={craft}>Craft</button>
+    <button on:click={craft} disabled={!craftable}>Craft</button>
     <button on:click={close}>Done</button>
   </div>
 </MenuPanel>

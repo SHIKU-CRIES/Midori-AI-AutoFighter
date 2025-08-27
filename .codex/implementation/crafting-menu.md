@@ -11,6 +11,11 @@ materials collapse into a single grid tile with an updated count. Names are
 normalized via `formatName` (e.g., `ice_4` → `Ice ★★★★`,
 `lightning_3` → `Lightning ★★★`) for readability in the detail panel.
 
+Selecting an item shows its current quantity alongside the amount required to
+craft (125 for 1★–3★ upgrades, 10 for converting 4★ items into a ticket). The
+Craft button remains disabled until at least one stack meets these thresholds,
+preventing accidental calls when nothing can be upgraded.
+
 Each grid tile displays an icon loaded from
 `frontend/src/lib/assets/items/{element}/generic{rank}.png` with a colored
 border and matching box shadow derived from the `--star-color` CSS variable
