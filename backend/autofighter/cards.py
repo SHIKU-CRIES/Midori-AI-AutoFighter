@@ -30,9 +30,9 @@ def award_card(party: Party, card_id: str) -> CardBase | None:
     party.cards.append(card_id)
     return card_cls()
 
-def apply_cards(party: Party) -> None:
+async def apply_cards(party: Party) -> None:
     registry = _registry()
     for cid in party.cards:
         card_cls = registry.get(cid)
         if card_cls:
-            card_cls().apply(party)
+            await card_cls().apply(party)

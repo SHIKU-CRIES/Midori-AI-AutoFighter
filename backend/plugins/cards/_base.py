@@ -29,7 +29,7 @@ class CardBase:
                 parts.append(f"{sign}{pct * 100:.0f}% {pretty}")
             self.about = ", ".join(parts)
 
-    def apply(self, party: Party) -> None:
+    async def apply(self, party: Party) -> None:
         log.info("Applying card %s to party", self.id)
         for member in party.members:
             log.debug("Applying effects to %s", getattr(member, "id", "member"))
@@ -46,11 +46,11 @@ class CardBase:
                 if attr == "max_hp":
                     heal = int(getattr(member, "hp", 0) * pct)
                     try:
-                        loop = asyncio.get_running_loop()
+                        asyncio.get_running_loop()
                     except RuntimeError:
-                        asyncio.run(member.apply_healing(heal))
+                        await member.apply_healing(heal)
                     else:
-                        loop.create_task(member.apply_healing(heal))
+                        asyncio.create_task(member.apply_healing(heal))
                     log.debug(
                         "Updated %s max_hp and healed %s",
                         getattr(member, "id", "member"),

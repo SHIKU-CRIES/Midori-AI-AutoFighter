@@ -151,7 +151,7 @@ class BattleRoom(Room):
             cards=party.cards,
             rdr=party.rdr,
         )
-        apply_cards(combat_party)
+        await apply_cards(combat_party)
         apply_relics(combat_party)
         party.rdr = combat_party.rdr
 
