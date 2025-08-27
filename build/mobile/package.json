@@ -1,0 +1,17 @@
+{
+  "name": "autofighter-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build:web": "cd ../../frontend && bun run build",
+    "sync": "bunx cap sync android",
+    "build": "bun run build:web && bun run sync"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/android": "^6.1.2"
+  }
+}
