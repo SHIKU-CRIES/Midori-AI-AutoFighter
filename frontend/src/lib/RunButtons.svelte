@@ -11,7 +11,7 @@
       { icon: Hammer, label: 'Craft', action: handlers.openCraft, disabled: battleActive },
       { icon: Settings, label: 'Settings', action: handlers.openSettings, disabled: false },
       { icon: MessageSquare, label: 'Feedback', action: handlers.openFeedback, disabled: false },
-      { icon: Package, label: 'Inventory', action: handlers.openInventory, disabled: battleActive }
+      // Inventory moved to in-run NavBar; remove from main menu
     ];
   }
 </script>

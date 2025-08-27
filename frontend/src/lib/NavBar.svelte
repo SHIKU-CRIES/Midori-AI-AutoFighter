@@ -4,12 +4,13 @@
   Emits high-level navigation events without managing run logic.
 -->
 <script>
-  import { Diamond, User, Settings, Swords, ArrowLeft } from 'lucide-svelte';
+  import { Diamond, User, Settings, Swords, ArrowLeft, Package } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
 
   export let battleActive = false;
   export let viewMode = 'main';
   export let snapshotLoading = false;
+  export let runId = '';
   const dispatch = createEventDispatcher();
 </script>
 
@@ -22,6 +23,11 @@
     {:else}
       <button class="icon-btn" title="Home" on:click={() => dispatch('home')}>
         <Diamond size={22} color="#fff" />
+      </button>
+    {/if}
+    {#if runId}
+      <button class="icon-btn" title="Inventory" on:click={() => dispatch('openInventory')} disabled={battleActive}>
+        <Package size={22} color="#fff" />
       </button>
     {/if}
     <button class="icon-btn" title="Player Editor" on:click={() => dispatch('openEditor')}>

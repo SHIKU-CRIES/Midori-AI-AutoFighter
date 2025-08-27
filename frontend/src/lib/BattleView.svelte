@@ -184,7 +184,7 @@
   style={`background-image: url(${bg})`}
   data-testid="battle-view"
 >
-  <EnrageIndicator active={enrage?.active} {flashDuration} />
+  <EnrageIndicator active={active} {reducedMotion} />
   <BattleEffects cue={effectCue} />
   <div class="party-column" style={`--portrait-size: ${partyPortraitSize}` }>
     {#each party as member (member.id)}

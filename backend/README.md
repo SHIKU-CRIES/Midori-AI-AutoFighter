@@ -55,6 +55,12 @@ persisted on the host.
 Player and foe base classes assign a random damage type when none is
 specified, and battles respect these preset elements without rolling new ones.
 
+Foe balance: foes receive a 10× debuff to core stats (HP, ATK, DEF) before
+room scaling is applied. This global pre‑scale adjustment happens in
+`autofighter/rooms/utils._scale_stats` and lowers the minimum HP target used
+by room curves accordingly, improving baseline survivability without affecting
+party stats.
+
 Battle resolution awards experience to all party members. Characters below
 level 1000 receive a 10× boost to earned experience, and level-ups are synced
 back to the run along with updated stats.
@@ -84,6 +90,8 @@ the player. `PUT /player/editor` validates pronouns up to 15 characters,
 ensures the chosen damage type is Light, Dark, Wind, Lightning, Fire, or Ice,
 and rejects edits if a run is active or if allocations exceed the available
 points. Each point boosts the matching stat by 1% (100 points doubles it).
+Edits apply to new runs and to the roster view, but do not retroactively
+modify an active battle.
 
 Static assets are served from `/assets/<path>`; for example, `GET /rooms/images`
 returns a JSON mapping of room types to background image URLs under `/assets/...`.

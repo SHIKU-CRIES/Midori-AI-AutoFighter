@@ -99,6 +99,8 @@
   async function handleEndRun() {
     if (runId) {
       try {
+        // Immediately halt any battle snapshot polling while ending the run
+        try { if (typeof window !== 'undefined') window.afHaltSync = true; } catch {}
         await endRun(runId);
       } catch (e) {
         console.error('Failed to end run', e);

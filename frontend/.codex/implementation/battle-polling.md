@@ -14,3 +14,7 @@ ended. `pollBattle` watches for thrown errors whose message contains
 "run ended" or whose status code is `404` and stops polling without queuing
 another cycle. This prevents repeated error overlays once a run is gone.
 
+Additionally, ending a run from Settings now immediately sets a global
+`window.afHaltSync = true` flag and clears timers to prevent any further
+`snapshot` polls during teardown. The same flag is set again in
+`handleRunEnd()` before clearing run state and returning home.

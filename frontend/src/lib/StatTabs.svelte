@@ -48,7 +48,16 @@
       </div>
       <div class="stats-list">
         {#if activeTab === 'Core'}
-          <div><span>HP</span><span>{sel.stats.hp ?? '-'}</span></div>
+          <div>
+            <span>HP</span>
+            <span>
+              {#if sel.stats.max_hp != null}
+                {(sel.stats.hp ?? 0) + '/' + sel.stats.max_hp}
+              {:else}
+                {sel.stats.hp ?? '-'}
+              {/if}
+            </span>
+          </div>
           <div><span>EXP</span><span>{sel.stats.exp ?? sel.stats.xp ?? '-'}</span></div>
           <div><span>Vitality</span><span>{sel.stats.vitality ?? sel.stats.vita ?? '-'}</span></div>
           <div><span>Regain</span><span>{sel.stats.regain ?? sel.stats.regain_rate ?? '-'}</span></div>
@@ -80,9 +89,9 @@
 <style>
 .stats-panel {
   flex: 1;
-  width: 350px;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.25);
-  border-left: 2px solid #444;
   padding: 1rem;
   display: flex;
   flex-direction: column;

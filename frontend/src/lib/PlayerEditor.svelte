@@ -59,6 +59,7 @@
       </div>
     </div>
     <div class="actions">
+      <p class="hint">Note: Changes affect the roster panel immediately and apply to new runs. Ongoing battles won’t update mid-fight.</p>
       <button class="primary" on:click={save}>Save</button>
       <button on:click={close}>Close</button>
     </div>
@@ -75,6 +76,7 @@
   .stat-row { display:flex; flex-direction:column; gap:0.2rem; }
   .remaining { margin:0 0 0.2rem 0; font-size:0.85rem; opacity:0.85; }
   .actions { display:flex; justify-content:flex-end; gap:0.5rem; }
+  .hint { margin-right: auto; opacity: 0.8; font-size: 0.75rem; }
   button { border:1px solid #fff; background:#0a0a0a; color:#fff; padding:0.35rem 0.8rem; cursor:pointer; font-size:0.8rem; }
   button.primary { background:rgba(120,180,255,0.18); }
   button.primary:hover { background:rgba(120,180,255,0.32); }

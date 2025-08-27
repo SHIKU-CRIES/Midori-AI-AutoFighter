@@ -14,6 +14,7 @@
   export let selected = [];
   export let compact = false;
   let previewId;
+  export let reducedMotion = false;
 
   onMount(async () => {
     background = getHourlyBackground();
@@ -63,11 +64,11 @@
 </script>
 
 {#if compact}
-  <PartyRoster {roster} {selected} bind:previewId {compact} />
+  <PartyRoster {roster} {selected} bind:previewId {compact} {reducedMotion} />
 {:else}
   <MenuPanel style={`background-image: url(${background}); background-size: cover;`}>
     <div class="full" data-testid="party-picker">
-      <PartyRoster {roster} {selected} bind:previewId />
+      <PartyRoster {roster} {selected} bind:previewId {reducedMotion} />
       <PlayerPreview {roster} {previewId} />
       <StatTabs {roster} {previewId} {selected} on:toggle={(e) => toggleMember(e.detail)} />
     </div>

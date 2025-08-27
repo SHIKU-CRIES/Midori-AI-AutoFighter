@@ -92,6 +92,9 @@
   }
 
   function handleRunEnd() {
+    // Halt any in-flight battle snapshot polling ASAP
+    haltSync = true;
+    if (typeof window !== 'undefined') window.afHaltSync = true;
     runId = '';
     roomData = null;
     nextRoom = '';
@@ -536,7 +539,7 @@
     battleActive={battleActive}
     on:startRun={handleStart}
     on:editorSave={(e) => handleEditorSave(e)}
-    on:target={openInventory}
+    on:openInventory={openInventory}
     on:back={backOverlay}
     on:home={homeOverlay}
     on:openEditor={openEditor}

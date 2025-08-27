@@ -28,6 +28,28 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     pressure_mult = 1.0 * max(node.pressure, 1)
     base_mult = max(strength * floor_mult * index_mult * loop_mult * pressure_mult, 0.5)
 
+    # Apply a global pre-scale debuff to foes so they are significantly weaker
+    # before room modifiers are applied. This reduces core combat stats by 10x.
+    foe_debuff = 0.1 if isinstance(obj, FoeBase) else 1.0
+    if foe_debuff != 1.0:
+        try:
+            if hasattr(obj, "atk") and isinstance(obj.atk, (int, float)):
+                obj.atk = type(obj.atk)(obj.atk * foe_debuff)
+        except Exception:
+            pass
+        try:
+            if hasattr(obj, "defense") and isinstance(obj.defense, (int, float)):
+                obj.defense = type(obj.defense)(obj.defense * foe_debuff)
+        except Exception:
+            pass
+        try:
+            if hasattr(obj, "max_hp") and isinstance(obj.max_hp, (int, float)):
+                obj.max_hp = type(obj.max_hp)(obj.max_hp * foe_debuff)
+            if hasattr(obj, "hp") and isinstance(obj.hp, (int, float)):
+                obj.hp = type(obj.hp)(obj.hp * foe_debuff)
+        except Exception:
+            pass
+
     for field in fields(type(obj)):
         if field.name in {"exp", "level", "exp_multiplier"}:
             continue
@@ -46,7 +68,8 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
 
     try:
         room_num = max(int(node.index), 1)
-        base_hp = 700 * room_num
+        # Keep the same base curve but apply foe debuff to the minimum target as well
+        base_hp = int(700 * room_num * (foe_debuff if isinstance(obj, FoeBase) else 1.0))
         low = int(base_hp * 0.85)
         high = int(base_hp * 1.10)
         target = random.randint(low, max(high, low + 1))

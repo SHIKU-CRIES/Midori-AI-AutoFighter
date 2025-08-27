@@ -82,7 +82,7 @@
 
 {#if $overlayView === 'party'}
   <OverlaySurface>
-    <PartyPicker bind:selected />
+    <PartyPicker bind:selected {reducedMotion} />
     <div class="stained-glass-row">
       <button class="icon-btn" on:click={() => dispatch('saveParty')}>Save Party</button>
       <button class="icon-btn" on:click={() => dispatch('back')}>Cancel</button>
@@ -120,7 +120,7 @@
 
 {#if $overlayView === 'party-start'}
   <OverlaySurface>
-    <PartyPicker bind:selected />
+    <PartyPicker bind:selected {reducedMotion} />
     <div class="stained-glass-row">
       <button class="icon-btn" on:click={() => dispatch('startRun')}>Start Run</button>
       <button class="icon-btn" on:click={() => dispatch('back')}>Cancel</button>
@@ -266,6 +266,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.35);
     cursor: pointer;
     transition: background 0.18s, box-shadow 0.18s;
     box-shadow: 0 1px 4px 0 rgba(0,40,120,0.10);

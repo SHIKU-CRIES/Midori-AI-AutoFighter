@@ -11,22 +11,42 @@ bun dev
 ```
 
 The development server runs at `http://localhost:59001` and displays a
-high-contrast icon grid powered by `lucide-svelte`. Clicking **Party** opens a
-responsive party picker overlay that fetches available characters from the
-backend and lets you add or remove allies with a single button. Portraits
-use four equal columns so each image scales to 25% of the roster width, and
-no confirm action is required. The **Run** icon posts the selected party to
-`/run/start` and reveals the generated floor map. The **Settings** icon opens a
-similar overlay with sliders for sound effects, music, and voice that auto-save changes and briefly show a "Saved" status. An upcoming **Edit Player** panel will use
-`/player/editor` to save pronouns, starting damage type, and stat allocations,
-boosting HP, Attack, and Defense by 1% per point.
-The **Pulls** icon calls `/gacha/pull` so players can recruit 5★ or 6★ characters or
-earn 1★–4★ upgrade items between runs. Pity raises the odds of higher-tier items,
-and auto-crafting those materials is an optional toggle. A **Craft** icon opens a
-menu listing upgrade items, offering a manual `/gacha/craft` action and a toggle
-for `/gacha/auto-craft`. A **Feedback** icon opens a pre-filled GitHub issue in a new tab so players can report bugs or sugges
-tions.
-After each battle, any returned `card_choices` trigger a Star Rail–style reward overlay that uses `CardArt.svelte` and `CurioChoice.svelte` to build card and relic panels from `src/lib/assets`. Gold and item drops float briefly on screen before the overlay appears. During combat, party members appear in a left column and foes on the right, with HP, Attack, Defense, Mitigation, and Crit rate listed beside each portrait. HoT/DoT markers render below each portrait and collapse duplicate effects into a single icon with a small stack count in the bottom-right corner.
+high‑contrast icon grid powered by `lucide-svelte`.
+
+- Party: Opens a responsive party picker overlay that fetches available
+  characters and lets you add/remove allies with one click. Selected members
+  are now clearly indicated by an element‑tinted ambient sweep behind their
+  row. This effect starts smoothly, honors Reduced Motion, and no longer
+  obscures the photo/name/type. Gray side bars were removed; the stats panel on
+  the right fills its column.
+- Run: Posts the selected party to `/run/start` and reveals the generated
+  floor map.
+- Settings: Opens a panel with sliders for sound effects, music, and voice
+  that auto‑save and briefly show a “Saved” status. Also includes Reduced
+  Motion and “End Run” controls. End Run now immediately halts battle polling
+  and returns home without residual snapshot requests.
+- Edit Player: Uses `/player/editor` to save pronouns, starting damage type,
+  and stat allocations. The stats panel now shows HP as `current/max` so HP
+  investment is visible. These edits apply to new runs and to the roster view
+  (open the Party overlay to refresh), but do not retroactively modify an
+  active battle.
+- Pulls: Calls `/gacha/pull` so players can recruit 5★ or 6★ characters or
+  earn 1★–4★ upgrade items between runs. Pity raises the odds of higher‑tier
+  items; auto‑crafting is an optional toggle under Crafting.
+- Craft: Lists upgrade items and offers `/gacha/craft` and `/gacha/auto-craft`.
+- Inventory: Moved to the in‑run top‑left NavBar (disabled during battles).
+- Feedback: Opens a pre‑filled GitHub issue in a new tab.
+During combat, party members appear in a left column and foes on the right,
+with HP, Attack, Defense, Mitigation, and Crit rate listed beside each
+portrait. HoT/DoT markers render below each portrait and collapse duplicate
+effects into a single icon with a stack count. The previous blue/red enrage
+flashing was replaced by subtle, color‑shifting orbs that float during combat
+and gracefully fade after battles; Reduced Motion disables their animation.
+
+After each battle, any returned `card_choices` trigger a reward overlay that
+uses `CardArt.svelte` and `CurioChoice.svelte` to build card and relic panels
+from `src/lib/assets`. Gold and item drops float briefly on screen before the
+overlay appears.
 Placeholder icons for items, relics, and cards live under `src/lib/assets/{items,relics,cards}`. Asset names combine the star folder and base filename (e.g. `3star/omega_core.png`) so the frontend can resolve the correct image for a given reward. Each damage type or star rank has its own folder with 24×24 colored placeholders so artists can replace them later.
 
 ## Settings: Wipe Save Data
