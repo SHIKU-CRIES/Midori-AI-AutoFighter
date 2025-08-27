@@ -174,6 +174,22 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
                     "INSERT OR REPLACE INTO damage_types (id, type) VALUES (?, ?)",
                     ("player", damage_type),
                 )
+        
+        # Also write to shared file for legacy system integration
+        shared_config = {
+            "pronouns": pronouns,
+            "damage_type": damage_type,
+            "hp": hp,
+            "attack": attack,
+            "defense": defense
+        }
+        try:
+            import os
+            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "player_customization.json")
+            with open(config_path, "w") as f:
+                json.dump(shared_config, f, indent=2)
+        except Exception:
+            pass  # Fail silently if can't write shared config
 
     await asyncio.to_thread(update_player_data)
     return jsonify({"status": "ok"})

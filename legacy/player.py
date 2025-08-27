@@ -3,6 +3,7 @@ import sys
 import math
 import uuid
 import random
+import json
 
 import pickle
 
@@ -119,6 +120,44 @@ class Player:
 
     def set_photo(self, photo: str):
         self.photo: str = set_themed_photo(photo)
+
+    def load_player_customization(self):
+        """
+        Load player customizations from the shared config file written by the backend player editor.
+        Apply percentage-based stat multipliers to base stats.
+        """
+        try:
+            # Look for the shared customization file
+            config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "player_customization.json")
+            if not os.path.exists(config_path):
+                return  # No customizations available
+            
+            with open(config_path, "r") as f:
+                customizations = json.load(f)
+            
+            # Apply stat multipliers (same logic as backend)
+            hp_bonus = customizations.get("hp", 0) * 0.01  # Convert to percentage
+            attack_bonus = customizations.get("attack", 0) * 0.01
+            defense_bonus = customizations.get("defense", 0) * 0.01
+            
+            if hp_bonus > 0:
+                self.MHP = int(self.MHP * (1 + hp_bonus))
+                self.HP = self.MHP  # Update current HP to match new max
+            
+            if attack_bonus > 0:
+                self.Atk = int(self.Atk * (1 + attack_bonus))
+            
+            if defense_bonus > 0:
+                self.Def = int(self.Def * (1 + defense_bonus))
+            
+            # Apply damage type if specified
+            damage_type = customizations.get("damage_type", "")
+            if damage_type and damage_type in ["Light", "Dark", "Wind", "Lightning", "Fire", "Ice"]:
+                self.Type = get_damage_type(damage_type.lower())
+                
+        except Exception as e:
+            # Fail silently if can't load customizations
+            pass
 
     def load_past_lives(self):
         past_lives_folder = "past_lives"
@@ -559,6 +598,10 @@ class Player:
             self.EXP += min(max(round((foe_level ** 0.0015) * int_mod_novit), round(foe_level  ** 0.0035)) + 1, EXP_to_levelup * 2)
         else:
             self.EXP += min(max(round(((foe_level * 4) ** 0.55) * int_mod_novit), round((foe_level * 4) ** 0.75)) + 1, EXP_to_levelup * 5)
+        
+        # Check if we have enough EXP to level up and trigger level-up if needed
+        if self.EXP >= self.exp_to_levelup():
+            self.level_up(mod, foe_level)
 
     def exp_to_levelup(self):
         return min(max((self.level ** 1.55) / (self.EXPMod ** 0.55), 1), 10 ** 10)
@@ -851,6 +894,11 @@ def create_player(player_id: str, name: str | None = None, **kwargs) -> Player:
     player.load()
     player.set_photo(player_id)
     player.isplayer = True
+    
+    # Apply player customizations from editor if this is the main player character
+    if player_id == "player" or (name and "player" in name.lower()):
+        player.load_player_customization()
+    
     return player
 
                 
