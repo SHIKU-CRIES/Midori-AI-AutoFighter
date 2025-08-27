@@ -74,7 +74,8 @@ export async function roomAction(runId, type, action = '') {
   // Short-circuit snapshot polling when global sync is halted (e.g., defeat popup)
   try {
     const halted = typeof window !== 'undefined' && window.afHaltSync === true;
-    if (halted && type === 'battle' && String(payload?.action || '') === 'snapshot') {
+    const rewardPause = typeof window !== 'undefined' && window.afRewardOpen === true;
+    if ((halted || rewardPause) && type === 'battle' && String(payload?.action || '') === 'snapshot') {
       return {};
     }
   } catch {}

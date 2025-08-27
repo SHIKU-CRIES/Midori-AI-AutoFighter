@@ -16,6 +16,10 @@ craft (125 for 1★–3★ upgrades, 10 for converting 4★ items into a ticket)
 Craft button remains disabled until at least one stack meets these thresholds,
 preventing accidental calls when nothing can be upgraded.
 
+During crafting, any inventory entries that drop to zero are purged on the
+backend, and `stackItems` filters out non-positive counts so empty slots never
+render in the menu.
+
 Each grid tile displays an icon loaded from
 `frontend/src/lib/assets/items/{element}/generic{rank}.png` with a colored
 border and matching box shadow derived from the `--star-color` CSS variable

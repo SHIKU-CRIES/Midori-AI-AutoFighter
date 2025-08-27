@@ -129,3 +129,14 @@ export async function testLrmModel(prompt) {
     body: JSON.stringify({ prompt })
   });
 }
+
+// Catalog: card/relic metadata for inventory and builders
+export async function getCardCatalog() {
+  const data = await handleFetch(`${API_BASE}/catalog/cards`, { cache: 'no-store', noOverlay: true });
+  return data.cards || [];
+}
+
+export async function getRelicCatalog() {
+  const data = await handleFetch(`${API_BASE}/catalog/relics`, { cache: 'no-store', noOverlay: true });
+  return data.relics || [];
+}

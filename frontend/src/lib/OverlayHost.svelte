@@ -42,6 +42,13 @@
   // but the overlay should remain visible until the player advances.
   $: rewardOpen = computeRewardOpen(roomData, battleActive);
 
+  // Hint to pause battle snapshot polling globally while rewards are open
+  $: {
+    try {
+      if (typeof window !== 'undefined') window.afRewardOpen = Boolean(rewardOpen);
+    } catch {}
+  }
+
   function titleForItem(item) {
     if (!item) return '';
     if (item.name) return item.name;
@@ -148,7 +155,7 @@
 {/if}
 
 {#if $overlayView === 'inventory'}
-  <PopupWindow title="Inventory" padding="0.75rem" zIndex={1300} on:close={() => dispatch('back')}>
+  <PopupWindow title="Inventory" padding="0.75rem" maxWidth="1040px" zIndex={1300} on:close={() => dispatch('back')}>
     <InventoryPanel cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
   </PopupWindow>
 {/if}
