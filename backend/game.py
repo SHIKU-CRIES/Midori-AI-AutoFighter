@@ -243,14 +243,16 @@ def save_party(run_id: str, party: Party) -> None:
     snapshot = existing.get("player", {})
     for member in party.members:
         if member.id == "player":
-            base = player_plugins.player.Player()
+            # Use original base customization values instead of calculating from current stats
+            # This prevents exponential growth from accumulated bonuses
+            _, loaded_stats = _load_player_customization()
             custom = {
                 "id": "player_custom",
                 "turns": -1,
                 "multipliers": {
-                    "max_hp": member.max_hp / base.max_hp,
-                    "atk": member.atk / base.atk,
-                    "defense": member.defense / base.defense,
+                    "max_hp": 1 + loaded_stats.get("hp", 0) * 0.01,
+                    "atk": 1 + loaded_stats.get("attack", 0) * 0.01,
+                    "defense": 1 + loaded_stats.get("defense", 0) * 0.01,
                 },
             }
             snapshot = {
