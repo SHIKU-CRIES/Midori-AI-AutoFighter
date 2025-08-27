@@ -87,8 +87,8 @@ class PlayerBase(Stats):
         # Minimal, dependency-light memory to avoid LangChain deprecation warnings
         try:
             from langchain.memory import VectorStoreRetrieverMemory
-            from langchain_community.embeddings import HuggingFaceEmbeddings
             from langchain_chroma import Chroma
+            from langchain_huggingface import HuggingFaceEmbeddings
         except (ImportError, ModuleNotFoundError):
             # Fall back to simple in-process memory without deprecations
             self.lrm_memory = SimpleConversationMemory()
