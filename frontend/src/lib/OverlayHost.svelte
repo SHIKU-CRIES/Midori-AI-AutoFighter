@@ -241,6 +241,7 @@
   .overlay-inset {
     position: absolute;
     inset: 0;
+    z-index: 1; /* always sit below popup overlays */
     background: rgba(0,0,0,0.85);
     display: flex;
     align-items: center;

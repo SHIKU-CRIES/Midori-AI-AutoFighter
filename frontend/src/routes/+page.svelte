@@ -476,13 +476,43 @@
       if (res && res.next_room) {
         nextRoom = res.next_room;
       }
-      await enterRoom();
+      // Try entering the next room with a few short retries to avoid timing issues
+      for (let i = 0; i < 5; i++) {
+        await new Promise((r) => setTimeout(r, 150 + i * 150));
+        await enterRoom();
+        const isBattleSnapshot = roomData && (roomData.result === 'battle' || roomData.result === 'boss');
+        const progressed = (roomData && (!isBattleSnapshot || battleActive));
+        if (progressed) break;
+      }
     } catch (e) {
       // If not ready (e.g., server 400), refresh snapshot so rewards remain visible.
       try {
         if (haltSync || !runId) return;
         const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
         roomData = snap;
+        // If the backend still indicates we're awaiting the next room and
+        // there are no choices to make, attempt the advance again.
+        const noChoices = ((snap?.card_choices?.length || 0) === 0) && ((snap?.relic_choices?.length || 0) === 0);
+        if (snap?.awaiting_next && noChoices) {
+          try {
+            const res2 = await advanceRoom(runId);
+            if (res2 && typeof res2.current_index === 'number') {
+              currentIndex = res2.current_index;
+              currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+            }
+            if (res2 && res2.next_room) {
+              nextRoom = res2.next_room;
+            }
+            for (let i = 0; i < 5; i++) {
+              await new Promise((r) => setTimeout(r, 150 + i * 150));
+              await enterRoom();
+              const isBattleSnapshot = roomData && (roomData.result === 'battle' || roomData.result === 'boss');
+              const progressed = (roomData && (!isBattleSnapshot || battleActive));
+              if (progressed) break;
+            }
+            return;
+          } catch {}
+        }
       } catch {
         /* no-op */
       }
