@@ -19,5 +19,5 @@ class Luna(PlayerPlugin):
         player.isplayer = True
         passive = get_passive("luna_passive")
         if passive:
-            passive.on_apply(player)
+            passive.apply_once(player)
         return player

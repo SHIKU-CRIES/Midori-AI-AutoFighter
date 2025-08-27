@@ -20,5 +20,5 @@ class Graygray(PlayerPlugin):
         player.isplayer = True
         passive = get_passive("graygray_passive")
         if passive:
-            passive.on_apply(player)
+            passive.apply_once(player)
         return player

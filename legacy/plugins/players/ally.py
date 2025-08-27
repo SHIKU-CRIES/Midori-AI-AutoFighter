@@ -20,5 +20,5 @@ class Ally(PlayerPlugin):
         player.isplayer = True
         passive = get_passive("ally_passive")
         if passive:
-            passive.on_apply(player)
+            passive.apply_once(player)
         return player

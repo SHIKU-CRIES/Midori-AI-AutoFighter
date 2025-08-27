@@ -23,5 +23,5 @@ class Bubbles(PlayerPlugin):
         player.Items.append(ItemType())
         passive = get_passive("bubbles_passive")
         if passive:
-            passive.on_apply(player)
+            passive.apply_once(player)
         return player

@@ -77,6 +77,7 @@ class Player:
         self.HOTS: list[healingovertimetype] = []
         self.photo: str = "player.png"
         self.photodata = ""
+        self.editor_buffs_applied: bool = False
         
     def save(self):
         temp_data = self.photodata
@@ -114,6 +115,15 @@ class Player:
             pass
         except Exception as e:
             print(f"Error loading save file: {e}")
+
+        # Handle existing saves that don't have the editor_buffs_applied flag
+        if not hasattr(self, 'editor_buffs_applied'):
+            # If this is a character with special abilities and is a player, mark as already buffed
+            # since they would have been created through the plugin system previously
+            if self.isplayer and self.PlayerName.lower() in ["ally", "luna", "carly", "bubbles", "graygray"]:
+                self.editor_buffs_applied = True
+            else:
+                self.editor_buffs_applied = False
 
         self.check_stats()
 
