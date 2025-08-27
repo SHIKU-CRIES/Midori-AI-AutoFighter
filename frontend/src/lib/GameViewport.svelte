@@ -149,7 +149,7 @@
       on:settings={() => dispatch('settings')}
       on:back={() => dispatch('back')}
     />
-    {#if battleActive}
+    {#if battleActive || rewardOpen}
       <div class="top-center-header">
         <div class="title-chip">
           Room {info.roomNumber} / Floor {info.floorNumber} / {roomLabel(info.currentType)}

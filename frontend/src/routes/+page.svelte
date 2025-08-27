@@ -318,6 +318,15 @@
           stopBattlePoll();
           return;
         }
+        // If the backend indicates we are ready to advance and there are no
+        // choices to make, immediately advance instead of idling.
+        try {
+          const noChoices = ((data?.card_choices?.length || 0) === 0) && ((data?.relic_choices?.length || 0) === 0);
+          if (data?.awaiting_next && noChoices && runId) {
+            await handleNextRoom();
+            return;
+          }
+        } catch {}
         const noFoes = !Array.isArray(data?.foes) || data.foes.length === 0;
         if (noFoes) {
           // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
@@ -344,6 +353,15 @@
       } else {
         battleActive = false;
         stopBattlePoll();
+        // Non-battle rooms that are immediately ready to advance (no choices)
+        // should auto-advance to avoid getting stuck.
+        try {
+          const noChoices = ((data?.card_choices?.length || 0) === 0) && ((data?.relic_choices?.length || 0) === 0);
+          if (data?.awaiting_next && noChoices && runId) {
+            await handleNextRoom();
+            return;
+          }
+        } catch {}
       }
   } catch (e) {
       try {

@@ -12,7 +12,7 @@
   display: flex;
   padding: var(--padding);
   box-sizing: border-box;
-  z-index: 5;
+  z-index: 1000; /* ensure overlays appear above room/battle layer */
   /* allow vertical scrolling; hide stray horizontal scrollbars */
   overflow-x: hidden;
   overflow-y: auto;
