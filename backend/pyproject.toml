@@ -40,6 +40,7 @@ llm-cpu = [
     "pillow",
     "transformers",
     "sentence-transformers",
+    "accelerate>=0.26.0",
 ]
 
 llm-cuda = [
@@ -60,6 +61,7 @@ llm-cuda = [
     "pillow",
     "transformers",
     "sentence-transformers",
+    "accelerate>=0.26.0",
 ]
 
 llm-amd = [
@@ -80,4 +82,5 @@ llm-amd = [
     "pillow",
     "transformers",
     "sentence-transformers",
+    "accelerate>=0.26.0",
 ]
