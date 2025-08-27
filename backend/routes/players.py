@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import asdict
+from dataclasses import fields
 import json
 import logging
 
@@ -43,6 +43,41 @@ def _get_stat_refresh_rate() -> int:
 
 @bp.get("/players")
 async def get_players() -> tuple[str, int, dict[str, str]]:
+    def _serialize_stats(obj) -> dict:
+        data: dict[str, object] = {}
+        # Build a dict without triggering dataclasses.asdict deep-copy, which
+        # chokes on complex objects (e.g., langchain/pydantic bindings).
+        for f in fields(obj):
+            name = f.name
+            if name == "lrm_memory":
+                # Non-serializable, runtime-only memory object
+                continue
+            value = getattr(obj, name)
+            if name == "char_type":
+                # Enum-like object; surface the name/string
+                try:
+                    data[name] = value.name
+                except Exception:
+                    data[name] = str(value)
+                continue
+            if name == "damage_type":
+                # Surface damage type as element id string
+                try:
+                    data[name] = obj.element_id
+                except Exception:
+                    data[name] = str(value)
+                continue
+            # Keep primitives as-is, shallow-copy containers, stringify others
+            if isinstance(value, (int, float, bool, str)) or value is None:
+                data[name] = value
+            elif isinstance(value, list):
+                data[name] = list(value)
+            elif isinstance(value, dict):
+                data[name] = dict(value)
+            else:
+                data[name] = str(value)
+        return data
+
     def get_owned_players():
         with get_save_manager().connection() as conn:
             cur = conn.execute("SELECT id FROM owned_players")
@@ -56,10 +91,7 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
         await asyncio.to_thread(_assign_damage_type, inst)
         if inst.id == "player":
             await asyncio.to_thread(_apply_player_customization, inst)
-        stats = asdict(inst)
-        stats.pop("lrm_memory", None)
-        stats["char_type"] = inst.char_type.name
-        stats["damage_type"] = inst.element_id
+        stats = _serialize_stats(inst)
         roster.append(
             {
                 "id": inst.id,
