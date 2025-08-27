@@ -10,13 +10,14 @@
   // Constrain popup size (useful for reward overlay)
   export let maxWidth = '820px';
   export let maxHeight = '85vh';
+  export let zIndex = 1000;
 
   function close() {
     dispatch('close');
   }
 </script>
 
-<OverlaySurface>
+<OverlaySurface {zIndex}>
   <div class="box" style={`--max-w: ${maxWidth}; --max-h: ${maxHeight}` }>
   <MenuPanel {padding}>
     {#if title}

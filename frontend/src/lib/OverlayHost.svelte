@@ -78,7 +78,7 @@
 </script>
 
 {#if $overlayView === 'party'}
-  <OverlaySurface>
+  <OverlaySurface zIndex={1300}>
     <PartyPicker bind:selected {reducedMotion} />
     <div class="stained-glass-row">
       <button class="icon-btn" on:click={() => dispatch('saveParty')}>Save Party</button>
@@ -126,19 +126,19 @@
 {/if}
 
 {#if $overlayView === 'pulls'}
-  <OverlaySurface>
+  <OverlaySurface zIndex={1300}>
     <PullsMenu on:close={() => dispatch('back')} />
   </OverlaySurface>
 {/if}
 
 {#if $overlayView === 'craft'}
-  <OverlaySurface>
+  <OverlaySurface zIndex={1300}>
     <CraftingMenu on:close={() => dispatch('back')} />
   </OverlaySurface>
 {/if}
 
 {#if $overlayView === 'editor'}
-  <OverlaySurface>
+  <OverlaySurface zIndex={1300}>
     <PlayerEditor
       {...editorState}
       on:close={() => dispatch('back')}
@@ -148,13 +148,13 @@
 {/if}
 
 {#if $overlayView === 'inventory'}
-  <PopupWindow title="Inventory" padding="0.75rem" on:close={() => dispatch('back')}>
+  <PopupWindow title="Inventory" padding="0.75rem" zIndex={1300} on:close={() => dispatch('back')}>
     <InventoryPanel cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
   </PopupWindow>
 {/if}
 
 {#if $overlayView === 'settings'}
-  <PopupWindow title="Settings" on:close={() => dispatch('back')}>
+  <PopupWindow title="Settings" zIndex={1300} on:close={() => dispatch('back')}>
     <SettingsMenu
       {sfxVolume}
       {musicVolume}
@@ -170,8 +170,8 @@
 {/if}
 
 {#if rewardOpen}
-  <OverlaySurface>
-    <PopupWindow title="Battle Rewards" maxWidth="880px" maxHeight="95vh" on:close={() => dispatch('nextRoom')}>
+  <OverlaySurface zIndex={1100}>
+    <PopupWindow title="Battle Rewards" maxWidth="880px" maxHeight="95vh" zIndex={1100} on:close={() => dispatch('nextRoom')}>
       <RewardOverlay
         gold={lootConsumed ? 0 : roomData.loot?.gold || 0}
         cards={roomData.card_choices || []}
@@ -188,7 +188,7 @@
 {/if}
 
 {#if roomData && roomData.result === 'shop'}
-  <OverlaySurface>
+  <OverlaySurface zIndex={1100}>
     <ShopMenu
       items={roomData.items || []}
       gold={roomData.gold}
@@ -201,7 +201,7 @@
 {/if}
 
 {#if roomData && roomData.result === 'rest'}
-  <OverlaySurface>
+  <OverlaySurface zIndex={1100}>
     <RestRoom
       gold={roomData.gold}
       reducedMotion={reducedMotion}
