@@ -106,7 +106,7 @@ def _apply_player_customization(
     effect: dict[str, object] | None = None,
 ) -> None:
     """Apply player customization effects.
-    
+
     For the base player (id="player"), customization is now applied during instantiation
     so this function only handles saved effects from old save files for backwards compatibility.
     For other players, this still applies mods as before.
@@ -115,7 +115,7 @@ def _apply_player_customization(
         # Base player customization is now handled during instantiation
         log.debug("Skipping mod-based customization for base player (already applied during instantiation)")
         return
-        
+
     # Handle saved effects for backwards compatibility or other players
     if effect is None:
         _, loaded = _load_player_customization()
@@ -131,7 +131,7 @@ def _apply_player_customization(
             "atk_mult": mults.get("atk", 1),
             "defense_mult": mults.get("defense", 1),
         }
-    
+
     # Debug logging to help identify issues
     log.debug(
         "Applying player customization: player_id=%s, loaded_effect=%s, multipliers=%s",
@@ -139,14 +139,14 @@ def _apply_player_customization(
         effect is not None,
         multipliers,
     )
-    
+
     if all(v == 1 for v in multipliers.values()):
         log.debug("No customizations to apply (all multipliers are 1)")
         return
-        
+
     # Store original stats for debugging
     orig_stats = (player.max_hp, player.atk, player.defense)
-    
+
     mod = create_stat_buff(
         player,
         name="customization",
@@ -155,7 +155,7 @@ def _apply_player_customization(
         **multipliers,
     )
     player.mods.append(mod.id)
-    
+
     # Log the stat changes for debugging
     log.debug(
         "Player customization applied: stats changed from %s to (%d, %d, %d)",
