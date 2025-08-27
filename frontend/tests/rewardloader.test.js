@@ -11,7 +11,7 @@ describe('reward loader card art', () => {
   });
 
   test('fallback card art is used for unknown ids', () => {
-    const art = getRewardArt('card', 'nonexistent-card');
+    const art = getRewardArt('card', '1/nonexistent-card');
     expect(typeof art).toBe('string');
     expect(art.length).toBeGreaterThan(0);
     expect(art).toContain('bg_attack_default_gray2.png');

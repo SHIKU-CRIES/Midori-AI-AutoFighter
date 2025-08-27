@@ -26,11 +26,8 @@ and auto-crafting those materials is an optional toggle. A **Craft** icon opens 
 menu listing upgrade items, offering a manual `/gacha/craft` action and a toggle
 for `/gacha/auto-craft`. A **Feedback** icon opens a pre-filled GitHub issue in a new tab so players can report bugs or sugges
 tions.
-After each battle, any returned `card_choices` trigger a reward overlay that
-loads art from `src/lib/assets` and lets the player pick one before
-continuing. During combat, party members appear in a left column and foes on the right, with HP, Attack, Defense, Mitigation, and Crit rate listed beside each portrait. HoT/DoT markers render below each portrait and collapse duplicate effects into a single icon with a small stack count in the bottom-right corner.
-
-Placeholder icons for items, relics, and cards live under `src/lib/assets/{items,relics,cards}`. Each damage type or star rank has its own folder with 24×24 colored placeholders so artists can replace them later.
+After each battle, any returned `card_choices` trigger a Star Rail–style reward overlay that uses `CardArt.svelte` and `CurioChoice.svelte` to build card and relic panels from `src/lib/assets`. Gold and item drops float briefly on screen before the overlay appears. During combat, party members appear in a left column and foes on the right, with HP, Attack, Defense, Mitigation, and Crit rate listed beside each portrait. HoT/DoT markers render below each portrait and collapse duplicate effects into a single icon with a small stack count in the bottom-right corner.
+Placeholder icons for items, relics, and cards live under `src/lib/assets/{items,relics,cards}`. Asset names combine the star folder and base filename (e.g. `3star/omega_core.png`) so the frontend can resolve the correct image for a given reward. Each damage type or star rank has its own folder with 24×24 colored placeholders so artists can replace them later.
 
 ## Settings: Wipe Save Data
 - The Wipe button calls the backend wipe endpoint and also clears all client storage and caches (localStorage, sessionStorage, IndexedDB, CacheStorage) and unregisters service workers. After completion it forces a full page reload to prevent stale roster or party selections from persisting.

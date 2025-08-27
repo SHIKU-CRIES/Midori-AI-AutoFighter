@@ -1,5 +1,6 @@
 <script>
   import { getRewardArt } from './rewardLoader.js';
+  import CurioChoice from './CurioChoice.svelte';
   export let cards = [];
   export let relics = [];
   const count = (arr) => {
@@ -30,10 +31,8 @@
     <div class="grid">
       {#each count(relics) as [id, qty]}
         <div class="item">
-          {#if getRewardArt('relic', id)}
-            <img src={getRewardArt('relic', id)} alt={id} />
-          {/if}
-          <span>{id} x{qty}</span>
+          <CurioChoice entry={{ id, name: id, stars: 1 }} size="small" />
+          <span>x{qty}</span>
         </div>
       {/each}
     </div>
@@ -44,5 +43,6 @@
   .inv-root { display:flex; flex-direction:column; gap:0.5rem; }
   .grid { display:flex; flex-wrap:wrap; gap:0.5rem; }
   .item { display:flex; flex-direction:column; align-items:center; font-size:0.75rem; }
+  .item :global(button) { pointer-events:none; }
   .item img { width:48px; height:64px; object-fit:contain; margin-bottom:0.25rem; }
 </style>

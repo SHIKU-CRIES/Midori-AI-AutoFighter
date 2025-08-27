@@ -23,11 +23,14 @@ const itemModules =
       })
     : {};
 
-function prepare(mods, fallback) {
+function prepare(mods, fallback, useFolder = false) {
   const assets = {};
   const list = [];
   for (const path in mods) {
-    const name = path.split('/').pop().replace('.png', '');
+    const parts = path.split('/');
+    const file = parts.pop().replace('.png', '');
+    const folder = parts.pop();
+    const name = useFolder ? `${folder}/${file}` : file;
     const href = new URL(mods[path], import.meta.url).href;
     assets[name] = href;
     list.push(href);
@@ -51,8 +54,8 @@ const defaultItemFallback = new URL(
   import.meta.url
 ).href;
 
-export const cardArt = prepare(cardModules, defaultCardFallback);
-export const relicArt = prepare(relicModules, defaultRelicFallback);
+export const cardArt = prepare(cardModules, defaultCardFallback, true);
+export const relicArt = prepare(relicModules, defaultRelicFallback, true);
 export const itemArt = prepare(itemModules, defaultItemFallback);
 
 export function getRewardArt(type, id) {

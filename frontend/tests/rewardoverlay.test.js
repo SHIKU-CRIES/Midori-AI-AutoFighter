@@ -9,16 +9,13 @@ describe('reward overlay assets', () => {
     expect(loader).not.toContain('.codex/downloads');
   });
 
-  test('overlay provides confirm flow', () => {
+  test('overlay uses RewardCard and CurioChoice components', () => {
     const content = readFileSync(join(import.meta.dir, '../src/lib/RewardOverlay.svelte'), 'utf8');
     expect(content).toContain('Choose a Card');
     expect(content).toContain('Choose a Relic');
-    expect(content).toContain('Confirm');
-    expect(content).toContain('selected = { type');
-    expect(content).toContain('filter: grayscale(1)');
-    expect(content).toContain('--star-color');
-    expect(content).toContain("selected.type === 'card' || selected.type === 'relic'");
-    expect(content).toContain('selected.data.about');
+    expect(content).toContain('RewardCard');
+    expect(content).toContain('CurioChoice');
+    expect(content).not.toContain('Confirm');
   });
 
   test('1x3 grid dimensions', () => {
