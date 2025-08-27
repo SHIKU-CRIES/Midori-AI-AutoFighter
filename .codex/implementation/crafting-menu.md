@@ -11,6 +11,10 @@ materials collapse into a single grid tile with an updated count. Names are
 normalized via `formatName` (e.g., `ice_4` → `Ice ★★★★`,
 `lightning_3` → `Lightning ★★★`) for readability in the detail panel.
 
+During crafting, any inventory entries that drop to zero are purged on the
+backend, and `stackItems` filters out non-positive counts so empty slots never
+render in the menu.
+
 Each grid tile displays an icon loaded from
 `frontend/src/lib/assets/items/{element}/generic{rank}.png` with a colored
 border and matching box shadow derived from the `--star-color` CSS variable

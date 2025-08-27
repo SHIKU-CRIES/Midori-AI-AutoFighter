@@ -7,8 +7,13 @@ export function stackItems(raw) {
     }
   } else {
     for (const [key, value] of Object.entries(raw)) {
-      result[key] = (result[key] || 0) + Number(value);
+      const num = Number(value);
+      if (num <= 0) continue;
+      result[key] = (result[key] || 0) + num;
     }
+  }
+  for (const [key, value] of Object.entries(result)) {
+    if (value === 0) delete result[key];
   }
   return result;
 }

@@ -122,6 +122,9 @@ class GachaManager:
                 items[f"{element}_4"] -= 10
                 items["ticket"] = items.get("ticket", 0) + 1
 
+        for key in [k for k, v in items.items() if v == 0]:
+            del items[key]
+
     def craft(self) -> dict[str, int]:
         items = self._get_items()
         self._auto_craft(items)
