@@ -131,13 +131,13 @@ Install prebuilt packages when available:
 
 ## Desktop Builds
 
-Scripts under `desktop-builder/` package the app for Windows and Linux. Each
+Scripts under `build/desktop/` package the app for Windows and Linux. Each
 script builds a Docker image that compiles the Python backend with PyInstaller
 and bundles the Svelte frontend with Tauri.
 
 ```bash
-./desktop-builder/build-windows.sh   # outputs .exe to desktop-dist/windows
-./desktop-builder/build-linux.sh     # outputs .AppImage and .tar.gz to desktop-dist/linux
+./build/desktop/build-windows.sh   # outputs .exe to desktop-dist/windows
+./build/desktop/build-linux.sh     # outputs .AppImage and .tar.gz to desktop-dist/linux
 ```
 
 See `.codex/instructions/building-desktop.md` for details.
