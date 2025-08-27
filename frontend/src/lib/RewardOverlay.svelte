@@ -23,7 +23,18 @@
     return stars ? `${cap} Upgrade (${stars})` : `${cap} Upgrade`;
   }
 
-  $: remaining = cards.length + relics.length;
+  let cardsDone = false;
+  $: showCards = cards.length > 0 && !cardsDone;
+  $: showRelics = relics.length > 0 && (cards.length === 0 || cardsDone);
+  $: remaining = (showCards ? cards.length : 0) + (showRelics ? relics.length : 0);
+
+  function handleSelect(e) {
+    const detail = e.detail || {};
+    if (detail.type === 'card') {
+      cardsDone = true;
+    }
+    dispatch('select', detail);
+  }
 </script>
 
 <style>
@@ -64,19 +75,19 @@
 </style>
 
 <div class="layout">
-  {#if cards.length}
+  {#if showCards}
     <h3 class="section-title">Choose a Card</h3>
     <div class="choices">
         {#each cards.slice(0,3) as card}
-          <RewardCard entry={card} type="card" on:select={(e) => dispatch('select', e.detail)} />
+          <RewardCard entry={card} type="card" on:select={handleSelect} />
         {/each}
     </div>
   {/if}
-  {#if relics.length}
+  {#if showRelics}
     <h3 class="section-title">Choose a Relic</h3>
     <div class="choices">
         {#each relics.slice(0,3) as relic}
-          <CurioChoice entry={relic} on:select={(e) => dispatch('select', e.detail)} />
+          <CurioChoice entry={relic} on:select={handleSelect} />
         {/each}
     </div>
   {/if}

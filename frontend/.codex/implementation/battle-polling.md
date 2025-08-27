@@ -18,3 +18,7 @@ Additionally, ending a run from Settings now immediately sets a global
 `window.afHaltSync = true` flag and clears timers to prevent any further
 `snapshot` polls during teardown. The same flag is set again in
 `handleRunEnd()` before clearing run state and returning home.
+
+When a battle completes with no rewards or choices (no cards/relics/loot) and
+the backend marks `awaiting_next = true`, the UI now auto‑advances to the next
+room without requiring the rewards overlay.

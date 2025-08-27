@@ -12,6 +12,8 @@
   export let enrage = { active: false, stacks: 0 };
   export let reducedMotion = false;
   export let active = true;
+  export let showHud = true;
+  export let showFoes = true;
   let foes = [];
   let timer;
   let logs = [];
@@ -190,55 +192,63 @@
     {#each party as member (member.id)}
       <div class="combatant">
         <FighterPortrait fighter={member} />
-        <div class="stats right stained-glass-panel">
-          <div class="name">{(member.name ?? member.id)} ({member.level ?? 1})</div>
-          <div class="row"><span class="k">HP</span> <span class="v">{member.hp}/{member.max_hp}</span></div>
-          <div class="row"><span class="k">VIT</span> <span class="v">{fmt2(member.vitality ?? 0)}</span></div>
-          <div class="row"><span class="k">ATK</span> <span class="v">{member.atk}</span></div>
-          <div class="row"><span class="k">DEF</span> <span class="v">{member.defense}</span></div>
-          <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(member.mitigation)}</span></div>
-          <div class="row"><span class="k">CRate</span> <span class="v">{pctOdds(member.crit_rate)}</span></div>
-          <div class="row"><span class="k">CDmg</span> <span class="v">{pctFromMultiplier(member.crit_damage)}</span></div>
-          <div class="row"><span class="k">E.Hit</span> <span class="v">{pctRatio(member.effect_hit_rate)}</span></div>
-          <div class="row"><span class="k">E.Res</span> <span class="v">{pctOdds(member.effect_resistance)}</span></div>
-          <div class="row small"><span class="k">AP</span> <span class="v">{member.action_points ?? 0}</span> <span class="k">/ APT</span> <span class="v">{member.actions_per_turn ?? 1}</span></div>
-          <details class="advanced">
-            <summary>Combat stats</summary>
-            <div class="row small"><span class="k">Dmg Dealt</span> <span class="v">{member.damage_dealt ?? 0}</span></div>
-            <div class="row small"><span class="k">Dmg Taken</span> <span class="v">{member.damage_taken ?? 0}</span></div>
-            <div class="row small"><span class="k">Kills</span> <span class="v">{member.kills ?? 0}</span></div>
-          </details>
-        </div>
+        {#if showHud}
+          <div class="stats right stained-glass-panel">
+            <div class="name">{(member.name ?? member.id)} ({member.level ?? 1})</div>
+            <div class="row"><span class="k">HP</span> <span class="v">{member.hp}/{member.max_hp}</span></div>
+            <div class="row"><span class="k">VIT</span> <span class="v">{fmt2(member.vitality ?? 0)}</span></div>
+            <div class="row"><span class="k">ATK</span> <span class="v">{member.atk}</span></div>
+            <div class="row"><span class="k">DEF</span> <span class="v">{member.defense}</span></div>
+            <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(member.mitigation)}</span></div>
+            <div class="row"><span class="k">CRate</span> <span class="v">{pctOdds(member.crit_rate)}</span></div>
+            <div class="row"><span class="k">CDmg</span> <span class="v">{pctFromMultiplier(member.crit_damage)}</span></div>
+            <div class="row"><span class="k">E.Hit</span> <span class="v">{pctRatio(member.effect_hit_rate)}</span></div>
+            <div class="row"><span class="k">E.Res</span> <span class="v">{pctOdds(member.effect_resistance)}</span></div>
+            <div class="row small"><span class="k">AP</span> <span class="v">{member.action_points ?? 0}</span> <span class="k">/ APT</span> <span class="v">{member.actions_per_turn ?? 1}</span></div>
+            <details class="advanced">
+              <summary>Combat stats</summary>
+              <div class="row small"><span class="k">Dmg Dealt</span> <span class="v">{member.damage_dealt ?? 0}</span></div>
+              <div class="row small"><span class="k">Dmg Taken</span> <span class="v">{member.damage_taken ?? 0}</span></div>
+              <div class="row small"><span class="k">Kills</span> <span class="v">{member.kills ?? 0}</span></div>
+            </details>
+          </div>
+        {/if}
       </div>
     {/each}
   </div>
-  <div class="foe-column" style={`--portrait-size: ${foePortraitSize}` }>
-    {#each foes as foe (foe.id)}
-      <div class="combatant">
-        <div class="stats left stained-glass-panel">
-          <div class="name">{(foe.name ?? foe.id)} ({foe.level ?? 1})</div>
-          <div class="row"><span class="k">HP</span> <span class="v">{foe.hp}/{foe.max_hp}</span></div>
-          <div class="row"><span class="k">VIT</span> <span class="v">{fmt2(foe.vitality ?? 0)}</span></div>
-          <div class="row"><span class="k">ATK</span> <span class="v">{foe.atk}</span></div>
-          <div class="row"><span class="k">DEF</span> <span class="v">{foe.defense}</span></div>
-          <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(foe.mitigation)}</span></div>
-          <div class="row"><span class="k">CRate</span> <span class="v">{pctOdds(foe.crit_rate)}</span></div>
-          <div class="row"><span class="k">CDmg</span> <span class="v">{pctFromMultiplier(foe.crit_damage)}</span></div>
-          <div class="row"><span class="k">E.Hit</span> <span class="v">{pctRatio(foe.effect_hit_rate)}</span></div>
-          <div class="row"><span class="k">E.Res</span> <span class="v">{pctOdds(foe.effect_resistance)}</span></div>
-          <div class="row small"><span class="k">AP</span> <span class="v">{foe.action_points ?? 0}</span> <span class="k">/ APT</span> <span class="v">{foe.actions_per_turn ?? 1}</span></div>
-          <details class="advanced">
-            <summary>Combat stats</summary>
-            <div class="row small"><span class="k">Dmg Dealt</span> <span class="v">{foe.damage_dealt ?? 0}</span></div>
-            <div class="row small"><span class="k">Dmg Taken</span> <span class="v">{foe.damage_taken ?? 0}</span></div>
-            <div class="row small"><span class="k">Kills</span> <span class="v">{foe.kills ?? 0}</span></div>
-          </details>
+  {#if showFoes}
+    <div class="foe-column" style={`--portrait-size: ${foePortraitSize}` }>
+      {#each foes as foe (foe.id)}
+        <div class="combatant">
+          {#if showHud}
+            <div class="stats left stained-glass-panel">
+              <div class="name">{(foe.name ?? foe.id)} ({foe.level ?? 1})</div>
+              <div class="row"><span class="k">HP</span> <span class="v">{foe.hp}/{foe.max_hp}</span></div>
+              <div class="row"><span class="k">VIT</span> <span class="v">{fmt2(foe.vitality ?? 0)}</span></div>
+              <div class="row"><span class="k">ATK</span> <span class="v">{foe.atk}</span></div>
+              <div class="row"><span class="k">DEF</span> <span class="v">{foe.defense}</span></div>
+              <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(foe.mitigation)}</span></div>
+              <div class="row"><span class="k">CRate</span> <span class="v">{pctOdds(foe.crit_rate)}</span></div>
+              <div class="row"><span class="k">CDmg</span> <span class="v">{pctFromMultiplier(foe.crit_damage)}</span></div>
+              <div class="row"><span class="k">E.Hit</span> <span class="v">{pctRatio(foe.effect_hit_rate)}</span></div>
+              <div class="row"><span class="k">E.Res</span> <span class="v">{pctOdds(foe.effect_resistance)}</span></div>
+              <div class="row small"><span class="k">AP</span> <span class="v">{foe.action_points ?? 0}</span> <span class="k">/ APT</span> <span class="v">{foe.actions_per_turn ?? 1}</span></div>
+              <details class="advanced">
+                <summary>Combat stats</summary>
+                <div class="row small"><span class="k">Dmg Dealt</span> <span class="v">{foe.damage_dealt ?? 0}</span></div>
+                <div class="row small"><span class="k">Dmg Taken</span> <span class="v">{foe.damage_taken ?? 0}</span></div>
+                <div class="row small"><span class="k">Kills</span> <span class="v">{foe.kills ?? 0}</span></div>
+              </details>
+            </div>
+          {/if}
+          <FighterPortrait fighter={foe} />
         </div>
-        <FighterPortrait fighter={foe} />
-      </div>
-    {/each}
-  </div>
-  <BattleLog entries={logs} />
+      {/each}
+    </div>
+  {/if}
+  {#if showHud}
+    <BattleLog entries={logs} />
+  {/if}
 </div>
 
 <style>

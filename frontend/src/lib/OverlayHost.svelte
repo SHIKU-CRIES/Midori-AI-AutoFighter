@@ -225,6 +225,8 @@
       enrage={roomData?.enrage}
       reducedMotion={reducedMotion}
       active={battleActive}
+      showHud={true}
+      showFoes={true}
       on:snapshot-start={() => dispatch('snapshot-start')}
       on:snapshot-end={() => dispatch('snapshot-end')}
     />

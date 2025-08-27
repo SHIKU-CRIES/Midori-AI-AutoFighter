@@ -513,7 +513,8 @@ class BattleRoom(Room):
         relic_opts = []
         if _roll_relic_drop(self, party.rdr):
             relic_star = _apply_rdr_to_stars(_pick_relic_stars(self), party.rdr)
-            relic_opts = relic_choices(combat_party, relic_star, count=1)
+            # Offer 3 relic choices when a relic drop occurs
+            relic_opts = relic_choices(combat_party, relic_star, count=3)
         relic_choice_data = [
             {
                 "id": r.id,

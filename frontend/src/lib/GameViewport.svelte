@@ -21,6 +21,7 @@
     applyMusicVolume,
     stopGameMusic,
   } from './viewportState.js';
+  import { rewardOpen as computeRewardOpen } from './viewportState.js';
   import { overlayView } from './OverlayController.js';
 
   export let runId = '';
@@ -65,6 +66,7 @@
   $: selectedParty = mapSelectedParty(roster, selected);
   $: applyMusicVolume(musicVolume);
   $: info = roomInfo(mapRooms, currentIndex, currentRoomType, roomData);
+  $: rewardOpen = computeRewardOpen(roomData, battleActive);
 </script>
 
 <style>
@@ -158,7 +160,7 @@
         </div>
       </div>
     {/if}
-    {#if $overlayView === 'main' && !battleActive}
+    {#if $overlayView === 'main' && !battleActive && !rewardOpen}
       <MainMenu {items} />
     {/if}
     {#if runId && roomData && !(((roomData.result === 'battle') || (roomData.result === 'boss')) && !battleActive)}

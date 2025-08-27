@@ -239,6 +239,14 @@
           if (snap?.ended && snap?.result === 'defeat') {
             handleDefeat();
           }
+          // Auto-advance when there are no rewards to pick and the backend
+          // indicates the run is awaiting the next room.
+          try {
+            const noChoices = ((roomData?.card_choices?.length || 0) === 0) && ((roomData?.relic_choices?.length || 0) === 0);
+            if (!rewardsReady && noChoices && roomData?.awaiting_next && runId) {
+              await handleNextRoom();
+            }
+          } catch {}
           return;
         }
       }
@@ -337,7 +345,7 @@
         battleActive = false;
         stopBattlePoll();
       }
-    } catch (e) {
+  } catch (e) {
       try {
         if (haltSync || !runId) return;
         const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
@@ -348,11 +356,20 @@
         if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
         if (snap.current_room) currentRoomType = snap.current_room;
         saveRunState(runId, nextRoom);
-        // Show a popup error instead of a blocking alert
-        openOverlay('error', {
-          message: 'Failed to enter room. Restored latest battle state.',
-          traceback: (e && e.stack) || ''
-        });
+        // If we're simply not ready yet (common 400s), avoid noisy overlays and
+        // auto-advance when appropriate.
+        const noChoices = ((snap?.card_choices?.length || 0) === 0) && ((snap?.relic_choices?.length || 0) === 0);
+        const simpleRecoverable = (e?.status === 400) || /not ready|awaiting next|invalid room/i.test(String(e?.message || ''));
+        if (snap?.awaiting_next && noChoices && runId) {
+          try { await handleNextRoom(); } catch { /* ignore */ }
+          return;
+        }
+        if (!simpleRecoverable) {
+          openOverlay('error', {
+            message: 'Failed to enter room. Restored latest battle state.',
+            traceback: (e && e.stack) || ''
+          });
+        }
       } catch {
         // Surface error via overlay for consistency
         openOverlay('error', { message: 'Failed to enter room.', traceback: '' });
