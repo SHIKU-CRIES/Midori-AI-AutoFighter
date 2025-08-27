@@ -1,9 +1,12 @@
 import os
 from typing import Any
 
-try:
+from .torch_checker import is_torch_available
+
+# Import torch only if available
+if is_torch_available():
     import torch
-except Exception:  # pragma: no cover - optional dependency
+else:
     torch = None
 
 try:

@@ -4,19 +4,20 @@ from enum import Enum
 import os
 from typing import Protocol
 
-try:
+from .torch_checker import is_torch_available
+from .torch_checker import require_torch
+
+# Import dependencies only if torch is available
+if is_torch_available():
     from langchain_community.llms import llamacpp as LlamaCpp
     from langchain_huggingface import HuggingFacePipeline
     import torch
     from transformers import pipeline
-except Exception as err:
+else:
     torch = None
     LlamaCpp = None
     HuggingFacePipeline = None
     pipeline = None
-    _IMPORT_ERROR = err
-else:
-    _IMPORT_ERROR = None
 
 from .safety import ensure_ram
 from .safety import gguf_strategy
@@ -45,11 +46,7 @@ class _LangChainWrapper:
 
 
 def load_llm(model: str | None = None, *, gguf_path: str | None = None) -> SupportsStream:
-    if _IMPORT_ERROR is not None:
-        msg = (
-            "LLM dependencies are not installed. Install extras to enable LLM features."
-        )
-        raise RuntimeError(msg) from _IMPORT_ERROR
+    require_torch()
     name = model or os.getenv("AF_LLM_MODEL", ModelName.DEEPSEEK.value)
     if name == ModelName.DEEPSEEK.value:
         min_ram, _ = model_memory_requirements(name)
