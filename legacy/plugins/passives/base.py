@@ -53,6 +53,12 @@ class PassivePlugin(PassiveType, ABC):
     id: str
     name: str
 
+    def apply_once(self, player: "Player") -> None:
+        """Apply the passive effect only if editor buffs haven't been applied yet."""
+        if not player.editor_buffs_applied:
+            self.on_apply(player)
+            player.editor_buffs_applied = True
+
     @abstractmethod
     def on_apply(self, player: "Player") -> None:  # noqa: D401
         """Grant the passive's effect to ``player``."""

@@ -21,5 +21,5 @@ class Carly(PlayerPlugin):
         player.isplayer = True
         passive = get_passive("carly_passive")
         if passive:
-            passive.on_apply(player)
+            passive.apply_once(player)
         return player
