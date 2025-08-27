@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import asdict
 import json
+import logging
 
 from game import _apply_player_customization
 from game import _assign_damage_type
@@ -16,6 +17,7 @@ from autofighter.stats import apply_status_hooks
 from plugins import players as player_plugins
 
 bp = Blueprint("players", __name__)
+log = logging.getLogger(__name__)
 
 
 def _get_stat_refresh_rate() -> int:
@@ -76,8 +78,25 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
     refresh = _get_stat_refresh_rate()
     player = player_plugins.player.Player()
     await asyncio.to_thread(_assign_damage_type, player)
+    
+    # Store original stats before customization
+    orig_stats = (player.max_hp, player.atk, player.defense)
+    
     await asyncio.to_thread(_apply_player_customization, player)
     apply_status_hooks(player)
+    
+    # Log the stat changes for debugging
+    log.debug(
+        "Player stats endpoint: original=(%d, %d, %d), final=(%d, %d, %d), mods=%s",
+        orig_stats[0],
+        orig_stats[1], 
+        orig_stats[2],
+        player.max_hp,
+        player.atk,
+        player.defense,
+        player.mods,
+    )
+    
     stats = {
         "core": {
             "hp": player.hp,
@@ -122,6 +141,7 @@ async def get_player_editor() -> tuple[str, int, dict[str, object]]:
     player = player_plugins.player.Player()
     await asyncio.to_thread(_assign_damage_type, player)
     pronouns, stats = await asyncio.to_thread(_load_player_customization)
+    log.debug("Loading player editor data: pronouns=%s, stats=%s", pronouns, stats)
     return jsonify(
         {
             "pronouns": pronouns,
@@ -153,6 +173,15 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
     if total > 100:
         return jsonify({"error": "over-allocation"}), 400
 
+    log.debug(
+        "Updating player editor: pronouns=%s, damage_type=%s, hp=%d, attack=%d, defense=%d",
+        pronouns,
+        damage_type,
+        hp,
+        attack,
+        defense,
+    )
+
     def update_player_data():
         with get_save_manager().connection() as conn:
             conn.execute(
@@ -176,4 +205,5 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
                 )
 
     await asyncio.to_thread(update_player_data)
+    log.debug("Player customization saved successfully")
     return jsonify({"status": "ok"})

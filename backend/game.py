@@ -119,8 +119,21 @@ def _apply_player_customization(
             "atk_mult": mults.get("atk", 1),
             "defense_mult": mults.get("defense", 1),
         }
+    
+    # Debug logging to help identify issues
+    log.debug(
+        "Applying player customization: loaded=%s, multipliers=%s",
+        loaded,
+        multipliers,
+    )
+    
     if all(v == 1 for v in multipliers.values()):
+        log.debug("No customizations to apply (all multipliers are 1)")
         return
+        
+    # Store original stats for debugging
+    orig_stats = (player.max_hp, player.atk, player.defense)
+    
     mod = create_stat_buff(
         player,
         name="customization",
@@ -129,6 +142,15 @@ def _apply_player_customization(
         **multipliers,
     )
     player.mods.append(mod.id)
+    
+    # Log the stat changes for debugging
+    log.debug(
+        "Player customization applied: stats changed from %s to (%d, %d, %d)",
+        orig_stats,
+        player.max_hp,
+        player.atk,
+        player.defense,
+    )
 
 def _assign_damage_type(player: PlayerBase) -> None:
     with get_save_manager().connection() as conn:
