@@ -55,9 +55,13 @@ class Player(PlayerBase):
             else:
                 conn = sqlite3.connect(db_path)
             
+            # Ensure options table exists
+            conn.execute("CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)")
+            
             # Load customization stats from options table
             cur = conn.execute("SELECT value FROM options WHERE key = ?", ("player_stats",))
             row = cur.fetchone()
+            
             if row:
                 stats = json.loads(row[0])
                 
@@ -83,6 +87,7 @@ class Player(PlayerBase):
                     "Applied base customization: hp=%d, attack=%d, defense=%d -> final stats hp=%d, atk=%d, def=%d",
                     hp_bonus, attack_bonus, defense_bonus, self.max_hp, self.atk, self.defense
                 )
+                
             conn.close()
                 
         except Exception as e:
