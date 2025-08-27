@@ -149,6 +149,8 @@ class FoeBase(Stats):
         super().adjust_stat_on_loss(target, amount)
 
     async def send_lrm_message(self, message: str) -> str:
+        import asyncio
+        
         try:
             from llms.loader import load_llm
         except Exception:
@@ -158,7 +160,8 @@ class FoeBase(Stats):
 
             llm = _LLM()
         else:
-            llm = load_llm()
+            # Load LLM in thread pool to avoid blocking the event loop
+            llm = await asyncio.to_thread(load_llm)
         context = self.lrm_memory.load_memory_variables({}).get("history", "")
         prompt = f"{context}\n{message}".strip()
         chunks: list[str] = []

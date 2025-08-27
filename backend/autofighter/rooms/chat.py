@@ -19,13 +19,17 @@ class ChatRoom(Room):
     """Chat rooms forward a single message to an LLM character."""
 
     async def resolve(self, party: Party, data: dict[str, Any]) -> dict[str, Any]:
+        import asyncio
+        
         registry = PassiveRegistry()
         for member in party.members:
             await registry.trigger("room_enter", member)
         message = data.get("message", "")
         party_data = [_serialize(p) for p in party.members]
         model = get_option("lrm_model", ModelName.DEEPSEEK.value)
-        llm = load_llm(model)
+        
+        # Load LLM in thread pool to avoid blocking the event loop
+        llm = await asyncio.to_thread(load_llm, model)
         payload = {"party": party_data, "message": message}
         prompt = json.dumps(payload)
         reply = ""

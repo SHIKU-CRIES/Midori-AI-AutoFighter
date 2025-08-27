@@ -52,34 +52,52 @@ def load_llm(model: str | None = None, *, gguf_path: str | None = None) -> Suppo
         min_ram, _ = model_memory_requirements(name)
         ensure_ram(min_ram)
         device = pick_device()
+        # Configure generation parameters to avoid warnings
+        model_kwargs = {
+            "max_new_tokens": 512,
+            "do_sample": True,
+            "temperature": 0.7,
+            "pad_token_id": 50256,  # Common pad token ID
+        }
         if device == 0:
             pipe = pipeline(
                 "text-generation",
                 model=ModelName.DEEPSEEK.value,
                 device_map="auto",
+                model_kwargs=model_kwargs,
             )
         else:
             pipe = pipeline(
                 "text-generation",
                 model=ModelName.DEEPSEEK.value,
                 device=device,
+                model_kwargs=model_kwargs,
             )
         return _LangChainWrapper(HuggingFacePipeline(pipeline=pipe))
     if name == ModelName.GEMMA.value:
         min_ram, _ = model_memory_requirements(name)
         ensure_ram(min_ram)
         device = pick_device()
+        # Configure generation parameters to avoid warnings
+        model_kwargs = {
+            "max_new_tokens": 512,
+            "do_sample": True,
+            "temperature": 0.7,
+            "pad_token_id": 50256,  # Common pad token ID
+        }
         if device == 0:
             pipe = pipeline(
                 "text-generation",
                 model=ModelName.GEMMA.value,
                 device_map="auto",
+                model_kwargs=model_kwargs,
             )
         else:
             pipe = pipeline(
                 "text-generation",
                 model=ModelName.GEMMA.value,
                 device=device,
+                model_kwargs=model_kwargs,
             )
         return _LangChainWrapper(HuggingFacePipeline(pipeline=pipe))
     if name == ModelName.GGUF.value:
