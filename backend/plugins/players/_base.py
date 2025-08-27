@@ -84,8 +84,8 @@ class PlayerBase(Stats):
 
         try:
             from langchain.memory import VectorStoreRetrieverMemory
-            from langchain_chroma import Chroma
             from langchain_community.embeddings import HuggingFaceEmbeddings
+            from langchain_chroma import Chroma
         except (ImportError, ModuleNotFoundError):
             # Fall back to simple in-process memory without deprecations
             self.lrm_memory = _SimpleConversationMemory()
