@@ -28,6 +28,7 @@ from quart import jsonify
 from quart import request
 from routes.assets import bp as assets_bp
 from routes.config import bp as config_bp
+from routes.catalog import bp as catalog_bp
 from routes.gacha import bp as gacha_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp
@@ -49,6 +50,7 @@ app.register_blueprint(runs_bp)
 app.register_blueprint(rooms_bp)
 app.register_blueprint(rewards_bp)
 app.register_blueprint(config_bp)
+app.register_blueprint(catalog_bp)
 
 BACKEND_FLAVOR = os.getenv("UV_EXTRA", "default")
 

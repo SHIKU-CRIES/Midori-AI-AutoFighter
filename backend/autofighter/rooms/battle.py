@@ -250,11 +250,11 @@ class BattleRoom(Room):
                 alive_foe_idxs = [i for i, f in enumerate(foes) if f.hp > 0]
                 if not alive_foe_idxs:
                     break
-                foe_idx = random.choice(alive_foe_idxs)
-                foe = foes[foe_idx]
-                foe_mgr = foe_effects[foe_idx]
+                tgt_idx = random.choice(alive_foe_idxs)
+                tgt_foe = foes[tgt_idx]
+                tgt_mgr = foe_effects[tgt_idx]
                 dt = getattr(member, "damage_type", None)
-                await member_effect.tick(foe_mgr)
+                await member_effect.tick(tgt_mgr)
                 if member.hp <= 0:
                     await registry.trigger("turn_end", member)
                     elapsed = time.perf_counter() - turn_start
@@ -290,15 +290,15 @@ class BattleRoom(Room):
                     if elapsed < 0.5:
                         await asyncio.sleep(0.5 - elapsed)
                     continue
-                dmg = await foe.apply_damage(member.atk, attacker=member)
+                dmg = await tgt_foe.apply_damage(member.atk, attacker=member)
                 if dmg <= 0:
-                    log.info("%s's attack was dodged by %s", member.id, foe.id)
+                    log.info("%s's attack was dodged by %s", member.id, tgt_foe.id)
                 else:
-                    log.info("%s hits %s for %s", member.id, foe.id, dmg)
-                foe_mgr.maybe_inflict_dot(member, dmg)
+                    log.info("%s hits %s for %s", member.id, tgt_foe.id, dmg)
+                tgt_mgr.maybe_inflict_dot(member, dmg)
                 if getattr(member.damage_type, "id", "").lower() == "wind":
                     for extra_idx, extra_foe in enumerate(foes):
-                        if extra_idx == foe_idx or extra_foe.hp <= 0:
+                        if extra_idx == tgt_idx or extra_foe.hp <= 0:
                             continue
                         extra_dmg = await extra_foe.apply_damage(
                             member.atk, attacker=member
@@ -367,12 +367,10 @@ class BattleRoom(Room):
                             "rdr": party.rdr,
                         }
                     )
-                if foe.hp <= 0:
-                    exp_reward += foe.level * 12 + 5 * self.node.index
+                if tgt_foe.hp <= 0:
+                    exp_reward += tgt_foe.level * 12 + 5 * self.node.index
                     try:
-                        label = (
-                            getattr(foe, "name", None) or getattr(foe, "id", "")
-                        ).lower()
+                        label = (getattr(tgt_foe, "name", None) or getattr(tgt_foe, "id", "")).lower()
                         if "slime" in label:
                             for m in combat_party.members:
                                 m.exp_multiplier += 0.025
@@ -386,48 +384,58 @@ class BattleRoom(Room):
                     if all(f.hp <= 0 for f in foes):
                         break
                     continue
-                # If party wiped during this turn, stop taking actions
-                if not any(m.hp > 0 for m in combat_party.members):
-                    break
-                alive = [
+                # Foe actions are handled after all party members act
+                # in a dedicated loop per living foe.
+                # Continue to next party member.
+                continue
+            # End of party member loop
+            # If party wiped during this round, stop taking actions
+            if not any(m.hp > 0 for m in combat_party.members):
+                break
+            # Foes: each living foe takes exactly one action per round
+            for foe_idx, acting_foe in enumerate(foes):
+                if acting_foe.hp <= 0:
+                    continue
+                alive_targets = [
                     (idx, m)
                     for idx, m in enumerate(combat_party.members)
                     if m.hp > 0
                 ]
-                if not alive:
+                if not alive_targets:
                     break
-                idx, target = random.choices(
-                    alive,
-                    weights=[m.defense * m.mitigation for _, m in alive],
+                pidx, target = random.choices(
+                    alive_targets,
+                    weights=[m.defense * m.mitigation for _, m in alive_targets],
                 )[0]
-                target_effect = party_effects[idx]
-                await registry.trigger("turn_start", foe)
-                log.debug("%s turn start targeting %s", foe.id, target.id)
-                await foe.maybe_regain(turn)
-                dt = getattr(foe, "damage_type", None)
+                target_effect = party_effects[pidx]
+                foe_mgr = foe_effects[foe_idx]
+                await registry.trigger("turn_start", acting_foe)
+                log.debug("%s turn start targeting %s", acting_foe.id, target.id)
+                await acting_foe.maybe_regain(turn)
+                dt = getattr(acting_foe, "damage_type", None)
                 await foe_mgr.tick(target_effect)
-                if foe.hp <= 0:
-                    await registry.trigger("turn_end", foe)
+                if acting_foe.hp <= 0:
+                    await registry.trigger("turn_end", acting_foe)
                     continue
                 proceed = await foe_mgr.on_action()
                 if proceed is None:
                     proceed = True
                 if proceed and hasattr(dt, "on_action"):
-                    res = await dt.on_action(foe, foes, combat_party.members)
+                    res = await dt.on_action(acting_foe, foes, combat_party.members)
                     proceed = True if res is None else bool(res)
                 if not proceed:
-                    await registry.trigger("turn_end", foe)
+                    await registry.trigger("turn_end", acting_foe)
                     elapsed = time.perf_counter() - turn_start
                     if elapsed < 0.5:
                         await asyncio.sleep(0.5 - elapsed)
                     continue
-                dmg = await target.apply_damage(foe.atk, attacker=foe)
+                dmg = await target.apply_damage(acting_foe.atk, attacker=acting_foe)
                 if dmg <= 0:
-                    log.info("%s's attack was dodged by %s", foe.id, target.id)
+                    log.info("%s's attack was dodged by %s", acting_foe.id, target.id)
                 else:
-                    log.info("%s hits %s for %s", foe.id, target.id, dmg)
-                target_effect.maybe_inflict_dot(foe, dmg)
-                await registry.trigger("turn_end", foe)
+                    log.info("%s hits %s for %s", acting_foe.id, target.id, dmg)
+                target_effect.maybe_inflict_dot(acting_foe, dmg)
+                await registry.trigger("turn_end", acting_foe)
                 elapsed = time.perf_counter() - turn_start
                 if elapsed < 0.5:
                     await asyncio.sleep(0.5 - elapsed)
