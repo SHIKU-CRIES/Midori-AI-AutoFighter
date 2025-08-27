@@ -96,6 +96,28 @@ Docker images for both services will be published to Docker Hub. Native
 dependencies are handled inside the images, so no manual wheel management is
 required.
 
+## Package Installation
+
+Install prebuilt packages when available:
+
+- **Flatpak**
+
+  ```bash
+  flatpak install org.midori.ai.autofighter
+  ```
+
+- **Arch Linux (AUR)**
+
+  ```bash
+  yay -S autofighter-git
+  ```
+
+- **Debian/Ubuntu**
+
+  ```bash
+  sudo apt install ./autofighter.deb
+  ```
+
 ## Desktop Builds
 
 Scripts under `desktop-builder/` package the app for Windows and Linux. Each
