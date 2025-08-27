@@ -84,13 +84,20 @@ class PlayerBase(Stats):
     lrm_memory: object | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
-        # Minimal, dependency-light memory to avoid LangChain deprecation warnings
+        # Use centralized torch checker instead of individual import attempts
+        from llms.torch_checker import is_torch_available
+        
+        if not is_torch_available():
+            # Fall back to simple in-process memory without dependencies
+            self.lrm_memory = SimpleConversationMemory()
+            return
+        
         try:
             from langchain.memory import VectorStoreRetrieverMemory
             from langchain_chroma import Chroma
             from langchain_huggingface import HuggingFaceEmbeddings
         except (ImportError, ModuleNotFoundError):
-            # Fall back to simple in-process memory without deprecations
+            # Fallback if imports still fail despite torch being available
             self.lrm_memory = SimpleConversationMemory()
             return
 
@@ -159,18 +166,25 @@ class PlayerBase(Stats):
 
     async def send_lrm_message(self, message: str) -> str:
         import asyncio
+        from llms.torch_checker import is_torch_available
         
+        if not is_torch_available():
+            # Return empty response but still save context
+            response = ""
+            self.lrm_memory.save_context({"input": message}, {"output": response})
+            return response
+            
         try:
             from llms.loader import load_llm
+            # Load LLM in thread pool to avoid blocking the event loop
+            llm = await asyncio.to_thread(load_llm)
         except Exception:
+            # Fallback to empty LLM if loading fails
             class _LLM:
                 async def generate_stream(self, text: str):
                     yield ""
-
             llm = _LLM()
-        else:
-            # Load LLM in thread pool to avoid blocking the event loop
-            llm = await asyncio.to_thread(load_llm)
+            
         context = self.lrm_memory.load_memory_variables({}).get("history", "")
         prompt = f"{context}\n{message}".strip()
         chunks: list[str] = []
