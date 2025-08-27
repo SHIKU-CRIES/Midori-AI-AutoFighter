@@ -2,8 +2,8 @@ pkgname=autofighter-git
 pkgver=1.0
 pkgrel=1
 arch=('any')
-depends=('python' 'nodejs')
-source=('git+https://github.com/Midori-AI/Midori-AI-AutoFighter.git')
+depends=('uv' 'bun')
+source=('git+https://github.com/Midori-AI-OSS/Midori-AI-AutoFighter.git')
 md5sums=('SKIP')
 
 pkgver() {
