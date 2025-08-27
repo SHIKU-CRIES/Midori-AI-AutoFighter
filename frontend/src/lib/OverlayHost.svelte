@@ -20,6 +20,7 @@
   import BattleView from './BattleView.svelte';
   import ErrorOverlay from './ErrorOverlay.svelte';
   import BackendNotReady from './BackendNotReady.svelte';
+  import FloatingLoot from './FloatingLoot.svelte';
   import { rewardOpen as computeRewardOpen } from './viewportState.js';
 
   export let selected = [];
@@ -37,6 +38,40 @@
 
   const dispatch = createEventDispatcher();
   $: rewardOpen = computeRewardOpen(roomData, battleActive);
+
+  function titleForItem(item) {
+    if (!item) return '';
+    if (item.name) return item.name;
+    if (item.id === 'ticket') return 'Gacha Ticket';
+    const id = String(item.id || '').toLowerCase();
+    const cap = id.charAt(0).toUpperCase() + id.slice(1);
+    const stars = Number.isFinite(item.stars) ? String(item.stars) : '';
+    return stars ? `${cap} Upgrade (${stars})` : `${cap} Upgrade`;
+  }
+
+  let lootMessages = [];
+  let lootConsumed = false;
+  let lastRoom = null;
+  let msgId = 0;
+  function pushLoot(text) {
+    lootMessages = [...lootMessages, { id: msgId++, text }];
+  }
+  function removeLoot(id) {
+    lootMessages = lootMessages.filter((m) => m.id !== id);
+  }
+  $: if (roomData !== lastRoom) {
+    lootConsumed = false;
+    lastRoom = roomData;
+  }
+  $: if (!lootConsumed && roomData?.loot) {
+    if (roomData.loot.gold) pushLoot(`Gold +${roomData.loot.gold}`);
+    if (roomData.loot.items) {
+      for (const item of roomData.loot.items) {
+        pushLoot(titleForItem(item));
+      }
+    }
+    lootConsumed = true;
+  }
 </script>
 
 {#if $overlayView === 'party'}
@@ -135,10 +170,10 @@
   <OverlaySurface>
     <PopupWindow title="Battle Rewards" maxWidth="880px" maxHeight="95vh" on:close={() => dispatch('nextRoom')}>
       <RewardOverlay
-        gold={roomData.loot?.gold || 0}
+        gold={lootConsumed ? 0 : roomData.loot?.gold || 0}
         cards={roomData.card_choices || []}
         relics={roomData.relic_choices || []}
-        items={roomData.loot?.items || []}
+        items={lootConsumed ? [] : roomData.loot?.items || []}
         partyStats={roomData.party || []}
         ended={Boolean(roomData?.ended)}
         nextRoom={roomData?.next_room}
@@ -189,6 +224,10 @@
     />
   </div>
 {/if}
+
+{#each lootMessages as m, i (m.id)}
+  <FloatingLoot message={m.text} offset={i * 20} on:done={() => removeLoot(m.id)} />
+{/each}
 
 <style>
   .overlay-inset {
