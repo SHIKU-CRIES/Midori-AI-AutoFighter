@@ -1,6 +1,6 @@
 [project]
 name = "autofighter"
-version = "0.1.0"
+version = "0+46b3b6ae6dff630fbeea9172522e407b8c38867d2830c4c66e3da7761f88fa0e"
 description = "Quart backend for Midori AI AutoFighter"
 readme = "README.md"
 requires-python = ">=3.11"
