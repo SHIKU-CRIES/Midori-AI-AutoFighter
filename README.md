@@ -16,6 +16,8 @@ legacy/     # Previous Pygame version (read-only)
 
 1. Install [uv](https://github.com/astral-sh/uv) and
    [bun](https://bun.sh/).
+
+   > **Reminder:** Keep the `version` fields in [`backend/pyproject.toml`](backend/pyproject.toml) and [`frontend/package.json`](frontend/package.json) in sync with the repository `folderhash`; update them with every change.
 2. Start both services with Docker Compose (bind-mounted source):
 
 ```bash
