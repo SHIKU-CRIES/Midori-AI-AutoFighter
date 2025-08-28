@@ -54,8 +54,16 @@ class ShinyPebble(RelicBase):
             BUS.subscribe("turn_start", _reset)
 
     def describe(self, stacks: int) -> str:
-        defense = 3 * stacks
-        mit = 3 * stacks
-        return (
-            f"+{defense}% DEF. The first time each ally is hit, they gain +{mit}% mitigation for one turn."
-        )
+        if stacks == 1:
+            return (
+                "+3% DEF. The first time each ally is hit, they gain +3% mitigation for one turn."
+            )
+        else:
+            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
+            multiplier = (1.03 ** stacks) - 1
+            total_def_pct = round(multiplier * 100, 2)
+            mit = 3 * stacks
+            return (
+                f"+{total_def_pct}% DEF ({stacks} stacks, multiplicative). "
+                f"The first time each ally is hit, they gain +{mit}% mitigation for one turn."
+            )

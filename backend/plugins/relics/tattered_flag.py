@@ -30,5 +30,10 @@ class TatteredFlag(RelicBase):
         BUS.subscribe("damage_taken", _fallen)
 
     def describe(self, stacks: int) -> str:
-        hp = 3 * stacks
-        return f"+{hp}% party Max HP; ally deaths grant survivors +3% ATK."
+        if stacks == 1:
+            return "+3% party Max HP; ally deaths grant survivors +3% ATK."
+        else:
+            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
+            multiplier = (1.03 ** stacks) - 1
+            total_hp_pct = round(multiplier * 100, 2)
+            return f"+{total_hp_pct}% party Max HP ({stacks} stacks, multiplicative); ally deaths grant survivors +3% ATK."

@@ -26,5 +26,10 @@ class FallbackEssence(RelicBase):
     )
 
     def describe(self, stacks: int) -> str:
-        pct = 1 * stacks
-        return f"When the card pool is exhausted, grants +{pct}% to all stats per stack."
+        if stacks == 1:
+            return "When the card pool is exhausted, grants +1% to core combat stats."
+        else:
+            # Calculate actual multiplicative bonus: (1.01)^stacks - 1
+            multiplier = (1.01 ** stacks) - 1
+            total_pct = round(multiplier * 100, 2)
+            return f"When the card pool is exhausted, grants +{total_pct}% to core combat stats ({stacks} stacks, multiplicative)."

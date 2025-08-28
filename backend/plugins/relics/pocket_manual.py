@@ -36,6 +36,11 @@ class PocketManual(RelicBase):
         BUS.subscribe("hit_landed", _hit)
 
     def describe(self, stacks: int) -> str:
-        dmg = 3 * stacks
-        aftertaste_dmg = 3 * stacks
-        return f"+{dmg}% damage; every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."
+        if stacks == 1:
+            return "+3% damage; every 10th hit triggers an additional Aftertaste hit dealing +3% of the original damage."
+        else:
+            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
+            multiplier = (1.03 ** stacks) - 1
+            total_dmg_pct = round(multiplier * 100, 2)
+            aftertaste_dmg = 3 * stacks
+            return f"+{total_dmg_pct}% damage ({stacks} stacks, multiplicative); every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."
