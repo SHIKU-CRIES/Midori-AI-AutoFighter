@@ -4,6 +4,7 @@
 
   export let hots = [];
   export let dots = [];
+  export let active_effects = []; // For special effects like aftertaste, crit boost
   // layout: 'overlay' positions icons inside the portrait frame.
   // layout: 'bar' renders a horizontal bar (used by the Buff Bar under portraits).
   export let layout = 'overlay';
@@ -16,6 +17,33 @@
     if (effect.turns) parts.push(`Turns: ${effect.turns}`);
     if (effect.source) parts.push(`Src: ${effect.source}`);
     return parts.join(' | ');
+  }
+
+  function formatEffectTooltip(effect) {
+    if (!effect) return '';
+    let description = '';
+    
+    // Special descriptions for known effects
+    if (effect.name === 'aftertaste') {
+      description = 'Deals additional damage after the main attack';
+    } else if (effect.name === 'critical_boost') {
+      description = 'Increases critical hit rate and damage until hit';
+    } else {
+      // Generic description from modifiers
+      const modParts = [];
+      if (effect.modifiers) {
+        for (const [stat, value] of Object.entries(effect.modifiers)) {
+          const sign = value > 0 ? '+' : '';
+          modParts.push(`${stat}: ${sign}${value}`);
+        }
+      }
+      description = modParts.join(', ') || 'Unknown effect';
+    }
+    
+    let tooltip = effect.name || 'Unknown Effect';
+    if (description) tooltip += `: ${description}`;
+    if (effect.duration > 0) tooltip += ` (${effect.duration} turns)`;
+    return tooltip;
   }
   // internal state for bar layout paging
   let startIndex = 0;
@@ -74,6 +102,12 @@
           style={`border-color: ${getElementColor(getDotElement(dot))}`}
         />
         {#if dot.stacks > 1}<span class="stack inside">{dot.stacks}</span>{/if}
+      </span>
+    {/each}
+    <!-- Special Effects (aftertaste, crit boost, etc.) -->
+    {#each (active_effects || []) as effect}
+      <span class="special-effect" title={formatEffectTooltip(effect)}>
+        {effect.name}
       </span>
     {/each}
   {/if}
@@ -147,5 +181,19 @@
     color: #fff;
     text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     pointer-events: none;
+  }
+  
+  /* Special Effects styling */
+  .special-effect {
+    display: inline-block;
+    padding: 2px 6px;
+    background: rgba(0, 100, 255, 0.8);
+    color: white;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.6);
+    border: 1px solid rgba(0, 150, 255, 0.9);
+    cursor: help;
   }
 </style>

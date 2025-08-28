@@ -83,6 +83,10 @@ class Stats:
     damage_dealt: int = 0
     kills: int = 0
     last_damage_taken: int = 0
+    
+    # Overheal system (for shields from relics/cards)
+    overheal_enabled: bool = field(default=False, init=False)
+    shields: int = field(default=0, init=False)  # Amount of overheal/shields
 
     # Collections
     passives: list[str] = field(default_factory=list)
@@ -372,7 +376,17 @@ class Stats:
             log.info("Critical hit! %s -> %s for %s", attacker.id, self.id, amount)
         self.last_damage_taken = amount
         self.damage_taken += amount
-        self.hp = max(self.hp - amount, 0)
+        
+        # Handle shields/overheal absorption first
+        if self.shields > 0:
+            shield_absorbed = min(amount, self.shields)
+            self.shields -= shield_absorbed
+            amount -= shield_absorbed
+            
+        # Apply remaining damage to HP
+        if amount > 0:
+            self.hp = max(self.hp - amount, 0)
+            
         BUS.emit("damage_taken", self, attacker, amount)
         if attacker is not None:
             attacker.damage_dealt += amount
@@ -403,11 +417,40 @@ class Stats:
         if enr > 0:
             amount *= max(1.0 - enr, 0.0)
         amount = int(amount)
-        self.hp = min(self.hp + amount, self.max_hp)
+        
+        # Handle overheal/shields if enabled
+        if self.overheal_enabled:
+            if self.hp < self.max_hp:
+                # Heal normal HP first
+                normal_heal = min(amount, self.max_hp - self.hp)
+                self.hp += normal_heal
+                amount -= normal_heal
+            
+            # Add any remaining healing as shields
+            if amount > 0:
+                self.shields += amount
+        else:
+            # Standard healing - cap at max HP
+            self.hp = min(self.hp + amount, self.max_hp)
+            
         BUS.emit("heal_received", self, healer, amount)
         if healer is not None:
             BUS.emit("heal", healer, self, amount)
         return amount
+
+    def enable_overheal(self) -> None:
+        """Enable overheal/shields for this entity (typically from relic/card effects)."""
+        self.overheal_enabled = True
+        
+    def disable_overheal(self) -> None:
+        """Disable overheal/shields and remove any existing shields."""
+        self.overheal_enabled = False
+        self.shields = 0
+
+    @property
+    def effective_hp(self) -> int:
+        """Get total effective HP (actual HP + shields)."""
+        return self.hp + self.shields
 
 
 StatusHook = Callable[["Stats"], None]
