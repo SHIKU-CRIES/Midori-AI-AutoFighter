@@ -201,7 +201,7 @@ async def end_run(run_id: str) -> tuple[str, int, dict[str, str]]:
         if task is not None and not task.done():
             task.cancel()
             try:
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.001)
             except Exception:
                 pass
     except Exception:

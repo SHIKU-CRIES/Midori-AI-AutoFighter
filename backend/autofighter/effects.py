@@ -1,4 +1,5 @@
 import asyncio
+import math
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -24,14 +25,42 @@ class StatModifier:
     def apply(self) -> None:
         """Apply configured modifiers to the stats object."""
 
+        # Safe application: clamp extreme values and avoid inf/NaN conversions
+        MAX_ABS = 10**12
         for name, value in (self.deltas or {}).items():
             current = getattr(self.stats, name, 0)
             self._originals.setdefault(name, current)
-            setattr(self.stats, name, current + value)
+            try:
+                new_val = current + value
+                if isinstance(new_val, (int, float)):
+                    if not math.isfinite(float(new_val)):
+                        new_val = 0
+                    if abs(float(new_val)) > MAX_ABS:
+                        new_val = MAX_ABS if new_val > 0 else -MAX_ABS
+                setattr(self.stats, name, type(current)(new_val))
+            except Exception:
+                # Fallback: set without casting
+                setattr(self.stats, name, new_val)
         for name, value in (self.multipliers or {}).items():
             current = getattr(self.stats, name, 0)
             self._originals.setdefault(name, current)
-            setattr(self.stats, name, type(current)(current * value))
+            try:
+                new_val = float(current) * float(value)
+                if not math.isfinite(new_val):
+                    new_val = MAX_ABS if current >= 0 else -MAX_ABS
+                if abs(new_val) > MAX_ABS:
+                    new_val = MAX_ABS if new_val > 0 else -MAX_ABS
+                # Preserve integer fields as integers
+                if isinstance(current, int) and not isinstance(current, bool):
+                    setattr(self.stats, name, int(new_val))
+                else:
+                    setattr(self.stats, name, type(current)(new_val))
+            except Exception:
+                # As a last resort, avoid crashing the battle loop
+                try:
+                    setattr(self.stats, name, current)
+                except Exception:
+                    pass
 
     def remove(self) -> None:
         """Restore original stat values."""

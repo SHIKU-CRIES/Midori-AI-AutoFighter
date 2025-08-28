@@ -203,7 +203,7 @@ class BattleRoom(Room):
         ):
             for member_effect, member in zip(party_effects, combat_party.members, strict=False):
                 if member.hp <= 0:
-                    await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
                     continue
                 turn += 1
                 if turn > threshold:
@@ -259,10 +259,7 @@ class BattleRoom(Room):
                 if member.hp <= 0:
                     await registry.trigger("turn_end", member)
                     elapsed = time.perf_counter() - turn_start
-                    if elapsed < 0.5:
-                        await asyncio.sleep(0.5 - elapsed)
-                    else:
-                        await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
                     continue
                 proceed = await member_effect.on_action()
                 if proceed is None:
@@ -290,10 +287,7 @@ class BattleRoom(Room):
                             }
                         )
                     elapsed = time.perf_counter() - turn_start
-                    if elapsed < 0.5:
-                        await asyncio.sleep(0.5 - elapsed)
-                    else:
-                        await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
                     continue
                 dmg = await tgt_foe.apply_damage(member.atk, attacker=member)
                 if dmg <= 0:
@@ -304,7 +298,7 @@ class BattleRoom(Room):
                 if getattr(member.damage_type, "id", "").lower() == "wind":
                     for extra_idx, extra_foe in enumerate(foes):
                         if extra_idx == tgt_idx or extra_foe.hp <= 0:
-                            await asyncio.sleep(0)
+                            await asyncio.sleep(0.001)
                             continue
                         extra_dmg = await extra_foe.apply_damage(
                             member.atk, attacker=member
@@ -385,18 +379,15 @@ class BattleRoom(Room):
                     except Exception:
                         pass
                     elapsed = time.perf_counter() - turn_start
-                    if elapsed < 0.5:
-                        await asyncio.sleep(0.5 - elapsed)
-                    else:
-                        await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
                     if all(f.hp <= 0 for f in foes):
                         break
-                    await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
                     continue
                 # Foe actions are handled after all party members act
                 # in a dedicated loop per living foe.
                 # Continue to next party member.
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.001)
                 continue
             # End of party member loop
             # If party wiped during this round, stop taking actions
@@ -405,7 +396,7 @@ class BattleRoom(Room):
             # Foes: each living foe takes exactly one action per round
             for foe_idx, acting_foe in enumerate(foes):
                 if acting_foe.hp <= 0:
-                    await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
                     continue
                 alive_targets = [
                     (idx, m)
@@ -427,7 +418,7 @@ class BattleRoom(Room):
                 await foe_mgr.tick(target_effect)
                 if acting_foe.hp <= 0:
                     await registry.trigger("turn_end", acting_foe)
-                    await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
                     continue
                 proceed = await foe_mgr.on_action()
                 if proceed is None:
@@ -438,11 +429,8 @@ class BattleRoom(Room):
                 if not proceed:
                     await registry.trigger("turn_end", acting_foe)
                     elapsed = time.perf_counter() - turn_start
-                    if elapsed < 0.5:
-                        await asyncio.sleep(0.5 - elapsed)
-                    else:
-                        await asyncio.sleep(0)
-                    await asyncio.sleep(0)
+                    await asyncio.sleep(0.001)
+                    await asyncio.sleep(0.001)
                     continue
                 dmg = await target.apply_damage(acting_foe.atk, attacker=acting_foe)
                 if dmg <= 0:
@@ -452,10 +440,7 @@ class BattleRoom(Room):
                 target_effect.maybe_inflict_dot(acting_foe, dmg)
                 await registry.trigger("turn_end", acting_foe)
                 elapsed = time.perf_counter() - turn_start
-                if elapsed < 0.5:
-                    await asyncio.sleep(0.5 - elapsed)
-                else:
-                    await asyncio.sleep(0)
+                await asyncio.sleep(0.001)
         # Signal completion as soon as the loop ends to help UIs stop polling
         # immediately, even before rewards are fully computed.
         if progress is not None:
