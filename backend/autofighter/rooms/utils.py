@@ -18,15 +18,19 @@ from ..stats import Stats
 def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     """Scale foe stats based on room metadata.
 
-    Foes grow stronger with floor, room index, loop count, and user-set pressure.
+    Foes grow stronger with cumulative room progression across floors, loop count, and user-set pressure.
+    Each floor adds 45 rooms worth of stat progression (rooms_per_floor from MapGenerator).
     Small per-stat variation keeps battles from feeling identical.
     """
+    from ..mapgen import MapGenerator
+    
     starter_int = 1.0 + random.uniform(-0.05, 0.05)
-    floor_mult = starter_int + 0.08 * max(node.floor - 1, 0)
-    index_mult = starter_int + 0.10 * max(node.index - 1, 0)
+    # Calculate cumulative room progression: (floors - 1) * rooms_per_floor + current_room_index
+    cumulative_rooms = (node.floor - 1) * MapGenerator.rooms_per_floor + node.index
+    room_mult = starter_int + 0.10 * max(cumulative_rooms - 1, 0)
     loop_mult = starter_int + 0.20 * max(node.loop - 1, 0)
     pressure_mult = 1.0 * max(node.pressure, 1)
-    base_mult = max(strength * floor_mult * index_mult * loop_mult * pressure_mult, 0.5)
+    base_mult = max(strength * room_mult * loop_mult * pressure_mult, 0.5)
 
     # Apply a global pre-scale debuff to foes so they are significantly weaker
     # before room modifiers are applied. This reduces core combat stats by 10x.
