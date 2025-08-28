@@ -87,6 +87,24 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     except Exception:
         pass
 
+    # Enforce a minimum defense value for foes so they are not trivially zeroed.
+    try:
+        if isinstance(obj, FoeBase):
+            d = getattr(obj, "defense", None)
+            if isinstance(d, (int, float)):
+                new_def = max(25, int(d))
+                # For foes, 'defense' is a dataclass field; set the field directly
+                try:
+                    setattr(obj, "defense", type(d)(new_def))
+                except Exception:
+                    # As a fallback, adjust base stat
+                    try:
+                        obj.set_base_stat("defense", new_def)
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
     try:
         if isinstance(obj, FoeBase):
             vit = getattr(obj, "vitality", None)
@@ -95,13 +113,19 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
                 step = 0.25
                 base_slow = 5.0
                 fvit = float(vit)
-                if fvit > thr:
+                if fvit < thr:
+                    fvit = thr
+                else:
                     excess = fvit - thr
                     steps = int(excess // step)
                     factor = base_slow + steps
                     fvit = thr + (excess / factor)
-                    fvit = max(fvit, 0.25)
-                    obj.vitality = type(vit)(fvit)
+                    fvit = max(fvit, thr)
+                # Foes use dataclass fields, so set the live field directly
+                try:
+                    setattr(obj, "vitality", type(vit)(fvit))
+                except Exception:
+                    pass
     except Exception:
         pass
 
@@ -113,13 +137,19 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
                 step = 0.01
                 base_slow = 5.0
                 fmit = float(mit)
-                if fmit > thr:
+                if fmit < thr:
+                    fmit = thr
+                else:
                     excess = fmit - thr
                     steps = int(excess // step)
                     factor = base_slow + steps
                     fmit = thr + (excess / factor)
-                    fmit = max(fmit, 0.2)
-                    obj.mitigation = type(mit)(fmit)
+                    fmit = max(fmit, thr)
+                # Foes use dataclass fields, so set the live field directly
+                try:
+                    setattr(obj, "mitigation", type(mit)(fmit))
+                except Exception:
+                    pass
     except Exception:
         pass
 
@@ -258,6 +288,42 @@ def _serialize(obj: Stats) -> dict[str, Any]:
 
     data["dots"] = dots
     data["hots"] = hots
+
+    # Ensure in-run (runtime) stats are present even when implemented as @property
+    # on the Stats dataclass. For foes (plain dataclasses), fall back to raw attrs.
+    def _num(get, default=0):
+        try:
+            v = get()
+            return v if isinstance(v, (int, float)) else default
+        except Exception:
+            return default
+
+    if isinstance(obj, Stats):
+        data["max_hp"] = int(_num(lambda: obj.max_hp, data.get("max_hp", 0)))
+        data["atk"] = int(_num(lambda: obj.atk, data.get("atk", 0)))
+        data["defense"] = int(_num(lambda: obj.defense, data.get("defense", 0)))
+        data["crit_rate"] = float(_num(lambda: obj.crit_rate, data.get("crit_rate", 0.0)))
+        data["crit_damage"] = float(_num(lambda: obj.crit_damage, data.get("crit_damage", 2.0)))
+        data["effect_hit_rate"] = float(_num(lambda: obj.effect_hit_rate, data.get("effect_hit_rate", 0.0)))
+        data["effect_resistance"] = float(_num(lambda: obj.effect_resistance, data.get("effect_resistance", 0.0)))
+        data["mitigation"] = float(_num(lambda: obj.mitigation, data.get("mitigation", 1.0)))
+        data["vitality"] = float(_num(lambda: obj.vitality, data.get("vitality", 1.0)))
+        data["regain"] = int(_num(lambda: obj.regain, data.get("regain", 0)))
+        data["dodge_odds"] = float(_num(lambda: obj.dodge_odds, data.get("dodge_odds", 0.0)))
+    else:
+        # Non-Stats objects: keep provided values if present
+        data.setdefault("max_hp", int(getattr(obj, "max_hp", data.get("max_hp", 0)) or 0))
+        data.setdefault("atk", int(getattr(obj, "atk", data.get("atk", 0)) or 0))
+        data.setdefault("defense", int(getattr(obj, "defense", data.get("defense", 0)) or 0))
+        data.setdefault("crit_rate", float(getattr(obj, "crit_rate", data.get("crit_rate", 0.0)) or 0.0))
+        data.setdefault("crit_damage", float(getattr(obj, "crit_damage", data.get("crit_damage", 2.0)) or 2.0))
+        data.setdefault("effect_hit_rate", float(getattr(obj, "effect_hit_rate", data.get("effect_hit_rate", 0.0)) or 0.0))
+        data.setdefault("effect_resistance", float(getattr(obj, "effect_resistance", data.get("effect_resistance", 0.0)) or 0.0))
+        data.setdefault("mitigation", float(getattr(obj, "mitigation", data.get("mitigation", 1.0)) or 1.0))
+        data.setdefault("vitality", float(getattr(obj, "vitality", data.get("vitality", 1.0)) or 1.0))
+        data.setdefault("regain", int(getattr(obj, "regain", data.get("regain", 0)) or 0))
+        data.setdefault("dodge_odds", float(getattr(obj, "dodge_odds", data.get("dodge_odds", 0.0)) or 0.0))
+
     return data
 
 

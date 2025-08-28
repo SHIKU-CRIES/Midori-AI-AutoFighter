@@ -197,10 +197,24 @@ class BattleRoom(Room):
                     "rdr": party.rdr,
                 }
             )
+        # Helper to pace actions: ensure at least 0.5s per actor action
+        async def _pace(start_time: float) -> None:
+            try:
+                elapsed = asyncio.get_event_loop().time() - start_time
+            except Exception:
+                elapsed = 0.0
+            wait = 0.5 - elapsed
+            if wait > 0:
+                try:
+                    await asyncio.sleep(wait)
+                except Exception:
+                    pass
+
         while any(f.hp > 0 for f in foes) and any(
             m.hp > 0 for m in combat_party.members
         ):
             for member_effect, member in zip(party_effects, combat_party.members, strict=False):
+                action_start = asyncio.get_event_loop().time()
                 if member.hp <= 0:
                     await asyncio.sleep(0.001)
                     continue
@@ -283,6 +297,7 @@ class BattleRoom(Room):
                                 "rdr": party.rdr,
                             }
                         )
+                    await _pace(action_start)
                     await asyncio.sleep(0.001)
                     continue
                 dmg = await tgt_foe.apply_damage(member.atk, attacker=member)
@@ -363,6 +378,7 @@ class BattleRoom(Room):
                             "rdr": party.rdr,
                         }
                     )
+                await _pace(action_start)
                 if tgt_foe.hp <= 0:
                     exp_reward += tgt_foe.level * 12 + 5 * self.node.index
                     try:
@@ -390,6 +406,7 @@ class BattleRoom(Room):
                 break
             # Foes: each living foe takes exactly one action per round
             for foe_idx, acting_foe in enumerate(foes):
+                action_start = asyncio.get_event_loop().time()
                 if acting_foe.hp <= 0:
                     await asyncio.sleep(0.001)
                     continue
@@ -433,6 +450,7 @@ class BattleRoom(Room):
                     log.info("%s hits %s for %s", acting_foe.id, target.id, dmg)
                 target_effect.maybe_inflict_dot(acting_foe, dmg)
                 await registry.trigger("turn_end", acting_foe)
+                await _pace(action_start)
                 await asyncio.sleep(0.001)
         # Signal completion as soon as the loop ends to help UIs stop polling
         # immediately, even before rewards are fully computed.

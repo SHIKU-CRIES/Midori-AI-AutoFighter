@@ -87,6 +87,7 @@
     padding-left: 1rem;
     text-align: left;
   }
+  
 </style>
 
 <div class="layout">
@@ -106,6 +107,7 @@
         {/each}
     </div>
   {/if}
+  
   {#if items.length}
     <h3 class="section-title">Drops</h3>
     <div class="status">

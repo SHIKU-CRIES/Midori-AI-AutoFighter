@@ -228,9 +228,27 @@ async def advance_room(run_id: str) -> tuple[str, int, dict[str, object]]:
         return jsonify({"error": "not ready"}), 400
     state["current"] += 1
     state["awaiting_next"] = False
-    next_type = (
-        rooms[state["current"]].room_type if state["current"] < len(rooms) else None
-    )
+
+    # If we have advanced past the end of the current floor, generate a new floor.
+    if state["current"] >= len(rooms):
+        try:
+            last = rooms[-1]
+            next_floor = int(getattr(last, "floor", 1)) + 1
+            loop = int(getattr(last, "loop", 1))
+            pressure = int(getattr(last, "pressure", 0))
+        except Exception:
+            next_floor, loop, pressure = 1, 1, 0
+
+        # Generate the next floor using a seed derived from run_id and floor
+        generator = MapGenerator(f"{run_id}-floor-{next_floor}", floor=next_floor, loop=loop, pressure=pressure)
+        nodes = generator.generate_floor()
+        state["rooms"] = [n.to_dict() for n in nodes]
+        state["current"] = 1  # enter at room index 1 (after start)
+        next_type = nodes[state["current"]].room_type if state["current"] < len(nodes) else None
+    else:
+        # Continue within the current floor
+        next_type = rooms[state["current"]].room_type if state["current"] < len(rooms) else None
+
     await asyncio.to_thread(save_map, run_id, state)
     return jsonify({"next_room": next_type, "current_index": state["current"]})
 

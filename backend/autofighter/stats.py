@@ -162,6 +162,14 @@ class Stats:
         """Calculate runtime mitigation (base + effects)."""
         return max(0.1, self._base_mitigation + self._calculate_stat_modifier('mitigation'))
 
+    @mitigation.setter
+    def mitigation(self, value: float) -> None:  # type: ignore[override]
+        try:
+            self._base_mitigation = float(value)
+        except Exception:
+            # Fallback to no-op on invalid values
+            pass
+
     @property
     def regain(self) -> int:
         """Calculate runtime regain (base + effects)."""
@@ -181,6 +189,13 @@ class Stats:
     def vitality(self) -> float:
         """Calculate runtime vitality (base + effects)."""
         return max(0.01, self._base_vitality + self._calculate_stat_modifier('vitality'))
+
+    @vitality.setter
+    def vitality(self, value: float) -> None:  # type: ignore[override]
+        try:
+            self._base_vitality = float(value)
+        except Exception:
+            pass
 
     def _calculate_stat_modifier(self, stat_name: str) -> Union[int, float]:
         """Calculate the total modifier for a stat from all active effects."""

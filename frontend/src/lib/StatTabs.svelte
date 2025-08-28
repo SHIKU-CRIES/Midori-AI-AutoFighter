@@ -27,16 +27,44 @@
   }
 
   // Helper function to format stat display
+  // Supports percentage-style values by multiplying by 100 when suffix === '%'.
   function formatStat(runtimeValue, baseValue, suffix = '') {
-    if (baseValue !== undefined && runtimeValue !== baseValue) {
-      const modifier = runtimeValue - baseValue;
+    const isPercent = suffix === '%';
+    const rv = runtimeValue == null ? null : (isPercent ? runtimeValue * 100 : runtimeValue);
+    const bv = baseValue == null ? null : (isPercent ? baseValue * 100 : baseValue);
+
+    if (bv !== null && rv !== null && rv !== bv) {
+      const modifier = rv - bv;
       const sign = modifier >= 0 ? '+' : '';
-      return `${runtimeValue}${suffix} (${baseValue}${sign}${modifier})`;
+      const show = (v) => (Number.isInteger(v) ? v : v.toFixed(1));
+      return `${show(rv)}${suffix} (${show(bv)}${sign}${show(modifier)})`;
     }
-    return `${runtimeValue ?? '-'}${suffix}`;
+    if (rv === null) return '-';
+    return `${Number.isInteger(rv) ? rv : rv.toFixed(1)}${suffix}`;
   }
 
-  // Helper to get base stat value
+  // Helper to format multiplier-style values (e.g., 1.0 -> 1x)
+  function formatMult(runtimeValue, baseValue) {
+    const rv = runtimeValue == null ? null : Number(runtimeValue);
+    const bv = baseValue == null ? null : Number(baseValue);
+    const show = (v) => {
+      if (v == null || !isFinite(v)) return '-';
+      // Prefer integer when close, else show up to 2 decimals
+      const rounded = Math.round(v);
+      return Math.abs(v - rounded) < 1e-6 ? String(rounded) : v.toFixed(2);
+    };
+    if (rv === null) return '-';
+    if (bv !== null && rv !== bv) {
+      const modifier = rv - bv;
+      const sign = modifier >= 0 ? '+' : '';
+      return `${show(rv)}x (${show(bv)}${sign}${show(modifier)})`;
+    }
+    return `${show(rv)}x`;
+  }
+
+  // Helper to get base stat value (legacy).
+  // In current in-run refactor, base comparisons may be unavailable;
+  // this returns undefined to suppress base deltas unless provided.
   function getBaseStat(character, statName) {
     return character.stats?.base_stats?.[statName];
   }
@@ -74,7 +102,7 @@
             </span>
           </div>
           <div><span>EXP</span><span>{sel.stats.exp ?? sel.stats.xp ?? '-'}</span></div>
-          <div><span>Vitality</span><span>{formatStat(sel.stats.vitality ?? sel.stats.vita, getBaseStat(sel, 'vitality'))}</span></div>
+          <div><span>Vitality</span><span>{formatMult(sel.stats.vitality ?? sel.stats.vita, getBaseStat(sel, 'vitality'))}</span></div>
           <div><span>Regain</span><span>{formatStat(sel.stats.regain ?? sel.stats.regain_rate, getBaseStat(sel, 'regain'))}</span></div>
         {:else if activeTab === 'Offense'}
           <div><span>ATK</span><span>{formatStat(sel.stats.atk, getBaseStat(sel, 'atk'))}</span></div>
@@ -83,9 +111,9 @@
           <div><span>Effect Hit Rate</span><span>{formatStat((sel.stats.effectHit ?? sel.stats.effect_hit_rate ?? 0), getBaseStat(sel, 'effect_hit_rate'), '%')}</span></div>
         {:else if activeTab === 'Defense'}
           <div><span>DEF</span><span>{formatStat(sel.stats.defense, getBaseStat(sel, 'defense'))}</span></div>
-          <div><span>Mitigation</span><span>{formatStat(sel.stats.mitigation, getBaseStat(sel, 'mitigation'))}</span></div>
-          <div><span>Dodge Odds</span><span>{formatStat(sel.stats.dodge_odds, getBaseStat(sel, 'dodge_odds'))}</span></div>
-          <div><span>Effect Resist</span><span>{formatStat(sel.stats.effectResist ?? sel.stats.effect_resistance, getBaseStat(sel, 'effect_resistance'))}</span></div>
+          <div><span>Mitigation</span><span>{formatMult(sel.stats.mitigation, getBaseStat(sel, 'mitigation'))}</span></div>
+          <div><span>Dodge Odds</span><span>{formatStat(sel.stats.dodge_odds, getBaseStat(sel, 'dodge_odds'), '%')}</span></div>
+          <div><span>Effect Resist</span><span>{formatStat(sel.stats.effectResist ?? sel.stats.effect_resistance, getBaseStat(sel, 'effect_resistance'), '%')}</span></div>
         {:else if activeTab === 'Effects'}
           {#if sel.stats.active_effects && sel.stats.active_effects.length > 0}
             <div class="effects-header">Active Effects:</div>
@@ -98,7 +126,9 @@
                 {/if}
                 <div class="effect-modifiers">
                   {#each Object.entries(effect.modifiers) as [stat, value]}
-                    <span class="modifier">{stat}: {value >= 0 ? '+' : ''}{value}</span>
+                    <span class="modifier" class:negative={value < 0} class:positive={value >= 0}>
+                      {stat}: {value >= 0 ? '+' : ''}{value}
+                    </span>
                   {/each}
                 </div>
               </div>
@@ -241,7 +271,7 @@ button.confirm {
   border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
-.modifier:has-text('-') {
+.modifier.negative {
   color: #f44336;
   border-color: rgba(244, 67, 54, 0.3);
 }

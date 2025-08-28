@@ -126,6 +126,12 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
 async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
     state, rooms = await asyncio.to_thread(load_map, run_id)
+    # Guard against empty or out-of-range room indices (e.g., after end-of-run)
+    if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
+        snap = battle_snapshots.get(run_id)
+        if snap is not None:
+            return jsonify(snap)
+        return jsonify({"error": "run ended or room out of range"}), 404
     node = rooms[state["current"]]
     if node.room_type != "shop":
         return jsonify({"error": "invalid room"}), 400

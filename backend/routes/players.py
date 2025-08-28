@@ -76,6 +76,43 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
                 data[name] = dict(value)
             else:
                 data[name] = str(value)
+
+        # Append in-run (computed) stats so the Party Picker can show live values
+        try:
+            data["max_hp"] = int(getattr(obj, "max_hp"))
+            data["atk"] = int(getattr(obj, "atk"))
+            data["defense"] = int(getattr(obj, "defense"))
+            data["crit_rate"] = float(getattr(obj, "crit_rate"))
+            data["crit_damage"] = float(getattr(obj, "crit_damage"))
+            data["effect_hit_rate"] = float(getattr(obj, "effect_hit_rate"))
+            data["effect_resistance"] = float(getattr(obj, "effect_resistance"))
+            data["mitigation"] = float(getattr(obj, "mitigation"))
+            data["vitality"] = float(getattr(obj, "vitality"))
+            data["regain"] = int(getattr(obj, "regain"))
+            data["dodge_odds"] = float(getattr(obj, "dodge_odds"))
+        except Exception:
+            # If any property access fails, leave as-is
+            pass
+
+        # Provide base_stats map when available for delta display
+        try:
+            getb = getattr(obj, "get_base_stat")
+            data["base_stats"] = {
+                "max_hp": getb("max_hp"),
+                "atk": getb("atk"),
+                "defense": getb("defense"),
+                "crit_rate": getb("crit_rate"),
+                "crit_damage": getb("crit_damage"),
+                "effect_hit_rate": getb("effect_hit_rate"),
+                "effect_resistance": getb("effect_resistance"),
+                "mitigation": getb("mitigation"),
+                "vitality": getb("vitality"),
+                "regain": getb("regain"),
+                "dodge_odds": getb("dodge_odds"),
+            }
+        except Exception:
+            pass
+
         return data
 
     def get_owned_players():
