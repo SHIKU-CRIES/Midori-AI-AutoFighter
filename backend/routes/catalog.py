@@ -7,7 +7,6 @@ from quart import jsonify
 from autofighter.cards import _registry as card_registry
 from autofighter.relics import _registry as relic_registry
 
-
 bp = Blueprint("catalog", __name__, url_prefix="/catalog")
 
 
