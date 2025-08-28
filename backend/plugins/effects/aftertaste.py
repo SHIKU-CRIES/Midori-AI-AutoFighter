@@ -23,7 +23,7 @@ class Aftertaste:
     use_weighted_random: bool = True  # Favor attacker's damage type
 
     # Available damage types for random selection
-    _damage_types = [Generic, Fire, Ice, Wind, Lightning, Light, Dark]
+    _damage_types = [Fire, Ice, Wind, Lightning, Light, Dark]
 
     def _get_random_damage_type(self, attacker: Stats = None):
         """Get a random damage type, optionally weighted toward attacker's type."""
@@ -33,7 +33,7 @@ class Aftertaste:
             return damage_type_class()
 
         # Weighted selection favoring attacker's damage type
-        attacker_type_id = getattr(attacker.damage_type, 'id', 'Generic')
+        attacker_type_id = getattr(attacker.damage_type, 'id', 'Light')
 
         # Find the attacker's damage type class
         attacker_damage_class = None
@@ -43,10 +43,10 @@ class Aftertaste:
                 break
 
         if attacker_damage_class is None:
-            attacker_damage_class = Generic
+            attacker_damage_class = Light
 
-        # Create weighted selection: 50% chance for attacker's type, 50% for others
-        if self.rng.random() < 0.5:
+        # Create weighted selection: 25% chance for attacker's type, 50% for others
+        if self.rng.random() < 0.25:
             return attacker_damage_class()
         else:
             # Select from remaining types
