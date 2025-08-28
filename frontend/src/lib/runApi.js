@@ -1,0 +1,107 @@
+// Lightweight wrappers for run-related API calls.
+// Each helper talks to the backend and returns JSON payloads.
+
+import { openOverlay } from './OverlayController.js';
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:59002';
+
+async function handleFetch(url, options = {}) {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      let data;
+      try { data = await res.json(); } catch {}
+      const message = data?.message || `HTTP error ${res.status}`;
+      const traceback = data?.traceback || '';
+      if (res.status !== 404) {
+        openOverlay('error', { message, traceback });
+      }
+      const err = new Error(message);
+      err.status = res.status;
+      err.overlayShown = true;
+      throw err;
+    }
+    return res.json();
+  } catch (e) {
+    if (!e.overlayShown) {
+      openOverlay('error', { message: e.message, traceback: e.stack || '' });
+    }
+    throw e;
+  }
+}
+
+export async function startRun(party, damageType = '') {
+  return handleFetch(`${API_BASE}/run/start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ party, damage_type: damageType })
+  });
+}
+
+export async function getMap(runId) {
+  try {
+    const res = await fetch(`${API_BASE}/map/${runId}`, { cache: 'no-store' });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      let data;
+      try { data = await res.json(); } catch {}
+      const message = data?.message || `HTTP error ${res.status}`;
+      const traceback = data?.traceback || '';
+      openOverlay('error', { message, traceback });
+      const err = new Error(message);
+      err.overlayShown = true;
+      throw err;
+    }
+    return res.json();
+  } catch (e) {
+    if (!e.overlayShown) {
+      openOverlay('error', { message: e.message, traceback: e.stack || '' });
+    }
+    throw e;
+  }
+}
+
+export async function updateParty(runId, party) {
+  return handleFetch(`${API_BASE}/party/${runId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ party })
+  });
+}
+
+export async function roomAction(runId, type, action = '') {
+  const payload = (action && typeof action === 'object') ? action : { action };
+  // Short-circuit snapshot polling when global sync is halted (e.g., defeat popup)
+  try {
+    const halted = typeof window !== 'undefined' && window.afHaltSync === true;
+    const rewardPause = typeof window !== 'undefined' && window.afRewardOpen === true;
+    if ((halted || rewardPause) && type === 'battle' && String(payload?.action || '') === 'snapshot') {
+      return {};
+    }
+  } catch {}
+  return handleFetch(`${API_BASE}/rooms/${runId}/${type}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function advanceRoom(runId) {
+  return handleFetch(`${API_BASE}/run/${runId}/next`, { method: 'POST' });
+}
+
+export async function chooseCard(runId, cardId) {
+  return handleFetch(`${API_BASE}/cards/${runId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ card: cardId })
+  });
+}
+
+export async function chooseRelic(runId, relicId) {
+  return handleFetch(`${API_BASE}/relics/${runId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ relic: relicId })
+  });
+}

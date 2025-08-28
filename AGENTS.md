@@ -11,6 +11,7 @@ This document summarizes common development practices for all services in this r
   - `instructions/`: Contributor mode docs, process notes, and service-specific instructions. Place all new and updated process documentation here, following the structure and naming conventions. See examples in this folder.
   - `implementation/`: Service-specific implementation notes and technical docs. Keep these in sync with code changes.
   - Other subfolders: `requests/`, `prototyping/`, etc. for planning, feedback, and prototyping notes.
+- **Never edit files in `.codex/audit/` unless you are in Auditor mode.**
 - **`.github/`**: Workflow guidelines and UX standards.
 
 ---
@@ -19,11 +20,11 @@ This document summarizes common development practices for all services in this r
 - Use [`uv`](https://github.com/astral-sh/uv) for Python environments and running code. Avoid `python` or `pip` directly.
 - Use [`bun`](https://bun.sh/) for Node/React tooling instead of `npm` or `yarn`.
 - Split large modules into smaller ones when practical and keep documentation in `*/.codex/implementation` in sync with code.
-- Commit frequently with messages formatted `[TYPE] Title`; pull requests use the same format and include a short summary.
 - If a build retry occurs, the workflow may produce a commit titled `"Applying previous commit."` when reapplying a patch.
   This is normal and does not replace the need for your own clear `[TYPE]` commit messages.
 - Run available tests (e.g., `pytest`) before committing.
-- Any test running longer than 25 seconds is automatically aborted.
+- Any test running longer than 15 seconds is automatically aborted in local development (using `run-tests.sh`). GitHub Actions CI has no timeout limits.
+- **Linting is mandatory**: Run `ruff check . --fix` before every commit on Python code. All pull requests must pass linting checks in CI. See `.codex/implementation/linting-standards.md` for comprehensive guidelines.
 - For Python style:
    - Place each import on its own line.
    - Sort imports within each group (standard library, third-party, project modules) from shortest to longest.
@@ -42,18 +43,31 @@ This document summarizes common development practices for all services in this r
      from langchain_text_splitters import RecursiveCharacterTextSplitter
      ```
 
+## File Size and Readability (Repository-wide Rule)
+- Aim for ~300 lines or fewer per file.
+- Split monolithic modules into smaller units when they grow beyond this threshold.
+- Keep code well commented and organized for readability.
+
 ---
 
 ## Contributor Modes
 The repository supports several contributor modes to clarify expectations and best practices for different types of contributions:
 
+> **MANDATORY: All contributors must read their mode's documentation in `.codex/modes/` before starting any work. Failure to do so may result in removal from the repository.**
+> 
+> Recent incidents (e.g., a coder updating audit files 3 times without following mode guidelines) have shown that skipping these docs leads to wasted effort and rework. This is not optional—review your mode doc every time you contribute.
+
 **All contributors should regularly review and keep their mode cheat sheet in `.codex/notes/` up to date.**
 Refer to your mode's cheat sheet for quick reminders and update it as needed.
+For every task stub, prefix the request with the responsible role (e.g., ‘Task Master, …’, ‘Reviewer, …’, ‘Coder, …’).
 
-- **Task Master Mode** (`.codex/modes/TASKMASTER.md`): For creating, organizing, and maintaining actionable tasks in the root `.codex/tasks/` folder. Task Masters define and prioritize work for Coders and ensure tasks are ready for implementation.
-- **Coder Mode** (`.codex/modes/CODER.md`): For implementing, refactoring, and reviewing code. Focuses on high-quality, maintainable, and well-documented contributions. Coders regularly review the `.codex/tasks/` folder for new or assigned work.
-- **Reviewer Mode** (`.codex/modes/REVIEWER.md`): For auditing repository documentation and filing `TMT`-prefixed tasks when updates are needed.
-- **Auditor Mode** (`.codex/modes/AUDITOR.md`): For performing comprehensive reviews and audits. Emphasizes thoroughness, completeness, and catching anything others may have missed.
-- **Unknown Mode** (no file): If you are unsure which mode applies, review all four mode guides in `.codex/modes/` and pick the one that best fits your task. Then, use the team communication command (`contact.sh`) to announce which mode you selected and the nature of your request. This helps us improve our prompting and documentation for future contributors.
+- **Task Master Mode** (`.codex/modes/TASKMASTER.md`)
+- **Coder Mode** (`.codex/modes/CODER.md`)
+- **Reviewer Mode** (`.codex/modes/REVIEWER.md`)
+- **Auditor Mode** (`.codex/modes/AUDITOR.md`)
+- **Unknown Mode** (no file)
 
-Refer to the relevant mode guide in `.codex/modes/` before starting work, and follow the documentation structure and conventions described there. For service-specific details, see the `.codex/instructions/` folder of the service you are working on. Each service may provide additional rules in its own `AGENTS.md`—start here, then check the service directory for any extra requirements.
+You must refer to the relevant mode guide in `.codex/modes/` before starting work, and follow the documentation structure and conventions described there. For service-specific details, see the `.codex/instructions/` folder of the service you are working on. Each service may provide additional rules in its own `AGENTS.md`—start here, then check the service directory for any extra requirements.
+
+### Documentation sync
+When adding or modifying player or foe plugins, update both `README.md` and `.codex/implementation/player-foe-reference.md` so the roster and enemy details stay accurate.

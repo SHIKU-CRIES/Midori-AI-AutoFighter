@@ -1,0 +1,60 @@
+# Frontend
+
+Svelte-based GUI served with Bun on port `59001`.
+
+## Setup
+
+```bash
+cd frontend
+bun install
+bun dev
+```
+
+The development server runs at `http://localhost:59001` and displays a
+high‑contrast icon grid powered by `lucide-svelte`.
+
+- Party: Opens a responsive party picker overlay that fetches available
+  characters and lets you add/remove allies with one click. Selected members
+  are now clearly indicated by an element‑tinted ambient sweep behind their
+  row. This effect starts smoothly, honors Reduced Motion, and no longer
+  obscures the photo/name/type. Gray side bars were removed; the stats panel on
+  the right fills its column.
+- Run: Posts the selected party to `/run/start` and reveals the generated
+  floor map.
+- Settings: Opens a panel with sliders for sound effects, music, and voice
+  that auto‑save and briefly show a “Saved” status. Also includes Reduced
+  Motion and “End Run” controls. End Run now immediately halts battle polling
+  and returns home without residual snapshot requests.
+- Edit Player: Uses `/player/editor` to save pronouns, starting damage type,
+  and stat allocations. The stats panel now shows HP as `current/max` so HP
+  investment is visible. These edits apply to new runs and to the roster view
+  (open the Party overlay to refresh), but do not retroactively modify an
+  active battle.
+- Pulls: Calls `/gacha/pull` so players can recruit 5★ or 6★ characters or
+  earn 1★–4★ upgrade items between runs. Pity raises the odds of higher‑tier
+  items; auto‑crafting is an optional toggle under Crafting.
+- Craft: Lists upgrade items, shows 125×/10× requirements, and offers
+  `/gacha/craft` and `/gacha/auto-craft`. The Craft button is disabled until
+  enough materials exist.
+- Inventory: Moved to the in‑run top‑left NavBar (disabled during battles).
+- Feedback: Opens a pre‑filled GitHub issue in a new tab.
+During combat, party members appear in a left column and foes on the right,
+with HP, Attack, Defense, Mitigation, and Crit rate listed beside each
+portrait. HoT/DoT markers render below each portrait and collapse duplicate
+effects into a single icon with a stack count. The previous blue/red enrage
+flashing was replaced by subtle, color‑shifting orbs that float during combat
+and gracefully fade after battles; Reduced Motion disables their animation.
+
+After each battle, any returned `card_choices` trigger a reward overlay that
+uses `CardArt.svelte` and `CurioChoice.svelte` to build card and relic panels
+from `src/lib/assets`. Gold and item drops float briefly on screen before the
+overlay appears.
+Placeholder icons for items, relics, and cards live under `src/lib/assets/{items,relics,cards}`. Asset names combine the star folder and base filename (e.g. `3star/omega_core.png`) so the frontend can resolve the correct image for a given reward. Each damage type or star rank has its own folder with 24×24 colored placeholders so artists can replace them later.
+
+## Settings: Wipe Save Data
+- The Wipe button calls the backend wipe endpoint and also clears all client storage and caches (localStorage, sessionStorage, IndexedDB, CacheStorage) and unregisters service workers. After completion it forces a full page reload to prevent stale roster or party selections from persisting.
+
+## Asset Loading
+- Backgrounds: a random image is selected from `src/lib/assets/backgrounds` whenever the viewport initializes.
+- Character portraits: if `src/lib/assets/characters/<name>.png` exists it is used; otherwise if a folder `src/lib/assets/characters/<name>/` exists, a random `.png` inside that folder is used. If neither exists, a random fallback from `src/lib/assets/characters/fallbacks` is used, falling back to the Midori AI logo as a last resort.
+- Battle effects: `.efkefc` files under `src/lib/assets/effects` power runtime animations. The current mapping expects `HitEffect.efkefc`, `Fire1.efkefc`, `Poison.efkefc`, and `HealOne1.efkefc` to be present.

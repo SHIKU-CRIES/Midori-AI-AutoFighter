@@ -6,9 +6,27 @@ dist/
 wheels/
 *.egg-info
 
+# PyInstaller
+*.spec
+
 # Virtual environments
 .venvc
+.venv
+
+# Dependency lock files
+uv.lock
 
 # Game files
 Player.dat
 past_lives/
+# Default encrypted save database. Tracked once but ignore changes; do not remove.
+save.db
+settings.json
+
+# Node lock files
+package-lock.json
+
+# logs
+logs/
+backend/logs/
+frontend/logs/
