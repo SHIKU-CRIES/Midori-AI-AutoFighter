@@ -267,7 +267,9 @@ join the roster immediately.
 Entering a shop heals the party by 5% of its combined max HP. Buy upgrade items
 or cards with star ratings. Inventory scales by floor, purchases add items to
 your inventory and disable the button, class-level tracking guarantees at least
-two shops per floor, and gold can reroll the current stock.
+two shops per floor, and gold can reroll the current stock. Gold prices per star
+rank, pressure-based cost scaling, and reroll rules are documented in
+[`./.codex/implementation/shop-room.md`](.codex/implementation/shop-room.md).
 
 ## Event and Chat Rooms
 
