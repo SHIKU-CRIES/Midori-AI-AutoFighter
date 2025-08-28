@@ -1,0 +1,66 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [non-llm, llm-cpu, llm-cuda, llm-amd]
+        
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: astral-sh/setup-uv@v3
+        with:
+          python-version: '3.12'
+          
+      - name: Setup build environment
+        working-directory: legacy
+        run: |
+          uv sync
+          
+      - name: Install variant dependencies
+        working-directory: legacy
+        run: |
+          if ("${{ matrix.variant }}" -eq "llm-cpu") {
+            uv sync --extra llm-cpu
+          } elseif ("${{ matrix.variant }}" -eq "llm-cuda") {
+            uv sync --extra llm-cuda
+          } elseif ("${{ matrix.variant }}" -eq "llm-amd") {
+            uv sync --extra llm-amd
+          }
+          
+      - name: Install PyInstaller
+        working-directory: legacy
+        run: uv add --dev pyinstaller
+        
+      - name: Create assets directories
+        working-directory: legacy
+        run: |
+          if (!(Test-Path "photos")) { New-Item -ItemType Directory -Name "photos" }
+          if (!(Test-Path "music")) { New-Item -ItemType Directory -Name "music" }
+          
+      - name: Build executable
+        working-directory: legacy
+        run: |
+          $dataArgs = ""
+          if (Test-Path "photos") { $dataArgs += "--add-data photos;photos " }
+          if (Test-Path "music") { $dataArgs += "--add-data music;music " }
+          
+          $cmd = "uv run pyinstaller --onefile $dataArgs --clean --name midori-autofighter-${{ matrix.variant }}-windows main.py"
+          Invoke-Expression $cmd
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: midori-autofighter-${{ matrix.variant }}-windows
+          path: legacy/dist/midori-autofighter-${{ matrix.variant }}-windows.exe
+          retention-days: 30
