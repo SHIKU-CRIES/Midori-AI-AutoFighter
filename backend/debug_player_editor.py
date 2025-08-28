@@ -6,8 +6,8 @@ This script helps verify that the player editor customization system is working 
 Run this script to test the player customization logic without needing the full backend.
 """
 
-import sys
 import os
+import sys
 
 # Add the backend directory to the path so we can import modules
 backend_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,40 +16,40 @@ sys.path.insert(0, backend_dir)
 def test_customization_calculation():
     """Test the customization calculation logic."""
     print("=== Testing Player Customization Calculation ===")
-    
+
     # User's reported settings: hp=60, attack=20, defense=20
     test_settings = {"hp": 60, "attack": 20, "defense": 20}
-    
+
     # Calculate multipliers (same logic as _apply_player_customization)
     multipliers = {
         "max_hp_mult": 1 + test_settings.get("hp", 0) * 0.01,
         "atk_mult": 1 + test_settings.get("attack", 0) * 0.01,
         "defense_mult": 1 + test_settings.get("defense", 0) * 0.01,
     }
-    
+
     # Base player stats (from plugins/players/_base.py)
     base_stats = {
         "max_hp": 1000,
         "atk": 100,
         "defense": 50,
     }
-    
+
     # Calculate expected final stats
     expected_stats = {
         "max_hp": int(base_stats["max_hp"] * multipliers["max_hp_mult"]),
         "atk": int(base_stats["atk"] * multipliers["atk_mult"]),
         "defense": int(base_stats["defense"] * multipliers["defense_mult"]),
     }
-    
+
     print(f"User settings: {test_settings}")
     print(f"Base stats: {base_stats}")
     print(f"Calculated multipliers: {multipliers}")
     print(f"Expected final stats: {expected_stats}")
-    
+
     # Check if multipliers would trigger early return
     all_one = all(v == 1 for v in multipliers.values())
     print(f"All multipliers are 1 (would cause early return): {all_one}")
-    
+
     return expected_stats
 
 def print_instructions():
@@ -86,6 +86,6 @@ def print_instructions():
 if __name__ == "__main__":
     print("Player Editor Debug Tool")
     print("=" * 50)
-    
+
     test_customization_calculation()
     print_instructions()

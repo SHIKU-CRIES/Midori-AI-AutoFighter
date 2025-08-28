@@ -195,6 +195,8 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "crit_damage": 2.0,
             "effect_hit_rate": 0.0,
             "effect_resistance": 0.0,
+            "shields": 0,
+            "overheal_enabled": False,
         }
 
     # Build a dict without dataclasses.asdict to avoid deepcopy of complex fields
@@ -234,6 +236,8 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "crit_damage": float(getattr(obj, "crit_damage", 2.0) or 2.0),
             "effect_hit_rate": float(getattr(obj, "effect_hit_rate", 0.0) or 0.0),
             "effect_resistance": float(getattr(obj, "effect_resistance", 0.0) or 0.0),
+            "shields": int(getattr(obj, "shields", 0) or 0),
+            "overheal_enabled": bool(getattr(obj, "overheal_enabled", False)),
         }
 
     # Remove non-serializable fields introduced by plugins (e.g., runtime memory)
@@ -289,6 +293,18 @@ def _serialize(obj: Stats) -> dict[str, Any]:
     data["dots"] = dots
     data["hots"] = hots
 
+    # Add special effects (aftertaste, crit boost, etc.)
+    active_effects = []
+    if hasattr(obj, '_active_effects'):
+        for effect in obj.get_active_effects():
+            active_effects.append({
+                "name": effect.name,
+                "source": effect.source,
+                "duration": effect.duration,
+                "modifiers": effect.stat_modifiers
+            })
+    data["active_effects"] = active_effects
+
     # Ensure in-run (runtime) stats are present even when implemented as @property
     # on the Stats dataclass. For foes (plain dataclasses), fall back to raw attrs.
     def _num(get, default=0):
@@ -310,6 +326,9 @@ def _serialize(obj: Stats) -> dict[str, Any]:
         data["vitality"] = float(_num(lambda: obj.vitality, data.get("vitality", 1.0)))
         data["regain"] = int(_num(lambda: obj.regain, data.get("regain", 0)))
         data["dodge_odds"] = float(_num(lambda: obj.dodge_odds, data.get("dodge_odds", 0.0)))
+        # Add shields/overheal support
+        data["shields"] = int(_num(lambda: getattr(obj, "shields", 0), 0))
+        data["overheal_enabled"] = bool(getattr(obj, "overheal_enabled", False))
     else:
         # Non-Stats objects: keep provided values if present
         data.setdefault("max_hp", int(getattr(obj, "max_hp", data.get("max_hp", 0)) or 0))
@@ -323,6 +342,9 @@ def _serialize(obj: Stats) -> dict[str, Any]:
         data.setdefault("vitality", float(getattr(obj, "vitality", data.get("vitality", 1.0)) or 1.0))
         data.setdefault("regain", int(getattr(obj, "regain", data.get("regain", 0)) or 0))
         data.setdefault("dodge_odds", float(getattr(obj, "dodge_odds", data.get("dodge_odds", 0.0)) or 0.0))
+        # Add shields/overheal support
+        data.setdefault("shields", int(getattr(obj, "shields", 0) or 0))
+        data.setdefault("overheal_enabled", bool(getattr(obj, "overheal_enabled", False)))
 
     return data
 

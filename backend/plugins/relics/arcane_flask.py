@@ -20,6 +20,7 @@ class ArcaneFlask(RelicBase):
         super().apply(party)
 
         def _ultimate(user) -> None:
+            user.enable_overheal()  # Enable shields for the user
             shield = int(user.max_hp * 0.2)
             asyncio.create_task(user.apply_healing(shield))
 

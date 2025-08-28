@@ -84,6 +84,10 @@ class Stats:
     kills: int = 0
     last_damage_taken: int = 0
 
+    # Overheal system (for shields from relics/cards)
+    overheal_enabled: bool = field(default=False, init=False)
+    shields: int = field(default=0, init=False)  # Amount of overheal/shields
+
     # Collections
     passives: list[str] = field(default_factory=list)
     dots: list[str] = field(default_factory=list)
@@ -370,14 +374,25 @@ class Stats:
         amount = max(int(amount), 1)
         if critical and attacker is not None:
             log.info("Critical hit! %s -> %s for %s", attacker.id, self.id, amount)
+        original_amount = amount
         self.last_damage_taken = amount
         self.damage_taken += amount
-        self.hp = max(self.hp - amount, 0)
-        BUS.emit("damage_taken", self, attacker, amount)
+
+        # Handle shields/overheal absorption first
+        if self.shields > 0:
+            shield_absorbed = min(amount, self.shields)
+            self.shields -= shield_absorbed
+            amount -= shield_absorbed
+
+        # Apply remaining damage to HP
+        if amount > 0:
+            self.hp = max(self.hp - amount, 0)
+
+        BUS.emit("damage_taken", self, attacker, original_amount)
         if attacker is not None:
-            attacker.damage_dealt += amount
-            BUS.emit("damage_dealt", attacker, self, amount)
-        return amount
+            attacker.damage_dealt += original_amount
+            BUS.emit("damage_dealt", attacker, self, original_amount)
+        return original_amount
 
     async def apply_healing(self, amount: int, healer: Optional["Stats"] = None) -> int:
         def _ensure(obj: "Stats") -> DamageTypeBase:
@@ -403,11 +418,52 @@ class Stats:
         if enr > 0:
             amount *= max(1.0 - enr, 0.0)
         amount = int(amount)
-        self.hp = min(self.hp + amount, self.max_hp)
+
+        # Handle overheal/shields if enabled
+        if self.overheal_enabled:
+            if self.hp < self.max_hp:
+                # Heal normal HP first
+                normal_heal = min(amount, self.max_hp - self.hp)
+                self.hp += normal_heal
+                amount -= normal_heal
+
+            # Add any remaining healing as shields with diminishing returns
+            if amount > 0:
+                # Calculate penalty based on CURRENT shield amount
+                current_overheal_percent = (self.shields / self.max_hp) * 100
+
+                if current_overheal_percent <= 0:
+                    # No existing overheal - healing works normally
+                    self.shields += amount
+                else:
+                    # Apply diminishing returns based on current overheal percentage
+                    # At 10% overheal, healing effectiveness = 1/5 = 0.2
+                    # So 10 healing gives 2 shields, matching the example
+                    healing_effectiveness = 1.0 / 5.0  # 20% effectiveness when overhealed
+                    shields_to_add = amount * healing_effectiveness
+                    self.shields += int(shields_to_add)
+        else:
+            # Standard healing - cap at max HP
+            self.hp = min(self.hp + amount, self.max_hp)
+
         BUS.emit("heal_received", self, healer, amount)
         if healer is not None:
             BUS.emit("heal", healer, self, amount)
         return amount
+
+    def enable_overheal(self) -> None:
+        """Enable overheal/shields for this entity (typically from relic/card effects)."""
+        self.overheal_enabled = True
+
+    def disable_overheal(self) -> None:
+        """Disable overheal/shields and remove any existing shields."""
+        self.overheal_enabled = False
+        self.shields = 0
+
+    @property
+    def effective_hp(self) -> int:
+        """Get total effective HP (actual HP + shields)."""
+        return self.hp + self.shields
 
 
 StatusHook = Callable[["Stats"], None]

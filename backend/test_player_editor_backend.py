@@ -14,10 +14,11 @@ Example:
 
 import json
 import sys
-import urllib.request
-import urllib.parse
+from typing import Any
+from typing import Dict
 import urllib.error
-from typing import Dict, Any
+import urllib.parse
+import urllib.request
 
 
 def make_request(
@@ -29,16 +30,16 @@ def make_request(
     """Make an HTTP request and return status code and response data."""
     if headers is None:
         headers = {}
-    
+
     if data is not None:
         data_bytes = json.dumps(data).encode('utf-8')
         headers['Content-Type'] = 'application/json'
         headers['Content-Length'] = str(len(data_bytes))
     else:
         data_bytes = None
-    
+
     req = urllib.request.Request(url, data=data_bytes, headers=headers, method=method)
-    
+
     try:
         with urllib.request.urlopen(req, timeout=10) as response:
             response_data = response.read().decode('utf-8')
@@ -60,7 +61,7 @@ def test_player_editor_endpoints(base_url: str):
     """Test the player editor endpoints."""
     print(f"Testing player editor endpoints at: {base_url}")
     print("=" * 60)
-    
+
     # Test 1: Get current player editor settings
     print("\n1. Getting current player editor settings...")
     status, data = make_request(f"{base_url}/player/editor")
@@ -70,7 +71,7 @@ def test_player_editor_endpoints(base_url: str):
     else:
         print(f"   Error: {data}")
         return False
-    
+
     # Test 2: Update player editor settings
     print("\n2. Updating player editor settings...")
     test_settings = {
@@ -88,7 +89,7 @@ def test_player_editor_endpoints(base_url: str):
     else:
         print(f"   Error: {data}")
         return False
-    
+
     # Test 3: Verify settings were saved
     print("\n3. Verifying settings were saved...")
     status, data = make_request(f"{base_url}/player/editor")
@@ -102,7 +103,7 @@ def test_player_editor_endpoints(base_url: str):
     else:
         print(f"   Error: {data}")
         return False
-    
+
     # Test 4: Get player stats (should show customized values)
     print("\n4. Getting player stats (should show customized values)...")
     status, data = make_request(f"{base_url}/player/stats")
@@ -111,41 +112,41 @@ def test_player_editor_endpoints(base_url: str):
         core = data.get("stats", {}).get("core", {})
         offense = data.get("stats", {}).get("offense", {})
         defense_stats = data.get("stats", {}).get("defense", {})
-        
+
         print(f"   Core stats: HP={core.get('hp')}, Max HP={core.get('max_hp')}")
         print(f"   Offense stats: ATK={offense.get('atk')}")
         print(f"   Defense stats: DEF={defense_stats.get('defense')}")
-        
+
         # Calculate expected values
         expected_max_hp = int(1000 * 1.6)  # 60% boost
-        expected_atk = int(100 * 1.2)      # 20% boost  
+        expected_atk = int(100 * 1.2)      # 20% boost
         expected_def = int(50 * 1.2)       # 20% boost
-        
-        print(f"\n   Expected values:")
+
+        print("\n   Expected values:")
         print(f"   Max HP: {expected_max_hp} (got {core.get('max_hp')})")
         print(f"   ATK: {expected_atk} (got {offense.get('atk')})")
         print(f"   DEF: {expected_def} (got {defense_stats.get('defense')})")
-        
+
         # Check if values match expectations
         if core.get('max_hp') == expected_max_hp:
-            print(f"   ✓ Max HP is correct!")
+            print("   ✓ Max HP is correct!")
         else:
-            print(f"   ✗ Max HP mismatch - customization may not be applied")
-            
+            print("   ✗ Max HP mismatch - customization may not be applied")
+
         if offense.get('atk') == expected_atk:
-            print(f"   ✓ ATK is correct!")
+            print("   ✓ ATK is correct!")
         else:
-            print(f"   ✗ ATK mismatch - customization may not be applied")
-            
+            print("   ✗ ATK mismatch - customization may not be applied")
+
         if defense_stats.get('defense') == expected_def:
-            print(f"   ✓ DEF is correct!")
+            print("   ✓ DEF is correct!")
         else:
-            print(f"   ✗ DEF mismatch - customization may not be applied")
-            
+            print("   ✗ DEF mismatch - customization may not be applied")
+
     else:
         print(f"   Error: {data}")
         return False
-    
+
     print("\n" + "=" * 60)
     print("Test completed! Check the results above.")
     return True
@@ -156,12 +157,12 @@ def main():
         base_url = sys.argv[1].rstrip('/')
     else:
         base_url = "http://localhost:8000"
-    
+
     print("Player Editor Backend Test Script")
     print("This script tests the backend player editor functionality directly.")
     print("Make sure the backend server is running before using this script.")
     print()
-    
+
     try:
         test_player_editor_endpoints(base_url)
     except KeyboardInterrupt:

@@ -32,12 +32,13 @@ async def set_lrm_model() -> tuple[str, int, dict[str, str]]:
 @bp.post("/lrm/test")
 async def test_lrm_model() -> tuple[str, int, dict[str, str]]:
     import asyncio
+
     from llms.loader import load_llm
 
     data = await request.get_json()
     prompt = data.get("prompt", "")
     model = get_option(_OPTION_KEY, ModelName.DEEPSEEK.value)
-    
+
     # Load LLM in thread pool to avoid blocking the event loop
     llm = await asyncio.to_thread(load_llm, model)
     reply = ""

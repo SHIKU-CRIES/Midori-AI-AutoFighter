@@ -4,9 +4,6 @@ import logging
 import os
 import traceback
 
-# Import torch checker early to perform the one-time check
-from llms.torch_checker import is_torch_available
-
 from game import GachaManager  # noqa: F401  # re-export for tests
 from game import _apply_player_customization  # noqa: F401
 from game import _assign_damage_type  # noqa: F401
@@ -22,13 +19,16 @@ from game import load_map  # noqa: F401
 from game import load_party  # noqa: F401
 from game import save_map  # noqa: F401
 from game import save_party  # noqa: F401
+
+# Import torch checker early to perform the one-time check
+from llms.torch_checker import is_torch_available
 from logging_config import configure_logging
 from quart import Quart
 from quart import jsonify
 from quart import request
 from routes.assets import bp as assets_bp
-from routes.config import bp as config_bp
 from routes.catalog import bp as catalog_bp
+from routes.config import bp as config_bp
 from routes.gacha import bp as gacha_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp

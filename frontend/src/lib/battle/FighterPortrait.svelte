@@ -15,6 +15,12 @@
       class="hp-fill"
       style={`width: ${fighter.max_hp ? (100 * fighter.hp) / fighter.max_hp : 0}%`}
     ></div>
+    {#if fighter.shields && fighter.shields > 0}
+      <div
+        class="shield-fill"
+        style={`width: ${fighter.max_hp ? (100 * fighter.shields) / fighter.max_hp : 0}%; left: ${fighter.max_hp ? (100 * fighter.hp) / fighter.max_hp : 0}%`}
+      ></div>
+    {/if}
   </div>
   <div class="portrait-frame" title={passiveTip}>
     <img
@@ -31,12 +37,12 @@
         aria-hidden="true" />
     </div>
   </div>
-  {#if ((Array.isArray(fighter.hots) ? fighter.hots.length : 0) + (Array.isArray(fighter.dots) ? fighter.dots.length : 0)) > 0}
+  {#if ((Array.isArray(fighter.hots) ? fighter.hots.length : 0) + (Array.isArray(fighter.dots) ? fighter.dots.length : 0) + (Array.isArray(fighter.active_effects) ? fighter.active_effects.length : 0)) > 0}
     <!-- Buff Bar: shows current HoT/DoT effects under the portrait. -->
     <!-- This bar is intentionally styled with a stained-glass look, matching
          the stats panels and top bars. Keep this comment to clarify purpose. -->
     <div class="buff-bar">
-      <StatusIcons hots={fighter.hots} dots={fighter.dots} layout="bar" />
+      <StatusIcons hots={fighter.hots} dots={fighter.dots} active_effects={fighter.active_effects} layout="bar" />
     </div>
   {/if}
 </div>
@@ -53,8 +59,19 @@
     border: 1px solid #000;
     background: #333;
     margin-bottom: 0.2rem;
+    position: relative;
   }
   .hp-fill { height: 100%; background: #0f0; }
+  .shield-fill { 
+    height: 100%; 
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid white;
+    border-left: none;
+    border-right: none;
+    position: absolute;
+    top: 0;
+    box-sizing: border-box;
+  }
   .portrait-frame { position: relative; width: var(--portrait-size); height: var(--portrait-size); }
   .portrait {
     width: 100%;

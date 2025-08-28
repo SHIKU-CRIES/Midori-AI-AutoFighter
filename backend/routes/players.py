@@ -147,25 +147,25 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
     refresh = _get_stat_refresh_rate()
     player = player_plugins.player.Player()
     await asyncio.to_thread(_assign_damage_type, player)
-    
+
     # Store original stats before customization
     orig_stats = (player.max_hp, player.atk, player.defense)
-    
+
     await asyncio.to_thread(_apply_player_customization, player)
     apply_status_hooks(player)
-    
+
     # Log the stat changes for debugging
     log.debug(
         "Player stats endpoint: original=(%d, %d, %d), final=(%d, %d, %d), mods=%s",
         orig_stats[0],
-        orig_stats[1], 
+        orig_stats[1],
         orig_stats[2],
         player.max_hp,
         player.atk,
         player.defense,
         player.mods,
     )
-    
+
     # Get base stats and active effects if available
     base_stats = {}
     active_effects = []
@@ -183,7 +183,7 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
             "effect_resistance": player.get_base_stat("effect_resistance"),
             "vitality": player.get_base_stat("vitality"),
         }
-    
+
     if hasattr(player, 'get_active_effects'):
         for effect in player.get_active_effects():
             active_effects.append({
@@ -192,7 +192,7 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
                 "duration": effect.duration,
                 "modifiers": effect.stat_modifiers
             })
-    
+
     stats = {
         "core": {
             "hp": player.hp,

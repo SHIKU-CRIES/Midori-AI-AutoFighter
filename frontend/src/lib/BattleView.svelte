@@ -202,7 +202,7 @@
         {#if showHud}
           <div class="stats right stained-glass-panel">
             <div class="name">{(member.name ?? member.id)} ({member.level ?? 1})</div>
-            <div class="row"><span class="k">HP</span> <span class="v">{member.hp}/{member.max_hp}</span></div>
+            <div class="row"><span class="k">HP</span> <span class="v">{member.hp}/{member.max_hp}{member.shields > 0 ? ` (+${member.shields})` : ''}</span></div>
             <div class="row"><span class="k">VIT</span> <span class="v">{formatMultiplier(member.vitality)}</span></div>
             <div class="row"><span class="k">ATK</span> <span class="v">{member.atk}</span></div>
             <div class="row"><span class="k">DEF</span> <span class="v">{member.defense}</span></div>
@@ -230,7 +230,7 @@
           {#if showHud}
             <div class="stats left stained-glass-panel">
               <div class="name">{(foe.name ?? foe.id)} ({foe.level ?? 1})</div>
-              <div class="row"><span class="k">HP</span> <span class="v">{foe.hp}/{foe.max_hp}</span></div>
+              <div class="row"><span class="k">HP</span> <span class="v">{foe.hp}/{foe.max_hp}{foe.shields > 0 ? ` (+${foe.shields})` : ''}</span></div>
               <div class="row"><span class="k">VIT</span> <span class="v">{formatMultiplier(foe.vitality)}</span></div>
               <div class="row"><span class="k">ATK</span> <span class="v">{foe.atk}</span></div>
               <div class="row"><span class="k">DEF</span> <span class="v">{foe.defense}</span></div>
