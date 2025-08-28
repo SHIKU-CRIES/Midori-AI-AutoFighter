@@ -37,4 +37,5 @@ class PocketManual(RelicBase):
 
     def describe(self, stacks: int) -> str:
         dmg = 3 * stacks
-        return f"+{dmg}% damage; every 10th hit triggers an additional Aftertaste hit dealing +3% of the original damage."
+        aftertaste_dmg = 3 * stacks
+        return f"+{dmg}% damage; every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."

@@ -19,6 +19,7 @@ class ThreadbareCloak(RelicBase):
         super().apply(party)
 
         for member in party.members:
+            member.enable_overheal()  # Enable shields for this member
             shield = int(member.max_hp * 0.03)
             asyncio.create_task(member.apply_healing(shield))
 
