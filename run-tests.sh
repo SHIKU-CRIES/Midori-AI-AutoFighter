@@ -42,8 +42,9 @@ if command -v uv >/dev/null 2>&1; then
   PYTHON_CMD="uv run pytest"
 else
   echo "uv not found, using standard Python tools"
-  if [ ! -d "venv" ]; then
+  if [ ! -d "venv" ] || [ ! -f "venv/bin/activate" ]; then
     echo "Creating virtual environment..."
+    rm -rf venv  # Clean up any partial venv
     python3 -m venv venv
     source venv/bin/activate
     echo "Installing dependencies..."
