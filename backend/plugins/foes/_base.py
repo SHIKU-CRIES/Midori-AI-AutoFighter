@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
-import copy
 import logging
 
 from autofighter.character import CharacterType
+from autofighter.stats import StatEffect
 from autofighter.stats import Stats
 from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
@@ -83,12 +84,12 @@ class FoeBase(Stats):
     def __post_init__(self) -> None:
         # Use centralized torch checker instead of individual import attempts
         from llms.torch_checker import is_torch_available
-        
+
         if not is_torch_available():
             # Fall back to simple in-process memory without dependencies
             self.lrm_memory = SimpleConversationMemory()
             return
-        
+
         try:
             from langchain.memory import VectorStoreRetrieverMemory
             from langchain_chroma import Chroma
@@ -135,36 +136,18 @@ class FoeBase(Stats):
             setattr(result, name, copy.deepcopy(val, memo))
         return result
 
-    def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
-        target = self.stat_gain_map.get(stat_name, stat_name)
-        log.debug(
-            "%s gaining %s: %s",
-            getattr(self, "id", type(self).__name__),
-            target,
-            amount,
-        )
-        super().adjust_stat_on_gain(target, amount)
-
-    def adjust_stat_on_loss(self, stat_name: str, amount: int) -> None:
-        target = self.stat_loss_map.get(stat_name, stat_name)
-        log.debug(
-            "%s losing %s: %s",
-            getattr(self, "id", type(self).__name__),
-            target,
-            amount,
-        )
-        super().adjust_stat_on_loss(target, amount)
 
     async def send_lrm_message(self, message: str) -> str:
         import asyncio
+
         from llms.torch_checker import is_torch_available
-        
+
         if not is_torch_available():
             # Return empty response but still save context
             response = ""
             self.lrm_memory.save_context({"input": message}, {"output": response})
             return response
-            
+
         try:
             from llms.loader import load_llm
             # Load LLM in thread pool to avoid blocking the event loop
@@ -175,7 +158,7 @@ class FoeBase(Stats):
                 async def generate_stream(self, text: str):
                     yield ""
             llm = _LLM()
-            
+
         context = self.lrm_memory.load_memory_variables({}).get("history", "")
         prompt = f"{context}\n{message}".strip()
         chunks: list[str] = []
@@ -211,5 +194,17 @@ class FoeBase(Stats):
             self.level + 1,
         )
         super()._on_level_up()
-        self.adjust_stat_on_gain("mitigation", 0.0001)
-        self.adjust_stat_on_gain("vitality", 0.0001)
+        self.add_effect(
+            StatEffect(
+                name="level_up_mitigation",
+                stat_modifiers={"mitigation": 0.0001},
+                source="level_up",
+            )
+        )
+        self.add_effect(
+            StatEffect(
+                name="level_up_vitality",
+                stat_modifiers={"vitality": 0.0001},
+                source="level_up",
+            )
+        )

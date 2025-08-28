@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from autofighter.stats import StatEffect
+
 
 @dataclass
 class AttackUp:
@@ -10,4 +12,9 @@ class AttackUp:
     amount = 5
 
     async def apply(self, target) -> None:
-        target.adjust_stat_on_gain("atk", self.amount)
+        effect = StatEffect(
+            name=f"{self.id}_atk_up",
+            stat_modifiers={"atk": self.amount},
+            source=self.id,
+        )
+        target.add_effect(effect)

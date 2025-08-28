@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
-import copy
 import logging
 
 from autofighter.character import CharacterType
@@ -85,18 +85,18 @@ class PlayerBase(Stats):
         self._base_dodge_odds = 0.0
         self._base_effect_resistance = 1.0
         self._base_vitality = 1.0
-        
+
         # Call parent post_init
         super().__post_init__()
-        
+
         # Use centralized torch checker instead of individual import attempts
         from llms.torch_checker import is_torch_available
-        
+
         if not is_torch_available():
             # Fall back to simple in-process memory without dependencies
             self.lrm_memory = SimpleConversationMemory()
             return
-        
+
         try:
             from langchain.memory import VectorStoreRetrieverMemory
             from langchain_chroma import Chroma
@@ -149,36 +149,18 @@ class PlayerBase(Stats):
             setattr(result, name, copy.deepcopy(val, memo))
         return result
 
-    def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
-        target = self.stat_gain_map.get(stat_name, stat_name)
-        log.debug(
-            "%s gaining %s: %s",
-            getattr(self, "id", type(self).__name__),
-            target,
-            amount,
-        )
-        super().adjust_stat_on_gain(target, amount)
-
-    def adjust_stat_on_loss(self, stat_name: str, amount: int) -> None:
-        target = self.stat_loss_map.get(stat_name, stat_name)
-        log.debug(
-            "%s losing %s: %s",
-            getattr(self, "id", type(self).__name__),
-            target,
-            amount,
-        )
-        super().adjust_stat_on_loss(target, amount)
 
     async def send_lrm_message(self, message: str) -> str:
         import asyncio
+
         from llms.torch_checker import is_torch_available
-        
+
         if not is_torch_available():
             # Return empty response but still save context
             response = ""
             self.lrm_memory.save_context({"input": message}, {"output": response})
             return response
-            
+
         try:
             from llms.loader import load_llm
             # Load LLM in thread pool to avoid blocking the event loop
@@ -189,7 +171,7 @@ class PlayerBase(Stats):
                 async def generate_stream(self, text: str):
                     yield ""
             llm = _LLM()
-            
+
         context = self.lrm_memory.load_memory_variables({}).get("history", "")
         prompt = f"{context}\n{message}".strip()
         chunks: list[str] = []
