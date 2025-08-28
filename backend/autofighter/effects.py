@@ -1,5 +1,4 @@
 import asyncio
-import math
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -7,7 +6,8 @@ from typing import Optional
 
 from rich.console import Console
 
-from autofighter.stats import Stats, StatEffect
+from autofighter.stats import StatEffect
+from autofighter.stats import Stats
 
 
 @dataclass
@@ -26,14 +26,14 @@ class StatModifier:
         """Apply configured modifiers to the stats object using StatEffect."""
         if self._effect_applied:
             return  # Already applied
-            
+
         # Convert deltas and multipliers to a single stat_modifiers dict
         stat_modifiers = {}
-        
+
         # Handle additive deltas
         for name, value in (self.deltas or {}).items():
             stat_modifiers[name] = stat_modifiers.get(name, 0) + value
-        
+
         # Handle multiplicative changes by converting to additive
         # Note: This is an approximation since pure multiplicative requires more complex handling
         for name, multiplier in (self.multipliers or {}).items():
@@ -43,11 +43,11 @@ class StatModifier:
                     base_value = self.stats.get_base_stat(name)
                 else:
                     base_value = getattr(self.stats, name, 0)
-                
+
                 # Convert multiplier to additive value
                 additive_change = base_value * (multiplier - 1.0)
                 stat_modifiers[name] = stat_modifiers.get(name, 0) + additive_change
-        
+
         if stat_modifiers:
             # Create and apply StatEffect
             effect = StatEffect(
@@ -56,64 +56,20 @@ class StatModifier:
                 duration=self.turns if self.turns > 0 else -1,  # -1 for permanent
                 source=f"modifier_{self.name}"
             )
-            
-            if hasattr(self.stats, 'add_effect'):
-                self.stats.add_effect(effect)
-                self._effect_applied = True
-            else:
-                # Fallback for legacy stats objects - direct modification
-                # This preserves backward compatibility
-                self._apply_legacy_direct_modification()
 
-    def _apply_legacy_direct_modification(self) -> None:
-        """Fallback method for legacy stats objects that don't support StatEffect."""
-        # Safe application: clamp extreme values and avoid inf/NaN conversions
-        MAX_ABS = 10**12
-        for name, value in (self.deltas or {}).items():
-            current = getattr(self.stats, name, 0)
-            try:
-                new_val = current + value
-                if isinstance(new_val, (int, float)):
-                    if not math.isfinite(float(new_val)):
-                        new_val = 0
-                    if abs(float(new_val)) > MAX_ABS:
-                        new_val = MAX_ABS if new_val > 0 else -MAX_ABS
-                setattr(self.stats, name, type(current)(new_val))
-            except Exception:
-                # Fallback: set without casting
-                setattr(self.stats, name, new_val)
-        for name, value in (self.multipliers or {}).items():
-            current = getattr(self.stats, name, 0)
-            try:
-                new_val = float(current) * float(value)
-                if not math.isfinite(new_val):
-                    new_val = MAX_ABS if current >= 0 else -MAX_ABS
-                if abs(new_val) > MAX_ABS:
-                    new_val = MAX_ABS if new_val > 0 else -MAX_ABS
-                # Preserve integer fields as integers
-                if isinstance(current, int) and not isinstance(current, bool):
-                    setattr(self.stats, name, int(new_val))
-                else:
-                    setattr(self.stats, name, type(current)(new_val))
-            except Exception:
-                # As a last resort, avoid crashing the battle loop
-                try:
-                    setattr(self.stats, name, current)
-                except Exception:
-                    pass
+            self.stats.add_effect(effect)
+            self._effect_applied = True
 
     def remove(self) -> None:
-        """Remove the effect from stats."""
-        if hasattr(self.stats, 'remove_effect_by_name') and self._effect_applied:
+        """Remove the effect from stats if it was applied."""
+        if self._effect_applied:
             self.stats.remove_effect_by_name(self.id)
-        # For legacy stats, there's no clean way to remove the effect since
-        # we don't track original values in the new system
 
     def tick(self) -> bool:
         """Decrement remaining turns and remove when expired."""
         if self.turns <= 0:
             return True  # Permanent effect
-            
+
         self.turns -= 1
         if self.turns <= 0:
             self.remove()
