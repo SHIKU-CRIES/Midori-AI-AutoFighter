@@ -34,5 +34,5 @@ class BentDagger(RelicBase):
         else:
             # Calculate actual multiplicative bonus: (1.03)^stacks - 1
             multiplier = (1.03 ** stacks) - 1
-            total_pct = round(multiplier * 100, 2)
+            total_pct = round(multiplier * 100)
             return f"+{total_pct}% ATK ({stacks} stacks, multiplicative); killing a foe grants +1% ATK for the rest of combat."

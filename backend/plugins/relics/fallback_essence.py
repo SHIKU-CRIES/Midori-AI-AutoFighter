@@ -31,5 +31,5 @@ class FallbackEssence(RelicBase):
         else:
             # Calculate actual multiplicative bonus: (1.01)^stacks - 1
             multiplier = (1.01 ** stacks) - 1
-            total_pct = round(multiplier * 100, 2)
+            total_pct = round(multiplier * 100)
             return f"When the card pool is exhausted, grants +{total_pct}% to core combat stats ({stacks} stacks, multiplicative)."

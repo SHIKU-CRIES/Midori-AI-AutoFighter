@@ -35,5 +35,5 @@ class TatteredFlag(RelicBase):
         else:
             # Calculate actual multiplicative bonus: (1.03)^stacks - 1
             multiplier = (1.03 ** stacks) - 1
-            total_hp_pct = round(multiplier * 100, 2)
+            total_hp_pct = round(multiplier * 100)
             return f"+{total_hp_pct}% party Max HP ({stacks} stacks, multiplicative); ally deaths grant survivors +3% ATK."

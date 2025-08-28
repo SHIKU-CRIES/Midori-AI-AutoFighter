@@ -41,6 +41,6 @@ class PocketManual(RelicBase):
         else:
             # Calculate actual multiplicative bonus: (1.03)^stacks - 1
             multiplier = (1.03 ** stacks) - 1
-            total_dmg_pct = round(multiplier * 100, 2)
+            total_dmg_pct = round(multiplier * 100)
             aftertaste_dmg = 3 * stacks
             return f"+{total_dmg_pct}% damage ({stacks} stacks, multiplicative); every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."

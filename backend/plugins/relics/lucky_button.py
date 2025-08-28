@@ -55,7 +55,7 @@ class LuckyButton(RelicBase):
         else:
             # Calculate actual multiplicative bonus: (1.03)^stacks - 1
             multiplier = (1.03 ** stacks) - 1
-            total_pct = round(multiplier * 100, 2)
+            total_pct = round(multiplier * 100)
             return (
                 f"+{total_pct}% Crit Rate ({stacks} stacks, multiplicative); missed crits grant {stacks} "
                 f"Critical Boost stack{'s' if stacks != 1 else ''} next turn."

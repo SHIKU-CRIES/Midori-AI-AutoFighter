@@ -61,7 +61,7 @@ class ShinyPebble(RelicBase):
         else:
             # Calculate actual multiplicative bonus: (1.03)^stacks - 1
             multiplier = (1.03 ** stacks) - 1
-            total_def_pct = round(multiplier * 100, 2)
+            total_def_pct = round(multiplier * 100)
             mit = 3 * stacks
             return (
                 f"+{total_def_pct}% DEF ({stacks} stacks, multiplicative). "

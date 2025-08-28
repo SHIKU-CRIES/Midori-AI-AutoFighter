@@ -50,7 +50,7 @@ class WoodenIdol(RelicBase):
         else:
             # Calculate actual multiplicative bonus: (1.03)^stacks - 1
             multiplier = (1.03 ** stacks) - 1
-            total_res_pct = round(multiplier * 100, 2)
+            total_res_pct = round(multiplier * 100)
             return (
                 f"+{total_res_pct}% Effect Res ({stacks} stacks, multiplicative); resisting a debuff grants +1% Effect Res next turn."
             )
