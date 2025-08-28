@@ -26,7 +26,8 @@ def award_relic(party: Party, relic_id: str) -> RelicBase | None:
 
 def relic_choices(party: Party, stars: int, count: int = 3) -> list[RelicBase]:
     relics = [cls() for cls in _registry().values()]
-    available = [r for r in relics if r.stars == stars and r.id not in party.relics]
+    # Exclude fallback relic from normal selection - it should only appear when no cards are available
+    available = [r for r in relics if r.stars == stars and r.id not in party.relics and r.id != "fallback_essence"]
     if not available:
         return []
     if len(available) >= count:
