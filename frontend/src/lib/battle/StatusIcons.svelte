@@ -25,7 +25,7 @@
     
     // Special descriptions for known effects
     if (effect.name === 'aftertaste') {
-      description = 'Deals a hit of random (10% to 150%) damage type direct damage to the target';
+      description = 'Deals a hit with random damage type (10% to 150% damage), favoring attacker\'s type';
     } else if (effect.name === 'critical_boost') {
       description = '+0.5% crit rate and +5% crit damage per stack. Removed when taking damage.';
     } else {
