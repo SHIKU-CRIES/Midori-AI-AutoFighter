@@ -17,13 +17,28 @@
   export let previewId;
   export let selected = [];
 
-  const statTabs = ['Core', 'Offense', 'Defense'];
+  const statTabs = ['Core', 'Offense', 'Defense', 'Effects'];
   let activeTab = 'Core';
   const dispatch = createEventDispatcher();
 
   function toggleMember() {
     if (!previewId) return;
     dispatch('toggle', previewId);
+  }
+
+  // Helper function to format stat display
+  function formatStat(runtimeValue, baseValue, suffix = '') {
+    if (baseValue !== undefined && runtimeValue !== baseValue) {
+      const modifier = runtimeValue - baseValue;
+      const sign = modifier >= 0 ? '+' : '';
+      return `${runtimeValue}${suffix} (${baseValue}${sign}${modifier})`;
+    }
+    return `${runtimeValue ?? '-'}${suffix}`;
+  }
+
+  // Helper to get base stat value
+  function getBaseStat(character, statName) {
+    return character.stats?.base_stats?.[statName];
   }
 </script>
 
@@ -52,25 +67,45 @@
             <span>HP</span>
             <span>
               {#if sel.stats.max_hp != null}
-                {(sel.stats.hp ?? 0) + '/' + sel.stats.max_hp}
+                {(sel.stats.hp ?? 0) + '/' + formatStat(sel.stats.max_hp, getBaseStat(sel, 'max_hp'))}
               {:else}
                 {sel.stats.hp ?? '-'}
               {/if}
             </span>
           </div>
           <div><span>EXP</span><span>{sel.stats.exp ?? sel.stats.xp ?? '-'}</span></div>
-          <div><span>Vitality</span><span>{sel.stats.vitality ?? sel.stats.vita ?? '-'}</span></div>
-          <div><span>Regain</span><span>{sel.stats.regain ?? sel.stats.regain_rate ?? '-'}</span></div>
+          <div><span>Vitality</span><span>{formatStat(sel.stats.vitality ?? sel.stats.vita, getBaseStat(sel, 'vitality'))}</span></div>
+          <div><span>Regain</span><span>{formatStat(sel.stats.regain ?? sel.stats.regain_rate, getBaseStat(sel, 'regain'))}</span></div>
         {:else if activeTab === 'Offense'}
-          <div><span>ATK</span><span>{sel.stats.atk ?? '-'}</span></div>
-          <div><span>CRIT Rate</span><span>{(sel.stats.critRate ?? sel.stats.crit_rate ?? 0) + '%'}</span></div>
-          <div><span>CRIT DMG</span><span>{(sel.stats.critDamage ?? sel.stats.crit_damage ?? 0) + '%'}</span></div>
-          <div><span>Effect Hit Rate</span><span>{(sel.stats.effectHit ?? sel.stats.effect_hit_rate ?? 0) + '%'}</span></div>
+          <div><span>ATK</span><span>{formatStat(sel.stats.atk, getBaseStat(sel, 'atk'))}</span></div>
+          <div><span>CRIT Rate</span><span>{formatStat((sel.stats.critRate ?? sel.stats.crit_rate ?? 0), getBaseStat(sel, 'crit_rate'), '%')}</span></div>
+          <div><span>CRIT DMG</span><span>{formatStat((sel.stats.critDamage ?? sel.stats.crit_damage ?? 0), getBaseStat(sel, 'crit_damage'), '%')}</span></div>
+          <div><span>Effect Hit Rate</span><span>{formatStat((sel.stats.effectHit ?? sel.stats.effect_hit_rate ?? 0), getBaseStat(sel, 'effect_hit_rate'), '%')}</span></div>
         {:else if activeTab === 'Defense'}
-          <div><span>DEF</span><span>{sel.stats.defense ?? '-'}</span></div>
-          <div><span>Mitigation</span><span>{sel.stats.mitigation ?? '-'}</span></div>
-          <div><span>Dodge Odds</span><span>{sel.stats.dodge_odds ?? '-'}</span></div>
-          <div><span>Effect Resist</span><span>{sel.stats.effectResist ?? sel.stats.effect_resistance ?? '-'}</span></div>
+          <div><span>DEF</span><span>{formatStat(sel.stats.defense, getBaseStat(sel, 'defense'))}</span></div>
+          <div><span>Mitigation</span><span>{formatStat(sel.stats.mitigation, getBaseStat(sel, 'mitigation'))}</span></div>
+          <div><span>Dodge Odds</span><span>{formatStat(sel.stats.dodge_odds, getBaseStat(sel, 'dodge_odds'))}</span></div>
+          <div><span>Effect Resist</span><span>{formatStat(sel.stats.effectResist ?? sel.stats.effect_resistance, getBaseStat(sel, 'effect_resistance'))}</span></div>
+        {:else if activeTab === 'Effects'}
+          {#if sel.stats.active_effects && sel.stats.active_effects.length > 0}
+            <div class="effects-header">Active Effects:</div>
+            {#each sel.stats.active_effects as effect}
+              <div class="effect-item">
+                <div class="effect-name">{effect.name}</div>
+                <div class="effect-source">Source: {effect.source}</div>
+                {#if effect.duration > 0}
+                  <div class="effect-duration">Duration: {effect.duration} turns</div>
+                {/if}
+                <div class="effect-modifiers">
+                  {#each Object.entries(effect.modifiers) as [stat, value]}
+                    <span class="modifier">{stat}: {value >= 0 ? '+' : ''}{value}</span>
+                  {/each}
+                </div>
+              </div>
+            {/each}
+          {:else}
+            <div class="no-effects">No active effects</div>
+          {/if}
         {/if}
       </div>
     {/each}
@@ -157,4 +192,64 @@ button.confirm {
   transition: background 0.2s;
 }
 .tab-btn.active { background: rgba(255,255,255,0.3); color: #fff; }
+
+/* Effects tab styles */
+.effects-header {
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.effect-item {
+  background: rgba(255,255,255,0.1);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid #4a9eff;
+}
+
+.effect-name {
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.effect-source {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-bottom: 0.25rem;
+}
+
+.effect-duration {
+  font-size: 0.9rem;
+  color: #ffeb3b;
+  margin-bottom: 0.5rem;
+}
+
+.effect-modifiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.modifier {
+  background: rgba(0,0,0,0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.modifier:has-text('-') {
+  color: #f44336;
+  border-color: rgba(244, 67, 54, 0.3);
+}
+
+.no-effects {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
 </style>

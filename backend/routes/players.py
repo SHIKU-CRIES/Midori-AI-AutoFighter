@@ -129,6 +129,33 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
         player.mods,
     )
     
+    # Get base stats and active effects if available
+    base_stats = {}
+    active_effects = []
+    if hasattr(player, 'get_base_stat'):
+        base_stats = {
+            "max_hp": player.get_base_stat("max_hp"),
+            "atk": player.get_base_stat("atk"),
+            "defense": player.get_base_stat("defense"),
+            "crit_rate": player.get_base_stat("crit_rate"),
+            "crit_damage": player.get_base_stat("crit_damage"),
+            "effect_hit_rate": player.get_base_stat("effect_hit_rate"),
+            "mitigation": player.get_base_stat("mitigation"),
+            "regain": player.get_base_stat("regain"),
+            "dodge_odds": player.get_base_stat("dodge_odds"),
+            "effect_resistance": player.get_base_stat("effect_resistance"),
+            "vitality": player.get_base_stat("vitality"),
+        }
+    
+    if hasattr(player, 'get_active_effects'):
+        for effect in player.get_active_effects():
+            active_effects.append({
+                "name": effect.name,
+                "source": effect.source,
+                "duration": effect.duration,
+                "modifiers": effect.stat_modifiers
+            })
+    
     stats = {
         "core": {
             "hp": player.hp,
@@ -164,6 +191,8 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
             "dots": player.dots,
             "hots": player.hots,
         },
+        "base_stats": base_stats,
+        "active_effects": active_effects,
     }
     return jsonify({"stats": stats, "refresh_rate": refresh})
 

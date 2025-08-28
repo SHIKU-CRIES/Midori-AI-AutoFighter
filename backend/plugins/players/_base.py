@@ -44,10 +44,8 @@ class SimpleConversationMemory:
 class PlayerBase(Stats):
     plugin_type = "player"
 
+    # Override Stats defaults with PlayerBase-specific values
     hp: int = 1000
-    max_hp: int = 1000
-    atk: int = 100
-    defense: int = 50
     char_type: CharacterType = CharacterType.C
     prompt: str = "Player prompt placeholder"
     about: str = "Player description placeholder"
@@ -57,17 +55,8 @@ class PlayerBase(Stats):
     exp_multiplier: float = 1.0
     actions_per_turn: int = 1
 
-    crit_rate: float = 0.05
-    crit_damage: float = 2
-    effect_hit_rate: float = 0.01
     damage_type: DamageTypeBase = field(default_factory=random_damage_type)
 
-    mitigation: float = 1.0
-    regain: int = 1
-    dodge_odds: float = 0
-    effect_resistance: float = 1.0
-
-    vitality: float = 1.0
     action_points: int = 1
     damage_taken: int = 1
     damage_dealt: int = 1
@@ -84,6 +73,22 @@ class PlayerBase(Stats):
     lrm_memory: object | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
+        # Initialize base stats with PlayerBase defaults
+        self._base_max_hp = 1000
+        self._base_atk = 100
+        self._base_defense = 50
+        self._base_crit_rate = 0.05
+        self._base_crit_damage = 2.0
+        self._base_effect_hit_rate = 0.01
+        self._base_mitigation = 1.0
+        self._base_regain = 1
+        self._base_dodge_odds = 0.0
+        self._base_effect_resistance = 1.0
+        self._base_vitality = 1.0
+        
+        # Call parent post_init
+        super().__post_init__()
+        
         # Use centralized torch checker instead of individual import attempts
         from llms.torch_checker import is_torch_available
         
