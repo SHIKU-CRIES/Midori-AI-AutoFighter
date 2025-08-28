@@ -92,7 +92,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
         if isinstance(obj, FoeBase):
             d = getattr(obj, "defense", None)
             if isinstance(d, (int, float)):
-                new_def = max(25, int(d))
+                new_def = max(5, int(d))
                 # For foes, 'defense' is a dataclass field; set the field directly
                 try:
                     setattr(obj, "defense", type(d)(new_def))

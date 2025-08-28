@@ -5,6 +5,7 @@
   export let size = 'normal';
   export let hideFallback = false;
   import { getHourlyBackground } from './assetLoader.js';
+  import { getGlyphArt } from './rewardLoader.js';
   const starColors = {
     1: '#808080',
     2: '#228B22',
@@ -17,8 +18,13 @@
   // Fixed card height so top box can be exactly 50%
   $: cardHeight = size === 'small' ? 320 : 440;
   $: color = starColors[entry.stars] || starColors.fallback;
-  // Test background image for the interbox (top section)
+  // Background image for the interbox (top section)
+  // Use special art for specific relics when available.
   let bg = getHourlyBackground();
+  $: {
+    const custom = getGlyphArt(type, entry);
+    bg = custom || getHourlyBackground();
+  }
   // Ambient floating gray marks under the glyph box
   function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
   function makeMarks(count) {
@@ -120,7 +126,7 @@
     background-size: cover;
     background-position: center;
     filter: saturate(0.9) contrast(1.05);
-    opacity: 0.35;
+    opacity: 0.65; /* make image less faded across cards/relics */
     z-index: 0; /* bottom-most inside glyph */
     border-radius: inherit;
   }

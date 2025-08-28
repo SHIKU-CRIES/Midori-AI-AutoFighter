@@ -51,14 +51,11 @@ Null Lantern: Luna carrying a null lantern, a black iron lamp whose interior glo
 Old Coin: Luna flipping an old coin, a tarnished silver disc worn smooth by time, edges dented from countless hands.
 Omega Core: Luna harnessing an omega core, a dense metallic sphere with glowing seams arranged in an omega symbol, humming powerfully.
 Paradox Hourglass: Luna turning a paradox hourglass, twin glass bulbs filled with shimmering sand that flows upward and downward simultaneously.
-Pocket Manual: Luna flipping through a pocket manual, a palm-sized booklet with dog-eared pages and tiny hand-sketched diagrams.
 Rusty Buckle: Luna fastening a rusty buckle, a corroded iron clasp flecked with orange rust, squeaking as it snaps shut.
 Shiny Pebble: Luna admiring a shiny pebble, a smooth stone polished to mirror brightness, catching sunlight with a dazzling gleam.
 Soul Prism: Luna holding a soul prism, a multifaceted crystal prism refracting ethereal light into rainbow beams that dance around her.
 Stellar Compass: Luna plotting with a stellar compass, a celestial instrument studded with tiny star gems, its needle pointing toward distant constellations.
 Tattered Flag: Luna waving a tattered flag, a faded cloth banner riddled with holes, edges frayed by wind and battle.
-Threadbare Cloak: Luna wrapping a threadbare cloak around her shoulders, fabric so thin it is almost translucent, patched in several places.
 Timekeeper's Hourglass: Luna guarding a timekeeper's hourglass, a brass-framed glass timer whose sand glows golden and falls in measured, audible ticks.
 Traveler's Charm: Luna clutching a traveler's charm, a circular pendant with engraved maps and a tiny compass spinning inside.
 Vengeful Pendant: Luna brandishing a vengeful pendant, a dark gemstone hung from a chain, pulsing with crimson light that seethes with anger.
-Wooden Idol: Luna holding a wooden idol, a small hand-carved figure with exaggerated features and offerings tied at its base.
