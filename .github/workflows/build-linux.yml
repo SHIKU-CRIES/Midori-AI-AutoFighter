@@ -59,6 +59,14 @@ jobs:
       - name: Build backend executable
         working-directory: backend
         run: |
+          # Ensure frontend build directory exists
+          if [ ! -d "../frontend/build" ]; then
+            echo "Error: Frontend build directory not found at ../frontend/build"
+            echo "Available directories in frontend:"
+            ls -la ../frontend/
+            exit 1
+          fi
+          
           DATA_ARGS="--add-data ../frontend/build:frontend"
           uv run pyinstaller --onefile $DATA_ARGS --clean --name midori-autofighter-${{ matrix.variant }}-linux app.py
           

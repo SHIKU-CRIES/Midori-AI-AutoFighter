@@ -7,7 +7,8 @@ requires-python = ">=3.11"
 dependencies = [
     "pillow>=11.3.0",
     "rich>=13.0.0",
-    "sqlcipher3-binary>=0.5.4",
+    "sqlcipher3-binary>=0.5.4; sys_platform != 'win32'",
+    "pysqlcipher3>=1.0.0; sys_platform == 'win32'",
     "quart>=0.19.6",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
