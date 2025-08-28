@@ -7,17 +7,27 @@
   let orbs = [];
 
   function rand(min, max) { return Math.random() * (max - min) + min; }
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  // Restrict hues to only red and blue for enrage visuals
+  function redOrBlueHue() {
+    // 50/50 chance: red cluster (~350-359 or 0-10) or blue cluster (~200-240)
+    if (Math.random() < 0.5) {
+      const branch = Math.random() < 0.5 ? rand(350, 359) : rand(0, 10);
+      return branch;
+    }
+    return rand(200, 240);
+  }
 
   function makeOrb() {
-    const hue = rand(200, 360); // blue→red range
+    const hue = redOrBlueHue(); // only red or blue
     return {
       id: Math.random().toString(36).slice(2),
       x: rand(0, 100),
       y: rand(0, 100),
-      size: rand(1.8, 3.6),
+      size: rand(2.4, 4.2),
       dx: rand(8, 16),
       dy: rand(6, 14),
-      colorDur: rand(6, 12),
+      colorDur: rand(6, 10),
       delay: rand(0, 3),
       hue,
     };
@@ -26,7 +36,7 @@
   $: if (active) {
     ending = false;
     if (orbs.length === 0) {
-      const count = reducedMotion ? 6 : 12;
+      const count = reducedMotion ? 6 : 14;
       orbs = Array.from({ length: count }, makeOrb);
     }
   }
@@ -78,18 +88,19 @@
   .orb .i {
     width: 100%; height: 100%; border-radius: 50%;
     background: radial-gradient(circle,
-      hsla(var(--hue), 85%, 65%, 0.28) 0%,
-      hsla(calc(var(--hue) + 40), 85%, 55%, 0.22) 55%,
+      hsla(var(--hue), 90%, 60%, 0.40) 0%,
+      hsla(calc(var(--hue) + 10), 95%, 55%, 0.34) 55%,
       rgba(0,0,0,0) 70%
     );
     animation: driftY var(--dy) ease-in-out infinite alternate, hueShift var(--colorDur) linear infinite;
     mix-blend-mode: screen;
+    box-shadow: 0 0 12px hsla(var(--hue), 95%, 60%, 0.28), 0 0 24px hsla(var(--hue), 95%, 55%, 0.20);
   }
 
   .enrage-orbs.reduced .orb { animation: none; }
   .enrage-orbs.reduced .orb .i { animation: none; opacity: 0.5; }
 
-  .vignette { position:absolute; inset:0; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.25) 100%); }
+  .vignette { position:absolute; inset:0; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.22) 100%); }
   .fade { position:absolute; inset:0; background: transparent; }
 
   @keyframes driftX {
@@ -102,6 +113,6 @@
   }
   @keyframes hueShift {
     0% { filter: hue-rotate(0deg); }
-    100% { filter: hue-rotate(180deg); }
+    100% { filter: hue-rotate(12deg); }
   }
 </style>
