@@ -53,7 +53,7 @@ Rusty Buckle: Luna fastening a rusty buckle, a corroded iron clasp flecked with 
 Shiny Pebble: Luna admiring a shiny pebble, a smooth stone polished to mirror brightness, catching sunlight with a dazzling gleam.
 Soul Prism: Luna holding a soul prism, a multifaceted crystal prism refracting ethereal light into rainbow beams that dance around her.
 Stellar Compass: Luna plotting with a stellar compass, a celestial instrument studded with tiny star gems, its needle pointing toward distant constellations.
-Tattered Flag: Luna waving a tattered flag, a faded cloth banner riddled with holes, edges frayed by wind and battle.
-Timekeeper's Hourglass: Luna guarding a timekeeper's hourglass, a brass-framed glass timer whose sand glows golden and falls in measured, audible ticks.
-Traveler's Charm: Luna clutching a traveler's charm, a circular pendant with engraved maps and a tiny compass spinning inside.
-Vengeful Pendant: Luna brandishing a vengeful pendant, a dark gemstone hung from a chain, pulsing with crimson light that seethes with anger.
+Tattered Flag: 
+Timekeeper's Hourglass:
+Traveler's Charm: 
+Vengeful Pendant: 
