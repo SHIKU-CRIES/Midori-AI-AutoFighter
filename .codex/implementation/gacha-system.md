@@ -1,4 +1,3 @@
-
 # Gacha system
 
 ## Presentation flow
