@@ -158,6 +158,21 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
         pass
 
 
+def _get_effect_description(effect_name: str) -> str:
+    """Get the description for an effect by its name."""
+    try:
+        if effect_name == "aftertaste":
+            from plugins.effects.aftertaste import Aftertaste
+            return Aftertaste.get_description()
+        elif effect_name == "critical_boost":
+            from plugins.effects.critical_boost import CriticalBoost
+            return CriticalBoost.get_description()
+        else:
+            return "Unknown effect"
+    except Exception:
+        return "Unknown effect"
+
+
 def _normalize_damage_type(dt: Any) -> str:
     """Return a simple identifier for a damage type or element."""
     try:
@@ -305,7 +320,8 @@ def _serialize(obj: Stats) -> dict[str, Any]:
                 "name": effect.name,
                 "source": effect.source,
                 "duration": effect.duration,
-                "modifiers": effect.stat_modifiers
+                "modifiers": effect.stat_modifiers,
+                "description": _get_effect_description(effect.name)
             })
     data["active_effects"] = active_effects
 

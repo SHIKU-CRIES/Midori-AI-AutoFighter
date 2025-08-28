@@ -24,6 +24,11 @@ class Aftertaste:
     # Available damage types for random selection
     _damage_types = [Fire, Ice, Wind, Lightning, Light, Dark]
 
+    @classmethod
+    def get_description(cls) -> str:
+        """Get the description of this effect for display purposes."""
+        return "Deals a hit with random damage type (10% to 150% damage)"
+
     def _get_random_damage_type(self, attacker: Stats = None):
         """Get a random damage type, optionally weighted toward attacker's type."""
         if not self.use_weighted_random or attacker is None:

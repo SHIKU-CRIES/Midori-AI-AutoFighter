@@ -9,7 +9,7 @@ class FallbackEssence(RelicBase):
     """A fallback relic granted when the card pool is exhausted. Provides a small boost to all stats."""
 
     id: str = "fallback_essence"
-    name: str = "Essence of Determination"
+    name: str = "Essence of 6858"
     stars: int = 1
     effects: dict[str, float] = field(default_factory=lambda: {
         "atk": 0.01,
@@ -18,13 +18,11 @@ class FallbackEssence(RelicBase):
         "crit_rate": 0.01,
         "crit_damage": 0.01,
         "effect_hit_rate": 0.01,
-        "effect_resistance": 0.01,
-        "mitigation": 0.01,
-        "vitality": 0.01
+        "effect_resistance": 0.01
     })
     about: str = (
         "A mystical essence that forms when one's determination transcends the need for material cards. "
-        "+1% to all stats."
+        "+1% to core combat stats."
     )
 
     def describe(self, stacks: int) -> str:
