@@ -47,13 +47,5 @@ Killer Instinct: Luna activating a killer instinct token, a jagged tooth pendant
 Lucky Button: Luna stroking a lucky button, an oversized pearly button with carved clovers, hanging from a thread like a talisman.
 Null Lantern: Luna carrying a null lantern, a black iron lamp whose interior glows with void-dark light that swallows surrounding shadows.
 Old Coin: Luna flipping an old coin, a tarnished silver disc worn smooth by time, edges dented from countless hands.
-Omega Core: Luna harnessing an omega core, a dense metallic sphere with glowing seams arranged in an omega symbol, humming powerfully.
-Paradox Hourglass: Luna turning a paradox hourglass, twin glass bulbs filled with shimmering sand that flows upward and downward simultaneously.
-Rusty Buckle: Luna fastening a rusty buckle, a corroded iron clasp flecked with orange rust, squeaking as it snaps shut.
-Shiny Pebble: Luna admiring a shiny pebble, a smooth stone polished to mirror brightness, catching sunlight with a dazzling gleam.
-Soul Prism: Luna holding a soul prism, a multifaceted crystal prism refracting ethereal light into rainbow beams that dance around her.
-Stellar Compass: Luna plotting with a stellar compass, a celestial instrument studded with tiny star gems, its needle pointing toward distant constellations.
-Tattered Flag: 
-Timekeeper's Hourglass:
-Traveler's Charm: 
-Vengeful Pendant: 
+Omega Core: 
+Paradox Hourglass: 
