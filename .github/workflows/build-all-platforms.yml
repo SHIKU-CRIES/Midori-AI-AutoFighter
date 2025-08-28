@@ -22,14 +22,23 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: '3.12'
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install bun
+        run: |
+          powershell -c "irm bun.sh/install.ps1|iex"
+          echo "$env:USERPROFILE\.bun\bin" >> $env:GITHUB_PATH
           
-      - name: Setup build environment
-        working-directory: legacy
+      - name: Setup backend environment
+        working-directory: backend
         run: |
           uv sync
           
-      - name: Install variant dependencies
-        working-directory: legacy
+      - name: Install backend variant dependencies
+        working-directory: backend
         run: |
           if ("${{ matrix.variant }}" -eq "llm-cpu") {
             uv sync --extra llm-cpu
@@ -39,31 +48,28 @@ jobs:
             uv sync --extra llm-amd
           }
           
-      - name: Install PyInstaller
-        working-directory: legacy
+      - name: Install PyInstaller for backend
+        working-directory: backend
         run: uv add --dev pyinstaller
         
-      - name: Create assets directories
-        working-directory: legacy
+      - name: Build frontend
+        working-directory: frontend
         run: |
-          if (!(Test-Path "photos")) { New-Item -ItemType Directory -Name "photos" }
-          if (!(Test-Path "music")) { New-Item -ItemType Directory -Name "music" }
+          bun install
+          bun run build
           
-      - name: Build executable
-        working-directory: legacy
+      - name: Build backend executable
+        working-directory: backend
         run: |
-          $dataArgs = ""
-          if (Test-Path "photos") { $dataArgs += "--add-data photos;photos " }
-          if (Test-Path "music") { $dataArgs += "--add-data music;music " }
-          
-          $cmd = "uv run pyinstaller --onefile $dataArgs --clean --name midori-autofighter-${{ matrix.variant }}-windows main.py"
+          $dataArgs = "--add-data ../frontend/build;frontend"
+          $cmd = "uv run pyinstaller --onefile $dataArgs --clean --name midori-autofighter-${{ matrix.variant }}-windows app.py"
           Invoke-Expression $cmd
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: midori-autofighter-${{ matrix.variant }}-windows
-          path: legacy/dist/midori-autofighter-${{ matrix.variant }}-windows.exe
+          path: backend/dist/midori-autofighter-${{ matrix.variant }}-windows.exe
           retention-days: 30
 
   build-linux:
@@ -79,14 +85,18 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: '3.12'
+      
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
           
-      - name: Setup build environment
-        working-directory: legacy
+      - name: Setup backend environment
+        working-directory: backend
         run: |
           uv sync
           
-      - name: Install variant dependencies
-        working-directory: legacy
+      - name: Install backend variant dependencies
+        working-directory: backend
         run: |
           case "${{ matrix.variant }}" in
             "llm-cpu")
@@ -100,33 +110,27 @@ jobs:
               ;;
           esac
           
-      - name: Install PyInstaller
-        working-directory: legacy
+      - name: Install PyInstaller for backend
+        working-directory: backend
         run: uv add --dev pyinstaller
         
-      - name: Create assets directories
-        working-directory: legacy
+      - name: Build frontend
+        working-directory: frontend
         run: |
-          mkdir -p photos music
+          bun install
+          bun run build
           
-      - name: Build executable
-        working-directory: legacy
+      - name: Build backend executable
+        working-directory: backend
         run: |
-          DATA_ARGS=""
-          if [ -d "photos" ]; then
-            DATA_ARGS="$DATA_ARGS --add-data photos:photos"
-          fi
-          if [ -d "music" ]; then
-            DATA_ARGS="$DATA_ARGS --add-data music:music"
-          fi
-          
-          uv run pyinstaller --onefile $DATA_ARGS --clean --name midori-autofighter-${{ matrix.variant }}-linux main.py
+          DATA_ARGS="--add-data ../frontend/build:frontend"
+          uv run pyinstaller --onefile $DATA_ARGS --clean --name midori-autofighter-${{ matrix.variant }}-linux app.py
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: midori-autofighter-${{ matrix.variant }}-linux
-          path: legacy/dist/midori-autofighter-${{ matrix.variant }}-linux
+          path: backend/dist/midori-autofighter-${{ matrix.variant }}-linux
           retention-days: 30
 
   build-android:
@@ -135,12 +139,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -148,96 +147,36 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         
-      - name: Install build dependencies
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+          
+      - name: Build frontend for mobile
+        working-directory: frontend
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev
-          pip install buildozer cython
+          bun install
+          bun run build
           
-      - name: Create buildozer.spec
-        working-directory: legacy
+      - name: Setup mobile build environment
+        working-directory: build/mobile
         run: |
-          cat > buildozer.spec << 'EOF'
-          [app]
-          title = Midori AutoFighter
-          package.name = midoriautofighter
-          package.domain = ai.midori
-          source.dir = .
-          source.include_exts = py,png,jpg,kv,atlas,wav,mp3,ogg,json
-          version = 0.1
-          requirements = python3,kivy,pygame
-          
-          [buildozer]
-          log_level = 2
-          warn_on_root = 1
-          
-          [app:android]
-          fullscreen = 1
-          orientation = landscape
-          permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
-          android.minapi = 21
-          android.sdk = 31
-          android.ndk = 25b
-          android.gradle_dependencies = 
-          
-          EOF
-          
-      - name: Create Android-compatible main
-        working-directory: legacy
-        run: |
-          # Create a simplified version for Android
-          cat > main_android.py << 'EOF'
-          import os
-          import sys
-          
-          # Add current directory to path for imports
-          sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-          
-          try:
-              from gamestates import main
-              from load_photos import cleanup_temp_dirs
-          except ImportError:
-              # Fallback for Android build
-              def main(mode):
-                  print("Midori AutoFighter - Android version")
-                  print("Game is starting...")
-                  # Minimal game loop for Android
-                  import time
-                  time.sleep(1)
-                  
-              def cleanup_temp_dirs():
-                  pass
-          
-          if __name__ == "__main__":
-              try:
-                  main(1)
-                  cleanup_temp_dirs()
-              except Exception as error:
-                  print(f"Error: {str(error)}")
-          EOF
-          
-      - name: Create assets directories
-        working-directory: legacy
-        run: |
-          mkdir -p photos music
-          # Create dummy assets for Android build
-          echo "# Placeholder" > photos/placeholder.txt
-          echo "# Placeholder" > music/placeholder.txt
+          bun install
           
       - name: Build Android APK
-        working-directory: legacy
+        working-directory: build/mobile
         run: |
-          # Copy main file for Android
-          cp main_android.py main.py
+          # Sync frontend build to Capacitor
+          bun run sync
           
-          # Initialize buildozer
-          buildozer android debug
+          # Build APK
+          cd android
+          ./gradlew assembleDebug
           
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: midori-autofighter-non-llm-android
-          path: legacy/bin/*.apk
+          path: build/mobile/android/app/build/outputs/apk/debug/*.apk
           retention-days: 30
 
   create-release:

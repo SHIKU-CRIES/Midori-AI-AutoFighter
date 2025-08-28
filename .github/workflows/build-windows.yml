@@ -21,14 +21,19 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: '3.12'
+      
+      - name: Install bun
+        run: |
+          powershell -c "irm bun.sh/install.ps1|iex"
+          echo "$env:USERPROFILE\.bun\bin" >> $env:GITHUB_PATH
           
-      - name: Setup build environment
-        working-directory: legacy
+      - name: Setup backend environment
+        working-directory: backend
         run: |
           uv sync
           
-      - name: Install variant dependencies
-        working-directory: legacy
+      - name: Install backend variant dependencies
+        working-directory: backend
         run: |
           if ("${{ matrix.variant }}" -eq "llm-cpu") {
             uv sync --extra llm-cpu
@@ -38,29 +43,26 @@ jobs:
             uv sync --extra llm-amd
           }
           
-      - name: Install PyInstaller
-        working-directory: legacy
+      - name: Install PyInstaller for backend
+        working-directory: backend
         run: uv add --dev pyinstaller
         
-      - name: Create assets directories
-        working-directory: legacy
+      - name: Build frontend
+        working-directory: frontend
         run: |
-          if (!(Test-Path "photos")) { New-Item -ItemType Directory -Name "photos" }
-          if (!(Test-Path "music")) { New-Item -ItemType Directory -Name "music" }
+          bun install
+          bun run build
           
-      - name: Build executable
-        working-directory: legacy
+      - name: Build backend executable
+        working-directory: backend
         run: |
-          $dataArgs = ""
-          if (Test-Path "photos") { $dataArgs += "--add-data photos;photos " }
-          if (Test-Path "music") { $dataArgs += "--add-data music;music " }
-          
-          $cmd = "uv run pyinstaller --onefile $dataArgs --clean --name midori-autofighter-${{ matrix.variant }}-windows main.py"
+          $dataArgs = "--add-data ../frontend/build;frontend"
+          $cmd = "uv run pyinstaller --onefile $dataArgs --clean --name midori-autofighter-${{ matrix.variant }}-windows app.py"
           Invoke-Expression $cmd
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: midori-autofighter-${{ matrix.variant }}-windows
-          path: legacy/dist/midori-autofighter-${{ matrix.variant }}-windows.exe
+          path: backend/dist/midori-autofighter-${{ matrix.variant }}-windows.exe
           retention-days: 30

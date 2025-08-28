@@ -12,11 +12,46 @@ PLATFORM=${2:-$(uname -s | tr '[:upper:]' '[:lower:]')}
 
 echo "Building Midori AutoFighter - Variant: $VARIANT, Platform: $PLATFORM"
 
-# Change to legacy directory
-cd "$(dirname "$0")/legacy" || exit 1
+# Handle Android builds separately using Capacitor
+if [ "$PLATFORM" = "android" ]; then
+    echo "Building Android APK..."
+    
+    # Build frontend
+    echo "Building frontend..."
+    cd frontend
+    bun install
+    bun run build
+    cd ..
+    
+    # Build mobile app
+    echo "Building mobile app with Capacitor..."
+    cd build/mobile
+    bun install
+    bun run sync
+    cd android
+    ./gradlew assembleDebug
+    
+    echo "Android build completed!"
+    echo "Output: build/mobile/android/app/build/outputs/apk/debug/"
+    exit 0
+fi
+
+# Desktop builds (Windows/Linux) - build backend + frontend
+echo "Building desktop application..."
+
+# Build frontend first
+echo "Building frontend..."
+cd frontend
+bun install
+bun run build
+cd ..
+
+# Build backend
+echo "Setting up backend build environment..."
+cd backend
 
 # Setup environment
-echo "Setting up build environment..."
+echo "Installing backend dependencies..."
 uv sync
 
 # Install variant-specific dependencies
@@ -47,26 +82,13 @@ esac
 echo "Installing PyInstaller..."
 uv add --dev pyinstaller
 
-# Create asset directories if they don't exist
-echo "Setting up asset directories..."
-mkdir -p photos music
-
 # Build executable
 echo "Building executable..."
-DATA_ARGS=""
-if [ -d "photos" ]; then
-    if [ "$PLATFORM" = "windows" ]; then
-        DATA_ARGS="$DATA_ARGS --add-data photos;photos"
-    else
-        DATA_ARGS="$DATA_ARGS --add-data photos:photos"
-    fi
-fi
-if [ -d "music" ]; then
-    if [ "$PLATFORM" = "windows" ]; then
-        DATA_ARGS="$DATA_ARGS --add-data music;music"
-    else
-        DATA_ARGS="$DATA_ARGS --add-data music:music"
-    fi
+DATA_ARGS="--add-data ../frontend/build"
+if [ "$PLATFORM" = "windows" ]; then
+    DATA_ARGS="$DATA_ARGS;frontend"
+else
+    DATA_ARGS="$DATA_ARGS:frontend"
 fi
 
 OUTPUT_NAME="midori-autofighter-$VARIANT-$PLATFORM"
@@ -75,7 +97,7 @@ if [ "$PLATFORM" = "windows" ]; then
 fi
 
 echo "Building: $OUTPUT_NAME"
-uv run pyinstaller --onefile $DATA_ARGS --clean --name "$OUTPUT_NAME" main.py
+uv run pyinstaller --onefile $DATA_ARGS --clean --name "$OUTPUT_NAME" app.py
 
 echo "Build completed successfully!"
 echo "Output: dist/$OUTPUT_NAME"

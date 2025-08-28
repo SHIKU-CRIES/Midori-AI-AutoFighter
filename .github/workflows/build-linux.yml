@@ -21,14 +21,18 @@ jobs:
       - uses: astral-sh/setup-uv@v3
         with:
           python-version: '3.12'
+      
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
           
-      - name: Setup build environment
-        working-directory: legacy
+      - name: Setup backend environment
+        working-directory: backend
         run: |
           uv sync
           
-      - name: Install variant dependencies
-        working-directory: legacy
+      - name: Install backend variant dependencies
+        working-directory: backend
         run: |
           case "${{ matrix.variant }}" in
             "llm-cpu")
@@ -42,31 +46,25 @@ jobs:
               ;;
           esac
           
-      - name: Install PyInstaller
-        working-directory: legacy
+      - name: Install PyInstaller for backend
+        working-directory: backend
         run: uv add --dev pyinstaller
         
-      - name: Create assets directories
-        working-directory: legacy
+      - name: Build frontend
+        working-directory: frontend
         run: |
-          mkdir -p photos music
+          bun install
+          bun run build
           
-      - name: Build executable
-        working-directory: legacy
+      - name: Build backend executable
+        working-directory: backend
         run: |
-          DATA_ARGS=""
-          if [ -d "photos" ]; then
-            DATA_ARGS="$DATA_ARGS --add-data photos:photos"
-          fi
-          if [ -d "music" ]; then
-            DATA_ARGS="$DATA_ARGS --add-data music:music"
-          fi
-          
-          uv run pyinstaller --onefile $DATA_ARGS --clean --name midori-autofighter-${{ matrix.variant }}-linux main.py
+          DATA_ARGS="--add-data ../frontend/build:frontend"
+          uv run pyinstaller --onefile $DATA_ARGS --clean --name midori-autofighter-${{ matrix.variant }}-linux app.py
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: midori-autofighter-${{ matrix.variant }}-linux
-          path: legacy/dist/midori-autofighter-${{ matrix.variant }}-linux
+          path: backend/dist/midori-autofighter-${{ matrix.variant }}-linux
           retention-days: 30
