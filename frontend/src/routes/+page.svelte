@@ -602,6 +602,7 @@
     items={items}
     editorState={editorState}
     battleActive={battleActive}
+    backendFlavor={backendFlavor}
     on:startRun={handleStart}
     on:editorSave={(e) => handleEditorSave(e)}
     on:openInventory={openInventory}

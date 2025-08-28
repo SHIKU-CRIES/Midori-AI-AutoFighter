@@ -19,6 +19,9 @@ describe('SettingsMenu component', () => {
     expect(content).toContain('data-testid="save-status"');
     expect(content).toContain('LRM Model');
     expect(content).toContain('Test Model');
+    expect(content).toContain('backendFlavor');
+    expect(content).toContain('{#if showLrm}');
+    expect(content).toContain('if (showLrm)');
     expect(content).not.toContain('Save</button>');
     expect(content).not.toContain('alert(');
   });

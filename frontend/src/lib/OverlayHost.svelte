@@ -35,6 +35,7 @@
   export let reducedMotion = false;
   export let selectedParty = [];
   export let battleActive = false;
+  export let backendFlavor = '';
 
   const dispatch = createEventDispatcher();
   // Determine whether to show rewards overlay based on raw room data.
@@ -170,6 +171,7 @@
       {autocraft}
       {reducedMotion}
       {runId}
+      {backendFlavor}
       on:save={(e) => dispatch('saveSettings', e.detail)}
       on:endRun={() => dispatch('endRun')}
     />

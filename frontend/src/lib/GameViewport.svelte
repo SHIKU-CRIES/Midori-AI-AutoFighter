@@ -34,6 +34,7 @@
   export let editorState = {};
   export let battleActive = false;
   export let selected = [];
+  export let backendFlavor = '';
 
   let randomBg = '';
   let roster = [];
@@ -168,24 +169,25 @@
     {:else if runId}
       <div class="placeholder">Awaiting next room...</div>
     {/if}
-    <OverlayHost
-      bind:selected
-      {runId}
-      {roomData}
-      {editorState}
-      {sfxVolume}
-      {musicVolume}
-      {voiceVolume}
-      {framerate}
-      {autocraft}
-      {reducedMotion}
-      {selectedParty}
-      {battleActive}
-      on:saveParty={() => dispatch('saveParty')}
-      on:startRun={() => dispatch('startRun')}
-      on:back={() => dispatch('back')}
-      on:rewardSelect={(e) => dispatch('rewardSelect', e.detail)}
-      on:nextRoom={() => dispatch('nextRoom')}
+      <OverlayHost
+        bind:selected
+        {runId}
+        {roomData}
+        {editorState}
+        {sfxVolume}
+        {musicVolume}
+        {voiceVolume}
+        {framerate}
+        {autocraft}
+        {reducedMotion}
+        {selectedParty}
+        {battleActive}
+        {backendFlavor}
+        on:saveParty={() => dispatch('saveParty')}
+        on:startRun={() => dispatch('startRun')}
+        on:back={() => dispatch('back')}
+        on:rewardSelect={(e) => dispatch('rewardSelect', e.detail)}
+        on:nextRoom={() => dispatch('nextRoom')}
       on:editorSave={(e) => dispatch('editorSave', e.detail)}
       on:saveSettings={(e) => ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } = e.detail)}
       on:endRun={() => dispatch('endRun')}
