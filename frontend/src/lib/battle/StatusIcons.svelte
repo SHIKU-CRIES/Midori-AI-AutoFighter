@@ -25,9 +25,9 @@
     
     // Special descriptions for known effects
     if (effect.name === 'aftertaste') {
-      description = 'Deals additional damage after the main attack';
+      description = 'Deals 25 * random(0.1, 1.5) direct damage per hit';
     } else if (effect.name === 'critical_boost') {
-      description = 'Increases critical hit rate and damage until hit';
+      description = '+0.5% crit rate and +5% crit damage per stack. Removed when taking damage.';
     } else {
       // Generic description from modifiers
       const modParts = [];

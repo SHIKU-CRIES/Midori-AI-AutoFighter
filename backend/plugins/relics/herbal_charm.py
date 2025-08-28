@@ -8,19 +8,15 @@ from plugins.relics._base import RelicBase
 
 @dataclass
 class HerbalCharm(RelicBase):
-    """Heals all allies for 0.5% Max HP at the start of each turn. Enables overheal (shields)."""
+    """Heals all allies for 0.5% Max HP at the start of each turn."""
 
     id: str = "herbal_charm"
     name: str = "Herbal Charm"
     stars: int = 1
     effects: dict[str, float] = field(default_factory=dict)
-    about: str = "Heals all allies for 0.5% Max HP at the start of each turn per stack. Enables overheal as shields."
+    about: str = "Heals all allies for 0.5% Max HP at the start of each turn per stack."
 
     def apply(self, party) -> None:
-        # Enable overheal for all party members
-        for member in party.members:
-            member.enable_overheal()
-
         def _heal(*_) -> None:
             for member in party.members:
                 heal = int(member.max_hp * 0.005)
@@ -30,4 +26,4 @@ class HerbalCharm(RelicBase):
 
     def describe(self, stacks: int) -> str:
         pct = 0.5 * stacks
-        return f"Heals all allies for {pct}% Max HP at the start of each turn. Enables overheal as shields."
+        return f"Heals all allies for {pct}% Max HP at the start of each turn."

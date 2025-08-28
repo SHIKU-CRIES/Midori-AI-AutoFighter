@@ -427,9 +427,21 @@ class Stats:
                 self.hp += normal_heal
                 amount -= normal_heal
 
-            # Add any remaining healing as shields
+            # Add any remaining healing as shields with diminishing returns
             if amount > 0:
-                self.shields += amount
+                # Calculate penalty based on CURRENT shield amount
+                current_overheal_percent = (self.shields / self.max_hp) * 100
+
+                if current_overheal_percent <= 0:
+                    # No existing overheal - healing works normally
+                    self.shields += amount
+                else:
+                    # Apply diminishing returns based on current overheal percentage
+                    # At 10% overheal, healing effectiveness = 1/5 = 0.2
+                    # So 10 healing gives 2 shields, matching the example
+                    healing_effectiveness = 1.0 / 5.0  # 20% effectiveness when overhealed
+                    shields_to_add = amount * healing_effectiveness
+                    self.shields += int(shields_to_add)
         else:
             # Standard healing - cap at max HP
             self.hp = min(self.hp + amount, self.max_hp)
