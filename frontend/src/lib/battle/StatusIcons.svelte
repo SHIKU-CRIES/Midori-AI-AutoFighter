@@ -23,13 +23,11 @@
     if (!effect) return '';
     let description = '';
     
-    // Special descriptions for known effects
-    if (effect.name === 'aftertaste') {
-      description = 'Deals a hit with random damage type (10% to 150% damage)';
-    } else if (effect.name === 'critical_boost') {
-      description = '+0.5% crit rate and +5% crit damage per stack. Removed when taking damage.';
+    // Use description from backend if available
+    if (effect.description) {
+      description = effect.description;
     } else {
-      // Generic description from modifiers
+      // Fallback to generic description from modifiers
       const modParts = [];
       if (effect.modifiers) {
         for (const [stat, value] of Object.entries(effect.modifiers)) {

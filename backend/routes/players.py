@@ -186,11 +186,24 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
 
     if hasattr(player, 'get_active_effects'):
         for effect in player.get_active_effects():
+            # Import effect descriptions
+            description = "Unknown effect"
+            try:
+                if effect.name == "aftertaste":
+                    from plugins.effects.aftertaste import Aftertaste
+                    description = Aftertaste.get_description()
+                elif effect.name == "critical_boost":
+                    from plugins.effects.critical_boost import CriticalBoost
+                    description = CriticalBoost.get_description()
+            except Exception:
+                pass
+            
             active_effects.append({
                 "name": effect.name,
                 "source": effect.source,
                 "duration": effect.duration,
-                "modifiers": effect.stat_modifiers
+                "modifiers": effect.stat_modifiers,
+                "description": description
             })
 
     stats = {

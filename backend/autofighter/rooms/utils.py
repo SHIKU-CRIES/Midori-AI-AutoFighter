@@ -18,15 +18,19 @@ from ..stats import Stats
 def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     """Scale foe stats based on room metadata.
 
-    Foes grow stronger with floor, room index, loop count, and user-set pressure.
+    Foes grow stronger with cumulative room progression across floors, loop count, and user-set pressure.
+    Each floor adds 45 rooms worth of stat progression (rooms_per_floor from MapGenerator).
     Small per-stat variation keeps battles from feeling identical.
     """
+    from ..mapgen import MapGenerator
+
     starter_int = 1.0 + random.uniform(-0.05, 0.05)
-    floor_mult = starter_int + 0.08 * max(node.floor - 1, 0)
-    index_mult = starter_int + 0.10 * max(node.index - 1, 0)
+    # Calculate cumulative room progression: (floors - 1) * rooms_per_floor + current_room_index
+    cumulative_rooms = (node.floor - 1) * MapGenerator.rooms_per_floor + node.index
+    room_mult = starter_int + 0.10 * max(cumulative_rooms - 1, 0)
     loop_mult = starter_int + 0.20 * max(node.loop - 1, 0)
     pressure_mult = 1.0 * max(node.pressure, 1)
-    base_mult = max(strength * floor_mult * index_mult * loop_mult * pressure_mult, 0.5)
+    base_mult = max(strength * room_mult * loop_mult * pressure_mult, 0.5)
 
     # Apply a global pre-scale debuff to foes so they are significantly weaker
     # before room modifiers are applied. This reduces core combat stats by 10x.
@@ -152,6 +156,21 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
                     pass
     except Exception:
         pass
+
+
+def _get_effect_description(effect_name: str) -> str:
+    """Get the description for an effect by its name."""
+    try:
+        if effect_name == "aftertaste":
+            from plugins.effects.aftertaste import Aftertaste
+            return Aftertaste.get_description()
+        elif effect_name == "critical_boost":
+            from plugins.effects.critical_boost import CriticalBoost
+            return CriticalBoost.get_description()
+        else:
+            return "Unknown effect"
+    except Exception:
+        return "Unknown effect"
 
 
 def _normalize_damage_type(dt: Any) -> str:
@@ -301,7 +320,8 @@ def _serialize(obj: Stats) -> dict[str, Any]:
                 "name": effect.name,
                 "source": effect.source,
                 "duration": effect.duration,
-                "modifiers": effect.stat_modifiers
+                "modifiers": effect.stat_modifiers,
+                "description": _get_effect_description(effect.name)
             })
     data["active_effects"] = active_effects
 

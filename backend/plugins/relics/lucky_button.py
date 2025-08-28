@@ -50,8 +50,13 @@ class LuckyButton(RelicBase):
         BUS.subscribe("turn_end", _turn_end)
 
     def describe(self, stacks: int) -> str:
-        rate = 3 * stacks
-        return (
-            f"+{rate}% Crit Rate; missed crits grant {stacks} "
-            f"Critical Boost stack{'s' if stacks != 1 else ''} next turn."
-        )
+        if stacks == 1:
+            return "+3% Crit Rate; missed crits grant Critical Boost next turn."
+        else:
+            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
+            multiplier = (1.03 ** stacks) - 1
+            total_pct = round(multiplier * 100)
+            return (
+                f"+{total_pct}% Crit Rate ({stacks} stacks, multiplicative); missed crits grant {stacks} "
+                f"Critical Boost stack{'s' if stacks != 1 else ''} next turn."
+            )

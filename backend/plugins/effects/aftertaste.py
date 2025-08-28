@@ -5,7 +5,6 @@ import random
 from autofighter.stats import Stats
 from plugins.damage_types.dark import Dark
 from plugins.damage_types.fire import Fire
-from plugins.damage_types.generic import Generic
 from plugins.damage_types.ice import Ice
 from plugins.damage_types.light import Light
 from plugins.damage_types.lightning import Lightning
@@ -24,6 +23,11 @@ class Aftertaste:
 
     # Available damage types for random selection
     _damage_types = [Fire, Ice, Wind, Lightning, Light, Dark]
+
+    @classmethod
+    def get_description(cls) -> str:
+        """Get the description of this effect for display purposes."""
+        return "Deals a hit with random damage type (10% to 150% damage)"
 
     def _get_random_damage_type(self, attacker: Stats = None):
         """Get a random damage type, optionally weighted toward attacker's type."""
