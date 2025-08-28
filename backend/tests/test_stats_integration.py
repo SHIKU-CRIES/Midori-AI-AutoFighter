@@ -6,10 +6,12 @@ correctly across all components of the system.
 """
 
 import sys
+
 sys.path.append('.')
 
-from autofighter.stats import Stats, StatEffect
 from autofighter.effects import create_stat_buff
+from autofighter.stats import StatEffect
+from autofighter.stats import Stats
 from plugins.players._base import PlayerBase
 
 
@@ -37,7 +39,7 @@ def test_complete_stats_system():
     # Test 2: PlayerBase functionality
     print('2. Testing PlayerBase class:')
     player = PlayerBase()
-    
+
     # Test permanent base stat change (like leveling)
     original_base = player.get_base_stat('atk')
     player.modify_base_stat('atk', 10)
@@ -56,10 +58,10 @@ def test_complete_stats_system():
     print('3. Testing StatModifier integration:')
     initial_effects = len(player.get_active_effects())
     modifier = create_stat_buff(player, name='weapon_enchant', atk=20, defense_mult=1.5)
-    
+
     new_effects = len(player.get_active_effects())
     assert new_effects > initial_effects, "StatModifier should create effects"
-    
+
     # Cleanup
     modifier.remove()
     player.remove_effect_by_name('battle_buff')
@@ -68,21 +70,9 @@ def test_complete_stats_system():
     assert final_atk == expected_final, f"After cleanup, should have {expected_final} atk"
     print('   ✓ Effect cleanup working correctly\n')
 
-    # Test 4: Legacy compatibility
-    print('4. Testing legacy compatibility:')
-    pre_legacy_base = player.get_base_stat('atk')
-    pre_legacy_runtime = player.atk
-    
-    player.adjust_stat_on_gain('atk', 12)  # Legacy method
-    
-    # Base should be unchanged, runtime should be modified via effect
-    assert player.get_base_stat('atk') == pre_legacy_base, "Legacy method should not modify base stats"
-    assert player.atk == pre_legacy_runtime + 12, "Legacy method should modify runtime via effect"
-    print('   ✓ Legacy compatibility working correctly\n')
-
     print('=== ALL INTEGRATION TESTS PASSED ===\n')
     print('🎉 STATS REFACTORING SUCCESSFULLY IMPLEMENTED! 🎉\n')
-    
+
     return True
 
 

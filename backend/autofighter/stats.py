@@ -1,11 +1,12 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field
-from dataclasses import fields
 import importlib
 import logging
 import random
-from typing import Dict, Optional, Union
+from typing import Dict
+from typing import Optional
+from typing import Union
 
 from plugins.damage_types._base import DamageTypeBase
 from plugins.damage_types.generic import Generic
@@ -25,11 +26,11 @@ class StatEffect:
     stat_modifiers: Dict[str, Union[int, float]]  # stat_name -> modifier value
     duration: int = -1  # -1 for permanent effects (cards/relics), >0 for temporary
     source: str = "unknown"  # source identifier (card name, relic name, etc.)
-    
+
     def is_expired(self) -> bool:
         """Check if this effect has expired."""
         return self.duration == 0
-    
+
     def tick(self) -> None:
         """Reduce duration by 1 if it's a temporary effect."""
         if self.duration > 0:
@@ -72,10 +73,10 @@ class Stats:
     _base_dodge_odds: float = field(default=0.05, init=False)
     _base_effect_resistance: float = field(default=0.05, init=False)
     _base_vitality: float = field(default=1.0, init=False)
-    
+
     # Damage type and other permanent attributes
     damage_type: DamageTypeBase = field(default_factory=Generic)
-    
+
     # Runtime tracking stats (not affected by effects)
     action_points: int = 0
     damage_taken: int = 0
@@ -88,14 +89,14 @@ class Stats:
     dots: list[str] = field(default_factory=list)
     hots: list[str] = field(default_factory=list)
     mods: list[str] = field(default_factory=list)
-    
+
     # Effects system
     _active_effects: list[StatEffect] = field(default_factory=list, init=False)
 
     level_up_gains: dict[str, int] = field(
         default_factory=lambda: {"max_hp": 10, "atk": 5, "defense": 3}
     )
-    
+
     def __post_init__(self):
         """Initialize base stats from constructor values."""
         # Initialize base stats with default values if not already set
@@ -121,7 +122,7 @@ class Stats:
             self._base_effect_resistance = 0.05
         if not hasattr(self, '_base_vitality'):
             self._base_vitality = 1.0
-            
+
         # Set hp to match max_hp at start
         self.hp = self.max_hp
 
@@ -130,57 +131,57 @@ class Stats:
     def max_hp(self) -> int:
         """Calculate runtime max HP (base + effects)."""
         return int(self._base_max_hp + self._calculate_stat_modifier('max_hp'))
-    
+
     @property
     def atk(self) -> int:
         """Calculate runtime attack (base + effects)."""
         return int(self._base_atk + self._calculate_stat_modifier('atk'))
-    
+
     @property
     def defense(self) -> int:
         """Calculate runtime defense (base + effects)."""
         return int(self._base_defense + self._calculate_stat_modifier('defense'))
-    
+
     @property
     def crit_rate(self) -> float:
         """Calculate runtime crit rate (base + effects)."""
         return max(0.0, self._base_crit_rate + self._calculate_stat_modifier('crit_rate'))
-    
+
     @property
     def crit_damage(self) -> float:
         """Calculate runtime crit damage (base + effects)."""
         return max(1.0, self._base_crit_damage + self._calculate_stat_modifier('crit_damage'))
-    
+
     @property
     def effect_hit_rate(self) -> float:
         """Calculate runtime effect hit rate (base + effects)."""
         return max(0.0, self._base_effect_hit_rate + self._calculate_stat_modifier('effect_hit_rate'))
-    
+
     @property
     def mitigation(self) -> float:
         """Calculate runtime mitigation (base + effects)."""
         return max(0.1, self._base_mitigation + self._calculate_stat_modifier('mitigation'))
-    
+
     @property
     def regain(self) -> int:
         """Calculate runtime regain (base + effects)."""
         return int(max(0, self._base_regain + self._calculate_stat_modifier('regain')))
-    
+
     @property
     def dodge_odds(self) -> float:
         """Calculate runtime dodge odds (base + effects)."""
         return max(0.0, min(1.0, self._base_dodge_odds + self._calculate_stat_modifier('dodge_odds')))
-    
+
     @property
     def effect_resistance(self) -> float:
         """Calculate runtime effect resistance (base + effects)."""
         return max(0.0, self._base_effect_resistance + self._calculate_stat_modifier('effect_resistance'))
-    
+
     @property
     def vitality(self) -> float:
         """Calculate runtime vitality (base + effects)."""
         return max(0.01, self._base_vitality + self._calculate_stat_modifier('vitality'))
-    
+
     def _calculate_stat_modifier(self, stat_name: str) -> Union[int, float]:
         """Calculate the total modifier for a stat from all active effects."""
         total = 0
@@ -188,7 +189,7 @@ class Stats:
             if stat_name in effect.stat_modifiers:
                 total += effect.stat_modifiers[stat_name]
         return total
-    
+
     # Base stat access methods (for permanent changes like leveling)
     def set_base_stat(self, stat_name: str, value: Union[int, float]) -> None:
         """Set a base stat value (use only for permanent changes like leveling)."""
@@ -197,19 +198,19 @@ class Stats:
             setattr(self, base_attr, value)
         else:
             log.warning(f"Attempted to set unknown base stat: {stat_name}")
-    
+
     def get_base_stat(self, stat_name: str) -> Union[int, float]:
         """Get a base stat value."""
         base_attr = f"_base_{stat_name}"
         if hasattr(self, base_attr):
             return getattr(self, base_attr)
         return 0
-    
+
     def modify_base_stat(self, stat_name: str, amount: Union[int, float]) -> None:
         """Modify a base stat (use only for permanent changes like leveling)."""
         current = self.get_base_stat(stat_name)
         self.set_base_stat(stat_name, current + amount)
-    
+
     # Effect management methods
     def add_effect(self, effect: StatEffect) -> None:
         """Add a stat effect."""
@@ -217,7 +218,7 @@ class Stats:
         self.remove_effect_by_name(effect.name)
         self._active_effects.append(effect)
         log.debug(f"Added effect {effect.name} with modifiers {effect.stat_modifiers}")
-    
+
     def remove_effect_by_name(self, effect_name: str) -> bool:
         """Remove an effect by name. Returns True if an effect was removed."""
         initial_count = len(self._active_effects)
@@ -226,7 +227,7 @@ class Stats:
         if removed:
             log.debug(f"Removed effect {effect_name}")
         return removed
-    
+
     def remove_effect_by_source(self, source: str) -> int:
         """Remove all effects from a specific source. Returns number of effects removed."""
         initial_count = len(self._active_effects)
@@ -235,7 +236,7 @@ class Stats:
         if removed_count > 0:
             log.debug(f"Removed {removed_count} effects from source {source}")
         return removed_count
-    
+
     def tick_effects(self) -> None:
         """Update all temporary effects, removing expired ones."""
         expired_effects = []
@@ -243,14 +244,14 @@ class Stats:
             effect.tick()
             if effect.is_expired():
                 expired_effects.append(effect.name)
-        
+
         for effect_name in expired_effects:
             self.remove_effect_by_name(effect_name)
-    
+
     def get_active_effects(self) -> list[StatEffect]:
         """Get a copy of all active effects."""
         return self._active_effects.copy()
-    
+
     def clear_all_effects(self) -> None:
         """Remove all active effects."""
         self._active_effects.clear()
@@ -277,22 +278,22 @@ class Stats:
 
     def _on_level_up(self) -> None:
         inc = random.uniform(0.003 * self.level, 0.008 * self.level)
-        
+
         # Apply percentage increase to base stats
-        base_stat_names = ['max_hp', 'atk', 'defense', 'crit_rate', 'crit_damage', 
-                          'effect_hit_rate', 'mitigation', 'regain', 'dodge_odds', 
+        base_stat_names = ['max_hp', 'atk', 'defense', 'crit_rate', 'crit_damage',
+                          'effect_hit_rate', 'mitigation', 'regain', 'dodge_odds',
                           'effect_resistance', 'vitality']
-        
+
         for stat_name in base_stat_names:
             current_base = self.get_base_stat(stat_name)
             if isinstance(current_base, (int, float)) and current_base > 0:
                 new_val = current_base * (1 + inc)
                 self.set_base_stat(stat_name, type(current_base)(new_val))
-        
+
         # Apply fixed gains from level_up_gains to base stats
         for stat, base in self.level_up_gains.items():
             self.modify_base_stat(stat, base * self.level)
-        
+
         # Set current HP to new max HP
         self.hp = self.max_hp
 
@@ -306,26 +307,6 @@ class Stats:
             self.level += 1
             self._on_level_up()
 
-    # Backward compatibility methods
-    def adjust_stat_on_gain(self, stat_name: str, amount: int) -> None:
-        """Legacy method - now adds a temporary effect instead of modifying base stats."""
-        log.warning(f"Legacy adjust_stat_on_gain called for {stat_name}. Consider using add_effect instead.")
-        effect = StatEffect(
-            name=f"legacy_gain_{stat_name}",
-            stat_modifiers={stat_name: amount},
-            source="legacy_adjustment"
-        )
-        self.add_effect(effect)
-
-    def adjust_stat_on_loss(self, stat_name: str, amount: int) -> None:
-        """Legacy method - now adds a temporary effect instead of modifying base stats."""
-        log.warning(f"Legacy adjust_stat_on_loss called for {stat_name}. Consider using add_effect instead.")
-        effect = StatEffect(
-            name=f"legacy_loss_{stat_name}",
-            stat_modifiers={stat_name: -amount},
-            source="legacy_adjustment"
-        )
-        self.add_effect(effect)
 
     async def apply_damage(self, amount: float, attacker: Optional["Stats"] = None) -> int:
         def _ensure(obj: "Stats") -> DamageTypeBase:

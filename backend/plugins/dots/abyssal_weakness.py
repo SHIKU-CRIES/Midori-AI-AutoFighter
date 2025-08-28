@@ -1,4 +1,5 @@
 from autofighter.effects import DamageOverTime
+from autofighter.stats import StatEffect
 
 
 class AbyssalWeakness(DamageOverTime):
@@ -11,10 +12,15 @@ class AbyssalWeakness(DamageOverTime):
 
     def tick(self, target, *_):
         if not self._applied:
-            target.adjust_stat_on_loss("defense", 1)
+            effect = StatEffect(
+                name=f"{self.id}_defense_down",
+                stat_modifiers={"defense": -1},
+                source=self.id,
+            )
+            target.add_effect(effect)
             target.defense = max(target.defense, 0)
             self._applied = True
-        alive = super().tick(target)
-        if not alive:
-            target.adjust_stat_on_gain("defense", 1)
-        return alive
+        active = super().tick(target)
+        if not active:
+            target.remove_effect_by_name(f"{self.id}_defense_down")
+        return active
