@@ -13,6 +13,10 @@
   export let reducedMotion = false;
   export let lrmModel = '';
   export let runId = '';
+  export let backendFlavor = typeof window !== 'undefined' ? window.backendFlavor || '' : '';
+
+  let showLrm = false;
+  $: showLrm = (backendFlavor || '').toLowerCase().includes('llm');
 
   let saveStatus = '';
   let saveTimeout;
@@ -33,13 +37,15 @@
     } catch {
       /* ignore network/backend issues; leave local state */
     }
-    try {
-      const cfg = await getLrmConfig();
-      lrmOptions = cfg?.available_models || [];
-      lrmModel = cfg?.current_model || lrmModel;
-      saveSettings({ lrmModel });
-    } catch {
-      /* ignore */
+    if (showLrm) {
+      try {
+        const cfg = await getLrmConfig();
+        lrmOptions = cfg?.available_models || [];
+        lrmModel = cfg?.current_model || lrmModel;
+        saveSettings({ lrmModel });
+      } catch {
+        /* ignore */
+      }
     }
   });
 
@@ -190,20 +196,22 @@
         <label>Reduced Motion</label>
         <input type="checkbox" bind:checked={reducedMotion} on:change={scheduleSave} />
       </div>
-      <div class="control" title="Select language reasoning model.">
-        <label>LRM Model</label>
-        <select bind:value={lrmModel} on:change={handleModelChange}>
-          {#each lrmOptions as opt}
-            <option value={opt}>{opt}</option>
-          {/each}
-        </select>
-      </div>
-      <div class="control" title="Send a sample prompt to the selected model.">
-        <label>Test Model</label>
-        <button on:click={handleTestModel}>Test</button>
-      </div>
-      {#if testReply}
-        <p class="status" data-testid="lrm-test-reply">{testReply}</p>
+      {#if showLrm}
+        <div class="control" title="Select language reasoning model.">
+          <label>LRM Model</label>
+          <select bind:value={lrmModel} on:change={handleModelChange}>
+            {#each lrmOptions as opt}
+              <option value={opt}>{opt}</option>
+            {/each}
+          </select>
+        </div>
+        <div class="control" title="Send a sample prompt to the selected model.">
+          <label>Test Model</label>
+          <button on:click={handleTestModel}>Test</button>
+        </div>
+        {#if testReply}
+          <p class="status" data-testid="lrm-test-reply">{testReply}</p>
+        {/if}
       {/if}
       <div class="control" title="Clear all save data.">
         <Trash2 />
