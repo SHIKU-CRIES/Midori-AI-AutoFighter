@@ -292,7 +292,7 @@ def _serialize(obj: Stats) -> dict[str, Any]:
 
     data["dots"] = dots
     data["hots"] = hots
-    
+
     # Add special effects (aftertaste, crit boost, etc.)
     active_effects = []
     if hasattr(obj, '_active_effects'):
