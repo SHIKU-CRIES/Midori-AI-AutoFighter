@@ -39,6 +39,7 @@ Stat changes may be applied in two ways:
 - **Percentage:** float fields such as `crit_rate`, `crit_damage`, `effect_hit_rate`, `effect_resistance`, `vitality`, and `exp_multiplier` represent percentage modifiers.
 
 Effects and passives mutate these fields directly. Percentage values are expressed as decimals (e.g., `0.05` for +5%).
+Stat modifiers are applied through the `Stats.add_effect` API; direct legacy mutations are no longer supported.
 
 ### Player Customization
 Player customization works differently from other stat modifiers. Instead of being applied as temporary effects or mods, customization values are applied directly to base stats during player instantiation. This permanent application prevents stat accumulation bugs while maintaining the intended customization experience. See `player-customization.md` for implementation details.
