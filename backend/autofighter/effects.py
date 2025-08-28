@@ -7,12 +7,12 @@ from typing import Optional
 
 from rich.console import Console
 
-from autofighter.stats import Stats
+from autofighter.stats import Stats, StatEffect
 
 
 @dataclass
 class StatModifier:
-    """Temporarily adjust stats via additive or multiplicative changes."""
+    """Temporarily adjust stats via additive or multiplicative changes using the new StatEffect system."""
 
     stats: Stats
     name: str
@@ -20,16 +20,57 @@ class StatModifier:
     id: str
     deltas: dict[str, float] | None = None
     multipliers: dict[str, float] | None = None
-    _originals: dict[str, float] = field(init=False, default_factory=dict)
+    _effect_applied: bool = field(init=False, default=False)
 
     def apply(self) -> None:
-        """Apply configured modifiers to the stats object."""
+        """Apply configured modifiers to the stats object using StatEffect."""
+        if self._effect_applied:
+            return  # Already applied
+            
+        # Convert deltas and multipliers to a single stat_modifiers dict
+        stat_modifiers = {}
+        
+        # Handle additive deltas
+        for name, value in (self.deltas or {}).items():
+            stat_modifiers[name] = stat_modifiers.get(name, 0) + value
+        
+        # Handle multiplicative changes by converting to additive
+        # Note: This is an approximation since pure multiplicative requires more complex handling
+        for name, multiplier in (self.multipliers or {}).items():
+            if hasattr(self.stats, name):
+                # Get base stat value for calculation
+                if hasattr(self.stats, 'get_base_stat'):
+                    base_value = self.stats.get_base_stat(name)
+                else:
+                    base_value = getattr(self.stats, name, 0)
+                
+                # Convert multiplier to additive value
+                additive_change = base_value * (multiplier - 1.0)
+                stat_modifiers[name] = stat_modifiers.get(name, 0) + additive_change
+        
+        if stat_modifiers:
+            # Create and apply StatEffect
+            effect = StatEffect(
+                name=self.id,
+                stat_modifiers=stat_modifiers,
+                duration=self.turns if self.turns > 0 else -1,  # -1 for permanent
+                source=f"modifier_{self.name}"
+            )
+            
+            if hasattr(self.stats, 'add_effect'):
+                self.stats.add_effect(effect)
+                self._effect_applied = True
+            else:
+                # Fallback for legacy stats objects - direct modification
+                # This preserves backward compatibility
+                self._apply_legacy_direct_modification()
 
+    def _apply_legacy_direct_modification(self) -> None:
+        """Fallback method for legacy stats objects that don't support StatEffect."""
         # Safe application: clamp extreme values and avoid inf/NaN conversions
         MAX_ABS = 10**12
         for name, value in (self.deltas or {}).items():
             current = getattr(self.stats, name, 0)
-            self._originals.setdefault(name, current)
             try:
                 new_val = current + value
                 if isinstance(new_val, (int, float)):
@@ -43,7 +84,6 @@ class StatModifier:
                 setattr(self.stats, name, new_val)
         for name, value in (self.multipliers or {}).items():
             current = getattr(self.stats, name, 0)
-            self._originals.setdefault(name, current)
             try:
                 new_val = float(current) * float(value)
                 if not math.isfinite(new_val):
@@ -63,14 +103,17 @@ class StatModifier:
                     pass
 
     def remove(self) -> None:
-        """Restore original stat values."""
-
-        for name, value in self._originals.items():
-            setattr(self.stats, name, value)
+        """Remove the effect from stats."""
+        if hasattr(self.stats, 'remove_effect_by_name') and self._effect_applied:
+            self.stats.remove_effect_by_name(self.id)
+        # For legacy stats, there's no clean way to remove the effect since
+        # we don't track original values in the new system
 
     def tick(self) -> bool:
         """Decrement remaining turns and remove when expired."""
-
+        if self.turns <= 0:
+            return True  # Permanent effect
+            
         self.turns -= 1
         if self.turns <= 0:
             self.remove()
