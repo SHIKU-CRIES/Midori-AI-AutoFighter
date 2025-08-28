@@ -328,6 +328,10 @@ class Stats:
 
 
     async def apply_damage(self, amount: float, attacker: Optional["Stats"] = None) -> int:
+        # If already dead, ignore further damage applications to avoid
+        # post-death damage loops from async tasks or event subscribers.
+        if getattr(self, "hp", 0) <= 0:
+            return 0
         def _ensure(obj: "Stats") -> DamageTypeBase:
             dt = getattr(obj, "damage_type", Generic())
             if isinstance(dt, str):
