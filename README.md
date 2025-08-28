@@ -12,6 +12,26 @@ backend/    # Quart backend and game logic
 legacy/     # Previous Pygame version (read-only)
 ```
 
+## Standalone Builds
+
+The repository includes automated GitHub Actions workflows to build standalone game executables for multiple platforms. See [BUILD.md](BUILD.md) for complete documentation.
+
+### Available Builds
+- **Windows** (4 variants): non-llm, llm-cpu, llm-cuda, llm-amd
+- **Linux** (4 variants): non-llm, llm-cpu, llm-cuda, llm-amd  
+- **Android** (1 variant): non-llm
+
+### Quick Local Build
+```bash
+# Build for current platform
+./build.sh
+
+# Build specific variant
+./build.sh llm-cpu
+```
+
+Builds are automatically created on every push and releases are generated for version tags. Download the latest builds from the [Releases page](../../releases).
+
 ## Setup
 
 1. Install [uv](https://github.com/astral-sh/uv) and
