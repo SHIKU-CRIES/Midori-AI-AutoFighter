@@ -1,0 +1,7 @@
+DO NOT MODIFY ANY FILES IN THIS LEGACY FOLDER
+
+This folder contains legacy code that should not be touched or modified.
+Any changes to legacy code should be avoided.
+
+If you need to make compatibility changes, create new files in the appropriate
+modern directories (backend/, frontend/, etc.) rather than modifying legacy code.
