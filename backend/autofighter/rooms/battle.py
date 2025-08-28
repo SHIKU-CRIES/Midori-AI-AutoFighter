@@ -7,7 +7,6 @@ import copy
 from dataclasses import dataclass
 import logging
 import random
-import time
 from typing import Any
 
 from autofighter.cards import apply_cards
@@ -241,7 +240,6 @@ class BattleRoom(Room):
                 else:
                     # Not enraged yet; ensure percent is zero
                     set_enrage_percent(0.0)
-                turn_start = time.perf_counter()
                 await registry.trigger("turn_start", member)
                 log.debug("%s turn start", member.id)
                 await member.maybe_regain(turn)
@@ -258,7 +256,6 @@ class BattleRoom(Room):
                 await member_effect.tick(tgt_mgr)
                 if member.hp <= 0:
                     await registry.trigger("turn_end", member)
-                    elapsed = time.perf_counter() - turn_start
                     await asyncio.sleep(0.001)
                     continue
                 proceed = await member_effect.on_action()
@@ -286,7 +283,6 @@ class BattleRoom(Room):
                                 "rdr": party.rdr,
                             }
                         )
-                    elapsed = time.perf_counter() - turn_start
                     await asyncio.sleep(0.001)
                     continue
                 dmg = await tgt_foe.apply_damage(member.atk, attacker=member)
@@ -378,7 +374,6 @@ class BattleRoom(Room):
                                 m.exp_multiplier += 0.025
                     except Exception:
                         pass
-                    elapsed = time.perf_counter() - turn_start
                     await asyncio.sleep(0.001)
                     if all(f.hp <= 0 for f in foes):
                         break
@@ -428,7 +423,6 @@ class BattleRoom(Room):
                     proceed = True if res is None else bool(res)
                 if not proceed:
                     await registry.trigger("turn_end", acting_foe)
-                    elapsed = time.perf_counter() - turn_start
                     await asyncio.sleep(0.001)
                     await asyncio.sleep(0.001)
                     continue
@@ -439,7 +433,6 @@ class BattleRoom(Room):
                     log.info("%s hits %s for %s", acting_foe.id, target.id, dmg)
                 target_effect.maybe_inflict_dot(acting_foe, dmg)
                 await registry.trigger("turn_end", acting_foe)
-                elapsed = time.perf_counter() - turn_start
                 await asyncio.sleep(0.001)
         # Signal completion as soon as the loop ends to help UIs stop polling
         # immediately, even before rewards are fully computed.
