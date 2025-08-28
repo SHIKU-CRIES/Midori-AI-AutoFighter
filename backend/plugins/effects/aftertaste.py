@@ -5,7 +5,6 @@ import random
 from autofighter.stats import Stats
 from plugins.damage_types.dark import Dark
 from plugins.damage_types.fire import Fire
-from plugins.damage_types.generic import Generic
 from plugins.damage_types.ice import Ice
 from plugins.damage_types.light import Light
 from plugins.damage_types.lightning import Lightning

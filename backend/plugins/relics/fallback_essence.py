@@ -13,7 +13,7 @@ class FallbackEssence(RelicBase):
     stars: int = 1
     effects: dict[str, float] = field(default_factory=lambda: {
         "atk": 0.01,
-        "defense": 0.01, 
+        "defense": 0.01,
         "max_hp": 0.01,
         "crit_rate": 0.01,
         "crit_damage": 0.01,

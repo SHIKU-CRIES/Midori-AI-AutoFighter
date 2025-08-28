@@ -536,7 +536,7 @@ class BattleRoom(Room):
             relic_star = _apply_rdr_to_stars(_pick_relic_stars(self), party.rdr)
             # Offer 3 relic choices when a relic drop occurs
             relic_opts = relic_choices(combat_party, relic_star, count=3)
-        
+
         # Fallback relic system: if no cards are available, provide fallback relic
         if not card_opts:
             from plugins.relics.fallback_essence import FallbackEssence

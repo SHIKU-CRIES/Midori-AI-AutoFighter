@@ -433,7 +433,15 @@
     const res = await advanceRoom(runId);
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
-      currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+      // Refresh map data when advancing floors
+      if (res.next_room) {
+        currentRoomType = res.next_room;
+      }
+      const mapData = await getMap(runId);
+      if (mapData?.map?.rooms) {
+        mapRooms = mapData.map.rooms;
+        currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+      }
     }
     if (res && res.next_room) {
       nextRoom = res.next_room;
@@ -458,7 +466,15 @@
     const res = await advanceRoom(runId);
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
-      currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+      // Refresh map data when advancing floors
+      if (res.next_room) {
+        currentRoomType = res.next_room;
+      }
+      const mapData = await getMap(runId);
+      if (mapData?.map?.rooms) {
+        mapRooms = mapData.map.rooms;
+        currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+      }
     }
     if (res && res.next_room) {
       nextRoom = res.next_room;
@@ -489,7 +505,18 @@
       const res = await advanceRoom(runId);
       if (res && typeof res.current_index === 'number') {
         currentIndex = res.current_index;
-        currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+        // When advancing floors, the mapRooms data becomes stale
+        // Use the next_room from the response instead of looking up in old mapRooms
+        if (res.next_room) {
+          currentRoomType = res.next_room;
+        }
+        // Refresh map data to get the updated floor information
+        const mapData = await getMap(runId);
+        if (mapData?.map?.rooms) {
+          mapRooms = mapData.map.rooms;
+          // Now we can safely use the updated mapRooms
+          currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+        }
       }
       if (res && res.next_room) {
         nextRoom = res.next_room;
@@ -516,7 +543,15 @@
             const res2 = await advanceRoom(runId);
             if (res2 && typeof res2.current_index === 'number') {
               currentIndex = res2.current_index;
-              currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+              // Refresh map data for retry attempts too
+              if (res2.next_room) {
+                currentRoomType = res2.next_room;
+              }
+              const mapData = await getMap(runId);
+              if (mapData?.map?.rooms) {
+                mapRooms = mapData.map.rooms;
+                currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+              }
             }
             if (res2 && res2.next_room) {
               nextRoom = res2.next_room;

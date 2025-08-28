@@ -23,7 +23,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     Small per-stat variation keeps battles from feeling identical.
     """
     from ..mapgen import MapGenerator
-    
+
     starter_int = 1.0 + random.uniform(-0.05, 0.05)
     # Calculate cumulative room progression: (floors - 1) * rooms_per_floor + current_room_index
     cumulative_rooms = (node.floor - 1) * MapGenerator.rooms_per_floor + node.index
