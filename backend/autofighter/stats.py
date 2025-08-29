@@ -338,6 +338,14 @@ class Stats:
         if self.ultimate_charge >= 15:
             self.ultimate_ready = True
 
+    def handle_ally_action(self, actor: "Stats") -> None:
+        """Grant bonus charge when an ally takes an action."""
+        if actor is self:
+            return
+        dt = getattr(self, "damage_type", None)
+        if getattr(dt, "id", "").lower() == "ice":
+            self.add_ultimate_charge(actor.actions_per_turn)
+
 
     async def apply_damage(
         self,
