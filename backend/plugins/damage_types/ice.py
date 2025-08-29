@@ -24,6 +24,6 @@ class Ice(DamageTypeBase):
             bonus = 1.0
             for foe in foes:
                 dmg = int(base * bonus)
-                await foe.apply_damage(dmg, attacker=user)
+                await foe.apply_damage(dmg, attacker=user, action_name="Ice Ultimate")
                 bonus += 0.3
         return True

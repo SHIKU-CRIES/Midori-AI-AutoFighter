@@ -53,6 +53,7 @@ class BattleSummary:
     # Enhanced tracking
     damage_by_type: Dict[str, Dict[str, int]] = field(default_factory=dict)  # entity -> damage_type -> amount
     damage_by_source: Dict[str, Dict[str, int]] = field(default_factory=dict)  # source_type -> entity -> amount
+    damage_by_action: Dict[str, Dict[str, int]] = field(default_factory=dict)  # entity -> action_name -> amount
     healing_by_source: Dict[str, Dict[str, int]] = field(default_factory=dict)  # source_type -> entity -> amount
     dot_damage: Dict[str, int] = field(default_factory=dict)  # entity -> total DoT damage dealt
     hot_healing: Dict[str, int] = field(default_factory=dict)  # entity -> total HoT healing done
@@ -228,7 +229,7 @@ class BattleLogger:
         # Participant lists are set by the battle controller; avoid guessing here
         # to prevent misclassification.
 
-    def _on_damage_dealt(self, attacker, target, amount, source_type="attack", source_name=None, damage_type=None):
+    def _on_damage_dealt(self, attacker, target, amount, source_type="attack", source_name=None, damage_type=None, action_name=None):
         """Handle damage dealt event."""
         attacker_id = getattr(attacker, 'id', str(attacker))
         target_id = getattr(target, 'id', str(target))
@@ -256,6 +257,12 @@ class BattleLogger:
         if source_type not in self.summary.damage_by_source:
             self.summary.damage_by_source[source_type] = {}
         self.summary.damage_by_source[source_type][attacker_id] = self.summary.damage_by_source[source_type].get(attacker_id, 0) + amount
+
+        # Track damage by action name for more specific breakdown
+        if action_name:
+            if attacker_id not in self.summary.damage_by_action:
+                self.summary.damage_by_action[attacker_id] = {}
+            self.summary.damage_by_action[attacker_id][action_name] = self.summary.damage_by_action[attacker_id].get(action_name, 0) + amount
 
     def _on_damage_taken(self, target, attacker, amount):
         """Handle damage taken event."""
@@ -299,7 +306,7 @@ class BattleLogger:
                 self.summary.healing_by_source[source_type] = {}
             self.summary.healing_by_source[source_type][healer_id] = self.summary.healing_by_source[source_type].get(healer_id, 0) + amount
 
-    def _on_hit_landed(self, attacker, target, amount, source_type="attack", source_name=None):
+    def _on_hit_landed(self, attacker, target, amount, source_type="attack", source_name=None, action_name=None):
         """Handle hit landed event."""
         attacker_id = getattr(attacker, 'id', str(attacker))
         target_id = getattr(target, 'id', str(target))
@@ -420,6 +427,19 @@ class BattleLogger:
 
         # Update relic effect tracking
         self.summary.relic_effects[relic_name] = self.summary.relic_effects.get(relic_name, 0) + 1
+
+        # Track aftertaste and similar effects as specific actions for damage breakdown
+        if relic_name == "aftertaste" and effect_type == "damage" and amount:
+            if entity_id not in self.summary.damage_by_action:
+                self.summary.damage_by_action[entity_id] = {}
+
+            # Create element-specific action name for Aftertaste to show mixed colors
+            action_name = "Aftertaste"
+            if details and "random_damage_type" in details:
+                damage_type = details["random_damage_type"]
+                action_name = f"Aftertaste ({damage_type})"
+
+            self.summary.damage_by_action[entity_id][action_name] = self.summary.damage_by_action[entity_id].get(action_name, 0) + amount
 
     def _on_card_effect(self, card_name, entity, effect_type=None, amount=None, details=None):
         """Handle card effect event."""

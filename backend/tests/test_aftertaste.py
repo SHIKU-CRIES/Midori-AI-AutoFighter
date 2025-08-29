@@ -20,7 +20,7 @@ async def test_aftertaste_multi_hit(monkeypatch):
 
     applied = []
 
-    async def fake_apply_damage(self, amount, attacker=None):
+    async def fake_apply_damage(self, amount, attacker=None, *, trigger_on_hit=True, action_name=None):
         applied.append(amount)
         return amount
 

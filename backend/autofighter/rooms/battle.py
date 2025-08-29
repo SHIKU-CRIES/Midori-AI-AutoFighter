@@ -359,7 +359,7 @@ class BattleRoom(Room):
                         await _pace(action_start)
                         await asyncio.sleep(0.001)
                         break
-                    dmg = await tgt_foe.apply_damage(member.atk, attacker=member)
+                    dmg = await tgt_foe.apply_damage(member.atk, attacker=member, action_name="Normal Attack")
                     if dmg <= 0:
                         log.info("%s's attack was dodged by %s", member.id, tgt_foe.id)
                     else:
@@ -373,7 +373,7 @@ class BattleRoom(Room):
                                 await asyncio.sleep(0.001)
                                 continue
                             extra_dmg = await extra_foe.apply_damage(
-                                member.atk, attacker=member
+                                member.atk, attacker=member, action_name="Wind Spread"
                             )
                             if extra_dmg <= 0:
                                 log.info(

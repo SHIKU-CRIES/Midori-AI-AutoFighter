@@ -40,18 +40,34 @@
     'elemental_spark': 'One random ally gains +5% effect hit rate until they take damage.'
   };
 
-  // Generate element colors
-  function getElementBarColor(element) {
+  // Generate colors for different action types
+  function getActionBarColor(action) {
+    // Handle element-specific Aftertaste actions (e.g., "Aftertaste (Fire)")
+    if (action.startsWith('Aftertaste (') && action.endsWith(')')) {
+      const elementMatch = action.match(/Aftertaste \((\w+)\)/);
+      if (elementMatch) {
+        const element = elementMatch[1];
+        // Use element-specific colors for mixed Aftertaste display
+        return getElementColor(element);
+      }
+    }
+    
     const colorMap = {
-      'Fire': '#ff6b35',
-      'Ice': '#4fb3ff', 
-      'Lightning': '#ffd93d',
-      'Wind': '#7dd3c0',
-      'Light': '#fff2b3',
-      'Dark': '#9b59b6',
-      'Generic': '#8e44ad'
+      'Normal Attack': '#ff6b35',
+      'Dark Ultimate': '#9b59b6',
+      'Ice Ultimate': '#4fb3ff',
+      'Fire Ultimate': '#ff6b35',
+      'Lightning Ultimate': '#ffd93d',
+      'Wind Ultimate': '#7dd3c0',
+      'Light Ultimate': '#fff2b3',
+      'Aftertaste': '#e74c3c', // Fallback for legacy data
+      'Wind Spread': '#7dd3c0',
+      // Fallback colors for any other actions
+      'Ultimate': '#8e44ad',
+      'Relic Effect': '#f39c12',
+      'Card Effect': '#27ae60'
     };
-    return colorMap[element] || '#8e44ad';
+    return colorMap[action] || '#8e44ad';
   }
 
   // Prefer room-provided ids; if no bar data is available for them, fall back
@@ -157,7 +173,7 @@
     if (!summary || entityId === 'overview') return null;
     
     return {
-      damage: summary.damage_by_type?.[entityId] || {},
+      damage: summary.damage_by_action?.[entityId] || {},
       criticals: summary.critical_hits?.[entityId] || 0,
       criticalDamage: summary.critical_damage?.[entityId] || 0,
       shieldAbsorbed: summary.shield_absorbed?.[entityId] || 0,
@@ -960,17 +976,17 @@
                   <!-- Damage Output with Bar Graphs -->
                   {#if Object.keys(entityData.damage).length > 0}
                     <div class="entity-section">
-                      <h4>Damage Output</h4>
+                      <h4>Damage Output by Source</h4>
                       <div class="damage-bar-container">
-                        {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [element, damage]}
+                        {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [action, damage]}
                           {@const totalDamage = Object.values(entityData.damage).reduce((a, b) => a + b, 0)}
                           {@const percentage = totalDamage > 0 ? (damage / totalDamage * 100) : 0}
                           <div class="damage-bar">
                             <div 
                               class="damage-bar-fill" 
-                              style="width: {percentage}%; background-color: {getElementBarColor(element)};"
+                              style="width: {percentage}%; background-color: {getActionBarColor(action)};"
                             ></div>
-                            <div class="damage-bar-label">{element}</div>
+                            <div class="damage-bar-label">{action}</div>
                             <div class="damage-bar-amount">{fmt(damage)}</div>
                           </div>
                         {/each}

@@ -30,6 +30,7 @@ from routes.assets import bp as assets_bp
 from routes.catalog import bp as catalog_bp
 from routes.config import bp as config_bp
 from routes.gacha import bp as gacha_bp
+from routes.performance import perf_bp as performance_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp
 from routes.rooms import bp as rooms_bp
@@ -51,6 +52,7 @@ app.register_blueprint(rooms_bp)
 app.register_blueprint(rewards_bp)
 app.register_blueprint(config_bp)
 app.register_blueprint(catalog_bp)
+app.register_blueprint(performance_bp, url_prefix='/api/performance')
 
 BACKEND_FLAVOR = os.getenv("UV_EXTRA", "default")
 
