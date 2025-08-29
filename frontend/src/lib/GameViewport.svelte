@@ -161,7 +161,7 @@
       {runId}
       on:home={() => dispatch('home')}
       on:openInventory={() => dispatch('openInventory')}
-      on:openEditor={() => dispatch('openEditor')}
+      
       on:settings={() => dispatch('settings')}
       on:back={() => dispatch('back')}
     />

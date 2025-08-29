@@ -6,10 +6,16 @@
   export let hp = 0;
   export let attack = 0;
   export let defense = 0;
+  // When embedded inside another panel, hide header/actions and outer panel chrome
+  export let embedded = false;
   const maxPoints = 100;
   const dispatch = createEventDispatcher();
 
   $: remaining = maxPoints - hp - attack - defense;
+
+  function broadcastChange() {
+    dispatch('change', { pronouns, damageType, hp: +hp, attack: +attack, defense: +defense });
+  }
 
   function close() { dispatch('close'); }
   function save() {
@@ -23,6 +29,7 @@
   }
 </script>
 
+{#if !embedded}
 <MenuPanel data-testid="player-editor" padding="0.75rem">
   <div class="editor">
     <header class="editor-header">
@@ -46,15 +53,15 @@
     <div class="stats">
       <p class="remaining">Points remaining: {remaining}</p>
       <div class="stat-row">
-        <label for="hp">HP: {hp}</label>
+        <label for="hp">HP: {hp}%</label>
         <input id="hp" type="range" min="0" max={hp + remaining} bind:value={hp} />
       </div>
       <div class="stat-row">
-        <label for="attack">Attack: {attack}</label>
+        <label for="attack">Attack: {attack}%</label>
         <input id="attack" type="range" min="0" max={attack + remaining} bind:value={attack} />
       </div>
       <div class="stat-row">
-        <label for="defense">Defense: {defense}</label>
+        <label for="defense">Defense: {defense}%</label>
         <input id="defense" type="range" min="0" max={defense + remaining} bind:value={defense} />
       </div>
     </div>
@@ -65,6 +72,38 @@
     </div>
   </div>
 </MenuPanel>
+{:else}
+<div class="editor editor-embedded" data-testid="player-editor">
+  <div class="grid">
+    <label for="pronouns">Pronouns</label>
+    <input id="pronouns" type="text" maxlength="15" bind:value={pronouns} on:input={broadcastChange} />
+    <label for="damage">Damage Type</label>
+    <select id="damage" bind:value={damageType} on:change={broadcastChange}>
+      <option>Light</option>
+      <option>Dark</option>
+      <option>Wind</option>
+      <option>Lightning</option>
+      <option>Fire</option>
+      <option>Ice</option>
+    </select>
+  </div>
+  <div class="stats">
+    <p class="remaining">Points remaining: {remaining}</p>
+    <div class="stat-row">
+      <label for="hp">HP: {hp}%</label>
+      <input id="hp" type="range" min="0" max={hp + remaining} bind:value={hp} on:input={broadcastChange} />
+    </div>
+    <div class="stat-row">
+      <label for="attack">Attack: {attack}%</label>
+      <input id="attack" type="range" min="0" max={attack + remaining} bind:value={attack} on:input={broadcastChange} />
+    </div>
+    <div class="stat-row">
+      <label for="defense">Defense: {defense}%</label>
+      <input id="defense" type="range" min="0" max={defense + remaining} bind:value={defense} on:input={broadcastChange} />
+    </div>
+  </div>
+</div>
+{/if}
 
 <style>
   .editor { display:flex; flex-direction:column; gap:0.9rem; }
@@ -83,4 +122,9 @@
   button.mini { padding:0.2rem 0.45rem; font-size:0.7rem; }
   input[type="text"], select { background:#111; border:1px solid #555; color:#fff; padding:0.25rem 0.4rem; font-size:0.8rem; }
   input[type="range"] { width:100%; }
+  /* Embedded variant chrome to sit inside stats panel */
+  .editor-embedded {
+    /* inherit parent panel styling; keep spacing only */
+    padding: 0.25rem 0 0 0;
+  }
 </style>

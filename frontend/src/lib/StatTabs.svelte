@@ -1,6 +1,8 @@
 <script>
   import { getElementIcon, getElementColor } from './assetLoader.js';
   import { createEventDispatcher } from 'svelte';
+  import PlayerEditor from './PlayerEditor.svelte';
+  import { getPlayerConfig } from './api.js';
 
   /**
    * Renders the stats panel with category tabs and a toggle control.
@@ -20,6 +22,71 @@
   const statTabs = ['Core', 'Offense', 'Defense', 'Effects'];
   let activeTab = 'Core';
   const dispatch = createEventDispatcher();
+
+  // Previewed character and inline editor overlay state
+  let previewChar;
+  let isPlayer = false;
+  let editorVals = null; // { pronouns, damageType, hp, attack, defense }
+  let viewStats = {};    // stats object used for display (with overrides when player)
+  let loadingEditorCfg = false;
+
+  $: previewChar = roster.find(r => r.id === previewId);
+  $: isPlayer = !!previewChar?.is_player;
+  $: if (isPlayer && previewChar) {
+    if (!editorVals && !loadingEditorCfg) {
+      loadingEditorCfg = true;
+      (async () => {
+        try {
+          const cfg = await getPlayerConfig();
+          editorVals = {
+            pronouns: cfg?.pronouns || '',
+            damageType: cfg?.damage_type || 'Light',
+            hp: Number(cfg?.hp) || 0,
+            attack: Number(cfg?.attack) || 0,
+            defense: Number(cfg?.defense) || 0,
+          };
+        } catch {
+          // Fallback to preview runtime stats if config fetch fails
+          editorVals = {
+            pronouns: previewChar.pronouns || '',
+            damageType: previewChar.element || 'Light',
+            hp: (previewChar.stats?.max_hp ?? previewChar.stats?.hp ?? 0),
+            attack: (previewChar.stats?.atk ?? 0),
+            defense: (previewChar.stats?.defense ?? 0),
+          };
+        } finally {
+          loadingEditorCfg = false;
+        }
+      })();
+    }
+  } else {
+    editorVals = null;
+  }
+  $: {
+    const base = previewChar?.stats || {};
+    if (isPlayer && editorVals) {
+      const baseMax = getBaseStat(previewChar, 'max_hp') ?? base.max_hp ?? 0;
+      const baseAtk = getBaseStat(previewChar, 'atk') ?? base.atk ?? 0;
+      const baseDef = getBaseStat(previewChar, 'defense') ?? base.defense ?? 0;
+      const hpPct = Number(editorVals.hp) || 0;
+      const atkPct = Number(editorVals.attack) || 0;
+      const defPct = Number(editorVals.defense) || 0;
+      const newMax = Math.round(baseMax * (1 + hpPct / 100));
+      const hpRatio = baseMax > 0 ? Math.min(1, Math.max(0, (base.hp ?? baseMax) / baseMax)) : 1;
+      const newHp = Math.round(newMax * hpRatio);
+      const newAtk = Math.round(baseAtk * (1 + atkPct / 100));
+      const newDef = Math.round(baseDef * (1 + defPct / 100));
+      viewStats = {
+        ...base,
+        max_hp: newMax,
+        hp: newHp,
+        atk: newAtk,
+        defense: newDef,
+      };
+    } else {
+      viewStats = { ...base };
+    }
+  }
 
   function toggleMember() {
     if (!previewId) return;
@@ -94,10 +161,10 @@
           <div>
             <span>HP</span>
             <span>
-              {#if sel.stats.max_hp != null}
-                {(sel.stats.hp ?? 0) + '/' + formatStat(sel.stats.max_hp, getBaseStat(sel, 'max_hp'))}
+              {#if viewStats.max_hp != null}
+                {(viewStats.hp ?? 0) + '/' + formatStat(viewStats.max_hp, getBaseStat(sel, 'max_hp'))}
               {:else}
-                {sel.stats.hp ?? '-'}
+                {viewStats.hp ?? '-'}
               {/if}
             </span>
           </div>
@@ -105,12 +172,12 @@
           <div><span>Vitality</span><span>{formatMult(sel.stats.vitality ?? sel.stats.vita, getBaseStat(sel, 'vitality'))}</span></div>
           <div><span>Regain</span><span>{formatStat(sel.stats.regain ?? sel.stats.regain_rate, getBaseStat(sel, 'regain'))}</span></div>
         {:else if activeTab === 'Offense'}
-          <div><span>ATK</span><span>{formatStat(sel.stats.atk, getBaseStat(sel, 'atk'))}</span></div>
+          <div><span>ATK</span><span>{formatStat(viewStats.atk, getBaseStat(sel, 'atk'))}</span></div>
           <div><span>CRIT Rate</span><span>{formatStat((sel.stats.critRate ?? sel.stats.crit_rate ?? 0), getBaseStat(sel, 'crit_rate'), '%')}</span></div>
           <div><span>CRIT DMG</span><span>{formatStat((sel.stats.critDamage ?? sel.stats.crit_damage ?? 0), getBaseStat(sel, 'crit_damage'), '%')}</span></div>
           <div><span>Effect Hit Rate</span><span>{formatStat((sel.stats.effectHit ?? sel.stats.effect_hit_rate ?? 0), getBaseStat(sel, 'effect_hit_rate'), '%')}</span></div>
         {:else if activeTab === 'Defense'}
-          <div><span>DEF</span><span>{formatStat(sel.stats.defense, getBaseStat(sel, 'defense'))}</span></div>
+          <div><span>DEF</span><span>{formatStat(viewStats.defense, getBaseStat(sel, 'defense'))}</span></div>
           <div><span>Mitigation</span><span>{formatMult(sel.stats.mitigation, getBaseStat(sel, 'mitigation'))}</span></div>
           <div><span>Dodge Odds</span><span>{formatStat(sel.stats.dodge_odds, getBaseStat(sel, 'dodge_odds'), '%')}</span></div>
           <div><span>Effect Resist</span><span>{formatStat(sel.stats.effectResist ?? sel.stats.effect_resistance, getBaseStat(sel, 'effect_resistance'), '%')}</span></div>
@@ -149,6 +216,26 @@
       </button>
     </div>
   {/if}
+  {#if previewId}
+    {#each roster.filter(r => r.id === previewId) as sel}
+      {#if sel.is_player}
+        <div class="hello-anchor">
+          <div class="inline-divider" aria-hidden="true"></div>
+          <div class="editor-wrap">
+            <PlayerEditor
+              embedded={true}
+              pronouns={editorVals?.pronouns || ''}
+              damageType={editorVals?.damageType || 'Light'}
+              hp={editorVals?.hp || 0}
+              attack={editorVals?.attack || 0}
+              defense={editorVals?.defense || 0}
+              on:change={(e) => editorVals = e.detail}
+            />
+          </div>
+        </div>
+      {/if}
+    {/each}
+  {/if}
 </div>
 
 <style>
@@ -163,6 +250,7 @@
   gap: 1rem;
   box-sizing: border-box;
   border-radius: 8px;
+  position: relative; /* allow absolute positioning for anchored elements */
 }
 .stats-header {
   display: flex;
@@ -222,6 +310,22 @@ button.confirm {
   transition: background 0.2s;
 }
 .tab-btn.active { background: rgba(255,255,255,0.3); color: #fff; }
+
+/* Divider and inline half-height spacer below stats within panel */
+.inline-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  margin: 0 0 0.35rem 0;
+}
+.hello-anchor {
+  position: absolute;
+  top: 50%;
+  left: 1rem;   /* align with stats-panel side padding */
+  right: 1rem;  /* align with stats-panel side padding */
+}
+
+/* Inline container occupying 50% of the stats panel width */
+.editor-wrap { width: 100%; }
 
 /* Effects tab styles */
 .effects-header {

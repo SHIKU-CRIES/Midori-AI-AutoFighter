@@ -85,4 +85,5 @@
     max-height: 98%;
     /* allow internal scrolling instead of clipping when content grows */
   }
+  /* no additional right column wrappers */
 </style>

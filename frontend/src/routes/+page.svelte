@@ -556,7 +556,6 @@
     {
       openRun,
       handleParty,
-      openEditor,
       openPulls,
       openCraft,
       openFeedback,
@@ -624,7 +623,6 @@
     on:openInventory={openInventory}
     on:back={backOverlay}
     on:home={homeOverlay}
-    on:openEditor={openEditor}
     on:settings={() => openOverlay('settings')}
     on:rewardSelect={(e) => handleRewardSelect(e.detail)}
     on:shopBuy={(e) => handleShopBuy(e.detail)}

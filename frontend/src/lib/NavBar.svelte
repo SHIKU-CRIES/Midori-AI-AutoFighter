@@ -30,9 +30,7 @@
         <Package size={22} color="#fff" />
       </button>
     {/if}
-    <button class="icon-btn" title="Player Editor" on:click={() => dispatch('openEditor')}>
-      <User size={22} color="#fff" />
-    </button>
+    <!-- Player Editor button removed per design -->
     <button class="icon-btn" title="Settings" on:click={() => dispatch('settings')}>
       <Settings size={22} color="#fff" />
     </button>
