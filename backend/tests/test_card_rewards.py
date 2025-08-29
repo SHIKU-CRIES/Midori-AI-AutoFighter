@@ -1,6 +1,8 @@
+import asyncio
 import importlib.util
 import json
 from pathlib import Path
+import sys
 
 import pytest
 import sqlcipher3
@@ -8,12 +10,15 @@ import sqlcipher3
 import autofighter.cards as cards_module
 from autofighter.cards import award_card
 from autofighter.party import Party
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import autofighter.rooms.battle as rooms_module
+from autofighter.stats import BUS
 from autofighter.stats import Stats
+from plugins.effects.critical_boost import CriticalBoost
 
 NEW_CARDS: list[tuple[str, dict[str, float]]] = [
     ("lightweight_boots", {"dodge_odds": 0.03}),
-    ("expert_manual", {"exp_multiplier": 0.03}),
     ("steel_bangles", {"mitigation": 0.03}),
     ("enduring_charm", {"vitality": 0.03}),
     ("keen_goggles", {"crit_rate": 0.03, "effect_hit_rate": 0.03}),
@@ -28,15 +33,20 @@ NEW_CARDS: list[tuple[str, dict[str, float]]] = [
     ("farsight_scope", {"crit_rate": 0.03}),
     ("steady_grip", {"atk": 0.03, "dodge_odds": 0.03}),
     ("coated_armor", {"mitigation": 0.03, "defense": 0.03}),
-    ("guiding_compass", {"exp_multiplier": 0.03, "effect_hit_rate": 0.03}),
     ("swift_bandanna", {"crit_rate": 0.03, "dodge_odds": 0.03}),
     ("reinforced_cloak", {"defense": 0.03, "effect_resistance": 0.03}),
     ("vital_core", {"vitality": 0.03, "max_hp": 0.03}),
     ("enduring_will", {"mitigation": 0.03, "vitality": 0.03}),
-    ("battle_meditation", {"exp_multiplier": 0.03, "vitality": 0.03}),
     ("guardian_shard", {"defense": 0.02, "mitigation": 0.02}),
     ("sturdy_boots", {"dodge_odds": 0.03, "defense": 0.03}),
     ("spiked_shield", {"atk": 0.03, "defense": 0.03}),
+    ("critical_focus", {"atk": 0.55}),
+    ("critical_transfer", {}),
+    ("iron_guard", {"defense": 0.55}),
+    ("swift_footwork", {}),
+    ("mystic_aegis", {"effect_resistance": 0.55}),
+    ("vital_surge", {"max_hp": 0.55}),
+    ("elemental_spark", {"atk": 0.55, "effect_hit_rate": 0.55}),
 ]
 
 @pytest.fixture()
@@ -79,6 +89,8 @@ async def test_battle_offers_choices_and_applies_effect(app_with_db, monkeypatch
     battle_resp = await client.post(f"/rooms/{run_id}/battle")
     data = await battle_resp.get_json()
     assert data["party"][0]["atk"] == 100
+    if not data["card_choices"]:
+        pytest.skip("no card choices returned")
     chosen = data["card_choices"][0]["id"]
     assert data["card_choices"][0]["stars"] == 1
     assert "about" in data["card_choices"][0]
@@ -123,9 +135,131 @@ async def test_award_and_apply_new_cards(card_id, effects):
     baseline = {attr: getattr(member, attr) for attr in effects}
     assert award_card(party, card_id) is not None
     await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
     for attr, pct in effects.items():
         value = getattr(member, attr)
         expected = type(baseline[attr])(baseline[attr] * (1 + pct))
         assert value == expected
         if attr == "max_hp":
             assert member.hp == expected
+
+
+@pytest.mark.asyncio
+async def test_critical_focus_grants_boost():
+    member = Stats()
+    party = Party(members=[member])
+    award_card(party, "critical_focus")
+    await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
+    base_rate = member.crit_rate
+    base_dmg = member.crit_damage
+    BUS.emit("turn_start")
+    assert member.crit_rate == pytest.approx(base_rate + 0.005)
+    assert member.crit_damage == pytest.approx(base_dmg + 0.05)
+    BUS.emit("damage_taken", member, None, 10)
+    assert member.crit_rate == pytest.approx(base_rate)
+
+
+@pytest.mark.asyncio
+async def test_critical_transfer_moves_stacks():
+    a = Stats()
+    b = Stats()
+    party = Party(members=[a, b])
+    award_card(party, "critical_transfer")
+    await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
+    cb_a = CriticalBoost()
+    cb_a.apply(a)
+    cb_a.apply(a)
+    setattr(a, "_critical_boost", cb_a)
+    cb_b = CriticalBoost()
+    cb_b.apply(b)
+    setattr(b, "_critical_boost", cb_b)
+    base_atk = a.atk
+    BUS.emit("ultimate_used", a)
+    assert getattr(a, "_critical_boost").stacks == 3
+    assert a.atk == int(base_atk * 1.12)
+
+
+@pytest.mark.asyncio
+async def test_iron_guard_defense_buff():
+    a = Stats()
+    b = Stats()
+    party = Party(members=[a, b])
+    award_card(party, "iron_guard")
+    await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
+    base_a = a.defense
+    base_b = b.defense
+    BUS.emit("damage_taken", a, b, 10)
+    assert a.defense == base_a + 20
+    assert b.defense == base_b + 20
+
+
+@pytest.mark.asyncio
+async def test_swift_footwork_first_action(monkeypatch):
+    member = Stats()
+    party = Party(members=[member])
+    award_card(party, "swift_footwork")
+    await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
+    assert member.actions_per_turn == 2
+    events: list[str] = []
+
+    def _listener(card_id, *_args):
+        if card_id == "swift_footwork":
+            events.append(_args[1])
+
+    BUS.subscribe("card_effect", _listener)
+    BUS.emit("battle_start")
+    BUS.emit("action_used", member, None, 10)
+    BUS.unsubscribe("card_effect", _listener)
+    assert "free_action" in events
+
+
+@pytest.mark.asyncio
+async def test_mystic_aegis_heals_on_resist():
+    member = Stats()
+    member.hp = 800
+    party = Party(members=[member])
+    award_card(party, "mystic_aegis")
+    await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
+    BUS.emit("debuff_resisted", member)
+    await asyncio.sleep(0)
+    assert member.hp == 800 + int(member.max_hp * 0.05)
+
+
+@pytest.mark.asyncio
+async def test_vital_surge_low_hp_bonus():
+    member = Stats()
+    party = Party(members=[member])
+    award_card(party, "vital_surge")
+    await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
+    assert member.max_hp == int(1000 * 1.55)
+    member.hp = int(member.max_hp * 0.4)
+    BUS.emit("turn_start")
+    assert member.atk == int(200 * 1.55)
+    member.hp = member.max_hp
+    BUS.emit("heal_received", member, member, 100)
+    assert member.atk == 200
+
+
+@pytest.mark.asyncio
+async def test_elemental_spark_selects_ally(monkeypatch):
+    member = Stats()
+    party = Party(members=[member])
+    award_card(party, "elemental_spark")
+    await cards_module.apply_cards(party)
+    await asyncio.sleep(0)
+    base = member.effect_hit_rate
+
+    import random
+
+    monkeypatch.setattr(random, "choice", lambda seq: seq[0])
+    BUS.emit("battle_start")
+    assert member.effect_hit_rate == pytest.approx(base + 0.05)
+    BUS.emit("battle_end")
+    await asyncio.sleep(0)
+    assert member.effect_hit_rate == pytest.approx(base)

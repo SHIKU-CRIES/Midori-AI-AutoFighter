@@ -7,6 +7,10 @@ from pathlib import Path
 import random
 from uuid import uuid4
 
+from battle_logging import end_run_logging
+
+# Import battle logging
+from battle_logging import start_run_logging
 from game import _assign_damage_type
 from game import _load_player_customization
 from game import _passive_names
@@ -22,9 +26,6 @@ from quart import request
 
 from autofighter.mapgen import MapGenerator
 from plugins import players as player_plugins
-
-# Import battle logging
-from battle_logging import start_run_logging, end_run_logging
 
 bp = Blueprint("runs", __name__)
 
@@ -64,10 +65,10 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
 
         await asyncio.to_thread(set_damage_type)
     run_id = str(uuid4())
-    
+
     # Start run logging
     start_run_logging(run_id)
-    
+
     generator = MapGenerator(run_id)
     nodes = generator.generate_floor()
     state = {
@@ -222,7 +223,7 @@ async def end_run(run_id: str) -> tuple[str, int, dict[str, str]]:
 
     # End run logging before deleting
     end_run_logging()
-    
+
     rowcount = await asyncio.to_thread(delete_run)
     if rowcount == 0:
         return jsonify({"error": "run not found"}), 404
@@ -261,6 +262,25 @@ async def advance_room(run_id: str) -> tuple[str, int, dict[str, object]]:
 
     await asyncio.to_thread(save_map, run_id, state)
     return jsonify({"next_room": next_type, "current_index": state["current"]})
+
+
+@bp.get("/run/<run_id>/battles/<int:index>/summary")
+async def get_battle_summary(run_id: str, index: int):
+    summary_path = (
+        Path(__file__).resolve().parents[1]
+        / "logs"
+        / "runs"
+        / run_id
+        / "battles"
+        / str(index)
+        / "summary"
+        / "battle_summary.json"
+    )
+    if not summary_path.exists():
+        return jsonify({"error": "summary not found"}), 404
+
+    data = await asyncio.to_thread(summary_path.read_text)
+    return jsonify(json.loads(data))
 
 
 @bp.post("/save/wipe")
