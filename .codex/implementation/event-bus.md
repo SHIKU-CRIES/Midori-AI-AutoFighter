@@ -16,6 +16,6 @@ The core combat engine emits a few global events that plugins may subscribe to:
 - `damage_taken(target, attacker, amount)`
 - `heal(healer, target, amount)`
 - `heal_received(target, healer, amount)`
-- `hit_landed(attacker, target, amount)` - emitted when a successful hit occurs
+- `hit_landed(attacker, target, amount, source_type="attack", source_name=None)` - emitted when a successful hit occurs
 
 Plugins can define additional event names as needed.
