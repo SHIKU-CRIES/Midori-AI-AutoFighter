@@ -24,7 +24,7 @@ class FrostSigil(RelicBase):
         if state is None:
             party._frost_sigil_state = True
 
-            def _hit(attacker, target, amount) -> None:
+            def _hit(attacker, target, amount, source_type="attack", source_name=None) -> None:
                 stacks = party.relics.count(self.id)
                 dmg = int(attacker.atk * 0.05)
                 asyncio.create_task(
