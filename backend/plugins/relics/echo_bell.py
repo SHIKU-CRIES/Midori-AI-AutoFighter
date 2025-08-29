@@ -29,7 +29,18 @@ class EchoBell(RelicBase):
             if pid in used:
                 return
             used.add(pid)
-            dmg = int(amount * 0.15)
+            stacks = party.relics.count(self.id)
+            dmg = int(amount * 0.15 * stacks)
+
+            # Emit relic effect event for echo action
+            BUS.emit("relic_effect", "echo_bell", actor, "echo_action", dmg, {
+                "original_amount": amount,
+                "echo_percentage": 15 * stacks,
+                "target": getattr(target, 'id', str(target)),
+                "first_action": True,
+                "stacks": stacks
+            })
+
             asyncio.create_task(target.apply_damage(dmg, attacker=actor))
 
         BUS.subscribe("battle_start", lambda: _battle_start())

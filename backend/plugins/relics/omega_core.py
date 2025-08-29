@@ -36,6 +36,14 @@ class OmegaCore(RelicBase):
             if isinstance(entity, FoeBase) or state["mods"]:
                 return
             for member in party.members:
+                # Emit relic effect event for massive stat boost
+                BUS.emit("relic_effect", "omega_core", member, "stat_amplification", mult, {
+                    "multiplier": mult,
+                    "duration": "entire_fight",
+                    "drain_delay": delay,
+                    "stacks": stacks
+                })
+
                 mod = create_stat_buff(
                     member,
                     name=f"{self.id}_{id(member)}",
@@ -65,6 +73,15 @@ class OmegaCore(RelicBase):
             drain = (state["turn"] - delay) * 0.01
             for member in party.members:
                 dmg = int(member.max_hp * drain)
+
+                # Emit relic effect event for HP drain
+                BUS.emit("relic_effect", "omega_core", member, "hp_drain", dmg, {
+                    "drain_percentage": drain * 100,
+                    "turn": state["turn"],
+                    "turns_past_delay": state["turn"] - delay,
+                    "delay": delay
+                })
+
                 asyncio.create_task(member.apply_damage(dmg))
 
         def _battle_end(entity) -> None:

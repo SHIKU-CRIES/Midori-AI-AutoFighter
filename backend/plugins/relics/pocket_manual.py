@@ -34,7 +34,7 @@ class PocketManual(RelicBase):
                         "original_damage": amount,
                         "aftertaste_damage": base
                     })
-                    
+
                     effect = Aftertaste(base_pot=base)
                     asyncio.get_event_loop().create_task(
                         effect.apply(attacker, target)
