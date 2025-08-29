@@ -56,7 +56,7 @@ class KillerInstinct(RelicBase):
 
         BUS.subscribe("ultimate_used", _ultimate)
         BUS.subscribe("damage_taken", _damage)
-        BUS.subscribe("turn_end", lambda: _turn_end())
+        BUS.subscribe("turn_end", lambda *_: _turn_end())
 
     def describe(self, stacks: int) -> str:
         pct = 75 * stacks

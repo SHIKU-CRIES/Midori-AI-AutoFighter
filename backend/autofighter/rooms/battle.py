@@ -167,6 +167,12 @@ class BattleRoom(Room):
         enrage_mods: list[StatModifier | None] = [None for _ in foes]
 
         party_effects = []
+        # Mark battle as active to allow damage/heal processing
+        try:
+            from autofighter.stats import set_battle_active
+            set_battle_active(True)
+        except Exception:
+            pass
         for member in combat_party.members:
             mgr = EffectManager(member)
             member.effect_manager = mgr
@@ -524,6 +530,12 @@ class BattleRoom(Room):
         # Reset enrage percent after battle ends to avoid leaking to other battles.
         try:
             set_enrage_percent(0.0)
+        except Exception:
+            pass
+        # Mark battle inactive to drop any stray async pings
+        try:
+            from autofighter.stats import set_battle_active
+            set_battle_active(False)
         except Exception:
             pass
         party.members = combat_party.members

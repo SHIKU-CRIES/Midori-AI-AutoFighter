@@ -32,7 +32,7 @@ class EchoingDrum(RelicBase):
             dmg = int(amount * 0.25)
             asyncio.create_task(target.apply_damage(dmg, attacker=attacker))
 
-        BUS.subscribe("battle_start", lambda: _battle_start())
+        BUS.subscribe("battle_start", lambda *_: _battle_start())
         BUS.subscribe("attack_used", _attack)
 
     def describe(self, stacks: int) -> str:

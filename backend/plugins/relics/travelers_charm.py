@@ -58,8 +58,8 @@ class TravelersCharm(RelicBase):
             active.clear()
 
         BUS.subscribe("damage_taken", _hit)
-        BUS.subscribe("turn_start", lambda: _turn_start())
-        BUS.subscribe("turn_end", lambda: _turn_end())
+        BUS.subscribe("turn_start", lambda *_: _turn_start())
+        BUS.subscribe("turn_end", lambda *_: _turn_end())
 
     def describe(self, stacks: int) -> str:
         d = 25 * stacks

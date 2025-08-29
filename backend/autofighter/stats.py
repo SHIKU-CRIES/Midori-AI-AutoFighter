@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 # Global enrage percentage applied during battles.
 # Set by battle rooms when enrage is active, used in damage/heal calculations.
 _ENRAGE_PERCENT: float = 0.0
+_BATTLE_ACTIVE: bool = False
 
 
 @dataclass
@@ -51,6 +52,23 @@ def set_enrage_percent(value: float) -> None:
 
 def get_enrage_percent() -> float:
     return _ENRAGE_PERCENT
+
+
+def set_battle_active(active: bool) -> None:
+    """Mark whether a battle is currently active.
+
+    Used to ignore stray async damage/heal pings after battles conclude,
+    preventing post-battle loops from background tasks.
+    """
+    global _BATTLE_ACTIVE
+    try:
+        _BATTLE_ACTIVE = bool(active)
+    except Exception:
+        _BATTLE_ACTIVE = False
+
+
+def is_battle_active() -> bool:
+    return _BATTLE_ACTIVE
 
 @dataclass
 class Stats:
@@ -354,6 +372,10 @@ class Stats:
         *,
         trigger_on_hit: bool = True,
     ) -> int:
+        # Drop any stray post-battle damage tasks to avoid loops.
+        from autofighter.stats import is_battle_active  # local import for clarity
+        if not is_battle_active():
+            return 0
         # If already dead, ignore further damage applications to avoid
         # post-death damage loops from async tasks or event subscribers.
         if getattr(self, "hp", 0) <= 0:

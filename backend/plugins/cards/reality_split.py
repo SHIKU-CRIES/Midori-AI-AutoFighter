@@ -73,5 +73,5 @@ class RealitySplit(CardBase):
 
         BUS.subscribe("battle_start", _battle_start)
         BUS.subscribe("battle_end", _battle_end)
-        BUS.subscribe("turn_start", lambda: _turn_start())
+        BUS.subscribe("turn_start", lambda *_: _turn_start())
         BUS.subscribe("hit_landed", _hit_landed)

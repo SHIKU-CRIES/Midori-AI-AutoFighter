@@ -41,8 +41,8 @@ class WoodenIdol(RelicBase):
             active.clear()
 
         BUS.subscribe("debuff_resisted", _resisted)
-        BUS.subscribe("turn_start", lambda: _turn_start())
-        BUS.subscribe("turn_end", lambda: _turn_end())
+        BUS.subscribe("turn_start", lambda *_: _turn_start())
+        BUS.subscribe("turn_end", lambda *_: _turn_end())
 
     def describe(self, stacks: int) -> str:
         if stacks == 1:
