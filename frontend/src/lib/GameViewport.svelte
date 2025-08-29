@@ -82,6 +82,7 @@
   $: applyMusicVolume(musicVolume);
   $: info = roomInfo(mapRooms, currentIndex, currentRoomType, roomData);
   $: rewardOpen = computeRewardOpen(roomData, battleActive);
+  $: reviewOpen = Boolean(roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive);
 </script>
 
 <style>
@@ -164,7 +165,7 @@
       on:settings={() => dispatch('settings')}
       on:back={() => dispatch('back')}
     />
-    {#if battleActive || rewardOpen}
+    {#if battleActive || rewardOpen || reviewOpen}
       <div class="top-center-header">
         <div class="title-chip">
           Room {info.roomNumber} / Floor {info.floorNumber} / {roomLabel(info.currentType)}
@@ -175,7 +176,7 @@
         </div>
       </div>
     {/if}
-    {#if $overlayView === 'main' && !battleActive && !rewardOpen}
+    {#if $overlayView === 'main' && !battleActive && !rewardOpen && !reviewOpen}
       <MainMenu {items} />
     {/if}
     {#if runId && roomData && !(((roomData.result === 'battle') || (roomData.result === 'boss')) && !battleActive)}

@@ -7,20 +7,28 @@
   $: passiveTip = (fighter.passives || [])
     .map((p) => `${p.id}${p.stacks > 1 ? ` x${p.stacks}` : ''}`)
     .join(', ');
+
+  // Percent helpers for HP and overheal (shields)
+  $: _maxHP = Number(fighter?.max_hp || 0);
+  $: _hp = Number(fighter?.hp || 0);
+  $: _shields = Number(fighter?.shields || 0);
+  $: hpPct = _maxHP > 0 ? Math.min(100, (100 * _hp) / _maxHP) : 0;
+  $: ohPct = _maxHP > 0 ? Math.max(0, Math.min(100, (100 * _shields) / _maxHP)) : 0;
+  // TODO: Make this dynamic per-character (max overheal percent).
+  // For now, allow up to +100% overheal to display visually.
+  const OH_CAP_UI = 100;
+  $: ohDispPct = Math.min(ohPct, OH_CAP_UI);
 </script>
 
 <div class="portrait-wrap">
   <div class="hp-bar">
-    <div
-      class="hp-fill"
-      style={`width: ${fighter.max_hp ? (100 * fighter.hp) / fighter.max_hp : 0}%`}
-    ></div>
-    {#if fighter.shields && fighter.shields > 0}
+    {#if ohDispPct > 0}
       <div
-        class="shield-fill"
-        style={`width: ${fighter.max_hp ? (100 * fighter.shields) / fighter.max_hp : 0}%; left: ${fighter.max_hp ? (100 * fighter.hp) / fighter.max_hp : 0}%`}
+        class="overheal-fill"
+        style={`width: calc(${ohDispPct}% + 5px); left: -5px;`}
       ></div>
     {/if}
+    <div class="hp-fill" style={`width: ${hpPct}%`}></div>
   </div>
   <div class="portrait-frame" title={passiveTip}>
     <img
@@ -60,17 +68,15 @@
     background: #333;
     margin-bottom: 0.2rem;
     position: relative;
+    overflow: visible; /* allow underlay to extend slightly to the left */
   }
-  .hp-fill { height: 100%; background: #0f0; }
-  .shield-fill { 
-    height: 100%; 
-    background: rgba(255, 255, 255, 0.6);
-    border: 2px solid white;
-    border-left: none;
-    border-right: none;
+  .hp-fill { height: 100%; background: #0f0; position: absolute; left: 0; top: 0; }
+  .overheal-fill {
+    height: calc(100% + 4px);
+    background: rgba(255, 255, 255, 0.92);
     position: absolute;
-    top: 0;
-    box-sizing: border-box;
+    left: 0;
+    top: -2px; /* slight upward offset */
   }
   .portrait-frame { position: relative; width: var(--portrait-size); height: var(--portrait-size); }
   .portrait {
