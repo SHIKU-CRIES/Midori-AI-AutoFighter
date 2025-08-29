@@ -6,6 +6,8 @@ import {
   getGacha,
   pullGacha,
   setAutoCraft,
+  getUpgrade,
+  upgradeCharacter,
   wipeData,
   getLrmConfig,
   setLrmModel,
@@ -127,5 +129,17 @@ describe('api calls', () => {
     global.fetch = createFetch({ response: 'ok' });
     const result = await testLrmModel('hi');
     expect(result).toEqual({ response: 'ok' });
+  });
+
+  test('getUpgrade retrieves data', async () => {
+    global.fetch = createFetch({ level: 2, items: { fire_1: 3 } });
+    const result = await getUpgrade('player');
+    expect(result).toEqual({ level: 2, items: { fire_1: 3 } });
+  });
+
+  test('upgradeCharacter posts upgrade', async () => {
+    global.fetch = createFetch({ level: 1, items: {} });
+    const result = await upgradeCharacter('player');
+    expect(result).toEqual({ level: 1, items: {} });
   });
 });

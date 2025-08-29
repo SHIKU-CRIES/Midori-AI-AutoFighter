@@ -140,3 +140,15 @@ export async function getRelicCatalog() {
   const data = await handleFetch(`${API_BASE}/catalog/relics`, { cache: 'no-store', noOverlay: true });
   return data.relics || [];
 }
+
+export async function getUpgrade(id) {
+  return handleFetch(`${API_BASE}/players/${id}/upgrade`, { cache: 'no-store' });
+}
+
+export async function upgradeCharacter(id) {
+  return handleFetch(`${API_BASE}/players/${id}/upgrade`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+}

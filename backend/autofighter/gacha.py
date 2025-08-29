@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import json
 import random
 from typing import Any
 
@@ -67,25 +66,23 @@ class GachaManager:
 
     def _get_items(self) -> dict[str, int]:
         with self.save.connection() as conn:
-            cur = conn.execute(
-                "SELECT value FROM options WHERE key = ?", ("upgrade_items",)
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS upgrade_items (id TEXT PRIMARY KEY, count INTEGER NOT NULL)"
             )
-            row = cur.fetchone()
-            if row:
-                try:
-                    data = json.loads(row[0])
-                    if isinstance(data, dict):
-                        return {str(k): int(v) for k, v in data.items()}
-                except json.JSONDecodeError:
-                    pass
-            return {}
+            cur = conn.execute("SELECT id, count FROM upgrade_items")
+            return {row[0]: int(row[1]) for row in cur.fetchall()}
 
     def _set_items(self, items: dict[str, int]) -> None:
         with self.save.connection() as conn:
             conn.execute(
-                "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-                ("upgrade_items", json.dumps(items)),
+                "CREATE TABLE IF NOT EXISTS upgrade_items (id TEXT PRIMARY KEY, count INTEGER NOT NULL)"
             )
+            for key, value in items.items():
+                conn.execute(
+                    "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+                    (key, int(value)),
+                )
+            conn.execute("DELETE FROM upgrade_items WHERE count <= 0")
 
     def _get_auto_craft(self) -> bool:
         with self.save.connection() as conn:

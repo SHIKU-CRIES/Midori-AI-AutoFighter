@@ -11,6 +11,8 @@ from pathlib import Path
 import random
 from typing import Any
 
+# Import battle logging
+from battle_logging import end_run_logging
 from cryptography.fernet import Fernet
 
 from autofighter.effects import create_stat_buff
@@ -27,9 +29,6 @@ from plugins import passives as passive_plugins
 from plugins import players as player_plugins
 from plugins.damage_types import load_damage_type
 from plugins.players._base import PlayerBase
-
-# Import battle logging
-from battle_logging import end_run_logging
 
 log = logging.getLogger(__name__)
 
@@ -145,6 +144,33 @@ def _apply_player_customization(player: PlayerBase) -> None:
         player.defense,
     )
 
+
+def _load_upgrade_level(pid: str) -> int:
+    with get_save_manager().connection() as conn:
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS player_upgrades (id TEXT PRIMARY KEY, level INTEGER NOT NULL)"
+        )
+        cur = conn.execute("SELECT level FROM player_upgrades WHERE id = ?", (pid,))
+        row = cur.fetchone()
+    return int(row[0]) if row else 0
+
+
+def _apply_player_upgrades(player: PlayerBase) -> None:
+    level = _load_upgrade_level(player.id)
+    if level <= 0:
+        return
+    mult = 1 + level * 0.05
+    mod = create_stat_buff(
+        player,
+        name="upgrade",
+        turns=10**9,
+        id="upgrade_bonus",
+        max_hp_mult=mult,
+        atk_mult=mult,
+        defense_mult=mult,
+    )
+    player.mods.append(mod.id)
+
 def _assign_damage_type(player: PlayerBase) -> None:
     with get_save_manager().connection() as conn:
         cur = conn.execute("SELECT type FROM damage_types WHERE id = ?", (player.id,))
@@ -186,8 +212,10 @@ def load_party(run_id: str) -> Party:
                             snapshot.get("damage_type", inst.element_id)
                         )
                     _apply_player_customization(inst)
+                    _apply_player_upgrades(inst)
                 else:
                     _assign_damage_type(inst)
+                    _apply_player_upgrades(inst)
                 target_level = int(level_map.get(pid, 1) or 1)
                 if target_level > 1:
                     for _ in range(target_level - 1):

@@ -24,6 +24,7 @@
   import { createEventDispatcher } from 'svelte';
   import PlayerEditor from './PlayerEditor.svelte';
   import { getPlayerConfig } from './api.js';
+  import UpgradePanel from './UpgradePanel.svelte';
 
   /**
    * Renders the stats panel with category tabs and a toggle control.
@@ -264,7 +265,7 @@
             />
           </div>
         {/if}
-        <div class="upgrade-placeholder">Upgrade Character: Placeholder</div>
+        <UpgradePanel id={sel.id} element={sel.element} />
       </div>
     {/each}
   {/if}
@@ -358,11 +359,6 @@ button.confirm {
 
 /* Inline container occupying 50% of the stats panel width */
 .editor-wrap { width: 100%; }
-.upgrade-placeholder {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #ddd;
-}
 
 /* Effects tab styles */
 .effects-header {

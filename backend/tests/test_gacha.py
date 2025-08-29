@@ -46,8 +46,8 @@ async def test_pull_requires_ticket(app_with_db):
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
     conn.execute(
-        "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-        ("upgrade_items", '{}')
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("ticket", 0)
     )
     conn.commit()
     client = app.test_client()
@@ -77,8 +77,8 @@ async def test_pull_five_star_duplicate(app_with_db):
     for cid in others:
         conn.execute("INSERT OR IGNORE INTO owned_players (id) VALUES (?)", (cid,))
     conn.execute(
-        "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-        ("upgrade_items", '{"ticket":1}')
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("ticket", 1)
     )
     conn.commit()
 
@@ -124,11 +124,12 @@ async def test_auto_craft_setting(app_with_db):
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("ticket", 1)
     )
     conn.execute(
-        "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-        ("upgrade_items", '{"ticket":1,"fire_1":125}')
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("fire_1", 125)
     )
     conn.commit()
     with patch(
@@ -142,8 +143,12 @@ async def test_auto_craft_setting(app_with_db):
     resp = await client.post("/gacha/auto-craft", json={"enabled": True})
     assert (await resp.get_json())["auto_craft"] is True
     conn.execute(
-        "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-        ("upgrade_items", '{"ticket":1,"fire_1":125}')
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("ticket", 1)
+    )
+    conn.execute(
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("fire_1", 125)
     )
     conn.commit()
     with patch(
@@ -162,11 +167,8 @@ async def test_manual_craft_endpoint(app_with_db):
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)",
-    )
-    conn.execute(
-        "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
-        ("upgrade_items", '{"fire_1":125}')
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("fire_1", 125)
     )
     conn.commit()
     resp = await client.post("/gacha/craft")
