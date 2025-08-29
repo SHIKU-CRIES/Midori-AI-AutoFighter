@@ -199,7 +199,7 @@
 {#if roomData && roomData.result === 'shop'}
   <OverlaySurface zIndex={1100}>
     <ShopMenu
-      items={roomData.items || []}
+      items={roomData.stock || []}
       gold={roomData.gold}
       reducedMotion={reducedMotion}
       on:buy={(e) => dispatch('shopBuy', e.detail)}
