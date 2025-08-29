@@ -142,14 +142,6 @@
     };
   }
 
-  function barData(id) {
-    const totals = summary.damage_by_type?.[id] || {};
-    const total = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
-    return elements
-      .map((el) => ({ element: el, pct: ((totals[el] || 0) / total) * 100 }))
-      .filter((seg) => seg.pct > 0);
-  }
-
   function primaryElement(id) {
     const totals = summary.damage_by_type?.[id] || {};
     const entries = Object.entries(totals);
@@ -165,18 +157,7 @@
   function fmt(n) {
     try { return Number(n).toLocaleString(); } catch { return String(n ?? 0); }
   }
-  function elementBreakdown(id) {
-    const totals = summary.damage_by_type?.[id] || {};
-    const total = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
-    return elements
-      .map((el) => ({ element: el, value: totals[el] || 0, pct: ((totals[el] || 0) / total) * 100 }))
-      .filter((seg) => seg.value > 0)
-      .sort((a, b) => b.value - a.value);
-  }
-  function totalDealt(id) { return summary.total_damage_dealt?.[id] || 0; }
-  function totalTaken(id) { return summary.total_damage_taken?.[id] || 0; }
-  function totalHeal(id) { return summary.total_healing_done?.[id] || 0; }
-  function totalHits(id) { return summary.total_hits_landed?.[id] || 0; }
+  // Old bargraph helpers removed.
 
   async function toggleEvents() {
     showEvents = !showEvents;
@@ -193,13 +174,31 @@
     }
   }
 
-  // If no bars for provided ids but summary has data for others, switch display ids
+  // If no data for provided ids but summary has data for others, switch display ids
   $: {
-    const hasAnyBars = (list) => Array.isArray(list) && list.some((e) => barData(e.id).length > 0);
+    const hasAnySummary = (list) => Array.isArray(list) && list.some((e) => {
+      const id = (e && typeof e === 'object') ? (e.id || '') : e;
+      const totals = summary?.damage_by_type?.[id] || {};
+      return Object.keys(totals).length > 0;
+    });
     const summaryParty = (summary?.party_members || []).map(id => ({ id, element: 'Generic' }));
     const summaryFoes = (summary?.foes || []).map(id => ({ id, element: 'Generic' }));
-    if (!hasAnyBars(partyDisplay) && hasAnyBars(summaryParty)) partyDisplay = summaryParty;
-    if (!hasAnyBars(foesDisplay) && hasAnyBars(summaryFoes)) foesDisplay = summaryFoes;
+    if (!hasAnySummary(partyDisplay) && hasAnySummary(summaryParty)) partyDisplay = summaryParty;
+    if (!hasAnySummary(foesDisplay) && hasAnySummary(summaryFoes)) foesDisplay = summaryFoes;
+  }
+
+  // Build a safe fighter object for portraits in tabs (ensures id/element/hp exist)
+  function toDisplayFighter(entity) {
+    const eid = (entity && typeof entity === 'object') ? (entity.id || '') : (entity || '');
+    const id = eid || '';
+    const element = (entity && typeof entity === 'object' && (entity.element)) || primaryElement(id);
+    const hp = (entity && typeof entity === 'object' && Number.isFinite(entity.hp)) ? entity.hp : 1;
+    const max_hp = (entity && typeof entity === 'object' && Number.isFinite(entity.max_hp) && entity.max_hp > 0) ? entity.max_hp : 1;
+    const dots = (entity && typeof entity === 'object' && Array.isArray(entity.dots)) ? entity.dots : [];
+    const hots = (entity && typeof entity === 'object' && Array.isArray(entity.hots)) ? entity.hots : [];
+    const active_effects = (entity && typeof entity === 'object' && Array.isArray(entity.active_effects)) ? entity.active_effects : [];
+    const shields = (entity && typeof entity === 'object' && Number.isFinite(entity.shields)) ? entity.shields : 0;
+    return { ...(typeof entity === 'object' ? entity : {}), id, element, hp, max_hp, dots, hots, active_effects, shields };
   }
 </script>
 
@@ -234,16 +233,6 @@
   .row.player { flex-direction: row; }
   .row.foe { flex-direction: row-reverse; }
   .portrait-col { display: flex; flex-direction: column; align-items: center; }
-  .bars {
-    display: flex;
-    width: 8rem;
-    height: 0.55rem;
-    position: relative;
-    z-index: 1;
-  }
-  .bar {
-    height: 100%;
-  }
   .name-chip {
     width: var(--portrait-size);
     margin: 0 0 0.25rem 0;
@@ -257,10 +246,7 @@
     border: 1px solid rgba(255,255,255,0.12);
     padding: 2px 4px;
   }
-  .bar-wrap { display: flex; flex-direction: column; align-items: stretch; min-width: 8rem; }
-  .bar-label { font-size: 0.7rem; color: #bbb; margin-bottom: 0.25rem; text-align: left; }
-  .bar-stats { margin-top: 0.25rem; font-size: 0.72rem; color: #ddd; }
-  .bar-stats { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .effects-block { display: flex; flex-direction: column; align-items: stretch; min-width: 8rem; }
   .rewards {
     display: flex;
     flex-direction: column;
@@ -303,6 +289,8 @@
     background: rgba(0,0,0,0.4);
     padding: 0.75rem;
     border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
   }
   .effects-header {
     font-size: 0.85rem;
@@ -316,6 +304,11 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
   }
+
+  /* Ensure the tabbed view uses full popup width */
+  .battle-review-tabs { width: 100%; }
+  .tabs-nav { width: 100%; box-sizing: border-box; }
+  .tab-content { width: 100%; box-sizing: border-box; }
   .effects-column {
     display: flex;
     flex-direction: column;
@@ -578,85 +571,7 @@
 </style>
 
 <div class="layout review">
-  <div class="side">
-    {#each partyDisplay as member}
-      <div class="combatant">
-        <div class="row player">
-          <div class="portrait-col">
-            <div class="name-chip">{member.id || member}</div>
-            <FighterPortrait
-            fighter={{
-              ...member,
-              id: (member.id || member),
-              element: (member.element || primaryElement(member.id || member)),
-              hp: (Number.isFinite(member.hp) ? member.hp : 1),
-              max_hp: (Number.isFinite(member.max_hp) && member.max_hp > 0 ? member.max_hp : 1),
-              dots: member.dots || [],
-              hots: member.hots || [],
-              active_effects: member.active_effects || [],
-              shields: member.shields || 0,
-            }}
-          />
-          </div>
-          <div class="bar-wrap">
-            <div class="bar-label">Element Damage</div>
-            <div class="bars">
-              {#each barData(member.id || member) as seg}
-                <div
-                  class="bar"
-                  style={`width: ${seg.pct}%; background: ${getElementColor(seg.element)}`}
-                />
-              {/each}
-            </div>
-            <div class="bar-stats">Dealt: {fmt(totalDealt(member.id || member))} • Taken: {fmt(totalTaken(member.id || member))} • Heals: {fmt(totalHeal(member.id || member))} • Hits: {fmt(totalHits(member.id || member))}</div>
-            {#if outgoingBySource.get(member.id || member)}
-              <div class="effects-title" style="margin-top: 0.35rem;">DoTs / HoTs</div>
-              {#if (outgoingBySource.get(member.id || member).dots || []).length}
-                <div class="effects-section">
-                  {#each outgoingBySource.get(member.id || member).dots as d}
-                    <div class="effect-cap" title={`${d.name || d.id} • Dmg: ${d.damage ?? 0} • Turns: ${d.turns}${d.stacks > 1 ? ` • x${d.stacks}` : ''}`}>
-                      <img class="dot-mini" src={getDotImage(d)} alt={d.name || d.id} style={`border-color: ${getElementColor(getDotElement(d))}`}/>
-                      <div class="cap-lines">
-                        <div class="cap-name">{d.name || d.id}</div>
-                        <div class="cap-stats">Dmg {fmt(d.damage ?? 0)} • Turns {d.turns}{d.stacks > 1 ? ` • x${d.stacks}` : ''}</div>
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              {/if}
-              {#if (outgoingBySource.get(member.id || member).hots || []).length}
-                <div class="effects-section">
-                  {#each outgoingBySource.get(member.id || member).hots as h}
-                    <div class="effect-cap" title={`${h.name || h.id} • Heal: ${h.healing ?? 0} • Turns: ${h.turns}${h.stacks > 1 ? ` • x${h.stacks}` : ''}`}>
-                      <img class="dot-mini" src={getDotImage({ ...h, type: 'hot' })} alt={h.name || h.id} style={`border-color: ${getElementColor(getDotElement(h))}`}/>
-                      <div class="cap-lines">
-                        <div class="cap-name">{h.name || h.id}</div>
-                        <div class="cap-stats">Heal {fmt(h.healing ?? 0)} • Turns {h.turns}{h.stacks > 1 ? ` • x${h.stacks}` : ''}</div>
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              {/if}
-              {#if (outgoingBySource.get(member.id || member).buffs || []).length}
-                <div class="effects-section">
-                  {#each outgoingBySource.get(member.id || member).buffs as b}
-                    <div class="effect-cap" title={`${b.name || 'Effect'}${b.duration ? ` • ${b.duration} turns` : ''}`}>
-                      <img class="dot-mini" src={getDotImage({ id: b.name || 'effect', type: 'generic' })} alt={b.name || 'Effect'} style={`border-color: ${getElementColor('generic')}`}/>
-                      <div class="cap-lines">
-                        <div class="cap-name">{b.name || 'Effect'}</div>
-                        <div class="cap-stats">{b.duration ? `${b.duration} turns` : 'Active'}</div>
-                      </div>
-                    </div>
-                  {/each}
-                </div>
-              {/if}
-            {/if}
-          </div>
-        </div>
-        
-      </div>
-    {/each}
-  </div>
+  
   <div class="side rewards">
     {#if cards.length}
       <div class="reward-grid">
@@ -673,89 +588,7 @@
       </div>
     {/if}
   </div>
-  <div class="side">
-    {#each foesDisplay as foe}
-      <div class="combatant">
-        <div class="row foe">
-          <div class="portrait-col">
-            <div class="name-chip">{foe.id || foe}</div>
-            <FighterPortrait
-            fighter={{
-              ...foe,
-              id: (foe.id || foe),
-              element: (foe.element || primaryElement(foe.id || foe)),
-              hp: (Number.isFinite(foe.hp) ? foe.hp : 1),
-              max_hp: (Number.isFinite(foe.max_hp) && foe.max_hp > 0 ? foe.max_hp : 1),
-              dots: foe.dots || [],
-              hots: foe.hots || [],
-              active_effects: foe.active_effects || [],
-              shields: foe.shields || 0,
-            }}
-          />
-          </div>
-          <div class="bar-wrap">
-            <div class="bar-label">Element Damage</div>
-            <div class="bars">
-              {#each barData(foe.id || foe) as seg}
-                <div
-                  class="bar"
-                  style={`width: ${seg.pct}%; background: ${getElementColor(seg.element)}`}
-                />
-              {/each}
-            </div>
-            <div class="bar-stats">Dealt: {fmt(totalDealt(foe.id || foe))} • Taken: {fmt(totalTaken(foe.id || foe))} • Heals: {fmt(totalHeal(foe.id || foe))} • Hits: {fmt(totalHits(foe.id || foe))}</div>
-          </div>
-        </div>
-        
-        {#if outgoingBySource.get(foe.id || foe)}
-          <div class="effects-out">
-            {#if (outgoingBySource.get(foe.id || foe).dots || []).length}
-              <div class="effects-section">
-                <div class="effects-title">DoTs Applied</div>
-                {#each outgoingBySource.get(foe.id || foe).dots as d}
-                  <div class="effect-cap" title={`${d.name || d.id} • Dmg: ${d.damage ?? 0} • Turns: ${d.turns}${d.stacks > 1 ? ` • x${d.stacks}` : ''}`}>
-                    <img class="dot-mini" src={getDotImage(d)} alt={d.name || d.id} style={`border-color: ${getElementColor(getDotElement(d))}`}/>
-                    <div class="cap-lines">
-                      <div class="cap-name">{d.name || d.id}</div>
-                      <div class="cap-stats">Dmg {fmt(d.damage ?? 0)} • Turns {d.turns}{d.stacks > 1 ? ` • x${d.stacks}` : ''}</div>
-                    </div>
-                  </div>
-                {/each}
-              </div>
-            {/if}
-            {#if (outgoingBySource.get(foe.id || foe).hots || []).length}
-              <div class="effects-section">
-                <div class="effects-title">HoTs Applied</div>
-                {#each outgoingBySource.get(foe.id || foe).hots as h}
-                  <div class="effect-cap" title={`${h.name || h.id} • Heal: ${h.healing ?? 0} • Turns: ${h.turns}${h.stacks > 1 ? ` • x${h.stacks}` : ''}`}>
-                    <img class="dot-mini" src={getDotImage({ ...h, type: 'hot' })} alt={h.name || h.id} style={`border-color: ${getElementColor(getDotElement(h))}`}/>
-                    <div class="cap-lines">
-                      <div class="cap-name">{h.name || h.id}</div>
-                      <div class="cap-stats">Heal {fmt(h.healing ?? 0)} • Turns {h.turns}{h.stacks > 1 ? ` • x${h.stacks}` : ''}</div>
-                    </div>
-                  </div>
-                {/each}
-              </div>
-            {/if}
-            {#if (outgoingBySource.get(foe.id || foe).buffs || []).length}
-              <div class="effects-section">
-                <div class="effects-title">Buffs/Debuffs Applied</div>
-                {#each outgoingBySource.get(foe.id || foe).buffs as b}
-                  <div class="effect-cap" title={`${b.name || 'Effect'}${b.duration ? ` • ${b.duration} turns` : ''}`}>
-                    <img class="dot-mini" src={getDotImage({ id: b.name || 'effect', type: 'generic' })} alt={b.name || 'Effect'} style={`border-color: ${getElementColor('generic')}`}/>
-                    <div class="cap-lines">
-                      <div class="cap-name">{b.name || 'Effect'}</div>
-                      <div class="cap-stats">{b.duration ? `${b.duration} turns` : 'Active'}</div>
-                    </div>
-                  </div>
-                {/each}
-              </div>
-            {/if}
-          </div>
-        {/if}
-      </div>
-    {/each}
-  </div>
+  
 
   <!-- Top-level summary and raw events toggle -->
   <div class="side" style="grid-column: 1 / -1;">
@@ -802,18 +635,17 @@
               class="tab-btn" 
               class:active={activeTab === tab.id} 
               on:click={() => activeTab = tab.id}
+              title={tab.label}
             >
               {#if tab.icon}
                 <svelte:component this={tab.icon} size={16} />
+                <span class="tab-label">{tab.label}</span>
               {:else if tab.entity}
-                <FighterPortrait 
-                  id={tab.entity.id} 
-                  size="24px" 
-                  showBuffs={false}
-                  showHp={false}
-                />
+                {@const _tabFighter = toDisplayFighter(tab.entity)}
+                <span style="--portrait-size: 4.5rem; display:inline-block;">
+                  <FighterPortrait fighter={_tabFighter} />
+                </span>
               {/if}
-              <span class="tab-label">{tab.label}</span>
             </button>
           {/each}
         </div>
@@ -993,15 +825,13 @@
               {#if entityData && currentTab}
                 <div class="entity-breakdown">
                   <div class="entity-header">
-                    <h3>{currentTab.label} Breakdown</h3>
                     {#if currentTab.entity}
-                      <FighterPortrait 
-                        id={currentTab.entity.id} 
-                        size="48px" 
-                        showBuffs={true}
-                        showHp={true}
-                      />
+                      {@const _fighter = toDisplayFighter(currentTab.entity)}
+                      <div style="--portrait-size: 4.5rem;">
+                        <FighterPortrait fighter={_fighter} />
+                      </div>
                     {/if}
+                    <h3>{currentTab.label} Breakdown</h3>
                   </div>
                   
                   <!-- Damage Output -->

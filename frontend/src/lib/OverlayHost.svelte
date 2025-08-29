@@ -208,7 +208,7 @@
   <OverlaySurface zIndex={1100}>
     <PopupWindow
       title="Battle Review"
-      maxWidth="880px"
+      maxWidth="1200px"
       maxHeight="95vh"
       zIndex={1100}
       on:close={() => dispatch('nextRoom')}
