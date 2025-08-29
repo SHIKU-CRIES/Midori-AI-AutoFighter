@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 
 from autofighter.effects import DamageOverTime
@@ -88,7 +87,7 @@ class Dark(DamageTypeBase):
         actor: Stats,
         allies: list[Stats],
         enemies: list[Stats],
-    ) -> None:
+    ) -> bool:
         """Strike six times, scaling with allied DoT stacks.
 
         Damage is multiplied by ``1.75`` for every DoT stack present on the
@@ -96,8 +95,10 @@ class Dark(DamageTypeBase):
         ``damage`` event after applying damage.
         """
 
+        if not getattr(actor, "use_ultimate", lambda: False)():
+            return False
         if not enemies:
-            return
+            return False
 
         stacks = 0
         for member in allies:
@@ -113,19 +114,7 @@ class Dark(DamageTypeBase):
         for _ in range(6):
             dealt = await target.apply_damage(dmg, attacker=actor)
             BUS.emit("damage", actor, target, dealt)
+        return True
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         return damage_effects.create_dot(self.id, damage, source)
-
-
-def _ultimate_handler(user) -> None:
-    dt = getattr(user, "damage_type", None)
-    if not isinstance(dt, Dark):
-        return
-    allies = getattr(user, "allies", [])
-    enemies = getattr(user, "enemies", [])
-    loop = asyncio.get_event_loop()
-    loop.create_task(dt.ultimate(user, allies, enemies))
-
-
-BUS.subscribe("ultimate_used", _ultimate_handler)

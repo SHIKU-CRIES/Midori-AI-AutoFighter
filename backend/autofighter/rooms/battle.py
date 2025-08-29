@@ -38,6 +38,21 @@ log = logging.getLogger(__name__)
 ENRAGE_TURNS_NORMAL = 100
 ENRAGE_TURNS_BOSS = 500
 
+_EXTRA_TURNS: dict[int, int] = {}
+
+
+def _grant_extra_turn(entity: Stats) -> None:
+    ident = id(entity)
+    _EXTRA_TURNS[ident] = _EXTRA_TURNS.get(ident, 0) + 1
+
+
+def _clear_extra_turns(_entity: Stats) -> None:
+    _EXTRA_TURNS.clear()
+
+
+BUS.subscribe("extra_turn", _grant_extra_turn)
+BUS.subscribe("battle_end", _clear_extra_turns)
+
 ELEMENTS = [e.lower() for e in ALL_DAMAGE_TYPES]
 
 
@@ -243,255 +258,289 @@ class BattleRoom(Room):
             m.hp > 0 for m in combat_party.members
         ):
             for member_effect, member in zip(party_effects, combat_party.members, strict=False):
-                action_start = asyncio.get_event_loop().time()
-                if member.hp <= 0:
-                    await asyncio.sleep(0.001)
-                    continue
-                turn += 1
-                if turn > threshold:
-                    if not enrage_active:
-                        enrage_active = True
-                        for f in foes:
-                            f.passives.append("Enraged")
-                        log.info("Enrage activated")
-                    new_stacks = turn - threshold
-                    # Each enrage stack adds +1% damage taken and -1% healing dealt globally
-                    set_enrage_percent(0.01 * max(new_stacks, 0))
-                    mult = 1 + 0.4 * new_stacks
-                    for i, (f, mgr) in enumerate(zip(foes, foe_effects, strict=False)):
-                        if enrage_mods[i] is not None:
-                            enrage_mods[i].remove()
-                            try:
-                                mgr.mods.remove(enrage_mods[i])
-                                if enrage_mods[i].id in f.mods:
-                                    f.mods.remove(enrage_mods[i].id)
-                            except ValueError:
-                                pass
-                        mod = create_stat_buff(f, name="enrage_atk", atk_mult=mult, turns=9999)
-                        mgr.add_modifier(mod)
-                        enrage_mods[i] = mod
-                    enrage_stacks = new_stacks
-                    if turn > 1000:
-                        turns_in_enrage = max(enrage_stacks, 0)
-                        extra_damage = 100 * turns_in_enrage
-                        for m in combat_party.members:
-                            if m.hp > 0 and extra_damage > 0:
-                                await m.apply_damage(extra_damage)
-                        for f in foes:
-                            if f.hp > 0 and extra_damage > 0:
-                                await f.apply_damage(extra_damage)
-                else:
-                    # Not enraged yet; ensure percent is zero
-                    set_enrage_percent(0.0)
-                await registry.trigger("turn_start", member)
-                log.debug("%s turn start", member.id)
-                await member.maybe_regain(turn)
-                # If all foes died earlier in this round, stop taking actions
-                if not any(f.hp > 0 for f in foes):
-                    break
-                alive_foe_idxs = [i for i, f in enumerate(foes) if f.hp > 0]
-                if not alive_foe_idxs:
-                    break
-                tgt_idx = random.choice(alive_foe_idxs)
-                tgt_foe = foes[tgt_idx]
-                tgt_mgr = foe_effects[tgt_idx]
-                dt = getattr(member, "damage_type", None)
-                await member_effect.tick(tgt_mgr)
-                if member.hp <= 0:
+                safety = 0
+                while True:
+                    safety += 1
+                    if safety > 10:
+                        break
+                    action_start = asyncio.get_event_loop().time()
+                    if member.hp <= 0:
+                        await asyncio.sleep(0.001)
+                        break
+                    turn += 1
+                    if turn > threshold:
+                        if not enrage_active:
+                            enrage_active = True
+                            for f in foes:
+                                f.passives.append("Enraged")
+                            log.info("Enrage activated")
+                        new_stacks = turn - threshold
+                        # Each enrage stack adds +1% damage taken and -1% healing dealt globally
+                        set_enrage_percent(0.01 * max(new_stacks, 0))
+                        mult = 1 + 0.4 * new_stacks
+                        for i, (f, mgr) in enumerate(zip(foes, foe_effects, strict=False)):
+                            if enrage_mods[i] is not None:
+                                enrage_mods[i].remove()
+                                try:
+                                    mgr.mods.remove(enrage_mods[i])
+                                    if enrage_mods[i].id in f.mods:
+                                        f.mods.remove(enrage_mods[i].id)
+                                except ValueError:
+                                    pass
+                            mod = create_stat_buff(f, name="enrage_atk", atk_mult=mult, turns=9999)
+                            mgr.add_modifier(mod)
+                            enrage_mods[i] = mod
+                        enrage_stacks = new_stacks
+                        if turn > 1000:
+                            turns_in_enrage = max(enrage_stacks, 0)
+                            extra_damage = 100 * turns_in_enrage
+                            for m in combat_party.members:
+                                if m.hp > 0 and extra_damage > 0:
+                                    await m.apply_damage(extra_damage)
+                            for f in foes:
+                                if f.hp > 0 and extra_damage > 0:
+                                    await f.apply_damage(extra_damage)
+                    else:
+                        # Not enraged yet; ensure percent is zero
+                        set_enrage_percent(0.0)
+                    await registry.trigger("turn_start", member)
+                    log.debug("%s turn start", member.id)
+                    await member.maybe_regain(turn)
+                    # If all foes died earlier in this round, stop taking actions
+                    if not any(f.hp > 0 for f in foes):
+                        break
+                    alive_foe_idxs = [i for i, f in enumerate(foes) if f.hp > 0]
+                    if not alive_foe_idxs:
+                        break
+                    tgt_idx = random.choice(alive_foe_idxs)
+                    tgt_foe = foes[tgt_idx]
+                    tgt_mgr = foe_effects[tgt_idx]
+                    dt = getattr(member, "damage_type", None)
+                    await member_effect.tick(tgt_mgr)
+                    if member.hp <= 0:
+                        await registry.trigger("turn_end", member)
+                        await asyncio.sleep(0.001)
+                        break
+                    proceed = await member_effect.on_action()
+                    if proceed is None:
+                        proceed = True
+                    if proceed and hasattr(dt, "on_action"):
+                        res = await dt.on_action(
+                            member,
+                            combat_party.members,
+                            foes,
+                        )
+                        proceed = True if res is None else bool(res)
+                    if getattr(member, "ultimate_ready", False) and hasattr(dt, "ultimate"):
+                        try:
+                            await dt.ultimate(member, combat_party.members, foes)
+                        except Exception:
+                            pass
+                    if not proceed:
+                        BUS.emit("action_used", member, member, 0)
+                        await registry.trigger("turn_end", member)
+                        if _EXTRA_TURNS.get(id(member), 0) > 0 and member.hp > 0:
+                            _EXTRA_TURNS[id(member)] -= 1
+                            await _pace(action_start)
+                            continue
+                        if progress is not None:
+                            await progress(
+                                {
+                                    "result": "battle",
+                                    "party": [_serialize(m) for m in combat_party.members],
+                                    "foes": [_serialize(f) for f in foes],
+                                    "enrage": {
+                                        "active": enrage_active,
+                                        "stacks": enrage_stacks,
+                                    },
+                                    "rdr": party.rdr,
+                                }
+                            )
+                        await _pace(action_start)
+                        await asyncio.sleep(0.001)
+                        break
+                    dmg = await tgt_foe.apply_damage(member.atk, attacker=member)
+                    if dmg <= 0:
+                        log.info("%s's attack was dodged by %s", member.id, tgt_foe.id)
+                    else:
+                        log.info("%s hits %s for %s", member.id, tgt_foe.id, dmg)
+                        damage_type = getattr(member.damage_type, 'id', 'generic') if hasattr(member, 'damage_type') else 'generic'
+                        BUS.emit("hit_landed", member, tgt_foe, dmg, "attack", f"{damage_type}_attack")
+                    tgt_mgr.maybe_inflict_dot(member, dmg)
+                    if getattr(member.damage_type, "id", "").lower() == "wind":
+                        for extra_idx, extra_foe in enumerate(foes):
+                            if extra_idx == tgt_idx or extra_foe.hp <= 0:
+                                await asyncio.sleep(0.001)
+                                continue
+                            extra_dmg = await extra_foe.apply_damage(
+                                member.atk, attacker=member
+                            )
+                            if extra_dmg <= 0:
+                                log.info(
+                                    "%s's attack was dodged by %s",
+                                    member.id,
+                                    extra_foe.id,
+                                )
+                            else:
+                                log.info(
+                                    "%s hits %s for %s",
+                                    member.id,
+                                    extra_foe.id,
+                                    extra_dmg,
+                                )
+                                BUS.emit("hit_landed", member, extra_foe, extra_dmg, "attack", "wind_multi_attack")
+                            foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
+                            if extra_foe.hp <= 0:
+                                exp_reward += extra_foe.level * 12 + 5 * self.node.index
+                                try:
+                                    label = (
+                                        getattr(extra_foe, "name", None)
+                                        or getattr(extra_foe, "id", "")
+                                    ).lower()
+                                    if "slime" in label:
+                                        for m in combat_party.members:
+                                            m.exp_multiplier += 0.025
+                                        for m in party.members:
+                                            m.exp_multiplier += 0.025
+                                except Exception:
+                                    pass
+                    BUS.emit("action_used", member, tgt_foe, dmg)
+                    member.add_ultimate_charge(member.actions_per_turn)
+                    for ally in combat_party.members:
+                        ally.handle_ally_action(member)
+                    if enrage_active:
+                        turns_since_enrage = max(enrage_stacks, 0)
+                        next_trigger = (enrage_bleed_applies + 1) * 10
+                        if turns_since_enrage >= next_trigger:
+                            stacks_to_add = 1 + enrage_bleed_applies
+                            from autofighter.effects import DamageOverTime
+                            for mgr in party_effects:
+                                for _ in range(stacks_to_add):
+                                    dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.05)
+                                    mgr.add_dot(
+                                        DamageOverTime(
+                                            "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
+                                        )
+                                    )
+                            for mgr, foe_obj in zip(foe_effects, foes, strict=False):
+                                for _ in range(stacks_to_add):
+                                    dmg_per_tick = int(max(foe_obj.max_hp, 1) * 0.05)
+                                    mgr.add_dot(
+                                        DamageOverTime(
+                                            "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
+                                        )
+                                    )
+                            enrage_bleed_applies += 1
                     await registry.trigger("turn_end", member)
-                    await asyncio.sleep(0.001)
-                    continue
-                proceed = await member_effect.on_action()
-                if proceed is None:
-                    proceed = True
-                if proceed and hasattr(dt, "on_action"):
-                    res = await dt.on_action(
-                        member,
-                        combat_party.members,
-                        foes,
-                    )
-                    proceed = True if res is None else bool(res)
-                if not proceed:
-                    await registry.trigger("turn_end", member)
+                    if _EXTRA_TURNS.get(id(member), 0) > 0 and member.hp > 0:
+                        _EXTRA_TURNS[id(member)] -= 1
+                        await _pace(action_start)
+                        await asyncio.sleep(0.001)
+                        continue
                     if progress is not None:
                         await progress(
                             {
                                 "result": "battle",
                                 "party": [_serialize(m) for m in combat_party.members],
                                 "foes": [_serialize(f) for f in foes],
-                                "enrage": {
-                                    "active": enrage_active,
-                                    "stacks": enrage_stacks,
-                                },
+                                "enrage": {"active": enrage_active, "stacks": enrage_stacks},
                                 "rdr": party.rdr,
                             }
                         )
                     await _pace(action_start)
+                    if tgt_foe.hp <= 0:
+                        exp_reward += tgt_foe.level * 12 + 5 * self.node.index
+                        try:
+                            label = (getattr(tgt_foe, "name", None) or getattr(tgt_foe, "id", "")).lower()
+                            if "slime" in label:
+                                for m in combat_party.members:
+                                    m.exp_multiplier += 0.025
+                                for m in party.members:
+                                    m.exp_multiplier += 0.025
+                        except Exception:
+                            pass
+                        await asyncio.sleep(0.001)
+                        if all(f.hp <= 0 for f in foes):
+                            break
+                        await asyncio.sleep(0.001)
+                        continue
                     await asyncio.sleep(0.001)
-                    continue
-                dmg = await tgt_foe.apply_damage(member.atk, attacker=member)
-                if dmg <= 0:
-                    log.info("%s's attack was dodged by %s", member.id, tgt_foe.id)
-                else:
-                    log.info("%s hits %s for %s", member.id, tgt_foe.id, dmg)
-                    # Get damage type for logging
-                    damage_type = getattr(member.damage_type, 'id', 'generic') if hasattr(member, 'damage_type') else 'generic'
-                    BUS.emit("hit_landed", member, tgt_foe, dmg, "attack", f"{damage_type}_attack")
-                tgt_mgr.maybe_inflict_dot(member, dmg)
-                if getattr(member.damage_type, "id", "").lower() == "wind":
-                    for extra_idx, extra_foe in enumerate(foes):
-                        if extra_idx == tgt_idx or extra_foe.hp <= 0:
-                            await asyncio.sleep(0.001)
-                            continue
-                        extra_dmg = await extra_foe.apply_damage(
-                            member.atk, attacker=member
-                        )
-                        if extra_dmg <= 0:
-                            log.info(
-                                "%s's attack was dodged by %s",
-                                member.id,
-                                extra_foe.id,
-                            )
-                        else:
-                            log.info(
-                                "%s hits %s for %s",
-                                member.id,
-                                extra_foe.id,
-                                extra_dmg,
-                            )
-                            # Wind multi-target attack
-                            BUS.emit("hit_landed", member, extra_foe, extra_dmg, "attack", "wind_multi_attack")
-                        foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
-                        if extra_foe.hp <= 0:
-                            exp_reward += extra_foe.level * 12 + 5 * self.node.index
-                            try:
-                                label = (
-                                    getattr(extra_foe, "name", None)
-                                    or getattr(extra_foe, "id", "")
-                                ).lower()
-                                if "slime" in label:
-                                    for m in combat_party.members:
-                                        m.exp_multiplier += 0.025
-                                    for m in party.members:
-                                        m.exp_multiplier += 0.025
-                            except Exception:
-                                pass
-                member.add_ultimate_charge(member.actions_per_turn)
-                for ally in combat_party.members:
-                    ally.handle_ally_action(member)
-                # Keep prior enrage bleed: every 10 stacks since activation,
-                # add increasing stacks of a %max HP DoT to both sides.
-                if enrage_active:
-                    turns_since_enrage = max(enrage_stacks, 0)
-                    next_trigger = (enrage_bleed_applies + 1) * 10
-                    if turns_since_enrage >= next_trigger:
-                        stacks_to_add = 1 + enrage_bleed_applies
-                        from autofighter.effects import DamageOverTime
-                        for mgr in party_effects:
-                            for _ in range(stacks_to_add):
-                                dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.05)
-                                mgr.add_dot(
-                                    DamageOverTime(
-                                        "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
-                                    )
-                                )
-                        for mgr, foe_obj in zip(foe_effects, foes, strict=False):
-                            for _ in range(stacks_to_add):
-                                dmg_per_tick = int(max(foe_obj.max_hp, 1) * 0.05)
-                                mgr.add_dot(
-                                    DamageOverTime(
-                                        "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
-                                    )
-                                )
-                        enrage_bleed_applies += 1
-                await registry.trigger("turn_end", member)
-                if progress is not None:
-                    await progress(
-                        {
-                            "result": "battle",
-                            "party": [_serialize(m) for m in combat_party.members],
-                            "foes": [_serialize(f) for f in foes],
-                            "enrage": {"active": enrage_active, "stacks": enrage_stacks},
-                            "rdr": party.rdr,
-                        }
-                    )
-                await _pace(action_start)
-                if tgt_foe.hp <= 0:
-                    exp_reward += tgt_foe.level * 12 + 5 * self.node.index
-                    try:
-                        label = (getattr(tgt_foe, "name", None) or getattr(tgt_foe, "id", "")).lower()
-                        if "slime" in label:
-                            for m in combat_party.members:
-                                m.exp_multiplier += 0.025
-                            for m in party.members:
-                                m.exp_multiplier += 0.025
-                    except Exception:
-                        pass
-                    await asyncio.sleep(0.001)
-                    if all(f.hp <= 0 for f in foes):
-                        break
-                    await asyncio.sleep(0.001)
-                    continue
-                # Foe actions are handled after all party members act
-                # in a dedicated loop per living foe.
-                # Continue to next party member.
-                await asyncio.sleep(0.001)
-                continue
+                    break
             # End of party member loop
             # If party wiped during this round, stop taking actions
             if not any(m.hp > 0 for m in combat_party.members):
                 break
             # Foes: each living foe takes exactly one action per round
             for foe_idx, acting_foe in enumerate(foes):
-                action_start = asyncio.get_event_loop().time()
-                if acting_foe.hp <= 0:
+                safety = 0
+                while True:
+                    safety += 1
+                    if safety > 10:
+                        break
+                    action_start = asyncio.get_event_loop().time()
+                    if acting_foe.hp <= 0:
+                        await asyncio.sleep(0.001)
+                        break
+                    alive_targets = [
+                        (idx, m)
+                        for idx, m in enumerate(combat_party.members)
+                        if m.hp > 0
+                    ]
+                    if not alive_targets:
+                        break
+                    pidx, target = random.choices(
+                        alive_targets,
+                        weights=[m.defense * m.mitigation for _, m in alive_targets],
+                    )[0]
+                    target_effect = party_effects[pidx]
+                    foe_mgr = foe_effects[foe_idx]
+                    await registry.trigger("turn_start", acting_foe)
+                    log.debug("%s turn start targeting %s", acting_foe.id, target.id)
+                    await acting_foe.maybe_regain(turn)
+                    dt = getattr(acting_foe, "damage_type", None)
+                    await foe_mgr.tick(target_effect)
+                    if acting_foe.hp <= 0:
+                        await registry.trigger("turn_end", acting_foe)
+                        await asyncio.sleep(0.001)
+                        break
+                    proceed = await foe_mgr.on_action()
+                    if proceed is None:
+                        proceed = True
+                    if proceed and hasattr(dt, "on_action"):
+                        res = await dt.on_action(acting_foe, foes, combat_party.members)
+                        proceed = True if res is None else bool(res)
+                    if getattr(acting_foe, "ultimate_ready", False) and hasattr(dt, "ultimate"):
+                        try:
+                            await dt.ultimate(acting_foe, foes, combat_party.members)
+                        except Exception:
+                            pass
+                    if not proceed:
+                        BUS.emit("action_used", acting_foe, acting_foe, 0)
+                        await registry.trigger("turn_end", acting_foe)
+                        if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
+                            _EXTRA_TURNS[id(acting_foe)] -= 1
+                            await _pace(action_start)
+                            continue
+                        await asyncio.sleep(0.001)
+                        break
+                    dmg = await target.apply_damage(acting_foe.atk, attacker=acting_foe)
+                    if dmg <= 0:
+                        log.info("%s's attack was dodged by %s", acting_foe.id, target.id)
+                    else:
+                        log.info("%s hits %s for %s", acting_foe.id, target.id, dmg)
+                        damage_type = getattr(acting_foe.damage_type, 'id', 'generic') if hasattr(acting_foe, 'damage_type') else 'generic'
+                        BUS.emit("hit_landed", acting_foe, target, dmg, "attack", f"foe_{damage_type}_attack")
+                    target_effect.maybe_inflict_dot(acting_foe, dmg)
+                    BUS.emit("action_used", acting_foe, target, dmg)
+                    await registry.trigger("turn_end", acting_foe)
+                    if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
+                        _EXTRA_TURNS[id(acting_foe)] -= 1
+                        await _pace(action_start)
+                        await asyncio.sleep(0.001)
+                        continue
+                    await _pace(action_start)
                     await asyncio.sleep(0.001)
-                    continue
-                alive_targets = [
-                    (idx, m)
-                    for idx, m in enumerate(combat_party.members)
-                    if m.hp > 0
-                ]
-                if not alive_targets:
                     break
-                pidx, target = random.choices(
-                    alive_targets,
-                    weights=[m.defense * m.mitigation for _, m in alive_targets],
-                )[0]
-                target_effect = party_effects[pidx]
-                foe_mgr = foe_effects[foe_idx]
-                await registry.trigger("turn_start", acting_foe)
-                log.debug("%s turn start targeting %s", acting_foe.id, target.id)
-                await acting_foe.maybe_regain(turn)
-                dt = getattr(acting_foe, "damage_type", None)
-                await foe_mgr.tick(target_effect)
-                if acting_foe.hp <= 0:
-                    await registry.trigger("turn_end", acting_foe)
-                    await asyncio.sleep(0.001)
-                    continue
-                proceed = await foe_mgr.on_action()
-                if proceed is None:
-                    proceed = True
-                if proceed and hasattr(dt, "on_action"):
-                    res = await dt.on_action(acting_foe, foes, combat_party.members)
-                    proceed = True if res is None else bool(res)
-                if not proceed:
-                    await registry.trigger("turn_end", acting_foe)
-                    await asyncio.sleep(0.001)
-                    await asyncio.sleep(0.001)
-                    continue
-                dmg = await target.apply_damage(acting_foe.atk, attacker=acting_foe)
-                if dmg <= 0:
-                    log.info("%s's attack was dodged by %s", acting_foe.id, target.id)
-                else:
-                    log.info("%s hits %s for %s", acting_foe.id, target.id, dmg)
-                    # Get foe damage type for logging
-                    damage_type = getattr(acting_foe.damage_type, 'id', 'generic') if hasattr(acting_foe, 'damage_type') else 'generic'
-                    BUS.emit("hit_landed", acting_foe, target, dmg, "attack", f"foe_{damage_type}_attack")
-                target_effect.maybe_inflict_dot(acting_foe, dmg)
-                await registry.trigger("turn_end", acting_foe)
-                await _pace(action_start)
-                await asyncio.sleep(0.001)
         # Signal completion as soon as the loop ends to help UIs stop polling
         # immediately, even before rewards are fully computed.
         if progress is not None:

@@ -176,6 +176,21 @@ class DamageTypeBase:
             pass
         return heal
 
+    async def ultimate(
+        self,
+        actor: Stats,
+        allies: list[Stats],
+        enemies: list[Stats],
+    ) -> bool:
+        """Default ultimate implementation.
+
+        Consumes the actor's ultimate charge via ``use_ultimate``.  Subclasses
+        should override this method to provide their own effects but may call
+        it with ``super().ultimate(...)`` to handle charge consumption.
+        """
+
+        return getattr(actor, "use_ultimate", lambda: False)()
+
     def create_dot(self, damage: float, source: Stats) -> DamageOverTime | None:
         """Return a DoT effect based on ``damage`` or ``None`` to skip."""
 

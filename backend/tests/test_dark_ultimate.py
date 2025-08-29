@@ -1,32 +1,17 @@
 import asyncio
-import importlib
 
 from autofighter.effects import DamageOverTime
 from autofighter.effects import EffectManager
 from autofighter.stats import BUS
 from autofighter.stats import Stats
-import plugins.damage_types.dark as dark_module
-import plugins.event_bus as event_bus_module
+from plugins.damage_types.dark import Dark
 
 
 class DummyPlayer(Stats):
-    def use_ultimate(self) -> bool:
-        if not self.ultimate_ready:
-            return False
-        self.ultimate_charge = 0
-        self.ultimate_ready = False
-        BUS.emit("ultimate_used", self)
-        return True
-
-
-def _reload_dark():
-    return importlib.reload(dark_module).Dark
+    pass
 
 
 def test_dark_ultimate_dot_scaling(monkeypatch):
-    event_bus_module.bus._subs.clear()
-    Dark = _reload_dark()
-
     actor = DummyPlayer()
     actor.damage_type = Dark()
     actor._base_atk = 100
@@ -50,17 +35,15 @@ def test_dark_ultimate_dot_scaling(monkeypatch):
     hits: list[int] = []
     BUS.subscribe("damage", lambda a, t, d: hits.append(d))
 
-    actor.use_ultimate()
-    asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
+    asyncio.get_event_loop().run_until_complete(
+        actor.damage_type.ultimate(actor, actor.allies, actor.enemies)
+    )
 
     expected = int(100 * (1.75 ** 2))
     assert hits and all(h == expected for h in hits)
 
 
 def test_dark_ultimate_six_hits(monkeypatch):
-    event_bus_module.bus._subs.clear()
-    Dark = _reload_dark()
-
     actor = DummyPlayer()
     actor.damage_type = Dark()
     actor._base_atk = 100
@@ -78,7 +61,8 @@ def test_dark_ultimate_six_hits(monkeypatch):
     hits: list[int] = []
     BUS.subscribe("damage", lambda a, t, d: hits.append(d))
 
-    actor.use_ultimate()
-    asyncio.get_event_loop().run_until_complete(asyncio.sleep(0))
+    asyncio.get_event_loop().run_until_complete(
+        actor.damage_type.ultimate(actor, actor.allies, actor.enemies)
+    )
 
     assert len(hits) == 6
