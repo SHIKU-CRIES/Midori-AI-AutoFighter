@@ -42,3 +42,12 @@ when no cards are owned.
 - Guardian Shard – +2% DEF & +2% Mitigation
 - Sturdy Boots – +3% Dodge Odds & +3% DEF
 - Spiked Shield – +3% ATK & +3% DEF
+
+## 2★ Cards
+- Critical Focus – +55% ATK; start of turn grants Critical Boost stack
+- Critical Transfer – Ultimates absorb Critical Boost stacks; +4% ATK per stack for that turn
+- Iron Guard – +55% DEF; taking damage gives all allies +10% DEF for 1 turn
+- Swift Footwork – +1 action per turn; first action each combat is free
+- Mystic Aegis – +55% Effect Res; resisting a debuff heals 5% Max HP
+- Vital Surge – +55% Max HP; while below 50% HP, +55% ATK
+- Elemental Spark – +55% ATK & +55% Effect Hit Rate; one ally's debuffs gain +5% potency
