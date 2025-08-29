@@ -42,3 +42,8 @@ when no cards are owned.
 - Guardian Shard – +2% DEF & +2% Mitigation
 - Sturdy Boots – +3% Dodge Odds & +3% DEF
 - Spiked Shield – +3% ATK & +3% DEF
+
+## 4★ Cards
+- Overclock – +240% ATK & +240% Effect Hit Rate; at the start of each battle, all allies immediately take two actions back to back.
+- Iron Resolve – +240% DEF & +240% HP; the first time an ally dies, revive them at 30% HP. This effect refreshes every 3 turns.
+- Arcane Repeater – +240% ATK; each attack has a 30% chance to immediately repeat at 50% power.
