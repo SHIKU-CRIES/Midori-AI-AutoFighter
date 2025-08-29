@@ -62,10 +62,10 @@ def _generate_stock(party: Party, pressure: int) -> list[dict[str, Any]]:
                     "price": cost,
                 }
             )
+    # Offer up to 6 relics at the selected star tier; entries are unique
     stars = _apply_rdr_to_stars(_pick_shop_stars(), party.rdr)
-    choice = relic_choices(party, stars, count=1)
-    if choice:
-        relic = choice[0]
+    relic_list = relic_choices(party, stars, count=6)
+    for relic in relic_list:
         base = PRICE_BY_STARS.get(relic.stars, 0)
         cost = _pressure_cost(base, pressure)
         stock.append(

@@ -41,5 +41,5 @@ Echo Bell: Luna ringing an echo bell, a tiny silver bell whose chime reverberate
 Echoing Drum: Luna beating an echoing drum, a hide-covered drum with bronze studs, each strike sending rolling echoes across the field.
 Ember Stone: Luna clutching an ember stone, a coal-red gem that radiates gentle heat and flickers like an eternal coal.
 Frost Sigil: Luna tracing a frost sigil, an icy rune etched on a metal plate, exhaling mist and rimed with delicate snow crystals.
-Greed Engine: Luna examining a greed engine, a brass contraption of spinning gears and coin slots, humming with avaricious intent.
-Guardian Charm: Luna pinning a guardian charm to her cloak, a shield-shaped brooch of jade and gold, emanating a protective aura.
+Greed Engine: 
+Guardian Charm: 

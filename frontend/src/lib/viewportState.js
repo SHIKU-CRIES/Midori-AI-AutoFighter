@@ -76,34 +76,30 @@ export function rewardOpen(roomData, _battleActive) {
 }
 
 let gameAudio;
-let volumeTimer;
+let currentMusicVolume = 50;
 
 export function startGameMusic(volume) {
+  if (typeof volume === 'number') currentMusicVolume = volume;
   stopGameMusic();
   const src = getRandomMusicTrack();
   if (!src) return;
   gameAudio = new Audio(src);
-  applyMusicVolume(volume);
-  gameAudio.addEventListener('ended', () => startGameMusic(volume));
+  // Always use the latest requested volume
+  applyMusicVolume(currentMusicVolume);
+  gameAudio.addEventListener('ended', () => startGameMusic());
   gameAudio.play().catch(() => {});
-  volumeTimer = setInterval(() => {
-    applyMusicVolume(volume);
-  }, 500);
 }
 
 export function applyMusicVolume(volume) {
+  currentMusicVolume = typeof volume === 'number' ? volume : currentMusicVolume;
   if (gameAudio) {
-    gameAudio.volume = volume / 100;
+    gameAudio.volume = currentMusicVolume / 100;
   }
 }
 
 export function stopGameMusic() {
-  if (volumeTimer) {
-    clearInterval(volumeTimer);
-    volumeTimer = null;
-  }
   if (gameAudio) {
-    gameAudio.pause();
+    try { gameAudio.pause(); } catch {}
     gameAudio = null;
   }
 }

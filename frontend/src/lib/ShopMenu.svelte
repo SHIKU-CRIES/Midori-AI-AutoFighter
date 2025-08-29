@@ -96,11 +96,9 @@
     </div>
   </div>
   <div class="columns">
-    <section class="col">
-      <h4>Cards</h4>
-      {#if displayCards.length === 0}
-        <div class="empty">No cards available.</div>
-      {:else}
+    {#if displayCards.length > 0}
+      <section class="col">
+        <h4>Cards</h4>
         <div class="grid">
           {#each displayCards as item (item.key)}
             <div class={`cell ${soldKeys.has(item.key) ? 'dim sold' : ''}`}>
@@ -113,8 +111,8 @@
             </div>
           {/each}
         </div>
-      {/if}
-    </section>
+      </section>
+    {/if}
     <section class="col">
       <h4>Relics</h4>
       {#if displayRelics.length === 0}
