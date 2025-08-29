@@ -40,6 +40,16 @@ class ShinyPebble(RelicBase):
                 )
                 target.effect_manager.add_modifier(mod)
                 state["active"][id(target)] = (target, mod)
+                
+                # Track mitigation burst application
+                BUS.emit("relic_effect", "shiny_pebble", target, "mitigation_burst", int((mit_mult - 1) * 100), {
+                    "target": getattr(target, 'id', str(target)),
+                    "mitigation_multiplier": mit_mult,
+                    "base_mitigation": target.mitigation,
+                    "duration_turns": 1,
+                    "trigger": "first_hit",
+                    "stacks": stacks
+                })
 
             def _reset(*_) -> None:
                 for key, (member, mod) in list(state["active"].items()):

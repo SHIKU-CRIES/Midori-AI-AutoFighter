@@ -27,6 +27,17 @@ class FrostSigil(RelicBase):
             def _hit(attacker, target, amount, source_type="attack", source_name=None) -> None:
                 stacks = party.relics.count(self.id)
                 dmg = int(attacker.atk * 0.05)
+                
+                # Track frost sigil application
+                BUS.emit("relic_effect", "frost_sigil", attacker, "chill_applied", dmg, {
+                    "target": getattr(target, 'id', str(target)),
+                    "aftertaste_hits": stacks,
+                    "damage_per_hit": dmg,
+                    "atk_percentage": 5,
+                    "attacker_atk": attacker.atk,
+                    "trigger": "hit_landed"
+                })
+                
                 asyncio.create_task(
                     Aftertaste(base_pot=dmg, hits=stacks).apply(attacker, target)
                 )

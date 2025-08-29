@@ -43,6 +43,14 @@ class ParadoxHourglass(RelicBase):
                 )
                 entity.effect_manager.add_modifier(mod)
                 state["foe"][id(entity)] = mod
+                
+                # Track foe defense reduction
+                BUS.emit("relic_effect", "paradox_hourglass", entity, "defense_shredded", base_def - new_def, {
+                    "original_defense": base_def,
+                    "new_defense": new_def,
+                    "division_factor": div,
+                    "stacks": stacks
+                })
                 return
 
             if state.get("done"):
@@ -53,14 +61,31 @@ class ParadoxHourglass(RelicBase):
             if len(alive) <= 1:
                 return
             chance = 0.6 * (len(alive) - 1) / len(alive)
+            
+            # Track activation attempt
+            BUS.emit("relic_effect", "paradox_hourglass", party, "activation_attempt", int(chance * 100), {
+                "alive_count": len(alive),
+                "activation_chance": chance,
+                "max_sacrifices": min(stacks, 4, len(alive) - 1)
+            })
+            
             if random.random() >= chance:
                 return
+                
             kill_count = min(stacks, 4, len(alive) - 1)
             to_kill = random.sample(alive, kill_count)
+            
+            # Track sacrifices
             for m in to_kill:
+                BUS.emit("relic_effect", "paradox_hourglass", m, "ally_sacrificed", m.hp, {
+                    "sacrifice_count": kill_count,
+                    "ally_name": getattr(m, 'id', str(m))
+                })
                 m.hp = 0
+                
             survivors = [m for m in party.members if m.hp > 0]
             mult = 3 + (stacks - 1)
+            
             for m in survivors:
                 mod = create_stat_buff(
                     m,
@@ -80,6 +105,14 @@ class ParadoxHourglass(RelicBase):
                 m.effect_manager.add_modifier(mod)
                 m.hp = m.max_hp
                 state["buffs"][id(m)] = mod
+                
+                # Track survivor supercharging
+                BUS.emit("relic_effect", "paradox_hourglass", m, "survivor_supercharged", mult, {
+                    "multiplier": mult,
+                    "sacrifices_made": kill_count,
+                    "full_heal": True,
+                    "stats_affected": ["atk", "defense", "max_hp", "crit_rate", "crit_damage", "effect_hit_rate", "effect_resistance", "vitality", "mitigation"]
+                })
 
         def _battle_end(entity) -> None:
             from plugins.foes._base import FoeBase

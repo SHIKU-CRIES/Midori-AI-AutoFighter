@@ -24,7 +24,7 @@ class ElementalSpark(CardBase):
         await super().apply(party)
         chosen = {"member": None, "mod": None}
 
-        def _battle_start() -> None:
+        def _battle_start(entity) -> None:
             if not party.members:
                 return
             member = random.choice(party.members)

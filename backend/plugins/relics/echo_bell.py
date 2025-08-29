@@ -21,7 +21,7 @@ class EchoBell(RelicBase):
 
         used: set[int] = set()
 
-        def _battle_start() -> None:
+        def _battle_start(entity) -> None:
             used.clear()
 
         def _action(actor, target, amount) -> None:
@@ -43,7 +43,7 @@ class EchoBell(RelicBase):
 
             asyncio.create_task(target.apply_damage(dmg, attacker=actor))
 
-        BUS.subscribe("battle_start", lambda *_: _battle_start())
+        BUS.subscribe("battle_start", _battle_start)
         BUS.subscribe("action_used", _action)
 
     def describe(self, stacks: int) -> str:
