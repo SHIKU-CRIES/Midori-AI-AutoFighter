@@ -1,7 +1,9 @@
 import asyncio
 from dataclasses import dataclass
+import random
 
 from autofighter.effects import DamageOverTime
+from autofighter.stats import BUS
 from plugins import damage_effects
 from plugins.damage_types._base import DamageTypeBase
 
@@ -27,3 +29,39 @@ class Lightning(DamageTypeBase):
                 asyncio.create_task(
                     target.apply_damage(dmg, attacker=attacker, trigger_on_hit=False)
                 )
+
+    def ultimate(self, attacker, target) -> None:
+        mgr = getattr(target, "effect_manager", None)
+        if mgr is not None:
+            types = ["Fire", "Ice", "Wind", "Lightning", "Light", "Dark"]
+            dmg = int(getattr(attacker, "atk", 0) * 0.05)
+            for _ in range(10):
+                effect = damage_effects.create_dot(random.choice(types), dmg, attacker)
+                if effect is not None:
+                    mgr.add_dot(effect)
+
+        stacks = getattr(attacker, "_lightning_aftertaste_stacks", 0) + 1
+        attacker._lightning_aftertaste_stacks = stacks
+
+        if not hasattr(attacker, "_lightning_aftertaste_handler"):
+            def _hit(atk, tgt, amount, *_args) -> None:
+                if atk is attacker:
+                    from plugins.effects.aftertaste import Aftertaste
+
+                    asyncio.create_task(
+                        Aftertaste(
+                            hits=getattr(attacker, "_lightning_aftertaste_stacks", 0)
+                        ).apply(atk, tgt)
+                    )
+
+            def _clear(_):
+                BUS.unsubscribe("hit_landed", _hit)
+                BUS.unsubscribe("battle_end", _clear)
+                if hasattr(attacker, "_lightning_aftertaste_stacks"):
+                    delattr(attacker, "_lightning_aftertaste_stacks")
+                if hasattr(attacker, "_lightning_aftertaste_handler"):
+                    delattr(attacker, "_lightning_aftertaste_handler")
+
+            BUS.subscribe("hit_landed", _hit)
+            BUS.subscribe("battle_end", _clear)
+            attacker._lightning_aftertaste_handler = _hit
