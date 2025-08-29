@@ -10,6 +10,13 @@ from plugins import foes as foe_plugins
 from plugins import players as player_plugins
 from plugins.foes._base import FoeBase
 
+# Balance caps for foe stats to prevent runaway scaling
+FOE_MAX_CRIT_RATE: float = 0.12       # 12% max crit chance
+FOE_MAX_CRIT_DAMAGE: float = 2.5      # 250% max crit multiplier
+FOE_MAX_EFFECT_RESIST: float = 0.25   # 25% max effect resistance
+FOE_MAX_ACTIONS_PER_TURN: int = 1     # 1 action per turn
+FOE_MAX_ACTION_POINTS: int = 1        # start and cap at very low AP
+
 from ..mapgen import MapNode
 from ..party import Party
 from ..stats import Stats
@@ -90,6 +97,40 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
             obj.crit_damage = type(cd)(max(float(cd), 2.0))
     except Exception:
         pass
+
+    # Apply post-scale clamps specifically for foes to keep difficulty sane
+    if isinstance(obj, FoeBase):
+        try:
+            cr = getattr(obj, "crit_rate", None)
+            if isinstance(cr, (int, float)):
+                obj.crit_rate = float(min(max(0.0, cr), FOE_MAX_CRIT_RATE))
+        except Exception:
+            pass
+        try:
+            cd = getattr(obj, "crit_damage", None)
+            if isinstance(cd, (int, float)):
+                # keep at least 2.0 (200%), but cap high values aggressively
+                obj.crit_damage = float(min(max(2.0, cd), FOE_MAX_CRIT_DAMAGE))
+        except Exception:
+            pass
+        try:
+            er = getattr(obj, "effect_resistance", None)
+            if isinstance(er, (int, float)):
+                obj.effect_resistance = float(min(max(0.0, er), FOE_MAX_EFFECT_RESIST))
+        except Exception:
+            pass
+        try:
+            apt = getattr(obj, "actions_per_turn", None)
+            if isinstance(apt, (int, float)):
+                obj.actions_per_turn = int(min(max(1, int(apt)), FOE_MAX_ACTIONS_PER_TURN))
+        except Exception:
+            pass
+        try:
+            ap = getattr(obj, "action_points", None)
+            if isinstance(ap, (int, float)):
+                obj.action_points = int(min(max(0, int(ap)), FOE_MAX_ACTION_POINTS))
+        except Exception:
+            pass
 
     # Enforce a minimum defense value for foes so they are not trivially zeroed.
     try:

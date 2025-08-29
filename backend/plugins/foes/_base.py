@@ -63,10 +63,10 @@ class FoeBase(Stats):
     mitigation: float = 0.001
     regain: int = 1
     dodge_odds: float = 0
-    effect_resistance: float = 1.0
+    effect_resistance: float = 0.05
 
     vitality: float = 0.001
-    action_points: int = 1
+    action_points: int = 0
     damage_taken: int = 1
     damage_dealt: int = 1
     kills: int = 1

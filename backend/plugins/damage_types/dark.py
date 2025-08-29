@@ -82,6 +82,11 @@ class Dark(DamageTypeBase):
             pass
         return damage
 
+    # Per-stack damage multiplier for Darkness ultimate.
+    # Previously 1.75, which caused extreme exponential scaling.
+    # Adjust this value to tune balance without changing code below.
+    ULT_PER_STACK: float = 1.05
+
     async def ultimate(
         self,
         actor: Stats,
@@ -90,9 +95,9 @@ class Dark(DamageTypeBase):
     ) -> bool:
         """Strike six times, scaling with allied DoT stacks.
 
-        Damage is multiplied by ``1.75`` for every DoT stack present on the
-        ``allies`` list (including the ``actor``).  Each of the six hits emits a
-        ``damage`` event after applying damage.
+        Damage is multiplied by ``ULT_PER_STACK`` for every DoT stack present on
+        the ``allies`` list (including the ``actor``). Each of the six hits
+        emits a ``damage`` event after applying damage.
         """
 
         if not getattr(actor, "use_ultimate", lambda: False)():
@@ -108,7 +113,7 @@ class Dark(DamageTypeBase):
             else:
                 stacks += len(getattr(member, "dots", []))
 
-        multiplier = 1.75 ** stacks
+        multiplier = self.ULT_PER_STACK ** stacks
         dmg = int(actor.atk * multiplier)
         target = enemies[0]
         for _ in range(6):
