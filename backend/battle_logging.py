@@ -223,13 +223,8 @@ class BattleLogger:
         )
         self._log_event(event)
 
-        # Track entity
-        if hasattr(entity, 'level'):  # Likely a foe
-            if entity_id not in self.summary.foes:
-                self.summary.foes.append(entity_id)
-        else:  # Likely a party member
-            if entity_id not in self.summary.party_members:
-                self.summary.party_members.append(entity_id)
+        # Participant lists are set by the battle controller; avoid guessing here
+        # to prevent misclassification.
 
     def _on_damage_dealt(self, attacker, target, amount, source_type="attack", source_name=None, damage_type=None):
         """Handle damage dealt event."""
@@ -372,6 +367,10 @@ class BattleLogger:
             self.summary.damage_by_source["dot"] = {}
         self.summary.damage_by_source["dot"][attacker_id] = self.summary.damage_by_source["dot"].get(attacker_id, 0) + amount
 
+        # Fold DoT into headline totals
+        self.summary.total_damage_dealt[attacker_id] = self.summary.total_damage_dealt.get(attacker_id, 0) + amount
+        self.summary.total_damage_taken[target_id] = self.summary.total_damage_taken.get(target_id, 0) + amount
+
     def _on_hot_tick(self, healer, target, amount, hot_name=None, effect_details=None):
         """Handle HoT tick event."""
         healer_id = getattr(healer, 'id', str(healer)) if healer else None
@@ -397,6 +396,9 @@ class BattleLogger:
             if "hot" not in self.summary.healing_by_source:
                 self.summary.healing_by_source["hot"] = {}
             self.summary.healing_by_source["hot"][healer_id] = self.summary.healing_by_source["hot"].get(healer_id, 0) + amount
+
+            # Fold HoT into headline totals
+            self.summary.total_healing_done[healer_id] = self.summary.total_healing_done.get(healer_id, 0) + amount
 
     def _on_relic_effect(self, relic_name, entity, effect_type=None, amount=None, details=None):
         """Handle relic effect event."""
