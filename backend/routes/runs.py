@@ -191,7 +191,10 @@ async def update_party(run_id: str) -> tuple[str, int, dict[str, object]]:
 async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
     # Ensure run logging is initialized for this run (handles server restarts)
     try:
-        from battle_logging import get_current_run_logger, start_run_logging  # local import to avoid cycles
+        from battle_logging import (  # local import to avoid cycles
+            get_current_run_logger,
+        )
+        from battle_logging import start_run_logging  # local import to avoid cycles
         logger = get_current_run_logger()
         if logger is None or getattr(logger, 'run_id', None) != run_id:
             start_run_logging(run_id)

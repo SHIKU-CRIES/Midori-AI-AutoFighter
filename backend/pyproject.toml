@@ -21,6 +21,11 @@ build-backend = "setuptools.build_meta"
 where = ["."]
 include = ["autofighter", "plugins"]
 
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.15.0",
+]
+
 [project.optional-dependencies]
 windows-encryption = [
     "pysqlcipher3>=1.0.0; sys_platform == 'win32'",

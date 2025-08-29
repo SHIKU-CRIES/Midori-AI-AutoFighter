@@ -123,7 +123,7 @@ class DamageOverTime:
 
     async def tick(self, target: Stats, *_: object) -> bool:
         from autofighter.stats import BUS  # Import here to avoid circular imports
-        
+
         attacker = self.source or target
         dtype = getattr(self, "damage_type", None)
         if dtype is None:
@@ -141,14 +141,14 @@ class DamageOverTime:
         source_type = getattr(attacker, "damage_type", None)
         if source_type is not dtype:
             dmg = source_type.on_party_dot_damage_taken(dmg, attacker, target)
-            
+
         # Emit DoT tick event before applying damage
         BUS.emit("dot_tick", attacker, target, int(dmg), self.name, {
             "dot_id": self.id,
             "remaining_turns": self.turns - 1,
             "original_damage": self.damage
         })
-        
+
         await target.apply_damage(int(dmg), attacker=attacker)
         self.turns -= 1
         return self.turns > 0
@@ -166,7 +166,7 @@ class HealingOverTime:
 
     async def tick(self, target: Stats, *_: object) -> bool:
         from autofighter.stats import BUS  # Import here to avoid circular imports
-        
+
         healer = self.source or target
         dtype = getattr(self, "damage_type", None)
         if dtype is None:
@@ -176,14 +176,14 @@ class HealingOverTime:
         source_type = getattr(healer, "damage_type", None)
         if source_type is not dtype:
             heal = source_type.on_party_hot_heal_received(heal, healer, target)
-            
+
         # Emit HoT tick event before applying healing
         BUS.emit("hot_tick", healer, target, int(heal), self.name, {
             "hot_id": self.id,
             "remaining_turns": self.turns - 1,
             "original_healing": self.healing
         })
-        
+
         await target.apply_healing(int(heal), healer=healer)
         self.turns -= 1
         return self.turns > 0
@@ -219,7 +219,7 @@ class EffectManager:
                 return
         self.dots.append(effect)
         self.stats.dots.append(effect.id)
-        
+
         # Emit effect applied event
         BUS.emit("effect_applied", effect.name, self.stats, {
             "effect_type": "dot",
@@ -239,7 +239,7 @@ class EffectManager:
 
         self.hots.append(effect)
         self.stats.hots.append(effect.id)
-        
+
         # Emit effect applied event
         BUS.emit("effect_applied", effect.name, self.stats, {
             "effect_type": "hot",
@@ -255,7 +255,7 @@ class EffectManager:
 
         self.mods.append(effect)
         self.stats.mods.append(effect.id)
-        
+
         # Emit effect applied event
         BUS.emit("effect_applied", effect.name, self.stats, {
             "effect_type": "stat_modifier",
@@ -328,7 +328,7 @@ class EffectManager:
                     "effect_id": eff.id,
                     "expired_naturally": True
                 })
-                
+
                 collection.remove(eff)
                 if eff.id in names:
                     names.remove(eff.id)
@@ -346,7 +346,7 @@ class EffectManager:
                 "effect_id": mod.id,
                 "expired_naturally": True
             })
-            
+
             self.mods.remove(mod)
             if mod.id in self.stats.mods:
                 self.stats.mods.remove(mod.id)

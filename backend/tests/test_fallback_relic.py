@@ -83,17 +83,17 @@ def test_fallback_relic_logic():
 
 def test_fallback_relic_not_in_normal_drops():
     """Test that fallback relic does not appear in normal relic drops."""
-    from autofighter.relics import relic_choices
     from autofighter.party import Party
+    from autofighter.relics import relic_choices
     from plugins.players.player import Player
 
     # Create a party with no relics
     party = Party(members=[Player()], gold=100, relics=[], cards=[], rdr=1.0)
-    
+
     # Test multiple attempts to ensure fallback relic doesn't appear
     for star_level in [1, 2, 3, 4, 5]:
         relic_opts = relic_choices(party, star_level, count=10)  # Request many to increase chance
-        
+
         # Verify fallback relic is not in the options
         fallback_ids = [r.id for r in relic_opts if r.id == "fallback_essence"]
         assert len(fallback_ids) == 0, f"Fallback relic should not appear in normal {star_level}-star relic drops"

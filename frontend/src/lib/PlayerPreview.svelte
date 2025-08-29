@@ -5,15 +5,24 @@
    * Props:
    * - roster: array of character objects
    * - previewId: ID of character to display
+   * - overrideElement: optional element name to use for outline/glow color
    */
   export let roster = [];
   export let previewId;
+  export let overrideElement = '';
+  import { getElementColor } from './assetLoader.js';
 </script>
 
 <div class="preview">
   {#if previewId}
     {#each roster.filter(r => r.id === previewId) as sel}
-      <img src={sel.img} alt={sel.name} />
+      {#if sel}
+        <img
+          src={sel.img}
+          alt={sel.name}
+          style={`--outline: ${getElementColor(overrideElement || sel.element)};`}
+        />
+      {/if}
     {/each}
   {:else}
     <div class="placeholder">Select up to 4 allies</div>
@@ -38,10 +47,13 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  border: 3px solid #555;
+  border: 3px solid var(--outline, #555);
   background: #222;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.5),
+    0 0 18px color-mix(in srgb, var(--outline, #888) 65%, transparent),
+    0 0 36px color-mix(in srgb, var(--outline, #888) 35%, transparent);
   display: block;
   margin: 0 auto;
 }
