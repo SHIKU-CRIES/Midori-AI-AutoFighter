@@ -134,6 +134,30 @@ class ShopRoom(Room):
                     stock.remove(entry)
                     self.node.stock = stock
 
+        # Enrich stock entries with stacking-aware descriptions for relics
+        enriched_stock: list[dict[str, Any]] = []
+        try:
+            registry_map = relic_registry()
+        except Exception:
+            registry_map = {}
+        for s in stock:
+            if s.get("type") == "relic":
+                rid = s.get("id")
+                stacks = party.relics.count(rid)
+                about = None
+                try:
+                    cls = registry_map.get(rid)
+                    if cls is not None:
+                        about = cls().describe(stacks + 1)
+                except Exception:
+                    about = None
+                enriched = {**s, "stacks": stacks}
+                if about:
+                    enriched["about"] = about
+                enriched_stock.append(enriched)
+            else:
+                enriched_stock.append(dict(s))
+
         party_data = [_serialize(p) for p in party.members]
         return {
             "result": "shop",
@@ -142,7 +166,7 @@ class ShopRoom(Room):
             "relics": party.relics,
             "cards": party.cards,
             "rdr": party.rdr,
-            "stock": stock,
+            "stock": enriched_stock,
             "card": None,
             "foes": [],
         }

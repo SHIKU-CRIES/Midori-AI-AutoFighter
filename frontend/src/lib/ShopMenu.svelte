@@ -68,7 +68,12 @@
       return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, about: m.about || '' };
     } else if (entry.type === 'relic') {
       const m = relicMeta[entry.id] || {};
-      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, about: m.about || '' };
+      // Prefer server-provided about (stack-aware) when available
+      let about = entry.about || m.about || '';
+      if (typeof entry.stacks === 'number' && entry.stacks > 0) {
+        about = `${about} (Current stacks: ${entry.stacks})`;
+      }
+      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, about };
     }
     return entry;
   }
