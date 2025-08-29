@@ -42,3 +42,8 @@ when no cards are owned.
 - Guardian Shard – +2% DEF & +2% Mitigation
 - Sturdy Boots – +3% Dodge Odds & +3% DEF
 - Spiked Shield – +3% ATK & +3% DEF
+
+## 3★ Cards
+- Critical Overdrive – +255% ATK; while an ally has Critical Boost, they gain +10% Crit Rate and convert excess Crit Rate to +2% Crit Damage.
+- Iron Resurgence – +200% DEF & +200% HP; the first ally death revives at 10% HP and refreshes every 4 turns.
+- Arc Lightning – +255% ATK; every attack chains 50% damage to a random foe.
