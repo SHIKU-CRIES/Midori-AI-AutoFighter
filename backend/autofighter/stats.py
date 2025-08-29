@@ -443,10 +443,11 @@ class Stats:
         if amount > 0:
             self.hp = max(self.hp - amount, 0)
 
-        BUS.emit("damage_taken", self, attacker, original_amount)
+        # Use async emission for high-frequency damage events to reduce blocking
+        BUS.emit_batched("damage_taken", self, attacker, original_amount)
         if attacker is not None:
             attacker.damage_dealt += original_amount
-            BUS.emit("damage_dealt", attacker, self, original_amount, "attack", None, None, action_name)
+            BUS.emit_batched("damage_dealt", attacker, self, original_amount, "attack", None, None, action_name)
         return original_amount
 
     async def apply_healing(self, amount: int, healer: Optional["Stats"] = None) -> int:
@@ -501,9 +502,10 @@ class Stats:
             # Standard healing - cap at max HP
             self.hp = min(self.hp + amount, self.max_hp)
 
-        BUS.emit("heal_received", self, healer, amount)
+        # Use batched emission for high-frequency healing events
+        BUS.emit_batched("heal_received", self, healer, amount)
         if healer is not None:
-            BUS.emit("heal", healer, self, amount)
+            BUS.emit_batched("heal", healer, self, amount)
         return amount
 
     def enable_overheal(self) -> None:

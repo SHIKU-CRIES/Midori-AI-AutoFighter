@@ -64,7 +64,10 @@
       return;
     }
     // Ensure sync is not halted on load
-    if (typeof window !== 'undefined') window.afHaltSync = false;
+    if (typeof window !== 'undefined') {
+      window.afHaltSync = false;
+      window.afBattleActive = false; // Initialize battle state for ping indicator
+    }
     const saved = loadRunState();
     if (saved) {
       const data = await getMap(saved.runId);
@@ -96,7 +99,10 @@
   function handleRunEnd() {
     // Halt any in-flight battle snapshot polling ASAP
     haltSync = true;
-    if (typeof window !== 'undefined') window.afHaltSync = true;
+    if (typeof window !== 'undefined') {
+      window.afHaltSync = true;
+      window.afBattleActive = false; // Update battle state for ping indicator
+    }
     runId = '';
     roomData = null;
     nextRoom = '';
@@ -109,7 +115,10 @@
   function handleDefeat() {
     // Clear run state, go to main menu, and show a defeat popup
     haltSync = true;
-    if (typeof window !== 'undefined') window.afHaltSync = true;
+    if (typeof window !== 'undefined') {
+      window.afHaltSync = true;
+      window.afBattleActive = false; // Update battle state for ping indicator
+    }
     handleRunEnd();
     // Open a lightweight popup informing the player
     openOverlay('defeat');
@@ -117,7 +126,10 @@
 
   async function handleStart() {
     haltSync = false;
-    if (typeof window !== 'undefined') window.afHaltSync = false;
+    if (typeof window !== 'undefined') {
+      window.afHaltSync = false;
+      window.afBattleActive = false; // Initialize battle state
+    }
     const data = await startRun(selectedParty);
     runId = data.run_id;
     mapRooms = data.map.rooms || [];
@@ -340,9 +352,11 @@
         // Actively set a sensible type for header during combat
         if (!currentRoomType) currentRoomType = mapRooms?.[currentIndex]?.room_type || (endpoint.includes('boss') ? 'battle-boss-floor' : 'battle-normal');
         battleActive = true;
+        if (typeof window !== 'undefined') window.afBattleActive = true; // Update global state for ping indicator
         pollBattle();
       } else {
         battleActive = false;
+        if (typeof window !== 'undefined') window.afBattleActive = false; // Update global state for ping indicator
         stopBattlePoll();
         // Non-battle rooms that are immediately ready to advance (no choices)
         // should auto-advance to avoid getting stuck.
