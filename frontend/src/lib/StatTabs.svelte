@@ -23,7 +23,7 @@
   import { getElementIcon, getElementColor } from './assetLoader.js';
   import { createEventDispatcher } from 'svelte';
   import PlayerEditor from './PlayerEditor.svelte';
-  import { getPlayerConfig } from './api.js';
+  import { getPlayerConfig, savePlayerConfig } from './api.js';
 
   /**
    * Renders the stats panel with category tabs and a toggle control.
@@ -50,6 +50,22 @@
   let editorVals = null; // { pronouns, damageType, hp, attack, defense }
   let viewStats = {};    // stats object used for display (with overrides when player)
   let loadingEditorCfg = false;
+  let saveTimer = null;
+  function scheduleSave() {
+    if (!isPlayer || !editorVals) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      try {
+        await savePlayerConfig({
+          pronouns: editorVals.pronouns || '',
+          damage_type: editorVals.damageType || 'Light',
+          hp: Number(editorVals.hp) || 0,
+          attack: Number(editorVals.attack) || 0,
+          defense: Number(editorVals.defense) || 0,
+        });
+      } catch {}
+    }, 400);
+  }
 
   // Resolve selected entry and whether it's the Player
   $: previewChar = roster.find(r => r.id === previewId);
@@ -68,6 +84,7 @@
             attack: Number(cfg?.attack) || 0,
             defense: Number(cfg?.defense) || 0,
           };
+          try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
         } catch {
           // Fallback to preview runtime stats if config fetch fails
           editorVals = {
@@ -77,6 +94,7 @@
             attack: (previewChar.stats?.atk ?? 0),
             defense: (previewChar.stats?.defense ?? 0),
           };
+          try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
         } finally {
           loadingEditorCfg = false;
         }
@@ -176,9 +194,9 @@
         <span class="char-name">{sel.name}</span>
         <span class="char-level">Lv {sel.stats.level}</span>
         <svelte:component
-          this={getElementIcon(sel.element)}
+          this={getElementIcon((isPlayer && editorVals?.damageType) ? editorVals.damageType : sel.element)}
           class="type-icon"
-          style={`color: ${getElementColor(sel.element)}`}
+          style={`color: ${getElementColor((isPlayer && editorVals?.damageType) ? editorVals.damageType : sel.element)}`}
           aria-hidden="true" />
       </div>
       <div class="stats-list">
@@ -260,7 +278,7 @@
               hp={editorVals?.hp || 0}
               attack={editorVals?.attack || 0}
               defense={editorVals?.defense || 0}
-              on:change={(e) => editorVals = e.detail}
+              on:change={(e) => { editorVals = e.detail; if (isPlayer) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } scheduleSave(); }}
             />
           </div>
         {/if}

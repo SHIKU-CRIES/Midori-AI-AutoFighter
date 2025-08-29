@@ -1,8 +1,8 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { createEventDispatcher } from 'svelte';
   import { getPlayers } from './api.js';
-  import { getCharacterImage, getHourlyBackground, getRandomFallback } from './assetLoader.js';
+  import { getCharacterImage, getHourlyBackground, getRandomFallback, getElementColor } from './assetLoader.js';
   import MenuPanel from './MenuPanel.svelte';
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';
@@ -19,6 +19,86 @@
   // Label for the primary action; overlays set this to "Save Party" or "Start Run"
   export let actionLabel = 'Save Party';
   const dispatch = createEventDispatcher();
+  let previewElementOverride = '';
+  // Clear override when preview is not the player
+  $: {
+    const cur = roster.find(r => r.id === previewId);
+    if (!cur?.is_player) previewElementOverride = '';
+  }
+
+  // Starfield background tied to current preview element color
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+  function spawnStar(color) {
+    return {
+      left: Math.random() * 100,
+      size: rand(3, 6),
+      duration: rand(6, 14),
+      delay: rand(0, 6),
+      drift: rand(-20, 20),
+      color
+    };
+  }
+  function makeStars(count, color) {
+    return Array.from({ length: count }, () => spawnStar(color));
+  }
+  let density = 140;
+  let stars = [];
+  $: currentElementName = (() => {
+    const cur = roster.find(r => r.id === previewId);
+    const el = previewElementOverride || (cur && cur.element) || '';
+    return el ? String(el) : '';
+  })();
+  $: starColor = currentElementName ? (() => { try { return getElementColor(currentElementName); } catch { return ''; } })() : '';
+
+  // Global fade pulse helper
+  let fading = false;
+  function fadePulse(dur = 260, low = 0.25) {
+    // use CSS transition on .stars to dip opacity, then restore
+    fading = true;
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(() => { fading = false; }, dur);
+  }
+  let fadeTimer;
+
+  // Initialize stars once we have a color (delay spawn until element known)
+  $: if (stars.length === 0 && starColor) {
+    stars = makeStars(density, starColor);
+    fadePulse(260);
+  }
+
+  // Gradual color transition: on change, slowly replace existing stars
+  let lastStarColor = '';
+  let replaceTimer = null;
+  function startColorTransition(toColor) {
+    if (!toColor) return;
+    if (replaceTimer) clearInterval(replaceTimer);
+    fadePulse(260);
+    // Replace a small batch every tick for a smooth transition
+    const batch = Math.max(3, Math.floor(density * 0.05));
+    let remaining = Math.floor(density * 0.9); // keep some old ones briefly
+    replaceTimer = setInterval(() => {
+      for (let i = 0; i < batch; i++) {
+        const idx = Math.floor(Math.random() * stars.length);
+        stars[idx] = spawnStar(toColor);
+      }
+      // Reassign to trigger Svelte reactivity on array mutation
+      stars = stars.slice();
+      remaining -= batch;
+      if (remaining <= 0) {
+        clearInterval(replaceTimer);
+        replaceTimer = null;
+      }
+    }, 220);
+  }
+  $: if (starColor && lastStarColor && starColor !== lastStarColor) {
+    startColorTransition(starColor);
+  }
+  $: lastStarColor = starColor;
+
+  onDestroy(() => {
+    if (replaceTimer) clearInterval(replaceTimer);
+    if (fadeTimer) clearTimeout(fadeTimer);
+  });
 
   onMount(async () => {
     background = getHourlyBackground();
@@ -72,10 +152,25 @@
 {:else}
   <MenuPanel style={`background-image: url(${background}); background-size: cover;`}>
     <div class="full" data-testid="party-picker">
+      <!-- Starfield background layer (behind content) -->
+      <div class="stars" aria-hidden="true" style={`opacity:${fading ? 0.25 : 0.55}`}> 
+        {#each stars as s}
+          <span class="star" style={`--x:${s.left}%; --s:${s.size}px; --d:${s.duration}s; --delay:${s.delay}s; --dx:${s.drift}px; --c:${s.color};`}>
+            <span class="core"></span>
+          </span>
+        {/each}
+      </div>
       <PartyRoster {roster} {selected} bind:previewId {reducedMotion} on:toggle={(e) => toggleMember(e.detail)} />
-      <PlayerPreview {roster} {previewId} />
+      <PlayerPreview {roster} {previewId} overrideElement={previewElementOverride} />
       <div class="right-col">
-        <StatTabs {roster} {previewId} {selected} on:toggle={(e) => toggleMember(e.detail)} />
+        <StatTabs {roster} {previewId} {selected}
+          on:toggle={(e) => toggleMember(e.detail)}
+          on:preview-element={(e) => {
+            previewElementOverride = e.detail.element;
+            // Also update the player's element in the roster so the left list reflects it
+            roster = roster.map(r => r.is_player ? { ...r, element: e.detail.element } : r);
+          }}
+        />
         <div class="party-actions-inline">
           <button class="wide" on:click={() => dispatch('save')}>{actionLabel}</button>
           <button class="wide" on:click={() => dispatch('cancel')}>Cancel</button>
@@ -94,8 +189,70 @@
     max-width: 100%;
     max-height: 98%;
     /* allow internal scrolling instead of clipping when content grows */
+    position: relative;
+    z-index: 0; /* establish stacking context so stars can sit behind */
   }
   .right-col { display: flex; flex-direction: column; min-height: 0; }
   .party-actions-inline { display:flex; gap:0.5rem; margin-top: 0.5rem; }
   .party-actions-inline .wide { flex: 1; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.5); color:#fff; padding: 0.45rem 0.8rem; }
+
+  /* Falling starfield */
+  .stars { position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:-1; opacity: 0.55; transition: opacity 220ms ease; }
+  /* Parent handles vertical fall + opacity */
+  .star {
+    position: absolute;
+    top: -10%;
+    left: var(--x);
+    width: 0;  /* visuals live in .core */
+    height: 0; /* prevents layout shifts */
+    animation-name: af-fallTop;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-duration: var(--d);
+    animation-delay: var(--delay);
+  }
+  /* Child handles horizontal drift and the visual shape */
+  .star .core {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--s);
+    height: var(--s);
+    background: radial-gradient(circle, var(--c) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--c) 70%, transparent));
+    animation-name: af-drift;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-duration: var(--d);
+    animation-delay: var(--delay);
+  }
+  .star .core::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(var(--s) * -8);
+    width: calc(max(2px, var(--s) * 0.4));
+    height: calc(var(--s) * 10);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--c) 75%, transparent) 0%, transparent 70%);
+    filter: blur(1px);
+  }
+  @keyframes af-fallTop {
+    0% { top: -10%; opacity: 0.0; }
+    10% { opacity: 1.0; }
+    90% { opacity: 1.0; }
+    100% { top: 110%; opacity: 0.0; }
+  }
+  @keyframes af-drift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(var(--dx)); }
+  }
+
+  /* Respect reduced motion */
+  :global(html.reduced-motion) .stars .star,
+  :global(body.reduced-motion) .stars .star { animation: none; opacity: 0.35; top: 15%; }
+  :global(html.reduced-motion) .stars .star .core,
+  :global(body.reduced-motion) .stars .star .core { animation: none; }
+</style>
 </style>
