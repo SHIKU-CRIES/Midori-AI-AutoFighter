@@ -4,6 +4,7 @@
   import RewardCard from './RewardCard.svelte';
   import CurioChoice from './CurioChoice.svelte';
   import { getElementColor } from './assetLoader.js';
+  import { getBattleSummary } from './runApi.js';
 
   export let runId = '';
   export let battleIndex = 0;
@@ -17,14 +18,35 @@
 
   const elements = ['Generic', 'Light', 'Dark', 'Wind', 'Lightning', 'Fire', 'Ice'];
 
+  // Prefer room-provided ids; if no bar data is available for them, fall back
+  // to the ids present in the fetched summary to ensure graphs are shown.
+  let partyDisplay = [];
+  let foesDisplay = [];
+  $: partyDisplay = (party && party.length ? party : (summary.party_members || []));
+  $: foesDisplay = (foes && foes.length ? foes : (summary.foes || []));
+
   onMount(async () => {
     if (!runId || !battleIndex) return;
-    try {
-      const res = await fetch(`/run/${runId}/battles/${battleIndex}/summary`);
-      summary = await res.json();
-    } catch (err) {
-      console.error('Failed to load summary', err);
+    let cancelled = false;
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    async function loadWithRetry() {
+      for (let attempt = 0; attempt < 10 && !cancelled; attempt++) {
+        try {
+          const res = await getBattleSummary(runId, battleIndex);
+          summary = res || { damage_by_type: {} };
+          return;
+        } catch (err) {
+          // 404 is expected briefly while the backend writes logs
+          if (err?.status !== 404) {
+            console.warn('Battle summary fetch failed', err?.message || err);
+            return;
+          }
+        }
+        await sleep(attempt < 5 ? 400 : 800);
+      }
     }
+    loadWithRetry();
+    return () => { cancelled = true; };
   });
 
   function barData(id) {
@@ -44,6 +66,15 @@
 
   function handleSelect(e) {
     dispatch('select', e.detail);
+  }
+
+  // If no bars for provided ids but summary has data for others, switch display ids
+  $: {
+    const hasAnyBars = (ids) => Array.isArray(ids) && ids.some((id) => barData(id).length > 0);
+    const summaryParty = summary?.party_members || [];
+    const summaryFoes = summary?.foes || [];
+    if (!hasAnyBars(partyDisplay) && hasAnyBars(summaryParty)) partyDisplay = summaryParty;
+    if (!hasAnyBars(foesDisplay) && hasAnyBars(summaryFoes)) foesDisplay = summaryFoes;
   }
 </script>
 
@@ -89,7 +120,7 @@
 
 <div class="layout">
   <div class="side">
-    {#each party as member}
+    {#each partyDisplay as member}
       <div class="combatant">
         <FighterPortrait
           fighter={{ id: member, element: primaryElement(member), hp: 1, max_hp: 1 }}
@@ -122,7 +153,7 @@
     {/if}
   </div>
   <div class="side">
-    {#each foes as foe}
+    {#each foesDisplay as foe}
       <div class="combatant">
         <FighterPortrait
           fighter={{ id: foe, element: primaryElement(foe), hp: 1, max_hp: 1 }}
@@ -139,4 +170,3 @@
     {/each}
   </div>
 </div>
-

@@ -70,9 +70,9 @@ export function rewardOpen(roomData, _battleActive) {
   if (!roomData) return false;
   const hasCards = (roomData?.card_choices?.length || 0) > 0;
   const hasRelics = (roomData?.relic_choices?.length || 0) > 0;
-  const hasLootItems = (roomData?.loot?.items?.length || 0) > 0;
-  const hasLootGold = (roomData?.loot?.gold || 0) > 0;
-  return Boolean(hasCards || hasRelics || hasLootItems || hasLootGold);
+  // Only open the reward overlay for selectable choices (cards/relics).
+  // Loot items/gold are displayed via floating messages, not as a blocking popup.
+  return Boolean(hasCards || hasRelics);
 }
 
 let gameAudio;

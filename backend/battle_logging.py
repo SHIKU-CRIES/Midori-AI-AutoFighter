@@ -886,6 +886,14 @@ class RunLogger:
             base_logs_path = Path(__file__).resolve().parent / "logs"
         self.run_path = base_logs_path / "runs" / run_id
         self.run_path.mkdir(parents=True, exist_ok=True)
+        # Determine next battle index by scanning existing battle folders (survive restarts)
+        battles_root = self.run_path / "battles"
+        battles_root.mkdir(parents=True, exist_ok=True)
+        try:
+            existing = [int(p.name) for p in battles_root.iterdir() if p.is_dir() and p.name.isdigit()]
+            self.battle_count = max(existing) if existing else 0
+        except Exception:
+            self.battle_count = 0
 
     def start_battle(self) -> BattleLogger:
         """Start logging a new battle."""

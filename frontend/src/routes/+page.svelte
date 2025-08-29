@@ -239,14 +239,7 @@
           if (snap?.ended && snap?.result === 'defeat') {
             handleDefeat();
           }
-          // Auto-advance when there are no rewards to pick and the backend
-          // indicates the run is awaiting the next room.
-          try {
-            const noChoices = ((roomData?.card_choices?.length || 0) === 0) && ((roomData?.relic_choices?.length || 0) === 0);
-            if (!rewardsReady && noChoices && roomData?.awaiting_next && runId) {
-              await handleNextRoom();
-            }
-          } catch {}
+          // Do not auto-advance; show Battle Review popup after rewards.
           return;
         }
       }
@@ -318,15 +311,7 @@
           stopBattlePoll();
           return;
         }
-        // If the backend indicates we are ready to advance and there are no
-        // choices to make, immediately advance instead of idling.
-        try {
-          const noChoices = ((data?.card_choices?.length || 0) === 0) && ((data?.relic_choices?.length || 0) === 0);
-          if (data?.awaiting_next && noChoices && runId) {
-            await handleNextRoom();
-            return;
-          }
-        } catch {}
+        // Do not auto-advance; allow Battle Review popup to appear.
         const noFoes = !Array.isArray(data?.foes) || data.foes.length === 0;
         if (noFoes) {
           // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
@@ -374,14 +359,8 @@
         if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
         if (snap.current_room) currentRoomType = snap.current_room;
         saveRunState(runId, nextRoom);
-        // If we're simply not ready yet (common 400s), avoid noisy overlays and
-        // auto-advance when appropriate.
-        const noChoices = ((snap?.card_choices?.length || 0) === 0) && ((snap?.relic_choices?.length || 0) === 0);
+        // Avoid noisy overlays on transient 400s.
         const simpleRecoverable = (e?.status === 400) || /not ready|awaiting next|invalid room/i.test(String(e?.message || ''));
-        if (snap?.awaiting_next && noChoices && runId) {
-          try { await handleNextRoom(); } catch { /* ignore */ }
-          return;
-        }
         if (!simpleRecoverable) {
           openOverlay('error', {
             message: 'Failed to enter room. Restored latest battle state.',
@@ -412,12 +391,7 @@
     if (res && res.next_room) {
       nextRoom = res.next_room;
     }
-    // If all selectable rewards are consumed, advance automatically
-    const hasCards = (roomData?.card_choices?.length || 0) > 0;
-    const hasRelics = (roomData?.relic_choices?.length || 0) > 0;
-    if (!hasCards && !hasRelics) {
-      await handleNextRoom();
-    }
+    // Do not auto-advance; show Battle Review popup next.
   }
   async function handleShopBuy(item) {
     if (!runId) return;

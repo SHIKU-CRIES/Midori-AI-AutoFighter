@@ -105,3 +105,29 @@ export async function chooseRelic(runId, relicId) {
     body: JSON.stringify({ relic: relicId })
   });
 }
+
+export async function getBattleSummary(runId, index) {
+  // Use the backend API base; 404 is expected if summary not yet written
+  const url = `${API_BASE}/run/${runId}/battles/${index}/summary`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.status === 404) {
+      const err = new Error('summary not found');
+      err.status = 404;
+      err.overlayShown = true; // prevent global error overlay
+      throw err;
+    }
+    if (!res.ok) {
+      let data;
+      try { data = await res.json(); } catch {}
+      const message = data?.message || `HTTP error ${res.status}`;
+      const err = new Error(message);
+      err.status = res.status;
+      err.overlayShown = true;
+      throw err;
+    }
+    return res.json();
+  } catch (e) {
+    throw e;
+  }
+}

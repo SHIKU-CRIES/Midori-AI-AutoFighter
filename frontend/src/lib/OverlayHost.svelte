@@ -12,6 +12,7 @@
   import PullsMenu from './PullsMenu.svelte';
   import CraftingMenu from './CraftingMenu.svelte';
   import BattleReview from './BattleReview.svelte';
+  import RewardOverlay from './RewardOverlay.svelte';
   import PlayerEditor from './PlayerEditor.svelte';
   import InventoryPanel from './InventoryPanel.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
@@ -42,6 +43,10 @@
   // Floating loot messages are suppressed after first display via `lootConsumed`,
   // but the overlay should remain visible until the player advances.
   $: rewardOpen = computeRewardOpen(roomData, battleActive);
+  // Review should display after a battle finishes, once reward choices (if any) are done.
+  $: reviewOpen = Boolean(
+    roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive
+  );
 
   // Hint to pause battle snapshot polling globally while rewards are open
   $: {
@@ -181,6 +186,27 @@
 {#if rewardOpen}
   <OverlaySurface zIndex={1100}>
     <PopupWindow
+      title={(roomData?.card_choices?.length || 0) > 0 ? 'Choose a Card' : 'Choose a Relic'}
+      maxWidth="880px"
+      maxHeight="95vh"
+      zIndex={1100}
+      on:close={() => { /* block closing while choices remain */ }}
+    >
+      <RewardOverlay
+        cards={roomData.card_choices || []}
+        relics={roomData.relic_choices || []}
+        items={[]}
+        gold={0}
+        on:select={(e) => dispatch('rewardSelect', e.detail)}
+        on:next={() => dispatch('nextRoom')}
+      />
+    </PopupWindow>
+  </OverlaySurface>
+{/if}
+
+{#if reviewOpen && !rewardOpen}
+  <OverlaySurface zIndex={1100}>
+    <PopupWindow
       title="Battle Review"
       maxWidth="880px"
       maxHeight="95vh"
@@ -192,10 +218,12 @@
         battleIndex={roomData?.battle_index || 0}
         party={(roomData?.party || []).map((p) => p.id)}
         foes={(roomData?.foes || []).map((f) => f.id)}
-        cards={roomData.card_choices || []}
-        relics={roomData.relic_choices || []}
-        on:select={(e) => dispatch('rewardSelect', e.detail)}
+        cards={[]}
+        relics={[]}
       />
+      <div class="stained-glass-row" style="justify-content: flex-end; margin-top: 0.75rem;">
+        <button class="icon-btn" on:click={() => dispatch('nextRoom')}>Next Room</button>
+      </div>
     </PopupWindow>
   </OverlaySurface>
 {/if}
@@ -226,7 +254,7 @@
   </OverlaySurface>
 {/if}
 
-{#if roomData && (roomData.result === 'battle' || roomData.result === 'boss') && (battleActive || rewardOpen)}
+{#if roomData && (roomData.result === 'battle' || roomData.result === 'boss') && (battleActive || rewardOpen || reviewOpen)}
   <div class="overlay-inset">
     <BattleView
       {runId}
