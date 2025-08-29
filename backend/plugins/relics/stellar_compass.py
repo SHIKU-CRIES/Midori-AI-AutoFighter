@@ -37,7 +37,7 @@ class StellarCompass(RelicBase):
                 attacker.effect_manager.add_modifier(mod)
                 old_gold_rate = state["gold"]
                 state["gold"] += 0.015 * copies
-                
+
                 # Track critical hit buff application
                 BUS.emit("relic_effect", "stellar_compass", attacker, "crit_buff_applied", amount, {
                     "target": getattr(target, 'id', str(target)),
@@ -52,7 +52,7 @@ class StellarCompass(RelicBase):
                 if state["gold"] > 0:
                     bonus_gold = int(amount * state["gold"])
                     party.gold += bonus_gold
-                    
+
                     # Track bonus gold generation
                     BUS.emit("relic_effect", "stellar_compass", party, "bonus_gold_earned", bonus_gold, {
                         "base_gold": amount,

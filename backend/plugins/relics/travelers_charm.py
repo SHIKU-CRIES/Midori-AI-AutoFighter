@@ -32,7 +32,7 @@ class TravelersCharm(RelicBase):
             bmit = 10 * stacks
             pd, pm = pending.get(pid, (0, 0))
             pending[pid] = (pd + bdef, pm + bmit)
-            
+
             # Track hit reaction
             BUS.emit("relic_effect", "travelers_charm", target, "hit_reaction", amount, {
                 "target": getattr(target, 'id', str(target)),
@@ -59,7 +59,7 @@ class TravelersCharm(RelicBase):
                 member.effect_manager.add_modifier(mod)
                 active[pid] = (member, mod)
                 applied_count += 1
-                
+
                 # Track buff application
                 BUS.emit("relic_effect", "travelers_charm", member, "defensive_buff_applied", bdef + bmit, {
                     "ally": getattr(member, 'id', str(member)),
@@ -68,7 +68,7 @@ class TravelersCharm(RelicBase):
                     "duration_turns": 1,
                     "triggered_by": "previous_hits"
                 })
-            
+
             pending.clear()
 
         def _turn_end() -> None:

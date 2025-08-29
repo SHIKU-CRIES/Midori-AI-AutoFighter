@@ -31,7 +31,7 @@ class EchoingDrum(RelicBase):
             used.add(pid)
             stacks = party.relics.count(self.id)
             dmg = int(amount * 0.25 * stacks)
-            
+
             # Emit relic effect event for echo attack
             BUS.emit("relic_effect", "echoing_drum", attacker, "echo_attack", dmg, {
                 "original_amount": amount,
@@ -40,7 +40,7 @@ class EchoingDrum(RelicBase):
                 "first_attack": True,
                 "stacks": stacks
             })
-            
+
             asyncio.create_task(target.apply_damage(dmg, attacker=attacker))
 
         BUS.subscribe("battle_start", _battle_start)
