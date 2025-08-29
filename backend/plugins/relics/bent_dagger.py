@@ -18,13 +18,31 @@ class BentDagger(RelicBase):
 
     def apply(self, party) -> None:
         super().apply(party)
+        
+        stacks = party.relics.count(self.id)
 
         def _on_death(target, attacker, amount) -> None:
             if target in party.members or target.hp > 0:
                 return
+            
+            # Track the kill trigger
+            BUS.emit("relic_effect", "bent_dagger", attacker, "foe_killed", amount, {
+                "target": getattr(target, 'id', str(target)),
+                "permanent_atk_boost": 1,
+                "stacks": stacks,
+                "base_atk_bonus": 3 * stacks
+            })
+            
             for member in party.members:
                 mod = create_stat_buff(member, name=f"{self.id}_kill", atk_mult=1.01, turns=9999)
                 member.effect_manager.add_modifier(mod)
+                
+                # Track the ATK buff application
+                BUS.emit("relic_effect", "bent_dagger", member, "atk_boost_applied", 1, {
+                    "boost_percentage": 1,
+                    "permanent": True,
+                    "triggered_by_kill": True
+                })
 
         BUS.subscribe("damage_taken", _on_death)
 

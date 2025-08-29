@@ -23,16 +23,38 @@ class WoodenIdol(RelicBase):
         active: dict[int, tuple[PlayerBase, float]] = {}
 
         def _resisted(member) -> None:
+            if member not in party.members:
+                return
             pid = id(member)
-            pending[pid] = pending.get(pid, 0) + 0.01
+            bonus = 0.01 * party.relics.count(self.id)
+            pending[pid] = pending.get(pid, 0) + bonus
+            
+            # Track debuff resistance
+            BUS.emit("relic_effect", "wooden_idol", member, "debuff_resisted", int(bonus * 100), {
+                "ally": getattr(member, 'id', str(member)),
+                "resistance_bonus_next_turn": bonus * 100,
+                "total_pending_bonus": pending[pid] * 100,
+                "stacks": party.relics.count(self.id)
+            })
 
         def _turn_start() -> None:
+            applied_count = 0
             for pid, bonus in list(pending.items()):
                 member = next((m for m in party.members if id(m) == pid), None)
                 if member is None:
                     continue
                 member.effect_resistance += bonus
                 active[pid] = (member, bonus)
+                applied_count += 1
+                
+                # Track resistance buff application
+                BUS.emit("relic_effect", "wooden_idol", member, "resistance_buff_applied", int(bonus * 100), {
+                    "ally": getattr(member, 'id', str(member)),
+                    "resistance_bonus": bonus * 100,
+                    "new_total_resistance": member.effect_resistance * 100,
+                    "duration_turns": 1
+                })
+            
             pending.clear()
 
         def _turn_end() -> None:

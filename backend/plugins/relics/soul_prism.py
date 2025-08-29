@@ -31,9 +31,11 @@ class SoulPrism(RelicBase):
 
             if not isinstance(entity, FoeBase):
                 return
+            revived_count = 0
             for member in party.members:
                 if member.hp > 0:
                     continue
+                revived_count += 1
                 base = getattr(member, "_soul_prism_hp", member.max_hp)
                 member._soul_prism_hp = base
                 mod_id = f"{self.id}_{id(member)}"
@@ -57,7 +59,28 @@ class SoulPrism(RelicBase):
                 )
                 member.effect_manager.add_modifier(mod)
                 heal = max(1, int(member.max_hp * 0.01))
+                
+                # Track the revival
+                BUS.emit("relic_effect", "soul_prism", member, "ally_revived", heal, {
+                    "ally": getattr(member, 'id', str(member)),
+                    "max_hp_penalty": penalty * 100,
+                    "defense_buff": buff * 100,
+                    "mitigation_buff": buff * 100,
+                    "revival_hp": heal,
+                    "revival_hp_percentage": 1,
+                    "stacks": stacks
+                })
+                
                 asyncio.create_task(member.apply_healing(heal))
+            
+            # Track revival summary if any allies were revived
+            if revived_count > 0:
+                BUS.emit("relic_effect", "soul_prism", party, "battle_revival_summary", revived_count, {
+                    "allies_revived": revived_count,
+                    "max_hp_penalty": penalty * 100,
+                    "buffs_applied": ["defense", "mitigation"],
+                    "buff_percentage": buff * 100
+                })
 
         BUS.subscribe("battle_end", _battle_end)
 

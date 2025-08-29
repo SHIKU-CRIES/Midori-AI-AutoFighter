@@ -300,6 +300,64 @@
     padding: 0.1rem 0.3rem;
     border-radius: 2px;
   }
+  .new-badge {
+    font-size: 0.6rem;
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.2);
+    padding: 0.1rem 0.25rem;
+    border-radius: 2px;
+    margin-left: 0.25rem;
+    border: 1px solid rgba(74, 222, 128, 0.3);
+  }
+  .new-feature-badge {
+    font-size: 0.65rem;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.2);
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    margin-left: 0.5rem;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    font-weight: 600;
+    text-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
+  }
+  .detail-section {
+    margin-top: 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 0.5rem;
+  }
+  .detail-title {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-bottom: 0.35rem;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.25rem;
+  }
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.2rem 0.4rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .detail-name {
+    font-size: 0.7rem;
+    color: #ccc;
+    font-weight: 500;
+  }
+  .detail-stats {
+    font-size: 0.65rem;
+    color: #999;
+    font-weight: 600;
+  }
 </style>
 
 <div class="layout review">
@@ -489,10 +547,16 @@
       <div>Duration: {summary?.duration_seconds ? Math.round(summary.duration_seconds) + 's' : '—'}</div>
       <div>Events: {fmt(summary?.event_count || (events?.length || 0))}</div>
       {#if summary?.relic_effects && Object.keys(summary.relic_effects).length > 0}
-        <div>Relic Effects: {Object.values(summary.relic_effects).reduce((a, b) => a + b, 0)}</div>
+        <div>Relic Effects: {Object.values(summary.relic_effects).reduce((a, b) => a + b, 0)} <span class="new-badge">NEW</span></div>
       {/if}
       {#if summary?.card_effects && Object.keys(summary.card_effects).length > 0}
-        <div>Card Effects: {Object.values(summary.card_effects).reduce((a, b) => a + b, 0)}</div>
+        <div>Card Effects: {Object.values(summary.card_effects).reduce((a, b) => a + b, 0)} <span class="new-badge">NEW</span></div>
+      {/if}
+      {#if summary?.critical_hits && Object.keys(summary.critical_hits).length > 0}
+        <div>Criticals: {Object.values(summary.critical_hits).reduce((a, b) => a + b, 0)}</div>
+      {/if}
+      {#if summary?.shield_absorbed && Object.keys(summary.shield_absorbed).length > 0}
+        <div>Shields: {Object.values(summary.shield_absorbed).reduce((a, b) => a + b, 0)} absorbed</div>
       {/if}
       <span class="spacer"></span>
       <button class="mini-btn" on:click={toggleEvents}>{showEvents ? 'Hide' : 'Show'} Event Log</button>
@@ -511,14 +575,16 @@
       </div>
     {/if}
     
-    <!-- Relic and Card Effects Summary -->
+    <!-- Enhanced Relic and Card Effects Summary -->
     {#if (summary?.relic_effects && Object.keys(summary.relic_effects).length > 0) || (summary?.card_effects && Object.keys(summary.card_effects).length > 0)}
       <div class="effects-summary">
-        <div class="effects-header">Effects Summary</div>
+        <div class="effects-header">
+          🔮 Effects Summary <span class="new-feature-badge">NEW FEATURE</span>
+        </div>
         <div class="effects-grid">
           {#if summary?.relic_effects && Object.keys(summary.relic_effects).length > 0}
             <div class="effects-column">
-              <div class="effects-column-title">Relic Effects</div>
+              <div class="effects-column-title">🗿 Relic Effects</div>
               {#each Object.entries(summary.relic_effects).sort((a, b) => b[1] - a[1]) as [relicName, count]}
                 <div class="effect-item">
                   <span class="effect-name">{relicName}</span>
@@ -529,7 +595,7 @@
           {/if}
           {#if summary?.card_effects && Object.keys(summary.card_effects).length > 0}
             <div class="effects-column">
-              <div class="effects-column-title">Card Effects</div>
+              <div class="effects-column-title">🃏 Card Effects</div>
               {#each Object.entries(summary.card_effects).sort((a, b) => b[1] - a[1]) as [cardName, count]}
                 <div class="effect-item">
                   <span class="effect-name">{cardName}</span>
@@ -539,6 +605,68 @@
             </div>
           {/if}
         </div>
+        
+        <!-- Additional detailed tracking information -->
+        {#if summary?.critical_hits && Object.keys(summary.critical_hits).length > 0}
+          <div class="detail-section">
+            <div class="detail-title">⚡ Critical Hits Analysis</div>
+            <div class="detail-grid">
+              {#each Object.entries(summary.critical_hits).sort((a, b) => b[1] - a[1]) as [entity, crits]}
+                <div class="detail-item">
+                  <span class="detail-name">{entity}</span>
+                  <span class="detail-stats">
+                    {crits} crits
+                    {#if summary?.critical_damage?.[entity]}
+                      ({fmt(summary.critical_damage[entity])} dmg)
+                    {/if}
+                  </span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+        
+        {#if summary?.shield_absorbed && Object.keys(summary.shield_absorbed).length > 0}
+          <div class="detail-section">
+            <div class="detail-title">🛡️ Shield Protection</div>
+            <div class="detail-grid">
+              {#each Object.entries(summary.shield_absorbed).sort((a, b) => b[1] - a[1]) as [entity, absorbed]}
+                <div class="detail-item">
+                  <span class="detail-name">{entity}</span>
+                  <span class="detail-stats">{fmt(absorbed)} absorbed</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+        
+        {#if summary?.dot_damage && Object.keys(summary.dot_damage).length > 0}
+          <div class="detail-section">
+            <div class="detail-title">🔥 DoT Damage</div>
+            <div class="detail-grid">
+              {#each Object.entries(summary.dot_damage).sort((a, b) => b[1] - a[1]) as [entity, damage]}
+                <div class="detail-item">
+                  <span class="detail-name">{entity}</span>
+                  <span class="detail-stats">{fmt(damage)} DoT dmg</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+        
+        {#if summary?.hot_healing && Object.keys(summary.hot_healing).length > 0}
+          <div class="detail-section">
+            <div class="detail-title">💚 HoT Healing</div>
+            <div class="detail-grid">
+              {#each Object.entries(summary.hot_healing).sort((a, b) => b[1] - a[1]) as [entity, healing]}
+                <div class="detail-item">
+                  <span class="detail-name">{entity}</span>
+                  <span class="detail-stats">{fmt(healing)} HoT heal</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
     {/if}
   </div>
