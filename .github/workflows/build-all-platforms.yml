@@ -61,9 +61,7 @@ jobs:
       - name: Build backend executable
         working-directory: backend
         run: |
-          $dataArgs = "--add-data ../frontend/build;frontend"
-          $cmd = "uv run pyinstaller --onefile $dataArgs --clean --name midori-autofighter-${{ matrix.variant }}-windows app.py"
-          Invoke-Expression $cmd
+          uv run pyinstaller --onefile --add-data "../frontend/build;frontend" --clean --name "midori-autofighter-${{ matrix.variant }}-windows" app.py
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
