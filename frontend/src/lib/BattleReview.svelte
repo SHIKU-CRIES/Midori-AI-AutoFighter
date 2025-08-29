@@ -667,6 +667,52 @@
             </div>
           </div>
         {/if}
+        
+        {#if summary?.resources_spent && Object.keys(summary.resources_spent).length > 0}
+          <div class="detail-section">
+            <div class="detail-title">💰 Resource Usage</div>
+            <div class="detail-grid">
+              {#each Object.entries(summary.resources_spent) as [entity, resources]}
+                <div class="detail-item">
+                  <span class="detail-name">{entity}</span>
+                  <span class="detail-stats">
+                    {#each Object.entries(resources) as [type, amount]}
+                      {type}: {fmt(amount)}
+                    {/each}
+                  </span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+        
+        {#if summary?.temporary_hp_granted && Object.keys(summary.temporary_hp_granted).length > 0}
+          <div class="detail-section">
+            <div class="detail-title">🆙 Temporary HP</div>
+            <div class="detail-grid">
+              {#each Object.entries(summary.temporary_hp_granted).sort((a, b) => b[1] - a[1]) as [entity, tempHp]}
+                <div class="detail-item">
+                  <span class="detail-name">{entity}</span>
+                  <span class="detail-stats">{fmt(tempHp)} temp HP</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+        
+        {#if summary?.effect_applications && Object.keys(summary.effect_applications).length > 0}
+          <div class="detail-section">
+            <div class="detail-title">✨ Effect Applications</div>
+            <div class="detail-grid">
+              {#each Object.entries(summary.effect_applications).sort((a, b) => b[1] - a[1]).slice(0, 8) as [effect, count]}
+                <div class="detail-item">
+                  <span class="detail-name">{effect}</span>
+                  <span class="detail-stats">×{count}</span>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
       </div>
     {/if}
   </div>
