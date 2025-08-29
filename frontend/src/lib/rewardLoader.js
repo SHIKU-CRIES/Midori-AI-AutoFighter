@@ -127,7 +127,7 @@ export function getGlyphArt(type, entry) {
   // Dev-only debug to help diagnose drop-in naming mismatches
   try {
     if (import.meta?.env?.DEV && typeof window !== 'undefined' && keys?.length) {
-      // eslint-disable-next-line no-console
+       
       console.debug('[glyphArt] no match', { type, id: entry?.id, name: entry?.name, keys });
     }
   } catch {}

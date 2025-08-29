@@ -23,6 +23,10 @@ class PocketManual(RelicBase):
         counts: dict[int, int] = {}
 
         def _hit(attacker, target, amount, source_type="attack", source_name=None) -> None:
+            # Only trigger if the attacker is a party member
+            if attacker not in party.members:
+                return
+
             pid = id(attacker)
             counts[pid] = counts.get(pid, 0) + 1
             if counts[pid] % 10 == 0:

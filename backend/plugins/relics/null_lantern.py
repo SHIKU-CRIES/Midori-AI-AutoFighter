@@ -43,7 +43,7 @@ class NullLantern(RelicBase):
                     hp_mult=mult,
                 )
                 entity.effect_manager.add_modifier(mod)
-                
+
                 # Track foe buffing
                 BUS.emit("relic_effect", "null_lantern", entity, "foe_buffed", int((mult - 1) * 100), {
                     "battle_number": state["cleared"] + 1,
@@ -59,7 +59,7 @@ class NullLantern(RelicBase):
                 state["cleared"] += 1
                 pull_reward = 1 + (stacks - 1)
                 party.pull_tokens += pull_reward
-                
+
                 # Track pull token generation
                 BUS.emit("relic_effect", "null_lantern", entity, "pull_tokens_awarded", pull_reward, {
                     "battles_cleared": state["cleared"],

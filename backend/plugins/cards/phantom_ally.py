@@ -25,7 +25,7 @@ class PhantomAlly(CardBase):
         summon = copy.deepcopy(original)
         summon.id = f"{original.id}_phantom"
         party.members.append(summon)
-        
+
         # Track phantom ally summoning
         BUS.emit("card_effect", "phantom_ally", original, "phantom_summoned", 1, {
             "original_ally": getattr(original, 'id', str(original)),
@@ -42,7 +42,7 @@ class PhantomAlly(CardBase):
         def _cleanup(_entity):
             if summon in party.members:
                 party.members.remove(summon)
-                
+
                 # Track phantom cleanup
                 BUS.emit("card_effect", "phantom_ally", summon, "phantom_dismissed", 1, {
                     "reason": "battle_end",

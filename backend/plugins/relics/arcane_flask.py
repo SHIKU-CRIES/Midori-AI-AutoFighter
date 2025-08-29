@@ -18,13 +18,13 @@ class ArcaneFlask(RelicBase):
 
     def apply(self, party) -> None:
         super().apply(party)
-        
+
         stacks = party.relics.count(self.id)
 
         def _ultimate(user) -> None:
             user.enable_overheal()  # Enable shields for the user
             shield = int(user.max_hp * 0.2 * stacks)
-            
+
             # Track the shield generation
             BUS.emit("relic_effect", "arcane_flask", user, "shield_granted", shield, {
                 "shield_percentage": 20 * stacks,
@@ -32,7 +32,7 @@ class ArcaneFlask(RelicBase):
                 "trigger": "ultimate_used",
                 "stacks": stacks
             })
-            
+
             asyncio.create_task(user.apply_healing(shield))
 
         BUS.subscribe("ultimate_used", _ultimate)

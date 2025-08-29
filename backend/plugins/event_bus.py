@@ -1,5 +1,7 @@
+import asyncio
 from collections import defaultdict
 from collections.abc import Callable
+import inspect
 import logging
 from typing import Any
 
@@ -25,6 +27,24 @@ class _Bus:
         for _, func in list(self._subs.get(event, [])):
             func(*args)
 
+    async def send_async(self, event: str, args) -> None:
+        """Async version of send that executes callbacks concurrently"""
+        callbacks = list(self._subs.get(event, []))
+        if not callbacks:
+            return
+
+        async def _run_callback(func, args):
+            try:
+                if inspect.iscoroutinefunction(func):
+                    await func(*args)
+                else:
+                    func(*args)
+            except Exception as e:
+                log.exception("Error in async event callback: %s", e)
+
+        # Run all callbacks concurrently to avoid blocking
+        await asyncio.gather(*[_run_callback(func, args) for _, func in callbacks], return_exceptions=True)
+
 
 bus = _Bus()
 
@@ -48,3 +68,7 @@ class EventBus:
 
     def emit(self, event: str, *args: Any) -> None:
         bus.send(event, args)
+
+    async def emit_async(self, event: str, *args: Any) -> None:
+        """Async version of emit that executes callbacks concurrently"""
+        await bus.send_async(event, args)

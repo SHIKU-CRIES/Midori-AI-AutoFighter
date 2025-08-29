@@ -40,7 +40,7 @@ class ShinyPebble(RelicBase):
                 )
                 target.effect_manager.add_modifier(mod)
                 state["active"][id(target)] = (target, mod)
-                
+
                 # Track mitigation burst application
                 BUS.emit("relic_effect", "shiny_pebble", target, "mitigation_burst", int((mit_mult - 1) * 100), {
                     "target": getattr(target, 'id', str(target)),

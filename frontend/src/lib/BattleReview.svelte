@@ -27,6 +27,32 @@
   let availableTabs = [];
 
   const elements = ['Generic', 'Light', 'Dark', 'Wind', 'Lightning', 'Fire', 'Ice'];
+  
+  // Tooltip definitions for effects
+  const effectTooltips = {
+    'aftertaste': 'Deals a hit with random damage type (10% to 150% damage)',
+    'critical_boost': '+0.5% crit rate and +5% crit damage per stack. Removed when taking damage.',
+    'critboost': '+0.5% crit rate and +5% crit damage per stack. Removed when taking damage.',
+    'iron_guard': '+55% DEF; damage grants all allies +10% DEF for 1 turn.',
+    'phantom_ally': 'Summons a phantom copy of a random party member for one battle.',
+    'arc_lightning': 'Lightning attacks have a 50% chance to chain to another random foe for 50% damage.',
+    'critical_focus': 'Low HP allies gain +25% critical hit rate.',
+    'elemental_spark': 'One random ally gains +5% effect hit rate until they take damage.'
+  };
+
+  // Generate element colors
+  function getElementBarColor(element) {
+    const colorMap = {
+      'Fire': '#ff6b35',
+      'Ice': '#4fb3ff', 
+      'Lightning': '#ffd93d',
+      'Wind': '#7dd3c0',
+      'Light': '#fff2b3',
+      'Dark': '#9b59b6',
+      'Generic': '#8e44ad'
+    };
+    return colorMap[element] || '#8e44ad';
+  }
 
   // Prefer room-provided ids; if no bar data is available for them, fall back
   // to the ids present in the fetched summary to ensure graphs are shown.
@@ -568,6 +594,94 @@
     align-items: center;
     gap: 0.5rem;
   }
+
+  /* Damage bar graph styles */
+  .damage-bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+  
+  .damage-bar {
+    position: relative;
+    height: 16px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  
+  .damage-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  
+  .damage-bar-label {
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    z-index: 1;
+  }
+
+  .damage-bar-amount {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    z-index: 1;
+  }
+
+  /* Tooltip styles */
+  .tooltip-trigger {
+    position: relative;
+    cursor: help;
+  }
+  
+  .tooltip-trigger:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.9);
+    color: #fff;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+    border: 1px solid rgba(255,255,255,0.2);
+    max-width: 300px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(0,0,0,0.9);
+  }
 </style>
 
 <div class="layout review">
@@ -666,9 +780,12 @@
                       Relic Effects
                     </div>
                     {#each Object.entries(summary.relic_effects).sort((a, b) => b[1] - a[1]) as [relicName, count]}
-                      <div class="effect-item">
+                      <div class="effect-item tooltip-trigger">
                         <span class="effect-name">{relicName}</span>
                         <span class="effect-count">×{count}</span>
+                        <div class="tooltip">
+                          Relic effect triggered {count} time{count !== 1 ? 's' : ''}
+                        </div>
                       </div>
                     {/each}
                   </div>
@@ -680,9 +797,12 @@
                       Card Effects
                     </div>
               {#each Object.entries(summary.card_effects).sort((a, b) => b[1] - a[1]) as [cardName, count]}
-                <div class="effect-item">
+                <div class="effect-item tooltip-trigger">
                   <span class="effect-name">{cardName}</span>
                   <span class="effect-count">×{count}</span>
+                  <div class="tooltip">
+                    {effectTooltips[cardName] || `Card effect triggered ${count} time${count !== 1 ? 's' : ''}`}
+                  </div>
                 </div>
               {/each}
             </div>
@@ -809,9 +929,12 @@
             </div>
             <div class="detail-grid">
               {#each Object.entries(summary.effect_applications).sort((a, b) => b[1] - a[1]).slice(0, 8) as [effect, count]}
-                <div class="detail-item">
+                <div class="detail-item tooltip-trigger">
                   <span class="detail-name">{effect}</span>
                   <span class="detail-stats">×{count}</span>
+                  <div class="tooltip">
+                    {effectTooltips[effect] || `Effect applied ${count} time${count !== 1 ? 's' : ''}`}
+                  </div>
                 </div>
               {/each}
             </div>
@@ -834,15 +957,21 @@
                     <h3>{currentTab.label} Breakdown</h3>
                   </div>
                   
-                  <!-- Damage Output -->
+                  <!-- Damage Output with Bar Graphs -->
                   {#if Object.keys(entityData.damage).length > 0}
                     <div class="entity-section">
                       <h4>Damage Output</h4>
-                      <div class="damage-breakdown">
-                        {#each Object.entries(entityData.damage) as [element, damage]}
-                          <div class="damage-item">
-                            <span class="damage-element">{element}</span>
-                            <span class="damage-amount">{fmt(damage)}</span>
+                      <div class="damage-bar-container">
+                        {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [element, damage]}
+                          {@const totalDamage = Object.values(entityData.damage).reduce((a, b) => a + b, 0)}
+                          {@const percentage = totalDamage > 0 ? (damage / totalDamage * 100) : 0}
+                          <div class="damage-bar">
+                            <div 
+                              class="damage-bar-fill" 
+                              style="width: {percentage}%; background-color: {getElementBarColor(element)};"
+                            ></div>
+                            <div class="damage-bar-label">{element}</div>
+                            <div class="damage-bar-amount">{fmt(damage)}</div>
                           </div>
                         {/each}
                       </div>

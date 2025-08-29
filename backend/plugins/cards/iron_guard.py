@@ -23,6 +23,15 @@ class IronGuard(CardBase):
         def _damage_taken(victim, *_args) -> None:
             if victim not in party.members:
                 return
+            # Emit a single card effect event per trigger, regardless of how many party members get the buff
+            BUS.emit(
+                "card_effect",
+                self.id,
+                victim,  # Use victim as the event source since they triggered the effect
+                "temporary_defense",
+                10,
+                {"source": getattr(victim, "id", "victim"), "affected_members": len(party.members)},
+            )
             for member in party.members:
                 mgr = getattr(member, "effect_manager", None)
                 if mgr is None:
@@ -35,13 +44,5 @@ class IronGuard(CardBase):
                     defense_mult=1.10,
                 )
                 mgr.add_modifier(mod)
-                BUS.emit(
-                    "card_effect",
-                    self.id,
-                    member,
-                    "temporary_defense",
-                    10,
-                    {"source": getattr(victim, "id", "victim")},
-                )
 
         BUS.subscribe("damage_taken", _damage_taken)

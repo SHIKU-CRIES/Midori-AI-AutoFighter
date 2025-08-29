@@ -36,7 +36,12 @@ def test_pocket_manual_subscribes_to_hit_landed():
 @pytest.mark.asyncio
 async def test_pocket_manual_triggers_aftertaste():
     """Test that PocketManual triggers aftertaste after 10 hits."""
-    party = Party(members=[], gold=0, relics=[], cards=[], rdr=1.0)
+    # Create mock attacker and target
+    attacker = Stats()
+    target = Stats()
+
+    # Add attacker to party so the relic can apply to them
+    party = Party(members=[attacker], gold=0, relics=[], cards=[], rdr=1.0)
 
     # Mock the event loop to track tasks
     tasks_created = []
@@ -56,8 +61,7 @@ async def test_pocket_manual_triggers_aftertaste():
         relic = PocketManual()
         relic.apply(party)
 
-        # Create mock attacker and target
-        attacker = Stats()
+        # Create mock target (attacker is already created above)
         target = Stats()
 
         # Simulate 9 hits (should not trigger aftertaste)

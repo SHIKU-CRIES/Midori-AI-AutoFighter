@@ -28,7 +28,7 @@ class WoodenIdol(RelicBase):
             pid = id(member)
             bonus = 0.01 * party.relics.count(self.id)
             pending[pid] = pending.get(pid, 0) + bonus
-            
+
             # Track debuff resistance
             BUS.emit("relic_effect", "wooden_idol", member, "debuff_resisted", int(bonus * 100), {
                 "ally": getattr(member, 'id', str(member)),
@@ -46,7 +46,7 @@ class WoodenIdol(RelicBase):
                 member.effect_resistance += bonus
                 active[pid] = (member, bonus)
                 applied_count += 1
-                
+
                 # Track resistance buff application
                 BUS.emit("relic_effect", "wooden_idol", member, "resistance_buff_applied", int(bonus * 100), {
                     "ally": getattr(member, 'id', str(member)),
@@ -54,7 +54,7 @@ class WoodenIdol(RelicBase):
                     "new_total_resistance": member.effect_resistance * 100,
                     "duration_turns": 1
                 })
-            
+
             pending.clear()
 
         def _turn_end() -> None:
