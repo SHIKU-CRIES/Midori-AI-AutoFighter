@@ -51,6 +51,7 @@ class BattleSummary:
     events: List[BattleEvent] = field(default_factory=list)
 
     # Enhanced tracking
+    damage_by_type: Dict[str, Dict[str, int]] = field(default_factory=dict)  # entity -> damage_type -> amount
     damage_by_source: Dict[str, Dict[str, int]] = field(default_factory=dict)  # source_type -> entity -> amount
     healing_by_source: Dict[str, Dict[str, int]] = field(default_factory=dict)  # source_type -> entity -> amount
     dot_damage: Dict[str, int] = field(default_factory=dict)  # entity -> total DoT damage dealt
@@ -180,6 +181,15 @@ class BattleLogger:
         with self._lock:
             # Add to summary
             self.summary.events.append(event)
+
+            # Track per-entity damage by element
+            if (
+                event.damage_type
+                and event.amount is not None
+                and event.attacker_id is not None
+            ):
+                types = self.summary.damage_by_type.setdefault(event.attacker_id, {})
+                types[event.damage_type] = types.get(event.damage_type, 0) + event.amount
 
             # Log to raw file with enhanced details
             details_str = ""
@@ -613,6 +623,7 @@ class BattleLogger:
                     if self.summary.end_time else None
                 ),
                 # Enhanced tracking data
+                "damage_by_type": self.summary.damage_by_type,
                 "damage_by_source": self.summary.damage_by_source,
                 "healing_by_source": self.summary.healing_by_source,
                 "dot_damage": self.summary.dot_damage,
@@ -717,6 +728,16 @@ class BattleLogger:
             lines.append(f"  {entity}: {hits}")
 
         # Enhanced tracking summaries
+        if self.summary.damage_by_type:
+            lines.extend([
+                "",
+                "Damage by Element:",
+            ])
+            for entity, types in self.summary.damage_by_type.items():
+                lines.append(f"  {entity}:")
+                for dmg_type, amount in sorted(types.items(), key=lambda x: x[1], reverse=True):
+                    lines.append(f"    {dmg_type}: {amount}")
+
         if self.summary.damage_by_source:
             lines.extend([
                 "",
