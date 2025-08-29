@@ -69,26 +69,43 @@
   // Gradual color transition: on change, slowly replace existing stars
   let lastStarColor = '';
   let replaceTimer = null;
+  let forceTimer = null;
   function startColorTransition(toColor) {
     if (!toColor) return;
     if (replaceTimer) clearInterval(replaceTimer);
+    if (forceTimer) clearTimeout(forceTimer);
     fadePulse(260);
-    // Replace a small batch every tick for a smooth transition
-    const batch = Math.max(3, Math.floor(density * 0.05));
-    let remaining = Math.floor(density * 0.9); // keep some old ones briefly
+    // Build a deterministic pool of indices that still have the old color
+    let pool = stars
+      .map((s, i) => ({ s, i }))
+      .filter(({ s }) => s.color !== toColor)
+      .map(({ i }) => i);
+    if (pool.length === 0) return;
+    // Compute batch size to finish around target duration
+    const intervalMs = 120;
+    const targetMs = 1800;
+    const ticks = Math.max(1, Math.round(targetMs / intervalMs));
+    const batch = Math.max(1, Math.ceil(pool.length / ticks));
     replaceTimer = setInterval(() => {
-      for (let i = 0; i < batch; i++) {
-        const idx = Math.floor(Math.random() * stars.length);
+      const n = Math.min(batch, pool.length);
+      for (let k = 0; k < n; k++) {
+        const idx = pool.pop();
+        if (idx == null) break;
         stars[idx] = spawnStar(toColor);
       }
-      // Reassign to trigger Svelte reactivity on array mutation
       stars = stars.slice();
-      remaining -= batch;
-      if (remaining <= 0) {
+      if (pool.length === 0) {
         clearInterval(replaceTimer);
         replaceTimer = null;
       }
-    }, 220);
+    }, intervalMs);
+    // Safety: force any remaining to new color shortly after target
+    forceTimer = setTimeout(() => {
+      if (pool.length > 0) {
+        stars = stars.map(s => (s.color === toColor ? s : spawnStar(toColor)));
+      }
+      if (replaceTimer) { clearInterval(replaceTimer); replaceTimer = null; }
+    }, targetMs + 400);
   }
   $: if (starColor && lastStarColor && starColor !== lastStarColor) {
     startColorTransition(starColor);
@@ -98,6 +115,7 @@
   onDestroy(() => {
     if (replaceTimer) clearInterval(replaceTimer);
     if (fadeTimer) clearTimeout(fadeTimer);
+    if (forceTimer) clearTimeout(forceTimer);
   });
 
   onMount(async () => {
@@ -254,5 +272,4 @@
   :global(body.reduced-motion) .stars .star { animation: none; opacity: 0.35; top: 15%; }
   :global(html.reduced-motion) .stars .star .core,
   :global(body.reduced-motion) .stars .star .core { animation: none; }
-</style>
-</style>
+  </style>
