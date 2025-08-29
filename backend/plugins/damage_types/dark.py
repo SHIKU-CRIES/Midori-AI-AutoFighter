@@ -74,7 +74,7 @@ class Dark(DamageTypeBase):
                 changes["defense_mult"] = scale
                 changes["defense"] = 1
             if mgr is not None and changes:
-                mod = create_stat_buff(attacker, turns=1, **changes)
+                mod = create_stat_buff(attacker, turns=9999, **changes)
                 mgr.add_modifier(mod)
         except Exception:
             # Intentionally swallow errors to avoid breaking combat flow.
