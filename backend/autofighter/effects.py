@@ -122,6 +122,8 @@ class DamageOverTime:
     source: Stats | None = None
 
     async def tick(self, target: Stats, *_: object) -> bool:
+        from autofighter.stats import BUS  # Import here to avoid circular imports
+        
         attacker = self.source or target
         dtype = getattr(self, "damage_type", None)
         if dtype is None:
@@ -139,6 +141,14 @@ class DamageOverTime:
         source_type = getattr(attacker, "damage_type", None)
         if source_type is not dtype:
             dmg = source_type.on_party_dot_damage_taken(dmg, attacker, target)
+            
+        # Emit DoT tick event before applying damage
+        BUS.emit("dot_tick", attacker, target, int(dmg), self.name, {
+            "dot_id": self.id,
+            "remaining_turns": self.turns - 1,
+            "original_damage": self.damage
+        })
+        
         await target.apply_damage(int(dmg), attacker=attacker)
         self.turns -= 1
         return self.turns > 0
@@ -155,6 +165,8 @@ class HealingOverTime:
     source: Stats | None = None
 
     async def tick(self, target: Stats, *_: object) -> bool:
+        from autofighter.stats import BUS  # Import here to avoid circular imports
+        
         healer = self.source or target
         dtype = getattr(self, "damage_type", None)
         if dtype is None:
@@ -164,6 +176,14 @@ class HealingOverTime:
         source_type = getattr(healer, "damage_type", None)
         if source_type is not dtype:
             heal = source_type.on_party_hot_heal_received(heal, healer, target)
+            
+        # Emit HoT tick event before applying healing
+        BUS.emit("hot_tick", healer, target, int(heal), self.name, {
+            "hot_id": self.id,
+            "remaining_turns": self.turns - 1,
+            "original_healing": self.healing
+        })
+        
         await target.apply_healing(int(heal), healer=healer)
         self.turns -= 1
         return self.turns > 0
@@ -191,6 +211,7 @@ class EffectManager:
         copies to tick each turn.  When ``max_stacks`` is provided, extra
         applications beyond that limit are ignored rather than refreshed.
         """
+        from autofighter.stats import BUS  # Import here to avoid circular imports
 
         if max_stacks is not None:
             current = len([d for d in self.dots if d.id == effect.id])
@@ -198,6 +219,15 @@ class EffectManager:
                 return
         self.dots.append(effect)
         self.stats.dots.append(effect.id)
+        
+        # Emit effect applied event
+        BUS.emit("effect_applied", effect.name, self.stats, {
+            "effect_type": "dot",
+            "effect_id": effect.id,
+            "damage": effect.damage,
+            "turns": effect.turns,
+            "current_stacks": len([d for d in self.dots if d.id == effect.id])
+        })
 
     def add_hot(self, effect: HealingOverTime) -> None:
         """Attach a HoT instance to the tracked stats.
@@ -205,15 +235,35 @@ class EffectManager:
         Healing effects simply accumulate; each copy heals separately every
         tick with no inherent stack cap.
         """
+        from autofighter.stats import BUS  # Import here to avoid circular imports
 
         self.hots.append(effect)
         self.stats.hots.append(effect.id)
+        
+        # Emit effect applied event
+        BUS.emit("effect_applied", effect.name, self.stats, {
+            "effect_type": "hot",
+            "effect_id": effect.id,
+            "healing": effect.healing,
+            "turns": effect.turns,
+            "current_stacks": len([h for h in self.hots if h.id == effect.id])
+        })
 
     def add_modifier(self, effect: StatModifier) -> None:
         """Attach a stat modifier to the tracked stats."""
+        from autofighter.stats import BUS  # Import here to avoid circular imports
 
         self.mods.append(effect)
         self.stats.mods.append(effect.id)
+        
+        # Emit effect applied event
+        BUS.emit("effect_applied", effect.name, self.stats, {
+            "effect_type": "stat_modifier",
+            "effect_id": effect.id,
+            "turns": effect.turns,
+            "deltas": effect.deltas,
+            "multipliers": effect.multipliers
+        })
 
     def maybe_inflict_dot(self, attacker: Stats, damage: int) -> None:
         dot = attacker.damage_type.create_dot(damage, attacker)
@@ -271,6 +321,14 @@ class EffectManager:
                         break
 
             for eff in expired:
+                # Emit effect expired event
+                from autofighter.stats import BUS
+                BUS.emit("effect_expired", eff.name, self.stats, {
+                    "effect_type": "hot" if isinstance(eff, HealingOverTime) else "dot",
+                    "effect_id": eff.id,
+                    "expired_naturally": True
+                })
+                
                 collection.remove(eff)
                 if eff.id in names:
                     names.remove(eff.id)
@@ -281,6 +339,14 @@ class EffectManager:
             if not mod.tick():
                 expired_mods.append(mod)
         for mod in expired_mods:
+            # Emit effect expired event for stat modifiers
+            from autofighter.stats import BUS
+            BUS.emit("effect_expired", mod.name, self.stats, {
+                "effect_type": "stat_modifier",
+                "effect_id": mod.id,
+                "expired_naturally": True
+            })
+            
             self.mods.remove(mod)
             if mod.id in self.stats.mods:
                 self.stats.mods.remove(mod.id)
