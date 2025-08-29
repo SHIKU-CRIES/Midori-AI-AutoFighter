@@ -64,7 +64,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
             setattr(obj, field.name, type(value)(total))
 
     try:
-        room_num = max(int(node.index), 1)
+        room_num = max(int(cumulative_rooms), 1)
         desired = max(1, math.ceil(room_num / 2))
         obj.level = int(max(getattr(obj, "level", 1), desired))
     except Exception:
