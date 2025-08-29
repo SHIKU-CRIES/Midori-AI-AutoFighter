@@ -31,17 +31,38 @@ echo "Starting test run"
 # Backend tests
 cd backend
 
-# Set up Python environment once
-if [ -n "${UV_EXTRA:-}" ]; then
-  uv venv && uv sync --extra "$UV_EXTRA"
+# Detect available Python tools and set up environment
+if command -v uv >/dev/null 2>&1; then
+  echo "Using uv for Python environment"
+  if [ -n "${UV_EXTRA:-}" ]; then
+    uv venv && uv sync --extra "$UV_EXTRA"
+  else
+    uv venv && uv sync
+  fi
+  PYTHON_CMD="uv run pytest"
 else
-  uv venv && uv sync
+  echo "uv not found, using standard Python tools"
+  if [ ! -d "venv" ] || [ ! -f "venv/bin/activate" ]; then
+    echo "Creating virtual environment..."
+    rm -rf venv  # Clean up any partial venv
+    python3 -m venv venv
+    source venv/bin/activate
+    echo "Installing dependencies..."
+    pip3 install -e .
+  else
+    echo "Using existing virtual environment..."
+    source venv/bin/activate
+  fi
+  if [ -n "${UV_EXTRA:-}" ]; then
+    echo "Warning: UV_EXTRA specified but uv not available, installing base dependencies only"
+  fi
+  PYTHON_CMD="python3 -m pytest"
 fi
 
 echo "Starting backend tests..."
 for file in $(find tests -maxdepth 1 -name "test_*.py" -type f -printf "%f\n" | sort); do
   echo "Running backend test: $file"
-  run_test "uv run pytest tests/$file" "backend tests/$file"
+  run_test "$PYTHON_CMD tests/$file" "backend tests/$file"
 done
 echo "Finished backend tests"
 cd "$ROOT_DIR"
@@ -49,14 +70,21 @@ cd "$ROOT_DIR"
 # Frontend tests
 cd frontend
 
-# Install Node dependencies
-bun install
-
-echo "Starting frontend tests..."
-for file in $(find tests -maxdepth 1 -name "*.test.js" -type f -printf "%f\n" | sort); do
-  echo "Running frontend test: $file"
-  run_test "bun test tests/$file" "frontend tests/$file"
-done
+# Detect available Node tools and install dependencies
+if command -v bun >/dev/null 2>&1; then
+  echo "Using bun for Node.js environment"
+  bun install
+  NODE_CMD="bun test"
+  
+  echo "Starting frontend tests..."
+  for file in $(find tests -maxdepth 1 -name "*.test.js" -type f -printf "%f\n" | sort); do
+    echo "Running frontend test: $file"
+    run_test "$NODE_CMD tests/$file" "frontend tests/$file"
+  done
+else
+  echo "bun not found, skipping frontend tests (tests require bun:test API)"
+  echo "To run frontend tests, install bun: https://bun.sh/"
+fi
 echo "Finished frontend tests"
 cd "$ROOT_DIR"
 

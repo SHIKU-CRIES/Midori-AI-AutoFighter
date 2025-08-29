@@ -1,6 +1,7 @@
 import pytest
 
-from autofighter.gacha.system import GachaConfig, GachaSystem
+from autofighter.gacha.system import GachaConfig
+from autofighter.gacha.system import GachaSystem
 
 
 def test_pity_escalation_and_reset():

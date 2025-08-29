@@ -8,7 +8,8 @@
     "build": "bun run build:web && bun run sync"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.1.2"
+    "@capacitor/cli": "^6.1.2",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@capacitor/core": "^6.1.2",

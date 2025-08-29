@@ -12,6 +12,7 @@ wheels/
 # Virtual environments
 .venvc
 .venv
+venv/
 
 # Dependency lock files
 uv.lock

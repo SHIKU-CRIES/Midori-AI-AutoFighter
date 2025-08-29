@@ -1,7 +1,8 @@
+from dataclasses import asdict
+from dataclasses import dataclass
 import random
-
 from typing import Callable
-from dataclasses import dataclass, asdict
+
 
 @dataclass
 class GachaConfig:

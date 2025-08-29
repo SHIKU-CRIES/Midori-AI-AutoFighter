@@ -197,7 +197,7 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
                     description = CriticalBoost.get_description()
             except Exception:
                 pass
-            
+
             active_effects.append({
                 "name": effect.name,
                 "source": effect.source,

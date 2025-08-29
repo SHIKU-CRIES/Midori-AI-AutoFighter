@@ -56,9 +56,15 @@ jobs:
       - name: Build backend executable
         working-directory: backend
         run: |
-          $dataArgs = "--add-data ../frontend/build;frontend"
-          $cmd = "uv run pyinstaller --onefile $dataArgs --clean --name midori-autofighter-${{ matrix.variant }}-windows app.py"
-          Invoke-Expression $cmd
+          # Ensure frontend build directory exists
+          if (-not (Test-Path "../frontend/build")) {
+            Write-Host "Error: Frontend build directory not found at ../frontend/build"
+            Write-Host "Available directories in frontend:"
+            Get-ChildItem ../frontend/
+            exit 1
+          }
+          
+          uv run pyinstaller --onefile --add-data "../frontend/build;frontend" --clean --name "midori-autofighter-${{ matrix.variant }}-windows" app.py
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -40,6 +40,11 @@ jobs:
       - name: Build Android APK
         working-directory: build/mobile
         run: |
+          # Add Android platform if not present
+          if [ ! -d "android" ]; then
+            bunx cap add android
+          fi
+          
           # Sync frontend build to Capacitor
           bun run sync
           
