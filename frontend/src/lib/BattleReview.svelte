@@ -94,7 +94,7 @@
         await sleep(attempt < 5 ? 400 : 800);
       }
     }
-    await loadWithRetry();
+    loadWithRetry();
     return () => { cancelled = true; };
   });
 

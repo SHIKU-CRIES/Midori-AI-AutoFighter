@@ -39,7 +39,7 @@ async def test_pocket_manual_triggers_aftertaste():
     # Create mock attacker and target
     attacker = Stats()
     target = Stats()
-    
+
     # Add attacker to party so the relic can apply to them
     party = Party(members=[attacker], gold=0, relics=[], cards=[], rdr=1.0)
 
