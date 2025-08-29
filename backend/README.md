@@ -76,6 +76,8 @@ chance to award a pull ticket. `rdr` boosts drop quantity and odds and, at
 extreme values, can roll to upgrade relic and card star ranks (3★→4★ at 1000%
 `rdr`, 4★→5★ at 1,000,000%) though success is never guaranteed.
 
+Current 5★ cards include Phantom Ally, Temporal Shield, and Reality Split.
+
 `GET /gacha` returns the current pity counter, element-based upgrade items,
 owned characters with their duplicate stacks, and whether auto-crafting is
 enabled. `POST /gacha/pull` performs 1, 5, or 10 pulls, awarding 5★ or 6★
