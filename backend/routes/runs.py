@@ -291,6 +291,25 @@ async def get_battle_summary(run_id: str, index: int):
     return jsonify(json.loads(data))
 
 
+@bp.get("/run/<run_id>/battles/<int:index>/events")
+async def get_battle_events(run_id: str, index: int):
+    events_path = (
+        Path(__file__).resolve().parents[1]
+        / "logs"
+        / "runs"
+        / run_id
+        / "battles"
+        / str(index)
+        / "summary"
+        / "events.json"
+    )
+    if not events_path.exists():
+        return jsonify({"error": "events not found"}), 404
+
+    data = await asyncio.to_thread(events_path.read_text)
+    return jsonify(json.loads(data))
+
+
 @bp.post("/save/wipe")
 async def wipe_save() -> tuple[str, int, dict[str, str]]:
     def do_wipe():

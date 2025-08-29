@@ -27,6 +27,7 @@
   export let selected = [];
   export let runId = '';
   export let roomData = null;
+  export let battleSnapshot = null;
   export let editorState = {};
   export let sfxVolume = 50;
   export let musicVolume = 50;
@@ -216,8 +217,8 @@
       <BattleReview
         runId={runId}
         battleIndex={roomData?.battle_index || 0}
-        party={(roomData?.party || []).map((p) => p.id)}
-        foes={(roomData?.foes || []).map((f) => f.id)}
+        partyData={(battleSnapshot?.party && battleSnapshot?.party.length) ? battleSnapshot.party : (roomData?.party || [])}
+        foeData={(battleSnapshot?.foes && battleSnapshot?.foes.length) ? battleSnapshot.foes : (roomData?.foes || [])}
         cards={[]}
         relics={[]}
       />

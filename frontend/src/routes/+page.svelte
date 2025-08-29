@@ -32,6 +32,8 @@
   let battleActive = false;
   // When true, suppress backend syncing/polling (e.g., during defeat popup)
   let haltSync = false;
+  // Preserve the last live battle snapshot (with statuses) for review UI
+  let lastBattleSnapshot = null;
 
   // Normalize status fields so downstream components can rely on
   // `passives`, `dots`, and `hots` arrays of objects on each fighter.
@@ -210,8 +212,10 @@
     if (!battleActive || haltSync || !runId) return;
     try {
       const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
+      lastBattleSnapshot = snap || lastBattleSnapshot;
       if (snap?.error) {
         roomData = snap;
+        lastBattleSnapshot = snap || lastBattleSnapshot;
         battleActive = false;
         stopBattlePoll();
         stalledTicks = 0;
@@ -227,6 +231,7 @@
       if (snapHasRewards || snapCompleted) {
         // Stop only when rewards or completion flags arrive
         roomData = snap;
+        lastBattleSnapshot = snap || lastBattleSnapshot;
         const rewardsReady = hasRewards(roomData);
         if (rewardsReady || snapCompleted) {
           battleActive = false;
@@ -321,6 +326,7 @@
             const snapHasRewards = hasRewards(snap);
             if (snapHasRewards) {
               roomData = snap;
+              lastBattleSnapshot = snap || lastBattleSnapshot;
               battleActive = false;
               stopBattlePoll();
               nextRoom = snap.next_room || nextRoom;
@@ -603,6 +609,7 @@
   <GameViewport
     runId={runId}
     roomData={roomData}
+    battleSnapshot={lastBattleSnapshot}
     background={viewportBg}
     mapRooms={mapRooms}
     currentIndex={currentIndex}

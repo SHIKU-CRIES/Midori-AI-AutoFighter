@@ -26,6 +26,7 @@
 
   export let runId = '';
   export let roomData = null;
+  export let battleSnapshot = null;
   export let background = '';
   export let items = [];
   export let mapRooms = [];
@@ -186,6 +187,7 @@
         bind:selected
         {runId}
         {roomData}
+        {battleSnapshot}
         {editorState}
         {sfxVolume}
         {musicVolume}

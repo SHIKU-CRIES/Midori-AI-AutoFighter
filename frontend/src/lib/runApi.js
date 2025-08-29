@@ -131,3 +131,24 @@ export async function getBattleSummary(runId, index) {
     throw e;
   }
 }
+
+export async function getBattleEvents(runId, index) {
+  const url = `${API_BASE}/run/${runId}/battles/${index}/events`;
+  const res = await fetch(url, { cache: 'no-store' });
+  if (res.status === 404) {
+    const err = new Error('events not found');
+    err.status = 404;
+    err.overlayShown = true;
+    throw err;
+  }
+  if (!res.ok) {
+    let data;
+    try { data = await res.json(); } catch {}
+    const message = data?.message || `HTTP error ${res.status}`;
+    const err = new Error(message);
+    err.status = res.status;
+    err.overlayShown = true;
+    throw err;
+  }
+  return res.json();
+}
