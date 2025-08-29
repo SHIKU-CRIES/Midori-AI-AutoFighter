@@ -174,7 +174,11 @@
       const duration = performance.now() - start;
       dispatch('snapshot-end', { duration });
       if (active && runId) {
-        timer = setTimeout(fetchSnapshot, Math.max(0, pollDelay - duration));
+        // Ensure minimum 100ms delay between requests to prevent backend overload
+        // When lots of relics/cards are present, requests can take longer to process
+        const minDelay = 100;
+        const calculatedDelay = Math.max(minDelay, pollDelay - duration);
+        timer = setTimeout(fetchSnapshot, calculatedDelay);
       }
     }
   }

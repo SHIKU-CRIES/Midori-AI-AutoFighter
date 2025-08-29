@@ -25,6 +25,10 @@ class FrostSigil(RelicBase):
             party._frost_sigil_state = True
 
             def _hit(attacker, target, amount, source_type="attack", source_name=None) -> None:
+                # Only trigger if the attacker is a party member
+                if attacker not in party.members:
+                    return
+
                 stacks = party.relics.count(self.id)
                 dmg = int(attacker.atk * 0.05)
 
