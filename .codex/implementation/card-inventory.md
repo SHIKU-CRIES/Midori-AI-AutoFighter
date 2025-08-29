@@ -43,6 +43,15 @@ when no cards are owned.
 - Sturdy Boots – +3% Dodge Odds & +3% DEF
 - Spiked Shield – +3% ATK & +3% DEF
 
+## 2★ Cards
+- Critical Focus – +55% ATK; start of turn grants Critical Boost stack
+- Critical Transfer – Ultimates absorb Critical Boost stacks; +4% ATK per stack for that turn
+- Iron Guard – +55% DEF; taking damage gives all allies +10% DEF for 1 turn
+- Swift Footwork – +1 action per turn; first action each combat is free
+- Mystic Aegis – +55% Effect Res; resisting a debuff heals 5% Max HP
+- Vital Surge – +55% Max HP; while below 50% HP, +55% ATK
+- Elemental Spark – +55% ATK & +55% Effect Hit Rate; one ally's debuffs gain +5% potency
+- 
 ## 3★ Cards
 - Critical Overdrive – +255% ATK; while an ally has Critical Boost, they gain +10% Crit Rate and convert excess Crit Rate to +2% Crit Damage.
 - Iron Resurgence – +200% DEF & +200% HP; the first ally death revives at 10% HP and refreshes every 4 turns.

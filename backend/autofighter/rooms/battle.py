@@ -9,6 +9,11 @@ import logging
 import random
 from typing import Any
 
+from battle_logging import end_battle_logging
+
+# Import battle logging
+from battle_logging import start_battle_logging
+
 from autofighter.cards import apply_cards
 from autofighter.cards import card_choices
 from autofighter.effects import EffectManager
@@ -27,9 +32,6 @@ from . import Room
 from .utils import _build_foes
 from .utils import _scale_stats
 from .utils import _serialize
-
-# Import battle logging
-from battle_logging import start_battle_logging, end_battle_logging
 
 log = logging.getLogger(__name__)
 
@@ -182,7 +184,10 @@ class BattleRoom(Room):
         for f in foes:
             BUS.emit("battle_start", f)
             await registry.trigger("battle_start", f)
-        
+
+        # Start battle logging
+        battle_logger = start_battle_logging()
+
         log.info(
             "Battle start: %s vs %s",
             [f.id for f in foes],
@@ -642,6 +647,7 @@ class BattleRoom(Room):
             "loot": loot,
             "foes": foes_data,
             "room_number": self.node.index,
+            "battle_index": getattr(battle_logger, "battle_index", 0),
             "exp_reward": exp_reward,
             "enrage": {"active": enrage_active, "stacks": enrage_stacks},
             "rdr": party.rdr,

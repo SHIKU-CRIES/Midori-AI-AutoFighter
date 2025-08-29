@@ -32,8 +32,8 @@ class CriticalBoost:
     def _on_damage_taken(self, victim: Stats, *_: object) -> None:
         if victim is not self.target or self.target is None or self.stacks == 0:
             return
-        self.target.crit_rate -= self.crit_rate_per_stack * self.stacks
-        self.target.crit_damage -= self.crit_damage_per_stack * self.stacks
+        self.target._base_crit_rate -= self.crit_rate_per_stack * self.stacks
+        self.target._base_crit_damage -= self.crit_damage_per_stack * self.stacks
         self.stacks = 0
         BUS.emit("critical_boost_change", victim, 0)
         BUS.unsubscribe("damage_taken", self._on_damage_taken)

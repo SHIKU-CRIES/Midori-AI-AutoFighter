@@ -40,9 +40,9 @@ describe('Viewport modularization', () => {
     expect(content).toContain("dispatch('back')");
   });
 
-  test('Reward overlay referenced', () => {
+  test('Review overlay referenced', () => {
     const content = readFileSync(join(import.meta.dir, '../src/lib/OverlayHost.svelte'), 'utf8');
-    expect(content).toContain('RewardOverlay');
+    expect(content).toContain('BattleReview');
     expect(content).toContain('relic_choices');
     expect(content).toContain('card_choices');
   });
