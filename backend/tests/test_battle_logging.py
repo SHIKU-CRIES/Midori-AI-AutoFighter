@@ -1,11 +1,13 @@
 import json
-import pytest
-import tempfile
-import shutil
 from pathlib import Path
+import tempfile
 
-from battle_logging import BattleLogger, RunLogger
-from autofighter.stats import BUS, Stats
+from battle_logging import BattleLogger
+from battle_logging import RunLogger
+import pytest
+
+from autofighter.stats import BUS
+from autofighter.stats import Stats
 
 
 @pytest.fixture
@@ -19,21 +21,21 @@ def test_battle_logger_creates_folder_structure(temp_logs_dir):
     """Test that BattleLogger creates the proper folder structure."""
     run_id = "test_run_123"
     battle_index = 1
-    
+
     logger = BattleLogger(run_id, battle_index, temp_logs_dir)
-    
+
     # Check folder structure
     expected_base = temp_logs_dir / "runs" / run_id / "battles" / "1"
     expected_raw = expected_base / "raw"
     expected_summary = expected_base / "summary"
-    
+
     assert expected_base.exists()
     assert expected_raw.exists()
     assert expected_summary.exists()
-    
+
     # Check raw log file exists
     assert (expected_raw / "battle.log").exists()
-    
+
     logger.finalize_battle("test")
 
 
@@ -41,42 +43,42 @@ def test_battle_logger_tracks_events(temp_logs_dir):
     """Test that BattleLogger properly tracks battle events."""
     run_id = "test_run_456"
     battle_index = 1
-    
+
     logger = BattleLogger(run_id, battle_index, temp_logs_dir)
-    
+
     # Create mock entities
     attacker = Stats()
     attacker.id = "test_attacker"
     target = Stats()
     target.id = "test_target"
-    
+
     # Simulate battle events
     BUS.emit("battle_start", attacker)
     BUS.emit("battle_start", target)
     BUS.emit("damage_dealt", attacker, target, 50)
     BUS.emit("hit_landed", attacker, target, 50)
-    
+
     # Finalize to write summary
     logger.finalize_battle("victory")
-    
+
     # Check summary files were created
     summary_path = temp_logs_dir / "runs" / run_id / "battles" / "1" / "summary"
     assert (summary_path / "battle_summary.json").exists()
     assert (summary_path / "events.json").exists()
     assert (summary_path / "human_summary.txt").exists()
-    
+
     # Check summary content
     with open(summary_path / "battle_summary.json") as f:
         summary = json.load(f)
-    
+
     assert summary["result"] == "victory"
     assert summary["total_damage_dealt"]["test_attacker"] == 50
     assert summary["total_hits_landed"]["test_attacker"] == 1
-    
+
     # Check events content
     with open(summary_path / "events.json") as f:
         events = json.load(f)
-    
+
     assert len(events) == 4  # 2 battle_start, 1 damage_dealt, 1 hit_landed
     event_types = [e["event_type"] for e in events]
     assert "battle_start" in event_types
@@ -87,20 +89,20 @@ def test_battle_logger_tracks_events(temp_logs_dir):
 def test_run_logging_management(temp_logs_dir):
     """Test run logging start/end functionality."""
     run_id = "test_run_789"
-    
+
     run_logger = RunLogger(run_id, temp_logs_dir)
     assert run_logger is not None
     assert run_logger.run_id == run_id
-    
+
     # Start and end a battle
     battle_logger = run_logger.start_battle()
     assert battle_logger is not None
-    
+
     run_logger.end_battle("victory")
-    
+
     # Finalize run
     run_logger.finalize_run()
-    
+
     # Check that run folder exists
     run_path = temp_logs_dir / "runs" / run_id
     assert run_path.exists()
@@ -110,29 +112,29 @@ def test_human_readable_summary(temp_logs_dir):
     """Test that human-readable summary is generated correctly."""
     run_id = "test_run_readable"
     battle_index = 1
-    
+
     logger = BattleLogger(run_id, battle_index, temp_logs_dir)
-    
+
     # Simulate some events
     attacker = Stats()
     attacker.id = "hero"
     target = Stats()
     target.id = "monster"
-    
+
     BUS.emit("battle_start", attacker)
     BUS.emit("battle_start", target)
     BUS.emit("damage_dealt", attacker, target, 100)
     BUS.emit("damage_taken", target, attacker, 100)
     BUS.emit("hit_landed", attacker, target, 100)
     BUS.emit("heal", attacker, attacker, 25)
-    
+
     logger.finalize_battle("victory")
-    
+
     # Check human summary content
     summary_path = temp_logs_dir / "runs" / run_id / "battles" / "1" / "summary"
     with open(summary_path / "human_summary.txt") as f:
         content = f.read()
-    
+
     assert "Battle Summary:" in content
     assert "Result: VICTORY" in content
     assert "hero: 100" in content  # damage dealt

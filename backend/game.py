@@ -11,6 +11,8 @@ from pathlib import Path
 import random
 from typing import Any
 
+# Import battle logging
+from battle_logging import end_run_logging
 from cryptography.fernet import Fernet
 
 from autofighter.effects import create_stat_buff
@@ -27,9 +29,6 @@ from plugins import passives as passive_plugins
 from plugins import players as player_plugins
 from plugins.damage_types import load_damage_type
 from plugins.players._base import PlayerBase
-
-# Import battle logging
-from battle_logging import end_run_logging
 
 log = logging.getLogger(__name__)
 
