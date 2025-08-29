@@ -35,7 +35,6 @@ class StellarCompass(RelicBase):
                     turns=9999,
                 )
                 attacker.effect_manager.add_modifier(mod)
-                old_gold_rate = state["gold"]
                 state["gold"] += 0.015 * copies
 
                 # Track critical hit buff application
