@@ -45,3 +45,6 @@ other rewards.
 ticket chances. It can also roll to raise relic and card star ranks when `rdr`
 is extraordinarily high (3★→4★ at 1000%, 4★→5★ at 1,000,000%) but never
 upgrades item stars.
+
+Top-tier drops may award 5★ cards like Phantom Ally, Temporal Shield, or
+Reality Split, each capable of dramatically altering battle flow.

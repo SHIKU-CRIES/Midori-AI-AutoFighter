@@ -266,6 +266,10 @@ victory presents three unused cards of the appropriate star rank. Selecting one
 adds it to the party, and card and relic bonuses are applied at the start of the
 next battle.
 
+5★ cards such as Phantom Ally, Temporal Shield, and Reality Split introduce
+summoned allies, turn-based damage reduction, and afterimage attacks that echo
+damage across all foes.
+
 Parties also track a rare drop rate (`rdr`) that boosts relic drops, gold
 rewards, upgrade item counts, and pull ticket chances. At extreme values it can
 roll to raise relic and card star ranks (3★→4★ at 1000% `rdr`, 4★→5★ at
