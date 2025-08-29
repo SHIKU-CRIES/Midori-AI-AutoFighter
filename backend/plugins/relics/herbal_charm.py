@@ -18,8 +18,17 @@ class HerbalCharm(RelicBase):
 
     def apply(self, party) -> None:
         def _heal(*_) -> None:
+            stacks = party.relics.count(self.id)
             for member in party.members:
-                heal = int(member.max_hp * 0.005)
+                heal = int(member.max_hp * 0.005 * stacks)
+
+                # Emit relic effect event for healing
+                BUS.emit("relic_effect", "herbal_charm", member, "turn_start_healing", heal, {
+                    "healing_percentage": 0.5 * stacks,
+                    "max_hp": member.max_hp,
+                    "stacks": stacks
+                })
+
                 asyncio.create_task(member.apply_healing(heal))
 
         BUS.subscribe("turn_start", _heal)

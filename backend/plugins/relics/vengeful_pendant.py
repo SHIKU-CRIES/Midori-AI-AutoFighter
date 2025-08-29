@@ -21,6 +21,14 @@ class VengefulPendant(RelicBase):
             if attacker is None or target not in party.members:
                 return
             dmg = int(amount * 0.15)
+
+            # Emit relic effect event for damage reflection
+            BUS.emit("relic_effect", "vengeful_pendant", target, "damage_reflection", dmg, {
+                "original_damage": amount,
+                "reflection_percentage": 15,
+                "reflected_to": getattr(attacker, 'id', str(attacker))
+            })
+
             asyncio.create_task(attacker.apply_damage(dmg, attacker=target))
         BUS.subscribe("damage_taken", _reflect)
 

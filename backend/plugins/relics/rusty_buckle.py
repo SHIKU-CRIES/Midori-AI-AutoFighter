@@ -38,6 +38,14 @@ class RustyBuckle(RelicBase):
                 ally = min(party.members, key=lambda m: m.max_hp)
                 bleed = int(ally.max_hp * 0.01 * stacks)
                 dmg = min(bleed, max(ally.hp - 1, 0))
+
+                # Emit relic effect event for initial bleed
+                BUS.emit("relic_effect", "rusty_buckle", ally, "initial_bleed", dmg, {
+                    "target_selection": "lowest_max_hp",
+                    "bleed_percentage": 1 * stacks,
+                    "stacks": stacks
+                })
+
                 asyncio.create_task(ally.apply_damage(dmg, attacker=ally))
                 state["ally"] = ally
                 state["triggers"] = 0
@@ -55,6 +63,15 @@ class RustyBuckle(RelicBase):
                 total_lost = max_hp * 0.1 * triggers
                 dmg = int(total_lost * 0.005)
                 hits = 5 + 3 * (stacks - 1)
+
+                # Emit relic effect event for aftertaste trigger
+                BUS.emit("relic_effect", "rusty_buckle", ally, "aftertaste_trigger", dmg, {
+                    "trigger_count": triggers,
+                    "hp_lost_percentage": lost_frac * 100,
+                    "aftertaste_hits": hits,
+                    "damage_per_hit": dmg
+                })
+
                 for _ in range(hits):
                     if state["foes"]:
                         foe = random.choice(state["foes"])

@@ -30,6 +30,8 @@ class CardBase:
             self.about = ", ".join(parts)
 
     async def apply(self, party: Party) -> None:
+        from autofighter.stats import BUS  # Import here to avoid circular imports
+
         log.info("Applying card %s to party", self.id)
         for member in party.members:
             log.debug("Applying effects to %s", getattr(member, "id", "member"))
@@ -43,6 +45,14 @@ class CardBase:
                     member, name=f"{self.id}_{attr}", turns=9999, **changes
                 )
                 mgr.add_modifier(mod)
+
+                # Emit card effect event
+                BUS.emit("card_effect", self.id, member, f"stat_buff_{attr}", int(pct * 100), {
+                    "stat_affected": attr,
+                    "percentage_change": pct * 100,
+                    "new_modifier": f"{self.id}_{attr}"
+                })
+
                 if attr == "max_hp":
                     heal = int(getattr(member, "hp", 0) * pct)
                     try:
@@ -51,6 +61,13 @@ class CardBase:
                         await member.apply_healing(heal)
                     else:
                         asyncio.create_task(member.apply_healing(heal))
+
+                    # Emit card healing event
+                    BUS.emit("card_effect", self.id, member, "healing", heal, {
+                        "heal_amount": heal,
+                        "heal_type": "max_hp_increase"
+                    })
+
                     log.debug(
                         "Updated %s max_hp and healed %s",
                         getattr(member, "id", "member"),

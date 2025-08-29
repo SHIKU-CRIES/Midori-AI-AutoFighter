@@ -1,6 +1,17 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
-  import { Volume2, Music, Mic, Power, Trash2, Download, Upload } from 'lucide-svelte';
+  import {
+    Volume2,
+    Music,
+    Mic,
+    Power,
+    Trash2,
+    Download,
+    Upload,
+    Cog,
+    Brain,
+    Gamepad
+  } from 'lucide-svelte';
   import { endRun, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel } from './api.js';
   import { saveSettings, clearSettings, clearAllClientData } from './settingsStorage.js';
 
@@ -23,6 +34,8 @@
   let resetTimeout;
   let lrmOptions = [];
   let testReply = '';
+
+  let activeTab = 'audio';
 
   // Keep autocraft in sync with backend flag so this toggle
   // mirrors the Crafting menu's auto-craft behavior.
@@ -162,10 +175,26 @@
   }
 </script>
 
-<div data-testid="settings-menu">
-  <div class="cols">
-    <div class="col">
-      <h4>Audio</h4>
+<div data-testid="settings-menu" class="tabbed">
+  <div class="tabs">
+    <button class:active={activeTab === 'audio'} on:click={() => (activeTab = 'audio')} title="Audio">
+      <Volume2 />
+    </button>
+    <button class:active={activeTab === 'system'} on:click={() => (activeTab = 'system')} title="System">
+      <Cog />
+    </button>
+    {#if showLrm}
+      <button class:active={activeTab === 'llm'} on:click={() => (activeTab = 'llm')} title="LLM">
+        <Brain />
+      </button>
+    {/if}
+    <button class:active={activeTab === 'gameplay'} on:click={() => (activeTab = 'gameplay')} title="Gameplay">
+      <Gamepad />
+    </button>
+  </div>
+
+  {#if activeTab === 'audio'}
+    <div class="panel">
       <div class="control" title="Adjust sound effect volume.">
         <Volume2 />
         <label>SFX Volume</label>
@@ -182,8 +211,8 @@
         <input type="range" min="0" max="100" bind:value={voiceVolume} on:input={scheduleSave} />
       </div>
     </div>
-    <div class="col">
-      <h4>System</h4>
+  {:else if activeTab === 'system'}
+    <div class="panel">
       <div class="control" title="Limit server polling frequency.">
         <label>Framerate</label>
         <select bind:value={framerate} on:change={scheduleSave}>
@@ -196,23 +225,6 @@
         <label>Reduced Motion</label>
         <input type="checkbox" bind:checked={reducedMotion} on:change={scheduleSave} />
       </div>
-      {#if showLrm}
-        <div class="control" title="Select language reasoning model.">
-          <label>LRM Model</label>
-          <select bind:value={lrmModel} on:change={handleModelChange}>
-            {#each lrmOptions as opt}
-              <option value={opt}>{opt}</option>
-            {/each}
-          </select>
-        </div>
-        <div class="control" title="Send a sample prompt to the selected model.">
-          <label>Test Model</label>
-          <button on:click={handleTestModel}>Test</button>
-        </div>
-        {#if testReply}
-          <p class="status" data-testid="lrm-test-reply">{testReply}</p>
-        {/if}
-      {/if}
       <div class="control" title="Clear all save data.">
         <Trash2 />
         <label>Wipe Save Data</label>
@@ -232,8 +244,26 @@
         <input type="file" accept=".afsave" on:change={handleImport} />
       </div>
     </div>
-    <div class="col">
-      <h4>Gameplay</h4>
+  {:else if activeTab === 'llm' && showLrm}
+    <div class="panel">
+      <div class="control" title="Select language reasoning model.">
+        <label>LRM Model</label>
+        <select bind:value={lrmModel} on:change={handleModelChange}>
+          {#each lrmOptions as opt}
+            <option value={opt}>{opt}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="control" title="Send a sample prompt to the selected model.">
+        <label>Test Model</label>
+        <button on:click={handleTestModel}>Test</button>
+      </div>
+      {#if testReply}
+        <p class="status" data-testid="lrm-test-reply">{testReply}</p>
+      {/if}
+    </div>
+  {:else if activeTab === 'gameplay'}
+    <div class="panel">
       <div class="control" title="Automatically craft materials when possible.">
         <label>Autocraft</label>
         <input type="checkbox" bind:checked={autocraft} on:change={handleAutocraftToggle} />
@@ -244,7 +274,8 @@
         <button on:click={handleEndRun} disabled={!runId}>End</button>
       </div>
     </div>
-  </div>
+  {/if}
+
   <div class="actions">
     {#if saveStatus}
       <p class="status" data-testid="save-status">{saveStatus}</p>
@@ -253,21 +284,36 @@
 </div>
 
 <style>
-  .cols {
-    display: flex;
-    gap: 1rem;
+  .tabbed {
+    min-width: 600px;
+    min-height: 360px;
   }
 
-  .col {
-    flex: 1;
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .tabs button {
+    border: 2px solid #fff;
+    background: #0a0a0a;
+    color: #fff;
+    padding: 0.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tabs button.active {
+    background: #fff;
+    color: #0a0a0a;
+  }
+
+  .panel {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-  }
-
-  h4 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1rem;
   }
 
   .control {

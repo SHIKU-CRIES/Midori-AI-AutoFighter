@@ -162,7 +162,7 @@
 {/if}
 
 {#if $overlayView === 'settings'}
-  <PopupWindow title="Settings" zIndex={1300} on:close={() => dispatch('back')}>
+  <PopupWindow title="Settings" maxWidth="960px" maxHeight="90vh" zIndex={1300} on:close={() => dispatch('back')}>
     <SettingsMenu
       {sfxVolume}
       {musicVolume}

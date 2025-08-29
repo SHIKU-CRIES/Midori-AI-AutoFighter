@@ -23,12 +23,26 @@ class KillerInstinct(RelicBase):
         buffs: dict[int, tuple[PlayerBase, object]] = {}
 
         def _ultimate(user) -> None:
+            # Emit relic effect event for ultimate ATK boost
+            BUS.emit("relic_effect", "killer_instinct", user, "ultimate_atk_boost", 75, {
+                "atk_percentage": 75,
+                "trigger": "ultimate_used",
+                "duration": "1_turn"
+            })
+
             mod = create_stat_buff(user, name=f"{self.id}_atk", atk_mult=1.75, turns=1)
             user.effect_manager.add_modifier(mod)
             buffs[id(user)] = (user, mod)
 
         def _damage(target, attacker, amount) -> None:
             if target.hp <= 0 and id(attacker) in buffs:
+                # Emit relic effect event for extra turn
+                BUS.emit("relic_effect", "killer_instinct", attacker, "extra_turn_grant", 1, {
+                    "trigger": "kill",
+                    "victim": getattr(target, 'id', str(target)),
+                    "killer_damage": amount
+                })
+
                 BUS.emit("extra_turn", attacker)
 
         def _turn_end() -> None:

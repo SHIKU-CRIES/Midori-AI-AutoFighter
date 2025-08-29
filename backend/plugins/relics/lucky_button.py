@@ -27,6 +27,12 @@ class LuckyButton(RelicBase):
             pid = id(attacker)
             pending[pid] = pending.get(pid, 0) + 1
 
+            # Emit relic effect event for crit miss tracking
+            BUS.emit("relic_effect", "lucky_button", attacker, "crit_missed_tracked", 1, {
+                "target": getattr(target, 'id', str(target)),
+                "pending_stacks": pending[pid]
+            })
+
         def _turn_start() -> None:
             for pid, stacks in list(pending.items()):
                 member = next((m for m in party.members if id(m) == pid), None)
@@ -38,6 +44,12 @@ class LuckyButton(RelicBase):
                     active[pid] = (member, effect)
                 for _ in range(stacks):
                     effect.apply(member)
+
+                # Emit relic effect event for critical boost application
+                BUS.emit("relic_effect", "lucky_button", member, "critical_boost_applied", stacks, {
+                    "boost_stacks": stacks,
+                    "from_missed_crits": True
+                })
             pending.clear()
 
         def _turn_end() -> None:

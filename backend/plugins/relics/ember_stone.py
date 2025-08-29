@@ -21,7 +21,18 @@ class EmberStone(RelicBase):
             if attacker is None or target not in party.members:
                 return
             if target.hp <= target.max_hp * 0.25:
-                dmg = int(target.atk * 0.5)
+                stacks = party.relics.count(self.id)
+                dmg = int(target.atk * 0.5 * stacks)
+
+                # Emit relic effect event for burn counter-attack
+                BUS.emit("relic_effect", "ember_stone", target, "burn_counter", dmg, {
+                    "trigger_condition": "below_25_percent_hp",
+                    "current_hp_percentage": (target.hp / target.max_hp) * 100,
+                    "burn_damage": dmg,
+                    "attacker": getattr(attacker, 'id', str(attacker)),
+                    "stacks": stacks
+                })
+
                 asyncio.create_task(attacker.apply_damage(dmg, attacker=target))
         BUS.subscribe("damage_taken", _burn)
 

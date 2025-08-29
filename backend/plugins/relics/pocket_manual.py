@@ -28,6 +28,13 @@ class PocketManual(RelicBase):
             if counts[pid] % 10 == 0:
                 base = int(amount * 0.03)
                 if base > 0:
+                    # Emit relic effect event
+                    BUS.emit("relic_effect", "pocket_manual", attacker, "trigger_aftertaste", base, {
+                        "hit_count": counts[pid],
+                        "original_damage": amount,
+                        "aftertaste_damage": base
+                    })
+
                     effect = Aftertaste(base_pot=base)
                     asyncio.get_event_loop().create_task(
                         effect.apply(attacker, target)

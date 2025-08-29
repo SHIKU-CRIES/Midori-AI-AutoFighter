@@ -1,9 +1,15 @@
 # Settings Menu
 
-The settings overlay exposes audio, system, and gameplay options.
+The settings overlay now uses a tabbed layout with icon-only buttons
+for each category:
 
-- `SettingsMenu.svelte` receives `backendFlavor` from the page and
-  checks it for `"llm"` to decide whether language reasoning model
-  controls should appear.
-- When the flavor string omits `"llm"`, the component skips
-  `getLrmConfig()` and hides the LRM model selector and test button.
+- **Audio**: `Volume2` icon.
+- **System**: `Cog` icon.
+- **LLM**: `Brain` icon, shown only when language model controls are
+  available.
+- **Gameplay**: `Gamepad` icon.
+
+`SettingsMenu.svelte` receives `backendFlavor` from the page and
+checks it for `"llm"` to decide whether the LLM tab should appear. When
+the flavor string omits `"llm"`, the component skips `getLrmConfig()`
+and hides the model selector and test button.
