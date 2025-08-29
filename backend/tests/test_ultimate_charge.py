@@ -1,7 +1,5 @@
 import pytest
 
-from autofighter.party import Party
-from autofighter.rooms.battle import BattleRoom
 from autofighter.stats import BUS
 from autofighter.stats import Stats
 from plugins.damage_types.generic import Generic
@@ -17,19 +15,28 @@ def test_charge_accumulates_and_caps():
     assert player.ultimate_ready is True
 
 
-@pytest.mark.asyncio
-async def test_ice_allies_gain_charge():
+def test_charge_from_multiple_ally_actions():
     actor = PlayerBase(damage_type=Generic())
-    actor.id = "actor"
     ice = PlayerBase(damage_type=Ice())
-    ice.id = "ice"
-    foe = Stats()
-    foe.id = "foe"
-    foe.hp = 50
-    room = BattleRoom()
-    party = Party(members=[actor, ice])
-    await room.resolve(party, {}, foe=foe)
-    assert ice.ultimate_charge == actor.actions_per_turn
+    ice.handle_ally_action(actor)
+    ice.handle_ally_action(actor)
+    assert ice.ultimate_charge == actor.actions_per_turn * 2
+
+
+@pytest.mark.asyncio
+async def test_ice_ultimate_damage_scaling():
+    user = PlayerBase(damage_type=Ice())
+    user._base_atk = 10
+    foe_a = Stats()
+    foe_b = Stats()
+    for idx, foe in enumerate([foe_a, foe_b], start=1):
+        foe.id = f"f{idx}"
+        foe._base_defense = 1
+        foe._base_max_hp = 2000
+        foe.hp = foe.max_hp
+    await user.damage_type.ultimate(user, [foe_a, foe_b])
+    assert foe_a.hp == 2000 - 100 * 6
+    assert foe_b.hp == 2000 - 169 * 6
 
 
 def test_use_ultimate_emits_event():

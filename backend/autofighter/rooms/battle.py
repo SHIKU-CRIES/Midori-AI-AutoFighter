@@ -372,11 +372,7 @@ class BattleRoom(Room):
                                 pass
                 member.add_ultimate_charge(member.actions_per_turn)
                 for ally in combat_party.members:
-                    if ally is member:
-                        continue
-                    dt = getattr(ally, "damage_type", None)
-                    if getattr(dt, "id", "").lower() == "ice":
-                        ally.add_ultimate_charge(member.actions_per_turn)
+                    ally.handle_ally_action(member)
                 # Keep prior enrage bleed: every 10 stacks since activation,
                 # add increasing stacks of a %max HP DoT to both sides.
                 if enrage_active:
