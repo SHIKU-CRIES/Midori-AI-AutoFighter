@@ -245,6 +245,61 @@
     gap: 0.75rem;
     max-width: 960px;
   }
+  .effects-summary {
+    margin-top: 0.75rem;
+    border: var(--glass-border);
+    background: rgba(0,0,0,0.4);
+    padding: 0.75rem;
+    border-radius: 4px;
+  }
+  .effects-header {
+    font-size: 0.85rem;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+  }
+  .effects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .effects-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .effects-column-title {
+    font-size: 0.75rem;
+    color: #aaa;
+    margin-bottom: 0.25rem;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .effect-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .effect-name {
+    font-size: 0.72rem;
+    color: #ddd;
+    font-weight: 500;
+  }
+  .effect-count {
+    font-size: 0.7rem;
+    color: #bbb;
+    font-weight: 600;
+    background: rgba(255,255,255,0.1);
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+  }
 </style>
 
 <div class="layout review">
@@ -433,6 +488,12 @@
       <div>Result: {summary?.result || '—'}</div>
       <div>Duration: {summary?.duration_seconds ? Math.round(summary.duration_seconds) + 's' : '—'}</div>
       <div>Events: {fmt(summary?.event_count || (events?.length || 0))}</div>
+      {#if summary?.relic_effects && Object.keys(summary.relic_effects).length > 0}
+        <div>Relic Effects: {Object.values(summary.relic_effects).reduce((a, b) => a + b, 0)}</div>
+      {/if}
+      {#if summary?.card_effects && Object.keys(summary.card_effects).length > 0}
+        <div>Card Effects: {Object.values(summary.card_effects).reduce((a, b) => a + b, 0)}</div>
+      {/if}
       <span class="spacer"></span>
       <button class="mini-btn" on:click={toggleEvents}>{showEvents ? 'Hide' : 'Show'} Event Log</button>
     </div>
@@ -447,6 +508,37 @@
             <div class="event-row">[{ev.event_type}] {ev.attacker_id || '—'} → {ev.target_id || '—'}{ev.amount != null ? ` (${ev.amount})` : ''}{ev.damage_type ? ` [${ev.damage_type}]` : ''}{ev.source_type ? ` {${ev.source_type}}` : ''}</div>
           {/each}
         {/if}
+      </div>
+    {/if}
+    
+    <!-- Relic and Card Effects Summary -->
+    {#if (summary?.relic_effects && Object.keys(summary.relic_effects).length > 0) || (summary?.card_effects && Object.keys(summary.card_effects).length > 0)}
+      <div class="effects-summary">
+        <div class="effects-header">Effects Summary</div>
+        <div class="effects-grid">
+          {#if summary?.relic_effects && Object.keys(summary.relic_effects).length > 0}
+            <div class="effects-column">
+              <div class="effects-column-title">Relic Effects</div>
+              {#each Object.entries(summary.relic_effects).sort((a, b) => b[1] - a[1]) as [relicName, count]}
+                <div class="effect-item">
+                  <span class="effect-name">{relicName}</span>
+                  <span class="effect-count">×{count}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
+          {#if summary?.card_effects && Object.keys(summary.card_effects).length > 0}
+            <div class="effects-column">
+              <div class="effects-column-title">Card Effects</div>
+              {#each Object.entries(summary.card_effects).sort((a, b) => b[1] - a[1]) as [cardName, count]}
+                <div class="effect-item">
+                  <span class="effect-name">{cardName}</span>
+                  <span class="effect-count">×{count}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
       </div>
     {/if}
   </div>
