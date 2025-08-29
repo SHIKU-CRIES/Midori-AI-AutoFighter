@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Review Enhancement Demo</title>
+    <style>
+        body {
+            background: #111;
+            color: #ddd;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .demo-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .title {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .header {
+            font-size: 0.85rem;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .header > div {
+            background: rgba(255,255,255,0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .spacer { flex: 1; }
+        .mini-btn { 
+            border: 1px solid #888; 
+            background: #333; 
+            color: #fff; 
+            font-size: 0.7rem; 
+            padding: 0.3rem 0.6rem; 
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .effects-summary {
+            margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .effects-header {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .effects-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .effects-column-title {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .effect-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .effect-name {
+            font-size: 0.8rem;
+            color: #ddd;
+            font-weight: 500;
+        }
+        .effect-count {
+            font-size: 0.75rem;
+            color: #bbb;
+            font-weight: 600;
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+        .new-badge {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.6rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+        .description {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 6px;
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 class="title">🔧 Battle Review Enhancement Demo</h1>
+        
+        <div class="header">
+            <div>Result: victory</div>
+            <div>Duration: 45s</div>
+            <div>Events: 67</div>
+            <div style="color: #4CAF50;">Relic Effects: 6 <span class="new-badge">NEW</span></div>
+            <div style="color: #4CAF50;">Card Effects: 7 <span class="new-badge">NEW</span></div>
+            <span class="spacer"></span>
+            <button class="mini-btn">Show Event Log</button>
+        </div>
+
+        <div class="effects-summary">
+            <div class="effects-header">Effects Summary <span class="new-badge">NEW FEATURE</span></div>
+            <div class="effects-grid">
+                <div class="effects-column">
+                    <div class="effects-column-title">Relic Effects</div>
+                    <div class="effect-item">
+                        <span class="effect-name">echo_bell</span>
+                        <span class="effect-count">×3</span>
+                    </div>
+                    <div class="effect-item">
+                        <span class="effect-name">rusty_buckle</span>
+                        <span class="effect-count">×2</span>
+                    </div>
+                    <div class="effect-item">
+                        <span class="effect-name">null_lantern</span>
+                        <span class="effect-count">×1</span>
+                    </div>
+                </div>
+                <div class="effects-column">
+                    <div class="effects-column-title">Card Effects</div>
+                    <div class="effect-item">
+                        <span class="effect-name">swift_footwork</span>
+                        <span class="effect-count">×4</span>
+                    </div>
+                    <div class="effect-item">
+                        <span class="effect-name">elemental_spark</span>
+                        <span class="effect-count">×2</span>
+                    </div>
+                    <div class="effect-item">
+                        <span class="effect-name">overclock</span>
+                        <span class="effect-count">×1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="description">
+            <strong>✅ Problem Solved!</strong><br><br>
+            
+            <strong>Primary Issue Fixed:</strong> The ElementalSpark card (and similar items) were crashing with "TypeError: takes 0 positional arguments but 1 was given" because their battle_start event handlers didn't accept the required entity parameter.<br><br>
+            
+            <strong>Enhanced User Experience:</strong> The battle review screen now shows exactly which relics and cards activated during battle, providing clear feedback that your build is working as intended. Users can see:<br>
+            • Total effect counts in the main header<br>
+            • Detailed breakdown of which specific items triggered<br>
+            • How many times each effect activated<br><br>
+            
+            <strong>Items Fixed:</strong> ElementalSpark card, SwiftFootwork card, EchoBell relic, EchoingDrum relic
+        </div>
+    </div>
+</body>
+</html>
