@@ -93,11 +93,10 @@
 
 {#if $overlayView === 'party'}
   <OverlaySurface zIndex={1300}>
-    <PartyPicker bind:selected {reducedMotion} />
-    <div class="stained-glass-row">
-      <button class="icon-btn" on:click={() => dispatch('saveParty')}>Save Party</button>
-      <button class="icon-btn" on:click={() => dispatch('back')}>Cancel</button>
-    </div>
+    <PartyPicker bind:selected {reducedMotion}
+      on:save={() => dispatch('saveParty')}
+      on:cancel={() => dispatch('back')}
+    />
   </OverlaySurface>
 {/if}
 
@@ -131,11 +130,11 @@
 
 {#if $overlayView === 'party-start'}
   <OverlaySurface>
-    <PartyPicker bind:selected {reducedMotion} />
-    <div class="stained-glass-row">
-      <button class="icon-btn" on:click={() => dispatch('startRun')}>Start Run</button>
-      <button class="icon-btn" on:click={() => dispatch('back')}>Cancel</button>
-    </div>
+    <PartyPicker bind:selected {reducedMotion}
+      actionLabel="Start Run"
+      on:save={() => dispatch('startRun')}
+      on:cancel={() => dispatch('back')}
+    />
   </OverlaySurface>
 {/if}
 
@@ -297,6 +296,19 @@
     box-shadow: var(--glass-shadow);
     border: var(--glass-border);
     backdrop-filter: var(--glass-filter);
+  }
+
+  /* Party actions: stack full-width buttons vertically */
+  .party-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .party-actions .icon-btn {
+    width: 100%;
+    height: auto;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    justify-content: center;
   }
 
   .icon-btn {

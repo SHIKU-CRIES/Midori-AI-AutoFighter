@@ -1,5 +1,6 @@
 <script>
   import { getElementIcon, getElementColor } from './assetLoader.js';
+  import { createEventDispatcher } from 'svelte';
 
   /**
    * Displays the available roster and handles character selection.
@@ -15,9 +16,38 @@
   export let previewId;
   export let compact = false;
   export let reducedMotion = false;
+  const dispatch = createEventDispatcher();
 
-  function select(id) {
+  function select(id, e) {
+    // Suppress the single-click select if a long-press just toggled
+    if (suppressClick) {
+      suppressClick = false;
+      e && e.stopPropagation();
+      e && e.preventDefault();
+      return;
+    }
     previewId = id;
+  }
+
+  function toggle(id) {
+    dispatch('toggle', id);
+  }
+
+  // Long-press detection
+  let longTimer = null;
+  let longTriggered = false;
+  let suppressClick = false;
+  function onPointerDown(id, e) {
+    longTriggered = false;
+    clearTimeout(longTimer);
+    longTimer = setTimeout(() => {
+      longTriggered = true;
+      suppressClick = true;
+      toggle(id);
+    }, 500);
+  }
+  function onPointerUp() {
+    clearTimeout(longTimer);
   }
 
   // Deterministic pseudo-random from an id string
@@ -49,7 +79,11 @@
     <button
       data-testid={`choice-${char.id}`}
       class="char-btn"
-      on:click={() => select(char.id)}>
+      on:click={(e) => select(char.id, e)}
+      on:dblclick={() => toggle(char.id)}
+      on:pointerdown={(e) => onPointerDown(char.id, e)}
+      on:pointerup={onPointerUp}
+      on:pointerleave={onPointerUp}>
       <img src={char.img} alt={char.name} class="compact-img" />
     </button>
   {/each}
@@ -63,7 +97,11 @@
       class="char-row"
       class:selected={selected.includes(char.id)}
       class:reduced={reducedMotion}
-      on:click={() => select(char.id)}
+      on:click={(e) => select(char.id, e)}
+      on:dblclick={() => toggle(char.id)}
+      on:pointerdown={(e) => onPointerDown(char.id, e)}
+      on:pointerup={onPointerUp}
+      on:pointerleave={onPointerUp}
       style={`border-color: ${getElementColor(char.element)}; --el-color: ${getElementColor(char.element)}; --sweep-delay: ${sweepDelay(char.id)}s; --sweep-duration: ${sweepDuration(char.id)}s;`}> 
       <img src={char.img} alt={char.name} class="row-img" />
       <span class="row-name">{char.name}</span>

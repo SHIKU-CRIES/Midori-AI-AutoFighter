@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import { getPlayers } from './api.js';
   import { getCharacterImage, getHourlyBackground, getRandomFallback } from './assetLoader.js';
   import MenuPanel from './MenuPanel.svelte';
@@ -15,6 +16,9 @@
   export let compact = false;
   let previewId;
   export let reducedMotion = false;
+  // Label for the primary action; overlays set this to "Save Party" or "Start Run"
+  export let actionLabel = 'Save Party';
+  const dispatch = createEventDispatcher();
 
   onMount(async () => {
     background = getHourlyBackground();
@@ -64,13 +68,19 @@
 </script>
 
 {#if compact}
-  <PartyRoster {roster} {selected} bind:previewId {compact} {reducedMotion} />
+  <PartyRoster {roster} {selected} bind:previewId {compact} {reducedMotion} on:toggle={(e) => toggleMember(e.detail)} />
 {:else}
   <MenuPanel style={`background-image: url(${background}); background-size: cover;`}>
     <div class="full" data-testid="party-picker">
-      <PartyRoster {roster} {selected} bind:previewId {reducedMotion} />
+      <PartyRoster {roster} {selected} bind:previewId {reducedMotion} on:toggle={(e) => toggleMember(e.detail)} />
       <PlayerPreview {roster} {previewId} />
-      <StatTabs {roster} {previewId} {selected} on:toggle={(e) => toggleMember(e.detail)} />
+      <div class="right-col">
+        <StatTabs {roster} {previewId} {selected} on:toggle={(e) => toggleMember(e.detail)} />
+        <div class="party-actions-inline">
+          <button class="wide" on:click={() => dispatch('save')}>{actionLabel}</button>
+          <button class="wide" on:click={() => dispatch('cancel')}>Cancel</button>
+        </div>
+      </div>
     </div>
   </MenuPanel>
 {/if}
@@ -85,5 +95,7 @@
     max-height: 98%;
     /* allow internal scrolling instead of clipping when content grows */
   }
-  /* no additional right column wrappers */
+  .right-col { display: flex; flex-direction: column; min-height: 0; }
+  .party-actions-inline { display:flex; gap:0.5rem; margin-top: 0.5rem; }
+  .party-actions-inline .wide { flex: 1; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.5); color:#fff; padding: 0.45rem 0.8rem; }
 </style>

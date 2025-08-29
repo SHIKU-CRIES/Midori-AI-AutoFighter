@@ -4,7 +4,7 @@
   Emits high-level navigation events without managing run logic.
 -->
 <script>
-  import { Diamond, User, Settings, Swords, ArrowLeft, Package } from 'lucide-svelte';
+  import { Diamond, Users, Settings, Swords, ArrowLeft, Package } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
 
   export let battleActive = false;
@@ -30,6 +30,9 @@
         <Package size={22} color="#fff" />
       </button>
     {/if}
+    <button class="icon-btn" title="Party Menu" on:click={() => dispatch('openParty')} disabled={battleActive}>
+      <Users size={22} color="#fff" />
+    </button>
     <!-- Player Editor button removed per design -->
     <button class="icon-btn" title="Settings" on:click={() => dispatch('settings')}>
       <Settings size={22} color="#fff" />

@@ -621,6 +621,7 @@
     on:startRun={handleStart}
     on:editorSave={(e) => handleEditorSave(e)}
     on:openInventory={openInventory}
+    on:openParty={handleParty}
     on:back={backOverlay}
     on:home={homeOverlay}
     on:settings={() => openOverlay('settings')}

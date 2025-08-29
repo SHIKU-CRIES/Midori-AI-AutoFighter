@@ -24,7 +24,6 @@
   import { createEventDispatcher } from 'svelte';
   import PlayerEditor from './PlayerEditor.svelte';
   import { getPlayerConfig } from './api.js';
-  import { getPlayerConfig } from './api.js';
 
   /**
    * Renders the stats panel with category tabs and a toggle control.
