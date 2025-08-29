@@ -20,7 +20,7 @@ class SwiftFootwork(CardBase):
 
         used: set[int] = set()
 
-        def _battle_start() -> None:
+        def _battle_start(entity) -> None:
             used.clear()
 
         def _action_used(actor, *_args) -> None:
