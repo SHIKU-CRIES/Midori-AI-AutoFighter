@@ -11,7 +11,7 @@
   import PartyPicker from './PartyPicker.svelte';
   import PullsMenu from './PullsMenu.svelte';
   import CraftingMenu from './CraftingMenu.svelte';
-  import RewardOverlay from './RewardOverlay.svelte';
+  import BattleReview from './BattleReview.svelte';
   import PlayerEditor from './PlayerEditor.svelte';
   import InventoryPanel from './InventoryPanel.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
@@ -180,17 +180,21 @@
 
 {#if rewardOpen}
   <OverlaySurface zIndex={1100}>
-    <PopupWindow title="Battle Rewards" maxWidth="880px" maxHeight="95vh" zIndex={1100} on:close={() => dispatch('nextRoom')}>
-      <RewardOverlay
-        gold={lootConsumed ? 0 : roomData.loot?.gold || 0}
+    <PopupWindow
+      title="Battle Review"
+      maxWidth="880px"
+      maxHeight="95vh"
+      zIndex={1100}
+      on:close={() => dispatch('nextRoom')}
+    >
+      <BattleReview
+        runId={runId}
+        battleIndex={roomData?.battle_index || 0}
+        party={(roomData?.party || []).map((p) => p.id)}
+        foes={(roomData?.foes || []).map((f) => f.id)}
         cards={roomData.card_choices || []}
         relics={roomData.relic_choices || []}
-        items={lootConsumed ? [] : roomData.loot?.items || []}
-        partyStats={roomData.party || []}
-        ended={Boolean(roomData?.ended)}
-        nextRoom={roomData?.next_room}
         on:select={(e) => dispatch('rewardSelect', e.detail)}
-        on:next={() => dispatch('nextRoom')}
       />
     </PopupWindow>
   </OverlaySurface>

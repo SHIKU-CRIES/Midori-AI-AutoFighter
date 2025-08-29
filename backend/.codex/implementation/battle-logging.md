@@ -33,6 +33,7 @@ Each battle summary includes:
 - Total hits landed by each participant
 - Battle duration and result
 - Participant lists (party members and foes)
+- Damage totals by element for each combatant
 
 ### Usage
 
@@ -139,3 +140,14 @@ Total Events: 45
 - Does not interfere with existing logging to `backend.log`
 - Logs are organized by run ID and battle index for easy navigation
 - Each battle gets its own logger instance to prevent interference
+
+## Battle Review API
+
+The latest battle summary can be fetched using:
+
+```
+GET /run/<run_id>/battles/<index>/summary
+```
+
+This endpoint returns the `battle_summary.json` data, enabling clients to
+render post-battle review screens with per-element damage breakdowns.

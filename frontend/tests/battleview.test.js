@@ -12,8 +12,8 @@ describe('BattleView enrage handling', () => {
     expect(battleView).toContain('EnrageIndicator');
   });
   test('enrage indicator defines animation', () => {
-    expect(enrageIndicator).toContain('@keyframes enrage-bg');
-    expect(enrageIndicator).toContain('--flash-duration');
+    expect(enrageIndicator).toContain('@keyframes driftX');
+    expect(enrageIndicator).toContain('enrage-orbs');
   });
 });
 

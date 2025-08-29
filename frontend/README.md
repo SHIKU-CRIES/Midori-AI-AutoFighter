@@ -45,10 +45,11 @@ effects into a single icon with a stack count. The previous blue/red enrage
 flashing was replaced by subtle, color‑shifting orbs that float during combat
 and gracefully fade after battles; Reduced Motion disables their animation.
 
-After each battle, any returned `card_choices` trigger a reward overlay that
-uses `CardArt.svelte` and `CurioChoice.svelte` to build card and relic panels
-from `src/lib/assets`. Gold and item drops float briefly on screen before the
-overlay appears.
+After each battle, a review overlay presents per-combatant damage graphs by
+element and lists any card or relic rewards. `CardArt.svelte` and
+`CurioChoice.svelte` power the selection panels using assets from
+`src/lib/assets`. Gold and item drops float briefly on screen before the overlay
+appears.
 Placeholder icons for items, relics, and cards live under `src/lib/assets/{items,relics,cards}`. Asset names combine the star folder and base filename (e.g. `3star/omega_core.png`) so the frontend can resolve the correct image for a given reward. Each damage type or star rank has its own folder with 24×24 colored placeholders so artists can replace them later.
 
 ## Settings: Wipe Save Data
