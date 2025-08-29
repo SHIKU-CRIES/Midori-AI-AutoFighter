@@ -58,6 +58,19 @@
       init.settings);
     roster = init.roster;
     startGameMusic(musicVolume);
+    // Ensure music starts after first user gesture if autoplay was blocked
+    try {
+      const { resumeGameMusic } = await import('./viewportState.js');
+      const resumeOnce = () => { resumeGameMusic(); cleanup(); };
+      const cleanup = () => {
+        try {
+          window.removeEventListener('pointerdown', resumeOnce);
+          window.removeEventListener('keydown', resumeOnce);
+        } catch {}
+      };
+      window.addEventListener('pointerdown', resumeOnce, { once: true });
+      window.addEventListener('keydown', resumeOnce, { once: true });
+    } catch {}
   });
 
   onDestroy(() => {

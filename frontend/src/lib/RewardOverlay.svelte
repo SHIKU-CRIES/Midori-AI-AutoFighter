@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import RewardCard from './RewardCard.svelte';
   import CurioChoice from './CurioChoice.svelte';
 
@@ -12,6 +12,9 @@
   export let nextRoom = '';
 
   const dispatch = createEventDispatcher();
+
+  // Render immediately; CSS animations handle reveal on mount
+  onMount(() => {});
 
   function titleForItem(item) {
     if (!item) return '';
@@ -87,23 +90,61 @@
     padding-left: 1rem;
     text-align: left;
   }
+  /* CSS-based reveal: slide the whole card, twinkles appear first, then card fades in */
+  @keyframes overlay-slide {
+    0%   { transform: translateY(-40px); }
+    100% { transform: translateY(0); }
+  }
+  /* Twinkles fade in early to "form" the card */
+  @keyframes overlay-twinkle-fade {
+    0%   { opacity: 0; }
+    20%  { opacity: 0.6; }
+    40%  { opacity: 1; }
+    100% { opacity: 1; }
+  }
+  /* Card content fades in later than twinkles */
+  @keyframes overlay-card-fade {
+    0%   { opacity: 0; }
+    30%  { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  .reveal {
+    animation: overlay-slide 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  /* Target the CardArt twinkles layer only */
+  .reveal :global(.twinkles) {
+    opacity: 0;
+    animation: overlay-twinkle-fade 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--delay, 0ms);
+  }
+  /* Fade in the card content (including photo/box) slightly after twinkles */
+  .reveal :global(.card-art) {
+    opacity: 0;
+    animation: overlay-card-fade 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--delay, 0ms);
+  }
   
 </style>
 
 <div class="layout">
   {#if showCards}
-    <h3 class="section-title">Choose a Card</h3>
-    <div class="choices">
-        {#each cards.slice(0,3) as card}
-          <RewardCard entry={card} type="card" on:select={handleSelect} />
+  <h3 class="section-title">Choose a Card</h3>
+  <div class="choices">
+        {#each cards.slice(0,3) as card, i (card.id)}
+          <div class="reveal" style={`--delay: ${i * 120}ms`}>
+            <RewardCard entry={card} type="card" on:select={handleSelect} />
+          </div>
         {/each}
     </div>
   {/if}
   {#if showRelics}
-    <h3 class="section-title">Choose a Relic</h3>
-    <div class="choices">
-        {#each relics.slice(0,3) as relic}
-          <CurioChoice entry={relic} on:select={handleSelect} />
+  <h3 class="section-title">Choose a Relic</h3>
+  <div class="choices">
+        {#each relics.slice(0,3) as relic, i (relic.id)}
+          <div class="reveal" style={`--delay: ${i * 120}ms`}>
+            <CurioChoice entry={relic} on:select={handleSelect} />
+          </div>
         {/each}
     </div>
   {/if}
@@ -121,9 +162,5 @@
   {#if gold}
     <div class="status">Gold +{gold}</div>
   {/if}
-  <div class="status">
-    <button class="icon-btn" on:click={() => dispatch('next')} disabled={remaining > 0}>
-      {ended ? 'End Run' : 'Next Room'}
-    </button>
-  </div>
+  <!-- Next button removed; auto-advance remains when no choices/loot -->
 </div>

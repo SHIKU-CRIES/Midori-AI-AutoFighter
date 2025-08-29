@@ -102,7 +102,7 @@
         <div class="grid">
           {#each displayCards as item (item.key)}
             <div class={`cell ${soldKeys.has(item.key) ? 'dim sold' : ''}`}>
-              <RewardCard entry={item} type="card" quiet={true} disabled={soldKeys.has(item.key)} on:select={() => buy(item)} />
+              <RewardCard entry={item} type="card" disabled={soldKeys.has(item.key)} on:select={() => buy(item)} />
               <div class="buybar">
                 <button class="buy" disabled={soldKeys.has(item.key) || priceOf(item) > gold} on:click={() => buy(item)}>
                   {#if soldKeys.has(item.key)}Sold{:else}<Coins size={14} class="coin-icon" /> {priceOf(item)}{/if}
@@ -121,7 +121,7 @@
         <div class="grid">
           {#each displayRelics as item (item.key)}
             <div class={`cell ${soldKeys.has(item.key) ? 'dim sold' : ''}`}>
-              <CurioChoice entry={item} quiet={true} disabled={soldKeys.has(item.key)} on:select={() => buy(item)} />
+              <CurioChoice entry={item} disabled={soldKeys.has(item.key)} on:select={() => buy(item)} />
               <div class="buybar">
                 <button class="buy" disabled={soldKeys.has(item.key) || priceOf(item) > gold} on:click={() => buy(item)}>
                   {#if soldKeys.has(item.key)}Sold{:else}<Coins size={14} class="coin-icon" /> {priceOf(item)}{/if}

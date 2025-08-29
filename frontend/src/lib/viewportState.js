@@ -103,3 +103,17 @@ export function stopGameMusic() {
     gameAudio = null;
   }
 }
+
+export function resumeGameMusic() {
+  // Try to start or resume playback after a user gesture
+  try {
+    if (gameAudio) {
+      if (gameAudio.paused) {
+        gameAudio.volume = currentMusicVolume / 100;
+        gameAudio.play().catch(() => {});
+      }
+    } else {
+      startGameMusic();
+    }
+  } catch {}
+}
