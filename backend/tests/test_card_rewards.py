@@ -16,6 +16,7 @@ import autofighter.rooms.battle as rooms_module
 from autofighter.stats import BUS
 from autofighter.stats import Stats
 from plugins.effects.critical_boost import CriticalBoost
+from plugins.players._base import PlayerBase
 
 NEW_CARDS: list[tuple[str, dict[str, float]]] = [
     ("lightweight_boots", {"dodge_odds": 0.03}),
@@ -162,8 +163,8 @@ async def test_critical_focus_grants_boost():
 
 @pytest.mark.asyncio
 async def test_critical_transfer_moves_stacks():
-    a = Stats()
-    b = Stats()
+    a = PlayerBase()
+    b = PlayerBase()
     party = Party(members=[a, b])
     award_card(party, "critical_transfer")
     await cards_module.apply_cards(party)
@@ -176,7 +177,9 @@ async def test_critical_transfer_moves_stacks():
     cb_b.apply(b)
     setattr(b, "_critical_boost", cb_b)
     base_atk = a.atk
-    BUS.emit("ultimate_used", a)
+    a.add_ultimate_charge(15)
+    a.use_ultimate()
+    await asyncio.sleep(0)
     assert getattr(a, "_critical_boost").stacks == 3
     assert a.atk == int(base_atk * 1.12)
 

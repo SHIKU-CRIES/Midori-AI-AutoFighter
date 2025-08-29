@@ -7,6 +7,7 @@ from dataclasses import fields
 import logging
 
 from autofighter.character import CharacterType
+from autofighter.stats import BUS
 from autofighter.stats import Stats
 from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
@@ -148,6 +149,15 @@ class PlayerBase(Stats):
             val = getattr(self, name)
             setattr(result, name, copy.deepcopy(val, memo))
         return result
+
+    def use_ultimate(self) -> bool:
+        """Consume charge and emit an event when firing the ultimate."""
+        if not getattr(self, "ultimate_ready", False):
+            return False
+        self.ultimate_charge = 0
+        self.ultimate_ready = False
+        BUS.emit("ultimate_used", self)
+        return True
 
 
     async def send_lrm_message(self, message: str) -> str:

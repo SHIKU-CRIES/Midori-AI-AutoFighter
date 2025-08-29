@@ -13,6 +13,16 @@ import plugins.event_bus as event_bus_module
 from plugins.players._base import PlayerBase
 
 
+class DummyPlayer(Stats):
+    def use_ultimate(self) -> bool:
+        if not self.ultimate_ready:
+            return False
+        self.ultimate_charge = 0
+        self.ultimate_ready = False
+        BUS.emit("ultimate_used", self)
+        return True
+
+
 @pytest.mark.asyncio
 async def test_frost_sigil_applies_chill(monkeypatch):
     event_bus_module.bus._subs.clear()
@@ -69,14 +79,15 @@ async def test_frost_sigil_stacks(monkeypatch):
 def test_killer_instinct_grants_extra_turn():
     event_bus_module.bus._subs.clear()
     party = Party()
-    a = PlayerBase()
-    b = PlayerBase()
+    a = DummyPlayer()
+    b = DummyPlayer()
     b.hp = 10
     party.members.append(a)
     award_relic(party, "killer_instinct")
     apply_relics(party)
     base = a.atk
-    BUS.emit("ultimate_used", a)
+    a.add_ultimate_charge(15)
+    a.use_ultimate()
     assert a.atk > base
     turns: list[PlayerBase] = []
     BUS.subscribe("extra_turn", lambda m: turns.append(m))
