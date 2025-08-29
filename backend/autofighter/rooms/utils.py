@@ -27,14 +27,14 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     starter_int = 1.0 + random.uniform(-0.05, 0.05)
     # Calculate cumulative room progression: (floors - 1) * rooms_per_floor + current_room_index
     cumulative_rooms = (node.floor - 1) * MapGenerator.rooms_per_floor + node.index
-    room_mult = starter_int + 0.10 * max(cumulative_rooms - 1, 0)
-    loop_mult = starter_int + 0.20 * max(node.loop - 1, 0)
+    room_mult = starter_int + 0.55 * max(cumulative_rooms - 1, 0)
+    loop_mult = starter_int + 0.30 * max(node.loop - 1, 0)
     pressure_mult = 1.0 * max(node.pressure, 1)
     base_mult = max(strength * room_mult * loop_mult * pressure_mult, 0.5)
 
     # Apply a global pre-scale debuff to foes so they are significantly weaker
-    # before room modifiers are applied. This reduces core combat stats by 10x.
-    foe_debuff = 0.1 if isinstance(obj, FoeBase) else 1.0
+    # before room modifiers are applied.
+    foe_debuff = 0.5 if isinstance(obj, FoeBase) else 1.0
     if foe_debuff != 1.0:
         try:
             if hasattr(obj, "atk") and isinstance(obj.atk, (int, float)):
