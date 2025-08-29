@@ -42,6 +42,16 @@
 
   // Generate colors for different action types
   function getActionBarColor(action) {
+    // Handle element-specific Aftertaste actions (e.g., "Aftertaste (Fire)")
+    if (action.startsWith('Aftertaste (') && action.endsWith(')')) {
+      const elementMatch = action.match(/Aftertaste \((\w+)\)/);
+      if (elementMatch) {
+        const element = elementMatch[1];
+        // Use element-specific colors for mixed Aftertaste display
+        return getElementColor(element);
+      }
+    }
+    
     const colorMap = {
       'Normal Attack': '#ff6b35',
       'Dark Ultimate': '#9b59b6',
@@ -50,7 +60,7 @@
       'Lightning Ultimate': '#ffd93d',
       'Wind Ultimate': '#7dd3c0',
       'Light Ultimate': '#fff2b3',
-      'Aftertaste': '#e74c3c',
+      'Aftertaste': '#e74c3c', // Fallback for legacy data
       'Wind Spread': '#7dd3c0',
       // Fallback colors for any other actions
       'Ultimate': '#8e44ad',

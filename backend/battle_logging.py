@@ -432,7 +432,14 @@ class BattleLogger:
         if relic_name == "aftertaste" and effect_type == "damage" and amount:
             if entity_id not in self.summary.damage_by_action:
                 self.summary.damage_by_action[entity_id] = {}
-            self.summary.damage_by_action[entity_id]["Aftertaste"] = self.summary.damage_by_action[entity_id].get("Aftertaste", 0) + amount
+
+            # Create element-specific action name for Aftertaste to show mixed colors
+            action_name = "Aftertaste"
+            if details and "random_damage_type" in details:
+                damage_type = details["random_damage_type"]
+                action_name = f"Aftertaste ({damage_type})"
+
+            self.summary.damage_by_action[entity_id][action_name] = self.summary.damage_by_action[entity_id].get(action_name, 0) + amount
 
     def _on_card_effect(self, card_name, entity, effect_type=None, amount=None, details=None):
         """Handle card effect event."""
