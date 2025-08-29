@@ -78,6 +78,33 @@ def test_foe_scaling_room_progression_within_floor():
     assert foe2.atk > foe1.atk, f"Room 10 foe should be stronger than Room 5: {foe2.atk} > {foe1.atk}"
 
 
+def test_foe_level_cumulative_progression():
+    """Foe level should never decrease across floor transitions."""
+    foe1 = FoeBase()
+    foe1.atk = 100
+    foe1.defense = 50
+    foe1.max_hp = 1000
+    foe1.hp = 1000
+
+    foe2 = FoeBase()
+    foe2.atk = 100
+    foe2.defense = 50
+    foe2.max_hp = 1000
+    foe2.hp = 1000
+
+    node1 = MapNode(room_id=45, room_type="battle-normal", floor=1, index=45, loop=1, pressure=0)
+    node2 = MapNode(room_id=1, room_type="battle-normal", floor=2, index=1, loop=1, pressure=0)
+
+    random.seed(42)
+    _scale_stats(foe1, node1)
+    random.seed(42)
+    _scale_stats(foe2, node2)
+
+    assert foe2.level >= foe1.level, (
+        f"Floor 2 Room 1 foe level {foe2.level} should be ≥ Floor 1 Room 45 foe level {foe1.level}"
+    )
+
+
 def test_cumulative_room_calculation():
     """Test that cumulative room calculation matches expected values."""
     # Floor 1, Room 1 should be cumulative room 1
