@@ -4,6 +4,7 @@
   export let entry = {};
   export let type = 'card';
   export let size = 'normal';
+  export let quiet = false;
   const dispatch = createEventDispatcher();
   function handleClick() {
     dispatch('select', { type, id: entry?.id, entry });
@@ -29,7 +30,7 @@
 </script>
 
 <button class="card" type={btnType} aria-label={label} {tabIndex} role={role} aria-disabled={ariaDisabled} on:click={handleClick} on:keydown={onKey}>
-  <CardArt {entry} {type} {size} hideFallback={true} />
+  <CardArt {entry} {type} {size} hideFallback={true} {quiet} />
 </button>
 
 <style>

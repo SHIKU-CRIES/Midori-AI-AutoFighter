@@ -3,6 +3,7 @@
   import { createEventDispatcher } from 'svelte';
   export let entry = {};
   export let size = 'normal';
+  export let quiet = false;
   const dispatch = createEventDispatcher();
   function handleClick() {
     dispatch('select', { type: 'relic', id: entry?.id, entry });
@@ -20,7 +21,7 @@
 </script>
 
 <button class="curio" aria-label={`Select relic ${entry.name || entry.id}`} {tabIndex} aria-disabled={ariaDisabled} on:click={handleClick} on:keydown={onKey}>
-  <CardArt {entry} type="relic" roundIcon={true} {size} />
+  <CardArt {entry} type="relic" roundIcon={true} {size} {quiet} />
 </button>
 
 <style>

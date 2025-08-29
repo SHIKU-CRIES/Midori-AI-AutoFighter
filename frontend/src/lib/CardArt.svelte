@@ -4,6 +4,8 @@
   export let roundIcon = false;
   export let size = 'normal';
   export let hideFallback = false;
+  // When true, suppress ambient marks and border twinkles for cleaner embedding (e.g., shop)
+  export let quiet = false;
   import { getHourlyBackground } from './assetLoader.js';
   import { getGlyphArt } from './rewardLoader.js';
   const starColors = {
@@ -39,7 +41,7 @@
     }));
   }
   let marks = [];
-  $: marks = makeMarks(size === 'small' ? 14 : 24);
+  $: marks = quiet ? [] : makeMarks(size === 'small' ? 14 : 24);
   // Border twinkles configuration
   function makeTwinkles(count) {
     const sides = ['top','right','bottom','left'];
@@ -61,7 +63,7 @@
   $: twinkleCount = Math.round(baseTwinkles * twinkleFactor);
   // Nudge baseline alpha so 1-star is a bit more visible
   $: twinkleAlpha = Math.min(0.85, 0.60 + (starRank - 1) * 0.08);
-  $: twinkles = makeTwinkles(twinkleCount);
+  $: twinkles = quiet ? [] : makeTwinkles(twinkleCount);
 </script>
 
 <div class="card-art" style={`width:${width}px; height:${cardHeight}px; --accent:${color}; --twA:${twinkleAlpha}` }>
