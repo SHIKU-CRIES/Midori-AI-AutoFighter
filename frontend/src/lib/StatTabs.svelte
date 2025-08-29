@@ -1,7 +1,29 @@
 <script>
+  /*
+   * StatTabs.svelte
+   *
+   * Renders the character stats panel used by the Party Picker (right column).
+   * Features:
+   * - Tabbed view (Core, Offense, Defense, Effects).
+   * - Shows the currently previewed character's stats and effects.
+   * - When the previewed character is the Player, embeds a slim Player Editor
+   *   inside the panel (no overlay, no nav buttons) to tweak player starting
+   *   percent mods. The editor sends live changes that this component uses to
+   *   calculate preview values without saving.
+   * - Always shows an "Upgrade Character: Placeholder" note below (all chars)
+   *   as a staging area for the future per‑character upgrade UI.
+   *
+   * Plans:
+   * - Wire a real per‑character upgrade flow underneath the placeholder (e.g.,
+   *   item consumption, star‑based progression) and display available upgrades.
+   * - Provide a compact save/apply control for the embedded player editor, or
+   *   auto‑save changes to the backend with clear feedback.
+   * - Move editor placement to a fixed sub‑section if we add more widgets.
+   */
   import { getElementIcon, getElementColor } from './assetLoader.js';
   import { createEventDispatcher } from 'svelte';
   import PlayerEditor from './PlayerEditor.svelte';
+  import { getPlayerConfig } from './api.js';
   import { getPlayerConfig } from './api.js';
 
   /**
@@ -30,8 +52,10 @@
   let viewStats = {};    // stats object used for display (with overrides when player)
   let loadingEditorCfg = false;
 
+  // Resolve selected entry and whether it's the Player
   $: previewChar = roster.find(r => r.id === previewId);
   $: isPlayer = !!previewChar?.is_player;
+  // Lazy‑load the saved Player Editor config when the player is selected.
   $: if (isPlayer && previewChar) {
     if (!editorVals && !loadingEditorCfg) {
       loadingEditorCfg = true;
@@ -62,6 +86,8 @@
   } else {
     editorVals = null;
   }
+  // Compute displayed stats. For the Player, treat editor values as percent
+  // modifiers on base stats (1 point = +1%). Preserve current HP ratio.
   $: {
     const base = previewChar?.stats || {};
     if (isPlayer && editorVals) {
@@ -218,9 +244,15 @@
   {/if}
   {#if previewId}
     {#each roster.filter(r => r.id === previewId) as sel}
-      {#if sel.is_player}
-        <div class="hello-anchor">
-          <div class="inline-divider" aria-hidden="true"></div>
+      <!--
+        Inline editor/upgrade region:
+        - Divider separates stats list from interactive controls/notes.
+        - Player Editor shows only for the Player (no nav, embedded=true).
+        - Upgrade placeholder shows for all characters (future upgrades hub).
+      -->
+      <div class="hello-anchor">
+        <div class="inline-divider" aria-hidden="true"></div>
+        {#if sel.is_player}
           <div class="editor-wrap">
             <PlayerEditor
               embedded={true}
@@ -232,8 +264,9 @@
               on:change={(e) => editorVals = e.detail}
             />
           </div>
-        </div>
-      {/if}
+        {/if}
+        <div class="upgrade-placeholder">Upgrade Character: Placeholder</div>
+      </div>
     {/each}
   {/if}
 </div>
@@ -326,6 +359,11 @@ button.confirm {
 
 /* Inline container occupying 50% of the stats panel width */
 .editor-wrap { width: 100%; }
+.upgrade-placeholder {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #ddd;
+}
 
 /* Effects tab styles */
 .effects-header {

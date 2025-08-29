@@ -1,4 +1,22 @@
 <script>
+  /*
+   * PlayerEditor.svelte
+   *
+   * Edits the player's customization:
+   * - Pronouns (string, ≤15 chars)
+   * - Damage Type (Light, Dark, Wind, Lightning, Fire, Ice)
+   * - Percent modifiers for HP, Attack, Defense (sum ≤ 100)
+   *
+   * Modes:
+   * - Standalone (default): wrapped in MenuPanel with Save/Close controls.
+   * - Embedded (embedded=true): no panel chrome or nav buttons; emits 'change'
+   *   on every input so parents can reflect live values (without saving).
+   *
+   * Plans:
+   * - Add optional auto‑save toggle or an inline Save/Reset row in embedded
+   *   mode.
+   * - Validate and display remaining points shared with any future upgrades.
+   */
   import MenuPanel from './MenuPanel.svelte';
   import { createEventDispatcher } from 'svelte';
   export let pronouns = '';
@@ -13,6 +31,7 @@
 
   $: remaining = maxPoints - hp - attack - defense;
 
+  // Notify parent about any change in embedded mode so it can recompute stats
   function broadcastChange() {
     dispatch('change', { pronouns, damageType, hp: +hp, attack: +attack, defense: +defense });
   }
@@ -124,7 +143,7 @@
   input[type="range"] { width:100%; }
   /* Embedded variant chrome to sit inside stats panel */
   .editor-embedded {
-    /* inherit parent panel styling; keep spacing only */
+    /* Embedded variant inherits parent panel styling; keep spacing only */
     padding: 0.25rem 0 0 0;
   }
 </style>

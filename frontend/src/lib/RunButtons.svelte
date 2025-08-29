@@ -1,4 +1,16 @@
 <script context="module">
+  /*
+   * RunButtons.svelte (module)
+   *
+   * Exports `buildRunMenu` which returns the main menu actions for the
+   * right-hand panel on the home screen. Items include Run, Party, Pulls,
+   * Craft, Settings, and Feedback. The Player Editor entry was removed in
+   * favor of showing a slim editor inline within the Party Picker stats.
+   *
+   * Plans:
+   * - Consider a contextual entry that jumps to the Party Picker with the
+   *   player pre-selected once the per-character upgrade flow is ready.
+   */
   import { Play, Users, PackageOpen, Hammer, Settings, MessageSquare, Package } from 'lucide-svelte';
 
   // Build the run menu items array. Handlers are functions for each action.

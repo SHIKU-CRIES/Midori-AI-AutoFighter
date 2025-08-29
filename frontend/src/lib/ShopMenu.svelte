@@ -61,6 +61,9 @@
   });
 
   function priceOf(item) { return Number(item?.price ?? item?.cost ?? 0); }
+  // Enrich incoming stock entries with catalog data and presentable about text.
+  // For relics, we compute a stable baseAbout to avoid duplicating stack notes
+  // during reactive re-enrichment (metadata loads can re-run this).
   function enrich(entry) {
     if (!entry) return entry;
     if (entry.type === 'card') {
