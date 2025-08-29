@@ -68,12 +68,11 @@
       return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, about: m.about || '' };
     } else if (entry.type === 'relic') {
       const m = relicMeta[entry.id] || {};
-      // Prefer server-provided about (stack-aware) when available
-      let about = entry.about || m.about || '';
-      if (typeof entry.stacks === 'number' && entry.stacks > 0) {
-        about = `${about} (Current stacks: ${entry.stacks})`;
-      }
-      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, about };
+      // Keep a stable baseAbout so reactive re-enrichment doesn't duplicate the suffix
+      const baseAbout = entry.baseAbout ?? entry.about ?? m.about ?? '';
+      const stacks = typeof entry.stacks === 'number' ? entry.stacks : 0;
+      const about = stacks > 0 ? `${baseAbout} (Current stacks: ${stacks})` : baseAbout;
+      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, baseAbout, about };
     }
     return entry;
   }
