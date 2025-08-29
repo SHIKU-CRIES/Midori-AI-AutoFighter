@@ -30,7 +30,9 @@ class Lightning(DamageTypeBase):
                     target.apply_damage(dmg, attacker=attacker, trigger_on_hit=False)
                 )
 
-    def ultimate(self, attacker, target) -> None:
+    def ultimate(self, attacker, target) -> bool:
+        if not getattr(attacker, "use_ultimate", lambda: False)():
+            return False
         mgr = getattr(target, "effect_manager", None)
         if mgr is not None:
             types = ["Fire", "Ice", "Wind", "Lightning", "Light", "Dark"]
@@ -65,3 +67,4 @@ class Lightning(DamageTypeBase):
             BUS.subscribe("hit_landed", _hit)
             BUS.subscribe("battle_end", _clear)
             attacker._lightning_aftertaste_handler = _hit
+        return True
