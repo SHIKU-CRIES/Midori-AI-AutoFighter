@@ -469,6 +469,13 @@ class BattleRoom(Room):
             except Exception:
                 pass
 
+        # Emit battle_end for each foe to allow relics/effects to clean up.
+        try:
+            for foe_obj in foes:
+                BUS.emit("battle_end", foe_obj)
+        except Exception:
+            pass
+
         for mod in enrage_mods:
             if mod is not None:
                 mod.remove()

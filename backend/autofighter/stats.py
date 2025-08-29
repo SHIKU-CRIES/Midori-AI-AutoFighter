@@ -327,7 +327,13 @@ class Stats:
             self._on_level_up()
 
 
-    async def apply_damage(self, amount: float, attacker: Optional["Stats"] = None) -> int:
+    async def apply_damage(
+        self,
+        amount: float,
+        attacker: Optional["Stats"] = None,
+        *,
+        trigger_on_hit: bool = True,
+    ) -> int:
         # If already dead, ignore further damage applications to avoid
         # post-death damage loops from async tasks or event subscribers.
         if getattr(self, "hp", 0) <= 0:
@@ -352,7 +358,9 @@ class Stats:
                 )
                 return 0
             atk_type = _ensure(attacker)
-            atk_type.on_hit(attacker, self)
+            # Avoid recursive chains from secondary effects (e.g., Lightning on-hit reactions)
+            if trigger_on_hit:
+                atk_type.on_hit(attacker, self)
             if random.random() < attacker.crit_rate:
                 critical = True
                 amount *= attacker.crit_damage

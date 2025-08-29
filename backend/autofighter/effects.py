@@ -313,14 +313,23 @@ class EffectManager:
         Battle resolution calls this to ensure we don't leak stacked effects
         into post-battle state snapshots.
         """
-        # Remove references to effect instances
-        self.dots.clear()
-        self.hots.clear()
-        self.mods.clear()
-        # Clear status name lists on the stats object
+        # Proactively remove any remaining stat modifiers from the Stats object
+        # so underlying StatEffects do not persist across battles.
         try:
-            self.stats.dots = []
-            self.stats.hots = []
-            self.stats.mods = []
-        except Exception:
-            pass
+            for mod in list(self.mods):
+                try:
+                    mod.remove()
+                except Exception:
+                    pass
+        finally:
+            # Remove references to effect instances
+            self.dots.clear()
+            self.hots.clear()
+            self.mods.clear()
+            # Clear status name lists on the stats object
+            try:
+                self.stats.dots = []
+                self.stats.hots = []
+                self.stats.mods = []
+            except Exception:
+                pass

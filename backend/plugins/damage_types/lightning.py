@@ -22,4 +22,8 @@ class Lightning(DamageTypeBase):
         for effect in list(mgr.dots):
             dmg = int(effect.damage * 0.25)
             if dmg > 0:
-                asyncio.create_task(target.apply_damage(dmg, attacker=attacker))
+                # Secondary chain lightning pings should not retrigger on-hit hooks
+                # to avoid exponential task storms when dots are present.
+                asyncio.create_task(
+                    target.apply_damage(dmg, attacker=attacker, trigger_on_hit=False)
+                )
