@@ -29,13 +29,15 @@
   // Starfield background tied to current preview element color
   function rand(min, max) { return Math.random() * (max - min) + min; }
   function spawnStar(color) {
+    // Default to current starColor if none provided
+    const c = color || starColor || '#88a';
     return {
       left: Math.random() * 100,
       size: rand(3, 6),
       duration: rand(6, 14),
       delay: rand(0, 6),
       drift: rand(-20, 20),
-      color
+      color: c
     };
   }
   function makeStars(count, color) {
@@ -70,15 +72,15 @@
   let lastStarColor = '';
   let replaceTimer = null;
   let forceTimer = null;
-  function startColorTransition(toColor) {
-    if (!toColor) return;
+  function startColorTransition() {
+    if (!starColor) return;
     if (replaceTimer) clearInterval(replaceTimer);
     if (forceTimer) clearTimeout(forceTimer);
     fadePulse(260);
     // Build a deterministic pool of indices that still have the old color
     let pool = stars
       .map((s, i) => ({ s, i }))
-      .filter(({ s }) => s.color !== toColor)
+      .filter(({ s }) => s.color !== starColor)
       .map(({ i }) => i);
     if (pool.length === 0) return;
     // Compute batch size to finish around target duration
@@ -91,7 +93,8 @@
       for (let k = 0; k < n; k++) {
         const idx = pool.pop();
         if (idx == null) break;
-        stars[idx] = spawnStar(toColor);
+        // Use the latest starColor at replacement time
+        stars[idx] = spawnStar();
       }
       stars = stars.slice();
       if (pool.length === 0) {
@@ -102,13 +105,13 @@
     // Safety: force any remaining to new color shortly after target
     forceTimer = setTimeout(() => {
       if (pool.length > 0) {
-        stars = stars.map(s => (s.color === toColor ? s : spawnStar(toColor)));
+        stars = stars.map(s => (s.color === starColor ? s : spawnStar()));
       }
       if (replaceTimer) { clearInterval(replaceTimer); replaceTimer = null; }
     }, targetMs + 400);
   }
   $: if (starColor && lastStarColor && starColor !== lastStarColor) {
-    startColorTransition(starColor);
+    startColorTransition();
   }
   $: lastStarColor = starColor;
 
