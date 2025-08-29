@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 import copy
 
+from battle_logging import get_current_run_logger
+from battle_logging import start_run_logging
 from game import _run_battle
 from game import battle_snapshots
 from game import battle_tasks
@@ -25,7 +27,6 @@ from autofighter.rooms import _build_foes
 from autofighter.rooms import _scale_stats
 from autofighter.rooms import _serialize
 from plugins.damage_types import load_damage_type
-from battle_logging import get_current_run_logger, start_run_logging
 
 bp = Blueprint("rooms", __name__)
 

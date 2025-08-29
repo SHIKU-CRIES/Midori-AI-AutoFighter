@@ -7,7 +7,6 @@ from typing import Any
 from ..cards import card_choices
 from ..party import Party
 from ..passives import PassiveRegistry
-from ..relics import relic_choices
 from ..relics import _registry as relic_registry
 from . import Room
 from .utils import _serialize
