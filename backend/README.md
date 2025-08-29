@@ -87,6 +87,12 @@ disabled by default but can be toggled with `POST /gacha/auto-craft`, which
 converts 125 lower-star items into one higher star and ten 4★ items into a
 ticket.
 
+`GET /players/<id>/upgrade` returns a character's current upgrade level and the
+inventory of element-based items. `POST /players/<id>/upgrade` consumes
+20×4★ (or 100×3★/500×2★/1000×1★) items matching the character's damage type to
+raise their level, boosting core stats by 5% per rank. Upgrade levels are stored
+in the `player_upgrades` table and item counts in `upgrade_items`.
+
 `GET /player/editor` returns saved pronouns, element, and stat allocations for
 the player. `PUT /player/editor` validates pronouns up to 15 characters,
 ensures the chosen damage type is Light, Dark, Wind, Lightning, Fire, or Ice,

@@ -6,6 +6,7 @@ import json
 import logging
 
 from game import _apply_player_customization
+from game import _apply_player_upgrades
 from game import _assign_damage_type
 from game import _load_player_customization
 from game import get_save_manager
@@ -13,6 +14,7 @@ from quart import Blueprint
 from quart import jsonify
 from quart import request
 
+from autofighter.gacha import GachaManager
 from autofighter.stats import apply_status_hooks
 from plugins import players as player_plugins
 
@@ -128,6 +130,7 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
         await asyncio.to_thread(_assign_damage_type, inst)
         if inst.id == "player":
             await asyncio.to_thread(_apply_player_customization, inst)
+        await asyncio.to_thread(_apply_player_upgrades, inst)
         stats = _serialize_stats(inst)
         roster.append(
             {
@@ -152,6 +155,7 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
     orig_stats = (player.max_hp, player.atk, player.defense)
 
     await asyncio.to_thread(_apply_player_customization, player)
+    await asyncio.to_thread(_apply_player_upgrades, player)
     apply_status_hooks(player)
 
     # Log the stat changes for debugging
@@ -318,3 +322,71 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
     await asyncio.to_thread(update_player_data)
     log.debug("Player customization saved successfully")
     return jsonify({"status": "ok"})
+
+
+@bp.get("/players/<pid>/upgrade")
+async def get_player_upgrade(pid: str):
+    manager = GachaManager(get_save_manager())
+    items = await asyncio.to_thread(manager._get_items)
+
+    def fetch_level() -> int:
+        with get_save_manager().connection() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS player_upgrades (id TEXT PRIMARY KEY, level INTEGER NOT NULL)"
+            )
+            cur = conn.execute("SELECT level FROM player_upgrades WHERE id = ?", (pid,))
+            row = cur.fetchone()
+            return int(row[0]) if row else 0
+
+    level = await asyncio.to_thread(fetch_level)
+    return jsonify({"level": level, "items": items})
+
+
+@bp.post("/players/<pid>/upgrade")
+async def upgrade_player(pid: str):
+    manager = GachaManager(get_save_manager())
+
+    inst = None
+    for name in player_plugins.__all__:
+        cls = getattr(player_plugins, name)
+        if getattr(cls, "id", name) == pid:
+            inst = cls()
+            break
+    if inst is None:
+        return jsonify({"error": "unknown player"}), 404
+
+    await asyncio.to_thread(_assign_damage_type, inst)
+    element = inst.element_id
+
+    items = await asyncio.to_thread(manager._get_items)
+    costs = [
+        (f"{element}_4", 20),
+        (f"{element}_3", 100),
+        (f"{element}_2", 500),
+        (f"{element}_1", 1000),
+    ]
+    for key, required in costs:
+        if items.get(key, 0) >= required:
+            items[key] -= required
+            break
+    else:
+        return jsonify({"error": "insufficient items"}), 400
+
+    await asyncio.to_thread(manager._set_items, items)
+
+    def update_level() -> int:
+        with get_save_manager().connection() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS player_upgrades (id TEXT PRIMARY KEY, level INTEGER NOT NULL)"
+            )
+            cur = conn.execute("SELECT level FROM player_upgrades WHERE id = ?", (pid,))
+            row = cur.fetchone()
+            level = int(row[0]) + 1 if row else 1
+            conn.execute(
+                "INSERT OR REPLACE INTO player_upgrades (id, level) VALUES (?, ?)",
+                (pid, level),
+            )
+            return level
+
+    level = await asyncio.to_thread(update_level)
+    return jsonify({"level": level, "items": items})

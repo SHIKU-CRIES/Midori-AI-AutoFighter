@@ -19,4 +19,7 @@ Implementation details:
 - `PartyPicker.svelte` propagates `reducedMotion` to the roster so the effect
   can be disabled via Settings.
 - `StatTabs.svelte` uses flexible sizing so the panel fills its side.
+- `StatTabs.svelte` now embeds an `UpgradePanel` beneath the stats list,
+  showing upgrade level and per-star item counts with a button disabled until
+  enough materials are available (20×4★ or 100×3★ or 500×2★ or 1000×1★).
 

@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS player_upgrades (
+    id TEXT PRIMARY KEY,
+    level INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS upgrade_items (
+    id TEXT PRIMARY KEY,
+    count INTEGER NOT NULL DEFAULT 0
+);
