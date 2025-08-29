@@ -177,18 +177,29 @@
     background: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.08), rgba(0,0,0,0.0) 60%),
                 linear-gradient(180deg, rgba(0,0,0,0.20), rgba(0,0,0,0.45));
     border: 2px solid rgba(255,255,255,0.18);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.35), inset 0 0 0 2px var(--accent);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
     border-radius: 10px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.4);
     position: relative;
     margin-top: 6px;
     z-index: 1; /* glyph content base; specific layers override */
   }
+  /* Accent outline overlay above glyph image */
+  .glyph::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 2px var(--accent);
+    z-index: 4; /* ensure outline is above photo and ambient */
+    pointer-events: none;
+  }
+
   /* Border twinkles around the card outline */
   .twinkles {
     position: absolute;
     inset: 0;
-    z-index: 2; /* above base, below glyph stars overlay applies only within glyph */
+    z-index: 2; /* above base; glyph has its own higher overlays */
     pointer-events: none;
     border-radius: inherit;
   }
@@ -265,7 +276,7 @@
     font-size: 0.95rem;
     text-shadow: 0 1px 2px rgba(0,0,0,0.35);
     pointer-events: none;
-    z-index: 3; /* above glyph image and orbs */
+    z-index: 5; /* above glyph image, outline, and orbs */
   }
   .about-box {
     flex: 1;
