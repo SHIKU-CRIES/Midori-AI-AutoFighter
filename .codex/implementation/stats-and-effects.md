@@ -11,6 +11,7 @@ The `Stats` dataclass stores core attributes for both players and foes:
 - **Vitality & Advanced:** `vitality`, `action_points`, `damage_taken`, `damage_dealt`, `kills`
 - **Status Lists:** `passives`, `dots`, `hots`, `relics`
 - **Party:** `gold`, `rdr` – run-wide currency and rare drop rate multiplier applied to gold, upgrade item counts, relic odds, pull ticket chances, and (at extreme values) can roll to raise relic and card star ranks
+- **Ultimate:** `ultimate_charge`, `ultimate_ready` – charge builds with actions to power character ultimates
 
 `damage_type` is a `DamageType` plugin instance (default `Generic`). The helper
 property `element_id` exposes the damage type's string identifier for

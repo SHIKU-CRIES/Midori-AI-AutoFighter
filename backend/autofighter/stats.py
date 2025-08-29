@@ -84,6 +84,10 @@ class Stats:
     kills: int = 0
     last_damage_taken: int = 0
 
+    # Ultimate system
+    ultimate_charge: int = 0
+    ultimate_ready: bool = False
+
     # Overheal system (for shields from relics/cards)
     overheal_enabled: bool = field(default=False, init=False)
     shields: int = field(default=0, init=False)  # Amount of overheal/shields
@@ -325,6 +329,14 @@ class Stats:
             self.exp -= needed
             self.level += 1
             self._on_level_up()
+
+    def add_ultimate_charge(self, amount: int = 1) -> None:
+        """Increase ultimate charge, capping at 15."""
+        if self.ultimate_ready:
+            return
+        self.ultimate_charge = min(15, self.ultimate_charge + amount)
+        if self.ultimate_charge >= 15:
+            self.ultimate_ready = True
 
 
     async def apply_damage(

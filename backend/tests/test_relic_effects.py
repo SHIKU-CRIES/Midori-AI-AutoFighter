@@ -5,8 +5,19 @@ from autofighter.party import Party
 from autofighter.relics import apply_relics
 from autofighter.relics import award_relic
 from autofighter.stats import BUS
+from autofighter.stats import Stats
 import plugins.event_bus as event_bus_module
 from plugins.players._base import PlayerBase
+
+
+class DummyPlayer(Stats):
+    def use_ultimate(self) -> bool:
+        if not self.ultimate_ready:
+            return False
+        self.ultimate_charge = 0
+        self.ultimate_ready = False
+        BUS.emit("ultimate_used", self)
+        return True
 
 
 def test_bent_dagger_kill_trigger():
@@ -265,13 +276,21 @@ def test_pocket_manual_tenth_hit():
 def test_arcane_flask_shields():
     event_bus_module.bus._subs.clear()
     party = Party()
-    a = PlayerBase()
+    a = DummyPlayer()
     a.hp = 50
-    a.max_hp = 100
+    a._base_max_hp = 100
     party.members.append(a)
     award_relic(party, "arcane_flask")
     apply_relics(party)
-    BUS.emit("ultimate_used", a)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    async def fire():
+        a.add_ultimate_charge(15)
+        a.use_ultimate()
+        await asyncio.sleep(0)
+
+    loop.run_until_complete(fire())
     assert a.hp == 50 + int(100 * 0.2)
 
 
