@@ -23,6 +23,9 @@ from quart import request
 from autofighter.mapgen import MapGenerator
 from plugins import players as player_plugins
 
+# Import battle logging
+from battle_logging import start_run_logging, end_run_logging
+
 bp = Blueprint("runs", __name__)
 
 
@@ -61,6 +64,10 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
 
         await asyncio.to_thread(set_damage_type)
     run_id = str(uuid4())
+    
+    # Start run logging
+    start_run_logging(run_id)
+    
     generator = MapGenerator(run_id)
     nodes = generator.generate_floor()
     state = {
@@ -213,6 +220,9 @@ async def end_run(run_id: str) -> tuple[str, int, dict[str, str]]:
             cur = conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
             return cur.rowcount
 
+    # End run logging before deleting
+    end_run_logging()
+    
     rowcount = await asyncio.to_thread(delete_run)
     if rowcount == 0:
         return jsonify({"error": "run not found"}), 404

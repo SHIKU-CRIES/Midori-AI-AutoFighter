@@ -28,6 +28,9 @@ from .utils import _build_foes
 from .utils import _scale_stats
 from .utils import _serialize
 
+# Import battle logging
+from battle_logging import start_battle_logging, end_battle_logging
+
 log = logging.getLogger(__name__)
 
 ENRAGE_TURNS_NORMAL = 100
@@ -170,6 +173,10 @@ class BattleRoom(Room):
         for f in foes:
             BUS.emit("battle_start", f)
             await registry.trigger("battle_start", f)
+            
+        # Start battle logging
+        battle_logger = start_battle_logging()
+        
         log.info(
             "Battle start: %s vs %s",
             [f.id for f in foes],
@@ -305,6 +312,7 @@ class BattleRoom(Room):
                     log.info("%s's attack was dodged by %s", member.id, tgt_foe.id)
                 else:
                     log.info("%s hits %s for %s", member.id, tgt_foe.id, dmg)
+                    BUS.emit("hit_landed", member, tgt_foe, dmg)
                 tgt_mgr.maybe_inflict_dot(member, dmg)
                 if getattr(member.damage_type, "id", "").lower() == "wind":
                     for extra_idx, extra_foe in enumerate(foes):
@@ -327,6 +335,7 @@ class BattleRoom(Room):
                                 extra_foe.id,
                                 extra_dmg,
                             )
+                            BUS.emit("hit_landed", member, extra_foe, extra_dmg)
                         foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                         if extra_foe.hp <= 0:
                             exp_reward += extra_foe.level * 12 + 5 * self.node.index
@@ -448,6 +457,7 @@ class BattleRoom(Room):
                     log.info("%s's attack was dodged by %s", acting_foe.id, target.id)
                 else:
                     log.info("%s hits %s for %s", acting_foe.id, target.id, dmg)
+                    BUS.emit("hit_landed", acting_foe, target, dmg)
                 target_effect.maybe_inflict_dot(acting_foe, dmg)
                 await registry.trigger("turn_end", acting_foe)
                 await _pace(action_start)
@@ -475,6 +485,10 @@ class BattleRoom(Room):
                 BUS.emit("battle_end", foe_obj)
         except Exception:
             pass
+
+        # End battle logging
+        battle_result = "defeat" if all(m.hp <= 0 for m in combat_party.members) else "victory"
+        end_battle_logging(battle_result)
 
         for mod in enrage_mods:
             if mod is not None:

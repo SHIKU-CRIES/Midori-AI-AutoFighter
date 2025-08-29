@@ -28,6 +28,9 @@ from plugins import players as player_plugins
 from plugins.damage_types import load_damage_type
 from plugins.players._base import PlayerBase
 
+# Import battle logging
+from battle_logging import end_run_logging
+
 log = logging.getLogger(__name__)
 
 SAVE_MANAGER: SaveManager | None = None
@@ -320,6 +323,8 @@ async def _run_battle(
                     battle_snapshots[run_id] = result
                 finally:
                     try:
+                        # End run logging when run is deleted due to defeat
+                        end_run_logging()
                         with get_save_manager().connection() as conn:
                             conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
                     except Exception:
