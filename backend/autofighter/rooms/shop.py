@@ -8,6 +8,7 @@ from ..cards import card_choices
 from ..party import Party
 from ..passives import PassiveRegistry
 from ..relics import relic_choices
+from ..relics import _registry as relic_registry
 from . import Room
 from .utils import _serialize
 
@@ -63,8 +64,18 @@ def _generate_stock(party: Party, pressure: int) -> list[dict[str, Any]]:
                 }
             )
     # Offer up to 6 relics at the selected star tier; entries are unique
-    stars = _apply_rdr_to_stars(_pick_shop_stars(), party.rdr)
-    relic_list = relic_choices(party, stars, count=6)
+    # Shop relics: roll star rank per slot; allow owned, ensure uniqueness within this stock
+    all_relics = [cls() for cls in relic_registry().values()]
+    seen_relics: set[str] = set()
+    relic_list = []
+    for _ in range(6):
+        stars = _apply_rdr_to_stars(_pick_shop_stars(), party.rdr)
+        pool = [r for r in all_relics if r.stars == stars and r.id != "fallback_essence" and r.id not in seen_relics]
+        if not pool:
+            continue
+        relic = random.choice(pool)
+        seen_relics.add(relic.id)
+        relic_list.append(relic)
     for relic in relic_list:
         base = PRICE_BY_STARS.get(relic.stars, 0)
         cost = _pressure_cost(base, pressure)

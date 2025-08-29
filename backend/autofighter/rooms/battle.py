@@ -545,26 +545,42 @@ class BattleRoom(Room):
                 "enrage": {"active": enrage_active, "stacks": enrage_stacks},
                 "rdr": party.rdr,
             }
-        # Pick a star rank and fetch up to 3 unique card options the party doesn't own
-        card_star = _pick_card_stars(self)
-        card_opts = card_choices(combat_party, card_star, count=3)
+        # Pick cards with per-item star rolls; ensure unique choices not already owned
+        selected_cards: list = []
+        attempts = 0
+        while len(selected_cards) < 3 and attempts < 30:
+            attempts += 1
+            cstars = _apply_rdr_to_stars(_pick_card_stars(self), party.rdr)
+            one = card_choices(combat_party, cstars, count=1)
+            if not one:
+                continue
+            c = one[0]
+            if any(x.id == c.id for x in selected_cards):
+                continue
+            selected_cards.append(c)
         choice_data = [
-            {
-                "id": c.id,
-                "name": c.name,
-                "stars": c.stars,
-                "about": c.about,
-            }
-            for c in card_opts
+            {"id": c.id, "name": c.name, "stars": c.stars, "about": c.about}
+            for c in selected_cards
         ]
         relic_opts = []
         if _roll_relic_drop(self, party.rdr):
-            relic_star = _apply_rdr_to_stars(_pick_relic_stars(self), party.rdr)
-            # Offer 3 relic choices when a relic drop occurs
-            relic_opts = relic_choices(combat_party, relic_star, count=3)
+            # Offer relics with per-item star rolls; ensure unique choices
+            picked: list = []
+            tries = 0
+            while len(picked) < 3 and tries < 30:
+                tries += 1
+                rstars = _apply_rdr_to_stars(_pick_relic_stars(self), party.rdr)
+                one = relic_choices(combat_party, rstars, count=1)
+                if not one:
+                    continue
+                r = one[0]
+                if any(x.id == r.id for x in picked):
+                    continue
+                picked.append(r)
+            relic_opts = picked
 
         # Fallback relic system: if no cards are available, provide fallback relic
-        if not card_opts:
+        if not selected_cards:
             from plugins.relics.fallback_essence import FallbackEssence
             fallback_relic = FallbackEssence()
             if not relic_opts:  # If no regular relic drop, make fallback the only option
