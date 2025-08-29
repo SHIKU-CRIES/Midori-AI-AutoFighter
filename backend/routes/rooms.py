@@ -25,6 +25,7 @@ from autofighter.rooms import _build_foes
 from autofighter.rooms import _scale_stats
 from autofighter.rooms import _serialize
 from plugins.damage_types import load_damage_type
+from battle_logging import get_current_run_logger, start_run_logging
 
 bp = Blueprint("rooms", __name__)
 
@@ -52,6 +53,13 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     except Exception:
         pass
     state, rooms = await asyncio.to_thread(load_map, run_id)
+    # Ensure run logging is initialized for this run (survives server restarts)
+    try:
+        logger = get_current_run_logger()
+        if logger is None or getattr(logger, 'run_id', None) != run_id:
+            start_run_logging(run_id)
+    except Exception:
+        pass
     if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
@@ -221,6 +229,13 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         return jsonify(snap)
 
     state, rooms = await asyncio.to_thread(load_map, run_id)
+    # Ensure run logging is initialized for this run
+    try:
+        logger = get_current_run_logger()
+        if logger is None or getattr(logger, 'run_id', None) != run_id:
+            start_run_logging(run_id)
+    except Exception:
+        pass
     node = rooms[state["current"]]
     if node.room_type != "battle-boss-floor":
         return jsonify({"error": "invalid room"}), 400

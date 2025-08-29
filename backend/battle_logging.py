@@ -59,6 +59,8 @@ class BattleSummary:
     relic_effects: Dict[str, int] = field(default_factory=dict)  # relic_name -> trigger count
     card_effects: Dict[str, int] = field(default_factory=dict)  # card_name -> trigger count
     effect_applications: Dict[str, int] = field(default_factory=dict)  # effect_name -> application count
+    # Snapshot of party relics present during this battle (id -> count)
+    party_relics: Dict[str, int] = field(default_factory=dict)
 
     # Extended healing tracking
     shield_absorbed: Dict[str, int] = field(default_factory=dict)  # entity -> total shield absorption
@@ -622,6 +624,7 @@ class BattleLogger:
                     (self.summary.end_time - self.summary.start_time).total_seconds()
                     if self.summary.end_time else None
                 ),
+                "party_relics": self.summary.party_relics,
                 # Enhanced tracking data
                 "damage_by_type": self.summary.damage_by_type,
                 "damage_by_source": self.summary.damage_by_source,
@@ -781,6 +784,14 @@ class BattleLogger:
             ])
             for relic, count in sorted(self.summary.relic_effects.items(), key=lambda x: x[1], reverse=True):
                 lines.append(f"  {relic}: {count} times")
+
+        if self.summary.party_relics:
+            lines.extend([
+                "",
+                "Relics Equipped:",
+            ])
+            for rid, qty in sorted(self.summary.party_relics.items()):
+                lines.append(f"  {rid}: x{qty}")
 
         if self.summary.card_effects:
             lines.extend([

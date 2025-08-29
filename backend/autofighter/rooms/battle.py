@@ -178,6 +178,11 @@ class BattleRoom(Room):
             if battle_logger is not None:
                 battle_logger.summary.party_members = [m.id for m in combat_party.members]
                 battle_logger.summary.foes = [f.id for f in foes]
+                # Snapshot party relics present at battle start (id -> count)
+                relic_counts: dict[str, int] = {}
+                for rid in combat_party.relics:
+                    relic_counts[rid] = relic_counts.get(rid, 0) + 1
+                battle_logger.summary.party_relics = relic_counts
         except Exception:
             pass
 
