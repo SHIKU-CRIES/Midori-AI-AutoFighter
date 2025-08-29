@@ -371,6 +371,7 @@ class Stats:
         attacker: Optional["Stats"] = None,
         *,
         trigger_on_hit: bool = True,
+        action_name: Optional[str] = None,
     ) -> int:
         # Drop any stray post-battle damage tasks to avoid loops.
         from autofighter.stats import is_battle_active  # local import for clarity
@@ -445,7 +446,7 @@ class Stats:
         BUS.emit("damage_taken", self, attacker, original_amount)
         if attacker is not None:
             attacker.damage_dealt += original_amount
-            BUS.emit("damage_dealt", attacker, self, original_amount)
+            BUS.emit("damage_dealt", attacker, self, original_amount, "attack", None, None, action_name)
         return original_amount
 
     async def apply_healing(self, amount: int, healer: Optional["Stats"] = None) -> int:

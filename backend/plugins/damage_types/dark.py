@@ -112,7 +112,7 @@ class Dark(DamageTypeBase):
         dmg = int(actor.atk * multiplier)
         target = enemies[0]
         for _ in range(6):
-            dealt = await target.apply_damage(dmg, attacker=actor)
+            dealt = await target.apply_damage(dmg, attacker=actor, action_name="Dark Ultimate")
             BUS.emit("damage", actor, target, dealt)
         return True
 

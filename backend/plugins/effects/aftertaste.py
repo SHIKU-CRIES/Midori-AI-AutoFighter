@@ -92,6 +92,6 @@ class Aftertaste:
                 "actual_damage": amount
             })
 
-            dmg = await target.apply_damage(amount, temp_attacker)
+            dmg = await target.apply_damage(amount, temp_attacker, action_name="Aftertaste")
             results.append(dmg)
         return results
