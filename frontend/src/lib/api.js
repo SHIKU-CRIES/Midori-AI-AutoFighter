@@ -54,7 +54,7 @@ export async function getBackendHealth() {
       status = 'error';
     }
     return { status, ping_ms };
-  } catch (e) {
+  } catch {
     return { status: 'error', ping_ms: null };
   }
 }
