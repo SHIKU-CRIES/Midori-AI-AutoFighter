@@ -50,6 +50,6 @@ class BentDagger(RelicBase):
         if stacks == 1:
             return "+3% ATK; killing a foe grants +1% ATK for the rest of combat."
         else:
-            # Stacks are additive: each copy adds 3%
-            total_pct = 3 * stacks
-            return f"+{total_pct}% ATK ({stacks} stacks, additive); killing a foe grants +1% ATK for the rest of combat."
+            # Stacks are multiplicative: each copy compounds the effect
+            total_mult = (1.03 ** stacks - 1) * 100
+            return f"+{total_mult:.1f}% ATK ({stacks} stacks, multiplicative); killing a foe grants +1% ATK for the rest of combat."

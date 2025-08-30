@@ -83,8 +83,8 @@ class WoodenIdol(RelicBase):
         if stacks == 1:
             return "+3% Effect Res; resisting a debuff grants +1% Effect Res next turn."
         else:
-            # Stacks are additive: each copy adds 3%
-            total_res_pct = 3 * stacks
+            # Stacks are multiplicative: each copy compounds the effect
+            total_res_mult = (1.03 ** stacks - 1) * 100
             return (
-                f"+{total_res_pct}% Effect Res ({stacks} stacks, additive); resisting a debuff grants +1% Effect Res next turn."
+                f"+{total_res_mult:.1f}% Effect Res ({stacks} stacks, multiplicative); resisting a debuff grants +1% Effect Res next turn."
             )

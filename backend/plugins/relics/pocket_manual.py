@@ -48,7 +48,7 @@ class PocketManual(RelicBase):
         if stacks == 1:
             return "+3% damage; every 10th hit triggers an additional Aftertaste hit dealing +3% of the original damage."
         else:
-            # Stacks are additive: each copy adds 3%
-            total_dmg_pct = 3 * stacks
-            aftertaste_dmg = 3 * stacks
-            return f"+{total_dmg_pct}% damage ({stacks} stacks, additive); every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."
+            # Stacks are multiplicative: each copy compounds the effect
+            total_dmg_mult = (1.03 ** stacks - 1) * 100
+            aftertaste_dmg = 3 * stacks  # This part still stacks additively for the special effect
+            return f"+{total_dmg_mult:.1f}% damage ({stacks} stacks, multiplicative); every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."
