@@ -9,7 +9,7 @@ Summaries of elemental damage behaviors and ongoing effect plugins.
 - **[Lightning](../../backend/plugins/damage_types/lightning.py)** – Pops every active DoT for 25% of its damage on hit and applies [Charged Decay](../../backend/plugins/dots/charged_decay.py), a DoT that stuns on its final tick.
 - **[Wind](../../backend/plugins/damage_types/wind.py)** – Repeats the opening strike on each remaining foe and rolls [Gale Erosion](../../backend/plugins/dots/gale_erosion.py) on every target, trimming Mitigation each tick.
 - **[Light](../../backend/plugins/damage_types/light.py)** – Creates [Celestial Atrophy](../../backend/plugins/dots/celestial_atrophy.py) and grants allies [Radiant Regeneration](../../backend/plugins/hots/radiant_regeneration.py) every action; if an ally drops below 25% HP the attack becomes a direct heal. Its ultimate fully heals allies, cleanses allied DoTs, and inflicts a 10-turn defense debuff on enemies.
-- **[Dark](../../backend/plugins/damage_types/dark.py)** – Spreads [Abyssal Corruption](../../backend/plugins/dots/abyssal_corruption.py) and adds a permanent [Shadow Siphon](../../backend/plugins/dots/shadow_siphon.py) to each party member every turn. Siphon ticks drain 5% max HP and grant a small attack/defense boost to the caster.
+- **[Dark](../../backend/plugins/damage_types/dark.py)** – Spreads [Abyssal Corruption](../../backend/plugins/dots/abyssal_corruption.py) and adds a permanent [Shadow Siphon](../../backend/plugins/dots/shadow_siphon.py) to each party member every turn. Siphon ticks drain 5% max HP and grant the Dark attacker a small temporary attack/defense boost called "Dark Resonance" based on the damage dealt as a percentage of the target's max HP.
 
 ## Supported DoTs
 
