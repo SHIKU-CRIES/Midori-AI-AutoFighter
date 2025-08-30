@@ -85,8 +85,8 @@ class BeccaMenagerieBond:
         if target.hp <= hp_cost:
             return False  # Not enough HP
 
-        # Pay HP cost
-        target.hp -= hp_cost
+        # Pay HP cost using proper damage system
+        await target.apply_damage(hp_cost, target, trigger_on_hit=False)
 
         # If changing jellyfish type, previous one becomes a spirit
         if self._active_summon[entity_id] and jellyfish_type != self._active_summon[entity_id]:

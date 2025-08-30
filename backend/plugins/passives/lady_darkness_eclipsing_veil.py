@@ -53,8 +53,8 @@ class LadyDarknessEclipsingVeil:
         # Siphon 1% of the DoT damage as healing
         siphoned_healing = max(1, int(dot_damage * 0.01))
 
-        # Apply immediate healing
-        target.hp = min(target.max_hp, target.hp + siphoned_healing)
+        # Apply immediate healing using proper healing system
+        await target.apply_healing(siphoned_healing)
 
     async def on_debuff_resist(self, target: "Stats") -> None:
         """Grant +5% attack when resisting a debuff."""

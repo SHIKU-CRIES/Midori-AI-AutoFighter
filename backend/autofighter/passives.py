@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 from collections import Counter
+from pathlib import Path
 from typing import Any
 from typing import Optional
 
-from plugins import passives as passive_plugins
+from plugins import PluginLoader
 
 
 class PassiveRegistry:
     def __init__(self) -> None:
-        self._registry = {
-            getattr(passive_plugins, name).id: getattr(passive_plugins, name)
-            for name in getattr(passive_plugins, "__all__", [])
-        }
+        # Auto-discover passives using PluginLoader like cards and relics
+        plugin_dir = Path(__file__).resolve().parents[1] / "plugins" / "passives"
+        loader = PluginLoader(required=["passive"])
+        loader.discover(str(plugin_dir))
+
+        # Get all discovered passive plugins and index by ID
+        passive_plugins = loader.get_plugins("passive")
+        self._registry = {plugin_id: plugin_cls for plugin_id, plugin_cls in passive_plugins.items()}
 
     async def trigger(self, event: str, target, **kwargs) -> None:
         """Trigger passives for a given event with optional context."""
