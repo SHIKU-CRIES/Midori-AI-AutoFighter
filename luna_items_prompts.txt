@@ -40,10 +40,4 @@ Temporal Shield: Luna raising a temporal shield, a rippling bubble that bends li
 Reality Split: Luna slashing through reality, twin afterimages trailing her blade as echoes of the strike cut the air.
 
 === Relics ===
-Arcane Flask: Luna swirling an arcane flask, a crystalline bottle filled with swirling violet energy, corked with a rune-carved stopper.
-Echo Bell: Luna ringing an echo bell, a tiny silver bell whose chime reverberates impossibly long, shimmering in concentric waves.
-Echoing Drum: Luna beating an echoing drum, a hide-covered drum with bronze studs, each strike sending rolling echoes across the field.
-Ember Stone: Luna clutching an ember stone, a coal-red gem that radiates gentle heat and flickers like an eternal coal.
-Frost Sigil: Luna tracing a frost sigil, an icy rune etched on a metal plate, exhaling mist and rimed with delicate snow crystals.
-Greed Engine: 
-Guardian Charm: 
+Arcane Flask: 

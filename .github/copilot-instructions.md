@@ -2,6 +2,10 @@
 
 **ALWAYS follow these instructions first**. Only search for additional information or run exploration commands if the information here is incomplete or contradicted by actual behavior.
 
+<!-- MCP TOOLS REMINDER -->
+> NOTE FOR CODING AGENTS: Use MCP-style helper tools for task planning and research. Always prefer the `sequentialthinking` (sequential thought planning) tool for multi-step reasoning and the Context7 tools (e.g., `mcp_context7_resolve-library-id` / `mcp_context7_get-library-docs`) when you need up-to-date library documentation or API references. These tools improve traceability and should be used for all non-trivial tasks.
+
+
 ## Repository Overview
 
 Midori AI AutoFighter is a web-based auto-battler game with a Svelte frontend and Python Quart backend. The repository includes automated builds for Windows, Linux, and Android platforms with optional LLM (Language Model) support.
