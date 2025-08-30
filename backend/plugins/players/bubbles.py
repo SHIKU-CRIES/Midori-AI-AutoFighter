@@ -16,3 +16,4 @@ class Bubbles(PlayerBase):
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("Bubbles")
     )
+    passives: list[str] = field(default_factory=lambda: ["bubbles_bubble_burst"])
