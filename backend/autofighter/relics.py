@@ -25,21 +25,20 @@ def award_relic(party: Party, relic_id: str) -> RelicBase | None:
 
 
 def relic_choices(party: Party, stars: int, count: int = 3) -> list[RelicBase]:
-    """Return up to `count` unique relic options the party doesn't own.
+    """Return up to `count` unique relic options for the given star level.
 
-    Never returns duplicate relics. If fewer than `count` unique relics are
-    available at the requested star level, the result will contain fewer items
-    rather than repeating entries. The special fallback relic is excluded here
-    and is injected by battle logic only when no card options exist.
+    Ownership is NOT considered here (relics may be offered even if already
+    owned). The function avoids duplicate options within a single selection
+    batch but may include relics already present in `party.relics`. The special
+    fallback relic is excluded here and injected by battle logic only when no
+    card options exist.
     """
     relics = [cls() for cls in _registry().values()]
-    # Exclude relics the party owns and the fallback essence from normal pools
-    available = [
-        r for r in relics
-        if r.stars == stars and r.id not in party.relics and r.id != "fallback_essence"
-    ]
+    # Exclude only the fallback essence from normal pools; allow owned relics
+    available = [r for r in relics if r.stars == stars and r.id != "fallback_essence"]
     if not available:
         return []
+    # Ensure uniqueness within this call
     k = min(count, len(available))
     return random.sample(available, k=k)
 
