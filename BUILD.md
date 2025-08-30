@@ -23,17 +23,17 @@ This repository contains GitHub Actions workflows to automatically build the Mid
 
 #### Individual Platform Workflows
 - `.github/workflows/build-windows.yml` - Builds all 4 Windows variants
-- `.github/workflows/build-linux.yml` - Builds all 4 Linux variants  
+- `.github/workflows/build-linux.yml` - Builds all 4 Linux variants
 - `.github/workflows/build-android.yml` - Builds Android non-llm variant
 
 #### Comprehensive Build Workflow
 - `.github/workflows/build-all-platforms.yml` - Builds all variants for all platforms
 
 ### Trigger Conditions
-- **Push** to `main` or `master` branch
-- **Pull Request** to `main` or `master` branch
-- **Manual dispatch** (workflow_dispatch)
-- **Git tags** starting with `v` (creates GitHub releases)
+- **Manual dispatch** (workflow_dispatch) - All workflows require manual triggering via GitHub Actions UI
+- **Git tags** starting with `v` - Only the build-all-platforms workflow auto-runs for release creation
+
+**Note**: Automatic triggering on push and pull requests has been disabled. Build workflows must be manually initiated by clicking "Run workflow" in the GitHub Actions tab, except for the release process which still triggers automatically on version tags.
 
 ### Build Artifacts
 All builds are automatically uploaded as GitHub Actions artifacts with 30-day retention:
@@ -42,10 +42,12 @@ All builds are automatically uploaded as GitHub Actions artifacts with 30-day re
 - `midori-autofighter-non-llm-android.apk` (Android)
 
 ### Releases
-When you push a git tag starting with `v` (e.g., `v1.0.0`), the build-all-platforms workflow will:
+When you push a git tag starting with `v` (e.g., `v1.0.0`), the build-all-platforms workflow will automatically:
 1. Build all variants for all platforms
 2. Create a GitHub release
 3. Upload all build artifacts to the release
+
+**Note**: This is the only remaining automatic trigger - releases still work automatically when you push version tags.
 
 ## Local Development
 

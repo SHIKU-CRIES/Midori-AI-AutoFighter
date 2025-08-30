@@ -36,13 +36,14 @@ class RustyBuckle(RelicBase):
 
             if state["ally"] is None and party.members:
                 ally = min(party.members, key=lambda m: m.max_hp)
-                bleed = int(ally.max_hp * 0.01 * stacks)
+                # Increase initial bleed to 5% per stack (was 1%)
+                bleed = int(ally.max_hp * 0.05 * stacks)
                 dmg = min(bleed, max(ally.hp - 1, 0))
 
                 # Emit relic effect event for initial bleed
                 BUS.emit("relic_effect", "rusty_buckle", ally, "initial_bleed", dmg, {
                     "target_selection": "lowest_max_hp",
-                    "bleed_percentage": 1 * stacks,
+                    "bleed_percentage": 5 * stacks,
                     "stacks": stacks
                 })
 
@@ -81,7 +82,7 @@ class RustyBuckle(RelicBase):
         BUS.subscribe("damage_taken", _damage)
 
     def describe(self, stacks: int) -> str:
-        bleed = 1 * stacks
+        bleed = 5 * stacks
         hits = 5 + 3 * (stacks - 1)
         return (
             f"Lowest-HP ally bleeds for {bleed}% Max HP at start. "

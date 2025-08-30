@@ -9,6 +9,13 @@
   // layout: 'bar' renders a horizontal bar (used by the Buff Bar under portraits).
   export let layout = 'overlay';
 
+  // Cap large counters to 99+ for on-icon labels
+  const cap99 = (n) => {
+    const v = Number(n || 0);
+    if (!Number.isFinite(v)) return '';
+    return v >= 100 ? '99+' : String(v);
+  };
+
   function formatTooltip(effect, isHot = false) {
     if (!effect) return '';
     const parts = [effect.name || effect.id];
@@ -74,7 +81,7 @@
               alt={eff.data.name || eff.data.id || 'Effect'}
               style="border-color: #4a90e2"
             />
-            {#if eff.data.duration && eff.data.duration > 0}<span class="stack inside">{eff.data.duration}</span>{/if}
+            {#if eff.data.duration && eff.data.duration > 0}<span class="stack inside">{cap99(eff.data.duration)}</span>{/if}
           {:else}
             <img
               class="dot-img"
@@ -82,7 +89,7 @@
               alt={eff.data.name || eff.data.id}
               style={`border-color: ${getElementColor(getDotElement(eff.data))}`}
             />
-            {#if eff.data.stacks > 1}<span class="stack inside">{eff.data.stacks}</span>{/if}
+            {#if eff.data.stacks > 1}<span class="stack inside">{cap99(eff.data.stacks)}</span>{/if}
           {/if}
         </span>
       {/each}
@@ -99,7 +106,7 @@
           alt={hot.name || hot.id}
           style={`border-color: ${getElementColor(getDotElement(hot))}`}
         />
-        {#if hot.stacks > 1}<span class="stack inside">{hot.stacks}</span>{/if}
+        {#if hot.stacks > 1}<span class="stack inside">{cap99(hot.stacks)}</span>{/if}
       </span>
     {/each}
     {#each dots as dot}
@@ -110,7 +117,7 @@
           alt={dot.name || dot.id}
           style={`border-color: ${getElementColor(getDotElement(dot))}`}
         />
-        {#if dot.stacks > 1}<span class="stack inside">{dot.stacks}</span>{/if}
+        {#if dot.stacks > 1}<span class="stack inside">{cap99(dot.stacks)}</span>{/if}
       </span>
     {/each}
     <!-- Special Effects (aftertaste, crit boost, etc.) -->
@@ -122,7 +129,7 @@
           alt={effect.name || 'Effect'}
           style="border-color: #4a90e2"
         />
-        {#if effect.duration && effect.duration > 0}<span class="stack inside">{effect.duration}</span>{/if}
+        {#if effect.duration && effect.duration > 0}<span class="stack inside">{cap99(effect.duration)}</span>{/if}
       </span>
     {/each}
   {/if}

@@ -9,11 +9,12 @@
   import { getHourlyBackground } from './assetLoader.js';
   import { getGlyphArt } from './rewardLoader.js';
   const starColors = {
-    1: '#808080',
-    2: '#228B22',
-    3: '#1E90FF',
-    4: '#800080',
-    5: '#FFD700',
+    1: '#808080',  // gray
+    2: '#1E90FF',  // blue
+    3: '#228B22',  // green
+    4: '#800080',  // purple
+    5: '#FF3B30',  // red
+    6: '#FFD700',  // gold
     fallback: '#708090'
   };
   $: width = size === 'small' ? 140 : 280;

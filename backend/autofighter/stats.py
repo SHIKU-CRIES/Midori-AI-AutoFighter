@@ -443,6 +443,16 @@ class Stats:
         if amount > 0:
             self.hp = max(self.hp - amount, 0)
 
+        # Trigger passive registry for damage taken events
+        if original_amount > 0:
+            try:
+                # Import locally to avoid circular imports
+                from autofighter.passives import PassiveRegistry
+                registry = PassiveRegistry()
+                await registry.trigger_damage_taken(self, attacker, original_amount)
+            except Exception as e:
+                log.warning("Error triggering damage_taken passives: %s", e)
+
         # Use async emission for high-frequency damage events to reduce blocking
         BUS.emit_batched("damage_taken", self, attacker, original_amount)
         if attacker is not None:

@@ -18,6 +18,8 @@
   export let reducedMotion = false;
   // Label for the primary action; overlays set this to "Save Party" or "Start Run"
   export let actionLabel = 'Save Party';
+  // Pressure level for run difficulty
+  let pressure = 0;
   const dispatch = createEventDispatcher();
   let previewElementOverride = '';
   // Clear override when preview is not the player
@@ -192,8 +194,20 @@
             roster = roster.map(r => r.is_player ? { ...r, element: e.detail.element } : r);
           }}
         />
+        <div class="pressure-controls">
+          <div class="pressure-label">Pressure Level</div>
+          <div class="pressure-input">
+            <button class="pressure-btn" on:click={() => pressure = Math.max(0, pressure - 1)} disabled={pressure <= 0}>
+              ◀
+            </button>
+            <span class="pressure-value">{pressure}</span>
+            <button class="pressure-btn" on:click={() => pressure = pressure + 1}>
+              ▶
+            </button>
+          </div>
+        </div>
         <div class="party-actions-inline">
-          <button class="wide" on:click={() => dispatch('save')}>{actionLabel}</button>
+          <button class="wide" on:click={() => dispatch('save', { pressure })}>{actionLabel}</button>
           <button class="wide" on:click={() => dispatch('cancel')}>Cancel</button>
         </div>
       </div>
@@ -214,6 +228,43 @@
     z-index: 0; /* establish stacking context so stars can sit behind */
   }
   .right-col { display: flex; flex-direction: column; min-height: 0; }
+  
+  .pressure-controls { margin-top: 0.5rem; }
+  .pressure-label { 
+    display: block; 
+    color: #fff; 
+    font-size: 0.9rem; 
+    margin-bottom: 0.3rem; 
+    text-align: center;
+  }
+  .pressure-input { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 0.5rem; 
+  }
+  .pressure-btn { 
+    background: rgba(0,0,0,0.5); 
+    border: 1px solid rgba(255,255,255,0.35); 
+    color: #fff; 
+    padding: 0.3rem 0.5rem; 
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .pressure-btn:hover:not(:disabled) { 
+    background: rgba(255,255,255,0.1); 
+  }
+  .pressure-btn:disabled { 
+    opacity: 0.5; 
+    cursor: not-allowed; 
+  }
+  .pressure-value { 
+    color: #fff; 
+    font-weight: bold; 
+    min-width: 2rem; 
+    text-align: center; 
+  }
+  
   .party-actions-inline { display:flex; gap:0.5rem; margin-top: 0.5rem; }
   .party-actions-inline .wide { flex: 1; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.5); color:#fff; padding: 0.45rem 0.8rem; }
 

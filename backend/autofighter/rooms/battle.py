@@ -300,8 +300,9 @@ class BattleRoom(Room):
                                 f.passives.append("Enraged")
                             log.info("Enrage activated")
                         new_stacks = turn - threshold
-                        # Each enrage stack adds +1% damage taken and -1% healing dealt globally
-                        set_enrage_percent(0.01 * max(new_stacks, 0))
+                        # Make enrage much stronger: each stack adds +25% damage taken
+                        # and -25% healing dealt globally.
+                        set_enrage_percent(0.25 * max(new_stacks, 0))
                         mult = 1 + 0.4 * new_stacks
                         for i, (f, mgr) in enumerate(zip(foes, foe_effects, strict=False)):
                             if enrage_mods[i] is not None:
@@ -420,6 +421,8 @@ class BattleRoom(Room):
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                             _credit_if_dead(extra_foe)
                     BUS.emit("action_used", member, tgt_foe, dmg)
+                    # Trigger action_taken passives for the acting member
+                    await registry.trigger("action_taken", member)
                     member.add_ultimate_charge(member.actions_per_turn)
                     for ally in combat_party.members:
                         ally.handle_ally_action(member)
@@ -447,6 +450,7 @@ class BattleRoom(Room):
                                     )
                             enrage_bleed_applies += 1
                     await registry.trigger("turn_end", member)
+                    await registry.trigger_turn_end(member)
                     if _EXTRA_TURNS.get(id(member), 0) > 0 and member.hp > 0:
                         _EXTRA_TURNS[id(member)] -= 1
                         await _pace(action_start)
@@ -541,7 +545,10 @@ class BattleRoom(Room):
                         await BUS.emit_async("hit_landed", acting_foe, target, dmg, "attack", f"foe_{damage_type}_attack")
                     target_effect.maybe_inflict_dot(acting_foe, dmg)
                     BUS.emit("action_used", acting_foe, target, dmg)
+                    # Trigger action_taken passives for the acting foe
+                    await registry.trigger("action_taken", acting_foe)
                     await registry.trigger("turn_end", acting_foe)
+                    await registry.trigger_turn_end(acting_foe)
                     if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
                         _EXTRA_TURNS[id(acting_foe)] -= 1
                         await _pace(action_start)

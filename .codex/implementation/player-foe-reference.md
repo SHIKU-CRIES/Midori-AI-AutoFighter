@@ -4,12 +4,6 @@ Player and Foe base classes assign a random damage type when one is not
 provided, and battle rooms respect these preset elements without selecting new
 types.
 
-# Player and Foe Reference
-
-Player and Foe base classes assign a random damage type when one is not
-provided, and battle rooms respect these preset elements without selecting new
-types.
-
 Each instance initializes its own LangChain ChromaDB memory tied to the current
 run. Use `send_lrm_message` to interact with the LRM and `receive_lrm_message`
 to log replies. Conversations remain isolated between combatants and reset for
