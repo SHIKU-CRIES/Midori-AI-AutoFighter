@@ -432,7 +432,12 @@ def _choose_foe(party: Party) -> FoeBase:
 
 
 def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
-    """Build a list of foes for the given room node."""
+    """Build a list of foes for the given room node.
+
+    Ensures no duplicate foe IDs within a single encounter. If the available
+    unique foe pool is smaller than the desired count, the final list is
+    capped to the number of unique candidates.
+    """
     base = min(10, 1 + node.pressure // 5)
     extras = 0
     size = len(party.members)
@@ -445,5 +450,42 @@ def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
                 if random.random() < 0.75:
                     extras = tier
                     break
-    count = min(10, base + extras)
-    return [_choose_foe(party) for _ in range(count)]
+    desired = min(10, base + extras)
+
+    # Build a candidate pool of foe classes that are not members of the party
+    party_ids = {p.id for p in party.members}
+    candidates: list[type[FoeBase]] = []
+    try:
+        for name in getattr(foe_plugins, "__all__", []):
+            cls = getattr(foe_plugins, name, None)
+            if cls is None:
+                continue
+            try:
+                if getattr(cls, "id", None) in party_ids:
+                    continue
+            except Exception:
+                pass
+            candidates.append(cls)
+    except Exception:
+        # Fallback: keep Slime as a candidate at minimum
+        candidates = [foe_plugins.Slime]
+
+    # Remove any accidental duplicates in the candidate list by ID
+    unique_by_id: dict[str, type[FoeBase]] = {}
+    for cls in candidates:
+        try:
+            cid = getattr(cls, "id", None)
+            if cid and cid not in unique_by_id:
+                unique_by_id[cid] = cls
+        except Exception:
+            # If a class has no static id, include it once under its name
+            unique_by_id.setdefault(getattr(cls, "__name__", str(id(cls))), cls)
+
+    pool = list(unique_by_id.values())
+    if not pool:
+        pool = [foe_plugins.Slime]
+
+    k = min(desired, len(pool))
+    chosen_classes = random.sample(pool, k=k)
+    foes = [cls() for cls in chosen_classes]
+    return foes
