@@ -190,6 +190,7 @@
     currentIndex = data.map.current || 0;
     currentRoomType = mapRooms[currentIndex]?.room_type || '';
     nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+    saveRunState(runId, nextRoom);
     homeOverlay();
     await enterRoom();
   }
