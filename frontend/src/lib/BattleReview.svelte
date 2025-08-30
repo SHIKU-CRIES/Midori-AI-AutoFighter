@@ -348,9 +348,9 @@
   }
 
   /* Ensure the tabbed view uses full popup width */
-  .battle-review-tabs { width: 100%; }
+  .battle-review-tabs { width: 100%; overflow-x: hidden; }
   .tabs-nav { width: 100%; box-sizing: border-box; }
-  .tab-content { width: 100%; box-sizing: border-box; }
+  .tab-content { width: 100%; box-sizing: border-box; overflow-x: hidden; }
   .effects-column {
     display: flex;
     flex-direction: column;
