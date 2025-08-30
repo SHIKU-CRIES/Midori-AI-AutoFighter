@@ -1,9 +1,9 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -29,7 +29,7 @@ class VengefulPendant(RelicBase):
                 "reflected_to": getattr(attacker, 'id', str(attacker))
             })
 
-            asyncio.create_task(attacker.apply_damage(dmg, attacker=target))
+            safe_async_task(attacker.apply_damage(dmg, attacker=target))
         BUS.subscribe("damage_taken", _reflect)
 
     def describe(self, stacks: int) -> str:

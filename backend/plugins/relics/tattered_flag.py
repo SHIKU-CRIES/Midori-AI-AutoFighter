@@ -46,7 +46,6 @@ class TatteredFlag(RelicBase):
         if stacks == 1:
             return "+3% party Max HP; ally deaths grant survivors +3% ATK."
         else:
-            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
-            multiplier = (1.03 ** stacks) - 1
-            total_hp_pct = round(multiplier * 100)
-            return f"+{total_hp_pct}% party Max HP ({stacks} stacks, multiplicative); ally deaths grant survivors +3% ATK."
+            # Stacks are multiplicative: each copy compounds the effect
+            total_hp_mult = (1.03 ** stacks - 1) * 100
+            return f"+{total_hp_mult:.1f}% party Max HP ({stacks} stacks, multiplicative); ally deaths grant survivors +3% ATK."

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field
 
+from autofighter.effects import create_stat_buff
 from autofighter.stats import BUS
 from plugins.players._base import PlayerBase
 from plugins.relics._base import RelicBase
@@ -20,7 +21,7 @@ class WoodenIdol(RelicBase):
         super().apply(party)
 
         pending: dict[int, float] = {}
-        active: dict[int, tuple[PlayerBase, float]] = {}
+        active: dict[int, tuple[PlayerBase, object]] = {}
 
         def _resisted(member) -> None:
             if member not in party.members:
@@ -43,8 +44,16 @@ class WoodenIdol(RelicBase):
                 member = next((m for m in party.members if id(m) == pid), None)
                 if member is None:
                     continue
-                member.effect_resistance += bonus
-                active[pid] = (member, bonus)
+
+                # Create a temporary stat buff for the resistance bonus
+                mod = create_stat_buff(
+                    member,
+                    name=f"{self.id}_resistance_{pid}",
+                    effect_resistance=bonus,
+                    turns=1,
+                )
+                member.effect_manager.add_modifier(mod)
+                active[pid] = (member, mod)
                 applied_count += 1
 
                 # Track resistance buff application
@@ -58,8 +67,12 @@ class WoodenIdol(RelicBase):
             pending.clear()
 
         def _turn_end() -> None:
-            for pid, (member, bonus) in list(active.items()):
-                member.effect_resistance -= bonus
+            for pid, (member, mod) in list(active.items()):
+                mod.remove()
+                if mod in member.effect_manager.mods:
+                    member.effect_manager.mods.remove(mod)
+                if mod.id in member.mods:
+                    member.mods.remove(mod.id)
             active.clear()
 
         BUS.subscribe("debuff_resisted", _resisted)
@@ -70,9 +83,8 @@ class WoodenIdol(RelicBase):
         if stacks == 1:
             return "+3% Effect Res; resisting a debuff grants +1% Effect Res next turn."
         else:
-            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
-            multiplier = (1.03 ** stacks) - 1
-            total_res_pct = round(multiplier * 100)
+            # Stacks are multiplicative: each copy compounds the effect
+            total_res_mult = (1.03 ** stacks - 1) * 100
             return (
-                f"+{total_res_pct}% Effect Res ({stacks} stacks, multiplicative); resisting a debuff grants +1% Effect Res next turn."
+                f"+{total_res_mult:.1f}% Effect Res ({stacks} stacks, multiplicative); resisting a debuff grants +1% Effect Res next turn."
             )

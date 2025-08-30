@@ -10,16 +10,16 @@ from plugins import foes as foe_plugins
 from plugins import players as player_plugins
 from plugins.foes._base import FoeBase
 
+from ..mapgen import MapNode
+from ..party import Party
+from ..stats import Stats
+
 # Balance caps for foe stats to prevent runaway scaling
 FOE_MAX_CRIT_RATE: float = 0.12       # 12% max crit chance
 FOE_MAX_CRIT_DAMAGE: float = 2.5      # 250% max crit multiplier
 FOE_MAX_EFFECT_RESIST: float = 0.25   # 25% max effect resistance
 FOE_MAX_ACTIONS_PER_TURN: int = 1     # 1 action per turn
 FOE_MAX_ACTION_POINTS: int = 1        # start and cap at very low AP
-
-from ..mapgen import MapNode
-from ..party import Party
-from ..stats import Stats
 
 
 def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:

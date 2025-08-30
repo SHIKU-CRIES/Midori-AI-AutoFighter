@@ -1,10 +1,10 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.party import Party
 from autofighter.stats import BUS
 from plugins.cards._base import CardBase
+from plugins.cards._base import safe_async_task
 
 
 @dataclass
@@ -25,7 +25,7 @@ class IronResurgence(CardBase):
             if victim not in party.members or victim.hp > 0 or state["cooldown"] > 0:
                 return
             heal = max(int(victim.max_hp * 0.1), 1)
-            asyncio.create_task(victim.apply_healing(heal))
+            safe_async_task(victim.apply_healing(heal))
             state["cooldown"] = 4
             BUS.emit(
                 "card_effect",

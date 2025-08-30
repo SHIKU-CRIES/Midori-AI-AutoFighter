@@ -1,10 +1,10 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.effects.aftertaste import Aftertaste
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -42,7 +42,7 @@ class FrostSigil(RelicBase):
                     "trigger": "hit_landed"
                 })
 
-                asyncio.create_task(
+                safe_async_task(
                     Aftertaste(base_pot=dmg, hits=stacks).apply(attacker, target)
                 )
 

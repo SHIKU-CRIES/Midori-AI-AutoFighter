@@ -1,9 +1,9 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -21,7 +21,7 @@ class EchoBell(RelicBase):
 
         used: set[int] = set()
 
-        def _battle_start(entity) -> None:
+        def _battle_start(*args) -> None:
             used.clear()
 
         def _action(actor, target, amount) -> None:
@@ -41,7 +41,7 @@ class EchoBell(RelicBase):
                 "stacks": stacks
             })
 
-            asyncio.create_task(target.apply_damage(dmg, attacker=actor))
+            safe_async_task(target.apply_damage(dmg, attacker=actor))
 
         BUS.subscribe("battle_start", _battle_start)
         BUS.subscribe("action_used", _action)

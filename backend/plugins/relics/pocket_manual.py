@@ -1,10 +1,10 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.effects.aftertaste import Aftertaste
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -40,9 +40,7 @@ class PocketManual(RelicBase):
                     })
 
                     effect = Aftertaste(base_pot=base)
-                    asyncio.get_event_loop().create_task(
-                        effect.apply(attacker, target)
-                    )
+                    safe_async_task(effect.apply(attacker, target))
 
         BUS.subscribe("hit_landed", _hit)
 
@@ -50,8 +48,7 @@ class PocketManual(RelicBase):
         if stacks == 1:
             return "+3% damage; every 10th hit triggers an additional Aftertaste hit dealing +3% of the original damage."
         else:
-            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
-            multiplier = (1.03 ** stacks) - 1
-            total_dmg_pct = round(multiplier * 100)
-            aftertaste_dmg = 3 * stacks
-            return f"+{total_dmg_pct}% damage ({stacks} stacks, multiplicative); every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."
+            # Stacks are multiplicative: each copy compounds the effect
+            total_dmg_mult = (1.03 ** stacks - 1) * 100
+            aftertaste_dmg = 3 * stacks  # This part still stacks additively for the special effect
+            return f"+{total_dmg_mult:.1f}% damage ({stacks} stacks, multiplicative); every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."

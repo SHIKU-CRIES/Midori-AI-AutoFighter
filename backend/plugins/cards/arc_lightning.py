@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -6,6 +5,7 @@ import random
 from autofighter.party import Party
 from autofighter.stats import BUS
 from plugins.cards._base import CardBase
+from plugins.cards._base import safe_async_task
 from plugins.foes._base import FoeBase
 
 
@@ -43,7 +43,7 @@ class ArcLightning(CardBase):
                 return
             extra = random.choice(valid)
             extra_dmg = int(amount * 0.5)
-            asyncio.create_task(extra.apply_damage(extra_dmg, attacker, trigger_on_hit=False))
+            safe_async_task(extra.apply_damage(extra_dmg, attacker, trigger_on_hit=False))
             BUS.emit(
                 "card_effect",
                 self.id,

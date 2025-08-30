@@ -1,10 +1,10 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.effects import create_stat_buff
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -71,7 +71,7 @@ class SoulPrism(RelicBase):
                     "stacks": stacks
                 })
 
-                asyncio.create_task(member.apply_healing(heal))
+                safe_async_task(member.apply_healing(heal))
 
             # Track revival summary if any allies were revived
             if revived_count > 0:

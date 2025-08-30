@@ -1,9 +1,9 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -33,7 +33,7 @@ class EmberStone(RelicBase):
                     "stacks": stacks
                 })
 
-                asyncio.create_task(attacker.apply_damage(dmg, attacker=target))
+                safe_async_task(attacker.apply_damage(dmg, attacker=target))
         BUS.subscribe("damage_taken", _burn)
 
     def describe(self, stacks: int) -> str:

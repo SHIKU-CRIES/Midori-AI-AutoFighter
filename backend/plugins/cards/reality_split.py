@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -7,6 +6,7 @@ from autofighter.effects import EffectManager
 from autofighter.effects import create_stat_buff
 from autofighter.stats import BUS
 from plugins.cards._base import CardBase
+from plugins.cards._base import safe_async_task
 from plugins.foes._base import FoeBase
 
 
@@ -61,7 +61,7 @@ class RealitySplit(CardBase):
             for foe in foes:
                 if foe.hp <= 0:
                     continue
-                asyncio.create_task(foe.apply_damage(echo, attacker=attacker))
+                safe_async_task(foe.apply_damage(echo, attacker=attacker))
                 BUS.emit(
                     "card_effect",
                     self.id,
