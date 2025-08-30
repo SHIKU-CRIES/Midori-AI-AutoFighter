@@ -321,6 +321,11 @@ profiles are installed and do not affect room count. The frontend shows these
 nodes as stained-glass buttons with `lucide-svelte` icons for battles, shops,
 rests, and bosses.
 
+Across the broader interface, aim for a stained-glass aesthetic. Bar graphs and
+other visual meters should use vibrant, glass-like colors that mirror the
+element palette defined in `getElementBarColor` in
+`frontend/src/lib/BattleReview.svelte`.
+
 ## Playable Characters
 
 The roster in `plugins/players/` currently includes and each entry lists its

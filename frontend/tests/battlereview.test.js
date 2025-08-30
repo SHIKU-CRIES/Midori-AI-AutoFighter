@@ -5,9 +5,9 @@ import { join } from 'path';
 const review = readFileSync(join(import.meta.dir, '../src/lib/BattleReview.svelte'), 'utf8');
 
 describe('BattleReview component', () => {
-  test('renders party and foe sections', () => {
-    expect(review).toContain('{#each party as member}');
-    expect(review).toContain('{#each foes as foe}');
+  test('maps party and foe data', () => {
+    expect(review).toContain('partyDisplay');
+    expect(review).toContain('foesDisplay');
   });
 
   test('includes reward components', () => {
@@ -15,8 +15,8 @@ describe('BattleReview component', () => {
     expect(review).toContain('CurioChoice');
   });
 
-  test('uses colored damage bars', () => {
-    expect(review).toContain('class="bars"');
-    expect(review).toContain('getElementColor');
+  test('uses icon column navigation', () => {
+    expect(review).toContain('icon-column');
+    expect(review).toContain('stats-panel');
   });
 });
