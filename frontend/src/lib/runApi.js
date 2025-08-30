@@ -30,11 +30,11 @@ async function handleFetch(url, options = {}) {
   }
 }
 
-export async function startRun(party, damageType = '') {
+export async function startRun(party, damageType = '', pressure = 0) {
   return handleFetch(`${API_BASE}/run/start`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ party, damage_type: damageType })
+    body: JSON.stringify({ party, damage_type: damageType, pressure })
   });
 }
 

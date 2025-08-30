@@ -132,7 +132,7 @@
   <OverlaySurface>
     <PartyPicker bind:selected {reducedMotion}
       actionLabel="Start Run"
-      on:save={() => dispatch('startRun')}
+      on:save={(e) => dispatch('startRun', e.detail)}
       on:cancel={() => dispatch('back')}
     />
   </OverlaySurface>
