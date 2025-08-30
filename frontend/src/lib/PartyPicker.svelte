@@ -201,7 +201,7 @@
               ◀
             </button>
             <span class="pressure-value">{pressure}</span>
-            <button class="pressure-btn" on:click={() => pressure = Math.min(100, pressure + 1)} disabled={pressure >= 100}>
+            <button class="pressure-btn" on:click={() => pressure = pressure + 1}>
               ▶
             </button>
           </div>
