@@ -438,6 +438,9 @@ def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
     unique foe pool is smaller than the desired count, the final list is
     capped to the number of unique candidates.
     """
+    if "boss" in node.room_type:
+        return [_choose_foe(party)]
+
     base = min(10, 1 + node.pressure // 5)
     extras = 0
     size = len(party.members)

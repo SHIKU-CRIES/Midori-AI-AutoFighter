@@ -11,6 +11,7 @@ Each strike rolls the attacker's `effect_hit_rate` against the target's `effect_
 During the foe's turn, a target is chosen from living party members with a probability weight of `defense × mitigation`, making sturdier allies more likely to draw aggro.
 
 `BossRoom` subclasses `BattleRoom` but multiplies foe stats by 100× to create floor bosses.
+Boss encounters always spawn exactly one foe regardless of party size or pressure.
 
 Experience is awarded as soon as a foe falls, allowing multiple enemies to grant cumulative rewards. When the fight ends, the backend returns updated party stats, card choices, and foe data so the run map can advance.
 
