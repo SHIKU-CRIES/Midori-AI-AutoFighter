@@ -16,6 +16,7 @@
   // Catalog metadata maps for richer display
   let cardMeta = {};
   let relicMeta = {};
+  let metaReady = false;
 
   onMount(async () => {
     try {
@@ -25,6 +26,7 @@
     } catch (e) {
       // Silently ignore; components will fallback to id-only display
     }
+    metaReady = true;
   });
 
   // Helpers to resolve stars and names safely
@@ -52,7 +54,7 @@
 </script>
 
 <div class="inv-root" data-testid="inventory-panel">
-  {#if cards.length}
+  {#if metaReady && cards.length}
     <h3>Cards</h3>
     <div class="cards-grid">
       {#each sortedCardIds as id}
@@ -64,7 +66,7 @@
       {/each}
     </div>
   {/if}
-  {#if relics.length}
+  {#if metaReady && relics.length}
     <h3>Relics</h3>
     <div class="relics-grid">
       {#each sortedRelicEntries as [id, qty]}
