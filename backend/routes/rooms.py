@@ -24,6 +24,7 @@ from autofighter.rooms import ChatRoom
 from autofighter.rooms import RestRoom
 from autofighter.rooms import ShopRoom
 from autofighter.rooms import _build_foes
+from autofighter.rooms import _choose_foe
 from autofighter.rooms import _scale_stats
 from autofighter.rooms import _serialize
 from plugins.damage_types import load_damage_type
@@ -267,9 +268,9 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     await asyncio.to_thread(save_map, run_id, state)
     room = BossRoom(node)
     party = await asyncio.to_thread(load_party, run_id)
-    foes = _build_foes(node, party)
-    for f in foes:
-        _scale_stats(f, node, room.strength)
+    foe = _choose_foe(party)
+    _scale_stats(foe, node, room.strength)
+    foes = [foe]
     combat_party = Party(
         members=[copy.deepcopy(m) for m in party.members],
         gold=party.gold,

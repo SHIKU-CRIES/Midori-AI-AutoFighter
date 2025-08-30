@@ -272,6 +272,7 @@ Base battles spawn one foe plus one more for every five Pressure, up to ten.
 Party size can add bonus enemies: parties of two have a 35% chance to face one
 extra foe; parties of three roll 35% for two extras else 75% for one. Larger
 groups follow the same pattern, always capped at ten foes.
+Boss encounters ignore these rules and always spawn exactly one foe.
 
 5★ cards such as Phantom Ally, Temporal Shield, and Reality Split introduce
 summoned allies, turn-based damage reduction, and afterimage attacks that echo
