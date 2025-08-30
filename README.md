@@ -18,7 +18,7 @@ The repository includes automated GitHub Actions workflows to build standalone g
 
 ### Available Builds
 - **Windows** (4 variants): non-llm, llm-cpu, llm-cuda, llm-amd
-- **Linux** (4 variants): non-llm, llm-cpu, llm-cuda, llm-amd  
+- **Linux** (4 variants): non-llm, llm-cpu, llm-cuda, llm-amd
 - **Android** (1 variant): non-llm
 
 ### Quick Local Build

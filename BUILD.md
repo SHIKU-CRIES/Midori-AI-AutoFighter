@@ -23,7 +23,7 @@ This repository contains GitHub Actions workflows to automatically build the Mid
 
 #### Individual Platform Workflows
 - `.github/workflows/build-windows.yml` - Builds all 4 Windows variants
-- `.github/workflows/build-linux.yml` - Builds all 4 Linux variants  
+- `.github/workflows/build-linux.yml` - Builds all 4 Linux variants
 - `.github/workflows/build-android.yml` - Builds Android non-llm variant
 
 #### Comprehensive Build Workflow
