@@ -7,6 +7,7 @@ from pathlib import Path
 
 import sys
 from pathlib import Path
+import time
 sys.path.append(str(Path(__file__).parent.parent))
 
 from game import get_save_manager
@@ -45,7 +46,7 @@ def test_run_persistence_across_restart():
         manager1 = get_save_manager()
         
         # Create a test run
-        run_id = 'test-run-123'
+        run_id = f'test-run-{int(time.time())}'  # Use timestamp to make it unique
         party_data = {
             "members": ["player"],
             "gold": 100,
