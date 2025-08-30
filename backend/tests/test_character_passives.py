@@ -126,3 +126,74 @@ async def test_passive_registry_handles_no_passives():
     await registry.trigger("action_taken", entity)
     await registry.trigger_damage_taken(entity, None, 0)
     await registry.trigger_turn_end(entity)
+
+
+@pytest.mark.asyncio
+async def test_hilander_critical_ferment_passive():
+    """Test Hilander's Critical Ferment passive stacking and consumption."""
+    registry = PassiveRegistry()
+
+    # Create Hilander with the passive
+    hilander = Stats(hp=1000, damage_type=Generic())
+    hilander.passives = ["hilander_critical_ferment"]
+
+    # Initially should have no stacks
+    initial_effects = len(hilander._active_effects)
+
+    # Landing hits should build stacks
+    await registry.trigger("hit_landed", hilander)
+    await registry.trigger("hit_landed", hilander)
+
+    # Should have gained crit bonuses
+    assert len(hilander._active_effects) > initial_effects
+
+
+@pytest.mark.asyncio
+async def test_kboshi_flux_cycle_passive():
+    """Test Kboshi's Flux Cycle passive element switching."""
+    registry = PassiveRegistry()
+
+    # Create Kboshi with the passive
+    kboshi = Stats(hp=1000, damage_type=Generic())
+    kboshi.passives = ["kboshi_flux_cycle"]
+
+    # Trigger turn start multiple times to test element switching
+    for _ in range(5):
+        await registry.trigger("turn_start", kboshi)
+
+    # Should have processed without error
+    # Actual element switching would need damage type system integration
+
+
+@pytest.mark.asyncio
+async def test_player_level_up_bonus_passive():
+    """Test Player's enhanced level-up gains."""
+    registry = PassiveRegistry()
+
+    # Create Player with the passive
+    player = Stats(hp=1000, damage_type=Generic())
+    player.passives = ["player_level_up_bonus"]
+
+    initial_effects = len(player._active_effects)
+
+    # Trigger level up
+    await registry.trigger("level_up", player)
+
+    # Should have gained level-up bonus effects
+    assert len(player._active_effects) > initial_effects
+
+
+@pytest.mark.asyncio
+async def test_bubbles_bubble_burst_passive():
+    """Test Bubbles' Bubble Burst passive."""
+    registry = PassiveRegistry()
+
+    # Create Bubbles with the passive
+    bubbles = Stats(hp=1000, damage_type=Generic())
+    bubbles.passives = ["bubbles_bubble_burst"]
+
+    # Trigger turn start (changes element)
+    await registry.trigger("turn_start", bubbles)
+
+    # Should process without error
+    # Actual bubble mechanics would need hit tracking integration
