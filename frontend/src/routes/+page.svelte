@@ -50,6 +50,19 @@
         };
       });
     }
+    // Normalize party/foes shapes: arrays are preferred; accept object maps or alternate keys
+    if (snapshot && !Array.isArray(snapshot.party) && snapshot.party && typeof snapshot.party === 'object') {
+      snapshot.party = Object.values(snapshot.party);
+    }
+    if (snapshot && !Array.isArray(snapshot.foes)) {
+      if (snapshot.foes && typeof snapshot.foes === 'object') {
+        snapshot.foes = Object.values(snapshot.foes);
+      } else if (Array.isArray(snapshot.enemies)) {
+        snapshot.foes = snapshot.enemies;
+      } else if (snapshot.enemies && typeof snapshot.enemies === 'object') {
+        snapshot.foes = Object.values(snapshot.enemies);
+      }
+    }
     if (Array.isArray(snapshot.party)) snapshot.party = map(snapshot.party);
     if (Array.isArray(snapshot.foes)) snapshot.foes = map(snapshot.foes);
     return snapshot;

@@ -113,21 +113,8 @@
     position: relative;
     height: 50%;
     width: 100%;
-    /* Base accent color from star rank with animated gradient sheen */
-    background: var(--accent);
-    background-image:
-      /* subtle top-to-bottom shade */
-      linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.16)),
-      /* animated accent gradient */
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--accent) 28%, #ffffff) 0%,
-        color-mix(in srgb, var(--accent) 92%, #000000) 50%,
-        color-mix(in srgb, var(--accent) 28%, #ffffff) 100%
-      );
-    background-size: auto, 220% 220%;
-    background-position: center, 0% 50%;
-    animation: accent-pan 14s ease-in-out infinite;
+    /* Make the star-rank accent area slightly see-through */
+    background: transparent;
     display: grid;
     grid-template-rows: auto 1fr;
     align-items: stretch;
@@ -135,13 +122,37 @@
     padding: 6px 8px;
     box-sizing: border-box;
   }
+  /* Semi-transparent animated accent overlay so content remains crisp */
+  .topbox::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+    background-image:
+      /* subtle top-to-bottom shade */
+      linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.16)),
+      /* animated accent gradient */
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,0.85)) 0%,
+        color-mix(in srgb, var(--accent) 92%, rgba(0,0,0,0.85)) 50%,
+        color-mix(in srgb, var(--accent) 28%, rgba(255,255,255,0.85)) 100%
+      );
+    background-color: color-mix(in srgb, var(--accent) 68%, transparent);
+    background-size: auto, 220% 220%;
+    background-position: center, 0% 50%;
+    animation: accent-pan 14s ease-in-out infinite;
+    opacity: 0.72; /* see-through tint */
+    pointer-events: none;
+    z-index: 0;
+  }
   @keyframes accent-pan {
     0% { background-position: center, 0% 50%; }
     50% { background-position: center, 100% 50%; }
     100% { background-position: center, 0% 50%; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .topbox { animation: none; background-position: center, 50% 50%; }
+    .topbox::before { animation: none; background-position: center, 50% 50%; }
   }
   .glyph-bg {
     position: absolute;

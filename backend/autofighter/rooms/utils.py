@@ -50,7 +50,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
             pass
         try:
             if hasattr(obj, "defense") and isinstance(obj.defense, (int, float)):
-                obj.defense = type(obj.defense)(obj.defense * foe_debuff)
+                obj.defense = type(obj.defense)(obj.defense * (foe_debuff / 4))
         except Exception:
             pass
         try:

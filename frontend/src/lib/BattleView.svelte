@@ -123,6 +123,19 @@
     dispatch('snapshot-start');
     try {
       const snap = await roomAction(runId, 'battle', 'snapshot');
+      // Normalize alternate shapes for compatibility
+      if (snap && !Array.isArray(snap.party) && snap.party && typeof snap.party === 'object') {
+        snap.party = Object.values(snap.party);
+      }
+      if (snap && !Array.isArray(snap.foes)) {
+        if (snap.foes && typeof snap.foes === 'object') {
+          snap.foes = Object.values(snap.foes);
+        } else if (Array.isArray(snap.enemies)) {
+          snap.foes = snap.enemies;
+        } else if (snap.enemies && typeof snap.enemies === 'object') {
+          snap.foes = Object.values(snap.enemies);
+        }
+      }
       // removed console logging to avoid snapshot/round-trip spam
       // Do not overwrite party/foes directly; we enrich below to preserve
       // existing per-entity element data and avoid regressions.
