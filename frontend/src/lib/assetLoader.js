@@ -55,6 +55,16 @@ const dotModules = Object.fromEntries(
   ).map(([p, src]) => [p, normalizeUrl(src)])
 );
 
+// Load effect icons by type folder (e.g., ./assets/effects/buffs/*.png)
+const effectModules = Object.fromEntries(
+  Object.entries(
+    import.meta.glob('./assets/effects/*/*.png', {
+      eager: true,
+      as: 'url'
+    })
+  ).map(([p, src]) => [p, normalizeUrl(src)])
+);
+
 const ELEMENT_ICONS = {
   fire: Flame,
   ice: Snowflake,
@@ -81,6 +91,7 @@ const fallbackAssets = Object.values(fallbackModules);
 const backgroundAssets = Object.values(backgroundModules);
 const defaultFallback = normalizeUrl('./assets/midoriai-logo.png');
 const DOT_DEFAULT = normalizeUrl('./assets/dots/generic/generic1.png');
+const EFFECT_DEFAULT = normalizeUrl('./assets/effects/buffs/generic_buff.png');
 
 // Organize character assets by character ID (folder or single file)
 Object.keys(characterModules).forEach(p => {
@@ -204,6 +215,25 @@ const dotAssets = (() => {
   return map;
 })();
 
+// Build Effect assets map: { buffs: {name: url, ...}, debuffs: {name: url, ...} }
+const effectAssets = (() => {
+  const map = {
+    buffs: {},
+    debuffs: {}
+  };
+  for (const [p, url] of Object.entries(effectModules)) {
+    const m = p.match(/\.\/assets\/effects\/(\w+)\/(\w+)\.png$/);
+    if (m) {
+      const [, type, name] = m;
+      const effectType = type.toLowerCase();
+      const effectName = name.toLowerCase();
+      if (!map[effectType]) map[effectType] = {};
+      map[effectType][effectName] = url;
+    }
+  }
+  return map;
+})();
+
 // Internal helper to infer an element from a DoT id/name
 function inferElementFromKey(key) {
   const k = String(key || '').toLowerCase();
@@ -245,8 +275,88 @@ export function getDotImage(effect) {
   return list[idx] || DOT_DEFAULT || defaultFallback;
 }
 
+// Internal helper to infer effect type (buff vs debuff) from modifiers
+function inferEffectType(effect) {
+  if (!effect || typeof effect !== 'object') return 'buffs';
+  
+  const modifiers = effect.modifiers || effect.stat_modifiers || {};
+  
+  // Check if any modifier is negative (debuff) or positive (buff)
+  for (const [, value] of Object.entries(modifiers)) {
+    if (typeof value === 'number') {
+      if (value < 0) return 'debuffs';
+      if (value > 0) return 'buffs';
+    }
+  }
+  
+  // Default to buffs if we can't determine
+  return 'buffs';
+}
+
+// Internal helper to get effect name for icon mapping
+function getEffectIconName(effect) {
+  if (!effect || typeof effect !== 'object') return 'generic_buff';
+  
+  const name = String(effect.name || effect.id || '').toLowerCase();
+  
+  // Map specific effect names to icon names
+  const nameMap = {
+    'aftertaste': 'aftertaste',
+    'critical_boost': 'critical_boost',
+    'attack_up': 'attack_up',
+    'defense_up': 'defense_up',
+    'defense_down': 'defense_down',
+    'vitality_up': 'vitality_up',
+    'mitigation_up': 'mitigation_up'
+  };
+  
+  // Check for exact matches first
+  if (nameMap[name]) return nameMap[name];
+  
+  // Check for partial matches
+  for (const [key, icon] of Object.entries(nameMap)) {
+    if (name.includes(key.replace('_', ''))) return icon;
+  }
+  
+  // Check modifiers to guess icon type
+  const modifiers = effect.modifiers || effect.stat_modifiers || {};
+  for (const [stat, value] of Object.entries(modifiers)) {
+    if (stat === 'atk' || stat === 'attack') return value > 0 ? 'attack_up' : 'attack_down';
+    if (stat === 'defense' || stat === 'def') return value > 0 ? 'defense_up' : 'defense_down';
+    if (stat === 'vitality') return 'vitality_up';
+    if (stat === 'mitigation') return 'mitigation_up';
+  }
+  
+  // Fall back to generic based on effect type
+  const effectType = inferEffectType(effect);
+  return effectType === 'debuffs' ? 'generic_debuff' : 'generic_buff';
+}
+
+// Choose an effect icon based on an effect object
+// Falls back to generic buff/debuff if no specific icon is found.
+export function getEffectImage(effect) {
+  if (!effect || typeof effect !== 'object') {
+    return EFFECT_DEFAULT || defaultFallback;
+  }
+  
+  const effectType = inferEffectType(effect);
+  const iconName = getEffectIconName(effect);
+  
+  // Try to find the specific icon
+  const iconUrl = effectAssets[effectType]?.[iconName];
+  if (iconUrl) return iconUrl;
+  
+  // Fall back to generic for this effect type
+  const genericIcon = effectType === 'debuffs' ? 'generic_debuff' : 'generic_buff';
+  const genericUrl = effectAssets[effectType]?.[genericIcon];
+  if (genericUrl) return genericUrl;
+  
+  // Final fallback
+  return EFFECT_DEFAULT || defaultFallback;
+}
+
 // Export assets for debugging
-export { characterAssets, fallbackAssets, backgroundAssets };
+export { characterAssets, fallbackAssets, backgroundAssets, effectAssets };
 
 // Internal: cache and helpers for stable image selection
 const characterImageCache = new Map();

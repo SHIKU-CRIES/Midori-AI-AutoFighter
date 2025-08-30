@@ -1,6 +1,6 @@
 <script>
   // Displays HoT and DoT icons for a fighter.
-  import { getDotImage, getDotElement, getElementColor } from '../assetLoader.js';
+  import { getDotImage, getDotElement, getElementColor, getEffectImage } from '../assetLoader.js';
 
   export let hots = [];
   export let dots = [];
@@ -48,7 +48,8 @@
   const pageSize = 3;
   $: effects = [
     ...(Array.isArray(hots) ? hots.map((e) => ({ type: 'hot', data: e })) : []),
-    ...(Array.isArray(dots) ? dots.map((e) => ({ type: 'dot', data: e })) : [])
+    ...(Array.isArray(dots) ? dots.map((e) => ({ type: 'dot', data: e })) : []),
+    ...(Array.isArray(active_effects) ? active_effects.map((e) => ({ type: 'effect', data: e })) : [])
   ];
   $: total = effects.length;
   $: showArrows = layout === 'bar' && total > pageSize;
@@ -65,14 +66,24 @@
     {/if}
     <div class="icons">
       {#each visible as eff}
-        <span class={eff.type} title={formatTooltip(eff.data, eff.type === 'hot')}>
-          <img
-            class="dot-img"
-            src={getDotImage(eff.data)}
-            alt={eff.data.name || eff.data.id}
-            style={`border-color: ${getElementColor(getDotElement(eff.data))}`}
-          />
-          {#if eff.data.stacks > 1}<span class="stack inside">{eff.data.stacks}</span>{/if}
+        <span class={eff.type} title={eff.type === 'effect' ? formatEffectTooltip(eff.data) : formatTooltip(eff.data, eff.type === 'hot')}>
+          {#if eff.type === 'effect'}
+            <img
+              class="dot-img"
+              src={getEffectImage(eff.data)}
+              alt={eff.data.name || eff.data.id || 'Effect'}
+              style="border-color: #4a90e2"
+            />
+            {#if eff.data.duration && eff.data.duration > 0}<span class="stack inside">{eff.data.duration}</span>{/if}
+          {:else}
+            <img
+              class="dot-img"
+              src={getDotImage(eff.data)}
+              alt={eff.data.name || eff.data.id}
+              style={`border-color: ${getElementColor(getDotElement(eff.data))}`}
+            />
+            {#if eff.data.stacks > 1}<span class="stack inside">{eff.data.stacks}</span>{/if}
+          {/if}
         </span>
       {/each}
     </div>
@@ -105,7 +116,13 @@
     <!-- Special Effects (aftertaste, crit boost, etc.) -->
     {#each (active_effects || []) as effect}
       <span class="special-effect" title={formatEffectTooltip(effect)}>
-        {effect.name}
+        <img
+          class="dot-img"
+          src={getEffectImage(effect)}
+          alt={effect.name || 'Effect'}
+          style="border-color: #4a90e2"
+        />
+        {#if effect.duration && effect.duration > 0}<span class="stack inside">{effect.duration}</span>{/if}
       </span>
     {/each}
   {/if}
@@ -184,14 +201,12 @@
   /* Special Effects styling */
   .special-effect {
     display: inline-block;
-    padding: 2px 6px;
-    background: rgba(0, 100, 255, 0.8);
-    color: white;
-    border-radius: 3px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.6);
-    border: 1px solid rgba(0, 150, 255, 0.9);
-    cursor: help;
+    position: relative;
+  }
+  
+  /* Effect type styling */
+  .effect {
+    position: relative;
+    display: inline-block;
   }
 </style>
