@@ -26,16 +26,39 @@
       // Silently ignore; components will fallback to id-only display
     }
   });
+
+  // Helpers to resolve stars and names safely
+  const cardStars = (id) => (cardMeta?.[id]?.stars ?? 1) | 0;
+  const relicStars = (id) => (relicMeta?.[id]?.stars ?? 1) | 0;
+  const cardName = (id) => String(cardMeta?.[id]?.name || id);
+  const relicName = (id) => String(relicMeta?.[id]?.name || id);
+
+  // Sort order: Cards section first (already rendered first), then Relics.
+  // Within each section: sort by star rank descending, then by name A→Z for stability.
+  $: cardIdsUnique = Array.from(new Set(cards || []));
+  $: sortedCardIds = [...cardIdsUnique].sort((a, b) => {
+    const s = cardStars(b) - cardStars(a);
+    if (s !== 0) return s;
+    return cardName(a).localeCompare(cardName(b));
+  });
+
+  $: relicEntries = count(relics || []); // [id, qty]
+  $: sortedRelicEntries = [...relicEntries].sort((a, b) => {
+    const [idA] = a; const [idB] = b;
+    const s = relicStars(idB) - relicStars(idA);
+    if (s !== 0) return s;
+    return relicName(idA).localeCompare(relicName(idB));
+  });
 </script>
 
 <div class="inv-root" data-testid="inventory-panel">
   {#if cards.length}
     <h3>Cards</h3>
     <div class="cards-grid">
-      {#each [...new Set(cards)] as id}
+      {#each sortedCardIds as id}
         {#key id}
           <div class="item">
-            <CardArt entry={{ id, name: (cardMeta[id]?.name || id), stars: (cardMeta[id]?.stars || 1), about: (cardMeta[id]?.about || '') }} type="card" />
+            <CardArt entry={{ id, name: cardName(id), stars: cardStars(id), about: (cardMeta[id]?.about || '') }} type="card" />
           </div>
         {/key}
       {/each}
@@ -44,10 +67,10 @@
   {#if relics.length}
     <h3>Relics</h3>
     <div class="relics-grid">
-      {#each count(relics) as [id, qty]}
+      {#each sortedRelicEntries as [id, qty]}
         {#key id}
           <div class="item">
-            <CurioChoice entry={{ id, name: (relicMeta[id]?.name || id), stars: (relicMeta[id]?.stars || 1), about: (relicMeta[id]?.about || '') }} />
+            <CurioChoice entry={{ id, name: relicName(id), stars: relicStars(id), about: (relicMeta[id]?.about || '') }} />
             <span class="qty">x{qty}</span>
           </div>
         {/key}
