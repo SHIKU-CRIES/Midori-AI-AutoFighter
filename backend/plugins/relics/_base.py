@@ -48,7 +48,9 @@ class RelicBase:
             if mgr is None:
                 mgr = EffectManager(member)
                 member.effect_manager = mgr
-            changes = {f"{attr}_mult": 1 + pct for attr, pct in self.effects.items()}
+
+            # Apply stack multiplier to effects: each additional copy adds the same bonus
+            changes = {f"{attr}_mult": 1 + (pct * stacks) for attr, pct in self.effects.items()}
             if not changes:
                 continue
             mod = create_stat_buff(member, name=self.id, turns=9999, **changes)

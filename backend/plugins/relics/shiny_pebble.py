@@ -69,11 +69,10 @@ class ShinyPebble(RelicBase):
                 "+3% DEF. The first time each ally is hit, they gain +3% mitigation for one turn."
             )
         else:
-            # Calculate actual multiplicative bonus: (1.03)^stacks - 1
-            multiplier = (1.03 ** stacks) - 1
-            total_def_pct = round(multiplier * 100)
+            # Stacks are additive: each copy adds 3%
+            total_def_pct = 3 * stacks
             mit = 3 * stacks
             return (
-                f"+{total_def_pct}% DEF ({stacks} stacks, multiplicative). "
+                f"+{total_def_pct}% DEF ({stacks} stacks, additive). "
                 f"The first time each ally is hit, they gain +{mit}% mitigation for one turn."
             )
