@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -6,6 +5,7 @@ import random
 from autofighter.stats import BUS
 from plugins.effects.aftertaste import Aftertaste
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -46,7 +46,7 @@ class RustyBuckle(RelicBase):
                     "stacks": stacks
                 })
 
-                asyncio.create_task(ally.apply_damage(dmg, attacker=ally))
+                safe_async_task(ally.apply_damage(dmg, attacker=ally))
                 state["ally"] = ally
                 state["triggers"] = 0
 
@@ -75,7 +75,7 @@ class RustyBuckle(RelicBase):
                 for _ in range(hits):
                     if state["foes"]:
                         foe = random.choice(state["foes"])
-                        asyncio.create_task(Aftertaste(base_pot=dmg).apply(ally, foe))
+                        safe_async_task(Aftertaste(base_pot=dmg).apply(ally, foe))
 
         BUS.subscribe("battle_start", _battle_start)
         BUS.subscribe("damage_taken", _damage)

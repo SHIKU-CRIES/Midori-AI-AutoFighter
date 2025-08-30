@@ -1,8 +1,8 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -21,7 +21,7 @@ class ThreadbareCloak(RelicBase):
         for member in party.members:
             member.enable_overheal()  # Enable shields for this member
             shield = int(member.max_hp * 0.03)
-            asyncio.create_task(member.apply_healing(shield))
+            safe_async_task(member.apply_healing(shield))
 
     def describe(self, stacks: int) -> str:
         pct = 3 * stacks

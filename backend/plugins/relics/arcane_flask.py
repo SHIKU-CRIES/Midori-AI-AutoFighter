@@ -1,9 +1,9 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -33,7 +33,7 @@ class ArcaneFlask(RelicBase):
                 "stacks": stacks
             })
 
-            asyncio.create_task(user.apply_healing(shield))
+            safe_async_task(user.apply_healing(shield))
 
         BUS.subscribe("ultimate_used", _ultimate)
 
