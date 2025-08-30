@@ -9,7 +9,8 @@
     chooseRelic,
     advanceRoom,
     getMap,
-    updateParty
+    updateParty,
+    getActiveRuns
   } from '$lib/runApi.js';
   import { loadRunState, saveRunState, clearRunState } from '$lib/runState.js';
   import { buildRunMenu } from '$lib/RunButtons.svelte';
@@ -185,12 +186,38 @@
       window.afHaltSync = false;
       window.afBattleActive = false; // Initialize battle state
     }
+
+    // Check for active/live runs first
+    try {
+      const activeRunsData = await getActiveRuns();
+      const activeRuns = activeRunsData.runs || [];
+      
+      if (activeRuns.length > 0) {
+        // Resume the first active run found
+        const activeRun = activeRuns[0];
+        runId = activeRun.run_id;
+        mapRooms = activeRun.map.rooms || [];
+        currentIndex = activeRun.map.current || 0;
+        currentRoomType = mapRooms[currentIndex]?.room_type || '';
+        nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+        saveRunState(runId, nextRoom);
+        homeOverlay();
+        await enterRoom();
+        return;
+      }
+    } catch (error) {
+      // If checking for active runs fails, fall back to starting a new run
+      console.warn('Failed to check for active runs, starting new run:', error);
+    }
+
+    // No active runs found, start a new run
     const data = await startRun(selectedParty, editorState.damageType, pressure);
     runId = data.run_id;
     mapRooms = data.map.rooms || [];
     currentIndex = data.map.current || 0;
     currentRoomType = mapRooms[currentIndex]?.room_type || '';
     nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+    saveRunState(runId, nextRoom);
     homeOverlay();
     await enterRoom();
   }

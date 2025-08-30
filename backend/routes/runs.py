@@ -30,6 +30,28 @@ from plugins import players as player_plugins
 bp = Blueprint("runs", __name__)
 
 
+@bp.get("/runs")
+async def list_runs() -> tuple[str, int, dict[str, object]]:
+    """List all active/live runs that haven't been deleted due to defeat."""
+    def get_all_runs():
+        with get_save_manager().connection() as conn:
+            cur = conn.execute("SELECT id, party, map FROM runs")
+            return cur.fetchall()
+
+    rows = await asyncio.to_thread(get_all_runs)
+    runs = []
+    for row in rows:
+        run_id, party_json, map_json = row
+        party_data = json.loads(party_json) if party_json else {}
+        map_data = json.loads(map_json) if map_json else {}
+        runs.append({
+            "run_id": run_id,
+            "party": party_data.get("members", []),
+            "map": map_data
+        })
+    return jsonify({"runs": runs})
+
+
 @bp.post("/run/start")
 async def start_run() -> tuple[str, int, dict[str, object]]:
     data = await request.get_json(silent=True) or {}

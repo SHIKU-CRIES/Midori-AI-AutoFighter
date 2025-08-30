@@ -30,6 +30,10 @@ async function handleFetch(url, options = {}) {
   }
 }
 
+export async function getActiveRuns() {
+  return handleFetch(`${API_BASE}/runs`);
+}
+
 export async function startRun(party, damageType = '', pressure = 0) {
   return handleFetch(`${API_BASE}/run/start`, {
     method: 'POST',
