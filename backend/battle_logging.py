@@ -648,6 +648,7 @@ class BattleLogger:
                 # Enhanced tracking data
                 "damage_by_type": self.summary.damage_by_type,
                 "damage_by_source": self.summary.damage_by_source,
+                "damage_by_action": self.summary.damage_by_action,
                 "healing_by_source": self.summary.healing_by_source,
                 "dot_damage": self.summary.dot_damage,
                 "hot_healing": self.summary.hot_healing,
