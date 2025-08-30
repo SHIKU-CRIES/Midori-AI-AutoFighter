@@ -56,37 +56,78 @@
   }
 
   onMount(async () => {
-    try {
-      backendFlavor = await getBackendFlavor();
-      window.backendFlavor = backendFlavor;
-    } catch (e) {
-      // Dedicated overlay opened in getBackendFlavor; halt further init until backend is ready
-      return;
-    }
-    // Ensure sync is not halted on load
+    // Always ensure sync is not halted on load
     if (typeof window !== 'undefined') {
       window.afHaltSync = false;
       window.afBattleActive = false; // Initialize battle state for ping indicator
     }
+
+    // Always attempt to restore run state from localStorage, regardless of backend status
     const saved = loadRunState();
-    if (saved) {
-      const data = await getMap(saved.runId);
-      if (!data) {
-        clearRunState();
-      } else {
-        runId = saved.runId;
-        selectedParty = data.party || selectedParty;
-        mapRooms = data.map.rooms || [];
-        currentIndex = data.map.current || 0;
-        currentRoomType = mapRooms[currentIndex]?.room_type || '';
-        nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
-        await enterRoom();
+    
+    async function tryRestoreRun() {
+      if (!saved) return;
+      
+      try {
+        const data = await getMap(saved.runId);
+        if (!data) {
+          clearRunState();
+        } else {
+          runId = saved.runId;
+          selectedParty = data.party || selectedParty;
+          mapRooms = data.map.rooms || [];
+          currentIndex = data.map.current || 0;
+          currentRoomType = mapRooms[currentIndex]?.room_type || '';
+          nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+          await enterRoom();
+        }
+      } catch (e) {
+        // If run restoration fails due to backend unavailability, keep the runId for later retry
+        if (saved?.runId) {
+          runId = saved.runId;
+        }
       }
+    }
+    
+    // Try to get backend flavor and restore run
+    try {
+      backendFlavor = await getBackendFlavor();
+      window.backendFlavor = backendFlavor;
+      
+      // Backend is ready, attempt run restoration
+      await tryRestoreRun();
+    } catch (e) {
+      // Backend not ready, but still attempt to restore run state for later
+      if (saved?.runId) {
+        runId = saved.runId;
+      }
+      // Dedicated overlay opened in getBackendFlavor; user can retry when backend is ready
     }
   });
 
-  function openRun() {
+  async function openRun() {
     if (runId) {
+      // If we have a runId but don't have map data (e.g., backend was unavailable during load),
+      // try to restore the run data now
+      if (!mapRooms.length || currentIndex === 0) {
+        const saved = loadRunState();
+        if (saved?.runId === runId) {
+          try {
+            const data = await getMap(runId);
+            if (data) {
+              selectedParty = data.party || selectedParty;
+              mapRooms = data.map.rooms || [];
+              currentIndex = data.map.current || 0;
+              currentRoomType = mapRooms[currentIndex]?.room_type || '';
+              nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+            }
+          } catch (e) {
+            // If we still can't get run data, show error but don't clear runId
+            console.warn('Failed to restore run data:', e.message);
+          }
+        }
+      }
+      
       homeOverlay();
       if (!battleActive) {
         enterRoom();
