@@ -192,6 +192,8 @@ rolls a `10% × rdr` chance for a pull ticket. `rdr` improves drop quantity and
 odds and can even upgrade relic or card star ranks with lucky rolls at extreme
 values: climbing from 3★ to 4★ requires 1000% `rdr`, while 5★ demands a
 colossal 1,000,000%.
+Each foe defeated during a battle temporarily grants +55% `rdr` for that room,
+raising gold payouts and damage-type item drops.
 
 ## Plugins
 
@@ -266,6 +268,11 @@ victory presents three unused cards of the appropriate star rank. Selecting one
 adds it to the party, and card and relic bonuses are applied at the start of the
 next battle.
 
+Base battles spawn one foe plus one more for every five Pressure, up to ten.
+Party size can add bonus enemies: parties of two have a 35% chance to face one
+extra foe; parties of three roll 35% for two extras else 75% for one. Larger
+groups follow the same pattern, always capped at ten foes.
+
 5★ cards such as Phantom Ally, Temporal Shield, and Reality Split introduce
 summoned allies, turn-based damage reduction, and afterimage attacks that echo
 damage across all foes.
@@ -275,6 +282,8 @@ rewards, upgrade item counts, and pull ticket chances. At extreme values it can
 roll to raise relic and card star ranks (3★→4★ at 1000% `rdr`, 4★→5★ at
 1,000,000%), but even huge `rdr` never guarantees success. The 3★ Greed Engine
 relic raises `rdr` while draining HP each turn.
+Each slain foe grants a temporary +55% `rdr` bonus for the remainder of the
+battle, further increasing gold and element upgrade drops.
 
 Defeated foes grant experience to every party member. Characters below level
 1000 receive a 10× boost to experience gained so early levels advance quickly.

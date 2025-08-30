@@ -75,6 +75,8 @@ matching chance to yield an extra item. Each fight also rolls a `10% × rdr`
 chance to award a pull ticket. `rdr` boosts drop quantity and odds and, at
 extreme values, can roll to upgrade relic and card star ranks (3★→4★ at 1000%
 `rdr`, 4★→5★ at 1,000,000%) though success is never guaranteed.
+Each defeated foe grants a temporary +55% `rdr` boost for that battle,
+increasing the gold reward and number of damage-type items.
 
 Current 5★ cards include Phantom Ally, Temporal Shield, and Reality Split.
 

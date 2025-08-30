@@ -433,5 +433,17 @@ def _choose_foe(party: Party) -> FoeBase:
 
 def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
     """Build a list of foes for the given room node."""
-    count = min(10, 1 + node.pressure // 5)
+    base = min(10, 1 + node.pressure // 5)
+    extras = 0
+    size = len(party.members)
+    max_extra = max(size - 1, 0)
+    if max_extra:
+        if random.random() < 0.35:
+            extras = max_extra
+        else:
+            for tier in range(max_extra - 1, 0, -1):
+                if random.random() < 0.75:
+                    extras = tier
+                    break
+    count = min(10, base + extras)
     return [_choose_foe(party) for _ in range(count)]

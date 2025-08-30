@@ -21,6 +21,8 @@ Foe stats scale via `balance.loop.scale_stats`, multiplying base values by floor
 # Battle room rewards
 
 Rewards draw from a Rare Drop Rate (RDR) that starts at zero and rises with floor, room index, and any bonuses from relics or cards. Higher RDR increases the odds of rarer stars while proportionally reducing common ones. Card rewards roll star ranks using these baseline odds; regular battles only offer 1★ or 2★ cards, bosses extend the table up to 5★, and floor bosses guarantee 3★ or better. Percentages below reflect baseline odds at RDR 0.
+Each foe killed during combat adds a temporary 55% RDR boost for that room,
+further increasing gold and element upgrade item drops.
 
 Normal fights:
 - 5% chance to drop a relic (1★ at 98%, 2★ at 2%).
