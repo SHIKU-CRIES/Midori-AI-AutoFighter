@@ -7,5 +7,4 @@ The Battle Review interface uses a vertical icon column and a persistent side pa
 - `.battle-review-tabs` arranges three columns: `icon-column`, `content-area`, and `stats-panel`.
 - `.icon-btn` provides a square click target with hover and active states.
 - The stats panel hosts the `entity-stats-grid`, ensuring key metrics stay visible during navigation.
-- Colors should match the UI's stained-glass palette, using vibrant hues such
-  as those returned by `getElementBarColor` in `frontend/src/lib/BattleReview.svelte`.
+- Colors should match the UI's stained-glass palette, using vibrant hues such as those returned by `getElementBarColor` in `frontend/src/lib/BattleReview.svelte`.
