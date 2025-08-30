@@ -99,6 +99,59 @@ class Character(PlayerBase):
     passives: list[str] = field(default_factory=lambda: ["character_passive_name"])
 ```
 
+### Adding Passives to Existing Characters
+
+To add a passive to a character that doesn't currently have one:
+
+1. **Create the Passive Plugin** (`backend/plugins/passives/character_passive_name.py`)
+2. **Update Character Plugin** to declare the passive:
+
+```python
+@dataclass
+class Character(PlayerBase):
+    # ... existing fields ...
+    passives: list[str] = field(default_factory=lambda: ["character_passive_name"])
+```
+
+3. **Test Integration** with the battle system
+
+#### Example: Adding a Passive to Carly
+
+```python
+# backend/plugins/passives/carly_light_guardian.py
+@dataclass
+class CarlyLightGuardian:
+    """Carly's defensive light-based passive."""
+    plugin_type = "passive"
+    id = "carly_light_guardian"
+    name = "Light Guardian"
+    trigger = "damage_taken"
+    
+    async def apply(self, target: "Stats") -> None:
+        # Light-based damage reduction
+        if hasattr(target, 'damage_type') and target.damage_type.name == "Light":
+            effect = StatEffect(
+                name="light_protection",
+                stat_modifiers={"mitigation": 15},
+                duration=2,
+                source=self.id,
+            )
+            target.add_effect(effect)
+
+# backend/plugins/players/carly.py
+@dataclass
+class Carly(PlayerBase):
+    id = "carly"
+    name = "Carly"
+    char_type = CharacterType.B
+    gacha_rarity = 5
+    damage_type: DamageTypeBase = field(default_factory=Light)
+    stat_gain_map: dict[str, str] = field(
+        default_factory=lambda: {"atk": "defense"}
+    )
+    passives: list[str] = field(default_factory=lambda: ["carly_light_guardian"])
+```
+
 ### Advanced Patterns
 
 #### Class-Level State Tracking
@@ -137,48 +190,107 @@ class MultiTriggerPassive:
         pass
 ```
 
-## Implemented Passives
+## Character Roster & Passives
 
-### Luna - Lunar Reservoir
+### Characters with Implemented Passives
+
+#### Luna - Lunar Reservoir
 - **ID**: `luna_lunar_reservoir`
 - **Trigger**: `action_taken`
 - **Mechanic**: Charge-based attack scaling (2→4→8→16→32 attacks)
 - **Max Charge**: 200 points
 
-### Graygray - Counter Maestro
+#### Graygray - Counter Maestro
 - **ID**: `graygray_counter_maestro`
 - **Trigger**: `damage_taken`
 - **Mechanic**: Counter-attacks with stacking attack/mitigation buffs
 
-### Mezzy - Gluttonous Bulwark
+#### Mezzy - Gluttonous Bulwark
 - **ID**: `mezzy_gluttonous_bulwark`
 - **Trigger**: `turn_start`
 - **Mechanic**: 20% damage reduction + stat siphoning from allies
 
-### Ally - Overload
+#### Ally - Overload
 - **ID**: `ally_overload`
 - **Trigger**: `action_taken`
 - **Mechanic**: Twin daggers (2 attacks) scaling to Overload mode (4 attacks)
 
-### Hilander - Critical Ferment
+#### Hilander - Critical Ferment
 - **ID**: `hilander_critical_ferment`
 - **Trigger**: `hit_landed`
 - **Mechanic**: Crit stacking with Aftertaste damage on crits
 
-### Kboshi - Flux Cycle
+#### Kboshi - Flux Cycle
 - **ID**: `kboshi_flux_cycle`
 - **Trigger**: `turn_start`
 - **Mechanic**: Element switching with damage/HoT stacking on failures
 
-### Player - Enhanced Growth
+#### Player - Enhanced Growth
 - **ID**: `player_level_up_bonus`
 - **Trigger**: `level_up`
 - **Mechanic**: 1.35× multiplier on all level-up stat gains
 
-### Bubbles - Bubble Burst
+#### Bubbles - Bubble Burst
 - **ID**: `bubbles_bubble_burst`
 - **Trigger**: `hit_landed`
 - **Mechanic**: Element switching with bubble stacking and area damage
+
+### Characters without Passives (Available for Future Implementation)
+
+#### Carly
+- **Character Type**: B
+- **Gacha Rarity**: 5
+- **Damage Type**: Light
+- **Special Mechanic**: Defense-focused stat gain (ATK → Defense)
+- **Passive Status**: *Not yet implemented*
+
+#### Becca
+- **Character Type**: B
+- **Gacha Rarity**: 5
+- **Damage Type**: Variable (Becca-specific)
+- **Passive Status**: *Not yet implemented*
+
+#### Chibi
+- **Character Type**: A
+- **Gacha Rarity**: 5
+- **Damage Type**: Variable (Chibi-specific)
+- **Passive Status**: *Not yet implemented*
+
+#### Mimic
+- **Character Type**: C
+- **Gacha Rarity**: 5
+- **Damage Type**: Variable (Mimic-specific)
+- **Passive Status**: *Not yet implemented*
+
+#### Lady Darkness
+- **Character Type**: B
+- **Gacha Rarity**: 5
+- **Damage Type**: Dark
+- **Passive Status**: *Not yet implemented*
+
+#### Lady Echo
+- **Character Type**: B
+- **Gacha Rarity**: 5
+- **Damage Type**: Lightning
+- **Passive Status**: *Not yet implemented*
+
+#### Lady Fire and Ice
+- **Character Type**: B
+- **Gacha Rarity**: 6
+- **Damage Type**: Variable (LadyFireAndIce-specific)
+- **Passive Status**: *Not yet implemented*
+
+#### Lady Light
+- **Character Type**: B
+- **Gacha Rarity**: 5
+- **Damage Type**: Light
+- **Passive Status**: *Not yet implemented*
+
+#### Lady of Fire
+- **Character Type**: B
+- **Gacha Rarity**: 5* (*rarity field missing in plugin)
+- **Damage Type**: Fire
+- **Passive Status**: *Not yet implemented*
 
 ## Battle System Integration
 
@@ -257,6 +369,36 @@ python -m tests.test_passive_demos
 3. **Dynamic Passives**: Passives that change behavior based on game state
 4. **Passive Upgrades**: Evolution of passives through gameplay
 
+### Characters Ready for Passive Implementation
+
+The following characters are fully functional but lack passive abilities, making them excellent candidates for future passive implementations:
+
+#### Priority Candidates (Based on Unique Mechanics)
+- **Carly**: Defense-focused character with ATK→Defense stat conversion
+- **Lady Fire and Ice**: Dual-element character with potential for element-switching passives
+- **Mimic**: Copy-based character with potential for adaptive passives
+
+#### Additional Candidates
+- **Becca**: Variable damage type for versatile passive options
+- **Chibi**: Character Type A for unique scaling passives
+- **Lady Darkness**: Dark damage type for shadow-based mechanics
+- **Lady Echo**: Lightning damage type for chain/echo effects
+- **Lady Light**: Light damage type for healing/protection passives
+- **Lady of Fire**: Fire damage type for burning/DoT mechanics
+
+### Passive Design Themes by Character
+
+#### Element-Based Passives
+- **Fire Characters** (Lady of Fire): Burning DoT, area damage
+- **Light Characters** (Carly, Lady Light): Healing, damage reduction
+- **Dark Characters** (Lady Darkness): Life steal, debuff mechanics
+- **Lightning Characters** (Lady Echo): Chain damage, speed boosts
+
+#### Mechanic-Based Passives
+- **Defense Specialists** (Carly): Damage mitigation, counter-attacks
+- **Variable Types** (Becca, Chibi, Mimic): Adaptive abilities, form changes
+- **Dual Element** (Lady Fire and Ice): Element switching, temperature effects
+
 ### API Extensions
 
 ```python
@@ -267,6 +409,10 @@ async def should_trigger(self, target: "Stats", context: dict) -> bool:
 # Future: Passive interactions
 async def interact_with(self, other_passive: "PassiveBase", target: "Stats") -> None:
     # Handle cross-passive interactions
+
+# Future: Character-specific triggers
+async def on_stat_conversion(self, target: "Stats", stat_from: str, stat_to: str, amount: int) -> None:
+    # Trigger when stat gain map converts stats (useful for Carly)
 ```
 
 ## Troubleshooting
