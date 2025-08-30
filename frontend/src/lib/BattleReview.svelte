@@ -407,7 +407,7 @@
 
   .battle-review-tabs {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr 1fr;
     gap: 1rem;
     background: rgba(0,0,0,0.4);
     border-radius: 8px;
@@ -455,6 +455,8 @@
 
   .stats-panel {
     min-width: 220px;
+    display: flex;
+    flex-direction: column;
   }
   .effects-column {
     display: flex;
@@ -618,6 +620,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 0.75rem;
+    width: 100%;
   }
   
   .stat-item {
