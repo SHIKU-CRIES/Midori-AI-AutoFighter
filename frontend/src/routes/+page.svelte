@@ -422,7 +422,12 @@
           }
         } catch {}
       }
-  } catch (e) {
+    } catch (e) {
+      if (e?.status === 404) {
+        handleRunEnd();
+        openOverlay('error', { message: 'Run not found. Please start a new run.', traceback: '' });
+        return;
+      }
       try {
         if (haltSync || !runId) return;
         const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
