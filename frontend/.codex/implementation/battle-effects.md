@@ -7,6 +7,13 @@ with `damage` or `healing` values. `StatusIcons.svelte` and
 `FighterPortrait.svelte` consume these arrays to render icons with stack
 counts and tooltips showing effect details.
 
+## Stained-Glass Palette
+
+Effect indicators and bar graphs should reflect the project's stained-glass
+aesthetic. Use vibrant, glass-like hues for these elements, drawing inspiration
+from the element palette returned by `getElementBarColor` in
+`frontend/src/lib/BattleReview.svelte`.
+
 ## Enrage Indicator Redesign
 
 The previous blue/red full‑screen flashing during enrage has been replaced

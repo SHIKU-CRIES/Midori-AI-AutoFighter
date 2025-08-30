@@ -5,7 +5,7 @@
   import CurioChoice from './CurioChoice.svelte';
   import { getElementColor, getDotImage, getDotElement } from './assetLoader.js';
   import { getBattleSummary, getBattleEvents } from './runApi.js';
-  import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, Users, User, Swords } from 'lucide-svelte';
+  import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, User, Swords } from 'lucide-svelte';
 
   export let runId = '';
   export let battleIndex = 0;
@@ -154,7 +154,7 @@
 
   // Build available tabs based on available entities
   $: {
-    const tabs = [{ id: 'overview', label: 'Overview', icon: Users, type: 'overview' }];
+    const tabs = [{ id: 'overview', label: 'Overview', icon: Swords, type: 'overview' }];
     
     // Add party member tabs
     for (const member of partyDisplay || []) {
@@ -185,8 +185,28 @@
 
   // Get entity-specific data for a tab
   function getEntityData(entityId) {
-    if (!summary || entityId === 'overview') return null;
-    
+    if (!summary) return null;
+
+    if (entityId === 'overview') {
+      const resources = Object.values(summary.resources_spent || {}).reduce((acc, cur) => {
+        for (const [type, amt] of Object.entries(cur || {})) {
+          acc[type] = (acc[type] || 0) + amt;
+        }
+        return acc;
+      }, {});
+      return {
+        damage: totalDamageByType(),
+        actions: {},
+        criticals: Object.values(summary.critical_hits || {}).reduce((a, b) => a + b, 0),
+        criticalDamage: Object.values(summary.critical_damage || {}).reduce((a, b) => a + b, 0),
+        shieldAbsorbed: Object.values(summary.shield_absorbed || {}).reduce((a, b) => a + b, 0),
+        dotDamage: Object.values(summary.dot_damage || {}).reduce((a, b) => a + b, 0),
+        hotHealing: Object.values(summary.hot_healing || {}).reduce((a, b) => a + b, 0),
+        resourcesSpent: resources,
+        tempHpGranted: Object.values(summary.temporary_hp_granted || {}).reduce((a, b) => a + b, 0)
+      };
+    }
+
     return {
       damage: summary.damage_by_type?.[entityId] || {},
       actions: summary.damage_by_action?.[entityId] || {},
@@ -257,6 +277,10 @@
     if (!hasAnySummary(partyDisplay) && hasAnySummary(summaryParty)) partyDisplay = summaryParty;
     if (!hasAnySummary(foesDisplay) && hasAnySummary(summaryFoes)) foesDisplay = summaryFoes;
   }
+
+  // Calculate tab and entity data reactively
+  $: currentTab = availableTabs.find(t => t.id === activeTab);
+  $: entityData = getEntityData(activeTab);
 
   // Build a safe fighter object for portraits in tabs (ensures id/element/hp exist)
   function toDisplayFighter(entity) {
@@ -381,12 +405,59 @@
     gap: 1rem;
   }
 
-  /* Ensure the tabbed view uses full popup width */
-  .battle-review-tabs { width: 100%; max-width: 100%; overflow-x: hidden; }
-  .tabs-nav { width: 100%; box-sizing: border-box; flex-wrap: wrap; overflow-x: hidden; }
-  .tab-content { width: 100%; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
-  .tabs-nav { width: 100%; box-sizing: border-box; }
-  .tab-content { width: 100%; box-sizing: border-box; overflow-x: hidden; }
+  .battle-review-tabs {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 1rem;
+    background: rgba(0,0,0,0.4);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .icon-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: rgba(255,255,255,0.1);
+    color: #ccc;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .icon-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+
+  .icon-btn.active {
+    background: rgba(120,180,255,0.3);
+    color: #fff;
+    border: 1px solid rgba(120,180,255,0.5);
+  }
+
+  .content-area {
+    min-width: 0;
+  }
+
+  .stats-panel {
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+  }
   .effects-column {
     display: flex;
     flex-direction: column;
@@ -482,59 +553,8 @@
     font-weight: 600;
   }
   
-  /* Tab system styles */
-  .battle-review-tabs {
-    background: rgba(0,0,0,0.4);
-    border-radius: 8px;
-    padding: 1rem;
-    margin: 1rem 0;
-  }
-  
-  .tabs-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 1rem;
-  }
-  
-  .tab-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background: rgba(255,255,255,0.1);
-    color: #ccc;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.75rem;
-    min-width: 0;
-  }
-  
-  .tab-btn:hover {
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-  }
-  
-  .tab-btn.active {
-    background: rgba(120,180,255,0.3);
-    color: #fff;
-    border: 1px solid rgba(120,180,255,0.5);
-  }
-  
-  .tab-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100px;
-  }
-  
-  .tab-content {
-    min-height: 300px;
-  }
+  /* Layout for icon navigation and stats panel */
+
   
   /* Entity breakdown styles */
   .entity-breakdown {
@@ -600,6 +620,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 0.75rem;
+    width: 100%;
   }
   
   .stat-item {
@@ -790,343 +811,335 @@
         {/if}
       </div>
     {/if}
+  </div>
     
-    <!-- Tab-based Battle Review Interface (always visible; sections inside are conditional) -->
+  <!-- Icon-column Battle Review Interface -->
     <div class="battle-review-tabs">
-        <!-- Tab Navigation -->
-        <div class="tabs-nav">
-          {#each availableTabs as tab}
-            <button 
-              class="tab-btn" 
-              class:active={activeTab === tab.id} 
-              on:click={() => activeTab = tab.id}
-              title={tab.label}
-            >
-              {#if tab.icon}
-                <svelte:component this={tab.icon} size={16} />
-                <span class="tab-label">{tab.label}</span>
-              {:else if tab.entity}
-                {@const _tabFighter = toDisplayFighter(tab.entity)}
-                <span style="--portrait-size: 4.5rem; display:inline-block;">
-                  <FighterPortrait fighter={_tabFighter} />
-                </span>
-              {/if}
-            </button>
-          {/each}
-        </div>
-
-        <!-- Tab Content -->
-        <div class="tab-content">
-          {#if activeTab === 'overview'}
-            <div class="effects-summary">
-              {#if Object.keys(totalDamageByType()).length > 0}
-                <div class="entity-section">
-                  <h4>
-                    <Swords size={16} />
-                    Total Damage Output
-                  </h4>
-                  <div class="damage-bar-container">
-                    {#each Object.entries(totalDamageByType()).sort((a, b) => b[1] - a[1]) as [element, damage]}
-                      {@const grand = Object.values(totalDamageByType()).reduce((a, b) => a + b, 0)}
-                      {@const percentage = grand > 0 ? (damage / grand * 100) : 0}
-                      <div class="damage-bar">
-                        <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getElementBarColor(element)};"></div>
-                        <div class="damage-bar-label">{element}</div>
-                        <div class="damage-bar-amount">{fmt(damage)}</div>
-                      </div>
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-              <div class="effects-header">
-                <Sparkles size={20} />
-                Effects Summary <span class="new-feature-badge">NEW FEATURE</span>
-              </div>
-              <div class="effects-grid">
-                {#if summary?.relic_effects && Object.keys(summary.relic_effects).length > 0}
-                  <div class="effects-column">
-                    <div class="effects-column-title">
-                      <Shield size={16} />
-                      Relic Effects
-                    </div>
-                    {#each Object.entries(summary.relic_effects).sort((a, b) => b[1] - a[1]) as [relicName, count]}
-                      <div class="effect-item tooltip-trigger">
-                        <span class="effect-name">{relicName}</span>
-                        <span class="effect-count">×{count}</span>
-                        <div class="tooltip">
-                          Relic effect triggered {count} time{count !== 1 ? 's' : ''}
-                        </div>
-                      </div>
-                    {/each}
-                  </div>
-                {/if}
-                {#if summary?.card_effects && Object.keys(summary.card_effects).length > 0}
-                  <div class="effects-column">
-                    <div class="effects-column-title">
-                      <CreditCard size={16} />
-                      Card Effects
-                    </div>
-              {#each Object.entries(summary.card_effects).sort((a, b) => b[1] - a[1]) as [cardName, count]}
-                <div class="effect-item tooltip-trigger">
-                  <span class="effect-name">{cardName}</span>
-                  <span class="effect-count">×{count}</span>
-                  <div class="tooltip">
-                    {effectTooltips[cardName] || `Card effect triggered ${count} time${count !== 1 ? 's' : ''}`}
-                  </div>
-                </div>
-              {/each}
-            </div>
-          {/if}
-        </div>
-        
-        <!-- Additional detailed tracking information -->
-        {#if summary?.critical_hits && Object.keys(summary.critical_hits).length > 0}
-          <div class="detail-section">
-            <div class="detail-title">
-              <Zap size={16} />
-              Critical Hits Analysis
-            </div>
-            <div class="detail-grid">
-              {#each Object.entries(summary.critical_hits).sort((a, b) => b[1] - a[1]) as [entity, crits]}
-                <div class="detail-item">
-                  <span class="detail-name">{entity}</span>
-                  <span class="detail-stats">
-                    {crits} crits
-                    {#if summary?.critical_damage?.[entity]}
-                      ({fmt(summary.critical_damage[entity])} dmg)
-                    {/if}
-                  </span>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {/if}
-        
-        {#if summary?.shield_absorbed && Object.keys(summary.shield_absorbed).length > 0}
-          <div class="detail-section">
-            <div class="detail-title">
-              <Shield size={16} />
-              Shield Protection
-            </div>
-            <div class="detail-grid">
-              {#each Object.entries(summary.shield_absorbed).sort((a, b) => b[1] - a[1]) as [entity, absorbed]}
-                <div class="detail-item">
-                  <span class="detail-name">{entity}</span>
-                  <span class="detail-stats">{fmt(absorbed)} absorbed</span>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {/if}
-        
-        {#if summary?.dot_damage && Object.keys(summary.dot_damage).length > 0}
-          <div class="detail-section">
-            <div class="detail-title">
-              <Flame size={16} />
-              DoT Damage
-            </div>
-            <div class="detail-grid">
-              {#each Object.entries(summary.dot_damage).sort((a, b) => b[1] - a[1]) as [entity, damage]}
-                <div class="detail-item">
-                  <span class="detail-name">{entity}</span>
-                  <span class="detail-stats">{fmt(damage)} DoT dmg</span>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {/if}
-        
-        {#if summary?.hot_healing && Object.keys(summary.hot_healing).length > 0}
-          <div class="detail-section">
-            <div class="detail-title">
-              <Heart size={16} />
-              HoT Healing
-            </div>
-            <div class="detail-grid">
-              {#each Object.entries(summary.hot_healing).sort((a, b) => b[1] - a[1]) as [entity, healing]}
-                <div class="detail-item">
-                  <span class="detail-name">{entity}</span>
-                  <span class="detail-stats">{fmt(healing)} HoT heal</span>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {/if}
-        
-        {#if summary?.resources_spent && Object.keys(summary.resources_spent).length > 0}
-          <div class="detail-section">
-            <div class="detail-title">
-              <Coins size={16} />
-              Resource Usage
-            </div>
-            <div class="detail-grid">
-              {#each Object.entries(summary.resources_spent) as [entity, resources]}
-                <div class="detail-item">
-                  <span class="detail-name">{entity}</span>
-                  <span class="detail-stats">
-                    {#each Object.entries(resources) as [type, amount]}
-                      {type}: {fmt(amount)}
-                    {/each}
-                  </span>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {/if}
-        
-        {#if summary?.temporary_hp_granted && Object.keys(summary.temporary_hp_granted).length > 0}
-          <div class="detail-section">
-            <div class="detail-title">
-              <TrendingUp size={16} />
-              Temporary HP
-            </div>
-            <div class="detail-grid">
-              {#each Object.entries(summary.temporary_hp_granted).sort((a, b) => b[1] - a[1]) as [entity, tempHp]}
-                <div class="detail-item">
-                  <span class="detail-name">{entity}</span>
-                  <span class="detail-stats">{fmt(tempHp)} temp HP</span>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {/if}
-        
-        {#if summary?.effect_applications && Object.keys(summary.effect_applications).length > 0}
-          <div class="detail-section">
-            <div class="detail-title">
-              <Sparkles size={16} />
-              Effect Applications
-            </div>
-            <div class="detail-grid">
-              {#each Object.entries(summary.effect_applications).sort((a, b) => b[1] - a[1]).slice(0, 8) as [effect, count]}
-                <div class="detail-item tooltip-trigger">
-                  <span class="detail-name">{effect}</span>
-                  <span class="detail-stats">×{count}</span>
-                  <div class="tooltip">
-                    {effectTooltips[effect] || `Effect applied ${count} time${count !== 1 ? 's' : ''}`}
-                  </div>
-                </div>
-              {/each}
-            </div>
-          </div>
-        {/if}
+      <div class="icon-column">
+        {#each availableTabs as tab}
+          <button
+            class="icon-btn"
+            class:active={activeTab === tab.id}
+            on:click={() => activeTab = tab.id}
+            aria-label={tab.label}
+          >
+            {#if tab.icon}
+              <svelte:component this={tab.icon} size={20} />
+            {:else if tab.entity}
+              {@const _tabFighter = toDisplayFighter(tab.entity)}
+              <div style="--portrait-size: 3rem;">
+                <FighterPortrait fighter={_tabFighter} />
               </div>
             {:else}
-              <!-- Entity-specific tab content -->
-              {@const entityData = getEntityData(activeTab)}
-              {@const currentTab = availableTabs.find(t => t.id === activeTab)}
-              {#if entityData && currentTab}
-                <div class="entity-breakdown">
-                  <div class="entity-header">
-                    {#if currentTab.entity}
-                      {@const _fighter = toDisplayFighter(currentTab.entity)}
-                      <div style="--portrait-size: 4.5rem;">
-                        <FighterPortrait fighter={_fighter} />
-                      </div>
-                    {/if}
-                    <h3>{currentTab.label} Breakdown</h3>
-                  </div>
-                  
-                  <!-- Damage Output with Bar Graphs -->
-                  {#if Object.keys(entityData.damage).length > 0}
-                    <div class="entity-section">
-                      <h4>Damage Output by Source</h4>
-                      <div class="damage-bar-container">
-                        {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [action, damage]}
-                          {@const totalDamage = Object.values(entityData.damage).reduce((a, b) => a + b, 0)}
-                          {@const percentage = totalDamage > 0 ? (damage / totalDamage * 100) : 0}
-                          <div class="damage-bar">
-                            <div 
-                              class="damage-bar-fill" 
-                              style="width: {percentage}%; background-color: {getActionBarColor(action)};"
-                            ></div>
-                            <div class="damage-bar-label">{action}</div>
-                            <div class="damage-bar-amount">{fmt(damage)}</div>
-                          </div>
-                        {/each}
-                      </div>
-                    </div>
-                  {/if}
-                  
-                  <!-- Stats Grid -->
-                  <div class="entity-stats-grid">
-                    {#if entityData.criticals > 0}
-                      <div class="stat-item">
-                        <Zap size={16} />
-                        <span>Critical Hits</span>
-                        <span class="stat-value">{entityData.criticals}</span>
-                        {#if entityData.criticalDamage > 0}
-                          <span class="stat-detail">({fmt(entityData.criticalDamage)} dmg)</span>
-                        {/if}
-                      </div>
-                    {/if}
-                    
-                    {#if entityData.shieldAbsorbed > 0}
-                      <div class="stat-item">
-                        <Shield size={16} />
-                        <span>Shield Absorbed</span>
-                        <span class="stat-value">{fmt(entityData.shieldAbsorbed)}</span>
-                      </div>
-                    {/if}
-                    
-                    {#if entityData.dotDamage > 0}
-                      <div class="stat-item">
-                        <Flame size={16} />
-                        <span>DoT Damage</span>
-                        <span class="stat-value">{fmt(entityData.dotDamage)}</span>
-                      </div>
-                    {/if}
-                    
-                    {#if entityData.hotHealing > 0}
-                      <div class="stat-item">
-                        <Heart size={16} />
-                        <span>HoT Healing</span>
-                        <span class="stat-value">{fmt(entityData.hotHealing)}</span>
-                      </div>
-                    {/if}
-                    
-                    {#if entityData.tempHpGranted > 0}
-                      <div class="stat-item">
-                        <TrendingUp size={16} />
-                        <span>Temp HP Granted</span>
-                        <span class="stat-value">{fmt(entityData.tempHpGranted)}</span>
-                      </div>
-                    {/if}
-                    
-                    {#if Object.keys(entityData.resourcesSpent).length > 0}
-                      <div class="stat-item">
-                        <Coins size={16} />
-                        <span>Resources Spent</span>
-                        <div class="resource-breakdown">
-                          {#each Object.entries(entityData.resourcesSpent) as [type, amount]}
-                            <span class="resource-item">{type}: {fmt(amount)}</span>
-                          {/each}
-                        </div>
-                      </div>
-                    {/if}
-                  </div>
+              <User size={20} />
+            {/if}
+          </button>
+        {/each}
+      </div>
 
-                  <!-- Damage by Action -->
-                  {#if Object.keys(entityData.actions).length > 0}
-                    <div class="entity-section">
-                      <h4>
-                        <Swords size={16} />
-                        Damage by Action
-                      </h4>
-                      <div class="damage-breakdown">
-                        {#each Object.entries(entityData.actions).sort((a, b) => b[1] - a[1]) as [action, amount]}
-                          <div class="damage-item">
-                            <span class="damage-element">{action}</span>
-                            <span class="damage-amount">{fmt(amount)}</span>
-                          </div>
-                        {/each}
+      <div class="content-area">
+        {#if activeTab === 'overview'}
+          <div class="effects-summary">
+            {#if Object.keys(totalDamageByType()).length > 0}
+              <div class="entity-section">
+                <h4>
+                  <Swords size={16} />
+                  Total Damage Output
+                </h4>
+                <div class="damage-bar-container">
+                  {#each Object.entries(totalDamageByType()).sort((a, b) => b[1] - a[1]) as [element, damage]}
+                    {@const grand = Object.values(totalDamageByType()).reduce((a, b) => a + b, 0)}
+                    {@const percentage = grand > 0 ? (damage / grand * 100) : 0}
+                    <div class="damage-bar">
+                      <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getElementBarColor(element)};"></div>
+                      <div class="damage-bar-label">{element}</div>
+                      <div class="damage-bar-amount">{fmt(damage)}</div>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+            <div class="effects-header">
+              <Sparkles size={20} />
+              Effects Summary <span class="new-feature-badge">NEW FEATURE</span>
+            </div>
+            <div class="effects-grid">
+              {#if summary?.relic_effects && Object.keys(summary.relic_effects).length > 0}
+                <div class="effects-column">
+                  <div class="effects-column-title">
+                    <Shield size={16} />
+                    Relic Effects
+                  </div>
+                  {#each Object.entries(summary.relic_effects).sort((a, b) => b[1] - a[1]) as [relicName, count]}
+                    <div class="effect-item tooltip-trigger">
+                      <span class="effect-name">{relicName}</span>
+                      <span class="effect-count">×{count}</span>
+                      <div class="tooltip">
+                        Relic effect triggered {count} time{count !== 1 ? 's' : ''}
                       </div>
                     </div>
-                  {/if}
+                  {/each}
                 </div>
               {/if}
+              {#if summary?.card_effects && Object.keys(summary.card_effects).length > 0}
+                <div class="effects-column">
+                  <div class="effects-column-title">
+                    <CreditCard size={16} />
+                    Card Effects
+                  </div>
+                  {#each Object.entries(summary.card_effects).sort((a, b) => b[1] - a[1]) as [cardName, count]}
+                    <div class="effect-item tooltip-trigger">
+                      <span class="effect-name">{cardName}</span>
+                      <span class="effect-count">×{count}</span>
+                      <div class="tooltip">
+                        {effectTooltips[cardName] || `Card effect triggered ${count} time${count !== 1 ? 's' : ''}`}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          </div>
+
+          <!-- Additional detailed tracking information -->
+          {#if summary?.critical_hits && Object.keys(summary.critical_hits).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Zap size={16} />
+                Critical Hits Analysis
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.critical_hits).sort((a, b) => b[1] - a[1]) as [entity, crits]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">
+                      {crits} crits
+                      {#if summary?.critical_damage?.[entity]}
+                        ({fmt(summary.critical_damage[entity])} dmg)
+                      {/if}
+                    </span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.shield_absorbed && Object.keys(summary.shield_absorbed).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Shield size={16} />
+                Shield Protection
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.shield_absorbed).sort((a, b) => b[1] - a[1]) as [entity, absorbed]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(absorbed)} absorbed</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.dot_damage && Object.keys(summary.dot_damage).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Flame size={16} />
+                DoT Damage
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.dot_damage).sort((a, b) => b[1] - a[1]) as [entity, damage]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(damage)} DoT dmg</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.hot_healing && Object.keys(summary.hot_healing).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Heart size={16} />
+                HoT Healing
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.hot_healing).sort((a, b) => b[1] - a[1]) as [entity, healing]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(healing)} HoT heal</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.resources_spent && Object.keys(summary.resources_spent).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Coins size={16} />
+                Resource Usage
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.resources_spent) as [entity, resources]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">
+                      {#each Object.entries(resources) as [type, amount]}
+                        {type}: {fmt(amount)}
+                      {/each}
+                    </span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.temporary_hp_granted && Object.keys(summary.temporary_hp_granted).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <TrendingUp size={16} />
+                Temporary HP
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.temporary_hp_granted).sort((a, b) => b[1] - a[1]) as [entity, tempHp]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(tempHp)} temp HP</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.effect_applications && Object.keys(summary.effect_applications).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Sparkles size={16} />
+                Effect Applications
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.effect_applications).sort((a, b) => b[1] - a[1]).slice(0, 8) as [effect, count]}
+                  <div class="detail-item tooltip-trigger">
+                    <span class="detail-name">{effect}</span>
+                    <span class="detail-stats">×{count}</span>
+                    <div class="tooltip">
+                      {effectTooltips[effect] || `Effect applied ${count} time${count !== 1 ? 's' : ''}`}
+                    </div>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+        {:else if entityData && currentTab}
+          <div class="entity-breakdown">
+            <div class="entity-header">
+              {#if currentTab.entity}
+                {@const _fighter = toDisplayFighter(currentTab.entity)}
+                <div style="--portrait-size: 4.5rem;">
+                  <FighterPortrait fighter={_fighter} />
+                </div>
+              {/if}
+              <h3>{currentTab.label} Breakdown</h3>
+            </div>
+
+            {#if Object.keys(entityData.damage).length > 0}
+              <div class="entity-section">
+                <h4>Damage Output by Source</h4>
+                <div class="damage-bar-container">
+                  {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [action, damage]}
+                    {@const totalDamage = Object.values(entityData.damage).reduce((a, b) => a + b, 0)}
+                    {@const percentage = totalDamage > 0 ? (damage / totalDamage * 100) : 0}
+                    <div class="damage-bar">
+                      <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getActionBarColor(action)};"></div>
+                      <div class="damage-bar-label">{action}</div>
+                      <div class="damage-bar-amount">{fmt(damage)}</div>
+                    </div>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+
+            {#if Object.keys(entityData.actions).length > 0}
+              <div class="entity-section">
+                <h4>
+                  <Swords size={16} />
+                  Damage by Action
+                </h4>
+                <div class="damage-breakdown">
+                  {#each Object.entries(entityData.actions).sort((a, b) => b[1] - a[1]) as [action, amount]}
+                    <div class="damage-item">
+                      <span class="damage-element">{action}</span>
+                      <span class="damage-amount">{fmt(amount)}</span>
+                    </div>
+                  {/each}
+                </div>
+              </div>
             {/if}
           </div>
-        </div>
-  </div>
+        {/if}
+      </div>
+
+      <div class="stats-panel">
+        {#if entityData}
+          <div class="entity-stats-grid">
+            {#if entityData.criticals > 0}
+              <div class="stat-item">
+                <Zap size={16} />
+                <span>Critical Hits</span>
+                <span class="stat-value">{entityData.criticals}</span>
+                {#if entityData.criticalDamage > 0}
+                  <span class="stat-detail">({fmt(entityData.criticalDamage)} dmg)</span>
+                {/if}
+              </div>
+            {/if}
+
+            {#if entityData.shieldAbsorbed > 0}
+              <div class="stat-item">
+                <Shield size={16} />
+                <span>Shield Absorbed</span>
+                <span class="stat-value">{fmt(entityData.shieldAbsorbed)}</span>
+              </div>
+            {/if}
+
+            {#if entityData.dotDamage > 0}
+              <div class="stat-item">
+                <Flame size={16} />
+                <span>DoT Damage</span>
+                <span class="stat-value">{fmt(entityData.dotDamage)}</span>
+              </div>
+            {/if}
+
+            {#if entityData.hotHealing > 0}
+              <div class="stat-item">
+                <Heart size={16} />
+                <span>HoT Healing</span>
+                <span class="stat-value">{fmt(entityData.hotHealing)}</span>
+              </div>
+            {/if}
+
+            {#if entityData.tempHpGranted > 0}
+              <div class="stat-item">
+                <TrendingUp size={16} />
+                <span>Temp HP Granted</span>
+                <span class="stat-value">{fmt(entityData.tempHpGranted)}</span>
+              </div>
+            {/if}
+
+            {#if Object.keys(entityData.resourcesSpent).length > 0}
+              <div class="stat-item">
+                <Coins size={16} />
+                <span>Resources Spent</span>
+                <div class="resource-breakdown">
+                  {#each Object.entries(entityData.resourcesSpent) as [type, amount]}
+                    <span class="resource-item">{type}: {fmt(amount)}</span>
+                  {/each}
+                </div>
+              </div>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    </div>
 </div>
