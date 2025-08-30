@@ -16,3 +16,4 @@ class Kboshi(PlayerBase):
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("Kboshi")
     )
+    passives: list[str] = field(default_factory=lambda: ["kboshi_flux_cycle"])

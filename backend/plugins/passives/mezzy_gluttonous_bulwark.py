@@ -50,6 +50,10 @@ class MezzyGluttonousBulwark:
         )
         target.add_effect(debuff_immunity)
 
+        # Siphon from allies if we have access to them
+        # In a real battle system, this would be triggered by turn events
+        # For now, this handles the basic setup
+
     async def siphon_from_allies(self, mezzy: "Stats", allies: list["Stats"]) -> None:
         """Siphon stats from allies whose HP exceeds 20% of Mezzy's max HP."""
         mezzy_id = id(mezzy)

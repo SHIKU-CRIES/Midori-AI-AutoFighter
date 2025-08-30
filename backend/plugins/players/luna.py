@@ -15,3 +15,4 @@ class Luna(PlayerBase):
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("Luna")
     )
+    passives: list[str] = field(default_factory=lambda: ["luna_lunar_reservoir"])

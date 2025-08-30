@@ -18,6 +18,7 @@ class Player(PlayerBase):
     damage_type: DamageTypeBase = field(default_factory=Fire)
     prompt: str = "Player prompt placeholder"
     about: str = "Player description placeholder"
+    passives: list[str] = field(default_factory=lambda: ["player_level_up_bonus"])
 
     def __post_init__(self) -> None:
         # Apply customization to base stats during instantiation

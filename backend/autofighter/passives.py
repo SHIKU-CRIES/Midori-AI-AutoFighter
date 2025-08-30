@@ -76,16 +76,4 @@ class PassiveRegistry:
                 for _ in range(stacks):
                     await passive_instance.on_defeat(target)
 
-    async def trigger_siphon(self, mezzy_target, allies: list) -> None:
-        """Trigger siphon mechanics for Mezzy's passive."""
-        counts = Counter(mezzy_target.passives)
-        for pid, count in counts.items():
-            cls = self._registry.get(pid)
-            if pid != "mezzy_gluttonous_bulwark" or cls is None:
-                continue
 
-            passive_instance = cls()
-            if hasattr(passive_instance, "siphon_from_allies"):
-                stacks = min(count, getattr(cls, "max_stacks", count))
-                for _ in range(stacks):
-                    await passive_instance.siphon_from_allies(mezzy_target, allies)

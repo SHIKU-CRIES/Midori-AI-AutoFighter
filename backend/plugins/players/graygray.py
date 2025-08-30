@@ -16,3 +16,4 @@ class Graygray(PlayerBase):
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("Graygray")
     )
+    passives: list[str] = field(default_factory=lambda: ["graygray_counter_maestro"])

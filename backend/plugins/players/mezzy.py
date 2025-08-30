@@ -16,3 +16,4 @@ class Mezzy(PlayerBase):
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("Mezzy")
     )
+    passives: list[str] = field(default_factory=lambda: ["mezzy_gluttonous_bulwark"])
