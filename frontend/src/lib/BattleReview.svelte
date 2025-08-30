@@ -1056,12 +1056,12 @@
               <div class="entity-section">
                 <h4>Damage Output by Source</h4>
                 <div class="damage-bar-container">
-                  {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [action, damage]}
+                  {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [element, damage]}
                     {@const totalDamage = Object.values(entityData.damage).reduce((a, b) => a + b, 0)}
                     {@const percentage = totalDamage > 0 ? (damage / totalDamage * 100) : 0}
                     <div class="damage-bar">
-                      <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getActionBarColor(action)};"></div>
-                      <div class="damage-bar-label">{action}</div>
+                      <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getElementBarColor(element)};"></div>
+                      <div class="damage-bar-label">{element}</div>
                       <div class="damage-bar-amount">{fmt(damage)}</div>
                     </div>
                   {/each}
@@ -1092,50 +1092,54 @@
       <div class="stats-panel">
         {#if entityData}
           <div class="entity-stats-grid">
-            {#if entityData.criticals > 0}
-              <div class="stat-item">
-                <Zap size={16} />
-                <span>Critical Hits</span>
-                <span class="stat-value">{entityData.criticals}</span>
-                {#if entityData.criticalDamage > 0}
-                  <span class="stat-detail">({fmt(entityData.criticalDamage)} dmg)</span>
-                {/if}
-              </div>
-            {/if}
+            <!-- Always show critical hits stats -->
+            <div class="stat-item">
+              <Zap size={16} />
+              <span>Critical Hits</span>
+              <span class="stat-value">{entityData.criticals || 0}</span>
+              {#if entityData.criticalDamage > 0}
+                <span class="stat-detail">({fmt(entityData.criticalDamage)} dmg)</span>
+              {/if}
+            </div>
 
-            {#if entityData.shieldAbsorbed > 0}
+            <!-- Always show shield stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <Shield size={16} />
                 <span>Shield Absorbed</span>
-                <span class="stat-value">{fmt(entityData.shieldAbsorbed)}</span>
+                <span class="stat-value">{fmt(entityData.shieldAbsorbed || 0)}</span>
               </div>
             {/if}
 
-            {#if entityData.dotDamage > 0}
+            <!-- Always show DoT damage stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <Flame size={16} />
                 <span>DoT Damage</span>
-                <span class="stat-value">{fmt(entityData.dotDamage)}</span>
+                <span class="stat-value">{fmt(entityData.dotDamage || 0)}</span>
               </div>
             {/if}
 
-            {#if entityData.hotHealing > 0}
+            <!-- Always show HoT healing stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <Heart size={16} />
                 <span>HoT Healing</span>
-                <span class="stat-value">{fmt(entityData.hotHealing)}</span>
+                <span class="stat-value">{fmt(entityData.hotHealing || 0)}</span>
               </div>
             {/if}
 
-            {#if entityData.tempHpGranted > 0}
+            <!-- Always show temp HP stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <TrendingUp size={16} />
                 <span>Temp HP Granted</span>
-                <span class="stat-value">{fmt(entityData.tempHpGranted)}</span>
+                <span class="stat-value">{fmt(entityData.tempHpGranted || 0)}</span>
               </div>
             {/if}
 
-            {#if Object.keys(entityData.resourcesSpent).length > 0}
+            <!-- Show resources if any exist -->
+            {#if Object.keys(entityData.resourcesSpent || {}).length > 0}
               <div class="stat-item">
                 <Coins size={16} />
                 <span>Resources Spent</span>
