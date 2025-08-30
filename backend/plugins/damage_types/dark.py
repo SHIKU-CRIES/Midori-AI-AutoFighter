@@ -85,7 +85,7 @@ class Dark(DamageTypeBase):
     # Per-stack damage multiplier for Darkness ultimate.
     # Previously 1.75, which caused extreme exponential scaling.
     # Adjust this value to tune balance without changing code below.
-    ULT_PER_STACK: float = 1.05
+    ULT_PER_STACK: float = 1.005
 
     async def ultimate(
         self,

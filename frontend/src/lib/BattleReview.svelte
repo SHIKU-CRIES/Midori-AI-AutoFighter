@@ -40,6 +40,20 @@
     'elemental_spark': 'One random ally gains +5% effect hit rate until they take damage.'
   };
 
+  // Generate element colors for bar graphs
+  function getElementBarColor(element) {
+    const colorMap = {
+      'Fire': '#ff6b35',
+      'Ice': '#4fb3ff', 
+      'Lightning': '#ffd93d',
+      'Wind': '#7dd3c0',
+      'Light': '#fff2b3',
+      'Dark': '#9b59b6',
+      'Generic': '#8e44ad'
+    };
+    return colorMap[element] || '#8e44ad';
+  }
+
   // Generate colors for different action types
   function getActionBarColor(action) {
     // Handle element-specific Aftertaste actions (e.g., "Aftertaste (Fire)")
@@ -267,6 +281,7 @@
     /* Make portraits smaller so bars are clearly visible */
     --portrait-size: 4.5rem;
   }
+  .layout.review { width: 100%; max-width: 100%; overflow-x: hidden; }
   .side {
     display: flex;
     flex-direction: column;
@@ -325,20 +340,24 @@
   .events {
     margin-top: 0.75rem;
     max-height: 240px;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: auto;
+    max-width: 100%;
+    box-sizing: border-box;
     border: var(--glass-border);
     background: rgba(0,0,0,0.4);
     padding: 0.5rem;
   }
-  .event-row { font-size: 0.72rem; color: #ddd; margin: 0.15rem 0; white-space: nowrap; }
-  .header { font-size: 0.85rem; color: #fff; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.75rem; }
+  .event-row { font-size: 0.72rem; color: #ddd; margin: 0.15rem 0; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+  .header { font-size: 0.85rem; color: #fff; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; width: 100%; box-sizing: border-box; }
   .spacer { flex: 1; }
   .mini-btn { border: 1px solid #888; background: #111; color: #fff; font-size: 0.7rem; padding: 0.2rem 0.4rem; cursor: pointer; }
   .reward-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 0.75rem;
-    max-width: 960px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .effects-summary {
     margin-top: 0.75rem;
@@ -363,7 +382,9 @@
   }
 
   /* Ensure the tabbed view uses full popup width */
-  .battle-review-tabs { width: 100%; overflow-x: hidden; }
+  .battle-review-tabs { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .tabs-nav { width: 100%; box-sizing: border-box; flex-wrap: wrap; overflow-x: hidden; }
+  .tab-content { width: 100%; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
   .tabs-nav { width: 100%; box-sizing: border-box; }
   .tab-content { width: 100%; box-sizing: border-box; overflow-x: hidden; }
   .effects-column {

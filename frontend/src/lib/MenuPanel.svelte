@@ -12,7 +12,8 @@
     flex-direction: column;
     box-sizing: border-box;
     padding: var(--padding);
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     border: 2px solid #777;
     background: rgba(0,0,0,0.65);
     backdrop-filter: blur(4px);
