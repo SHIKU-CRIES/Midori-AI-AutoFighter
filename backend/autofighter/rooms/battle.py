@@ -232,6 +232,28 @@ class BattleRoom(Room):
         set_enrage_percent(0.0)
         threshold = ENRAGE_TURNS_BOSS if isinstance(self, BossRoom) else ENRAGE_TURNS_NORMAL
         exp_reward = 0
+        credited_foe_ids: set[str] = set()
+
+        def _credit_if_dead(foe_obj) -> None:
+            nonlocal exp_reward, temp_rdr
+            try:
+                fid = getattr(foe_obj, "id", None)
+                if getattr(foe_obj, "hp", 1) <= 0 and fid and fid not in credited_foe_ids:
+                    exp_reward += foe_obj.level * 12 + 5 * self.node.index
+                    temp_rdr += 0.55
+                    credited_foe_ids.add(fid)
+                    try:
+                        label = (getattr(foe_obj, "name", None) or getattr(foe_obj, "id", "")).lower()
+                        if "slime" in label:
+                            for m in combat_party.members:
+                                m.exp_multiplier += 0.025
+                            for m in party.members:
+                                m.exp_multiplier += 0.025
+                    except Exception:
+                        pass
+            except Exception:
+                # Never let EXP crediting break battle flow
+                pass
         turn = 0
         temp_rdr = party.rdr
         if progress is not None:
@@ -320,6 +342,9 @@ class BattleRoom(Room):
                     tgt_mgr = foe_effects[tgt_idx]
                     dt = getattr(member, "damage_type", None)
                     await member_effect.tick(tgt_mgr)
+                    # Credit any foes that died due to DoT/HoT ticks
+                    for f in foes:
+                        _credit_if_dead(f)
                     if member.hp <= 0:
                         await registry.trigger("turn_end", member)
                         await asyncio.sleep(0.001)
@@ -393,21 +418,7 @@ class BattleRoom(Room):
                                 )
                                 await BUS.emit_async("hit_landed", member, extra_foe, extra_dmg, "attack", "wind_multi_attack")
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
-                            if extra_foe.hp <= 0:
-                                exp_reward += extra_foe.level * 12 + 5 * self.node.index
-                                temp_rdr += 0.55
-                                try:
-                                    label = (
-                                        getattr(extra_foe, "name", None)
-                                        or getattr(extra_foe, "id", "")
-                                    ).lower()
-                                    if "slime" in label:
-                                        for m in combat_party.members:
-                                            m.exp_multiplier += 0.025
-                                        for m in party.members:
-                                            m.exp_multiplier += 0.025
-                                except Exception:
-                                    pass
+                            _credit_if_dead(extra_foe)
                     BUS.emit("action_used", member, tgt_foe, dmg)
                     member.add_ultimate_charge(member.actions_per_turn)
                     for ally in combat_party.members:
@@ -453,17 +464,7 @@ class BattleRoom(Room):
                         )
                     await _pace(action_start)
                     if tgt_foe.hp <= 0:
-                        exp_reward += tgt_foe.level * 12 + 5 * self.node.index
-                        temp_rdr += 0.55
-                        try:
-                            label = (getattr(tgt_foe, "name", None) or getattr(tgt_foe, "id", "")).lower()
-                            if "slime" in label:
-                                for m in combat_party.members:
-                                    m.exp_multiplier += 0.025
-                                for m in party.members:
-                                    m.exp_multiplier += 0.025
-                        except Exception:
-                            pass
+                        _credit_if_dead(tgt_foe)
                         await asyncio.sleep(0.001)
                         if all(f.hp <= 0 for f in foes):
                             break
@@ -504,6 +505,9 @@ class BattleRoom(Room):
                     await acting_foe.maybe_regain(turn)
                     dt = getattr(acting_foe, "damage_type", None)
                     await foe_mgr.tick(target_effect)
+                    # Credit any foes that died from effects applied by foes (e.g., bleed)
+                    for f in foes:
+                        _credit_if_dead(f)
                     if acting_foe.hp <= 0:
                         await registry.trigger("turn_end", acting_foe)
                         await asyncio.sleep(0.001)

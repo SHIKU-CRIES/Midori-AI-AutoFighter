@@ -80,7 +80,7 @@ class PlayerBase(Stats):
         self._base_defense = 50
         self._base_crit_rate = 0.05
         self._base_crit_damage = 2.0
-        self._base_effect_hit_rate = 0.01
+        self._base_effect_hit_rate = 1.1
         self._base_mitigation = 1.0
         self._base_regain = 1
         self._base_dodge_odds = 0.0
