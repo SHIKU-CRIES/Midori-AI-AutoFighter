@@ -1,9 +1,9 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -51,7 +51,7 @@ class GreedEngine(RelicBase):
                         "max_hp": member.max_hp
                     })
 
-                    asyncio.create_task(member.apply_damage(dmg))
+                    safe_async_task(member.apply_damage(dmg))
 
             BUS.subscribe("gold_earned", _gold)
             BUS.subscribe("turn_start", _drain)

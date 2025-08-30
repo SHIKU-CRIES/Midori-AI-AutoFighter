@@ -1,12 +1,12 @@
 """Omega Core relic effects."""
 
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.effects import create_stat_buff
 from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -60,7 +60,7 @@ class OmegaCore(RelicBase):
                     mitigation_mult=mult,
                 )
                 member.effect_manager.add_modifier(mod)
-                asyncio.create_task(member.apply_healing(member.max_hp))
+                safe_async_task(member.apply_healing(member.max_hp))
                 state["mods"][id(member)] = mod
             state["turn"] = 0
 
@@ -82,7 +82,7 @@ class OmegaCore(RelicBase):
                     "delay": delay
                 })
 
-                asyncio.create_task(member.apply_damage(dmg))
+                safe_async_task(member.apply_damage(dmg))
 
         def _battle_end(entity) -> None:
             from plugins.foes._base import FoeBase

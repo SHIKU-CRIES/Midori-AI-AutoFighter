@@ -1,10 +1,10 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 
 from autofighter.stats import BUS
 from plugins.effects.aftertaste import Aftertaste
 from plugins.relics._base import RelicBase
+from plugins.relics._base import safe_async_task
 
 
 @dataclass
@@ -40,9 +40,7 @@ class PocketManual(RelicBase):
                     })
 
                     effect = Aftertaste(base_pot=base)
-                    asyncio.get_event_loop().create_task(
-                        effect.apply(attacker, target)
-                    )
+                    safe_async_task(effect.apply(attacker, target))
 
         BUS.subscribe("hit_landed", _hit)
 
