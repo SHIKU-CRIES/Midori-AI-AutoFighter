@@ -300,8 +300,9 @@ class BattleRoom(Room):
                                 f.passives.append("Enraged")
                             log.info("Enrage activated")
                         new_stacks = turn - threshold
-                        # Each enrage stack adds +1% damage taken and -1% healing dealt globally
-                        set_enrage_percent(0.01 * max(new_stacks, 0))
+                        # Make enrage much stronger: each stack adds +25% damage taken
+                        # and -25% healing dealt globally.
+                        set_enrage_percent(0.25 * max(new_stacks, 0))
                         mult = 1 + 0.4 * new_stacks
                         for i, (f, mgr) in enumerate(zip(foes, foe_effects, strict=False)):
                             if enrage_mods[i] is not None:
