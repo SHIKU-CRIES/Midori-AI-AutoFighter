@@ -856,9 +856,8 @@
                   Total Damage Output
                 </h4>
                 <div class="damage-bar-container">
-                  {@const grand = overviewGrand}
                   {#each Object.entries(overviewTotals).sort((a, b) => b[1] - a[1]) as [element, damage]}
-                    {@const percentage = grand > 0 ? (damage / grand * 100) : 0}
+                    {@const percentage = overviewGrand > 0 ? (damage / overviewGrand * 100) : 0}
                     <div class="damage-bar">
                       <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getElementBarColor(element)};"></div>
                       <div class="damage-bar-label">{element}</div>
