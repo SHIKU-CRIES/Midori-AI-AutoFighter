@@ -19,6 +19,7 @@ from autofighter.cards import card_choices
 from autofighter.effects import EffectManager
 from autofighter.effects import StatModifier
 from autofighter.effects import create_stat_buff
+from autofighter.mapgen import MapNode
 from autofighter.relics import apply_relics
 from autofighter.relics import relic_choices
 from plugins.damage_types import ALL_DAMAGE_TYPES
@@ -145,6 +146,7 @@ def _apply_rdr_to_stars(stars: int, rdr: float) -> int:
 class BattleRoom(Room):
     """Standard battle room where the party fights a group of foes."""
 
+    node: MapNode
     strength: float = 1.0
 
     async def resolve(
@@ -231,6 +233,7 @@ class BattleRoom(Room):
         threshold = ENRAGE_TURNS_BOSS if isinstance(self, BossRoom) else ENRAGE_TURNS_NORMAL
         exp_reward = 0
         turn = 0
+        temp_rdr = party.rdr
         if progress is not None:
             await progress(
                 {
@@ -238,7 +241,7 @@ class BattleRoom(Room):
                     "party": [_serialize(m) for m in combat_party.members],
                     "foes": [_serialize(f) for f in foes],
                     "enrage": {"active": False, "stacks": 0},
-                    "rdr": party.rdr,
+                    "rdr": temp_rdr,
                 }
             )
         # Helper to pace actions: ensure at least 0.5s per actor action
@@ -353,7 +356,7 @@ class BattleRoom(Room):
                                         "active": enrage_active,
                                         "stacks": enrage_stacks,
                                     },
-                                    "rdr": party.rdr,
+                                    "rdr": temp_rdr,
                                 }
                             )
                         await _pace(action_start)
@@ -392,6 +395,7 @@ class BattleRoom(Room):
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                             if extra_foe.hp <= 0:
                                 exp_reward += extra_foe.level * 12 + 5 * self.node.index
+                                temp_rdr += 0.55
                                 try:
                                     label = (
                                         getattr(extra_foe, "name", None)
@@ -444,12 +448,13 @@ class BattleRoom(Room):
                                 "party": [_serialize(m) for m in combat_party.members],
                                 "foes": [_serialize(f) for f in foes],
                                 "enrage": {"active": enrage_active, "stacks": enrage_stacks},
-                                "rdr": party.rdr,
+                                "rdr": temp_rdr,
                             }
                         )
                     await _pace(action_start)
                     if tgt_foe.hp <= 0:
                         exp_reward += tgt_foe.level * 12 + 5 * self.node.index
+                        temp_rdr += 0.55
                         try:
                             label = (getattr(tgt_foe, "name", None) or getattr(tgt_foe, "id", "")).lower()
                             if "slime" in label:
@@ -551,7 +556,7 @@ class BattleRoom(Room):
                         "party": [_serialize(m) for m in combat_party.members],
                         "foes": [_serialize(f) for f in foes],
                         "enrage": {"active": enrage_active, "stacks": enrage_stacks},
-                        "rdr": party.rdr,
+                                "rdr": temp_rdr,
                         "ended": True,
                     }
                 )
@@ -623,14 +628,14 @@ class BattleRoom(Room):
                 "room_number": self.node.index,
                 "exp_reward": exp_reward,
                 "enrage": {"active": enrage_active, "stacks": enrage_stacks},
-                "rdr": party.rdr,
+                        "rdr": temp_rdr,
             }
         # Pick cards with per-item star rolls; ensure unique choices not already owned
         selected_cards: list = []
         attempts = 0
         while len(selected_cards) < 3 and attempts < 30:
             attempts += 1
-            cstars = _apply_rdr_to_stars(_pick_card_stars(self), party.rdr)
+            cstars = _apply_rdr_to_stars(_pick_card_stars(self), temp_rdr)
             one = card_choices(combat_party, cstars, count=1)
             if not one:
                 continue
@@ -643,13 +648,13 @@ class BattleRoom(Room):
             for c in selected_cards
         ]
         relic_opts = []
-        if _roll_relic_drop(self, party.rdr):
+        if _roll_relic_drop(self, temp_rdr):
             # Offer relics with per-item star rolls; ensure unique choices
             picked: list = []
             tries = 0
             while len(picked) < 3 and tries < 30:
                 tries += 1
-                rstars = _apply_rdr_to_stars(_pick_relic_stars(self), party.rdr)
+                rstars = _apply_rdr_to_stars(_pick_relic_stars(self), temp_rdr)
                 one = relic_choices(combat_party, rstars, count=1)
                 if not one:
                     continue
@@ -677,10 +682,10 @@ class BattleRoom(Room):
             }
             for r in relic_opts
         ]
-        gold_reward = _calc_gold(self, party.rdr)
+        gold_reward = _calc_gold(self, temp_rdr)
         party.gold += gold_reward
         BUS.emit("gold_earned", gold_reward)
-        item_base = 1 * party.rdr
+        item_base = 1 * temp_rdr
         base_int = int(item_base)
         item_count = max(1, base_int)
         if random.random() < item_base - base_int:
@@ -689,7 +694,7 @@ class BattleRoom(Room):
             {"id": random.choice(ELEMENTS), "stars": _pick_item_stars(self)}
             for _ in range(item_count)
         ]
-        ticket_chance = 0.1 * party.rdr
+        ticket_chance = 0.1 * temp_rdr
         if random.random() < ticket_chance:
             items.append({"id": "ticket", "stars": 0})
         loot = {
@@ -719,7 +724,7 @@ class BattleRoom(Room):
             "battle_index": getattr(battle_logger, "battle_index", 0),
             "exp_reward": exp_reward,
             "enrage": {"active": enrage_active, "stacks": enrage_stacks},
-            "rdr": party.rdr,
+                "rdr": party.rdr,
         }
 
 

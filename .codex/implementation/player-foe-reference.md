@@ -63,7 +63,14 @@ and reuse that element in future sessions.
 Foe plugins inherit from `FoeBase`, which mirrors `PlayerBase` stats but begins
 with minimal mitigation and vitality (0.001 each) that grow by 0.0001 on
 level-up. To keep encounters from stalling, foes regain health at one hundredth
-the player rate.
+the player rate. Base battles spawn one foe plus one more for every five
+Pressure, capped at ten. Party size can add bonus foes using descending
+probability rolls: parties of two have a 35% chance at one extra; parties of
+three roll 35% for two extras and, if that fails, 75% for one. Larger parties
+continue this sequence, and the total foe count never exceeds ten.
+Each foe defeated during a battle temporarily raises the party's rare drop rate
+by 55% for that room, increasing gold rewards and element-based item drops.
+ 
 They are procedurally named by prefixing a randomly selected adjective plugin
 from `plugins/themedadj` to a player name. Adjective plugins are
 auto-discovered based on files in that directory, so adding a new adjective
