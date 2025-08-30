@@ -17,7 +17,7 @@ class ElementalSpark(CardBase):
         default_factory=lambda: {"atk": 0.55, "effect_hit_rate": 0.55}
     )
     about: str = (
-        "+55% ATK & +55% Effect Hit Rate; one ally's debuffs gain +5% potency."
+        "+55% ATK & +55% Effect Hit Rate; at battle start, one random ally's debuffs gain +5% potency."
     )
 
     async def apply(self, party) -> None:  # type: ignore[override]

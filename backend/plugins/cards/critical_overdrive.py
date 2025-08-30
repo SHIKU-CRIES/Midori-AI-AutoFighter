@@ -14,7 +14,7 @@ class CriticalOverdrive(CardBase):
     stars: int = 3
     effects: dict[str, float] = field(default_factory=lambda: {"atk": 2.55})
     about: str = (
-        "+255% ATK; while an ally has Critical Boost, gain +10% Crit Rate and "
+        "+255% ATK; while any ally has Critical Boost active, all allies gain +10% Crit Rate and "
         "convert excess Crit Rate to +2% Crit Damage."
     )
 

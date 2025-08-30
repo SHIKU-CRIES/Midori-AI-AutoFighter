@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -6,6 +5,7 @@ import random
 from autofighter.stats import BUS
 from autofighter.stats import Stats
 from plugins.cards._base import CardBase
+from plugins.cards._base import safe_async_task
 
 
 @dataclass
@@ -47,7 +47,7 @@ class Overclock(CardBase):
 
         def _battle_start(entity: Stats) -> None:
             if entity in party.members:
-                asyncio.create_task(_double_act(entity))
+                safe_async_task(_double_act(entity))
             else:
                 foes.append(entity)
 

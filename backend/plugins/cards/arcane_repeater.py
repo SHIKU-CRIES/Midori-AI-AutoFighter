@@ -1,10 +1,10 @@
-import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 import random
 
 from autofighter.stats import BUS
 from plugins.cards._base import CardBase
+from plugins.cards._base import safe_async_task
 
 
 @dataclass
@@ -40,6 +40,6 @@ class ArcaneRepeater(CardBase):
                     "original": amount,
                 },
             )
-            asyncio.create_task(target.apply_damage(dmg, attacker=attacker))
+            safe_async_task(target.apply_damage(dmg, attacker=attacker))
 
         BUS.subscribe("attack_used", _attack)

@@ -10,6 +10,21 @@ from autofighter.party import Party
 log = logging.getLogger(__name__)
 
 
+def safe_async_task(coro):
+    """Safely create an async task, handling cases where no event loop is running."""
+    try:
+        # Try to get the current event loop
+        loop = asyncio.get_running_loop()
+        return loop.create_task(coro)
+    except RuntimeError:
+        # No event loop running, create a new one and run the coroutine
+        try:
+            return asyncio.run(coro)
+        except Exception as e:
+            log.warning("Failed to execute async operation: %s", e)
+            return None
+
+
 @dataclass
 class CardBase:
     plugin_type = "card"
