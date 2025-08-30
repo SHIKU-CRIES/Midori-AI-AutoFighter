@@ -278,6 +278,10 @@
     if (!hasAnySummary(foesDisplay) && hasAnySummary(summaryFoes)) foesDisplay = summaryFoes;
   }
 
+  // Calculate tab and entity data reactively
+  $: currentTab = availableTabs.find(t => t.id === activeTab);
+  $: entityData = getEntityData(activeTab);
+
   // Build a safe fighter object for portraits in tabs (ensures id/element/hp exist)
   function toDisplayFighter(entity) {
     const eid = (entity && typeof entity === 'object') ? (entity.id || '') : (entity || '');
@@ -804,8 +808,9 @@
         {/if}
       </div>
     {/if}
+  </div>
     
-    <!-- Icon-column Battle Review Interface -->
+  <!-- Icon-column Battle Review Interface -->
     <div class="battle-review-tabs">
       <div class="icon-column">
         {#each availableTabs as tab}
@@ -828,9 +833,6 @@
           </button>
         {/each}
       </div>
-
-      {@const currentTab = availableTabs.find(t => t.id === activeTab)}
-      {@const entityData = getEntityData(activeTab)}
 
       <div class="content-area">
         {#if activeTab === 'overview'}
@@ -1137,3 +1139,4 @@
         {/if}
       </div>
     </div>
+</div>
