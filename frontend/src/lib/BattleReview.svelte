@@ -40,18 +40,19 @@
     'elemental_spark': 'One random ally gains +5% effect hit rate until they take damage.'
   };
 
-  // Generate element colors for bar graphs
+  // Generate element colors for bar graphs (case-insensitive; falls back to shared palette)
   function getElementBarColor(element) {
+    const key = String(element || '').toLowerCase();
     const colorMap = {
-      'Fire': '#ff6b35',
-      'Ice': '#4fb3ff', 
-      'Lightning': '#ffd93d',
-      'Wind': '#7dd3c0',
-      'Light': '#fff2b3',
-      'Dark': '#9b59b6',
-      'Generic': '#8e44ad'
+      fire: '#ff6b35',
+      ice: '#4fb3ff', 
+      lightning: '#ffd93d',
+      wind: '#7dd3c0',
+      light: '#fff2b3',
+      dark: '#9b59b6',
+      generic: '#8e44ad'
     };
-    return colorMap[element] || '#8e44ad';
+    return colorMap[key] || getElementColor(element) || '#8e44ad';
   }
 
   // Generate colors for different action types
@@ -232,6 +233,10 @@
     return out;
   }
 
+  // Derived overview totals to avoid recomputation and ensure immediate reactivity
+  $: overviewTotals = totalDamageByType();
+  $: overviewGrand = Object.values(overviewTotals).reduce((a, b) => a + b, 0);
+
   function primaryElement(id) {
     const totals = summary.damage_by_type?.[id] || {};
     const entries = Object.entries(totals);
@@ -305,7 +310,13 @@
     /* Make portraits smaller so bars are clearly visible */
     --portrait-size: 4.5rem;
   }
-  .layout.review { width: 100%; max-width: 100%; overflow-x: hidden; }
+  .layout.review {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    /* Use a single-column flow for the review so content spans full width */
+    grid-template-columns: 1fr;
+  }
   .side {
     display: flex;
     flex-direction: column;
@@ -384,11 +395,7 @@
     box-sizing: border-box;
   }
   .effects-summary {
-    margin-top: 0.75rem;
-    border: var(--glass-border);
-    background: rgba(0,0,0,0.4);
-    padding: 0.75rem;
-    border-radius: 4px;
+    margin-top: 0.5rem;
     width: 100%;
     box-sizing: border-box;
   }
@@ -407,7 +414,9 @@
 
   .battle-review-tabs {
     display: grid;
-    grid-template-columns: auto 1fr 1fr;
+    /* Span full popup width and allocate more space to content than stats */
+    grid-column: 1 / -1;
+    grid-template-columns: auto 2fr 1fr;
     gap: 1rem;
     background: rgba(0,0,0,0.4);
     border-radius: 8px;
@@ -840,15 +849,15 @@
       <div class="content-area">
         {#if activeTab === 'overview'}
           <div class="effects-summary">
-            {#if Object.keys(totalDamageByType()).length > 0}
+            {#if Object.keys(overviewTotals).length > 0}
               <div class="entity-section">
                 <h4>
                   <Swords size={16} />
                   Total Damage Output
                 </h4>
                 <div class="damage-bar-container">
-                  {#each Object.entries(totalDamageByType()).sort((a, b) => b[1] - a[1]) as [element, damage]}
-                    {@const grand = Object.values(totalDamageByType()).reduce((a, b) => a + b, 0)}
+                  {@const grand = overviewGrand}
+                  {#each Object.entries(overviewTotals).sort((a, b) => b[1] - a[1]) as [element, damage]}
                     {@const percentage = grand > 0 ? (damage / grand * 100) : 0}
                     <div class="damage-bar">
                       <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getElementBarColor(element)};"></div>

@@ -113,8 +113,21 @@
     position: relative;
     height: 50%;
     width: 100%;
+    /* Base accent color from star rank with animated gradient sheen */
     background: var(--accent);
-    background-image: linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.25));
+    background-image:
+      /* subtle top-to-bottom shade */
+      linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.16)),
+      /* animated accent gradient */
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 28%, #ffffff) 0%,
+        color-mix(in srgb, var(--accent) 92%, #000000) 50%,
+        color-mix(in srgb, var(--accent) 28%, #ffffff) 100%
+      );
+    background-size: auto, 220% 220%;
+    background-position: center, 0% 50%;
+    animation: accent-pan 14s ease-in-out infinite;
     display: grid;
     grid-template-rows: auto 1fr;
     align-items: stretch;
@@ -122,13 +135,22 @@
     padding: 6px 8px;
     box-sizing: border-box;
   }
+  @keyframes accent-pan {
+    0% { background-position: center, 0% 50%; }
+    50% { background-position: center, 100% 50%; }
+    100% { background-position: center, 0% 50%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .topbox { animation: none; background-position: center, 50% 50%; }
+  }
   .glyph-bg {
     position: absolute;
     inset: 0;
     background-size: cover;
     background-position: center;
-    filter: saturate(0.9) contrast(1.05);
-    opacity: 0.65; /* make image less faded across cards/relics */
+    /* Let the artwork show with full color and brightness */
+    filter: saturate(1.05) contrast(1.06);
+    opacity: 1;
     z-index: 0; /* bottom-most inside glyph */
     border-radius: inherit;
   }
@@ -174,8 +196,8 @@
     font-weight: 800;
     font-size: 2rem;
     letter-spacing: 1px;
-    background: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.08), rgba(0,0,0,0.0) 60%),
-                linear-gradient(180deg, rgba(0,0,0,0.20), rgba(0,0,0,0.45));
+    /* Keep a subtle highlight, but remove heavy darkening so art isn't gray */
+    background: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,0.08), rgba(0,0,0,0.0) 60%);
     border: 2px solid rgba(255,255,255,0.18);
     box-shadow: 0 2px 10px rgba(0,0,0,0.35);
     border-radius: 10px;
