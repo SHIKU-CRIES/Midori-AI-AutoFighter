@@ -7,6 +7,7 @@
   let isInCombat = false;
   let interval;
   let lastUpdateTime = 0;
+  let pos = { top: '1.2rem', left: '1.2rem' };
 
   // Check if we're in combat by looking for battle-related elements or state
   function checkCombatState() {
@@ -22,12 +23,20 @@
     }
   }
 
+  // Derive a sensible backend base when not provided via env. This avoids
+  // using 'localhost' when accessed over LAN.
+  const DEFAULT_BACKEND = (typeof window !== 'undefined')
+    ? `${location.protocol}//${location.hostname}:59002`
+    : 'http://localhost:59002';
+  const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_BACKEND;
+
   async function checkBackendHealth() {
     if (!browser) return;
     
     try {
       const startTime = performance.now();
-      const response = await fetch('/api/performance/health', {
+      // Use absolute backend base; the dev server at 59001 doesn't proxy /api
+      const response = await fetch(`${API_BASE}/api/performance/health`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -39,12 +48,12 @@
       const networkPingTime = endTime - startTime;
       
       if (response.ok) {
-        const data = await response.json();
-        pingStatus = data.status === 'ok' ? 'healthy' : 
-                    data.status === 'degraded' ? 'degraded' : 'error';
-        
+        let data = null;
+        try { data = await response.json(); } catch {}
+        const status = (data && (data.status || (data.health && data.health.status))) || 'ok';
+        pingStatus = status === 'ok' ? 'healthy' : (status === 'degraded' ? 'degraded' : 'error');
         // Use backend-reported ping if available, otherwise use network round-trip
-        pingTime = data.ping_ms || networkPingTime;
+        pingTime = (data && data.ping_ms) || networkPingTime;
         lastUpdateTime = Date.now();
       } else {
         pingStatus = 'error';
@@ -102,6 +111,27 @@
 
   onMount(() => {
     if (browser) {
+      const updatePosition = () => {
+        try {
+          const nav = document.querySelector('.nav-wrapper .stained-glass-bar');
+          if (nav) {
+            const rect = nav.getBoundingClientRect();
+            pos = {
+              top: `${Math.max(12, Math.round(rect.top))}px`,
+              left: `${Math.round(rect.right + 12)}px`,
+            };
+          } else {
+            pos = { top: '1.2rem', left: '1.2rem' };
+          }
+        } catch {
+          pos = { top: '1.2rem', left: '1.2rem' };
+        }
+      };
+
+      // Initial placement next to top-left NavBar
+      updatePosition();
+      window.addEventListener('resize', updatePosition);
+
       // Initial check
       checkBackendHealth();
       
@@ -116,7 +146,10 @@
       };
 
       // Set up mutation observer to detect battle state changes
-      const observer = new MutationObserver(handleBattleStateChange);
+      const observer = new MutationObserver((...args) => {
+        handleBattleStateChange(...args);
+        updatePosition();
+      });
       observer.observe(document.body, {
         attributes: true,
         attributeFilter: ['data-battle-active'],
@@ -125,6 +158,7 @@
 
       return () => {
         observer.disconnect();
+        window.removeEventListener('resize', updatePosition);
       };
     }
   });
@@ -142,8 +176,7 @@
 <style>
   .ping-indicator {
     position: fixed;
-    top: 12px;
-    right: 12px;
+    /* Positioned dynamically next to top-left NavBar */
     z-index: 10000;
     font-family: 'Courier New', monospace;
     font-size: 14px;
@@ -186,7 +219,7 @@
   class="ping-indicator" 
   class:stale={isStale}
   class:combat={isInCombat}
-  style="color: {getIndicatorColor()}"
+  style="color: {getIndicatorColor()}; top: {pos.top}; left: {pos.left}"
   title={getTooltipText()}
 >
   {getIndicatorSymbol()}

@@ -37,6 +37,28 @@ export async function getBackendFlavor() {
   }
 }
 
+// Health check for the backend performance endpoint
+export async function getBackendHealth() {
+  const url = `${API_BASE}/api/performance/health`;
+  try {
+    const networkMsStart = performance.now();
+    const res = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+    let data = null;
+    let status = 'ok';
+    let ping_ms = null;
+    if (res.ok) {
+      try { data = await res.json(); } catch { data = null; }
+      status = (data && (data.status || (data.health && data.health.status))) || 'ok';
+      ping_ms = (data && data.ping_ms) || (performance.now() - networkMsStart);
+    } else {
+      status = 'error';
+    }
+    return { status, ping_ms };
+  } catch (e) {
+    return { status: 'error', ping_ms: null };
+  }
+}
+
 export async function getPlayers() {
   return handleFetch(`${API_BASE}/players`, { cache: 'no-store' });
 }

@@ -22,9 +22,9 @@
 
 <button class="curio tooltip-trigger" aria-label={`Select relic ${entry.name || entry.id}`} {tabIndex} aria-disabled={ariaDisabled} on:click={handleClick} on:keydown={onKey}>
   <CardArt {entry} type="relic" roundIcon={true} {size} {quiet} />
-  {#if entry.about}
+  {#if entry.tooltip || entry.about}
     <div class="tooltip">
-      {entry.about}
+      {entry.tooltip || entry.about}
     </div>
   {/if}
 </button>

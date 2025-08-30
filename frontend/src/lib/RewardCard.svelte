@@ -31,9 +31,9 @@
 
 <button class="card tooltip-trigger" type={btnType} aria-label={label} {tabIndex} role={role} aria-disabled={ariaDisabled} on:click={handleClick} on:keydown={onKey}>
   <CardArt {entry} {type} {size} hideFallback={true} {quiet} />
-  {#if entry.about}
+  {#if entry.tooltip || entry.about}
     <div class="tooltip">
-      {entry.about}
+      {entry.tooltip || entry.about}
     </div>
   {/if}
 </button>

@@ -12,7 +12,7 @@
     Brain,
     Gamepad
   } from 'lucide-svelte';
-  import { endRun, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel } from './api.js';
+  import { endRun, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel, getBackendHealth } from './api.js';
   import { saveSettings, clearSettings, clearAllClientData } from './settingsStorage.js';
 
   const dispatch = createEventDispatcher();
@@ -37,6 +37,26 @@
 
   let activeTab = 'audio';
 
+  // Backend health (moved from floating ping indicator)
+  let healthStatus = 'unknown'; // 'healthy' | 'degraded' | 'error' | 'unknown'
+  let healthPing = null;
+  let lastHealthFetch = 0;
+
+  async function refreshHealth(force = false) {
+    const now = Date.now();
+    if (!force && now - lastHealthFetch < 1500) return; // throttle within tab
+    try {
+      const { status, ping_ms } = await getBackendHealth();
+      healthStatus = status === 'ok' ? 'healthy' : (status === 'degraded' ? 'degraded' : (status === 'error' ? 'error' : String(status)));
+      healthPing = typeof ping_ms === 'number' ? ping_ms : null;
+    } catch {
+      healthStatus = 'error';
+      healthPing = null;
+    } finally {
+      lastHealthFetch = now;
+    }
+  }
+
   // Keep autocraft in sync with backend flag so this toggle
   // mirrors the Crafting menu's auto-craft behavior.
   onMount(async () => {
@@ -60,7 +80,10 @@
         /* ignore */
       }
     }
+    // Preload health once so System tab has data quickly
+    refreshHealth(true);
   });
+  $: (activeTab === 'system') && refreshHealth(false);
 
   function save() {
     saveSettings({
@@ -213,6 +236,16 @@
     </div>
   {:else if activeTab === 'system'}
     <div class="panel">
+      <div class="control" title="Backend health and network latency.">
+        <label>Backend Health</label>
+        <span class="badge" data-status={healthStatus}>
+          {healthStatus === 'healthy' ? 'Healthy' : healthStatus === 'degraded' ? 'Degraded' : healthStatus === 'error' ? 'Error' : 'Unknown'}
+        </span>
+        {#if healthPing !== null}
+          <span class="ping">{Math.round(healthPing)}ms</span>
+        {/if}
+        <button on:click={() => refreshHealth(true)}>Refresh</button>
+      </div>
       <div class="control" title="Limit server polling frequency.">
         <label>Framerate</label>
         <select bind:value={framerate} on:change={scheduleSave}>
@@ -356,4 +389,15 @@
     margin: 0;
     font-size: 0.8rem;
   }
+
+  .badge {
+    border: 1px solid rgba(255,255,255,0.6);
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    font-size: 0.75rem;
+  }
+  .badge[data-status='healthy'] { color: #00ff88; border-color: #00ff88; }
+  .badge[data-status='degraded'] { color: #ffaa00; border-color: #ffaa00; }
+  .badge[data-status='error'] { color: #ff4444; border-color: #ff4444; }
+  .ping { font-size: 0.75rem; opacity: 0.9; }
 </style>

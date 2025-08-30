@@ -1,6 +1,5 @@
 <script>
 	import favicon from '$lib/assets/favicon.svg';
-	import PingIndicator from '$lib/PingIndicator.svelte';
 
 	let { children } = $props();
 </script>
@@ -9,7 +8,6 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<!-- Add the persistent ping indicator to all pages -->
-<PingIndicator />
+<!-- Ping indicator moved into Settings → System -->
 
 {@render children?.()}

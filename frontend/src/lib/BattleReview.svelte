@@ -5,7 +5,7 @@
   import CurioChoice from './CurioChoice.svelte';
   import { getElementColor, getDotImage, getDotElement } from './assetLoader.js';
   import { getBattleSummary, getBattleEvents } from './runApi.js';
-  import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, Users, User } from 'lucide-svelte';
+  import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, Users, User, Swords } from 'lucide-svelte';
 
   export let runId = '';
   export let battleIndex = 0;
@@ -91,7 +91,8 @@
   );
 
   onMount(async () => {
-    if (!runId || !battleIndex) return;
+    // Allow battleIndex 0 (first battle). Only skip if index is null/undefined.
+    if (!runId || battleIndex == null) return;
     let cancelled = false;
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     async function loadWithRetry() {
@@ -173,7 +174,8 @@
     if (!summary || entityId === 'overview') return null;
     
     return {
-      damage: summary.damage_by_action?.[entityId] || {},
+      damage: summary.damage_by_type?.[entityId] || {},
+      actions: summary.damage_by_action?.[entityId] || {},
       criticals: summary.critical_hits?.[entityId] || 0,
       criticalDamage: summary.critical_damage?.[entityId] || 0,
       shieldAbsorbed: summary.shield_absorbed?.[entityId] || 0,
@@ -182,6 +184,18 @@
       resourcesSpent: summary.resources_spent?.[entityId] || {},
       tempHpGranted: summary.temporary_hp_granted?.[entityId] || 0
     };
+  }
+
+  // Aggregate helpers for overview
+  function totalDamageByType() {
+    const out = {};
+    const by = summary?.damage_by_type || {};
+    for (const types of Object.values(by)) {
+      for (const [elem, amt] of Object.entries(types || {})) {
+        out[elem] = (out[elem] || 0) + (amt || 0);
+      }
+    }
+    return out;
   }
 
   function primaryElement(id) {
@@ -203,7 +217,8 @@
 
   async function toggleEvents() {
     showEvents = !showEvents;
-    if (showEvents && events.length === 0 && runId && battleIndex) {
+    // Allow battleIndex 0
+    if (showEvents && events.length === 0 && runId && battleIndex != null) {
       loadingEvents = true;
       try {
         const data = await getBattleEvents(runId, battleIndex);
@@ -755,9 +770,8 @@
       </div>
     {/if}
     
-    <!-- Tab-based Battle Review Interface -->
-    {#if (summary?.relic_effects && Object.keys(summary.relic_effects).length > 0) || (summary?.card_effects && Object.keys(summary.card_effects).length > 0)}
-      <div class="battle-review-tabs">
+    <!-- Tab-based Battle Review Interface (always visible; sections inside are conditional) -->
+    <div class="battle-review-tabs">
         <!-- Tab Navigation -->
         <div class="tabs-nav">
           {#each availableTabs as tab}
@@ -784,6 +798,25 @@
         <div class="tab-content">
           {#if activeTab === 'overview'}
             <div class="effects-summary">
+              {#if Object.keys(totalDamageByType()).length > 0}
+                <div class="entity-section">
+                  <h4>
+                    <Swords size={16} />
+                    Total Damage Output
+                  </h4>
+                  <div class="damage-bar-container">
+                    {#each Object.entries(totalDamageByType()).sort((a, b) => b[1] - a[1]) as [element, damage]}
+                      {@const grand = Object.values(totalDamageByType()).reduce((a, b) => a + b, 0)}
+                      {@const percentage = grand > 0 ? (damage / grand * 100) : 0}
+                      <div class="damage-bar">
+                        <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getElementBarColor(element)};"></div>
+                        <div class="damage-bar-label">{element}</div>
+                        <div class="damage-bar-amount">{fmt(damage)}</div>
+                      </div>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
               <div class="effects-header">
                 <Sparkles size={20} />
                 Effects Summary <span class="new-feature-badge">NEW FEATURE</span>
@@ -1051,11 +1084,28 @@
                       </div>
                     {/if}
                   </div>
+
+                  <!-- Damage by Action -->
+                  {#if Object.keys(entityData.actions).length > 0}
+                    <div class="entity-section">
+                      <h4>
+                        <Swords size={16} />
+                        Damage by Action
+                      </h4>
+                      <div class="damage-breakdown">
+                        {#each Object.entries(entityData.actions).sort((a, b) => b[1] - a[1]) as [action, amount]}
+                          <div class="damage-item">
+                            <span class="damage-element">{action}</span>
+                            <span class="damage-amount">{fmt(amount)}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {/if}
                 </div>
               {/if}
             {/if}
           </div>
         </div>
-    {/if}
   </div>
 </div>

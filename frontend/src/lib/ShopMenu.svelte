@@ -5,6 +5,7 @@
   import RewardCard from './RewardCard.svelte';
   import CurioChoice from './CurioChoice.svelte';
   import { getCardCatalog, getRelicCatalog } from './api.js';
+  import { EFFECT_DESCRIPTIONS, ITEM_EFFECT_MAP } from './effectsInfo.js';
 
   export let items = [];
   export let gold = 0;
@@ -68,14 +69,19 @@
     if (!entry) return entry;
     if (entry.type === 'card') {
       const m = cardMeta[entry.id] || {};
-      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, about: m.about || '' };
+      const baseAbout = entry.about || m.about || '';
+      const effectId = ITEM_EFFECT_MAP[entry.id];
+      const tooltip = effectId && EFFECT_DESCRIPTIONS[effectId] ? EFFECT_DESCRIPTIONS[effectId] : baseAbout;
+      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, about: baseAbout, tooltip };
     } else if (entry.type === 'relic') {
       const m = relicMeta[entry.id] || {};
       // Keep a stable baseAbout so reactive re-enrichment doesn't duplicate the suffix
       const baseAbout = entry.baseAbout ?? entry.about ?? m.about ?? '';
       const stacks = typeof entry.stacks === 'number' ? entry.stacks : 0;
       const about = stacks > 0 ? `${baseAbout} (Current stacks: ${stacks})` : baseAbout;
-      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, baseAbout, about };
+      const effectId = ITEM_EFFECT_MAP[entry.id];
+      const tooltip = effectId && EFFECT_DESCRIPTIONS[effectId] ? EFFECT_DESCRIPTIONS[effectId] : baseAbout;
+      return { ...entry, name: entry.name || m.name || entry.id, stars: entry.stars || m.stars || 1, baseAbout, about, tooltip };
     }
     return entry;
   }
