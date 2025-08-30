@@ -178,13 +178,14 @@
     openOverlay('defeat');
   }
 
-  async function handleStart() {
+  async function handleStart(event) {
+    const pressure = event?.detail?.pressure || 0;
     haltSync = false;
     if (typeof window !== 'undefined') {
       window.afHaltSync = false;
       window.afBattleActive = false; // Initialize battle state
     }
-    const data = await startRun(selectedParty);
+    const data = await startRun(selectedParty, editorState.damageType, pressure);
     runId = data.run_id;
     mapRooms = data.map.rooms || [];
     currentIndex = data.map.current || 0;

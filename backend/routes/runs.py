@@ -35,6 +35,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
     data = await request.get_json(silent=True) or {}
     members: list[str] = data.get("party", [])
     damage_type = (data.get("damage_type") or "").capitalize()
+    pressure = int(data.get("pressure", 0))
     if (
         "player" not in members
         or not 1 <= len(members) <= 5
@@ -69,7 +70,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
     # Start run logging
     start_run_logging(run_id)
 
-    generator = MapGenerator(run_id)
+    generator = MapGenerator(run_id, pressure=pressure)
     nodes = generator.generate_floor()
     state = {
         "rooms": [n.to_dict() for n in nodes],
