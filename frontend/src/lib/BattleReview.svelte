@@ -867,9 +867,109 @@
                 </div>
               </div>
             {/if}
+
+            <!-- Party vs Foe Damage Comparison -->
+            {#if summary?.damage_by_type && Object.keys(summary.damage_by_type).length > 0}
+              {@const partyDamage = Object.entries(summary.damage_by_type || {})
+                .filter(([id]) => partyDisplay.some(p => p.id === id))
+                .reduce((acc, [id, damages]) => {
+                  Object.entries(damages || {}).forEach(([elem, dmg]) => {
+                    acc[elem] = (acc[elem] || 0) + (dmg || 0);
+                  });
+                  return acc;
+                }, {})}
+              {@const foeDamage = Object.entries(summary.damage_by_type || {})
+                .filter(([id]) => foesDisplay.some(f => f.id === id))
+                .reduce((acc, [id, damages]) => {
+                  Object.entries(damages || {}).forEach(([elem, dmg]) => {
+                    acc[elem] = (acc[elem] || 0) + (dmg || 0);
+                  });
+                  return acc;
+                }, {})}
+              {@const partyTotal = Object.values(partyDamage).reduce((a, b) => a + b, 0)}
+              {@const foeTotal = Object.values(foeDamage).reduce((a, b) => a + b, 0)}
+              {@const combatTotal = partyTotal + foeTotal}
+              
+              <div class="entity-section">
+                <h4>
+                  <User size={16} />
+                  Party vs Foe Damage Comparison
+                </h4>
+                <div class="damage-bar-container">
+                  {#if partyTotal > 0}
+                    {@const partyPercentage = combatTotal > 0 ? (partyTotal / combatTotal * 100) : 0}
+                    <div class="damage-bar">
+                      <div class="damage-bar-fill" style="width: {partyPercentage}%; background-color: #4ade80;"></div>
+                      <div class="damage-bar-label">Player Party</div>
+                      <div class="damage-bar-amount">{fmt(partyTotal)}</div>
+                    </div>
+                  {/if}
+                  {#if foeTotal > 0}
+                    {@const foePercentage = combatTotal > 0 ? (foeTotal / combatTotal * 100) : 0}
+                    <div class="damage-bar">
+                      <div class="damage-bar-fill" style="width: {foePercentage}%; background-color: #ef4444;"></div>
+                      <div class="damage-bar-label">Foe Party</div>
+                      <div class="damage-bar-amount">{fmt(foeTotal)}</div>
+                    </div>
+                  {/if}
+                </div>
+              </div>
+
+              <!-- Action Type Breakdown by Party -->
+              {#if summary?.damage_by_action && Object.keys(summary.damage_by_action).length > 0}
+                {@const partyActions = Object.entries(summary.damage_by_action || {})
+                  .filter(([id]) => partyDisplay.some(p => p.id === id))
+                  .reduce((acc, [id, actions]) => {
+                    Object.entries(actions || {}).forEach(([action, dmg]) => {
+                      acc[action] = (acc[action] || 0) + (dmg || 0);
+                    });
+                    return acc;
+                  }, {})}
+                {@const foeActions = Object.entries(summary.damage_by_action || {})
+                  .filter(([id]) => foesDisplay.some(f => f.id === id))
+                  .reduce((acc, [id, actions]) => {
+                    Object.entries(actions || {}).forEach(([action, dmg]) => {
+                      acc[action] = (acc[action] || 0) + (dmg || 0);
+                    });
+                    return acc;
+                  }, {})}
+                
+                <div class="entity-section">
+                  <h4>
+                    <Swords size={16} />
+                    Action Type Comparison
+                  </h4>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                      <div style="font-size: 0.8rem; color: #4ade80; margin-bottom: 0.5rem; font-weight: 600;">Player Party Actions</div>
+                      <div class="damage-breakdown">
+                        {#each Object.entries(partyActions).sort((a, b) => b[1] - a[1]) as [action, amount]}
+                          <div class="damage-item">
+                            <span class="damage-element">{action}</span>
+                            <span class="damage-amount">{fmt(amount)}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                    <div>
+                      <div style="font-size: 0.8rem; color: #ef4444; margin-bottom: 0.5rem; font-weight: 600;">Foe Party Actions</div>
+                      <div class="damage-breakdown">
+                        {#each Object.entries(foeActions).sort((a, b) => b[1] - a[1]) as [action, amount]}
+                          <div class="damage-item">
+                            <span class="damage-element">{action}</span>
+                            <span class="damage-amount">{fmt(amount)}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {/if}
+            {/if}
+
             <div class="effects-header">
               <Sparkles size={20} />
-              Effects Summary <span class="new-feature-badge">NEW FEATURE</span>
+              Full Overview <span class="new-feature-badge">NEW FEATURE</span>
             </div>
             <div class="effects-grid">
               {#if summary?.relic_effects && Object.keys(summary.relic_effects).length > 0}
@@ -1056,12 +1156,12 @@
               <div class="entity-section">
                 <h4>Damage Output by Source</h4>
                 <div class="damage-bar-container">
-                  {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [action, damage]}
+                  {#each Object.entries(entityData.damage).sort((a, b) => b[1] - a[1]) as [element, damage]}
                     {@const totalDamage = Object.values(entityData.damage).reduce((a, b) => a + b, 0)}
                     {@const percentage = totalDamage > 0 ? (damage / totalDamage * 100) : 0}
                     <div class="damage-bar">
-                      <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getActionBarColor(action)};"></div>
-                      <div class="damage-bar-label">{action}</div>
+                      <div class="damage-bar-fill" style="width: {percentage}%; background-color: {getElementBarColor(element)};"></div>
+                      <div class="damage-bar-label">{element}</div>
                       <div class="damage-bar-amount">{fmt(damage)}</div>
                     </div>
                   {/each}
@@ -1092,50 +1192,54 @@
       <div class="stats-panel">
         {#if entityData}
           <div class="entity-stats-grid">
-            {#if entityData.criticals > 0}
-              <div class="stat-item">
-                <Zap size={16} />
-                <span>Critical Hits</span>
-                <span class="stat-value">{entityData.criticals}</span>
-                {#if entityData.criticalDamage > 0}
-                  <span class="stat-detail">({fmt(entityData.criticalDamage)} dmg)</span>
-                {/if}
-              </div>
-            {/if}
+            <!-- Always show critical hits stats -->
+            <div class="stat-item">
+              <Zap size={16} />
+              <span>Critical Hits</span>
+              <span class="stat-value">{entityData.criticals || 0}</span>
+              {#if entityData.criticalDamage > 0}
+                <span class="stat-detail">({fmt(entityData.criticalDamage)} dmg)</span>
+              {/if}
+            </div>
 
-            {#if entityData.shieldAbsorbed > 0}
+            <!-- Always show shield stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <Shield size={16} />
                 <span>Shield Absorbed</span>
-                <span class="stat-value">{fmt(entityData.shieldAbsorbed)}</span>
+                <span class="stat-value">{fmt(entityData.shieldAbsorbed || 0)}</span>
               </div>
             {/if}
 
-            {#if entityData.dotDamage > 0}
+            <!-- Always show DoT damage stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <Flame size={16} />
                 <span>DoT Damage</span>
-                <span class="stat-value">{fmt(entityData.dotDamage)}</span>
+                <span class="stat-value">{fmt(entityData.dotDamage || 0)}</span>
               </div>
             {/if}
 
-            {#if entityData.hotHealing > 0}
+            <!-- Always show HoT healing stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <Heart size={16} />
                 <span>HoT Healing</span>
-                <span class="stat-value">{fmt(entityData.hotHealing)}</span>
+                <span class="stat-value">{fmt(entityData.hotHealing || 0)}</span>
               </div>
             {/if}
 
-            {#if entityData.tempHpGranted > 0}
+            <!-- Always show temp HP stats if there's any damage data -->
+            {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
                 <TrendingUp size={16} />
                 <span>Temp HP Granted</span>
-                <span class="stat-value">{fmt(entityData.tempHpGranted)}</span>
+                <span class="stat-value">{fmt(entityData.tempHpGranted || 0)}</span>
               </div>
             {/if}
 
-            {#if Object.keys(entityData.resourcesSpent).length > 0}
+            <!-- Show resources if any exist -->
+            {#if Object.keys(entityData.resourcesSpent || {}).length > 0}
               <div class="stat-item">
                 <Coins size={16} />
                 <span>Resources Spent</span>
