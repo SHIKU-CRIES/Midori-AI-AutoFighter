@@ -4,7 +4,7 @@
   and forwards user actions to the parent GameViewport.
 -->
 <script>
-  import { overlayView, overlayData } from './OverlayController.js';
+  import { overlayView, overlayData } from './systems/OverlayController.js';
   import { createEventDispatcher } from 'svelte';
   import OverlaySurface from './OverlaySurface.svelte';
   import PopupWindow from './PopupWindow.svelte';
@@ -22,7 +22,7 @@
   import ErrorOverlay from './ErrorOverlay.svelte';
   import BackendNotReady from './BackendNotReady.svelte';
   import FloatingLoot from './FloatingLoot.svelte';
-  import { rewardOpen as computeRewardOpen } from './viewportState.js';
+  import { rewardOpen as computeRewardOpen } from './systems/viewportState.js';
 
   export let selected = [];
   export let runId = '';

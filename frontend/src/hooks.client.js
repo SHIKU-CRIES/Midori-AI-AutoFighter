@@ -1,6 +1,6 @@
 // Global client-side error handler for SvelteKit
 // Converts unhandled load/navigation errors into our error overlay.
-import { openOverlay } from '$lib/OverlayController.js';
+import { openOverlay } from '$lib';
 
 /** @type {import('@sveltejs/kit').HandleClientError} */
 export function handleError({ error, event }) {

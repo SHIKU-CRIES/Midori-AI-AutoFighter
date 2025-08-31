@@ -4,8 +4,8 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import RewardCard from './RewardCard.svelte';
   import CurioChoice from './CurioChoice.svelte';
-  import { getCardCatalog, getRelicCatalog } from './api.js';
-  import { EFFECT_DESCRIPTIONS, ITEM_EFFECT_MAP } from './effectsInfo.js';
+  import { getCardCatalog, getRelicCatalog } from './systems/api.js';
+  import { EFFECT_DESCRIPTIONS, ITEM_EFFECT_MAP } from './systems/effectsInfo.js';
 
   export let items = [];
   export let gold = 0;

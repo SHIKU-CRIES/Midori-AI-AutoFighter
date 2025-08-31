@@ -20,11 +20,11 @@
    *   auto‑save changes to the backend with clear feedback.
    * - Move editor placement to a fixed sub‑section if we add more widgets.
    */
-  import { getElementIcon, getElementColor } from './assetLoader.js';
+  import { getElementIcon, getElementColor } from './systems/assetLoader.js';
   import { createEventDispatcher } from 'svelte';
   import PlayerEditor from './PlayerEditor.svelte';
   import UpgradePanel from './UpgradePanel.svelte';
-  import { getPlayerConfig, savePlayerConfig } from './api.js';
+  import { getPlayerConfig, savePlayerConfig } from './systems/api.js';
 
   /**
    * Renders the stats panel with category tabs and a toggle control.

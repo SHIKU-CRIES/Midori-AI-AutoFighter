@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import PopupWindow from './PopupWindow.svelte';
-  import { FEEDBACK_URL } from './constants.js';
+  import { FEEDBACK_URL } from './systems/constants.js';
 
   export let message = '';
   export let traceback = '';

@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import OverlayHost from '$lib/OverlayHost.svelte';
-  import { openOverlay, homeOverlay } from '$lib/OverlayController.js';
+  import { openOverlay, homeOverlay } from '$lib';
 
   // SvelteKit provides `error` and `status` to +error.svelte
   export let error;

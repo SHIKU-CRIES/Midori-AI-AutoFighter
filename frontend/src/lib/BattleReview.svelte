@@ -3,8 +3,8 @@
   import FighterPortrait from './battle/FighterPortrait.svelte';
   import RewardCard from './RewardCard.svelte';
   import CurioChoice from './CurioChoice.svelte';
-  import { getElementColor, getDotImage, getDotElement } from './assetLoader.js';
-  import { getBattleSummary, getBattleEvents } from './runApi.js';
+  import { getElementColor, getDotImage, getDotElement } from './systems/assetLoader.js';
+  import { getBattleSummary, getBattleEvents } from './systems/runApi.js';
   import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, User, Swords } from 'lucide-svelte';
 
   export let runId = '';

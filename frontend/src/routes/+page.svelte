@@ -1,8 +1,11 @@
 <script>
   import GameViewport from '$lib/GameViewport.svelte';
   import { onMount } from 'svelte';
-  import { getPlayerConfig, savePlayerConfig, getBackendFlavor, endAllRuns } from '$lib/api.js';
-  import {
+  import { 
+    getPlayerConfig, 
+    savePlayerConfig, 
+    getBackendFlavor, 
+    endAllRuns,
     startRun,
     roomAction,
     chooseCard,
@@ -10,12 +13,16 @@
     advanceRoom,
     getMap,
     updateParty,
-    getActiveRuns
-  } from '$lib/runApi.js';
-  import { loadRunState, saveRunState, clearRunState } from '$lib/runState.js';
+    getActiveRuns,
+    loadRunState, 
+    saveRunState, 
+    clearRunState,
+    FEEDBACK_URL,
+    openOverlay, 
+    backOverlay, 
+    homeOverlay
+  } from '$lib';
   import { buildRunMenu } from '$lib/RunButtons.svelte';
-  import { FEEDBACK_URL } from '$lib/constants.js';
-  import { openOverlay, backOverlay, homeOverlay } from '$lib/OverlayController.js';
   import { browser, dev } from '$app/environment';
 
   let runId = '';
@@ -364,7 +371,7 @@
           stopBattlePoll();
           roomData = { ...snap, error: 'Battle results could not be fetched.' };
           if (dev || !browser) {
-            const { warn } = await import('$lib/logger.js');
+            const { warn } = await import('$lib/systems/logger.js');
             warn('Battle results could not be fetched.');
           }
           return;
@@ -491,7 +498,7 @@
         // Surface error via overlay for consistency
         openOverlay('error', { message: 'Failed to enter room.', traceback: '' });
         if (dev || !browser) {
-          const { error } = await import('$lib/logger.js');
+          const { error } = await import('$lib/systems/logger.js');
           error('Failed to enter room.', e);
         }
       }

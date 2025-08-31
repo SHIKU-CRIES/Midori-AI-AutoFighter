@@ -1,6 +1,6 @@
 <script>
   // Renders a fighter portrait with HP bar, element chip, and status icons.
-  import { getCharacterImage, getElementColor, getElementIcon } from '../assetLoader.js';
+  import { getCharacterImage, getElementColor, getElementIcon } from '../systems/assetLoader.js';
   import StatusIcons from './StatusIcons.svelte';
 
   export let fighter = {};

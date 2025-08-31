@@ -14,14 +14,14 @@ export { default as ShopMenu } from './ShopMenu.svelte';
 export { default as CraftingMenu } from './CraftingMenu.svelte';
 export { default as RewardOverlay } from './RewardOverlay.svelte';
 export { default as PopupWindow } from './PopupWindow.svelte';
-export { layoutForWidth } from './layout.js';
+export { layoutForWidth } from './systems/layout.js';
 export {
   startRun,
   updateParty,
   roomAction,
   chooseCard,
   chooseRelic
-} from './runApi.js';
+} from './systems/runApi.js';
 export { default as NavBar } from './NavBar.svelte';
 export { default as OverlayHost } from './OverlayHost.svelte';
 export {
@@ -29,7 +29,7 @@ export {
   openOverlay,
   backOverlay,
   homeOverlay
-} from './OverlayController.js';
+} from './systems/OverlayController.js';
 export {
   loadInitialState,
   mapSelectedParty,
@@ -38,4 +38,31 @@ export {
   startGameMusic,
   applyMusicVolume,
   stopGameMusic
-} from './viewportState.js';
+} from './systems/viewportState.js';
+
+// Export additional API functions
+export {
+  getPlayerConfig,
+  savePlayerConfig,
+  getBackendFlavor,
+  endAllRuns
+} from './systems/api.js';
+
+// Export additional run API functions
+export {
+  advanceRoom,
+  getMap,
+  getActiveRuns
+} from './systems/runApi.js';
+
+// Export state management functions
+export {
+  loadRunState,
+  saveRunState,
+  clearRunState
+} from './systems/runState.js';
+
+// Export constants
+export {
+  FEEDBACK_URL
+} from './systems/constants.js';
