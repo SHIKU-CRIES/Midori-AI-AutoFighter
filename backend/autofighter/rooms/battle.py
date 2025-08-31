@@ -241,7 +241,7 @@ class BattleRoom(Room):
                 if getattr(foe_obj, "hp", 1) <= 0 and fid and fid not in credited_foe_ids:
                     # Emit kill event
                     BUS.emit("entity_killed", foe_obj, None, 0, "death", {"victim_type": "foe", "killer_type": "party"})
-                    
+
                     exp_reward += foe_obj.level * 12 + 5 * self.node.index
                     temp_rdr += 0.55
                     credited_foe_ids.add(fid)

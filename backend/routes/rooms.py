@@ -36,13 +36,13 @@ bp = Blueprint("rooms", __name__)
 async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
     action = data.get("action", "")
-    
+
     if action == "snapshot":
         snap = battle_snapshots.get(run_id)
         if snap is None:
             return jsonify({"error": "no battle"}), 404
         return jsonify(snap)
-    
+
     if action == "pause":
         # Pause battle by stopping the battle task
         if run_id in battle_tasks:
@@ -54,7 +54,7 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
             snap["paused"] = True
             battle_snapshots[run_id] = snap
         return jsonify({"result": "paused"})
-    
+
     if action == "resume":
         # Resume battle by restarting the battle task if it was cancelled
         snap = battle_snapshots.get(run_id)

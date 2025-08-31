@@ -156,7 +156,7 @@ class BattleLogger:
         BUS.subscribe("critical_hit", self._on_critical_hit)
         BUS.subscribe("resource_spent", self._on_resource_spent)
         BUS.subscribe("resource_gained", self._on_resource_gained)
-        
+
         # New events for enhanced logging
         BUS.subscribe("entity_killed", self._on_entity_killed)
         BUS.subscribe("dot_kill", self._on_dot_kill)
@@ -188,7 +188,7 @@ class BattleLogger:
         BUS.unsubscribe("critical_hit", self._on_critical_hit)
         BUS.unsubscribe("resource_spent", self._on_resource_spent)
         BUS.unsubscribe("resource_gained", self._on_resource_gained)
-        
+
         # New events unsubscriptions
         BUS.unsubscribe("entity_killed", self._on_entity_killed)
         BUS.unsubscribe("dot_kill", self._on_dot_kill)

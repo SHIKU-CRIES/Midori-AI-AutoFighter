@@ -47,3 +47,54 @@ async def list_relics():
             continue
     return jsonify({"relics": relics})
 
+
+@bp.get("/dots")
+async def list_dots():
+    dots = []
+    # Manually import known DoT classes since they don't use a registry
+    dot_classes = [
+        ('bleed', 'Bleed', 'Deals damage over time based on max HP'),
+        ('poison', 'Poison', 'Deals poison damage over time'),
+        ('blazing_torment', 'Blazing Torment', 'Fire-based damage over time'),
+        ('cold_wound', 'Cold Wound', 'Ice-based damage over time'),
+        ('frozen_wound', 'Frozen Wound', 'Frozen damage over time'),
+        ('abyssal_corruption', 'Abyssal Corruption', 'Dark corruption damage'),
+        ('abyssal_weakness', 'Abyssal Weakness', 'Weakening dark effect'),
+        ('celestial_atrophy', 'Celestial Atrophy', 'Light-based weakening'),
+        ('charged_decay', 'Charged Decay', 'Electric decay damage'),
+        ('gale_erosion', 'Gale Erosion', 'Wind-based erosion damage'),
+        ('impact_echo', 'Impact Echo', 'Physical impact echo'),
+        ('shadow_siphon', 'Shadow Siphon', 'Shadow damage that drains'),
+        ('twilight_decay', 'Twilight Decay', 'Twilight element decay')
+    ]
+
+    for dot_id, name, description in dot_classes:
+        dots.append({
+            "id": dot_id,
+            "name": name,
+            "about": description
+        })
+
+    return jsonify({"dots": dots})
+
+
+@bp.get("/hots")
+async def list_hots():
+    hots = []
+    # Manually import known HoT classes since they don't use a registry
+    hot_classes = [
+        ('regeneration', 'Regeneration', 'Provides healing over time'),
+        ('radiant_regeneration', 'Radiant Regeneration', 'Light-based healing over time'),
+        ('player_heal', 'Player Heal', 'Basic player healing effect'),
+        ('player_echo', 'Player Echo', 'Echo healing effect')
+    ]
+
+    for hot_id, name, description in hot_classes:
+        hots.append({
+            "id": hot_id,
+            "name": name,
+            "about": description
+        })
+
+    return jsonify({"hots": hots})
+

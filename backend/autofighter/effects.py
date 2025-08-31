@@ -152,7 +152,7 @@ class DamageOverTime:
         # Check if this DOT will kill the target
         target_hp_before = target.hp
         await target.apply_damage(int(dmg), attacker=attacker)
-        
+
         # If target died from this DOT, emit a DOT kill event
         if target_hp_before > 0 and target.hp <= 0:
             BUS.emit("dot_kill", attacker, target, int(dmg), self.name, {
@@ -160,7 +160,7 @@ class DamageOverTime:
                 "dot_name": self.name,
                 "final_damage": int(dmg)
             })
-        
+
         self.turns -= 1
         return self.turns > 0
 

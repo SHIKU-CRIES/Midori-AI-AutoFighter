@@ -4,8 +4,9 @@
   Shows character lists, stats, and status effects in a 3-part layout.
 -->
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
+  import { getCatalogData } from '../systems/runApi.js';
 
   export let party = [];
   export let foes = [];
@@ -16,6 +17,12 @@
 
   let selectedCharacterId = null;
   let activeTab = 'dots';
+  let catalogData = {
+    relics: [],
+    cards: [],
+    dots: [],
+    hots: []
+  };
 
   // Character selection
   $: allCharacters = [
@@ -36,14 +43,33 @@
     { id: 'passives', label: 'Passives' }
   ];
 
+  function getCatalogItem(type, id) {
+    const items = catalogData[type] || [];
+    return items.find(item => item.id === id);
+  }
+
   function getStatusEffects(character, type) {
     if (!character) return [];
     
     switch (type) {
       case 'dots':
-        return character.dots || [];
+        return (character.dots || []).map(dot => {
+          const catalogItem = getCatalogItem('dots', dot.id);
+          return {
+            ...dot,
+            about: catalogItem?.about || `Deals ${dot.damage} damage per turn for ${dot.turns} turns`,
+            source: 'dot'
+          };
+        });
       case 'hots':
-        return character.hots || [];
+        return (character.hots || []).map(hot => {
+          const catalogItem = getCatalogItem('hots', hot.id);
+          return {
+            ...hot,
+            about: catalogItem?.about || `Heals ${hot.healing} HP per turn for ${hot.turns} turns`,
+            source: 'hot'
+          };
+        });
       case 'buffs':
         // Extract buffs from passives and other effects
         const buffs = [];
@@ -58,7 +84,7 @@
                   name: passive.name,
                   id: passive.id || passive.name,
                   duration: passive.duration || passive.turns_left || 'Permanent',
-                  description: passive.description || 'Beneficial effect',
+                  about: passive.description || 'Beneficial effect',
                   source: 'passive'
                 });
               }
@@ -73,7 +99,7 @@
                 name: mod.name,
                 id: mod.id || mod.name,
                 duration: mod.turns || 'Permanent',
-                description: mod.description || 'Stat modification',
+                about: mod.description || 'Stat modification',
                 source: 'modifier'
               });
             }
@@ -94,7 +120,7 @@
                   name: passive.name,
                   id: passive.id || passive.name,
                   duration: passive.duration || passive.turns_left || 'Permanent',
-                  description: passive.description || 'Harmful effect',
+                  about: passive.description || 'Harmful effect',
                   source: 'passive'
                 });
               }
@@ -105,25 +131,33 @@
       case 'relics':
         // Get relic effects from battleSnapshot if available
         if (battleSnapshot && battleSnapshot.relics) {
-          return battleSnapshot.relics.map(relicId => ({
-            name: relicId,
-            id: relicId,
-            duration: 'Permanent',
-            description: 'Relic effect active',
-            source: 'relic'
-          }));
+          return battleSnapshot.relics.map(relicId => {
+            const catalogItem = getCatalogItem('relics', relicId);
+            return {
+              name: catalogItem?.name || relicId,
+              id: relicId,
+              duration: 'Permanent',
+              about: catalogItem?.about || 'Relic effect active',
+              source: 'relic',
+              stars: catalogItem?.stars || 1
+            };
+          });
         }
         return [];
       case 'cards':
         // Get card effects from battleSnapshot if available
         if (battleSnapshot && battleSnapshot.cards) {
-          return battleSnapshot.cards.map(cardId => ({
-            name: cardId,
-            id: cardId,
-            duration: 'Permanent',
-            description: 'Card effect active',
-            source: 'card'
-          }));
+          return battleSnapshot.cards.map(cardId => {
+            const catalogItem = getCatalogItem('cards', cardId);
+            return {
+              name: catalogItem?.name || cardId,
+              id: cardId,
+              duration: 'Permanent',
+              about: catalogItem?.about || 'Card effect active',
+              source: 'card',
+              stars: catalogItem?.stars || 1
+            };
+          });
         }
         return [];
       case 'passives':
@@ -134,7 +168,7 @@
                 name: passive,
                 id: passive,
                 duration: 'Permanent',
-                description: 'Passive ability',
+                about: 'Passive ability',
                 source: 'passive'
               };
             }
@@ -142,7 +176,7 @@
               name: passive.name || passive.id || 'Unknown',
               id: passive.id || passive.name || 'unknown',
               duration: passive.duration || passive.turns_left || 'Permanent',
-              description: passive.description || 'Passive ability',
+              about: passive.description || 'Passive ability',
               source: 'passive'
             };
           });
@@ -173,12 +207,17 @@
     let description = effect.name || effect.id || 'Unknown Effect';
     
     // Add amount/damage information
-    if (effect.amount !== undefined) {
-      description += ` (${effect.amount} per turn)`;
-    } else if (effect.damage !== undefined) {
+    if (effect.damage !== undefined) {
       description += ` (${effect.damage} damage/turn)`;
     } else if (effect.healing !== undefined) {
       description += ` (${effect.healing} healing/turn)`;
+    } else if (effect.amount !== undefined) {
+      description += ` (${effect.amount} per turn)`;
+    }
+    
+    // Add stacks information
+    if (effect.stacks && effect.stacks > 1) {
+      description += ` x${effect.stacks}`;
     }
     
     return description;
@@ -187,45 +226,55 @@
   function getEffectDetails(effect) {
     const details = [];
     
-    if (effect.description) {
-      details.push(`Description: ${effect.description}`);
+    if (effect.about) {
+      details.push(`Description: ${effect.about}`);
+    }
+    
+    if (effect.damage !== undefined) {
+      details.push(`Damage per turn: ${effect.damage}`);
+      if (effect.turns && typeof effect.turns === 'number') {
+        const totalDamage = effect.damage * effect.turns * (effect.stacks || 1);
+        details.push(`Total potential damage: ${totalDamage}`);
+      }
+    }
+    
+    if (effect.healing !== undefined) {
+      details.push(`Healing per turn: ${effect.healing}`);
+      if (effect.turns && typeof effect.turns === 'number') {
+        const totalHealing = effect.healing * effect.turns * (effect.stacks || 1);
+        details.push(`Total potential healing: ${totalHealing}`);
+      }
     }
     
     if (effect.amount !== undefined) {
       details.push(`Amount per turn: ${effect.amount}`);
     }
     
-    if (effect.damage !== undefined) {
-      details.push(`Damage per turn: ${effect.damage}`);
-    }
-    
-    if (effect.healing !== undefined) {
-      details.push(`Healing per turn: ${effect.healing}`);
-    }
-    
     if (effect.source) {
       details.push(`Source: ${effect.source}`);
     }
     
-    // Calculate total damage/healing potential
-    if (effect.damage && effect.duration && typeof effect.duration === 'number') {
-      const totalDamage = effect.damage * effect.duration;
-      details.push(`Total potential damage: ${totalDamage}`);
+    if (effect.element && effect.element !== 'Generic') {
+      details.push(`Element: ${effect.element}`);
     }
     
-    if (effect.healing && effect.duration && typeof effect.duration === 'number') {
-      const totalHealing = effect.healing * effect.duration;
-      details.push(`Total potential healing: ${totalHealing}`);
+    if (effect.stars) {
+      details.push(`Stars: ${'★'.repeat(effect.stars)}`);
     }
     
     return details;
   }
 
   // Handle pause when component mounts
-  import { onMount, onDestroy } from 'svelte';
-  
-  onMount(() => {
+  onMount(async () => {
     dispatch('pauseCombat');
+    
+    // Load catalog data
+    try {
+      catalogData = await getCatalogData();
+    } catch (error) {
+      console.warn('Failed to load catalog data:', error);
+    }
   });
 
   onDestroy(() => {

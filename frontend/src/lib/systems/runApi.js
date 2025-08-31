@@ -160,3 +160,20 @@ export async function getBattleEvents(runId, index) {
   }
   return res.json();
 }
+
+export async function getCatalogData() {
+  // Fetch all catalog data in parallel
+  const [relics, cards, dots, hots] = await Promise.all([
+    handleFetch(`${API_BASE}/catalog/relics`),
+    handleFetch(`${API_BASE}/catalog/cards`),
+    handleFetch(`${API_BASE}/catalog/dots`),
+    handleFetch(`${API_BASE}/catalog/hots`)
+  ]);
+  
+  return {
+    relics: relics.relics || [],
+    cards: cards.cards || [],
+    dots: dots.dots || [],
+    hots: hots.hots || []
+  };
+}
