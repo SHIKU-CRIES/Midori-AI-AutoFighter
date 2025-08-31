@@ -22,6 +22,7 @@
   import ErrorOverlay from './ErrorOverlay.svelte';
   import BackendNotReady from './BackendNotReady.svelte';
   import FloatingLoot from './FloatingLoot.svelte';
+  import CombatViewer from './CombatViewer.svelte';
   import { rewardOpen as computeRewardOpen } from '../systems/viewportState.js';
 
   export let selected = [];
@@ -166,6 +167,20 @@
   <PopupWindow title="Inventory" padding="0.75rem" maxWidth="1040px" zIndex={1300} on:close={() => dispatch('back')}>
     <InventoryPanel cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
   </PopupWindow>
+{/if}
+
+{#if $overlayView === 'combat-viewer'}
+  <OverlaySurface zIndex={1300}>
+    <CombatViewer 
+      party={battleSnapshot?.party ?? []}
+      foes={battleSnapshot?.foes ?? []}
+      {runId}
+      {battleSnapshot}
+      on:close={() => dispatch('back')}
+      on:pauseCombat={() => dispatch('pauseCombat')}
+      on:resumeCombat={() => dispatch('resumeCombat')}
+    />
+  </OverlaySurface>
 {/if}
 
 {#if $overlayView === 'settings'}

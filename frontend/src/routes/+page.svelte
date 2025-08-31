@@ -302,6 +302,22 @@
     openOverlay('inventory');
   }
 
+  function openCombatViewer() {
+    if (!battleActive) return;
+    openOverlay('combat-viewer');
+  }
+
+  // Placeholder functions for combat pause/resume - will implement backend API later
+  function pauseCombat() {
+    console.log('Pausing combat...');
+    // TODO: Call backend API to pause battle
+  }
+
+  function resumeCombat() {
+    console.log('Resuming combat...');
+    // TODO: Call backend API to resume battle
+  }
+
   let battleTimer;
   const STALL_TICKS = 60 * 3;
   let stalledTicks = 0;
@@ -744,6 +760,9 @@
     on:editorChange={(e) => handleEditorChange(e)}
     on:openInventory={openInventory}
     on:openParty={handleParty}
+    on:openCombatViewer={openCombatViewer}
+    on:pauseCombat={pauseCombat}
+    on:resumeCombat={resumeCombat}
     on:back={backOverlay}
     on:home={homeOverlay}
     on:settings={() => openOverlay('settings')}
