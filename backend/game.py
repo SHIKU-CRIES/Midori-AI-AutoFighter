@@ -25,7 +25,7 @@ from autofighter.rooms import _scale_stats  # noqa: F401
 from autofighter.rooms import _serialize  # noqa: F401
 from autofighter.save_manager import SaveManager
 from autofighter.stats import Stats
-from plugins import passives as passive_plugins
+from plugins import PluginLoader
 from plugins import players as player_plugins
 from plugins.damage_types import load_damage_type
 from plugins.players._base import PlayerBase
@@ -70,15 +70,21 @@ def get_fernet() -> Fernet:
 
 battle_tasks: dict[str, asyncio.Task] = {}
 battle_snapshots: dict[str, dict[str, Any]] = {}
+PASSIVE_LOADER: PluginLoader | None = None
 
 def _passive_names(ids: list[str]) -> list[str]:
+    global PASSIVE_LOADER
+    if PASSIVE_LOADER is None:
+        plugin_dir = Path(__file__).resolve().parent / "plugins" / "passives"
+        PASSIVE_LOADER = PluginLoader(required=["passive"])
+        PASSIVE_LOADER.discover(str(plugin_dir))
+
+    plugins = PASSIVE_LOADER.get_plugins("passive")
     names: list[str] = []
     for pid in ids:
-        for mod in passive_plugins.__all__:
-            cls = getattr(passive_plugins, mod)
-            if getattr(cls, "id", None) == pid:
-                names.append(getattr(cls, "name", pid))
-                break
+        cls = plugins.get(pid)
+        if cls is not None:
+            names.append(getattr(cls, "name", pid))
     return names
 
 def _load_player_customization() -> tuple[str, dict[str, int]]:
