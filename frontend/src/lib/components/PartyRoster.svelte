@@ -1,5 +1,5 @@
 <script>
-  import { getElementIcon, getElementColor } from './assetLoader.js';
+  import { getElementIcon, getElementColor } from '../systems/assetLoader.js';
   import { createEventDispatcher } from 'svelte';
 
   /**

@@ -1,6 +1,6 @@
 <script>
   // Displays HoT and DoT icons for a fighter.
-  import { getDotImage, getDotElement, getElementColor, getEffectImage } from '../assetLoader.js';
+  import { getDotImage, getDotElement, getElementColor, getEffectImage } from '../systems/assetLoader.js';
 
   export let hots = [];
   export let dots = [];

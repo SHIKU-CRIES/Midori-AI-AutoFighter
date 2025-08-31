@@ -12,9 +12,9 @@
     Brain,
     Gamepad
   } from 'lucide-svelte';
-  import { endRun, endAllRuns, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel, getBackendHealth } from './api.js';
-  import { getActiveRuns } from './runApi.js';
-  import { saveSettings, clearSettings, clearAllClientData } from './settingsStorage.js';
+  import { endRun, endAllRuns, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel, getBackendHealth } from '../systems/api.js';
+  import { getActiveRuns } from '../systems/runApi.js';
+  import { saveSettings, clearSettings, clearAllClientData } from '../systems/settingsStorage.js';
 
   const dispatch = createEventDispatcher();
   export let sfxVolume = 50;

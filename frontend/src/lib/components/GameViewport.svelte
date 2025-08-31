@@ -10,7 +10,7 @@
   import RoomView from './RoomView.svelte';
   import NavBar from './NavBar.svelte';
   import OverlayHost from './OverlayHost.svelte';
-  import { getRandomBackground } from './assetLoader.js';
+  import { getHourlyBackground } from '../systems/assetLoader.js';
   import MainMenu from './MainMenu.svelte';
   import {
     loadInitialState,
@@ -20,9 +20,9 @@
     startGameMusic,
     applyMusicVolume,
     stopGameMusic,
-  } from './viewportState.js';
-  import { rewardOpen as computeRewardOpen } from './viewportState.js';
-  import { overlayView } from './OverlayController.js';
+  } from '../systems/viewportState.js';
+  import { rewardOpen as computeRewardOpen } from '../systems/viewportState.js';
+  import { overlayView } from '../systems/OverlayController.js';
 
   export let runId = '';
   export let roomData = null;
@@ -52,7 +52,7 @@
 
   onMount(async () => {
     if (!background) {
-      randomBg = getRandomBackground();
+      randomBg = getHourlyBackground();
     }
     const init = await loadInitialState();
     ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } =
@@ -61,7 +61,7 @@
     startGameMusic(musicVolume);
     // Ensure music starts after first user gesture if autoplay was blocked
     try {
-      const { resumeGameMusic } = await import('./viewportState.js');
+      const { resumeGameMusic } = await import('../systems/viewportState.js');
       const resumeOnce = () => { resumeGameMusic(); cleanup(); };
       const cleanup = () => {
         try {

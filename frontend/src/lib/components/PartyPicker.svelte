@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { createEventDispatcher } from 'svelte';
-  import { getPlayers } from './api.js';
-  import { getCharacterImage, getHourlyBackground, getRandomFallback, getElementColor } from './assetLoader.js';
+  import { getPlayers } from '../systems/api.js';
+  import { getCharacterImage, getHourlyBackground, getRandomFallback, getElementColor } from '../systems/assetLoader.js';
   import MenuPanel from './MenuPanel.svelte';
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';
@@ -154,7 +154,7 @@
       }
     } catch (e) {
       if (dev || !browser) {
-        const { error } = await import('$lib/logger.js');
+        const { error } = await import('$lib/systems/logger.js');
         error('Unable to load roster. Is the backend running on 59002?');
       }
     }

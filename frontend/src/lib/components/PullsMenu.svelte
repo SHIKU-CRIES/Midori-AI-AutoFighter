@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import { createEventDispatcher } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
-  import { getGacha, pullGacha } from './api.js';
+  import { getGacha, pullGacha } from '../systems/api.js';
   import { browser, dev } from '$app/environment';
-  import { openOverlay } from './OverlayController.js';
+  import { openOverlay } from '../systems/OverlayController.js';
   const dispatch = createEventDispatcher();
   let pity = 0;
   let items = {};
@@ -24,7 +24,7 @@
       results = data.results || [];
     } catch (err) {
       if (dev || !browser) {
-        const { error } = await import('$lib/logger.js');
+        const { error } = await import('$lib/systems/logger.js');
         error('pull failed', err);
       }
       openOverlay('error', { message: 'Not enough tickets', traceback: err?.stack || '' });

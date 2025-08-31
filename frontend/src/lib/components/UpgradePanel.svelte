@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { getUpgrade, upgradeCharacter } from './api.js';
+  import { getUpgrade, upgradeCharacter } from '../systems/api.js';
 
   export let id;
   export let element;

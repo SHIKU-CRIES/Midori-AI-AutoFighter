@@ -10,7 +10,7 @@
   export let roster = [];
   export let previewId;
   export let overrideElement = '';
-  import { getElementColor } from './assetLoader.js';
+  import { getElementColor } from '../systems/assetLoader.js';
 </script>
 
 <div class="preview">
