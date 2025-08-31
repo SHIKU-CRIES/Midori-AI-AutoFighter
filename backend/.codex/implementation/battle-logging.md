@@ -31,6 +31,8 @@ Each battle summary includes:
 - Total damage taken by each participant
 - Total healing done by each participant
 - Total hits landed by each participant
+- Total self-inflicted damage by each participant
+- Total friendly fire damage by each participant
 - Battle duration and result
 - Participant lists (party members and foes)
 - Damage totals by element for each combatant
@@ -73,6 +75,12 @@ The battle logging system subscribes to the global event bus and automatically c
   "total_hits_landed": {
     "player": 8,
     "ally1": 6
+  },
+  "self_damage": {
+    "player": 5
+  },
+  "friendly_fire": {
+    "player": 12
   },
   "event_count": 45,
   "duration_seconds": 27.5
