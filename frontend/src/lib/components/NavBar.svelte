@@ -25,14 +25,14 @@
         <Diamond size={22} color="#fff" />
       </button>
     {/if}
+    <button class="icon-btn" title="Party Menu" on:click={() => dispatch('openParty')} disabled={battleActive}>
+      <Users size={22} color="#fff" />
+    </button>
     {#if runId}
       <button class="icon-btn" title="Inventory" on:click={() => dispatch('openInventory')} disabled={battleActive}>
         <Package size={22} color="#fff" />
       </button>
     {/if}
-    <button class="icon-btn" title="Party Menu" on:click={() => dispatch('openParty')} disabled={battleActive}>
-      <Users size={22} color="#fff" />
-    </button>
     <!-- Player Editor button removed per design -->
     <button class="icon-btn" title="Settings" on:click={() => dispatch('settings')}>
       <Settings size={22} color="#fff" />
