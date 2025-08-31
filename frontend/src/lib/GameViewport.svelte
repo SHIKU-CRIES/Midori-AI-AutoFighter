@@ -10,7 +10,7 @@
   import RoomView from './RoomView.svelte';
   import NavBar from './NavBar.svelte';
   import OverlayHost from './OverlayHost.svelte';
-  import { getRandomBackground } from './assetLoader.js';
+  import { getHourlyBackground } from './assetLoader.js';
   import MainMenu from './MainMenu.svelte';
   import {
     loadInitialState,
@@ -52,7 +52,7 @@
 
   onMount(async () => {
     if (!background) {
-      randomBg = getRandomBackground();
+      randomBg = getHourlyBackground();
     }
     const init = await loadInitialState();
     ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } =
