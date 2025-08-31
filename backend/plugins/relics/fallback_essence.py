@@ -10,7 +10,7 @@ class FallbackEssence(RelicBase):
 
     id: str = "fallback_essence"
     name: str = "Essence of 6858"
-    stars: int = 1
+    stars: int = 6
     effects: dict[str, float] = field(default_factory=lambda: {
         "atk": 0.01,
         "defense": 0.01,
