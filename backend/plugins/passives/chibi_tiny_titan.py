@@ -31,6 +31,9 @@ class ChibiTinyTitan:
         # When hit, increase Vitality by 0.01 for the rest of battle
         self._vitality_bonuses[entity_id] += 0.01
 
+        # Compute effective stacks from accumulated vitality bonus (each +0.01 = 1 stack)
+        stacks = int(round(self._vitality_bonuses[entity_id] * 100))
+
         # Apply 4x HP gain from Vitality based on BASE max_hp to avoid compounding
         try:
             base_max_hp = int(getattr(target, 'get_base_stat')('max_hp'))
@@ -70,6 +73,22 @@ class ChibiTinyTitan:
             source=self.id,
         )
         target.add_effect(mitigation_effect)
+
+        # Per-stack defense penalty: -25 DEF per stack, clamped so DEF never goes below 10
+        try:
+            base_def = int(getattr(target, 'get_base_stat')('defense'))
+        except Exception:
+            base_def = int(getattr(target, 'defense', 0))
+        max_penalty = max(base_def - 10, 0)
+        desired_penalty = 25 * max(stacks, 0)
+        penalty = min(desired_penalty, max_penalty)
+        defense_effect = StatEffect(
+            name=f"{self.id}_defense_penalty",
+            stat_modifiers={"defense": -int(penalty)},
+            duration=-1,
+            source=self.id,
+        )
+        target.add_effect(defense_effect)
 
     async def on_turn_end(self, target: "Stats") -> None:
         """Apply minor HoT each turn while Vitality bonus is active."""
