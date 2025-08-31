@@ -94,6 +94,14 @@ export async function advanceRoom(runId) {
   return handleFetch(`${API_BASE}/run/${runId}/next`, { method: 'POST' });
 }
 
+export async function pauseCombat(runId) {
+  return roomAction(runId, 'battle', 'pause');
+}
+
+export async function resumeCombat(runId) {
+  return roomAction(runId, 'battle', 'resume');
+}
+
 export async function chooseCard(runId, cardId) {
   return handleFetch(`${API_BASE}/cards/${runId}`, {
     method: 'POST',
@@ -151,4 +159,21 @@ export async function getBattleEvents(runId, index) {
     throw err;
   }
   return res.json();
+}
+
+export async function getCatalogData() {
+  // Fetch all catalog data in parallel
+  const [relics, cards, dots, hots] = await Promise.all([
+    handleFetch(`${API_BASE}/catalog/relics`),
+    handleFetch(`${API_BASE}/catalog/cards`),
+    handleFetch(`${API_BASE}/catalog/dots`),
+    handleFetch(`${API_BASE}/catalog/hots`)
+  ]);
+  
+  return {
+    relics: relics.relics || [],
+    cards: cards.cards || [],
+    dots: dots.dots || [],
+    hots: hots.hots || []
+  };
 }

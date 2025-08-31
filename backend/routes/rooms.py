@@ -36,11 +36,54 @@ bp = Blueprint("rooms", __name__)
 async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     data = await request.get_json(silent=True) or {}
     action = data.get("action", "")
+
     if action == "snapshot":
         snap = battle_snapshots.get(run_id)
         if snap is None:
             return jsonify({"error": "no battle"}), 404
         return jsonify(snap)
+
+    if action == "pause":
+        # Pause battle by stopping the battle task
+        if run_id in battle_tasks:
+            task = battle_tasks[run_id]
+            if not task.done():
+                task.cancel()
+            # Mark the battle as paused in the snapshot
+            snap = battle_snapshots.get(run_id, {})
+            snap["paused"] = True
+            battle_snapshots[run_id] = snap
+        return jsonify({"result": "paused"})
+
+    if action == "resume":
+        # Resume battle by restarting the battle task if it was cancelled
+        snap = battle_snapshots.get(run_id)
+        if snap and snap.get("paused"):
+            snap["paused"] = False
+            battle_snapshots[run_id] = snap
+            # Restart battle task if needed
+            if run_id not in battle_tasks or battle_tasks[run_id].done():
+                party = await asyncio.to_thread(load_party, run_id)
+                state, rooms = await asyncio.to_thread(load_map, run_id)
+                if rooms and 0 <= int(state.get("current", 0)) < len(rooms):
+                    node = rooms[state["current"]]
+                    room = BattleRoom(node)
+                    foes = _build_foes(node, party)
+                    for f in foes:
+                        _scale_stats(f, node, room.strength)
+                    combat_party = Party(
+                        members=[copy.deepcopy(m) for m in party.members],
+                        gold=party.gold,
+                        relics=party.relics,
+                        cards=party.cards,
+                        rdr=party.rdr,
+                    )
+                    # Restart the battle task
+                    task = asyncio.create_task(
+                        _run_battle(run_id, room, combat_party, foes)
+                    )
+                    battle_tasks[run_id] = task
+        return jsonify({"result": "resumed"})
     party = await asyncio.to_thread(load_party, run_id)
     try:
         with get_save_manager().connection() as conn:

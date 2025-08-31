@@ -76,6 +76,12 @@ class BattleSummary:
     resources_spent: Dict[str, Dict[str, int]] = field(default_factory=dict)  # entity -> resource_type -> amount
     resources_gained: Dict[str, Dict[str, int]] = field(default_factory=dict)  # entity -> resource_type -> amount
 
+    # New tracking fields for enhanced combat logging
+    kills: Dict[str, int] = field(default_factory=dict)  # entity -> kill count
+    dot_kills: Dict[str, int] = field(default_factory=dict)  # entity -> DOT kill count
+    ultimates_used: Dict[str, int] = field(default_factory=dict)  # entity -> ultimate usage count
+    ultimate_failures: Dict[str, int] = field(default_factory=dict)  # entity -> ultimate failure count
+
 
 class BattleLogger:
     """Manages logging for individual battles."""
@@ -151,6 +157,13 @@ class BattleLogger:
         BUS.subscribe("resource_spent", self._on_resource_spent)
         BUS.subscribe("resource_gained", self._on_resource_gained)
 
+        # New events for enhanced logging
+        BUS.subscribe("entity_killed", self._on_entity_killed)
+        BUS.subscribe("dot_kill", self._on_dot_kill)
+        BUS.subscribe("ultimate_used", self._on_ultimate_used)
+        BUS.subscribe("ultimate_completed", self._on_ultimate_completed)
+        BUS.subscribe("ultimate_failed", self._on_ultimate_failed)
+
     def _unsubscribe_from_events(self):
         """Unsubscribe from battle events."""
         BUS.unsubscribe("battle_start", self._on_battle_start)
@@ -175,6 +188,13 @@ class BattleLogger:
         BUS.unsubscribe("critical_hit", self._on_critical_hit)
         BUS.unsubscribe("resource_spent", self._on_resource_spent)
         BUS.unsubscribe("resource_gained", self._on_resource_gained)
+
+        # New events unsubscriptions
+        BUS.unsubscribe("entity_killed", self._on_entity_killed)
+        BUS.unsubscribe("dot_kill", self._on_dot_kill)
+        BUS.unsubscribe("ultimate_used", self._on_ultimate_used)
+        BUS.unsubscribe("ultimate_completed", self._on_ultimate_completed)
+        BUS.unsubscribe("ultimate_failed", self._on_ultimate_failed)
 
     def _log_event(self, event: BattleEvent):
         """Log an event to both raw logs and summary."""
@@ -891,6 +911,101 @@ class BattleLogger:
 
         with open(self.summary_path / "human_summary.txt", "w") as f:
             f.write("\n".join(lines))
+
+    def _on_entity_killed(self, victim, killer, amount, source_type="death", details=None):
+        """Handle entity killed event."""
+        victim_id = getattr(victim, 'id', str(victim))
+        killer_id = getattr(killer, 'id', str(killer)) if killer else None
+
+        event = BattleEvent(
+            timestamp=datetime.now(),
+            event_type="entity_killed",
+            attacker_id=killer_id,
+            target_id=victim_id,
+            amount=0,
+            source_type=source_type,
+            source_name="death",
+            effect_details=details or {}
+        )
+        self._log_event(event)
+
+        # Update kill tracking
+        if killer_id:
+            self.summary.kills[killer_id] = self.summary.kills.get(killer_id, 0) + 1
+
+    def _on_dot_kill(self, attacker, target, damage, dot_name, details=None):
+        """Handle DOT kill event."""
+        attacker_id = getattr(attacker, 'id', str(attacker))
+        target_id = getattr(target, 'id', str(target))
+
+        event = BattleEvent(
+            timestamp=datetime.now(),
+            event_type="dot_kill",
+            attacker_id=attacker_id,
+            target_id=target_id,
+            amount=damage,
+            source_type="dot",
+            source_name=dot_name,
+            effect_details=details or {}
+        )
+        self._log_event(event)
+
+        # Update DOT kill tracking
+        self.summary.dot_kills[attacker_id] = self.summary.dot_kills.get(attacker_id, 0) + 1
+
+    def _on_ultimate_used(self, caster, target, amount, source_type="ultimate", details=None):
+        """Handle ultimate used event."""
+        caster_id = getattr(caster, 'id', str(caster))
+
+        event = BattleEvent(
+            timestamp=datetime.now(),
+            event_type="ultimate_used",
+            attacker_id=caster_id,
+            target_id=None,
+            amount=0,
+            source_type=source_type,
+            source_name="ultimate",
+            effect_details=details or {}
+        )
+        self._log_event(event)
+
+        # Update ultimate usage tracking
+        self.summary.ultimates_used[caster_id] = self.summary.ultimates_used.get(caster_id, 0) + 1
+
+    def _on_ultimate_completed(self, caster, target, amount, source_type="ultimate", details=None):
+        """Handle ultimate completed event."""
+        caster_id = getattr(caster, 'id', str(caster))
+
+        event = BattleEvent(
+            timestamp=datetime.now(),
+            event_type="ultimate_completed",
+            attacker_id=caster_id,
+            target_id=None,
+            amount=0,
+            source_type=source_type,
+            source_name="ultimate",
+            effect_details=details or {}
+        )
+        self._log_event(event)
+
+    def _on_ultimate_failed(self, caster, target, amount, source_type="ultimate", details=None):
+        """Handle ultimate failed event."""
+        caster_id = getattr(caster, 'id', str(caster))
+
+        event = BattleEvent(
+            timestamp=datetime.now(),
+            event_type="ultimate_failed",
+            attacker_id=caster_id,
+            target_id=None,
+            amount=0,
+            source_type=source_type,
+            source_name="ultimate",
+            effect_details=details or {}
+        )
+        self._log_event(event)
+
+        # Update ultimate failure tracking
+        self.summary.ultimate_failures[caster_id] = self.summary.ultimate_failures.get(caster_id, 0) + 1
 
 
 class RunLogger:

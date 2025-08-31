@@ -162,6 +162,7 @@
       on:home={() => dispatch('home')}
       on:openInventory={() => dispatch('openInventory')}
       on:openParty={() => dispatch('openParty')}
+      on:openCombatViewer={() => dispatch('openCombatViewer')}
       
       on:settings={() => dispatch('settings')}
       on:back={() => dispatch('back')}
@@ -203,6 +204,8 @@
         on:saveParty={() => dispatch('saveParty')}
       on:startRun={(e) => dispatch('startRun', e.detail)}
         on:back={() => dispatch('back')}
+      on:pauseCombat={() => dispatch('pauseCombat')}
+      on:resumeCombat={() => dispatch('resumeCombat')}
       on:rewardSelect={(e) => dispatch('rewardSelect', e.detail)}
       on:nextRoom={() => dispatch('nextRoom')}
       on:editorSave={(e) => dispatch('editorSave', e.detail)}

@@ -47,3 +47,121 @@ async def list_relics():
             continue
     return jsonify({"relics": relics})
 
+
+@bp.get("/dots")
+async def list_dots():
+    """Get all available DoT (Damage over Time) effects with descriptions."""
+    dots = []
+
+    # Dynamically import DoT classes from plugins
+    import importlib.util
+    from pathlib import Path
+
+    dots_dir = Path(__file__).parent.parent / "plugins" / "dots"
+
+    if dots_dir.exists():
+        for dot_file in dots_dir.glob("*.py"):
+            if dot_file.name.startswith("__"):
+                continue
+
+            try:
+                # Import the module
+                spec = importlib.util.spec_from_file_location(
+                    f"plugins.dots.{dot_file.stem}", dot_file
+                )
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+
+                # Find DoT classes in the module
+                for item_name in dir(module):
+                    item = getattr(module, item_name)
+                    if (hasattr(item, 'plugin_type') and
+                        item.plugin_type == 'dot' and
+                        hasattr(item, 'id')):
+
+                        # Try to create a dummy instance to get name
+                        try:
+                            instance = item(1, 1)  # damage=1, turns=1
+                            name = getattr(instance, 'name', item.id.replace('_', ' ').title())
+                        except Exception:
+                            name = item.id.replace('_', ' ').title()
+
+                        # Create description based on damage type
+                        description = f"{name} - Damage over time effect"
+                        if hasattr(item, '__doc__') and item.__doc__:
+                            description = item.__doc__.strip()
+
+                        dots.append({
+                            "id": item.id,
+                            "name": name,
+                            "about": description
+                        })
+
+            except Exception:
+                # If we can't load a plugin, skip it but don't fail the whole request
+                continue
+
+    # Sort by ID for consistent ordering
+    dots.sort(key=lambda x: x['id'])
+
+    return jsonify({"dots": dots})
+
+
+@bp.get("/hots")
+async def list_hots():
+    """Get all available HoT (Healing over Time) effects with descriptions."""
+    hots = []
+
+    # Dynamically import HoT classes from plugins
+    import importlib.util
+    from pathlib import Path
+
+    hots_dir = Path(__file__).parent.parent / "plugins" / "hots"
+
+    if hots_dir.exists():
+        for hot_file in hots_dir.glob("*.py"):
+            if hot_file.name.startswith("__"):
+                continue
+
+            try:
+                # Import the module
+                spec = importlib.util.spec_from_file_location(
+                    f"plugins.hots.{hot_file.stem}", hot_file
+                )
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+
+                # Find HoT classes in the module
+                for item_name in dir(module):
+                    item = getattr(module, item_name)
+                    if (hasattr(item, 'plugin_type') and
+                        item.plugin_type == 'hot' and
+                        hasattr(item, 'id')):
+
+                        # Try to create a dummy instance to get name
+                        try:
+                            instance = item(1, 1)  # healing=1, turns=1
+                            name = getattr(instance, 'name', item.id.replace('_', ' ').title())
+                        except Exception:
+                            name = item.id.replace('_', ' ').title()
+
+                        # Create description based on healing type
+                        description = f"{name} - Healing over time effect"
+                        if hasattr(item, '__doc__') and item.__doc__:
+                            description = item.__doc__.strip()
+
+                        hots.append({
+                            "id": item.id,
+                            "name": name,
+                            "about": description
+                        })
+
+            except Exception:
+                # If we can't load a plugin, skip it but don't fail the whole request
+                continue
+
+    # Sort by ID for consistent ordering
+    hots.sort(key=lambda x: x['id'])
+
+    return jsonify({"hots": hots})
+

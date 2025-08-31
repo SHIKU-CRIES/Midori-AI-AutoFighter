@@ -20,7 +20,9 @@ export {
   updateParty,
   roomAction,
   chooseCard,
-  chooseRelic
+  chooseRelic,
+  pauseCombat,
+  resumeCombat
 } from './systems/runApi.js';
 export { default as NavBar } from './components/NavBar.svelte';
 export { default as OverlayHost } from './components/OverlayHost.svelte';
