@@ -81,6 +81,8 @@ class BattleSummary:
     dot_kills: Dict[str, int] = field(default_factory=dict)  # entity -> DOT kill count
     ultimates_used: Dict[str, int] = field(default_factory=dict)  # entity -> ultimate usage count
     ultimate_failures: Dict[str, int] = field(default_factory=dict)  # entity -> ultimate failure count
+    self_damage: Dict[str, int] = field(default_factory=dict)  # entity -> damage dealt to self
+    friendly_fire: Dict[str, int] = field(default_factory=dict)  # entity -> damage dealt to allies
 
 
 class BattleLogger:
@@ -269,9 +271,26 @@ class BattleLogger:
             damage_type=damage_type
         )
         self._log_event(event)
+        # Determine relationships for self damage and friendly fire
+        if attacker_id == target_id:
+            self.summary.self_damage[attacker_id] = (
+                self.summary.self_damage.get(attacker_id, 0) + amount
+            )
+        else:
+            attacker_is_party = attacker_id in self.summary.party_members
+            attacker_is_foe = attacker_id in self.summary.foes
+            target_is_party = target_id in self.summary.party_members
+            target_is_foe = target_id in self.summary.foes
+
+            if (attacker_is_party and target_is_party) or (attacker_is_foe and target_is_foe):
+                self.summary.friendly_fire[attacker_id] = (
+                    self.summary.friendly_fire.get(attacker_id, 0) + amount
+                )
 
         # Update summary stats
-        self.summary.total_damage_dealt[attacker_id] = self.summary.total_damage_dealt.get(attacker_id, 0) + amount
+        self.summary.total_damage_dealt[attacker_id] = (
+            self.summary.total_damage_dealt.get(attacker_id, 0) + amount
+        )
 
         # Track damage by source type
         if source_type not in self.summary.damage_by_source:
@@ -659,6 +678,8 @@ class BattleLogger:
                 "total_damage_taken": self.summary.total_damage_taken,
                 "total_healing_done": self.summary.total_healing_done,
                 "total_hits_landed": self.summary.total_hits_landed,
+                "self_damage": self.summary.self_damage,
+                "friendly_fire": self.summary.friendly_fire,
                 "event_count": len(self.summary.events),
                 "duration_seconds": (
                     (self.summary.end_time - self.summary.start_time).total_seconds()
