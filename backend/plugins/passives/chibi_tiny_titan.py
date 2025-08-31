@@ -31,9 +31,12 @@ class ChibiTinyTitan:
         # When hit, increase Vitality by 0.01 for the rest of battle
         self._vitality_bonuses[entity_id] += 0.01
 
-        # Apply 4x HP gain from Vitality
-        # Assuming Vitality translates to max HP bonus
-        vitality_hp_bonus = int(self._vitality_bonuses[entity_id] * 4 * target.max_hp)
+        # Apply 4x HP gain from Vitality based on BASE max_hp to avoid compounding
+        try:
+            base_max_hp = int(getattr(target, 'get_base_stat')('max_hp'))
+        except Exception:
+            base_max_hp = int(getattr(target, 'max_hp', 0))
+        vitality_hp_bonus = int(self._vitality_bonuses[entity_id] * 4 * base_max_hp)
 
         hp_effect = StatEffect(
             name=f"{self.id}_vitality_hp",
@@ -43,8 +46,12 @@ class ChibiTinyTitan:
         )
         target.add_effect(hp_effect)
 
-        # Convert 500% of current Vitality into attack
-        vitality_attack_bonus = int(self._vitality_bonuses[entity_id] * 5 * target.atk)
+        # Convert 500% of current Vitality into attack based on BASE atk to avoid compounding
+        try:
+            base_atk = int(getattr(target, 'get_base_stat')('atk'))
+        except Exception:
+            base_atk = int(getattr(target, 'atk', 0))
+        vitality_attack_bonus = int(self._vitality_bonuses[entity_id] * 5 * base_atk)
 
         attack_effect = StatEffect(
             name=f"{self.id}_vitality_attack",
