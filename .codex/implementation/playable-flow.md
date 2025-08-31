@@ -24,7 +24,7 @@ foes. When `card_choices` are present, `OverlayHost` opens a reward overlay so
 players can pick one option before advancing.
 
 Every menu opener checks `/map/{run_id}` for an active `battle` flag. When a
-fight is running, only the Settings menu remains accessible and a placeholder
+fight is running, the Settings and Inventory menus remain accessible and a placeholder
 message covers the viewport until combat finishes.
 
 This minimal loop lets the web build start a run, navigate the floor, and

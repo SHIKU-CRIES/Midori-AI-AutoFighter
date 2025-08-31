@@ -7,6 +7,7 @@ There is no way to view collected loot, making reward verification and testing d
 - [x] Replace the existing stats screen with an inventory screen accessible during runs.
 - [x] Display cards, relics, and other items with icons, counts, and descriptions.
 - [x] Allow opening the inventory after battles to review newly acquired loot.
+- [x] Allow opening the inventory during battles to review collected cards and relics.
 - [x] Persist inventory state across rooms within a run.
 - [x] Write frontend tests ensuring items appear in inventory after rewards.
 
