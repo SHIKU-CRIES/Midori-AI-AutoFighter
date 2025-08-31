@@ -5,7 +5,7 @@
   import CurioChoice from './CurioChoice.svelte';
   import { getElementColor, getDotImage, getDotElement } from '../systems/assetLoader.js';
   import { getBattleSummary, getBattleEvents } from '../systems/runApi.js';
-  import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, User, Swords } from 'lucide-svelte';
+  import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, User, Swords, Skull, XOctagon, HeartOff } from 'lucide-svelte';
 
   export let runId = '';
   export let battleIndex = 0;
@@ -189,7 +189,13 @@
     if (!summary) return null;
 
     if (entityId === 'overview') {
-      const resources = Object.values(summary.resources_spent || {}).reduce((acc, cur) => {
+      const resourcesSpent = Object.values(summary.resources_spent || {}).reduce((acc, cur) => {
+        for (const [type, amt] of Object.entries(cur || {})) {
+          acc[type] = (acc[type] || 0) + amt;
+        }
+        return acc;
+      }, {});
+      const resourcesGained = Object.values(summary.resources_gained || {}).reduce((acc, cur) => {
         for (const [type, amt] of Object.entries(cur || {})) {
           acc[type] = (acc[type] || 0) + amt;
         }
@@ -203,8 +209,14 @@
         shieldAbsorbed: Object.values(summary.shield_absorbed || {}).reduce((a, b) => a + b, 0),
         dotDamage: Object.values(summary.dot_damage || {}).reduce((a, b) => a + b, 0),
         hotHealing: Object.values(summary.hot_healing || {}).reduce((a, b) => a + b, 0),
-        resourcesSpent: resources,
-        tempHpGranted: Object.values(summary.temporary_hp_granted || {}).reduce((a, b) => a + b, 0)
+        resourcesSpent,
+        resourcesGained,
+        tempHpGranted: Object.values(summary.temporary_hp_granted || {}).reduce((a, b) => a + b, 0),
+        kills: Object.values(summary.kills || {}).reduce((a, b) => a + b, 0),
+        dotKills: Object.values(summary.dot_kills || {}).reduce((a, b) => a + b, 0),
+        ultimatesUsed: Object.values(summary.ultimates_used || {}).reduce((a, b) => a + b, 0),
+        ultimateFailures: Object.values(summary.ultimate_failures || {}).reduce((a, b) => a + b, 0),
+        healingPrevented: Object.values(summary.healing_prevented || {}).reduce((a, b) => a + b, 0)
       };
     }
 
@@ -217,7 +229,13 @@
       dotDamage: summary.dot_damage?.[entityId] || 0,
       hotHealing: summary.hot_healing?.[entityId] || 0,
       resourcesSpent: summary.resources_spent?.[entityId] || {},
-      tempHpGranted: summary.temporary_hp_granted?.[entityId] || 0
+      resourcesGained: summary.resources_gained?.[entityId] || {},
+      tempHpGranted: summary.temporary_hp_granted?.[entityId] || 0,
+      kills: summary.kills?.[entityId] || 0,
+      dotKills: summary.dot_kills?.[entityId] || 0,
+      ultimatesUsed: summary.ultimates_used?.[entityId] || 0,
+      ultimateFailures: summary.ultimate_failures?.[entityId] || 0,
+      healingPrevented: summary.healing_prevented?.[entityId] || 0
     };
   }
 
@@ -1083,19 +1101,106 @@
             </div>
           {/if}
 
-          {#if summary?.resources_spent && Object.keys(summary.resources_spent).length > 0}
+          {#if summary?.kills && Object.keys(summary.kills).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Skull size={16} />
+                Kills
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.kills).sort((a, b) => b[1] - a[1]) as [entity, count]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(count)} kills</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.dot_kills && Object.keys(summary.dot_kills).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Flame size={16} />
+                DoT Kills
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.dot_kills).sort((a, b) => b[1] - a[1]) as [entity, count]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(count)} DoT kills</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.ultimates_used && Object.keys(summary.ultimates_used).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <Zap size={16} />
+                Ultimates Used
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.ultimates_used).sort((a, b) => b[1] - a[1]) as [entity, count]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(count)} used</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.ultimate_failures && Object.keys(summary.ultimate_failures).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <XOctagon size={16} />
+                Ultimate Failures
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.ultimate_failures).sort((a, b) => b[1] - a[1]) as [entity, count]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(count)} failed</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if summary?.healing_prevented && Object.keys(summary.healing_prevented).length > 0}
+            <div class="detail-section">
+              <div class="detail-title">
+                <HeartOff size={16} />
+                Healing Prevented
+              </div>
+              <div class="detail-grid">
+                {#each Object.entries(summary.healing_prevented).sort((a, b) => b[1] - a[1]) as [entity, amount]}
+                  <div class="detail-item">
+                    <span class="detail-name">{entity}</span>
+                    <span class="detail-stats">{fmt(amount)} prevented</span>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          {/if}
+
+          {#if (summary?.resources_spent && Object.keys(summary.resources_spent).length > 0) || (summary?.resources_gained && Object.keys(summary.resources_gained).length > 0)}
             <div class="detail-section">
               <div class="detail-title">
                 <Coins size={16} />
                 Resource Usage
               </div>
               <div class="detail-grid">
-                {#each Object.entries(summary.resources_spent) as [entity, resources]}
+                {#each Array.from(new Set([...Object.keys(summary.resources_spent || {}), ...Object.keys(summary.resources_gained || {})])) as entity}
+                  {@const spent = summary.resources_spent?.[entity] || {}}
+                  {@const gained = summary.resources_gained?.[entity] || {}}
                   <div class="detail-item">
                     <span class="detail-name">{entity}</span>
                     <span class="detail-stats">
-                      {#each Object.entries(resources) as [type, amount]}
-                        {type}: {fmt(amount)}
+                      {#each Array.from(new Set([...Object.keys(spent), ...Object.keys(gained)])) as type}
+                        {type}: {fmt(spent[type] || 0)} spent / {fmt(gained[type] || 0)} gained
                       {/each}
                     </span>
                   </div>
@@ -1202,6 +1307,31 @@
               {/if}
             </div>
 
+            <!-- Kills and related metrics -->
+            <div class="stat-item">
+              <Skull size={16} />
+              <span>Kills</span>
+              <span class="stat-value">{entityData.kills || 0}</span>
+            </div>
+
+            <div class="stat-item">
+              <Flame size={16} />
+              <span>DoT Kills</span>
+              <span class="stat-value">{entityData.dotKills || 0}</span>
+            </div>
+
+            <div class="stat-item">
+              <Zap size={16} />
+              <span>Ultimates Used</span>
+              <span class="stat-value">{entityData.ultimatesUsed || 0}</span>
+            </div>
+
+            <div class="stat-item">
+              <XOctagon size={16} />
+              <span>Ultimate Failures</span>
+              <span class="stat-value">{entityData.ultimateFailures || 0}</span>
+            </div>
+
             <!-- Always show shield stats if there's any damage data -->
             {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
@@ -1229,6 +1359,14 @@
               </div>
             {/if}
 
+            {#if Object.keys(entityData.damage || {}).length > 0}
+              <div class="stat-item">
+                <HeartOff size={16} />
+                <span>Healing Prevented</span>
+                <span class="stat-value">{fmt(entityData.healingPrevented || 0)}</span>
+              </div>
+            {/if}
+
             <!-- Always show temp HP stats if there's any damage data -->
             {#if Object.keys(entityData.damage || {}).length > 0}
               <div class="stat-item">
@@ -1239,13 +1377,13 @@
             {/if}
 
             <!-- Show resources if any exist -->
-            {#if Object.keys(entityData.resourcesSpent || {}).length > 0}
+            {#if Object.keys(entityData.resourcesSpent || {}).length > 0 || Object.keys(entityData.resourcesGained || {}).length > 0}
               <div class="stat-item">
                 <Coins size={16} />
-                <span>Resources Spent</span>
+                <span>Resources</span>
                 <div class="resource-breakdown">
-                  {#each Object.entries(entityData.resourcesSpent) as [type, amount]}
-                    <span class="resource-item">{type}: {fmt(amount)}</span>
+                  {#each Array.from(new Set([...Object.keys(entityData.resourcesSpent || {}), ...Object.keys(entityData.resourcesGained || {})])) as type}
+                    <span class="resource-item">{type}: {fmt(entityData.resourcesSpent[type] || 0)} spent / {fmt(entityData.resourcesGained[type] || 0)} gained</span>
                   {/each}
                 </div>
               </div>
