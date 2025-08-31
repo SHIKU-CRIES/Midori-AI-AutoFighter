@@ -127,6 +127,16 @@
   });
 
   async function openRun() {
+    // First, check backend for any active runs and let user choose
+    try {
+      const data = await getActiveRuns();
+      const activeRuns = data?.runs || [];
+      if (activeRuns.length > 0) {
+        openOverlay('run-choose', { runs: activeRuns });
+        return;
+      }
+    } catch {}
+
     if (runId) {
       // If we have a runId but don't have map data (e.g., backend was unavailable during load),
       // try to restore the run data now
@@ -235,6 +245,32 @@
     saveRunState(runId, nextRoom);
     homeOverlay();
     await enterRoom();
+  }
+
+  async function handleLoadExistingRun(e) {
+    try {
+      const chosen = e?.detail || e; // Overlay dispatches the run object directly
+      const rid = chosen?.run_id;
+      if (!rid) { backOverlay(); return; }
+      const data = await getMap(rid);
+      if (!data) { backOverlay(); return; }
+      runId = rid;
+      selectedParty = data.party || selectedParty;
+      mapRooms = data.map.rooms || [];
+      currentIndex = data.map.current || 0;
+      currentRoomType = mapRooms[currentIndex]?.room_type || '';
+      nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+      saveRunState(runId, nextRoom);
+      backOverlay();
+      homeOverlay();
+      await enterRoom();
+    } catch (e) {
+      backOverlay();
+    }
+  }
+
+  function handleStartNewRun() {
+    openOverlay('party-start');
   }
 
   async function handleParty() {
@@ -747,6 +783,8 @@
     on:home={homeOverlay}
     on:settings={() => openOverlay('settings')}
     on:rewardSelect={(e) => handleRewardSelect(e.detail)}
+    on:loadRun={(e) => handleLoadExistingRun(e.detail)}
+    on:startNewRun={handleStartNewRun}
     on:shopBuy={(e) => handleShopBuy(e.detail)}
     on:shopReroll={handleShopReroll}
     on:shopLeave={handleShopLeave}

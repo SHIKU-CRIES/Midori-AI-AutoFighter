@@ -18,8 +18,10 @@ class Wind(DamageTypeBase):
 
     # Previous implementation scattered DoTs after an ultimate by moving
     # existing effects. The new design: when Wind uses its ultimate, strike
-    # every living foe 25 times and temporarily increase the user's
-    # effect hit rate so Gale Erosion applies more reliably.
+    # every living foe multiple times and temporarily increase the user's
+    # effect hit rate so Gale Erosion applies more reliably. The number of hits
+    # is derived dynamically (from actor.wind_ultimate_hits or actor.ultimate_hits)
+    # to allow relics/cards to adjust it.
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         return damage_effects.create_dot(self.id, damage, source)
@@ -44,7 +46,18 @@ class Wind(DamageTypeBase):
         )
         a_mgr.add_modifier(eh_mod)
 
-        # Strike each living enemy 25 times
+        # Determine dynamic hit count (allow cards/relics to override via attributes)
+        hits = int(getattr(actor, "wind_ultimate_hits", getattr(actor, "ultimate_hits", 25)) or 25)
+        hits = max(1, hits)
+
+        # Strike each living enemy 'hits' times, with per-hit damage scaled down by hit count
+        base = int(getattr(actor, "atk", 0))
+        base = max(1, base)
+
+        # Distribute rounding fairly so sum(per_hit) ~= base
+        per = base // hits
+        rem = base - per * hits
+
         for foe in enemies:
             if getattr(foe, "hp", 0) <= 0:
                 continue
@@ -52,10 +65,13 @@ class Wind(DamageTypeBase):
             if f_mgr is None:
                 f_mgr = EffectManager(foe)
                 foe.effect_manager = f_mgr
-            for _ in range(25):
+            for i in range(hits):
                 if getattr(foe, "hp", 0) <= 0:
                     break
-                dmg = await foe.apply_damage(getattr(actor, "atk", 0), attacker=actor, action_name="Wind Ultimate")
+                per_hit = per + (1 if i < rem else 0)
+                # Ensure a minimum of 1 damage per hit going into the resolver
+                per_hit = max(1, int(per_hit))
+                dmg = await foe.apply_damage(per_hit, attacker=actor, action_name="Wind Ultimate")
                 # Emit hit event for logging/passives, mirroring battle loop behavior
                 try:
                     await BUS.emit_async("hit_landed", actor, foe, dmg, "attack", "wind_ultimate")

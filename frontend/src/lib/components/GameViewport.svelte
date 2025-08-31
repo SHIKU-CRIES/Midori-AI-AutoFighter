@@ -207,6 +207,8 @@
       on:nextRoom={() => dispatch('nextRoom')}
       on:editorSave={(e) => dispatch('editorSave', e.detail)}
       on:editorChange={(e) => dispatch('editorChange', e.detail)}
+      on:loadRun={(e) => dispatch('loadRun', e.detail)}
+      on:startNewRun={() => dispatch('startNewRun')}
       on:saveSettings={(e) => ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } = e.detail)}
       on:endRun={() => dispatch('endRun')}
       on:shopBuy={(e) => dispatch('shopBuy', e.detail)}

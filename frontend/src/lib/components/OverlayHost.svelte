@@ -16,6 +16,7 @@
   import PlayerEditor from './PlayerEditor.svelte';
   import InventoryPanel from './InventoryPanel.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
+  import RunChooser from './RunChooser.svelte';
   import ShopMenu from './ShopMenu.svelte';
   import RestRoom from './RestRoom.svelte';
   import BattleView from './BattleView.svelte';
@@ -119,6 +120,15 @@
     traceback={$overlayData.traceback || ''}
     on:close={() => dispatch('back')}
   />
+{/if}
+
+{#if $overlayView === 'run-choose'}
+  <PopupWindow title="Resume or Start Run" maxWidth="720px" zIndex={1300} on:close={() => dispatch('back')}>
+    <RunChooser runs={$overlayData.runs || []}
+      on:load={(e) => dispatch('loadRun', e.detail.run)}
+      on:startNew={() => dispatch('startNewRun')}
+    />
+  </PopupWindow>
 {/if}
 
 {#if $overlayView === 'backend-not-ready'}

@@ -42,7 +42,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     # Apply a global pre-scale debuff to foes so they are significantly weaker
     # before room modifiers are applied.
     foe_debuff = 0.5 if isinstance(obj, FoeBase) else 1.0
-    if foe_debuff != 1.0:
+    if foe_debuff != 1.1:
         try:
             if hasattr(obj, "atk") and isinstance(obj.atk, (int, float)):
                 obj.atk = type(obj.atk)(obj.atk * foe_debuff)
