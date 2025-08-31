@@ -97,5 +97,61 @@ async def test_dot_expiration_with_optimizations():
     assert len(manager.dots) == 0
 
 
+@pytest.mark.asyncio
+async def test_dead_characters_dont_receive_dots_or_hots():
+    """Verify that dead characters (hp <= 0) don't receive new DOT or HOT effects."""
+    # Create a dead target
+    target = Stats()
+    target.hp = 0  # Set HP to 0 after creation to override post_init
+    target.id = "dead_target"
+    manager = EffectManager(target)
+
+    # Create a living source
+    source = Stats()
+    source.id = "living_source"
+
+    # Try to add DOT to dead character
+    dot = DamageOverTime("test_dot", damage=10, turns=3, id="test_dot", source=source)
+    manager.add_dot(dot)
+
+    # Try to add HOT to dead character
+    hot = HealingOverTime("test_hot", healing=5, turns=2, id="test_hot", source=source)
+    manager.add_hot(hot)
+
+    # Verify no effects were added
+    assert len(manager.dots) == 0
+    assert len(manager.hots) == 0
+    assert len(target.dots) == 0
+    assert len(target.hots) == 0
+
+
+@pytest.mark.asyncio
+async def test_living_characters_can_still_receive_effects():
+    """Verify that living characters (hp > 0) can still receive DOT and HOT effects."""
+    # Create a living target
+    target = Stats()
+    target.hp = 50  # Set HP explicitly
+    target.id = "living_target"
+    manager = EffectManager(target)
+
+    # Create a living source
+    source = Stats()
+    source.id = "living_source"
+
+    # Add DOT to living character
+    dot = DamageOverTime("test_dot", damage=10, turns=3, id="test_dot", source=source)
+    manager.add_dot(dot)
+
+    # Add HOT to living character
+    hot = HealingOverTime("test_hot", healing=5, turns=2, id="test_hot", source=source)
+    manager.add_hot(hot)
+
+    # Verify effects were added
+    assert len(manager.dots) == 1
+    assert len(manager.hots) == 1
+    assert len(target.dots) == 1
+    assert len(target.hots) == 1
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
