@@ -7,17 +7,27 @@ from typing import Optional
 
 from plugins import PluginLoader
 
+PASSIVE_LOADER: PluginLoader | None = None
+PASSIVE_REGISTRY: dict[str, type] | None = None
+
+
+def discover() -> dict[str, type]:
+    """Load passive plugins once and return the registry."""
+    global PASSIVE_LOADER
+    global PASSIVE_REGISTRY
+
+    if PASSIVE_REGISTRY is None:
+        plugin_dir = Path(__file__).resolve().parents[1] / "plugins" / "passives"
+        PASSIVE_LOADER = PluginLoader(required=["passive"])
+        PASSIVE_LOADER.discover(str(plugin_dir))
+        PASSIVE_REGISTRY = PASSIVE_LOADER.get_plugins("passive")
+    assert PASSIVE_REGISTRY is not None
+    return PASSIVE_REGISTRY
+
 
 class PassiveRegistry:
     def __init__(self) -> None:
-        # Auto-discover passives using PluginLoader like cards and relics
-        plugin_dir = Path(__file__).resolve().parents[1] / "plugins" / "passives"
-        loader = PluginLoader(required=["passive"])
-        loader.discover(str(plugin_dir))
-
-        # Get all discovered passive plugins and index by ID
-        passive_plugins = loader.get_plugins("passive")
-        self._registry = {plugin_id: plugin_cls for plugin_id, plugin_cls in passive_plugins.items()}
+        self._registry = discover()
 
     async def trigger(self, event: str, target, **kwargs) -> None:
         """Trigger passives for a given event with optional context."""
