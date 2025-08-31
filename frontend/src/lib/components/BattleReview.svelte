@@ -934,17 +934,32 @@
               </div>
 
               <!-- Action Type Breakdown by Party -->
-              {#if summary?.damage_by_action && Object.keys(summary.damage_by_action).length > 0}
-                {@const partyActions = Object.entries(summary.damage_by_action || {})
-                  .filter(([id]) => partyDisplay.some(p => p.id === id))
+              {#if (summary?.damage_by_action || summary?.ultimate_damage_by_action) && (Object.keys(summary.damage_by_action || {}).length > 0 || Object.keys(summary.ultimate_damage_by_action || {}).length > 0)}
+                {@const allActionsByEntity = (() => {
+                  const normal = summary.damage_by_action || {};
+                  const ult = summary.ultimate_damage_by_action || {};
+                  const out = {};
+                  for (const [id, actions] of Object.entries(normal)) {
+                    out[id] = { ...actions };
+                  }
+                  for (const [id, actions] of Object.entries(ult)) {
+                    const bucket = out[id] || (out[id] = {});
+                    for (const [action, dmg] of Object.entries(actions || {})) {
+                      bucket[action] = (bucket[action] || 0) + (dmg || 0);
+                    }
+                  }
+                  return out;
+                })()}
+                {@const partyActions = Object.entries(allActionsByEntity)
+                  .filter(([id]) => (summary.party_members || []).includes(id))
                   .reduce((acc, [id, actions]) => {
                     Object.entries(actions || {}).forEach(([action, dmg]) => {
                       acc[action] = (acc[action] || 0) + (dmg || 0);
                     });
                     return acc;
                   }, {})}
-                {@const foeActions = Object.entries(summary.damage_by_action || {})
-                  .filter(([id]) => foesDisplay.some(f => f.id === id))
+                {@const foeActions = Object.entries(allActionsByEntity)
+                  .filter(([id]) => (summary.foes || []).includes(id))
                   .reduce((acc, [id, actions]) => {
                     Object.entries(actions || {}).forEach(([action, dmg]) => {
                       acc[action] = (acc[action] || 0) + (dmg || 0);
