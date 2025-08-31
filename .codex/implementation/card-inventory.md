@@ -2,7 +2,8 @@
 
 `CardInventory.svelte` lists collected cards inside a shared `MenuPanel`. The
 menu shows each card's name in a wrapped grid and displays a placeholder message
-when no cards are owned.
+when no cards are owned. The inventory can be accessed during combat to review
+collected cards and their effects.
 
 ## Testing
 - `bun test`

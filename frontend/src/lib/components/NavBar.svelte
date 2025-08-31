@@ -29,7 +29,7 @@
       <Users size={22} color="#fff" />
     </button>
     {#if runId}
-      <button class="icon-btn" title="Inventory" on:click={() => dispatch('openInventory')} disabled={battleActive}>
+      <button class="icon-btn" title="Inventory" on:click={() => dispatch('openInventory')}>
         <Package size={22} color="#fff" />
       </button>
     {/if}
