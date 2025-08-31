@@ -190,7 +190,26 @@ class EventBus:
     def subscribe(self, event: str, callback: Callable[..., Any]) -> None:
         def wrapper(*args: Any) -> None:
             try:
-                callback(*args)
+                # Adaptively match subscriber signatures:
+                # - Trim extra args when subscriber expects fewer
+                # - Pad with None for required positional params when caller sent fewer
+                sig = inspect.signature(callback)
+                params = [p for p in sig.parameters.values()
+                          if p.kind in (inspect.Parameter.POSITIONAL_ONLY,
+                                        inspect.Parameter.POSITIONAL_OR_KEYWORD)]
+                accepts_varargs = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values())
+
+                call_args = list(args)
+                if not accepts_varargs:
+                    # Trim to max positional params supported
+                    if len(call_args) > len(params):
+                        call_args = call_args[: len(params)]
+                    # Pad to required positional count with None
+                    required = [p for p in params if p.default is inspect.Parameter.empty]
+                    if len(call_args) < len(required):
+                        call_args.extend([None] * (len(required) - len(call_args)))
+
+                callback(*call_args)
             except Exception:
                 log.exception("Error in '%s' subscriber %s", event, callback)
 
