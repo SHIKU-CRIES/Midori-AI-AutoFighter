@@ -213,6 +213,10 @@ class EffectManager:
         """
         from autofighter.stats import BUS  # Import here to avoid circular imports
 
+        # Don't add effects to dead characters
+        if self.stats.hp <= 0:
+            return
+
         if max_stacks is not None:
             current = len([d for d in self.dots if d.id == effect.id])
             if current >= max_stacks:
@@ -236,6 +240,10 @@ class EffectManager:
         tick with no inherent stack cap.
         """
         from autofighter.stats import BUS  # Import here to avoid circular imports
+
+        # Don't add effects to dead characters
+        if self.stats.hp <= 0:
+            return
 
         self.hots.append(effect)
         self.stats.hots.append(effect.id)
