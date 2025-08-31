@@ -1,6 +1,5 @@
 import asyncio
 from dataclasses import dataclass
-from typing import ClassVar
 
 from autofighter.effects import DamageOverTime
 from autofighter.effects import EffectManager
