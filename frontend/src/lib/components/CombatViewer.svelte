@@ -288,6 +288,7 @@
   });
 
   function handleClose() {
+    dispatch('resumeCombat');
     dispatch('close');
   }
 
@@ -352,6 +353,7 @@
                 alt={selectedCharacter.id}
                 class="portrait-image"
                 style={`border-color: ${getElementColor(selectedCharacter.element || 'Generic')}`}
+                on:error={() => console.warn(`Failed to load image for character: ${selectedCharacter.id}`)}
               />
               <div class="character-name">{selectedCharacter.id}</div>
               <div class="character-type">
@@ -366,10 +368,10 @@
                   <label>HP:</label>
                   <span>{selectedCharacter.hp}/{selectedCharacter.max_hp || selectedCharacter.hp}</span>
                 </div>
-                {#if selectedCharacter.shield}
+                {#if selectedCharacter.shields}
                   <div class="stat">
                     <label>Shield:</label>
-                    <span>{selectedCharacter.shield}</span>
+                    <span>{selectedCharacter.shields}</span>
                   </div>
                 {/if}
               </div>
@@ -384,10 +386,68 @@
                   <label>Defense:</label>
                   <span>{selectedCharacter.defense || selectedCharacter.def || 0}</span>
                 </div>
+                {#if selectedCharacter.mitigation !== undefined}
+                  <div class="stat">
+                    <label>Mitigation:</label>
+                    <span>x{(selectedCharacter.mitigation / 100).toFixed(2)}</span>
+                  </div>
+                {/if}
                 {#if selectedCharacter.crit_rate !== undefined}
                   <div class="stat">
                     <label>Crit Rate:</label>
                     <span>{(selectedCharacter.crit_rate * 100).toFixed(1)}%</span>
+                  </div>
+                {/if}
+                {#if selectedCharacter.crit_damage !== undefined}
+                  <div class="stat">
+                    <label>Crit Damage:</label>
+                    <span>{((selectedCharacter.crit_damage - 1) * 100).toFixed(1)}%</span>
+                  </div>
+                {/if}
+                {#if selectedCharacter.effect_hit_rate !== undefined}
+                  <div class="stat">
+                    <label>Effect Hit Rate:</label>
+                    <span>{(selectedCharacter.effect_hit_rate * 100).toFixed(1)}%</span>
+                  </div>
+                {/if}
+                {#if selectedCharacter.effect_resistance !== undefined}
+                  <div class="stat">
+                    <label>Effect Resistance:</label>
+                    <span>{(selectedCharacter.effect_resistance * 100).toFixed(1)}%</span>
+                  </div>
+                {/if}
+              </div>
+
+              <div class="stat-section">
+                <h4>Action Points</h4>
+                <div class="stat">
+                  <label>AP:</label>
+                  <span>{selectedCharacter.action_points ?? 0}</span>
+                </div>
+                <div class="stat">
+                  <label>APT:</label>
+                  <span>{selectedCharacter.actions_per_turn ?? 1}</span>
+                </div>
+              </div>
+
+              <div class="stat-section">
+                <h4>Battle Performance</h4>
+                <div class="stat">
+                  <label>Damage Dealt:</label>
+                  <span>{selectedCharacter.damage_dealt ?? 0}</span>
+                </div>
+                <div class="stat">
+                  <label>Damage Taken:</label>
+                  <span>{selectedCharacter.damage_taken ?? 0}</span>
+                </div>
+                <div class="stat">
+                  <label>Kills:</label>
+                  <span>{selectedCharacter.kills ?? 0}</span>
+                </div>
+                {#if selectedCharacter.healing_done !== undefined}
+                  <div class="stat">
+                    <label>Healing Done:</label>
+                    <span>{selectedCharacter.healing_done}</span>
                   </div>
                 {/if}
               </div>
