@@ -47,8 +47,10 @@
   // but the overlay should remain visible until the player advances.
   $: rewardOpen = computeRewardOpen(roomData, battleActive);
   // Review should display after a battle finishes, once reward choices (if any) are done.
+  // Only show review when we have a valid battle_index to load summaries
   $: reviewOpen = Boolean(
-    roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive
+    roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive &&
+    typeof roomData.battle_index === 'number' && roomData.battle_index > 0
   );
 
   // Hint to pause battle snapshot polling globally while rewards are open
@@ -126,6 +128,7 @@
 {#if $overlayView === 'run-choose'}
   <PopupWindow title="Resume or Start Run" maxWidth="720px" zIndex={1300} on:close={() => dispatch('back')}>
     <RunChooser runs={$overlayData.runs || []}
+      on:choose={(e) => dispatch('loadRun', e.detail.run)}
       on:load={(e) => dispatch('loadRun', e.detail.run)}
       on:startNew={() => dispatch('startNewRun')}
     />

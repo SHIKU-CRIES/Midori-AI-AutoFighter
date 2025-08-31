@@ -449,7 +449,8 @@
         stalledTicks = 0;
       }
     } catch (err) {
-      if (err?.message?.includes('run ended') || err?.status === 404) {
+      // Treat 404 snapshot as transient (e.g., not in battle yet); don't end the run.
+      if (err?.message?.includes('run ended')) {
         handleRunEnd();
         return;
       }
@@ -548,11 +549,6 @@
         } catch {}
       }
     } catch (e) {
-      if (e?.status === 404) {
-        handleRunEnd();
-        openOverlay('error', { message: 'Run not found. Please start a new run.', traceback: '' });
-        return;
-      }
       try {
         if (haltSync || !runId) return;
         const snap = mapStatuses(await roomAction(runId, 'battle', 'snapshot'));
@@ -564,7 +560,7 @@
         if (snap.current_room) currentRoomType = snap.current_room;
         saveRunState(runId, nextRoom);
         // Avoid noisy overlays on transient 400s.
-        const simpleRecoverable = (e?.status === 400) || /not ready|awaiting next|invalid room/i.test(String(e?.message || ''));
+        const simpleRecoverable = (e?.status === 400 || e?.status === 404) || /not ready|awaiting next|invalid room|out of range/i.test(String(e?.message || ''));
         if (!simpleRecoverable) {
           openOverlay('error', {
             message: 'Failed to enter room. Restored latest battle state.',

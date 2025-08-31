@@ -13,7 +13,11 @@
 
   function loadSelected() {
     if (selected < 0 || selected >= runs.length) return;
-    dispatch('load', { run: runs[selected] });
+    const detail = { run: runs[selected] };
+    // Emit a custom event name to avoid any browser/DOM 'load' confusion,
+    // while preserving the original 'load' event for backward compatibility.
+    dispatch('choose', detail);
+    dispatch('load', detail);
   }
 
   function startNew() {
@@ -61,4 +65,3 @@
   .icon-btn:hover { background: rgba(120,180,255,0.22); }
   .icon-btn:disabled { opacity: 0.5; cursor: default; }
 </style>
-

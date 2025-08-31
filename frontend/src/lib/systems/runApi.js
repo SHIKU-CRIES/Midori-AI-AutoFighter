@@ -13,11 +13,13 @@ async function handleFetch(url, options = {}) {
       try { data = await res.json(); } catch {}
       const message = data?.message || `HTTP error ${res.status}`;
       const traceback = data?.traceback || '';
+      // Suppress global error overlays for 404s; callers may treat them as transient
       if (res.status !== 404) {
         openOverlay('error', { message, traceback });
       }
       const err = new Error(message);
       err.status = res.status;
+      // Mark as handled for both 404s (transient) and explicit overlay cases
       err.overlayShown = true;
       throw err;
     }

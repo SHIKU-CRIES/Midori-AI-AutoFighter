@@ -106,8 +106,8 @@
   );
 
   onMount(async () => {
-    // Allow battleIndex 0 (first battle). Only skip if index is null/undefined.
-    if (!runId || battleIndex == null) return;
+    // Require a positive battleIndex; avoid hammering 404s for index 0 or undefined
+    if (!runId || battleIndex == null || battleIndex <= 0) return;
     let cancelled = false;
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     async function loadWithRetry() {
