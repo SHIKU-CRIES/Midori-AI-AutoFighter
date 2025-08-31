@@ -239,6 +239,9 @@ class BattleRoom(Room):
             try:
                 fid = getattr(foe_obj, "id", None)
                 if getattr(foe_obj, "hp", 1) <= 0 and fid and fid not in credited_foe_ids:
+                    # Emit kill event
+                    BUS.emit("entity_killed", foe_obj, None, 0, "death", {"victim_type": "foe", "killer_type": "party"})
+                    
                     exp_reward += foe_obj.level * 12 + 5 * self.node.index
                     temp_rdr += 0.55
                     credited_foe_ids.add(fid)
@@ -362,8 +365,14 @@ class BattleRoom(Room):
                         proceed = True if res is None else bool(res)
                     if getattr(member, "ultimate_ready", False) and hasattr(dt, "ultimate"):
                         try:
+                            # Emit ultimate start event
+                            BUS.emit("ultimate_used", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic')})
                             await dt.ultimate(member, combat_party.members, foes)
-                        except Exception:
+                            # Emit ultimate end event
+                            BUS.emit("ultimate_completed", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic')})
+                        except Exception as e:
+                            # Emit ultimate failed event
+                            BUS.emit("ultimate_failed", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic'), "error": str(e)})
                             pass
                     if not proceed:
                         BUS.emit("action_used", member, member, 0)
@@ -524,8 +533,14 @@ class BattleRoom(Room):
                         proceed = True if res is None else bool(res)
                     if getattr(acting_foe, "ultimate_ready", False) and hasattr(dt, "ultimate"):
                         try:
+                            # Emit ultimate start event for foes
+                            BUS.emit("ultimate_used", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe"})
                             await dt.ultimate(acting_foe, foes, combat_party.members)
-                        except Exception:
+                            # Emit ultimate end event for foes
+                            BUS.emit("ultimate_completed", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe"})
+                        except Exception as e:
+                            # Emit ultimate failed event for foes
+                            BUS.emit("ultimate_failed", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe", "error": str(e)})
                             pass
                     if not proceed:
                         BUS.emit("action_used", acting_foe, acting_foe, 0)
