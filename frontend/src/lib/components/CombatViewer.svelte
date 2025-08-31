@@ -7,7 +7,7 @@
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
   import { getCatalogData } from '../systems/runApi.js';
-  import { getElementColor } from '../systems/assetLoader.js';
+  import { getElementColor, getCharacterImage } from '../systems/assetLoader.js';
 
   export let party = [];
   export let foes = [];
@@ -347,6 +347,12 @@
           <div class="preview-container">
             <div class="character-portrait" 
                  style={`--outline: ${getElementColor(selectedCharacter.element || 'Generic')};`}>
+              <img 
+                src={getCharacterImage(selectedCharacter.id)}
+                alt={selectedCharacter.id}
+                class="portrait-image"
+                style={`border-color: ${getElementColor(selectedCharacter.element || 'Generic')}`}
+              />
               <div class="character-name">{selectedCharacter.id}</div>
               <div class="character-type">
                 {selectedCharacter.type === 'player' ? 'Party Member' : 'Foe'}
@@ -615,6 +621,19 @@
       0 0 18px color-mix(in srgb, var(--outline, #888) 65%, transparent),
       0 0 36px color-mix(in srgb, var(--outline, #888) 35%, transparent);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .portrait-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid var(--outline, #555);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
   }
 
   .character-name {
