@@ -1,7 +1,7 @@
 <script>
   import GameViewport from '$lib/GameViewport.svelte';
   import { onMount } from 'svelte';
-  import { getPlayerConfig, savePlayerConfig, getBackendFlavor } from '$lib/api.js';
+  import { getPlayerConfig, savePlayerConfig, getBackendFlavor, endAllRuns } from '$lib/api.js';
   import {
     startRun,
     roomAction,
@@ -193,17 +193,25 @@
       const activeRuns = activeRunsData.runs || [];
       
       if (activeRuns.length > 0) {
-        // Resume the first active run found
-        const activeRun = activeRuns[0];
-        runId = activeRun.run_id;
-        mapRooms = activeRun.map.rooms || [];
-        currentIndex = activeRun.map.current || 0;
-        currentRoomType = mapRooms[currentIndex]?.room_type || '';
-        nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
-        saveRunState(runId, nextRoom);
-        homeOverlay();
-        await enterRoom();
-        return;
+        // If the user set a specific pressure and it differs from the existing run,
+        // end all runs to honor the new selection.
+        const existing = activeRuns[0];
+        const existingPressure = existing?.map?.rooms?.[0]?.pressure ?? 0;
+        if (Number(existingPressure) !== Number(pressure)) {
+          try { await endAllRuns(); } catch {}
+        } else {
+          // Resume the first active run found
+          const activeRun = existing;
+          runId = activeRun.run_id;
+          mapRooms = activeRun.map.rooms || [];
+          currentIndex = activeRun.map.current || 0;
+          currentRoomType = mapRooms[currentIndex]?.room_type || '';
+          nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+          saveRunState(runId, nextRoom);
+          homeOverlay();
+          await enterRoom();
+          return;
+        }
       }
     } catch (error) {
       // If checking for active runs fails, fall back to starting a new run
@@ -261,6 +269,11 @@
       attack: editorState.attack,
       defense: editorState.defense,
     });
+  }
+
+  function handleEditorChange(e) {
+    // Lightweight in-memory sync from embedded editor (damage type, etc.)
+    editorState = { ...editorState, ...e.detail };
   }
 
   async function openPulls() {
@@ -721,6 +734,7 @@
     backendFlavor={backendFlavor}
     on:startRun={handleStart}
     on:editorSave={(e) => handleEditorSave(e)}
+    on:editorChange={(e) => handleEditorChange(e)}
     on:openInventory={openInventory}
     on:openParty={handleParty}
     on:back={backOverlay}

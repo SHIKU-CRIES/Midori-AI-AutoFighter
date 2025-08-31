@@ -264,6 +264,47 @@ async def end_run(run_id: str) -> tuple[str, int, dict[str, str]]:
     return jsonify({"status": "ended"})
 
 
+@bp.delete("/runs")
+async def end_all_runs() -> tuple[str, int, dict[str, object]]:
+    """End all active runs: cancel battle tasks, clear snapshots, and delete rows."""
+    # Cancel any active battle tasks
+    cancelled = 0
+    try:
+        tasks = list(battle_tasks.items())
+        for run_id, task in tasks:
+            if task is not None and not task.done():
+                try:
+                    task.cancel()
+                    cancelled += 1
+                except Exception:
+                    pass
+        if tasks:
+            try:
+                await asyncio.sleep(0.001)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    battle_tasks.clear()
+    battle_snapshots.clear()
+
+    def delete_all():
+        with get_save_manager().connection() as conn:
+            cur = conn.execute("SELECT COUNT(*) FROM runs")
+            count = cur.fetchone()[0]
+            conn.execute("DELETE FROM runs")
+            return count
+
+    # End run logging (global)
+    try:
+        end_run_logging()
+    except Exception:
+        pass
+
+    deleted = await asyncio.to_thread(delete_all)
+    return jsonify({"status": "ended", "deleted": deleted, "cancelled_tasks": cancelled})
+
+
 @bp.post("/run/<run_id>/next")
 async def advance_room(run_id: str) -> tuple[str, int, dict[str, object]]:
     state, rooms = await asyncio.to_thread(load_map, run_id)

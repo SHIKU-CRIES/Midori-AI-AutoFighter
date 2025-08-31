@@ -58,11 +58,14 @@ export function roomLabel(type) {
 }
 
 export function roomInfo(mapRooms, currentIndex, currentRoomType, roomData) {
+  const cur = mapRooms?.[currentIndex] || null;
+  const nxt = mapRooms?.[currentIndex + 1] || null;
   return {
-    roomNumber: mapRooms?.[currentIndex]?.index ?? currentIndex ?? 0,
-    floorNumber: mapRooms?.[currentIndex]?.floor ?? 1,
+    pressure: cur?.pressure ?? roomData?.pressure ?? 0,
+    floorNumber: cur?.floor ?? 1,
+    roomNumber: cur?.index ?? currentIndex ?? 0,
     currentType: currentRoomType || roomData?.current_room || '',
-    nextType: mapRooms?.[currentIndex + 1]?.room_type || (roomData?.next_room ?? ''),
+    nextType: nxt?.room_type || (roomData?.next_room ?? ''),
   };
 }
 

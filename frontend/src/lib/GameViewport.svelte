@@ -169,7 +169,7 @@
     {#if battleActive || rewardOpen || reviewOpen}
       <div class="top-center-header">
         <div class="title-chip">
-          Room {info.roomNumber} / Floor {info.floorNumber} / {roomLabel(info.currentType)}
+          Pressure {info.pressure} / Floor {info.floorNumber} / Room {info.roomNumber} / {roomLabel(info.currentType)}
         </div>
         <div class="arrow">→</div>
         <div class="title-chip">
@@ -201,11 +201,12 @@
         {battleActive}
         {backendFlavor}
         on:saveParty={() => dispatch('saveParty')}
-        on:startRun={() => dispatch('startRun')}
+      on:startRun={(e) => dispatch('startRun', e.detail)}
         on:back={() => dispatch('back')}
-        on:rewardSelect={(e) => dispatch('rewardSelect', e.detail)}
-        on:nextRoom={() => dispatch('nextRoom')}
+      on:rewardSelect={(e) => dispatch('rewardSelect', e.detail)}
+      on:nextRoom={() => dispatch('nextRoom')}
       on:editorSave={(e) => dispatch('editorSave', e.detail)}
+      on:editorChange={(e) => dispatch('editorChange', e.detail)}
       on:saveSettings={(e) => ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } = e.detail)}
       on:endRun={() => dispatch('endRun')}
       on:shopBuy={(e) => dispatch('shopBuy', e.detail)}

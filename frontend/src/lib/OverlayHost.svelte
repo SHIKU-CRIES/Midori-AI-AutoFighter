@@ -95,6 +95,7 @@
   <OverlaySurface zIndex={1300}>
     <PartyPicker bind:selected {reducedMotion}
       on:save={() => dispatch('saveParty')}
+      on:editorChange={(e) => dispatch('editorChange', e.detail)}
       on:cancel={() => dispatch('back')}
     />
   </OverlaySurface>
@@ -133,6 +134,7 @@
     <PartyPicker bind:selected {reducedMotion}
       actionLabel="Start Run"
       on:save={(e) => dispatch('startRun', e.detail)}
+      on:editorChange={(e) => dispatch('editorChange', e.detail)}
       on:cancel={() => dispatch('back')}
     />
   </OverlaySurface>

@@ -189,24 +189,27 @@
         <StatTabs {roster} {previewId} {selected}
           on:toggle={(e) => toggleMember(e.detail)}
           on:preview-element={(e) => {
-            previewElementOverride = e.detail.element;
+            const el = e.detail.element;
+            previewElementOverride = el;
             // Also update the player's element in the roster so the left list reflects it
-            roster = roster.map(r => r.is_player ? { ...r, element: e.detail.element } : r);
+            roster = roster.map(r => r.is_player ? { ...r, element: el } : r);
+            // Bubble an editor change so top-level editorState stays in sync for Start Run
+            try { dispatch('editorChange', { damageType: el }); } catch {}
           }}
         />
-        <div class="pressure-controls">
-          <div class="pressure-label">Pressure Level</div>
-          <div class="pressure-input">
-            <button class="pressure-btn" on:click={() => pressure = Math.max(0, pressure - 1)} disabled={pressure <= 0}>
-              ◀
-            </button>
-            <span class="pressure-value">{pressure}</span>
-            <button class="pressure-btn" on:click={() => pressure = pressure + 1}>
-              ▶
-            </button>
-          </div>
-        </div>
         <div class="party-actions-inline">
+          {#if actionLabel === 'Start Run'}
+            <div class="pressure-inline" aria-label="Pressure Level Controls">
+              <span class="pressure-inline-label">Pressure</span>
+              <button class="pressure-btn" on:click={() => pressure = Math.max(0, pressure - 1)} disabled={pressure <= 0}>
+                ◀
+              </button>
+              <span class="pressure-value" data-testid="pressure-value">{pressure}</span>
+              <button class="pressure-btn" on:click={() => pressure = pressure + 1}>
+                ▶
+              </button>
+            </div>
+          {/if}
           <button class="wide" on:click={() => dispatch('save', { pressure })}>{actionLabel}</button>
           <button class="wide" on:click={() => dispatch('cancel')}>Cancel</button>
         </div>
@@ -230,19 +233,8 @@
   .right-col { display: flex; flex-direction: column; min-height: 0; }
   
   .pressure-controls { margin-top: 0.5rem; }
-  .pressure-label { 
-    display: block; 
-    color: #fff; 
-    font-size: 0.9rem; 
-    margin-bottom: 0.3rem; 
-    text-align: center;
-  }
-  .pressure-input { 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 0.5rem; 
-  }
+  .pressure-label { display: block; color: #fff; font-size: 0.9rem; margin-bottom: 0.3rem; text-align: center; }
+  .pressure-input { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
   .pressure-btn { 
     background: rgba(0,0,0,0.5); 
     border: 1px solid rgba(255,255,255,0.35); 
@@ -264,8 +256,10 @@
     min-width: 2rem; 
     text-align: center; 
   }
-  
-  .party-actions-inline { display:flex; gap:0.5rem; margin-top: 0.5rem; }
+  /* Inline row containing pressure + primary actions */
+  .party-actions-inline { display:flex; align-items:center; gap:0.5rem; margin-top: 0.5rem; }
+  .pressure-inline { display:flex; align-items:center; gap:0.4rem; padding: 0.2rem 0.4rem; }
+  .pressure-inline-label { color:#fff; opacity:0.85; font-size: 0.9rem; margin-right: 0.1rem; }
   .party-actions-inline .wide { flex: 1; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.5); color:#fff; padding: 0.45rem 0.8rem; }
 
   /* Falling starfield */

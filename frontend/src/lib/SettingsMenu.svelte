@@ -12,7 +12,8 @@
     Brain,
     Gamepad
   } from 'lucide-svelte';
-  import { endRun, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel, getBackendHealth } from './api.js';
+  import { endRun, endAllRuns, wipeData, exportSave, importSave, setAutoCraft, getGacha, getLrmConfig, setLrmModel, testLrmModel, getBackendHealth } from './api.js';
+  import { getActiveRuns } from './runApi.js';
   import { saveSettings, clearSettings, clearAllClientData } from './settingsStorage.js';
 
   const dispatch = createEventDispatcher();
@@ -144,11 +145,32 @@
         // Immediately halt any battle snapshot polling while ending the run
         try { if (typeof window !== 'undefined') window.afHaltSync = true; } catch {}
         await endRun(runId);
+        // Verify deletion; if the run persists, fall back to end-all
+        try {
+          const data = await getActiveRuns();
+          const stillActive = Array.isArray(data?.runs) && data.runs.some(r => r.run_id === runId);
+          if (stillActive) {
+            await endAllRuns();
+          }
+        } catch {}
       } catch (e) {
         console.error('Failed to end run', e);
       } finally {
         dispatch('endRun');
       }
+    }
+  }
+
+  async function handleEndAllRuns() {
+    try {
+      // Halt any polling to avoid races while clearing runs
+      try { if (typeof window !== 'undefined') window.afHaltSync = true; } catch {}
+      await endAllRuns();
+    } catch (e) {
+      console.error('Failed to end all runs', e);
+    } finally {
+      // Notify parent to refresh local run state
+      dispatch('endRun');
     }
   }
 
@@ -305,6 +327,11 @@
         <Power />
         <label>End Run</label>
         <button on:click={handleEndRun} disabled={!runId}>End</button>
+      </div>
+      <div class="control" title="End all active runs on the backend.">
+        <Power />
+        <label>End All Runs</label>
+        <button on:click={handleEndAllRuns}>End All</button>
       </div>
     </div>
   {/if}

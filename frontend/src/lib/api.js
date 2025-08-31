@@ -113,6 +113,14 @@ export async function endRun(runId) {
   );
 }
 
+export async function endAllRuns() {
+  return handleFetch(
+    `${API_BASE}/runs`,
+    { method: 'DELETE' },
+    (r) => r.ok
+  );
+}
+
 export async function wipeData() {
   return handleFetch(`${API_BASE}/save/wipe`, { method: 'POST' });
 }
