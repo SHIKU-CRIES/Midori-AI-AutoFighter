@@ -2,7 +2,7 @@
   import CurioChoice from './CurioChoice.svelte';
   import CardArt from './CardArt.svelte';
   import { onMount } from 'svelte';
-  import { getCardCatalog, getRelicCatalog } from './systems/api.js';
+  import { getCardCatalog, getRelicCatalog } from '../systems/api.js';
   export let cards = [];
   export let relics = [];
   const count = (arr) => {

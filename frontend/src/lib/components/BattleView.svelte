@@ -1,11 +1,11 @@
 <script>
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { roomAction } from '$lib';
-  import { getRandomBackground } from './systems/assetLoader.js';
-  import FighterPortrait from './battle/FighterPortrait.svelte';
-  import EnrageIndicator from './battle/EnrageIndicator.svelte';
-  import BattleLog from './battle/BattleLog.svelte';
-  import BattleEffects from './effects/BattleEffects.svelte';
+  import { getRandomBackground } from '../systems/assetLoader.js';
+  import FighterPortrait from '../battle/FighterPortrait.svelte';
+  import EnrageIndicator from '../battle/EnrageIndicator.svelte';
+  import BattleLog from '../battle/BattleLog.svelte';
+  import BattleEffects from '../effects/BattleEffects.svelte';
   export let runId = '';
   export let framerate = 60;
   export let party = [];

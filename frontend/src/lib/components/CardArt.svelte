@@ -6,8 +6,8 @@
   export let hideFallback = false;
   // When true, suppress ambient marks and border twinkles for cleaner embedding (e.g., shop)
   export let quiet = false;
-  import { getHourlyBackground } from './systems/assetLoader.js';
-  import { getGlyphArt } from './systems/rewardLoader.js';
+  import { getHourlyBackground } from '../systems/assetLoader.js';
+  import { getGlyphArt } from '../systems/rewardLoader.js';
   const starColors = {
     1: '#808080',  // gray
     2: '#1E90FF',  // blue

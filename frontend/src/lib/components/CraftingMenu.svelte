@@ -1,9 +1,9 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
 
-  import { getGacha, setAutoCraft, craftItems } from './systems/api.js';
+  import { getGacha, setAutoCraft, craftItems } from '../systems/api.js';
   import MenuPanel from './MenuPanel.svelte';
-  import { stackItems, formatName } from './systems/craftingUtils.js';
+  import { stackItems, formatName } from '../systems/craftingUtils.js';
 
   const rawIconModules = import.meta.glob('./assets/items/*/*.png', {
     eager: true,

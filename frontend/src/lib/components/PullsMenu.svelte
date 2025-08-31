@@ -2,9 +2,9 @@
   import { onMount } from 'svelte';
   import { createEventDispatcher } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
-  import { getGacha, pullGacha } from './systems/api.js';
+  import { getGacha, pullGacha } from '../systems/api.js';
   import { browser, dev } from '$app/environment';
-  import { openOverlay } from './systems/OverlayController.js';
+  import { openOverlay } from '../systems/OverlayController.js';
   const dispatch = createEventDispatcher();
   let pity = 0;
   let items = {};

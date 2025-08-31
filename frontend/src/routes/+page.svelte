@@ -1,5 +1,5 @@
 <script>
-  import GameViewport from '$lib/GameViewport.svelte';
+  import GameViewport from '$lib/components/GameViewport.svelte';
   import { onMount } from 'svelte';
   import { 
     getPlayerConfig, 
@@ -22,7 +22,7 @@
     backOverlay, 
     homeOverlay
   } from '$lib';
-  import { buildRunMenu } from '$lib/RunButtons.svelte';
+  import { buildRunMenu } from '$lib/components/RunButtons.svelte';
   import { browser, dev } from '$app/environment';
 
   let runId = '';

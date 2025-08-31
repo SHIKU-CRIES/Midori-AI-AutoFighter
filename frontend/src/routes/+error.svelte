@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import OverlayHost from '$lib/OverlayHost.svelte';
+  import OverlayHost from '$lib/components/OverlayHost.svelte';
   import { openOverlay, homeOverlay } from '$lib';
 
   // SvelteKit provides `error` and `status` to +error.svelte

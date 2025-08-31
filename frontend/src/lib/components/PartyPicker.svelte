@@ -1,8 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { createEventDispatcher } from 'svelte';
-  import { getPlayers } from './systems/api.js';
-  import { getCharacterImage, getHourlyBackground, getRandomFallback, getElementColor } from './systems/assetLoader.js';
+  import { getPlayers } from '../systems/api.js';
+  import { getCharacterImage, getHourlyBackground, getRandomFallback, getElementColor } from '../systems/assetLoader.js';
   import MenuPanel from './MenuPanel.svelte';
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';

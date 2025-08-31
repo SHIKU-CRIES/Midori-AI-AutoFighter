@@ -1,19 +1,19 @@
 // place files you want to import through the `$lib` alias in this folder.
 
-export { default as PartyPicker } from './PartyPicker.svelte';
-export { default as PlayerEditor } from './PlayerEditor.svelte';
-export { default as InventoryPanel } from './InventoryPanel.svelte';
-export { default as RoomView } from './RoomView.svelte';
-export { default as OverlaySurface } from './OverlaySurface.svelte';
-export { default as SettingsMenu } from './SettingsMenu.svelte';
-export { default as CardInventory } from './CardInventory.svelte';
-export { default as RelicInventory } from './RelicInventory.svelte';
-export { default as BattleView } from './BattleView.svelte';
-export { default as RestRoom } from './RestRoom.svelte';
-export { default as ShopMenu } from './ShopMenu.svelte';
-export { default as CraftingMenu } from './CraftingMenu.svelte';
-export { default as RewardOverlay } from './RewardOverlay.svelte';
-export { default as PopupWindow } from './PopupWindow.svelte';
+export { default as PartyPicker } from './components/PartyPicker.svelte';
+export { default as PlayerEditor } from './components/PlayerEditor.svelte';
+export { default as InventoryPanel } from './components/InventoryPanel.svelte';
+export { default as RoomView } from './components/RoomView.svelte';
+export { default as OverlaySurface } from './components/OverlaySurface.svelte';
+export { default as SettingsMenu } from './components/SettingsMenu.svelte';
+export { default as CardInventory } from './components/CardInventory.svelte';
+export { default as RelicInventory } from './components/RelicInventory.svelte';
+export { default as BattleView } from './components/BattleView.svelte';
+export { default as RestRoom } from './components/RestRoom.svelte';
+export { default as ShopMenu } from './components/ShopMenu.svelte';
+export { default as CraftingMenu } from './components/CraftingMenu.svelte';
+export { default as RewardOverlay } from './components/RewardOverlay.svelte';
+export { default as PopupWindow } from './components/PopupWindow.svelte';
 export { layoutForWidth } from './systems/layout.js';
 export {
   startRun,
@@ -22,8 +22,8 @@ export {
   chooseCard,
   chooseRelic
 } from './systems/runApi.js';
-export { default as NavBar } from './NavBar.svelte';
-export { default as OverlayHost } from './OverlayHost.svelte';
+export { default as NavBar } from './components/NavBar.svelte';
+export { default as OverlayHost } from './components/OverlayHost.svelte';
 export {
   overlayView,
   openOverlay,
