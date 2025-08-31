@@ -78,9 +78,12 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
                         cards=party.cards,
                         rdr=party.rdr,
                     )
-                    # Restart the battle task
+                    # Restart the battle task with proper arguments/signature
+                    async def progress(snapshot: dict[str, dict | list]) -> None:
+                        battle_snapshots[run_id] = snapshot
+
                     task = asyncio.create_task(
-                        _run_battle(run_id, room, combat_party, foes)
+                        _run_battle(run_id, room, foes, combat_party, {}, state, rooms, progress)
                     )
                     battle_tasks[run_id] = task
         return jsonify({"result": "resumed"})

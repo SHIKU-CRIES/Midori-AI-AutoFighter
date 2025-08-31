@@ -4,10 +4,12 @@
   Shows character lists, stats, and status effects in a 3-part layout.
 -->
 <script>
-  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
   import { getCatalogData } from '../systems/runApi.js';
   import { getElementColor, getCharacterImage } from '../systems/assetLoader.js';
+  import PartyRoster from './PartyRoster.svelte';
+  import PlayerPreview from './PlayerPreview.svelte';
 
   export let party = [];
   export let foes = [];
@@ -30,6 +32,23 @@
     ...party.map(p => ({ ...p, type: 'player', element: p.element || p.damage_type || 'Generic' })),
     ...foes.map(f => ({ ...f, type: 'foe', element: f.element || f.damage_type || 'Generic' }))
   ];
+
+  // Build a roster compatible with PartyRoster (read-only)
+  $: viewerRoster = allCharacters.map(c => ({
+    id: c.id,
+    name: c.name || c.id,
+    img: getCharacterImage(c.id, c.type === 'player'),
+    owned: c.type === 'player',
+    is_player: c.type === 'player',
+    element: (typeof c.element === 'string' ? c.element : (c.element?.id || 'Generic')),
+    stats: {
+      level: c.level ?? 1,
+      hp: c.hp,
+      max_hp: c.max_hp ?? c.hp,
+      atk: c.attack ?? c.atk ?? 0,
+      defense: c.defense ?? c.def ?? 0,
+    }
+  }));
 
   $: selectedCharacter = allCharacters.find(c => c.id === selectedCharacterId) || allCharacters[0];
 
@@ -271,11 +290,8 @@
     return details;
   }
 
-  // Handle pause when component mounts
+  // Load catalog data on mount (no auto pause/resume)
   onMount(async () => {
-    dispatch('pauseCombat');
-    
-    // Load catalog data
     try {
       catalogData = await getCatalogData();
     } catch (error) {
@@ -283,12 +299,7 @@
     }
   });
 
-  onDestroy(() => {
-    dispatch('resumeCombat');
-  });
-
   function handleClose() {
-    dispatch('resumeCombat');
     dispatch('close');
   }
 
@@ -305,171 +316,146 @@
     </div>
     
     <div class="viewer-content">
-      <!-- Left panel: Character list (like PartyRoster) -->
+      <!-- Left panel: Use PartyRoster styling (read-only) -->
       <div class="character-roster">
-        <div class="character-section">
-          <h4>Party</h4>
-          {#each party as character}
-            <button 
-              class="char-row" 
-              class:selected={selectedCharacterId === character.id}
-              style={`border-color: ${getElementColor(character.element || character.damage_type || 'Generic')}; --el-color: ${getElementColor(character.element || character.damage_type || 'Generic')};`}
-              on:click={() => selectCharacter(character.id)}
-            >
-              <div class="row-name">{character.id}</div>
-              <div class="row-stats">
-                HP: {character.hp}/{character.max_hp || character.hp}
-              </div>
-            </button>
-          {/each}
+        <div class="roster-section">
+          <h4 class="roster-title">Party</h4>
+          <PartyRoster
+            roster={viewerRoster.filter(r => r.is_player)}
+            selected={[selectedCharacterId].filter(Boolean)}
+            bind:previewId={selectedCharacterId}
+            reducedMotion={true}
+            on:toggle={() => { /* read-only: suppress */ }}
+          />
         </div>
-
-        <div class="character-section">
-          <h4>Foes</h4>
-          {#each foes as character}
-            <button 
-              class="char-row" 
-              class:selected={selectedCharacterId === character.id}
-              style={`border-color: ${getElementColor(character.element || character.damage_type || 'Generic')}; --el-color: ${getElementColor(character.element || character.damage_type || 'Generic')};`}
-              on:click={() => selectCharacter(character.id)}
-            >
-              <div class="row-name">{character.id}</div>
-              <div class="row-stats">
-                HP: {character.hp}/{character.max_hp || character.hp}
-              </div>
-            </button>
-          {/each}
+        <div class="roster-section">
+          <h4 class="roster-title">Foes</h4>
+          <PartyRoster
+            roster={viewerRoster.filter(r => !r.is_player)}
+            selected={[selectedCharacterId].filter(Boolean)}
+            bind:previewId={selectedCharacterId}
+            reducedMotion={true}
+            on:toggle={() => { /* read-only: suppress */ }}
+          />
         </div>
       </div>
 
-      <!-- Center panel: Character portrait (like PlayerPreview) -->
+      <!-- Center panel: Big portrait (use PlayerPreview from Party menu) -->
       <div class="character-preview">
+        <PlayerPreview roster={viewerRoster} previewId={selectedCharacterId} />
+      </div>
+
+      <!-- Right panel: Stats + Status effects tabs -->
+      <div class="status-effects">
         {#if selectedCharacter}
-          <div class="preview-container">
-            <div class="character-portrait" 
-                 style={`--outline: ${getElementColor(selectedCharacter.element || 'Generic')};`}>
-              <img 
-                src={getCharacterImage(selectedCharacter.id)}
-                alt={selectedCharacter.id}
-                class="portrait-image"
-                style={`border-color: ${getElementColor(selectedCharacter.element || 'Generic')}`}
-                on:error={() => console.warn(`Failed to load image for character: ${selectedCharacter.id}`)}
-              />
-              <div class="character-name">{selectedCharacter.id}</div>
-              <div class="character-type">
-                {selectedCharacter.type === 'player' ? 'Party Member' : 'Foe'}
+          <div class="stats-grid">
+            <div class="stat-section">
+              <h4>Health</h4>
+              <div class="stat">
+                <label>HP:</label>
+                <span>{selectedCharacter.hp}/{selectedCharacter.max_hp || selectedCharacter.hp}</span>
+              </div>
+              {#if selectedCharacter.shields}
+                <div class="stat">
+                  <label>Shield:</label>
+                  <span>{selectedCharacter.shields}</span>
+                </div>
+              {/if}
+            </div>
+
+            <div class="stat-section">
+              <h4>Combat Stats</h4>
+              <div class="stat">
+                <label>Attack:</label>
+                <span>{selectedCharacter.attack || selectedCharacter.atk || 0}</span>
+              </div>
+              <div class="stat">
+                <label>Defense:</label>
+                <span>{selectedCharacter.defense || selectedCharacter.def || 0}</span>
+              </div>
+              {#if selectedCharacter.mitigation !== undefined}
+                <div class="stat">
+                  <label>Mitigation:</label>
+                  <span>x{Number(selectedCharacter.mitigation ?? 1).toFixed(2)}</span>
+                </div>
+              {/if}
+              {#if selectedCharacter.vitality !== undefined}
+                <div class="stat">
+                  <label>Vitality:</label>
+                  <span>x{Number(selectedCharacter.vitality ?? 1).toFixed(2)}</span>
+                </div>
+              {/if}
+              {#if selectedCharacter.crit_rate !== undefined}
+                <div class="stat">
+                  <label>Crit Rate:</label>
+                  <span>{(selectedCharacter.crit_rate * 100).toFixed(1)}%</span>
+                </div>
+              {/if}
+              {#if selectedCharacter.crit_damage !== undefined}
+                <div class="stat">
+                  <label>Crit Damage:</label>
+                  <span>{((selectedCharacter.crit_damage - 1) * 100).toFixed(1)}%</span>
+                </div>
+              {/if}
+              {#if selectedCharacter.effect_hit_rate !== undefined}
+                <div class="stat">
+                  <label>Effect Hit Rate:</label>
+                  <span>{(selectedCharacter.effect_hit_rate * 100).toFixed(1)}%</span>
+                </div>
+              {/if}
+              {#if selectedCharacter.effect_resistance !== undefined}
+                <div class="stat">
+                  <label>Effect Resistance:</label>
+                  <span>{(selectedCharacter.effect_resistance * 100).toFixed(1)}%</span>
+                </div>
+              {/if}
+            </div>
+
+            <div class="stat-section">
+              <h4>Action Points</h4>
+              <div class="stat">
+                <label>AP:</label>
+                <span>{selectedCharacter.action_points ?? 0}</span>
+              </div>
+              <div class="stat">
+                <label>APT:</label>
+                <span>{selectedCharacter.actions_per_turn ?? 1}</span>
               </div>
             </div>
-            
-            <div class="stats-grid">
-              <div class="stat-section">
-                <h4>Health</h4>
-                <div class="stat">
-                  <label>HP:</label>
-                  <span>{selectedCharacter.hp}/{selectedCharacter.max_hp || selectedCharacter.hp}</span>
-                </div>
-                {#if selectedCharacter.shields}
-                  <div class="stat">
-                    <label>Shield:</label>
-                    <span>{selectedCharacter.shields}</span>
-                  </div>
-                {/if}
-              </div>
 
-              <div class="stat-section">
-                <h4>Combat Stats</h4>
-                <div class="stat">
-                  <label>Attack:</label>
-                  <span>{selectedCharacter.attack || selectedCharacter.atk || 0}</span>
-                </div>
-                <div class="stat">
-                  <label>Defense:</label>
-                  <span>{selectedCharacter.defense || selectedCharacter.def || 0}</span>
-                </div>
-                {#if selectedCharacter.mitigation !== undefined}
-                  <div class="stat">
-                    <label>Mitigation:</label>
-                    <span>x{(selectedCharacter.mitigation / 100).toFixed(2)}</span>
-                  </div>
-                {/if}
-                {#if selectedCharacter.crit_rate !== undefined}
-                  <div class="stat">
-                    <label>Crit Rate:</label>
-                    <span>{(selectedCharacter.crit_rate * 100).toFixed(1)}%</span>
-                  </div>
-                {/if}
-                {#if selectedCharacter.crit_damage !== undefined}
-                  <div class="stat">
-                    <label>Crit Damage:</label>
-                    <span>{((selectedCharacter.crit_damage - 1) * 100).toFixed(1)}%</span>
-                  </div>
-                {/if}
-                {#if selectedCharacter.effect_hit_rate !== undefined}
-                  <div class="stat">
-                    <label>Effect Hit Rate:</label>
-                    <span>{(selectedCharacter.effect_hit_rate * 100).toFixed(1)}%</span>
-                  </div>
-                {/if}
-                {#if selectedCharacter.effect_resistance !== undefined}
-                  <div class="stat">
-                    <label>Effect Resistance:</label>
-                    <span>{(selectedCharacter.effect_resistance * 100).toFixed(1)}%</span>
-                  </div>
-                {/if}
+            <div class="stat-section">
+              <h4>Battle Performance</h4>
+              <div class="stat">
+                <label>Damage Dealt:</label>
+                <span>{selectedCharacter.damage_dealt ?? 0}</span>
               </div>
-
-              <div class="stat-section">
-                <h4>Action Points</h4>
-                <div class="stat">
-                  <label>AP:</label>
-                  <span>{selectedCharacter.action_points ?? 0}</span>
-                </div>
-                <div class="stat">
-                  <label>APT:</label>
-                  <span>{selectedCharacter.actions_per_turn ?? 1}</span>
-                </div>
+              <div class="stat">
+                <label>Damage Taken:</label>
+                <span>{selectedCharacter.damage_taken ?? 0}</span>
               </div>
-
-              <div class="stat-section">
-                <h4>Battle Performance</h4>
-                <div class="stat">
-                  <label>Damage Dealt:</label>
-                  <span>{selectedCharacter.damage_dealt ?? 0}</span>
-                </div>
-                <div class="stat">
-                  <label>Damage Taken:</label>
-                  <span>{selectedCharacter.damage_taken ?? 0}</span>
-                </div>
-                <div class="stat">
-                  <label>Kills:</label>
-                  <span>{selectedCharacter.kills ?? 0}</span>
-                </div>
-                {#if selectedCharacter.healing_done !== undefined}
-                  <div class="stat">
-                    <label>Healing Done:</label>
-                    <span>{selectedCharacter.healing_done}</span>
-                  </div>
-                {/if}
+              <div class="stat">
+                <label>Kills:</label>
+                <span>{selectedCharacter.kills ?? 0}</span>
               </div>
-
-              <div class="stat-section">
-                <h4>Element</h4>
+              {#if selectedCharacter.healing_done !== undefined}
                 <div class="stat">
-                  <label>Type:</label>
-                  <span class="element-type" style={`color: ${getElementColor(selectedCharacter.element || 'Generic')}`}>
-                    {selectedCharacter.element || selectedCharacter.damage_type || 'Generic'}
-                  </span>
+                  <label>Healing Done:</label>
+                  <span>{selectedCharacter.healing_done}</span>
                 </div>
+              {/if}
+            </div>
+
+            <div class="stat-section">
+              <h4>Element</h4>
+              <div class="stat">
+                <label>Type:</label>
+                <span class="element-type" style={`color: ${getElementColor(selectedCharacter.element || 'Generic')}`}>
+                  {selectedCharacter.element || selectedCharacter.damage_type || 'Generic'}
+                </span>
               </div>
             </div>
           </div>
-        {:else}
-          <div class="placeholder">Select a character to view details</div>
         {/if}
-      </div>
-
-      <!-- Right panel: Status effects tabs -->
-      <div class="status-effects">
         <div class="tab-header">
           {#each tabs as tab}
             <button 
@@ -518,6 +504,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* prevent whole viewer from scrolling */
   }
 
   .viewer-header {
@@ -540,6 +527,8 @@
   .viewer-content {
     display: grid;
     grid-template-columns: minmax(8rem, 22%) 1fr minmax(12rem, 26%);
+    height: 100%;
+    min-height: 0; /* allow inner columns to control scrolling */
     flex: 1;
     width: 100%;
     max-height: 98%;
@@ -556,6 +545,14 @@
     height: 100%;
     overflow-y: auto;
     min-width: 0;
+  }
+
+  .roster-section { margin-bottom: 0.5rem; }
+  .roster-title {
+    margin: 0.25rem 0 0.35rem 0.1rem;
+    color: #fff;
+    font-size: 0.9rem;
+    opacity: 0.85;
   }
 
   .character-section {
@@ -662,7 +659,7 @@
     box-sizing: border-box;
     min-width: 0;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden; /* center column stays fixed; no scroll here */
   }
 
   .preview-container {
@@ -770,6 +767,9 @@
     flex-direction: column;
     min-height: 0;
     padding: 0.4rem;
+    gap: 0.6rem;
+    height: 100%;
+    overflow-y: auto; /* scroll independently from center portrait */
   }
 
   .tab-header {
