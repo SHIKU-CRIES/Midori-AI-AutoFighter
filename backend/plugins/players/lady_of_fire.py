@@ -13,3 +13,4 @@ class LadyOfFire(PlayerBase):
     name = "LadyOfFire"
     char_type = CharacterType.B
     damage_type: DamageTypeBase = field(default_factory=Fire)
+    passives: list[str] = field(default_factory=lambda: ["lady_of_fire_infernal_momentum"])

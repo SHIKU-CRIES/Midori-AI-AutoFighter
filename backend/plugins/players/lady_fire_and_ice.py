@@ -16,3 +16,4 @@ class LadyFireAndIce(PlayerBase):
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("LadyFireAndIce")
     )
+    passives: list[str] = field(default_factory=lambda: ["lady_fire_and_ice_duality_engine"])

@@ -17,4 +17,5 @@ class Carly(PlayerBase):
     stat_gain_map: dict[str, str] = field(
         default_factory=lambda: {"atk": "defense"}
     )
+    passives: list[str] = field(default_factory=lambda: ["carly_guardians_aegis"])
 
