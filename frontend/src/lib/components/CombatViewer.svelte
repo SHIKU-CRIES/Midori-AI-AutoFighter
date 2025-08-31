@@ -690,10 +690,12 @@
   .portrait-image {
     width: 120px;
     height: 120px;
-    object-fit: cover;
+    object-fit: contain;
     border: 3px solid var(--outline, #555);
     border-radius: 8px;
     margin-bottom: 0.5rem;
+    background: #222;
+    display: block;
   }
 
   .character-name {
