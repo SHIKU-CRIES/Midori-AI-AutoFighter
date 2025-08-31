@@ -2,25 +2,28 @@
 // Vite statically analyzes these calls to inline the module map.
 const cardModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/cards/*/*.png', {
+    import.meta.glob('../assets/cards/*/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   )
 );
 const relicModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/relics/*/*.png', {
+    import.meta.glob('../assets/relics/*/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   )
 );
 const itemModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/items/*/*.png', {
+    import.meta.glob('../assets/items/*/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   )
 );
@@ -55,15 +58,15 @@ function prepare(mods, fallback, useFolder = false) {
 
 // Prefer gray default background art for missing card images
 const defaultCardFallback = new URL(
-  './assets/cards/gray/bg_attack_default_gray2.png',
+  '../assets/cards/gray/bg_attack_default_gray2.png',
   import.meta.url
 ).href;
 const defaultRelicFallback = new URL(
-  './assets/relics/fallback/placeholder.png',
+  '../assets/relics/fallback/placeholder.png',
   import.meta.url
 ).href;
 const defaultItemFallback = new URL(
-  './assets/items/generic/generic1.png',
+  '../assets/items/generic/generic1.png',
   import.meta.url
 ).href;
 
@@ -73,23 +76,25 @@ export const itemArt = prepare(itemModules, defaultItemFallback);
 
 // Optional glyph background art drop-ins:
 // Place files at:
-//  - ./assets/cards/Art/<id>.png
-//  - ./assets/relics/Art/<id>.png
+//  - ../assets/cards/Art/<id>.png
+//  - ../assets/relics/Art/<id>.png
 // where <id> can be exact id (e.g., `pocket_manual.png`) or a compacted
 // variant (e.g., `pocketmanual.png`). We match both id and name variants.
 const cardGlyphModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/cards/Art/*.png', {
+    import.meta.glob('../assets/cards/Art/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   )
 );
 const relicGlyphModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/relics/Art/*.png', {
+    import.meta.glob('../assets/relics/Art/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   )
 );

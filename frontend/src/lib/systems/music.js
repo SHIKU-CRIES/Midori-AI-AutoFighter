@@ -1,9 +1,10 @@
 // Music loader for background tracks
 // Tracks are provided by the lead developer in ./assets/music
 
-const musicModules = import.meta.glob('./assets/music/*', {
+const musicModules = import.meta.glob('../assets/music/*', {
   eager: true,
-  as: 'url'
+  import: 'default',
+  query: '?url'
 });
 
 export function getMusicTracks() {

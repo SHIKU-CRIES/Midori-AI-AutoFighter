@@ -20,27 +20,30 @@ function normalizeUrl(src) {
 // statically analyze these calls to inline the module map at build time.
 const characterModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/characters/**/*.png', {
+    import.meta.glob('../assets/characters/**/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   ).map(([p, src]) => [p, normalizeUrl(src)])
 );
 
 const fallbackModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/characters/fallbacks/*.png', {
+    import.meta.glob('../assets/characters/fallbacks/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   ).map(([p, src]) => [p, normalizeUrl(src)])
 );
 
 const backgroundModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/backgrounds/*.png', {
+    import.meta.glob('../assets/backgrounds/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   ).map(([p, src]) => [p, normalizeUrl(src)])
 );
@@ -48,9 +51,10 @@ const backgroundModules = Object.fromEntries(
 // Load DoT icons by element folder (e.g., ./assets/dots/fire/*.png)
 const dotModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/dots/*/*.png', {
+    import.meta.glob('../assets/dots/*/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   ).map(([p, src]) => [p, normalizeUrl(src)])
 );
@@ -58,9 +62,10 @@ const dotModules = Object.fromEntries(
 // Load effect icons by type folder (e.g., ./assets/effects/buffs/*.png)
 const effectModules = Object.fromEntries(
   Object.entries(
-    import.meta.glob('./assets/effects/*/*.png', {
+    import.meta.glob('../assets/effects/*/*.png', {
       eager: true,
-      as: 'url'
+      import: 'default',
+      query: '?url'
     })
   ).map(([p, src]) => [p, normalizeUrl(src)])
 );
@@ -89,14 +94,14 @@ const ELEMENT_COLORS = {
 const characterAssets = {};
 const fallbackAssets = Object.values(fallbackModules);
 const backgroundAssets = Object.values(backgroundModules);
-const defaultFallback = normalizeUrl('./assets/midoriai-logo.png');
-const DOT_DEFAULT = normalizeUrl('./assets/dots/generic/generic1.png');
-const EFFECT_DEFAULT = normalizeUrl('./assets/effects/buffs/generic_buff.png');
+const defaultFallback = normalizeUrl('../assets/midoriai-logo.png');
+const DOT_DEFAULT = normalizeUrl('../assets/dots/generic/generic1.png');
+const EFFECT_DEFAULT = normalizeUrl('../assets/effects/buffs/generic_buff.png');
 
 // Organize character assets by character ID (folder or single file)
 Object.keys(characterModules).forEach(p => {
-  const match = p.match(/\.\/assets\/characters\/(.+?)\/(.+?)\.png$/) ||
-                p.match(/\.\/assets\/characters\/(.+?)\.png$/);
+  const match = p.match(/assets\/characters\/(.+?)\/(.+?)\.png$/) ||
+                p.match(/assets\/characters\/(.+?)\.png$/);
   
   if (match) {
     const [, charId, fileName] = match;
@@ -207,7 +212,7 @@ const dotAssets = (() => {
     generic: []
   };
   for (const [p, url] of Object.entries(dotModules)) {
-    const m = p.match(/\.\/assets\/dots\/(\w+)\//);
+    const m = p.match(/assets\/dots\/(\w+)\//);
     const key = (m?.[1] || 'generic').toLowerCase();
     if (!map[key]) map[key] = [];
     map[key].push(url);
@@ -222,7 +227,7 @@ const effectAssets = (() => {
     debuffs: {}
   };
   for (const [p, url] of Object.entries(effectModules)) {
-    const m = p.match(/\.\/assets\/effects\/(\w+)\/(\w+)\.png$/);
+    const m = p.match(/assets\/effects\/(\w+)\/(\w+)\.png$/);
     if (m) {
       const [, type, name] = m;
       const effectType = type.toLowerCase();

@@ -5,7 +5,7 @@
   import MenuPanel from './MenuPanel.svelte';
   import { stackItems, formatName } from '../systems/craftingUtils.js';
 
-  const rawIconModules = import.meta.glob('./assets/items/*/*.png', {
+  const rawIconModules = import.meta.glob('../assets/items/*/*.png', {
     eager: true,
     import: 'default',
     query: '?url'
@@ -14,7 +14,7 @@
     Object.entries(rawIconModules).map(([path, src]) => [path, new URL(src, import.meta.url).href])
   );
   // Use a stable item placeholder instead of card placeholder
-  const fallbackIcon = new URL('./assets/items/generic/generic1.png', import.meta.url).href;
+  const fallbackIcon = new URL('../assets/items/generic/generic1.png', import.meta.url).href;
 
   const starColors = {
     1: '#808080',  // gray
@@ -36,18 +36,18 @@
     const rank = String(rawRank || '').replace(/[^0-9]/g, '') || '1';
 
     // 1) Prefer a rank-specific file in the element folder: `${rank}.png`
-    const rankPath = `./assets/items/${element}/${rank}.png`;
+    const rankPath = `../assets/items/${element}/${rank}.png`;
     if (iconModules[rankPath]) return iconModules[rankPath];
 
     // 2) Otherwise, use any file from the element folder (prefer `generic{rank}.png`)
-    const elementPrefix = `./assets/items/${element}/`;
+    const elementPrefix = `../assets/items/${element}/`;
     const elementKeys = Object.keys(iconModules).filter((p) => p.startsWith(elementPrefix));
     const genericRankPath = `${elementPrefix}generic${rank}.png`;
     if (iconModules[genericRankPath]) return iconModules[genericRankPath];
     if (elementKeys.length > 0) return iconModules[elementKeys[0]];
 
     // 3) Finally, try the generic rank file, then the static fallback icon
-    const genericPath = `./assets/items/generic/generic${rank}.png`;
+    const genericPath = `../assets/items/generic/generic${rank}.png`;
     return iconModules[genericPath] || fallbackIcon;
   }
 
