@@ -106,15 +106,39 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     except Exception:
         pass
     if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
+        # If we have a recent snapshot, return it
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return jsonify(snap)
-        return jsonify({"error": "run ended or room out of range"}), 404
+        # Otherwise, indicate awaiting_next so clients can advance the run
+        current_idx = int(state.get("current", 0))
+        current_room = rooms[-1].room_type if rooms else None
+        payload = {
+            "result": "battle",
+            "awaiting_next": True,
+            "current_index": current_idx,
+            "current_room": current_room,
+            "next_room": None,
+        }
+        return jsonify(payload)
     node = rooms[state["current"]]
     if node.room_type not in {"battle-weak", "battle-normal"}:
         return jsonify({"error": "invalid room"}), 400
     if state.get("awaiting_next"):
-        return jsonify({"error": "awaiting next"}), 400
+        next_type = (
+            rooms[state["current"] + 1].room_type
+            if state["current"] + 1 < len(rooms)
+            else None
+        )
+        payload = {
+            "result": "battle",
+            "awaiting_next": True,
+            "current_index": state.get("current", 0),
+            "current_room": node.room_type,
+        }
+        if next_type is not None:
+            payload["next_room"] = next_type
+        return jsonify(payload)
     if state.get("awaiting_card") or state.get("awaiting_relic"):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
@@ -285,7 +309,20 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     if node.room_type != "battle-boss-floor":
         return jsonify({"error": "invalid room"}), 400
     if state.get("awaiting_next"):
-        return jsonify({"error": "awaiting next"}), 400
+        next_type = (
+            rooms[state["current"] + 1].room_type
+            if state["current"] + 1 < len(rooms)
+            else None
+        )
+        payload = {
+            "result": "boss",
+            "awaiting_next": True,
+            "current_index": state.get("current", 0),
+            "current_room": node.room_type,
+        }
+        if next_type is not None:
+            payload["next_room"] = next_type
+        return jsonify(payload)
     if state.get("awaiting_card") or state.get("awaiting_relic"):
         snap = battle_snapshots.get(run_id)
         if snap is not None:

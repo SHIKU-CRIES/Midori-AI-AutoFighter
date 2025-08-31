@@ -421,6 +421,12 @@
           if (snap?.ended && snap?.result === 'defeat') {
             handleDefeat();
           }
+          // Auto-advance if awaiting_next without any reward choices present
+          try {
+            if (!rewardsReady && snap?.awaiting_next && runId) {
+              await handleNextRoom();
+            }
+          } catch {}
           // Do not auto-advance; show Battle Review popup after rewards.
           return;
         }
@@ -493,6 +499,14 @@
           stopBattlePoll();
           return;
         }
+        // If backend reports awaiting_next without choices, force-advance
+        try {
+          const noChoices = ((data?.card_choices?.length || 0) === 0) && ((data?.relic_choices?.length || 0) === 0);
+          if (data?.awaiting_next && noChoices && runId) {
+            await handleNextRoom();
+            return;
+          }
+        } catch {}
         // Do not auto-advance; allow Battle Review popup to appear.
         const noFoes = !Array.isArray(data?.foes) || data.foes.length === 0;
         if (noFoes) {
@@ -735,6 +749,34 @@
       }
     }
   }
+
+  async function handleForceNextRoom() {
+    if (!runId) return;
+    // Force-advance regardless of current overlay/state; safety for stuck awaiting_next
+    haltSync = false;
+    if (typeof window !== 'undefined') window.afHaltSync = false;
+    // Clear current snapshot to avoid stale gating
+    roomData = null;
+    battleActive = false;
+    stopBattlePoll();
+    try {
+      const res = await advanceRoom(runId);
+      if (res && typeof res.current_index === 'number') {
+        currentIndex = res.current_index;
+        if (res.next_room) currentRoomType = res.next_room;
+        const mapData = await getMap(runId);
+        if (mapData?.map?.rooms) {
+          mapRooms = mapData.map.rooms;
+          currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType;
+        }
+      }
+      if (res && res.next_room) nextRoom = res.next_room;
+      await enterRoom();
+    } catch (e) {
+      // Surface via overlay for visibility
+      openOverlay('error', { message: 'Failed to force-advance room.', traceback: (e && e.stack) || '' });
+    }
+  }
   let items = [];
   $: items = buildRunMenu(
     {
@@ -825,6 +867,7 @@
     on:restLeave={handleRestLeave}
     on:nextRoom={handleNextRoom}
     on:endRun={handleRunEnd}
+    on:forceNextRoom={handleForceNextRoom}
     on:saveParty={handlePartySave}
     on:error={(e) => openOverlay('error', e.detail)}
   />

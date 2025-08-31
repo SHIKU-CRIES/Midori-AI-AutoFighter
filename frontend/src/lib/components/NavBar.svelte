@@ -12,6 +12,28 @@
   export let snapshotLoading = false;
   export let runId = '';
   const dispatch = createEventDispatcher();
+
+  let longPressTimer = null;
+  let longPressTriggered = false;
+
+  function handleHomePointerDown() {
+    longPressTriggered = false;
+    clearTimeout(longPressTimer);
+    // Long-press after 800ms triggers force-next-room safety
+    longPressTimer = setTimeout(() => {
+      longPressTriggered = true;
+      dispatch('forceNextRoom');
+    }, 800);
+  }
+
+  function handleHomePointerUp() {
+    clearTimeout(longPressTimer);
+  }
+
+  function handleHomeClick() {
+    if (longPressTriggered) return; // suppress normal home on long-press
+    dispatch('home');
+  }
 </script>
 
 <div class="nav-wrapper">
@@ -21,7 +43,12 @@
         <Swords size={22} color="#fff" />
       </button>
     {:else}
-      <button class="icon-btn" title="Home" on:click={() => dispatch('home')}>
+      <button class="icon-btn" title="Home"
+        on:pointerdown={handleHomePointerDown}
+        on:pointerup={handleHomePointerUp}
+        on:mouseleave={handleHomePointerUp}
+        on:click={handleHomeClick}
+      >
         <Diamond size={22} color="#fff" />
       </button>
     {/if}

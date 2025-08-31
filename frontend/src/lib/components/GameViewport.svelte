@@ -160,6 +160,7 @@
       {snapshotLoading}
       {runId}
       on:home={() => dispatch('home')}
+      on:forceNextRoom={() => dispatch('forceNextRoom')}
       on:openInventory={() => dispatch('openInventory')}
       on:openParty={() => dispatch('openParty')}
       on:openCombatViewer={() => dispatch('openCombatViewer')}
