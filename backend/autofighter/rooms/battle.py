@@ -406,12 +406,22 @@ class BattleRoom(Room):
                         await BUS.emit_async("hit_landed", member, tgt_foe, dmg, "attack", f"{damage_type}_attack")
                     tgt_mgr.maybe_inflict_dot(member, dmg)
                     if getattr(member.damage_type, "id", "").lower() == "wind":
+                        # Compute dynamic scaling based on number of living targets.
+                        # Example mapping from N targets -> scale = 1 / (2N):
+                        # 4 targets => 1/8, 5 targets => 1/10, etc.
+                        try:
+                            living_targets = sum(1 for f in foes if getattr(f, "hp", 0) > 0)
+                        except Exception:
+                            living_targets = len(foes) if isinstance(foes, list) else 1
+                        living_targets = max(1, int(living_targets))
+                        scale = 1.0 / (2.0 * living_targets)
+                        scaled_atk = member.atk * scale
                         for extra_idx, extra_foe in enumerate(foes):
                             if extra_idx == tgt_idx or extra_foe.hp <= 0:
                                 await asyncio.sleep(0.001)
                                 continue
                             extra_dmg = await extra_foe.apply_damage(
-                                member.atk, attacker=member, action_name="Wind Spread"
+                                scaled_atk, attacker=member, action_name="Wind Spread"
                             )
                             if extra_dmg <= 0:
                                 log.info(

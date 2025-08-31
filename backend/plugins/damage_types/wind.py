@@ -49,15 +49,20 @@ class Wind(DamageTypeBase):
         hits = int(getattr(actor, "wind_ultimate_hits", getattr(actor, "ultimate_hits", 25)) or 25)
         hits = max(1, hits)
 
-        # Strike each living enemy 'hits' times, with per-hit damage scaled down by hit count
+        # Strike each living enemy with a total budget equal to actor.atk distributed
+        # across all hits and all targets. This keeps Wind ultimate AoE damage in line
+        # with single-target ults while preserving multi-hit feel.
         base = int(getattr(actor, "atk", 0))
         base = max(1, base)
 
-        # Distribute rounding fairly so sum(per_hit) ~= base
-        per = base // hits
-        rem = base - per * hits
+        living = [foe for foe in enemies if getattr(foe, "hp", 0) > 0]
+        if not living:
+            return True
+        total_chunks = hits * len(living)
+        per = base // total_chunks
+        rem = base - per * total_chunks
 
-        for foe in enemies:
+        for foe in living:
             if getattr(foe, "hp", 0) <= 0:
                 continue
             f_mgr = getattr(foe, "effect_manager", None)
@@ -67,7 +72,11 @@ class Wind(DamageTypeBase):
             for i in range(hits):
                 if getattr(foe, "hp", 0) <= 0:
                     break
-                per_hit = per + (1 if i < rem else 0)
+                # Fair rounding across all chunks (targets x hits)
+                add_one = 1 if rem > 0 else 0
+                per_hit = per + add_one
+                if rem > 0:
+                    rem -= 1
                 # Ensure a minimum of 1 damage per hit going into the resolver
                 per_hit = max(1, int(per_hit))
                 dmg = await foe.apply_damage(per_hit, attacker=actor, action_name="Wind Ultimate")

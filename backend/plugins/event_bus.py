@@ -119,8 +119,10 @@ class _Bus:
 
         for event, args_list in self._batched_events.items():
             if args_list:
-                # Process all batched events of this type
-                await self.send_async(event, args_list[-1])  # Only process the latest for performance
+                # Process all batched events of this type to ensure logging/summary accuracy
+                # This preserves correctness for analytics at the cost of some throughput.
+                for args in args_list:
+                    await self.send_async(event, args)
 
         self._batched_events.clear()
         self._batch_timer = None
