@@ -94,6 +94,14 @@ export async function advanceRoom(runId) {
   return handleFetch(`${API_BASE}/run/${runId}/next`, { method: 'POST' });
 }
 
+export async function pauseCombat(runId) {
+  return roomAction(runId, 'battle', 'pause');
+}
+
+export async function resumeCombat(runId) {
+  return roomAction(runId, 'battle', 'resume');
+}
+
 export async function chooseCard(runId, cardId) {
   return handleFetch(`${API_BASE}/cards/${runId}`, {
     method: 'POST',

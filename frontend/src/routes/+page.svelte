@@ -20,7 +20,9 @@
     FEEDBACK_URL,
     openOverlay, 
     backOverlay, 
-    homeOverlay
+    homeOverlay,
+    pauseCombat,
+    resumeCombat
   } from '$lib';
   import { buildRunMenu } from '$lib/components/RunButtons.svelte';
   import { browser, dev } from '$app/environment';
@@ -307,15 +309,25 @@
     openOverlay('combat-viewer');
   }
 
-  // Placeholder functions for combat pause/resume - will implement backend API later
-  function pauseCombat() {
-    console.log('Pausing combat...');
-    // TODO: Call backend API to pause battle
+  // Combat pause/resume functions using real API
+  async function handlePauseCombat() {
+    if (!runId) return;
+    try {
+      await pauseCombat(runId);
+      console.log('Combat paused');
+    } catch (error) {
+      console.error('Failed to pause combat:', error);
+    }
   }
 
-  function resumeCombat() {
-    console.log('Resuming combat...');
-    // TODO: Call backend API to resume battle
+  async function handleResumeCombat() {
+    if (!runId) return;
+    try {
+      await resumeCombat(runId);
+      console.log('Combat resumed');
+    } catch (error) {
+      console.error('Failed to resume combat:', error);
+    }
   }
 
   let battleTimer;
@@ -761,8 +773,8 @@
     on:openInventory={openInventory}
     on:openParty={handleParty}
     on:openCombatViewer={openCombatViewer}
-    on:pauseCombat={pauseCombat}
-    on:resumeCombat={resumeCombat}
+    on:pauseCombat={handlePauseCombat}
+    on:resumeCombat={handleResumeCombat}
     on:back={backOverlay}
     on:home={homeOverlay}
     on:settings={() => openOverlay('settings')}
