@@ -366,16 +366,16 @@ class BattleRoom(Room):
                     if getattr(member, "ultimate_ready", False) and hasattr(dt, "ultimate"):
                         try:
                             # Emit ultimate start event
-                            BUS.emit("ultimate_used", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic')})
+                            await BUS.emit_async("ultimate_used", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic')})
                             await dt.ultimate(member, combat_party.members, foes)
                             # Emit ultimate end event
-                            BUS.emit("ultimate_completed", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic')})
+                            await BUS.emit_async("ultimate_completed", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic')})
                         except Exception as e:
                             # Emit ultimate failed event
-                            BUS.emit("ultimate_failed", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic'), "error": str(e)})
+                            await BUS.emit_async("ultimate_failed", member, None, 0, "ultimate", {"ultimate_type": getattr(member.damage_type, 'id', 'generic'), "error": str(e)})
                             pass
                     if not proceed:
-                        BUS.emit("action_used", member, member, 0)
+                        await BUS.emit_async("action_used", member, member, 0)
                         await registry.trigger("turn_end", member)
                         if _EXTRA_TURNS.get(id(member), 0) > 0 and member.hp > 0:
                             _EXTRA_TURNS[id(member)] -= 1
@@ -429,7 +429,7 @@ class BattleRoom(Room):
                                 await BUS.emit_async("hit_landed", member, extra_foe, extra_dmg, "attack", "wind_multi_attack")
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                             _credit_if_dead(extra_foe)
-                    BUS.emit("action_used", member, tgt_foe, dmg)
+                    await BUS.emit_async("action_used", member, tgt_foe, dmg)
                     # Trigger action_taken passives for the acting member
                     await registry.trigger("action_taken", member)
                     member.add_ultimate_charge(member.actions_per_turn)
@@ -534,16 +534,16 @@ class BattleRoom(Room):
                     if getattr(acting_foe, "ultimate_ready", False) and hasattr(dt, "ultimate"):
                         try:
                             # Emit ultimate start event for foes
-                            BUS.emit("ultimate_used", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe"})
+                            await BUS.emit_async("ultimate_used", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe"})
                             await dt.ultimate(acting_foe, foes, combat_party.members)
                             # Emit ultimate end event for foes
-                            BUS.emit("ultimate_completed", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe"})
+                            await BUS.emit_async("ultimate_completed", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe"})
                         except Exception as e:
                             # Emit ultimate failed event for foes
-                            BUS.emit("ultimate_failed", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe", "error": str(e)})
+                            await BUS.emit_async("ultimate_failed", acting_foe, None, 0, "ultimate", {"ultimate_type": getattr(acting_foe.damage_type, 'id', 'generic'), "caster_type": "foe", "error": str(e)})
                             pass
                     if not proceed:
-                        BUS.emit("action_used", acting_foe, acting_foe, 0)
+                        await BUS.emit_async("action_used", acting_foe, acting_foe, 0)
                         await registry.trigger("turn_end", acting_foe)
                         if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
                             _EXTRA_TURNS[id(acting_foe)] -= 1
@@ -559,7 +559,7 @@ class BattleRoom(Room):
                         damage_type = getattr(acting_foe.damage_type, 'id', 'generic') if hasattr(acting_foe, 'damage_type') else 'generic'
                         await BUS.emit_async("hit_landed", acting_foe, target, dmg, "attack", f"foe_{damage_type}_attack")
                     target_effect.maybe_inflict_dot(acting_foe, dmg)
-                    BUS.emit("action_used", acting_foe, target, dmg)
+                    await BUS.emit_async("action_used", acting_foe, target, dmg)
                     # Trigger action_taken passives for the acting foe
                     await registry.trigger("action_taken", acting_foe)
                     await registry.trigger("turn_end", acting_foe)

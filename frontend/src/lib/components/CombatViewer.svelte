@@ -7,6 +7,7 @@
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
   import { getCatalogData } from '../systems/runApi.js';
+  import { getElementColor } from '../systems/assetLoader.js';
 
   export let party = [];
   export let foes = [];
@@ -26,11 +27,16 @@
 
   // Character selection
   $: allCharacters = [
-    ...party.map(p => ({ ...p, type: 'player' })),
-    ...foes.map(f => ({ ...f, type: 'foe' }))
+    ...party.map(p => ({ ...p, type: 'player', element: p.element || p.damage_type || 'Generic' })),
+    ...foes.map(f => ({ ...f, type: 'foe', element: f.element || f.damage_type || 'Generic' }))
   ];
 
   $: selectedCharacter = allCharacters.find(c => c.id === selectedCharacterId) || allCharacters[0];
+
+  // Auto-select first character if none selected
+  $: if (!selectedCharacterId && allCharacters.length > 0) {
+    selectedCharacterId = allCharacters[0].id;
+  }
 
   // Status effect tabs
   const tabs = [
@@ -284,6 +290,10 @@
   function handleClose() {
     dispatch('close');
   }
+
+  function selectCharacter(id) {
+    selectedCharacterId = id;
+  }
 </script>
 
 <MenuPanel>
@@ -294,20 +304,19 @@
     </div>
     
     <div class="viewer-content">
-      <!-- Left panel: Character list -->
-      <div class="character-list">
-        <h3>Characters</h3>
-        
+      <!-- Left panel: Character list (like PartyRoster) -->
+      <div class="character-roster">
         <div class="character-section">
           <h4>Party</h4>
           {#each party as character}
             <button 
-              class="character-item" 
+              class="char-row" 
               class:selected={selectedCharacterId === character.id}
-              on:click={() => selectedCharacterId = character.id}
+              style={`border-color: ${getElementColor(character.element || character.damage_type || 'Generic')}; --el-color: ${getElementColor(character.element || character.damage_type || 'Generic')};`}
+              on:click={() => selectCharacter(character.id)}
             >
-              <div class="character-name">{character.id}</div>
-              <div class="character-stats">
+              <div class="row-name">{character.id}</div>
+              <div class="row-stats">
                 HP: {character.hp}/{character.max_hp || character.hp}
               </div>
             </button>
@@ -318,12 +327,13 @@
           <h4>Foes</h4>
           {#each foes as character}
             <button 
-              class="character-item" 
+              class="char-row" 
               class:selected={selectedCharacterId === character.id}
-              on:click={() => selectedCharacterId = character.id}
+              style={`border-color: ${getElementColor(character.element || character.damage_type || 'Generic')}; --el-color: ${getElementColor(character.element || character.damage_type || 'Generic')};`}
+              on:click={() => selectCharacter(character.id)}
             >
-              <div class="character-name">{character.id}</div>
-              <div class="character-stats">
+              <div class="row-name">{character.id}</div>
+              <div class="row-stats">
                 HP: {character.hp}/{character.max_hp || character.hp}
               </div>
             </button>
@@ -331,93 +341,68 @@
         </div>
       </div>
 
-      <!-- Center panel: Character details -->
-      <div class="character-details">
+      <!-- Center panel: Character portrait (like PlayerPreview) -->
+      <div class="character-preview">
         {#if selectedCharacter}
-          <h3>{selectedCharacter.id}</h3>
-          <div class="character-type">
-            {selectedCharacter.type === 'player' ? 'Party Member' : 'Foe'}
-          </div>
-          
-          <div class="stats-grid">
-            <div class="stat-section">
-              <h4>Health</h4>
-              <div class="stat">
-                <label>HP:</label>
-                <span>{selectedCharacter.hp}/{selectedCharacter.max_hp || selectedCharacter.hp}</span>
+          <div class="preview-container">
+            <div class="character-portrait" 
+                 style={`--outline: ${getElementColor(selectedCharacter.element || 'Generic')};`}>
+              <div class="character-name">{selectedCharacter.id}</div>
+              <div class="character-type">
+                {selectedCharacter.type === 'player' ? 'Party Member' : 'Foe'}
               </div>
-              {#if selectedCharacter.shield}
-                <div class="stat">
-                  <label>Shield:</label>
-                  <span>{selectedCharacter.shield}</span>
-                </div>
-              {/if}
             </div>
+            
+            <div class="stats-grid">
+              <div class="stat-section">
+                <h4>Health</h4>
+                <div class="stat">
+                  <label>HP:</label>
+                  <span>{selectedCharacter.hp}/{selectedCharacter.max_hp || selectedCharacter.hp}</span>
+                </div>
+                {#if selectedCharacter.shield}
+                  <div class="stat">
+                    <label>Shield:</label>
+                    <span>{selectedCharacter.shield}</span>
+                  </div>
+                {/if}
+              </div>
 
-            <div class="stat-section">
-              <h4>Combat Stats</h4>
-              <div class="stat">
-                <label>Attack:</label>
-                <span>{selectedCharacter.attack || selectedCharacter.atk || 0}</span>
-              </div>
-              <div class="stat">
-                <label>Defense:</label>
-                <span>{selectedCharacter.defense || selectedCharacter.def || 0}</span>
-              </div>
-              {#if selectedCharacter.crit_rate !== undefined}
+              <div class="stat-section">
+                <h4>Combat Stats</h4>
                 <div class="stat">
-                  <label>Crit Rate:</label>
-                  <span>{(selectedCharacter.crit_rate * 100).toFixed(1)}%</span>
+                  <label>Attack:</label>
+                  <span>{selectedCharacter.attack || selectedCharacter.atk || 0}</span>
                 </div>
-              {/if}
-              {#if selectedCharacter.mitigation !== undefined}
                 <div class="stat">
-                  <label>Mitigation:</label>
-                  <span>{selectedCharacter.mitigation}</span>
+                  <label>Defense:</label>
+                  <span>{selectedCharacter.defense || selectedCharacter.def || 0}</span>
                 </div>
-              {/if}
-            </div>
+                {#if selectedCharacter.crit_rate !== undefined}
+                  <div class="stat">
+                    <label>Crit Rate:</label>
+                    <span>{(selectedCharacter.crit_rate * 100).toFixed(1)}%</span>
+                  </div>
+                {/if}
+              </div>
 
-            <div class="stat-section">
-              <h4>Battle Performance</h4>
-              <div class="stat">
-                <label>Damage Dealt:</label>
-                <span>{selectedCharacter.damage_dealt || 0}</span>
-              </div>
-              <div class="stat">
-                <label>Damage Taken:</label>
-                <span>{selectedCharacter.damage_taken || 0}</span>
-              </div>
-              {#if selectedCharacter.kills !== undefined}
-                <div class="stat">
-                  <label>Kills:</label>
-                  <span>{selectedCharacter.kills}</span>
-                </div>
-              {/if}
-              {#if selectedCharacter.healing_done !== undefined}
-                <div class="stat">
-                  <label>Healing Done:</label>
-                  <span>{selectedCharacter.healing_done}</span>
-                </div>
-              {/if}
-            </div>
-
-            {#if selectedCharacter.element || selectedCharacter.damage_type}
               <div class="stat-section">
                 <h4>Element</h4>
                 <div class="stat">
                   <label>Type:</label>
-                  <span class="element-type">{selectedCharacter.element || selectedCharacter.damage_type || 'Generic'}</span>
+                  <span class="element-type" style={`color: ${getElementColor(selectedCharacter.element || 'Generic')}`}>
+                    {selectedCharacter.element || selectedCharacter.damage_type || 'Generic'}
+                  </span>
                 </div>
               </div>
-            {/if}
+            </div>
           </div>
         {:else}
-          <p>Select a character to view details</p>
+          <div class="placeholder">Select a character to view details</div>
         {/if}
       </div>
 
-      <!-- Right panel: Status effects -->
+      <!-- Right panel: Status effects tabs -->
       <div class="status-effects">
         <div class="tab-header">
           {#each tabs as tab}
@@ -487,15 +472,24 @@
   }
 
   .viewer-content {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(8rem, 22%) 1fr minmax(12rem, 26%);
     flex: 1;
-    gap: 1rem;
-    padding: 1rem;
+    width: 100%;
+    max-height: 98%;
+    position: relative;
+    z-index: 0;
   }
 
-  .character-list {
-    flex: 1;
-    min-width: 200px;
+  /* Left panel: Character roster (like PartyRoster) */
+  .character-roster {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.4rem;
+    height: 100%;
+    overflow-y: auto;
+    min-width: 0;
   }
 
   .character-section {
@@ -509,55 +503,140 @@
     opacity: 0.8;
   }
 
-  .character-item {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    padding: 0.5rem;
-    margin-bottom: 0.25rem;
+  .char-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.25rem 0.4rem;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid transparent;
+    border-radius: 6px;
     cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    z-index: 0;
+    width: 100%;
+    margin-bottom: 0.25rem;
+    --el-dark: color-mix(in srgb, var(--el-color) 20%, black 80%);
+    --el-5darker: color-mix(in srgb, var(--el-color) 95%, black 5%);
+    --el-5lighter: color-mix(in srgb, var(--el-color) 95%, white 5%);
+  }
+
+  .char-row:hover {
+    background: rgba(20,20,20,0.8);
+  }
+
+  .char-row.selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 8px rgba(255,215,0,0.5);
+  }
+
+  .char-row::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      var(--el-dark) 0%,
+      var(--el-5darker) 25%,
+      var(--el-color) 50%,
+      var(--el-5lighter) 75%,
+      var(--el-dark) 100%
+    );
+    background-size: 200% 100%;
+    background-position: -100% 0;
+    opacity: 0;
+    filter: brightness(1.0);
+    mix-blend-mode: soft-light;
+    animation: af-elm-sweep 12s linear infinite;
+    animation-play-state: paused;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 280ms ease;
+  }
+
+  .char-row.selected::before {
+    opacity: 0.82;
+    animation-play-state: running;
+  }
+
+  @keyframes af-elm-sweep {
+    0% { background-position: -100% 0; }
+    100% { background-position: 100% 0; }
+  }
+
+  .row-name, .row-stats {
+    position: relative;
+    z-index: 1;
+  }
+
+  .row-name {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: bold;
     text-align: left;
   }
 
-  .character-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  .character-item.selected {
-    background: rgba(120, 180, 255, 0.3);
-    border-color: rgba(120, 180, 255, 0.5);
-  }
-
-  .character-name {
-    font-weight: bold;
-    font-size: 0.9rem;
-  }
-
-  .character-stats {
+  .row-stats {
+    color: #fff;
     font-size: 0.8rem;
     opacity: 0.8;
   }
 
-  .character-details {
-    flex: 1;
-    min-width: 250px;
-    max-height: 500px;
+  /* Center panel: Character preview (like PlayerPreview) */
+  .character-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
     overflow-y: auto;
+  }
+
+  .preview-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .character-portrait {
+    background: rgba(0, 0, 0, 0.3);
+    border: 3px solid var(--outline, #555);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.5),
+      0 0 18px color-mix(in srgb, var(--outline, #888) 65%, transparent),
+      0 0 36px color-mix(in srgb, var(--outline, #888) 35%, transparent);
+    text-align: center;
+  }
+
+  .character-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 0.5rem;
   }
 
   .character-type {
     font-size: 0.8rem;
     opacity: 0.7;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    color: #fff;
   }
 
   .stats-grid {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .stat-section {
@@ -585,25 +664,36 @@
   .stat label {
     font-weight: bold;
     opacity: 0.9;
+    color: #fff;
   }
 
   .stat span {
     opacity: 0.8;
+    color: #fff;
   }
 
   .element-type {
     text-transform: capitalize;
-    color: #4fc3f7;
     font-weight: bold;
   }
 
+  .placeholder {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* Right panel: Status effects */
   .status-effects {
-    flex: 1;
-    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0.4rem;
   }
 
   .tab-header {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.25rem;
     margin-bottom: 1rem;
   }
@@ -615,6 +705,7 @@
     color: #fff;
     cursor: pointer;
     font-size: 0.8rem;
+    border-radius: 3px;
   }
 
   .tab-btn:hover {
@@ -627,6 +718,7 @@
   }
 
   .tab-content {
+    flex: 1;
     max-height: 400px;
     overflow-y: auto;
   }
@@ -650,12 +742,14 @@
     font-weight: bold;
     flex: 1;
     margin-right: 0.5rem;
+    color: #fff;
   }
 
   .effect-duration {
     font-size: 0.8rem;
     opacity: 0.8;
     white-space: nowrap;
+    color: #fff;
   }
 
   .effect-details {
@@ -667,6 +761,7 @@
     line-height: 1.3;
     margin-bottom: 0.25rem;
     opacity: 0.9;
+    color: #fff;
   }
 
   .no-effects {
