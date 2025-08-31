@@ -298,7 +298,6 @@
   }
 
   async function openInventory() {
-    if (battleActive) return;
     openOverlay('inventory');
   }
 
