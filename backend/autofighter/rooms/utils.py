@@ -80,7 +80,7 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     try:
         room_num = max(int(node.index), 1)
         # Keep the same base curve but apply foe debuff to the minimum target as well
-        base_hp = int(700 * room_num * (foe_debuff if isinstance(obj, FoeBase) else 1.0))
+        base_hp = int(15 * room_num * (foe_debuff if isinstance(obj, FoeBase) else 1.0))
         low = int(base_hp * 0.85)
         high = int(base_hp * 1.10)
         target = random.randint(low, max(high, low + 1))
