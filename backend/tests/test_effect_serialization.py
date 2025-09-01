@@ -17,7 +17,7 @@ def test_serialize_effect_details():
     mgr.add_dot(DamageOverTime("burn", 5, 1, "burn", source))
     mgr.add_hot(HealingOverTime("regen", 3, 1, "regen", source))
 
-    target.passives = ["p1", "p1", "p2"]
+    target.passives = ["attack_up", "luna_lunar_reservoir", "luna_lunar_reservoir"]
 
     data = _serialize(target)
 
@@ -41,5 +41,11 @@ def test_serialize_effect_details():
             "stacks": 1,
         }
     ]
-    assert any(p["id"] == "p1" and p["stacks"] == 2 for p in data["passives"])
-    assert any(p["id"] == "p2" and p["stacks"] == 1 for p in data["passives"])
+    assert any(
+        p["id"] == "attack_up" and p["stacks"] == 1 and p["max_stacks"] is None
+        for p in data["passives"]
+    )
+    assert any(
+        p["id"] == "luna_lunar_reservoir" and p["stacks"] == 2 and p["max_stacks"] == 1
+        for p in data["passives"]
+    )

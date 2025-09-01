@@ -12,6 +12,7 @@ from plugins.foes._base import FoeBase
 
 from ..mapgen import MapNode
 from ..party import Party
+from ..passives import discover
 from ..stats import Stats
 
 # Balance caps for foe stats to prevent runaway scaling
@@ -314,7 +315,15 @@ def _serialize(obj: Stats) -> dict[str, Any]:
     data.pop("dots", None)
     data.pop("hots", None)
     counts = Counter(data.pop("passives", []))
-    data["passives"] = [{"id": pid, "stacks": count} for pid, count in counts.items()]
+    registry = discover()
+    data["passives"] = [
+        {
+            "id": pid,
+            "stacks": count,
+            "max_stacks": getattr(registry.get(pid), "max_stacks", None),
+        }
+        for pid, count in counts.items()
+    ]
 
     mgr = getattr(obj, "effect_manager", None)
     dots = []
