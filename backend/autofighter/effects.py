@@ -3,11 +3,100 @@ from dataclasses import dataclass
 from dataclasses import field
 import random
 from typing import Optional
+from typing import Union
 
 from rich.console import Console
 
 from autofighter.stats import StatEffect
 from autofighter.stats import Stats
+
+# Diminishing returns configuration for buff scaling
+# Each stat has: (threshold, scaling_factor, base_offset)
+DIMINISHING_RETURNS_CONFIG = {
+    # HP: 4x reduction per 500 HP
+    'max_hp': {'threshold': 500, 'scaling_factor': 4.0, 'base_offset': 0},
+    'hp': {'threshold': 500, 'scaling_factor': 4.0, 'base_offset': 0},
+
+    # ATK/DEF: 100x reduction per 100 points
+    'atk': {'threshold': 100, 'scaling_factor': 100.0, 'base_offset': 0},
+    'defense': {'threshold': 100, 'scaling_factor': 100.0, 'base_offset': 0},
+
+    # Crit rate, mitigation, vitality: 100x reduction per 1% over 2%
+    'crit_rate': {'threshold': 0.01, 'scaling_factor': 100.0, 'base_offset': 0.02},
+    'mitigation': {'threshold': 0.01, 'scaling_factor': 100.0, 'base_offset': 0.02},
+    'vitality': {'threshold': 0.01, 'scaling_factor': 100.0, 'base_offset': 0.02},
+
+    # Crit damage: 1000x reduction per 500% (5.0 multiplier)
+    'crit_damage': {'threshold': 5.0, 'scaling_factor': 1000.0, 'base_offset': 2.0},
+}
+
+
+def get_current_stat_value(stats: Stats, stat_name: str) -> Union[int, float]:
+    """Get the current value of a stat from the Stats object."""
+    # Map common stat names to their property accessors
+    stat_mapping = {
+        'max_hp': lambda s: s.max_hp,
+        'hp': lambda s: s.max_hp,  # Use max_hp for HP calculations
+        'atk': lambda s: s.atk,
+        'defense': lambda s: s.defense,
+        'crit_rate': lambda s: s.crit_rate,
+        'crit_damage': lambda s: s.crit_damage,
+        'mitigation': lambda s: s.mitigation,
+        'vitality': lambda s: s.vitality,
+        'effect_hit_rate': lambda s: s.effect_hit_rate,
+        'effect_resistance': lambda s: s.effect_resistance,
+        'dodge_odds': lambda s: s.dodge_odds,
+        'regain': lambda s: s.regain,
+    }
+
+    if stat_name in stat_mapping:
+        return stat_mapping[stat_name](stats)
+
+    # Fallback: try to get the attribute directly
+    return getattr(stats, stat_name, 0)
+
+
+def calculate_diminishing_returns(stat_name: str, current_value: Union[int, float]) -> float:
+    """Calculate diminishing returns scaling factor for buff effectiveness.
+
+    Args:
+        stat_name: Name of the stat being modified
+        current_value: Current value of the stat
+
+    Returns:
+        Scaling factor between 0.000001 and 1.0 representing buff effectiveness
+    """
+    if stat_name not in DIMINISHING_RETURNS_CONFIG:
+        return 1.0  # No scaling for unconfigured stats
+
+    config = DIMINISHING_RETURNS_CONFIG[stat_name]
+    threshold = config['threshold']
+    scaling_factor = config['scaling_factor']
+    base_offset = config['base_offset']
+
+    # Calculate how far above the base offset we are
+    effective_value = max(0, current_value - base_offset)
+
+    # Calculate number of complete threshold steps we've reached
+    # Add small epsilon to handle floating point precision issues
+    epsilon = threshold * 1e-10
+    steps = int((effective_value + epsilon) // threshold)
+
+    # TODO: Consider if these scaling factors are too aggressive for game balance
+    # Currently: 4x for HP per 500, 100x for ATK/DEF per 100, etc.
+    # Might need tuning based on gameplay feedback
+
+    if steps <= 0:
+        return 1.0  # Full effectiveness below first threshold
+
+    # Calculate scaling: 1 / (scaling_factor ^ steps)
+    try:
+        effectiveness = 1.0 / (scaling_factor ** steps)
+        # Clamp to prevent numerical issues
+        return max(1e-6, min(1.0, effectiveness))
+    except (OverflowError, ZeroDivisionError):
+        # Fallback for extreme values
+        return 1e-6
 
 
 @dataclass
@@ -23,19 +112,23 @@ class StatModifier:
     _effect_applied: bool = field(init=False, default=False)
 
     def apply(self) -> None:
-        """Apply configured modifiers to the stats object using StatEffect."""
+        """Apply configured modifiers to the stats object using StatEffect with diminishing returns."""
         if self._effect_applied:
             return  # Already applied
 
         # Convert deltas and multipliers to a single stat_modifiers dict
         stat_modifiers = {}
 
-        # Handle additive deltas
+        # Handle additive deltas with diminishing returns scaling
         for name, value in (self.deltas or {}).items():
-            stat_modifiers[name] = stat_modifiers.get(name, 0) + value
+            current_value = get_current_stat_value(self.stats, name)
+            scaling_factor = calculate_diminishing_returns(name, current_value)
 
-        # Handle multiplicative changes by converting to additive
-        # Note: This is an approximation since pure multiplicative requires more complex handling
+            # Apply diminishing returns to the buff value
+            scaled_value = value * scaling_factor
+            stat_modifiers[name] = stat_modifiers.get(name, 0) + scaled_value
+
+        # Handle multiplicative changes by converting to additive with diminishing returns
         for name, multiplier in (self.multipliers or {}).items():
             if hasattr(self.stats, name):
                 # Get base stat value for calculation
@@ -46,7 +139,13 @@ class StatModifier:
 
                 # Convert multiplier to additive value
                 additive_change = base_value * (multiplier - 1.0)
-                stat_modifiers[name] = stat_modifiers.get(name, 0) + additive_change
+
+                # Apply diminishing returns scaling to the additive change
+                current_value = get_current_stat_value(self.stats, name)
+                scaling_factor = calculate_diminishing_returns(name, current_value)
+                scaled_change = additive_change * scaling_factor
+
+                stat_modifiers[name] = stat_modifiers.get(name, 0) + scaled_change
 
         if stat_modifiers:
             # Create and apply StatEffect
