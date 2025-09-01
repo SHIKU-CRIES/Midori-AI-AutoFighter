@@ -11,7 +11,6 @@ Midori AI AutoFighter is being rebuilt as a web application with a Svelte fronte
 ```
 frontend/   # Svelte frontend
 backend/    # Quart backend and game logic
-legacy/     # Previous Pygame version (read-only)
 build/      # Build scripts and configuration
 .codex/     # Documentation and contributor guides
 ```
@@ -94,9 +93,9 @@ Pull for new characters, craft items, or rearrange the party before continuing a
 
 Entering a shop heals the party by 5% of its combined max HP. Buy upgrade items or cards with star ratings. Inventory scales by floor, purchases add items to your inventory and disable the button, class-level tracking guarantees at least two shops per floor, and gold can reroll the current stock. Gold prices per star rank, pressure-based cost scaling, and reroll rules are documented in [`./.codex/implementation/shop-room.md`](.codex/implementation/shop-room.md).
 
-### Event and Chat Rooms
+### Battle Review and Chat
 
-Event Rooms offer text-based encounters with selectable options that use seeded randomness to modify stats or inventory. Chat Rooms, available only when the LLM profiles are installed, let players send a single message to an LLM character, track usage per floor, and do not count toward the floor's room limit; only six chats may occur on each floor.
+Chat interactions with party members occur at the end of battles in the battle review screen. When LLM dependencies are installed, players can engage in AI-powered conversations with characters to enhance the narrative experience.
 
 ### Per-instance Memory
 
@@ -143,7 +142,7 @@ The repository includes automated GitHub Actions workflows to build standalone g
 #### Available Builds
 - **Windows** (4 variants): non-llm, llm-cpu, llm-cuda, llm-amd
 - **Linux** (4 variants): non-llm, llm-cpu, llm-cuda, llm-amd
-- **Android** (1 variant): non-llm
+- **Android**: Currently seeking testers for mobile builds
 
 #### Quick Local Build
 ```bash
@@ -177,11 +176,9 @@ Install prebuilt packages when available:
   flatpak install org.midori.ai.autofighter
   ```
 
-- **Arch Linux (AUR)**
+- **Arch Linux**
 
-  ```bash
-  yay -S autofighter-git
-  ```
+  Currently not available through AUR. Users will need to build from source using `makepkg` and `pacman` dependencies.
 
 - **Debian/Ubuntu**
 

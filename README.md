@@ -18,9 +18,9 @@ docker compose up --build frontend backend
 
 **Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
-### Option 2: AI-Enhanced Version with NVIDIA GPU Support
+### Option 2: LLM-Enhanced Version with NVIDIA GPU Support
 
-For users with NVIDIA graphics cards who want AI-powered chat features:
+For users with NVIDIA graphics cards who want LLM-powered chat features:
 
 ```bash
 docker compose --profile llm-cuda up --build
@@ -28,9 +28,9 @@ docker compose --profile llm-cuda up --build
 
 **Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
-### Option 3: AI-Enhanced Version with AMD GPU Support
+### Option 3: LLM-Enhanced Version with AMD GPU Support
 
-For users with AMD graphics cards who want AI-powered chat features:
+For users with AMD graphics cards who want LLM-powered chat features:
 
 ```bash
 docker compose --profile llm-amd up --build
@@ -38,9 +38,9 @@ docker compose --profile llm-amd up --build
 
 **Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
-### Option 4: AI-Enhanced Version with CPU-Only Support
+### Option 4: LLM-Enhanced Version with CPU-Only Support
 
-For users who want AI-powered chat features but don't have a compatible GPU:
+For users who want LLM-powered chat features but don't have a compatible GPU:
 
 ```bash
 docker compose --profile llm-cpu up --build
@@ -49,6 +49,8 @@ docker compose --profile llm-cpu up --build
 **Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
 ## Alternative Installation: Development Setup
+
+> **⚠️ Note:** This installation method is primarily intended for developers. For most users, we recommend using Docker Compose above.
 
 If you prefer to run the game without Docker or want to modify the code:
 
@@ -59,7 +61,9 @@ Install the required tools:
 ```bash
 # Install uv (Python package manager)
 curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
+```bash
 # Install bun (JavaScript package manager)
 curl -fsSL https://bun.sh/install | bash
 ```
@@ -71,6 +75,8 @@ curl -fsSL https://bun.sh/install | bash
    cd backend
    uv run app.py
    ```
+   
+   **For LLM support:** Install additional dependencies with `uv sync --extra llm-cpu`, `uv sync --extra llm-cuda`, or `uv sync --extra llm-amd` before running the backend.
 
 2. **Start the Frontend** (in another terminal):
    ```bash
