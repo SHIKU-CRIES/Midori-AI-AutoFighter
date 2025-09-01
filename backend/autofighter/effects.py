@@ -384,13 +384,37 @@ class EffectManager:
         })
 
     def maybe_inflict_dot(self, attacker: Stats, damage: int) -> None:
-        dot = attacker.damage_type.create_dot(damage, attacker)
-        if dot is None:
-            return
-        rate = max(attacker.effect_hit_rate - self.stats.effect_resistance, 0.0)
-        chance = max(min(rate * random.uniform(0.9, 1.1), 1.0), 0.01)
-        if random.random() < chance:
+        """Attempt to apply one or more DoT stacks based on effect hit rate.
+
+        The attacker's ``effect_hit_rate`` is processed in 100% chunks. Each
+        iteration subtracts the target's ``effect_resistance`` and rolls for a
+        stack using the remaining chance. Additional stacks are only attempted
+        after a successful roll. There is always a 1% chance for the first
+        stack even when resistance exceeds the hit rate.
+        """
+
+        remaining = attacker.effect_hit_rate
+        resistance = self.stats.effect_resistance
+        attempted = False
+        while remaining > 0 or not attempted:
+            effective = remaining - resistance
+            if effective <= 0.0:
+                if attempted:
+                    break
+                chance = 0.01
+            else:
+                chance = min(effective, 1.0)
+
+            attempted = True
+            if random.random() >= chance:
+                break
+
+            dot = attacker.damage_type.create_dot(damage, attacker)
+            if dot is None:
+                break
+
             self.add_dot(dot)
+            remaining -= 1.0
 
     async def tick(self, others: Optional["EffectManager"] = None) -> None:
         for collection, names in (

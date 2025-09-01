@@ -228,7 +228,7 @@ Elemental damage types hook into attacks. The `plugins/damage_effects.py` module
 - **[Light](backend/plugins/damage_types/light.py)** – Creates [Celestial Atrophy](backend/plugins/dots/celestial_atrophy.py) and grants allies [Radiant Regeneration](backend/plugins/hots/radiant_regeneration.py) every action. If an ally falls below 25% HP, the attack is replaced with a direct heal.
 - **[Dark](backend/plugins/damage_types/dark.py)** – Spreads [Abyssal Corruption](backend/plugins/dots/abyssal_corruption.py) and adds a permanent [Shadow Siphon](backend/plugins/dots/shadow_siphon.py) to each party member every turn, draining 5% max HP per tick while feeding attack and defense back to the caster.
 
-DoT and HoT plugins manage ongoing damage or recovery. Supported DoTs include
+DoT and HoT plugins manage ongoing damage or recovery. Effect hit rate that greatly exceeds a target's resistance can apply multiple DoT stacks in a single attack by looping in 100% hit chunks and subtracting resistance each time. Supported DoTs include
 [Bleed](backend/plugins/dots/bleed.py),
 [Poison](backend/plugins/dots/poison.py),
 [Celestial Atrophy](backend/plugins/dots/celestial_atrophy.py),

@@ -48,8 +48,9 @@ Player customization works differently from other stat modifiers. Instead of bei
 ## EffectManager
 `EffectManager` tracks `DamageOverTime` and `HealingOverTime` instances on a `Stats` object. Ticks call the target's damage type
 hooks so plugins can modify dot damage or hot healing globally. Damage types may also create new DoT effects when they land
-attacks via `maybe_inflict_dot`, which rolls the attacker's `effect_hit_rate` against the target's `effect_resistance` before
-adding the effect. The difference is clamped to zero and jittered by ±10%, and there is always at least a 1% chance to apply the status. Fire strikes apply the stackable Blazing Torment DoT, which gains an extra tick whenever the target acts.
+attacks via `maybe_inflict_dot`, which processes the attacker's `effect_hit_rate` in 100% chunks. Each loop subtracts the target's
+`effect_resistance` and rolls for a stack using the remaining chance. Additional stacks are only attempted after a successful
+roll, and the first stack always has at least a 1% chance even when resistance exceeds hit rate. Fire strikes apply the stackable Blazing Torment DoT, which gains an extra tick whenever the target acts.
 
 - `add_dot(effect, max_stacks=None)` – registers a DoT. Effects with the same
   ID stack independently, but a `max_stacks` cap can limit simultaneous copies.
