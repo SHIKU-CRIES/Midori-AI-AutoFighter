@@ -142,3 +142,26 @@ def test_human_readable_summary(temp_logs_dir):
     assert "hero: 1" in content  # hits landed
     assert "hero: 25" in content  # healing done
     assert "Total Events:" in content
+
+
+def test_damage_dealt_defaults_to_normal_attack(temp_logs_dir):
+    run_id = "test_run_normal_attack"
+    battle_index = 1
+    logger = BattleLogger(run_id, battle_index, temp_logs_dir)
+
+    attacker = Stats()
+    attacker.id = "hero"
+    target = Stats()
+    target.id = "monster"
+
+    BUS.emit("battle_start", attacker)
+    BUS.emit("battle_start", target)
+    BUS.emit("damage_dealt", attacker, target, 42)
+
+    logger.finalize_battle("victory")
+
+    summary_path = temp_logs_dir / "runs" / run_id / "battles" / "1" / "summary"
+    with open(summary_path / "battle_summary.json") as f:
+        summary = json.load(f)
+
+    assert summary["damage_by_action"]["hero"]["Normal Attack"] == 42
