@@ -28,7 +28,7 @@ async def select_card(run_id: str) -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "invalid card"}), 400
     state, rooms = await asyncio.to_thread(load_map, run_id)
     state["awaiting_card"] = False
-    if not state.get("awaiting_relic"):
+    if not state.get("awaiting_relic") and not state.get("awaiting_loot"):
         state["awaiting_next"] = True
         next_type = (
             rooms[state["current"] + 1].room_type
@@ -56,7 +56,7 @@ async def select_relic(run_id: str) -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "invalid relic"}), 400
     state, rooms = await asyncio.to_thread(load_map, run_id)
     state["awaiting_relic"] = False
-    if not state.get("awaiting_card"):
+    if not state.get("awaiting_card") and not state.get("awaiting_loot"):
         state["awaiting_next"] = True
         next_type = (
             rooms[state["current"] + 1].room_type
@@ -70,3 +70,26 @@ async def select_relic(run_id: str) -> tuple[str, int, dict[str, str]]:
     await asyncio.to_thread(save_party, run_id, party)
     relic_data = {"id": relic.id, "name": relic.name, "stars": relic.stars}
     return jsonify({"relic": relic_data, "relics": party.relics, "next_room": next_type})
+
+
+@bp.post("/loot/<run_id>")
+async def acknowledge_loot(run_id: str) -> tuple[str, int, dict[str, str]]:
+    """Endpoint for acknowledging loot and allowing room advancement"""
+    state, rooms = await asyncio.to_thread(load_map, run_id)
+    if not state.get("awaiting_loot"):
+        return jsonify({"error": "not awaiting loot"}), 400
+
+    state["awaiting_loot"] = False
+    if not state.get("awaiting_card") and not state.get("awaiting_relic"):
+        state["awaiting_next"] = True
+        next_type = (
+            rooms[state["current"] + 1].room_type
+            if state["current"] + 1 < len(rooms)
+            else None
+        )
+    else:
+        state["awaiting_next"] = False
+        next_type = None
+
+    await asyncio.to_thread(save_map, run_id, state)
+    return jsonify({"acknowledged": True, "next_room": next_type})

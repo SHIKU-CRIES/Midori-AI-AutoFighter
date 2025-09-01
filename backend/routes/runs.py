@@ -100,6 +100,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
         "battle": False,
         "awaiting_card": False,
         "awaiting_relic": False,
+        "awaiting_loot": False,
         "awaiting_next": False,
     }
     pronouns, stats = await asyncio.to_thread(_load_player_customization)
@@ -275,6 +276,7 @@ async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
             "awaiting_next": state.get("awaiting_next", False),
             "awaiting_card": state.get("awaiting_card", False),
             "awaiting_relic": state.get("awaiting_relic", False),
+            "awaiting_loot": state.get("awaiting_loot", False),
             "room_data": current_room_data
         }
     }
@@ -354,7 +356,7 @@ async def end_all_runs() -> tuple[str, int, dict[str, object]]:
 @bp.post("/run/<run_id>/next")
 async def advance_room(run_id: str) -> tuple[str, int, dict[str, object]]:
     state, rooms = await asyncio.to_thread(load_map, run_id)
-    if state.get("awaiting_card") or state.get("awaiting_relic"):
+    if state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot"):
         return jsonify({"error": "awaiting reward"}), 400
     if not state.get("awaiting_next"):
         return jsonify({"error": "not ready"}), 400

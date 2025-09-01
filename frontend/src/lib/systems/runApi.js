@@ -120,6 +120,14 @@ export async function chooseRelic(runId, relicId) {
   });
 }
 
+export async function acknowledgeLoot(runId) {
+  return handleFetch(`${API_BASE}/loot/${runId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+}
+
 export async function getBattleSummary(runId, index) {
   // Use the backend API base; 404 is expected if summary not yet written
   const url = `${API_BASE}/run/${runId}/battles/${index}/summary`;
