@@ -211,7 +211,7 @@ class BattleRoom(Room):
 
         for f in foes:
             await BUS.emit_async("battle_start", f)
-            await registry.trigger("battle_start", f)
+            await registry.trigger("battle_start", f, party=combat_party.members, foes=foes)
 
         # Start battle logging
         battle_logger = start_battle_logging()
@@ -223,7 +223,7 @@ class BattleRoom(Room):
         )
         for member_effect, member in zip(party_effects, combat_party.members, strict=False):
             await BUS.emit_async("battle_start", member)
-            await registry.trigger("battle_start", member)
+            await registry.trigger("battle_start", member, party=combat_party.members, foes=foes)
 
         enrage_active = False
         enrage_stacks = 0
@@ -333,6 +333,8 @@ class BattleRoom(Room):
                         # Not enraged yet; ensure percent is zero
                         set_enrage_percent(0.0)
                     await registry.trigger("turn_start", member)
+                    # Also trigger the enhanced turn_start method with battle context
+                    await registry.trigger_turn_start(member, turn=turn, party=combat_party.members, foes=foes, enrage_active=enrage_active)
                     log.debug("%s turn start", member.id)
                     await member.maybe_regain(turn)
                     # If all foes died earlier in this round, stop taking actions
@@ -350,7 +352,7 @@ class BattleRoom(Room):
                     for f in foes:
                         _credit_if_dead(f)
                     if member.hp <= 0:
-                        await registry.trigger("turn_end", member)
+                        await registry.trigger("turn_end", member, party=combat_party.members, foes=foes)
                         await asyncio.sleep(0.001)
                         break
                     proceed = await member_effect.on_action()
@@ -377,7 +379,7 @@ class BattleRoom(Room):
                                 pass
                     if not proceed:
                         await BUS.emit_async("action_used", member, member, 0)
-                        await registry.trigger("turn_end", member)
+                        await registry.trigger("turn_end", member, party=combat_party.members, foes=foes)
                         if _EXTRA_TURNS.get(id(member), 0) > 0 and member.hp > 0:
                             _EXTRA_TURNS[id(member)] -= 1
                             await _pace(action_start)
@@ -405,6 +407,11 @@ class BattleRoom(Room):
                         log.info("%s hits %s for %s", member.id, tgt_foe.id, dmg)
                         damage_type = getattr(member.damage_type, 'id', 'generic') if hasattr(member, 'damage_type') else 'generic'
                         await BUS.emit_async("hit_landed", member, tgt_foe, dmg, "attack", f"{damage_type}_attack")
+                        # Trigger hit_landed passives for the attacker
+                        await registry.trigger_hit_landed(member, tgt_foe, dmg, "attack",
+                                                        damage_type=damage_type,
+                                                        party=combat_party.members,
+                                                        foes=foes)
                     tgt_mgr.maybe_inflict_dot(member, dmg)
                     if getattr(member.damage_type, "id", "").lower() == "wind":
                         # Compute dynamic scaling based on number of living targets.
@@ -438,11 +445,16 @@ class BattleRoom(Room):
                                     extra_dmg,
                                 )
                                 await BUS.emit_async("hit_landed", member, extra_foe, extra_dmg, "attack", "wind_multi_attack")
+                                # Trigger hit_landed passives for wind multi-attack
+                                await registry.trigger_hit_landed(member, extra_foe, extra_dmg, "wind_multi_attack",
+                                                                damage_type="wind",
+                                                                party=combat_party.members,
+                                                                foes=foes)
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                             _credit_if_dead(extra_foe)
                     await BUS.emit_async("action_used", member, tgt_foe, dmg)
                     # Trigger action_taken passives for the acting member
-                    await registry.trigger("action_taken", member)
+                    await registry.trigger("action_taken", member, target=tgt_foe, damage=dmg, party=combat_party.members, foes=foes)
                     member.add_ultimate_charge(member.actions_per_turn)
                     for ally in combat_party.members:
                         ally.handle_ally_action(member)
@@ -469,7 +481,7 @@ class BattleRoom(Room):
                                         )
                                     )
                             enrage_bleed_applies += 1
-                    await registry.trigger("turn_end", member)
+                    await registry.trigger("turn_end", member, party=combat_party.members, foes=foes)
                     await registry.trigger_turn_end(member)
                     if _EXTRA_TURNS.get(id(member), 0) > 0 and member.hp > 0:
                         _EXTRA_TURNS[id(member)] -= 1
@@ -533,7 +545,7 @@ class BattleRoom(Room):
                     for f in foes:
                         _credit_if_dead(f)
                     if acting_foe.hp <= 0:
-                        await registry.trigger("turn_end", acting_foe)
+                        await registry.trigger("turn_end", acting_foe, party=combat_party.members, foes=foes)
                         await asyncio.sleep(0.001)
                         break
                     proceed = await foe_mgr.on_action()
@@ -557,7 +569,7 @@ class BattleRoom(Room):
                     if not proceed:
                         await BUS.emit_async("action_used", acting_foe, acting_foe, 0)
                         acting_foe.add_ultimate_charge(acting_foe.actions_per_turn)
-                        await registry.trigger("turn_end", acting_foe)
+                        await registry.trigger("turn_end", acting_foe, party=combat_party.members, foes=foes)
                         if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
                             _EXTRA_TURNS[id(acting_foe)] -= 1
                             await _pace(action_start)
@@ -576,7 +588,7 @@ class BattleRoom(Room):
                     # Trigger action_taken passives for the acting foe
                     await registry.trigger("action_taken", acting_foe)
                     acting_foe.add_ultimate_charge(acting_foe.actions_per_turn)
-                    await registry.trigger("turn_end", acting_foe)
+                    await registry.trigger("turn_end", acting_foe, party=combat_party.members, foes=foes)
                     await registry.trigger_turn_end(acting_foe)
                     if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
                         _EXTRA_TURNS[id(acting_foe)] -= 1
