@@ -16,7 +16,7 @@ describe('SettingsMenu component', () => {
     expect(content).toContain('Wipe Save Data');
     expect(content).toContain('Backup Save Data');
     expect(content).toContain('Import Save Data');
-    expect(content).toContain('End Current Run');
+    expect(content).toContain('End Run');
     expect(content).toContain('data-testid="wipe-status"');
     expect(content).toContain('data-testid="save-status"');
     expect(content).toContain('LRM Model');
