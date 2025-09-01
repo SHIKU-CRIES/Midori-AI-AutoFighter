@@ -556,6 +556,7 @@ class BattleRoom(Room):
                                 pass
                     if not proceed:
                         await BUS.emit_async("action_used", acting_foe, acting_foe, 0)
+                        acting_foe.add_ultimate_charge(acting_foe.actions_per_turn)
                         await registry.trigger("turn_end", acting_foe)
                         if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
                             _EXTRA_TURNS[id(acting_foe)] -= 1
@@ -574,6 +575,7 @@ class BattleRoom(Room):
                     await BUS.emit_async("action_used", acting_foe, target, dmg)
                     # Trigger action_taken passives for the acting foe
                     await registry.trigger("action_taken", acting_foe)
+                    acting_foe.add_ultimate_charge(acting_foe.actions_per_turn)
                     await registry.trigger("turn_end", acting_foe)
                     await registry.trigger_turn_end(acting_foe)
                     if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:
