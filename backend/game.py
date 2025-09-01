@@ -151,16 +151,6 @@ def _apply_player_customization(player: PlayerBase) -> None:
     )
 
 
-def _load_upgrade_level(pid: str) -> int:
-    with get_save_manager().connection() as conn:
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS player_upgrades (id TEXT PRIMARY KEY, level INTEGER NOT NULL)"
-        )
-        cur = conn.execute("SELECT level FROM player_upgrades WHERE id = ?", (pid,))
-        row = cur.fetchone()
-    return int(row[0]) if row else 0
-
-
 def _load_individual_stat_upgrades(pid: str) -> dict[str, float]:
     """Load individual stat upgrades from the new system."""
     with get_save_manager().connection() as conn:
@@ -188,22 +178,7 @@ def _load_individual_stat_upgrades(pid: str) -> dict[str, float]:
 
 
 def _apply_player_upgrades(player: PlayerBase) -> None:
-    # Apply legacy level-based upgrades (backward compatibility)
-    level = _load_upgrade_level(player.id)
-    if level > 0:
-        mult = 1 + level * 0.05
-        mod = create_stat_buff(
-            player,
-            name="upgrade_legacy",
-            turns=10**9,
-            id="upgrade_bonus_legacy",
-            max_hp_mult=mult,
-            atk_mult=mult,
-            defense_mult=mult,
-        )
-        player.mods.append(mod.id)
-
-    # Apply new individual stat upgrades
+    # Apply individual stat upgrades
     stat_upgrades = _load_individual_stat_upgrades(player.id)
     if stat_upgrades:
         # Create multiplier dict for create_stat_buff

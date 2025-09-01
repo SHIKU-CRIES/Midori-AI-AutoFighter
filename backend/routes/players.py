@@ -330,7 +330,7 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
 # Constants for new upgrade system
 UPGRADEABLE_STATS = ["max_hp", "atk", "defense", "crit_rate", "crit_damage"]
 STAT_BOOST_PERCENTAGES = {1: 0.001, 2: 0.02, 3: 0.03, 4: 0.04}  # 0.1%, 2%, 3%, 4%
-PLAYER_POINTS_VALUES = {1: 1, 2: 10, 3: 100, 4: 1000}
+PLAYER_POINTS_VALUES = {1: 1, 2: 150, 3: 22500, 4: 3375000}
 
 
 def _create_upgrade_tables():
@@ -435,15 +435,6 @@ async def get_player_upgrade(pid: str):
     manager = GachaManager(get_save_manager())
     items = await asyncio.to_thread(manager._get_items)
 
-    def fetch_legacy_level() -> int:
-        with get_save_manager().connection() as conn:
-            conn.execute(
-                "CREATE TABLE IF NOT EXISTS player_upgrades (id TEXT PRIMARY KEY, level INTEGER NOT NULL)"
-            )
-            cur = conn.execute("SELECT level FROM player_upgrades WHERE id = ?", (pid,))
-            row = cur.fetchone()
-            return int(row[0]) if row else 0
-
     def fetch_new_upgrade_data() -> Dict:
         stat_upgrades = _get_player_stat_upgrades(pid)
 
@@ -464,11 +455,9 @@ async def get_player_upgrade(pid: str):
 
         return result
 
-    legacy_level = await asyncio.to_thread(fetch_legacy_level)
     new_data = await asyncio.to_thread(fetch_new_upgrade_data)
 
     return jsonify({
-        "level": legacy_level,  # Keep for backward compatibility
         "items": items,
         **new_data
     })
@@ -494,45 +483,10 @@ async def upgrade_player(pid: str):
     await asyncio.to_thread(_assign_damage_type, inst)
     items = await asyncio.to_thread(manager._get_items)
 
-    # Check if this is the old API format (no JSON data) - use legacy behavior
+    # Get the item to use (star level and count) - JSON data is required
     if not data:
-        # Legacy upgrade logic - maintain backward compatibility
-        element = inst.element_id.lower()  # Convert to lowercase to match item keys
+        return jsonify({"error": "JSON data required with star_level and item_count"}), 400
 
-        costs = [
-            (f"{element}_4", 20),
-            (f"{element}_3", 100),
-            (f"{element}_2", 500),
-            (f"{element}_1", 1000),
-        ]
-        for key, required in costs:
-            if items.get(key, 0) >= required:
-                items[key] -= required
-                break
-        else:
-            return jsonify({"error": "insufficient items"}), 400
-
-        await asyncio.to_thread(manager._set_items, items)
-
-        def update_level() -> int:
-            with get_save_manager().connection() as conn:
-                conn.execute(
-                    "CREATE TABLE IF NOT EXISTS player_upgrades (id TEXT PRIMARY KEY, level INTEGER NOT NULL)"
-                )
-                cur = conn.execute("SELECT level FROM player_upgrades WHERE id = ?", (pid,))
-                row = cur.fetchone()
-                level = int(row[0]) + 1 if row else 1
-                conn.execute(
-                    "INSERT OR REPLACE INTO player_upgrades (id, level) VALUES (?, ?)",
-                    (pid, level),
-                )
-                return level
-
-        level = await asyncio.to_thread(update_level)
-        return jsonify({"level": level, "items": items})
-
-    # New API format with JSON data
-    # Get the item to use (star level and count)
     star_level = data.get("star_level")
     item_count = data.get("item_count", 1)
 

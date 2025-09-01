@@ -34,7 +34,7 @@ def app_with_db(tmp_path, monkeypatch):
     # Add some upgrade items for testing
     conn.execute(
         "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
-        ("fire_2", 5),  # 5 2-star fire items 
+        ("fire_2", 5),  # 5 2-star fire items
     )
     conn.execute(
         "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
@@ -69,19 +69,19 @@ async def test_character_random_stat_upgrade(app_with_db):
         json={"star_level": 2, "item_count": 2}
     )
     data = await resp.get_json()
-    
+
     # Should successfully upgrade
     assert "upgrades_applied" in data
     assert len(data["upgrades_applied"]) == 2  # 2 upgrades
-    
+
     # Each upgrade should be 2% (0.02)
     for upgrade in data["upgrades_applied"]:
         assert upgrade["percent"] == 0.02
         assert upgrade["stat"] in ["max_hp", "atk", "defense", "crit_rate", "crit_damage"]
-    
+
     # Should consume 2 fire_2 items
     assert data["items_consumed"]["fire_2"] == 2
-    
+
     # Check remaining items
     assert data["items"]["fire_2"] == 3  # 5 - 2 = 3
 
@@ -102,7 +102,7 @@ async def test_player_points_system(app_with_db):
         json={"star_level": 1, "item_count": 5}
     )
     data = await resp.get_json()
-    
+
     # Should gain points (1 point per 1-star item)
     assert "points_gained" in data
     assert data["points_gained"] == 5  # 5 * 1 = 5 points
@@ -129,7 +129,7 @@ async def test_player_spend_points(app_with_db):
         json={"stat_name": "max_hp", "points": 5}
     )
     data = await resp.get_json()
-    
+
     assert data["stat_upgraded"] == "max_hp"
     assert data["points_spent"] == 5
     assert data["upgrade_percent"] == 0.005  # 5 * 0.001 = 0.5%
@@ -144,7 +144,7 @@ async def test_new_upgrade_data_in_get_endpoint(app_with_db):
 
     # First add some upgrades
     await client.post(
-        "/players/ally/upgrade", 
+        "/players/ally/upgrade",
         json={"star_level": 2, "item_count": 1}
     )
 
@@ -156,9 +156,6 @@ async def test_new_upgrade_data_in_get_endpoint(app_with_db):
     assert "stat_upgrades" in data
     assert "stat_totals" in data
     assert len(data["stat_upgrades"]) == 1
-    
-    # Should still have legacy level for backward compatibility
-    assert "level" in data
 
 
 @pytest.mark.asyncio
@@ -173,7 +170,7 @@ async def test_insufficient_items_error(app_with_db):
         json={"star_level": 2, "item_count": 10}  # Only have 5 fire_2 items
     )
     data = await resp.get_json()
-    
+
     assert resp.status_code == 400
     assert "error" in data
     assert "insufficient" in data["error"]
@@ -191,13 +188,13 @@ async def test_invalid_star_level(app_with_db):
         json={"star_level": 5, "item_count": 1}  # 5-star not valid
     )
     data = await resp.get_json()
-    
+
     assert resp.status_code == 400
     assert "error" in data
     assert "invalid star_level" in data["error"]
 
 
-@pytest.mark.asyncio 
+@pytest.mark.asyncio
 async def test_invalid_stat_name_for_points(app_with_db):
     """Test error handling for invalid stat names when spending points."""
     app, db_path = app_with_db
@@ -215,7 +212,7 @@ async def test_invalid_stat_name_for_points(app_with_db):
         json={"stat_name": "invalid_stat", "points": 1}
     )
     data = await resp.get_json()
-    
+
     assert resp.status_code == 400
     assert "error" in data
     assert "invalid stat" in data["error"]
@@ -233,7 +230,7 @@ async def test_insufficient_points(app_with_db):
         json={"stat_name": "max_hp", "points": 1}
     )
     data = await resp.get_json()
-    
+
     assert resp.status_code == 400
     assert "error" in data
     assert "insufficient upgrade points" in data["error"]
