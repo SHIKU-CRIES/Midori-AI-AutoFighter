@@ -255,16 +255,23 @@ async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     party = await asyncio.to_thread(load_party, run_id)
     # resolve is async; must await to get the result dict
     result = await room.resolve(party, data)
-    # Mark room as completable and expose the next room type for the UI
-    state["awaiting_next"] = True
-    next_type = (
-        rooms[state["current"] + 1].room_type
-        if state["current"] + 1 < len(rooms)
-        else None
-    )
+    action = data.get("action", "")
+    next_type = None
+    if action == "leave":
+        state["awaiting_next"] = True
+        next_type = (
+            rooms[state["current"] + 1].room_type
+            if state["current"] + 1 < len(rooms)
+            else None
+        )
+    else:
+        state["awaiting_next"] = False
     await asyncio.to_thread(save_map, run_id, state)
     await asyncio.to_thread(save_party, run_id, party)
-    return jsonify({**result, "next_room": next_type})
+    payload = {**result}
+    if next_type is not None:
+        payload["next_room"] = next_type
+    return jsonify(payload)
 
 
 @bp.post("/rooms/<run_id>/chat")
