@@ -2,6 +2,7 @@
   // Ambient orbs during combat; gently despawn after combat ends.
   export let active = false;        // true while combat is running
   export let reducedMotion = false; // respect settings
+  export let enrageData = { active: false, stacks: 0, turns: 0 }; // enrage state data
 
   let ending = false;
   let orbs = [];
@@ -23,23 +24,36 @@
     return {
       id: Math.random().toString(36).slice(2),
       x: rand(0, 100),
-      y: rand(0, 100),
+      y: rand(-20, 0), // Start above the viewport for rain effect
       size: rand(2.4, 4.2),
-      dx: rand(8, 16),
-      dy: rand(6, 14),
-      colorDur: rand(6, 10),
+      fallSpeed: rand(4, 8), // Speed of falling 
       delay: rand(0, 3),
       hue,
     };
   }
 
+  function calculateOrbCount() {
+    if (!active) return 0;
+    const baseCount = reducedMotion ? 6 : 14;
+    
+    if (!enrageData.active) {
+      return baseCount;
+    }
+    
+    // Increase orb count based on enrage turns - more intense as enrage continues
+    const enrageTurns = enrageData.turns || 0;
+    const extraOrbs = Math.min(Math.floor(enrageTurns / 5), 20); // Cap at 20 extra orbs
+    return baseCount + extraOrbs;
+  }
+
   $: if (active) {
     ending = false;
-    if (orbs.length === 0) {
-      const count = reducedMotion ? 6 : 14;
-      orbs = Array.from({ length: count }, makeOrb);
+    const targetCount = calculateOrbCount();
+    if (orbs.length !== targetCount) {
+      orbs = Array.from({ length: targetCount }, makeOrb);
     }
   }
+  
   $: if (!active && orbs.length && !ending) {
     // Begin fade/despawn; keep DOM around briefly then clear.
     ending = true;
@@ -51,7 +65,7 @@
   {#each orbs as orb (orb.id)}
     <div
       class="orb"
-      style={`--x:${orb.x};--y:${orb.y};--size:${orb.size}rem;--dx:${orb.dx}s;--dy:${orb.dy}s;--hue:${orb.hue};--colorDur:${orb.colorDur}s;--delay:${orb.delay}s;`}
+      style={`--x:${orb.x};--y:${orb.y};--size:${orb.size}rem;--fallSpeed:${orb.fallSpeed}s;--hue:${orb.hue};--delay:${orb.delay}s;`}
     >
       <div class="i"></div>
     </div>
@@ -82,7 +96,7 @@
     width: var(--size);
     height: var(--size);
     filter: blur(0.5px);
-    animation: driftX var(--dx) linear infinite;
+    animation: rainFall var(--fallSpeed) linear infinite;
     animation-delay: var(--delay);
   }
   .orb .i {
@@ -92,7 +106,7 @@
       hsla(calc(var(--hue) + 10), 95%, 55%, 0.34) 55%,
       rgba(0,0,0,0) 70%
     );
-    animation: driftY var(--dy) ease-in-out infinite alternate, hueShift var(--colorDur) linear infinite;
+    animation: hueShift 8s linear infinite;
     mix-blend-mode: screen;
     box-shadow: 0 0 12px hsla(var(--hue), 95%, 60%, 0.28), 0 0 24px hsla(var(--hue), 95%, 55%, 0.20);
   }
@@ -103,13 +117,13 @@
   .vignette { position:absolute; inset:0; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.22) 100%); }
   .fade { position:absolute; inset:0; background: transparent; }
 
-  @keyframes driftX {
-    0% { transform: translateX(-10%); }
-    100% { transform: translateX(10%); }
-  }
-  @keyframes driftY {
-    0% { transform: translateY(-8%); }
-    100% { transform: translateY(8%); }
+  @keyframes rainFall {
+    0% { 
+      transform: translateY(-20vh) translateX(0);
+    }
+    100% { 
+      transform: translateY(120vh) translateX(10%);
+    }
   }
   @keyframes hueShift {
     0% { filter: hue-rotate(0deg); }

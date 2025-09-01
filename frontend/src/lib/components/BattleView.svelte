@@ -9,7 +9,7 @@
   export let runId = '';
   export let framerate = 60;
   export let party = [];
-  export let enrage = { active: false, stacks: 0 };
+  export let enrage = { active: false, stacks: 0, turns: 0 };
   export let reducedMotion = false;
   export let active = true;
   export let showHud = true;
@@ -206,7 +206,7 @@
   style={`background-image: url(${bg})`}
   data-testid="battle-view"
 >
-  <EnrageIndicator active={Boolean(enrage?.active)} {reducedMotion} />
+  <EnrageIndicator active={Boolean(enrage?.active)} {reducedMotion} enrageData={enrage} />
   <BattleEffects cue={effectCue} />
   <div class="party-column" style={`--portrait-size: ${partyPortraitSize}` }>
     {#each party as member (member.id)}
