@@ -4,6 +4,7 @@
   import StatusIcons from './StatusIcons.svelte';
 
   export let fighter = {};
+  export let reducedMotion = false;
   $: passiveTip = (fighter.passives || [])
     .map((p) => `${p.id}${p.stacks > 1 ? ` x${p.stacks}` : ''}`)
     .join(', ');
@@ -64,6 +65,26 @@
         aria-hidden="true"
       />
     </div>
+    {#if (fighter.passives || []).length}
+      <div class="passive-indicators" class:reduced={reducedMotion}>
+        {#each fighter.passives as p (p.id)}
+          {@const tip = `${p.id} ${p.stacks}${p.max_stacks ? `/${p.max_stacks}` : ''}`}
+          <div class="passive" aria-label={tip} title={tip}>
+            {#if p.max_stacks && p.max_stacks <= 5}
+              <div class="pips">
+                {#each Array(p.max_stacks) as _, i (i)}
+                  <span class="pip" class:filled={i < p.stacks} aria-hidden="true"></span>
+                {/each}
+              </div>
+            {:else if p.max_stacks}
+              <span class="count">{p.stacks}/{p.max_stacks}</span>
+            {:else}
+              <span class="count">{p.stacks}</span>
+            {/if}
+          </div>
+        {/each}
+      </div>
+    {/if}
   </div>
   {#if ((Array.isArray(fighter.hots) ? fighter.hots.length : 0) + (Array.isArray(fighter.dots) ? fighter.dots.length : 0) + (Array.isArray(fighter.active_effects) ? fighter.active_effects.length : 0)) > 0}
     <!-- Buff Bar: shows current HoT/DoT effects under the portrait. -->
@@ -132,6 +153,47 @@
     transition: stroke-dasharray 0.2s linear;
   }
   .element-icon { width: 16px; height: 16px; display: block; }
+
+  .passive-indicators {
+    position: absolute;
+    bottom: 2px;
+    right: 24px;
+    display: flex;
+    gap: 2px;
+    pointer-events: none;
+  }
+  .passive {
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
+    padding: 0 2px;
+    min-width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    line-height: 1;
+  }
+  .pips { display: flex; gap: 1px; }
+  .pip {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, background 0.2s;
+  }
+  .pip.filled {
+    background: var(--el-color);
+    transform: scale(1.2);
+  }
+  .passive-indicators.reduced .pip {
+    transition: none;
+  }
+  .passive-indicators.reduced .pip.filled {
+    transform: none;
+  }
 
   /* Buff Bar (stained-glass style) */
   .buff-bar {

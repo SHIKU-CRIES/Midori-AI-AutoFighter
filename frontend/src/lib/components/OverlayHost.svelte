@@ -250,6 +250,7 @@
         foeData={(battleSnapshot?.foes && battleSnapshot?.foes.length) ? battleSnapshot.foes : (roomData?.foes || [])}
         cards={[]}
         relics={[]}
+        {reducedMotion}
       />
       <div class="stained-glass-row" style="justify-content: flex-end; margin-top: 0.75rem;">
         <button class="icon-btn" on:click={() => dispatch('nextRoom')}>Next Room</button>
