@@ -91,4 +91,30 @@ class PassiveRegistry:
                 for _ in range(stacks):
                     await passive_instance.on_defeat(target)
 
+    def describe(self, target) -> list[dict[str, Any]]:
+        """Return structured information for a target's passives."""
+        info: list[dict[str, Any]] = []
+        counts = Counter(getattr(target, "passives", []))
+        for pid, count in counts.items():
+            cls = self._registry.get(pid)
+            if cls is None:
+                info.append({"id": pid, "name": pid, "stacks": count, "max_stacks": count})
+                continue
+            stacks = count
+            if hasattr(cls, "get_stacks"):
+                try:
+                    stacks = cls.get_stacks(target)  # type: ignore[attr-defined]
+                except Exception:
+                    stacks = count
+            max_stacks = getattr(cls, "max_stacks", stacks)
+            info.append(
+                {
+                    "id": pid,
+                    "name": getattr(cls, "name", pid),
+                    "stacks": stacks,
+                    "max_stacks": max_stacks,
+                }
+            )
+        return info
+
 

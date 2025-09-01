@@ -10,6 +10,7 @@
   import { getElementColor, getCharacterImage } from '../systems/assetLoader.js';
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';
+  import { Circle } from 'lucide-svelte';
 
   export let party = [];
   export let foes = [];
@@ -194,7 +195,9 @@
                 id: passive,
                 duration: 'Permanent',
                 about: 'Passive ability',
-                source: 'passive'
+                source: 'passive',
+                stacks: 1,
+                max_stacks: 1
               };
             }
             return {
@@ -202,7 +205,9 @@
               id: passive.id || passive.name || 'unknown',
               duration: passive.duration || passive.turns_left || 'Permanent',
               about: passive.description || 'Passive ability',
-              source: 'passive'
+              source: 'passive',
+              stacks: passive.stacks ?? 1,
+              max_stacks: passive.max_stacks ?? passive.stacks ?? 1
             };
           });
         }
@@ -242,7 +247,9 @@
     
     // Add stacks information
     if (effect.stacks && effect.stacks > 1) {
-      description += ` x${effect.stacks}`;
+      if (!(effect.source === 'passive' && effect.max_stacks && effect.max_stacks <= 5)) {
+        description += ` x${effect.stacks}`;
+      }
     }
     
     return description;
@@ -473,7 +480,20 @@
             {#each getStatusEffects(selectedCharacter, activeTab) as effect}
               <div class="effect-item">
                 <div class="effect-header">
-                  <div class="effect-name">{formatEffect(effect)}</div>
+                  <div class="effect-name">
+                    {formatEffect(effect)}
+                    {#if activeTab === 'passives'}
+                      {#if effect.max_stacks && effect.max_stacks <= 5}
+                        <span class="pips">
+                          {#each Array(effect.max_stacks) as _, i}
+                            <Circle class={`pip-icon${i < effect.stacks ? ' filled' : ''}`} />
+                          {/each}
+                        </span>
+                      {:else if effect.stacks !== undefined && effect.max_stacks}
+                        <span class="pip-count">{effect.stacks}/{effect.max_stacks}</span>
+                      {/if}
+                    {/if}
+                  </div>
                   <div class="effect-duration">{formatDuration(effect)}</div>
                 </div>
                 <div class="effect-details">
@@ -824,6 +844,28 @@
     flex: 1;
     margin-right: 0.5rem;
     color: #fff;
+  }
+
+  .pips {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 0.25rem;
+    line-height: 0;
+  }
+
+  :global(.pip-icon) {
+    width: 0.7em;
+    height: 0.7em;
+    stroke-width: 2;
+  }
+
+  :global(.pip-icon.filled) {
+    fill: currentColor;
+  }
+
+  .pip-count {
+    margin-left: 0.25rem;
+    font-size: 0.8rem;
   }
 
   .effect-duration {

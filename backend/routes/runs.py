@@ -12,8 +12,8 @@ from battle_logging import end_run_logging
 # Import battle logging
 from battle_logging import start_run_logging
 from game import _assign_damage_type
+from game import _describe_passives
 from game import _load_player_customization
-from game import _passive_names
 from game import battle_snapshots
 from game import battle_tasks
 from game import get_fernet
@@ -157,7 +157,7 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
                     {
                         "id": inst.id,
                         "name": inst.name,
-                        "passives": _passive_names(getattr(inst, "passives", [])),
+                        "passives": _describe_passives(inst),
                         "exp": inst.exp,
                         "level": inst.level,
                     }

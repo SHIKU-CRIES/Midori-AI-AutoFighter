@@ -81,6 +81,7 @@ The right panel contains a tabbed interface for viewing different types of statu
 - Character passive abilities
 - Permanent or temporary passive effects
 - Detailed ability descriptions
+- Stack counts display as colored pips (for max 5 or fewer) or `current/max`
 
 ## Enhanced Status Effect Information
 
