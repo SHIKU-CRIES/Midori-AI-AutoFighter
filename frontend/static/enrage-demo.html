@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Enrage Rain Effect Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%);
+            height: 100vh;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .demo-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 10;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+        }
+        
+        .enrage-orbs {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 1;
+        }
+        
+        .orb {
+            position: absolute;
+            left: calc(var(--x) * 1%);
+            top: calc(var(--y) * 1%);
+            width: var(--size);
+            height: var(--size);
+            filter: blur(0.5px);
+            animation: rainFall var(--fallSpeed) linear infinite;
+            animation-delay: var(--delay);
+        }
+        
+        .orb .i {
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                hsla(var(--hue), 90%, 60%, 0.40) 0%,
+                hsla(calc(var(--hue) + 10), 95%, 55%, 0.34) 55%,
+                rgba(0,0,0,0) 70%
+            );
+            animation: hueShift 8s linear infinite;
+            mix-blend-mode: screen;
+            box-shadow: 0 0 12px hsla(var(--hue), 95%, 60%, 0.28), 
+                        0 0 24px hsla(var(--hue), 95%, 55%, 0.20);
+        }
+        
+        @keyframes rainFall {
+            0% { 
+                transform: translateY(-20vh) translateX(0);
+            }
+            100% { 
+                transform: translateY(120vh) translateX(10%);
+            }
+        }
+        
+        @keyframes hueShift {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(12deg); }
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="info">
+            <h2>Enhanced Enrage Rain Effect</h2>
+            <p><strong>New Features:</strong></p>
+            <ul>
+                <li>Orbs fall like rain (vertical motion)</li>
+                <li>Count increases with enrage duration</li>
+                <li>Damage multipliers: 2x turns (dealt), 1.35x turns (taken)</li>
+                <li>DoT damage doubled from 5% to 10% max HP</li>
+            </ul>
+            <p><strong>Current:</strong> <span id="orbCount">0</span> orbs</p>
+        </div>
+        
+        <div class="enrage-orbs" id="orbContainer"></div>
+        
+        <div class="controls">
+            <button onclick="setEnrageTurns(0)">No Enrage</button>
+            <button onclick="setEnrageTurns(5)">5 Turns Enrage</button>
+            <button onclick="setEnrageTurns(15)">15 Turns Enrage</button>
+            <button onclick="setEnrageTurns(50)">50 Turns Enrage</button>
+        </div>
+    </div>
+
+    <script>
+        let currentOrbs = [];
+        
+        function rand(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        
+        function redOrBlueHue() {
+            if (Math.random() < 0.5) {
+                const branch = Math.random() < 0.5 ? rand(350, 359) : rand(0, 10);
+                return branch;
+            }
+            return rand(200, 240);
+        }
+        
+        function makeOrb() {
+            const hue = redOrBlueHue();
+            return {
+                id: Math.random().toString(36).slice(2),
+                x: rand(0, 100),
+                y: rand(-20, 0), // Start above viewport for rain effect
+                size: rand(2.4, 4.2),
+                fallSpeed: rand(4, 8), // Speed of falling
+                delay: rand(0, 3),
+                hue,
+            };
+        }
+        
+        function calculateOrbCount(enrageTurns) {
+            const baseCount = 14;
+            if (enrageTurns === 0) return baseCount;
+            
+            const extraOrbs = Math.min(Math.floor(enrageTurns / 5), 20);
+            return baseCount + extraOrbs;
+        }
+        
+        function updateOrbs(enrageTurns) {
+            const container = document.getElementById('orbContainer');
+            const targetCount = calculateOrbCount(enrageTurns);
+            
+            // Clear existing orbs
+            container.innerHTML = '';
+            
+            // Create new orbs
+            currentOrbs = Array.from({ length: targetCount }, makeOrb);
+            
+            currentOrbs.forEach(orb => {
+                const orbElement = document.createElement('div');
+                orbElement.className = 'orb';
+                orbElement.style.setProperty('--x', orb.x);
+                orbElement.style.setProperty('--y', orb.y);
+                orbElement.style.setProperty('--size', orb.size + 'rem');
+                orbElement.style.setProperty('--fallSpeed', orb.fallSpeed + 's');
+                orbElement.style.setProperty('--hue', orb.hue);
+                orbElement.style.setProperty('--delay', orb.delay + 's');
+                
+                const inner = document.createElement('div');
+                inner.className = 'i';
+                orbElement.appendChild(inner);
+                
+                container.appendChild(orbElement);
+            });
+            
+            document.getElementById('orbCount').textContent = targetCount;
+        }
+        
+        function setEnrageTurns(turns) {
+            updateOrbs(turns);
+        }
+        
+        // Initialize with no enrage
+        updateOrbs(0);
+    </script>
+</body>
+</html>
