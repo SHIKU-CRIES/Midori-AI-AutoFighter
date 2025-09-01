@@ -4,7 +4,7 @@ import { join } from 'path';
 
 describe('SettingsMenu component', () => {
   test('renders tab icons and panels', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/SettingsMenu.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/SettingsMenu.svelte'), 'utf8');
     expect(content).toContain('class="tabs"');
     expect(content).toContain('<Volume2 />');
     expect(content).toContain('<Cog />');
@@ -16,7 +16,7 @@ describe('SettingsMenu component', () => {
     expect(content).toContain('Wipe Save Data');
     expect(content).toContain('Backup Save Data');
     expect(content).toContain('Import Save Data');
-    expect(content).toContain('End Run');
+    expect(content).toContain('End Current Run');
     expect(content).toContain('data-testid="wipe-status"');
     expect(content).toContain('data-testid="save-status"');
     expect(content).toContain('LRM Model');
@@ -29,7 +29,7 @@ describe('SettingsMenu component', () => {
   });
 
   test('dispatches endRun even if API call fails', async () => {
-    const source = readFileSync(join(import.meta.dir, '../src/lib/SettingsMenu.svelte'), 'utf8');
+    const source = readFileSync(join(import.meta.dir, '../src/lib/components/SettingsMenu.svelte'), 'utf8');
     const start = source.indexOf('async function handleEndRun');
     const brace = source.indexOf('{', start);
     let depth = 1;

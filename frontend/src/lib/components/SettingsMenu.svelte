@@ -325,7 +325,7 @@
       </div>
       <div class="control" title="End the current run.">
         <Power />
-        <label>End Run</label>
+        <label>End Current Run</label>
         <button on:click={handleEndRun} disabled={!runId}>End</button>
       </div>
       <div class="control" title="End all active runs on the backend.">
