@@ -187,6 +187,186 @@ def test_get_map_endpoint_after_restart():
         db_path.unlink(missing_ok=True)
 
 
+def test_enhanced_map_endpoint_current_state():
+    """Test that the enhanced /map/<run_id> endpoint includes current_state section."""
+    import asyncio
+
+    from routes.runs import get_map
+
+    # Use a temporary database file
+    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp_db:
+        db_path = Path(tmp_db.name)
+
+    try:
+        # Set up test environment
+        import os
+        original_db_url = os.environ.get('DATABASE_URL')
+        os.environ['DATABASE_URL'] = f'sqlite:///{db_path}'
+
+        # Reset global state
+        game.SAVE_MANAGER = None
+        game.FERNET = None
+
+        # Get save manager
+        manager = get_save_manager()
+
+        # Create a test run with specific state
+        run_id = f'test-enhanced-map-{int(time.time())}'
+        party_data = {
+            "members": ["player"],
+            "gold": 100,
+            "relics": [],
+            "cards": [],
+            "exp": {"player": 0},
+            "level": {"player": 1},
+            "rdr": 1.0,
+            "player": {"pronouns": "", "damage_type": "Fire", "stats": {"hp": 0, "attack": 0, "defense": 0}}
+        }
+        map_data = {
+            "rooms": [
+                {"room_type": "start", "floor": 1, "index": 0, "room_id": 0, "loop": 1, "pressure": 0},
+                {"room_type": "battle-weak", "floor": 1, "index": 1, "room_id": 1, "loop": 1, "pressure": 0},
+                {"room_type": "battle-normal", "floor": 1, "index": 2, "room_id": 2, "loop": 1, "pressure": 0},
+                {"room_type": "shop", "floor": 1, "index": 3, "room_id": 3, "loop": 1, "pressure": 0}
+            ],
+            "current": 1,  # Currently at battle-weak
+            "battle": False,
+            "awaiting_card": False,
+            "awaiting_relic": False,
+            "awaiting_next": False,
+        }
+
+        with manager.connection() as conn:
+            conn.execute(
+                "INSERT INTO runs (id, party, map) VALUES (?, ?, ?)",
+                (run_id, json.dumps(party_data), json.dumps(map_data))
+            )
+
+        # Test the enhanced endpoint
+        async def test_enhanced_endpoint():
+            response_data, status_code, headers = await get_map(run_id)
+            response_json = response_data.get_json()
+
+            assert status_code == 200
+            
+            # Verify traditional map and party data still exists
+            assert "map" in response_json
+            assert "party" in response_json
+            assert response_json["map"]["current"] == 1
+            assert response_json["party"] == ["player"]
+            
+            # Verify new current_state section exists
+            assert "current_state" in response_json
+            current_state = response_json["current_state"]
+            
+            # Test current_state provides authoritative information
+            assert current_state["current_index"] == 1
+            assert current_state["current_room_type"] == "battle-weak"
+            assert current_state["next_room_type"] == "battle-normal"
+            assert current_state["awaiting_next"] is False
+            assert current_state["awaiting_card"] is False
+            assert current_state["awaiting_relic"] is False
+            
+            # Verify room_data is null when no active battle
+            assert current_state["room_data"] is None
+
+        asyncio.run(test_enhanced_endpoint())
+
+    finally:
+        # Clean up
+        if original_db_url:
+            os.environ['DATABASE_URL'] = original_db_url
+        else:
+            os.environ.pop('DATABASE_URL', None)
+        db_path.unlink(missing_ok=True)
+
+
+def test_enhanced_map_endpoint_with_awaiting_next():
+    """Test enhanced /map endpoint when awaiting_next is True."""
+    import asyncio
+
+    from routes.runs import get_map
+
+    # Use a temporary database file
+    with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp_db:
+        db_path = Path(tmp_db.name)
+
+    try:
+        # Set up test environment
+        import os
+        original_db_url = os.environ.get('DATABASE_URL')
+        os.environ['DATABASE_URL'] = f'sqlite:///{db_path}'
+
+        # Reset global state
+        game.SAVE_MANAGER = None
+        game.FERNET = None
+
+        # Get save manager
+        manager = get_save_manager()
+
+        # Create a test run in awaiting_next state
+        run_id = f'test-awaiting-next-{int(time.time())}'
+        party_data = {
+            "members": ["player"],
+            "gold": 50,
+            "relics": [],
+            "cards": [],
+            "exp": {"player": 0},
+            "level": {"player": 1},
+            "rdr": 1.0,
+            "player": {"pronouns": "", "damage_type": "Light", "stats": {"hp": 0, "attack": 0, "defense": 0}}
+        }
+        map_data = {
+            "rooms": [
+                {"room_type": "start", "floor": 1, "index": 0, "room_id": 0, "loop": 1, "pressure": 0},
+                {"room_type": "battle-weak", "floor": 1, "index": 1, "room_id": 1, "loop": 1, "pressure": 0},
+                {"room_type": "rest", "floor": 1, "index": 2, "room_id": 2, "loop": 1, "pressure": 0}
+            ],
+            "current": 1,  # Currently at battle-weak
+            "battle": False,
+            "awaiting_card": False,
+            "awaiting_relic": False,
+            "awaiting_next": True,  # Waiting for next room
+        }
+
+        with manager.connection() as conn:
+            conn.execute(
+                "INSERT INTO runs (id, party, map) VALUES (?, ?, ?)",
+                (run_id, json.dumps(party_data), json.dumps(map_data))
+            )
+
+        # Test the enhanced endpoint with awaiting_next
+        async def test_awaiting_next():
+            response_data, status_code, headers = await get_map(run_id)
+            response_json = response_data.get_json()
+
+            assert status_code == 200
+            current_state = response_json["current_state"]
+            
+            # Verify awaiting_next state is correctly reported
+            assert current_state["awaiting_next"] is True
+            assert current_state["current_index"] == 1
+            assert current_state["current_room_type"] == "battle-weak"
+            assert current_state["next_room_type"] == "rest"
+            
+            # Verify room_data includes awaiting info
+            room_data = current_state["room_data"]
+            assert room_data is not None
+            assert room_data["awaiting_next"] is True
+            assert room_data["current_room"] == "battle-weak"
+            assert room_data["next_room"] == "rest"
+
+        asyncio.run(test_awaiting_next())
+
+    finally:
+        # Clean up
+        if original_db_url:
+            os.environ['DATABASE_URL'] = original_db_url
+        else:
+            os.environ.pop('DATABASE_URL', None)
+        db_path.unlink(missing_ok=True)
+
+
 def test_run_not_found():
     """Test that non-existent runs return 404."""
     import asyncio

@@ -1,5 +1,5 @@
 // Utilities for persisting and restoring run state.
-// Stores current run id and next room in localStorage.
+// Stores current run id in localStorage.
 
 const STORAGE_KEY = 'runState';
 
@@ -13,10 +13,10 @@ export function loadRunState() {
   }
 }
 
-/** Save the current run id and next room to localStorage. */
-export function saveRunState(runId, nextRoom) {
+/** Save the current run id to localStorage. */
+export function saveRunState(runId) {
   if (runId) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ runId, nextRoom }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ runId }));
   }
 }
 
