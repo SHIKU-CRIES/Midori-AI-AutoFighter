@@ -88,22 +88,46 @@
     // Always attempt to restore run state from localStorage, regardless of backend status
     const saved = loadRunState();
     
-    async function tryRestoreRun() {
-      if (!saved) return;
+    async function syncWithBackend() {
+      if (!saved?.runId) return;
       
       try {
         const data = await getMap(saved.runId);
         if (!data) {
           clearRunState();
+          return;
+        }
+        
+        // Use backend as source of truth for all state
+        runId = saved.runId;
+        selectedParty = data.party || selectedParty;
+        mapRooms = data.map.rooms || [];
+        
+        // Use the enhanced current_state data from backend
+        if (data.current_state) {
+          currentIndex = data.current_state.current_index || 0;
+          currentRoomType = data.current_state.current_room_type || '';
+          nextRoom = data.current_state.next_room_type || '';
+          
+          // Set room data directly from backend if available
+          if (data.current_state.room_data) {
+            roomData = data.current_state.room_data;
+            
+            // If it's a battle and has snapshot data, start battle state
+            if (data.current_state.room_data.result === 'battle' && !data.current_state.awaiting_next) {
+              battleActive = true;
+              startBattlePoll();
+            }
+          }
         } else {
-          runId = saved.runId;
-          selectedParty = data.party || selectedParty;
-          mapRooms = data.map.rooms || [];
+          // Fallback to map-based state for backward compatibility
           currentIndex = data.map.current || 0;
           currentRoomType = mapRooms[currentIndex]?.room_type || '';
           nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
           await enterRoom();
         }
+        
+        saveRunState(runId);
       } catch (e) {
         // If run restoration fails due to backend unavailability, keep the runId for later retry
         if (saved?.runId) {
@@ -112,13 +136,13 @@
       }
     }
     
-    // Try to get backend flavor and restore run
+    // Try to get backend flavor and sync with backend
     try {
       backendFlavor = await getBackendFlavor();
       window.backendFlavor = backendFlavor;
       
-      // Backend is ready, attempt run restoration
-      await tryRestoreRun();
+      // Backend is ready, sync with backend state
+      await syncWithBackend();
     } catch (e) {
       // Backend not ready, but still attempt to restore run state for later
       if (saved?.runId) {
@@ -140,29 +164,48 @@
     } catch {}
 
     if (runId) {
-      // If we have a runId but don't have map data (e.g., backend was unavailable during load),
-      // try to restore the run data now
-      if (!mapRooms.length || currentIndex === 0) {
-        const saved = loadRunState();
-        if (saved?.runId === runId) {
-          try {
-            const data = await getMap(runId);
-            if (data) {
-              selectedParty = data.party || selectedParty;
-              mapRooms = data.map.rooms || [];
-              currentIndex = data.map.current || 0;
-              currentRoomType = mapRooms[currentIndex]?.room_type || '';
-              nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
+      // If we have a runId, sync with backend to get current state
+      try {
+        const data = await getMap(runId);
+        if (data) {
+          selectedParty = data.party || selectedParty;
+          mapRooms = data.map.rooms || [];
+          
+          // Use backend's current_state as source of truth
+          if (data.current_state) {
+            currentIndex = data.current_state.current_index || 0;
+            currentRoomType = data.current_state.current_room_type || '';
+            nextRoom = data.current_state.next_room_type || '';
+            
+            // Use room data from backend if available
+            if (data.current_state.room_data) {
+              roomData = data.current_state.room_data;
+              
+              // If it's a battle and not awaiting next, start battle state
+              if (data.current_state.room_data.result === 'battle' && !data.current_state.awaiting_next) {
+                battleActive = true;
+                startBattlePoll();
+              }
             }
-          } catch (e) {
-            // If we still can't get run data, show error but don't clear runId
-            console.warn('Failed to restore run data:', e.message);
+          } else {
+            // Fallback for backward compatibility
+            currentIndex = data.map.current || 0;
+            currentRoomType = mapRooms[currentIndex]?.room_type || '';
+            nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
           }
+        } else {
+          // Run not found on backend, clear local state
+          console.warn('Run not found on backend, clearing local state');
+          clearRunState();
+          runId = '';
         }
+      } catch (e) {
+        // If we can't get run data, show error but don't clear runId
+        console.warn('Failed to restore run data:', e.message);
       }
       
       homeOverlay();
-      if (!battleActive) {
+      if (!battleActive && !roomData) {
         enterRoom();
       }
     } else {
@@ -226,7 +269,7 @@
           currentIndex = activeRun.map.current || 0;
           currentRoomType = mapRooms[currentIndex]?.room_type || '';
           nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
-          saveRunState(runId, nextRoom);
+          saveRunState(runId);
           homeOverlay();
           await enterRoom();
           return;
@@ -244,7 +287,7 @@
     currentIndex = data.map.current || 0;
     currentRoomType = mapRooms[currentIndex]?.room_type || '';
     nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
-    saveRunState(runId, nextRoom);
+    saveRunState(runId);
     homeOverlay();
     await enterRoom();
   }
@@ -262,7 +305,7 @@
       currentIndex = data.map.current || 0;
       currentRoomType = mapRooms[currentIndex]?.room_type || '';
       nextRoom = mapRooms[currentIndex + 1]?.room_type || '';
-      saveRunState(runId, nextRoom);
+      saveRunState(runId);
       backOverlay();
       homeOverlay();
       await enterRoom();
@@ -492,7 +535,7 @@
       if (typeof data.current_index === 'number') currentIndex = data.current_index;
       if (data.current_room) currentRoomType = data.current_room;
       nextRoom = data.next_room || (mapRooms?.[currentIndex + 1]?.room_type || nextRoom || '');
-      saveRunState(runId, nextRoom);
+      saveRunState(runId);
       if (endpoint === 'battle' || endpoint === 'boss') {
         const gotRewards = hasRewards(data);
         if (gotRewards) {
@@ -558,7 +601,7 @@
         nextRoom = snap.next_room || nextRoom;
         if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
         if (snap.current_room) currentRoomType = snap.current_room;
-        saveRunState(runId, nextRoom);
+        saveRunState(runId);
         // Avoid noisy overlays on transient 400s.
         const simpleRecoverable = (e?.status === 400 || e?.status === 404) || /not ready|awaiting next|invalid room|out of range/i.test(String(e?.message || ''));
         if (!simpleRecoverable) {

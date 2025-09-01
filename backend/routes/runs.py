@@ -223,17 +223,63 @@ async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
             start_run_logging(run_id)
     except Exception:
         pass
-    def get_run_data():
-        with get_save_manager().connection() as conn:
-            cur = conn.execute("SELECT map, party FROM runs WHERE id = ?", (run_id,))
-            return cur.fetchone()
 
-    row = await asyncio.to_thread(get_run_data)
-    if row is None:
+    # Load map and party data
+    state, rooms = await asyncio.to_thread(load_map, run_id)
+    if not state:
         return jsonify({"error": "run not found"}), 404
-    map_state = json.loads(row[0])
-    party_state = json.loads(row[1]) if row[1] else {}
-    return jsonify({"map": map_state, "party": party_state.get("members", [])})
+
+    def get_party_data():
+        with get_save_manager().connection() as conn:
+            cur = conn.execute("SELECT party FROM runs WHERE id = ?", (run_id,))
+            row = cur.fetchone()
+            return json.loads(row[0]) if row and row[0] else {}
+
+    party_state = await asyncio.to_thread(get_party_data)
+
+    # Determine current room state and what the frontend should display
+    current_index = int(state.get("current", 0))
+    current_room_data = None
+    current_room_type = None
+    next_room_type = None
+
+    if rooms and 0 <= current_index < len(rooms):
+        current_node = rooms[current_index]
+        current_room_type = current_node.room_type
+
+        # Get next room type if available
+        if current_index + 1 < len(rooms):
+            next_room_type = rooms[current_index + 1].room_type
+
+        # Check if there's an active battle snapshot
+        snap = battle_snapshots.get(run_id)
+        if snap is not None and current_room_type in {'battle-weak', 'battle-normal', 'battle-boss-floor'}:
+            current_room_data = snap
+        elif state.get("awaiting_next"):
+            # Provide basic state when awaiting next room
+            current_room_data = {
+                "result": current_room_type.replace('-', '_') if current_room_type else "unknown",
+                "awaiting_next": True,
+                "current_index": current_index,
+                "current_room": current_room_type,
+                "next_room": next_room_type
+            }
+
+    response = {
+        "map": state,
+        "party": party_state.get("members", []),
+        "current_state": {
+            "current_index": current_index,
+            "current_room_type": current_room_type,
+            "next_room_type": next_room_type,
+            "awaiting_next": state.get("awaiting_next", False),
+            "awaiting_card": state.get("awaiting_card", False),
+            "awaiting_relic": state.get("awaiting_relic", False),
+            "room_data": current_room_data
+        }
+    }
+
+    return jsonify(response)
 
 
 @bp.delete("/run/<run_id>")
