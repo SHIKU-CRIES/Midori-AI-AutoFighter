@@ -11,9 +11,10 @@ class AttackUp:
     trigger = "battle_start"
     amount = 5
 
-    async def apply(self, target) -> None:
+    async def apply(self, target, **kwargs) -> None:
+        stack_index = kwargs.get('stack_index', 0)
         effect = StatEffect(
-            name=f"{self.id}_atk_up",
+            name=f"{self.id}_atk_up_{stack_index}",
             stat_modifiers={"atk": self.amount},
             source=self.id,
         )
