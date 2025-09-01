@@ -57,6 +57,21 @@ class LunaLunarReservoir:
             )
             target.add_effect(dodge_effect)
 
+    async def on_turn_end(self, target: "Stats") -> None:
+        """Handle charge spending at end of turn when in boosted mode."""
+        entity_id = id(target)
+
+        # Initialize charge if not present
+        if entity_id not in self._charge_points:
+            self._charge_points[entity_id] = 0
+            return
+
+        current_charge = self._charge_points[entity_id]
+
+        # Spend 50 charge per turn when above 200 (boosted mode)
+        if current_charge > 200:
+            self._charge_points[entity_id] = max(200, current_charge - 50)
+
     @classmethod
     def get_charge(cls, target: "Stats") -> int:
         """Get current charge points for an entity."""

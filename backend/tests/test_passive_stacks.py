@@ -157,7 +157,7 @@ async def test_soft_caps_luna_beyond_200():
     description = registry.describe(luna)
     luna_passive = next((p for p in description if p["id"] == "luna_lunar_reservoir"), None)
     assert luna_passive is not None
-    
+
     # Should show current charge (might be less due to boosted mode spending)
     current_charge = LunaLunarReservoir.get_charge(luna)
     assert current_charge >= 200  # Should be able to go past 200
@@ -180,7 +180,7 @@ async def test_soft_caps_ally_beyond_120():
         await registry.trigger("action_taken", ally)
 
     current_charge = AllyOverload.get_charge(ally)
-    
+
     # Should be able to go past 120
     if current_charge > 120:
         description = registry.describe(ally)
@@ -193,7 +193,6 @@ async def test_soft_caps_ally_beyond_120():
 async def test_soft_caps_graygray_beyond_50():
     """Test that Graygray Counter Maestro can stack beyond 50 with reduced benefits."""
     registry = PassiveRegistry()
-    from plugins.passives.graygray_counter_maestro import GraygrayCounterMaestro
 
     graygray = Stats(hp=1000, damage_type=Generic())
     graygray.passives = ["graygray_counter_maestro"]
