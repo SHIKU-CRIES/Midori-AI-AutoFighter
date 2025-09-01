@@ -28,7 +28,7 @@ async def test_many_dots_performance():
         dot = DamageOverTime(
             name=f"test_dot_{i}",
             damage=1,  # Small damage to avoid killing the target too quickly
-            turns=10,  # 10 turns each
+            turns=10000,  # 10 turns each
             id=f"dot_{i}",
             source=target
         )
