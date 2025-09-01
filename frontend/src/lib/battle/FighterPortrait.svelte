@@ -137,8 +137,8 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
   .ultimate-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
   .track {
@@ -152,12 +152,12 @@
     stroke-width: 2;
     transition: stroke-dasharray 0.2s linear;
   }
-  .element-icon { width: 16px; height: 16px; display: block; }
+  .element-icon { width: 18px; height: 18px; display: block; }
 
   .passive-indicators {
     position: absolute;
     bottom: 2px;
-    right: 24px;
+    right: 28px;
     display: flex;
     gap: 2px;
     pointer-events: none;
