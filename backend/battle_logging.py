@@ -256,6 +256,9 @@ class BattleLogger:
         attacker_id = getattr(attacker, 'id', str(attacker))
         target_id = getattr(target, 'id', str(target))
 
+        if source_type == "attack" and not action_name:
+            action_name = "Normal Attack"
+
         # Get damage type if not provided
         if damage_type is None and hasattr(attacker, 'damage_type'):
             damage_type = getattr(attacker.damage_type, 'id', str(attacker.damage_type))
