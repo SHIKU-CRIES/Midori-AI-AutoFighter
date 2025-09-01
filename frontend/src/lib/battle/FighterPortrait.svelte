@@ -18,6 +18,9 @@
   // For now, allow up to +100% overheal to display visually.
   const OH_CAP_UI = 100;
   $: ohDispPct = Math.min(ohPct, OH_CAP_UI);
+
+  $: elColor = getElementColor(fighter.element);
+  $: ultProgress = Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15));
 </script>
 
 <div class="portrait-wrap">
@@ -30,19 +33,36 @@
     {/if}
     <div class="hp-fill" style={`width: ${hpPct}%`}></div>
   </div>
-  <div class="portrait-frame" title={passiveTip}>
+  <div
+    class="portrait-frame"
+    class:ultimate-ready={fighter.ultimate_ready}
+    title={passiveTip}
+    style={`--el-color: ${elColor}`}
+  >
     <img
       src={getCharacterImage(fighter.id)}
       alt=""
       class="portrait"
-      style={`border-color: ${getElementColor(fighter.element)}`}
+      style={`border-color: ${elColor}`}
     />
     <div class="element-chip">
+      <svg class="ultimate-ring" viewBox="0 0 20 20">
+        <circle class="track" cx="10" cy="10" r="9" />
+        <circle
+          class="fill"
+          pathLength="100"
+          cx="10"
+          cy="10"
+          r="9"
+          style={`stroke-dasharray: ${ultProgress * 100} 100`}
+        />
+      </svg>
       <svelte:component
         this={getElementIcon(fighter.element)}
         class="element-icon"
-        style={`color: ${getElementColor(fighter.element)}`}
-        aria-hidden="true" />
+        style={`color: ${elColor}`}
+        aria-hidden="true"
+      />
     </div>
   </div>
   {#if ((Array.isArray(fighter.hots) ? fighter.hots.length : 0) + (Array.isArray(fighter.dots) ? fighter.dots.length : 0) + (Array.isArray(fighter.active_effects) ? fighter.active_effects.length : 0)) > 0}
@@ -86,6 +106,7 @@
     border-radius: 4px;
     display: block;
   }
+  .portrait-frame.ultimate-ready { box-shadow: 0 0 8px var(--el-color); }
   .element-chip {
     position: absolute;
     bottom: 2px;
@@ -95,6 +116,20 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    width: 20px;
+    height: 20px;
+  }
+  .ultimate-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .track {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.4);
+    stroke-width: 2;
+  }
+  .fill {
+    fill: none;
+    stroke: var(--el-color);
+    stroke-width: 2;
+    transition: stroke-dasharray 0.2s linear;
   }
   .element-icon { width: 16px; height: 16px; display: block; }
 
