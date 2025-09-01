@@ -15,7 +15,7 @@ class BubblesBubbleBurst:
     id = "bubbles_bubble_burst"
     name = "Bubble Burst"
     trigger = "turn_start"  # Triggers at start of Bubbles' turn
-    max_stacks = 1  # Only one instance per character
+    max_stacks = 20  # Show attack buff stacks (each bubble burst gives +10% attack)
 
     # Track bubble stacks per enemy target
     _bubble_stacks: ClassVar[dict[int, dict[int, int]]] = {}  # bubbles_id -> {target_id -> stacks}
@@ -74,3 +74,14 @@ class BubblesBubbleBurst:
         if bubbles_id not in cls._bubble_stacks:
             return 0
         return cls._bubble_stacks[bubbles_id].get(enemy_id, 0)
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current attack buff stacks for UI display."""
+        # Count permanent attack buff effects from bubble bursts
+        return len([e for e in target._active_effects if e.name.startswith(f"{cls.id}_burst_bonus")])
+
+    @classmethod
+    def get_attack_buff_stacks(cls, target: "Stats") -> int:
+        """Get current number of permanent attack buffs from bubble bursts."""
+        return cls.get_stacks(target)

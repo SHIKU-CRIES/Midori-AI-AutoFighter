@@ -15,7 +15,7 @@ class CarlyGuardiansAegis:
     id = "carly_guardians_aegis"
     name = "Guardian's Aegis"
     trigger = "turn_start"  # Triggers at start of turn for healing
-    max_stacks = 1  # Only one instance per character
+    max_stacks = 50  # Show mitigation stacks (2 per hit, reasonable max around 50)
 
     # Class-level tracking of mitigation stacks gained from being hit
     _mitigation_stacks: ClassVar[dict[int, int]] = {}
@@ -56,6 +56,10 @@ class CarlyGuardiansAegis:
     async def on_damage_taken(self, target: "Stats", attacker: "Stats", damage: int) -> None:
         """Handle Carly's damage mitigation mechanics when hit."""
         entity_id = id(target)
+
+        # Initialize mitigation stack tracking if not present
+        if entity_id not in self._mitigation_stacks:
+            self._mitigation_stacks[entity_id] = 0
 
         # Apply mitigation twice (square mitigation)
         # This would need integration with damage calculation system
@@ -110,4 +114,9 @@ class CarlyGuardiansAegis:
     @classmethod
     def get_mitigation_stacks(cls, target: "Stats") -> int:
         """Get current mitigation stacks for an entity."""
+        return cls._mitigation_stacks.get(id(target), 0)
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current mitigation stacks for UI display."""
         return cls._mitigation_stacks.get(id(target), 0)
