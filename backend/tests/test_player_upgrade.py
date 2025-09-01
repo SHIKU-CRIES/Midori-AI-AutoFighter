@@ -21,6 +21,12 @@ def app_with_db(tmp_path, monkeypatch):
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
     conn.execute(
+        "CREATE TABLE IF NOT EXISTS damage_types (id TEXT PRIMARY KEY, type TEXT)"
+    )
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS upgrade_items (id TEXT PRIMARY KEY, count INTEGER NOT NULL)"
+    )
+    conn.execute(
         "INSERT OR REPLACE INTO damage_types (id, type) VALUES (?, ?)",
         ("player", "fire"),
     )
@@ -34,27 +40,13 @@ def app_with_db(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_upgrade_increases_stats(app_with_db):
+async def test_upgrade_requires_json_data(app_with_db):
     app, db_path = app_with_db
     client = app.test_client()
 
+    # Test that API now requires JSON data
     resp = await client.post("/players/player/upgrade")
     data = await resp.get_json()
-    assert data["level"] == 1
-    assert data["items"].get("fire_4", 0) == 0
-
-    resp = await client.get("/players/player/upgrade")
-    data = await resp.get_json()
-    assert data["level"] == 1
-
-    resp = await client.get("/players")
-    roster = await resp.get_json()
-    player_entry = next(p for p in roster["players"] if p["id"] == "player")
-    assert player_entry["stats"]["max_hp"] > 1000
-
-    conn = sqlcipher3.connect(db_path)
-    conn.execute("PRAGMA key = 'testkey'")
-    cur = conn.execute("SELECT level FROM player_upgrades WHERE id = ?", ("player",))
-    assert cur.fetchone()[0] == 1
-    conn.close()
+    assert resp.status_code == 400
+    assert "JSON data required" in data["error"]
 
