@@ -48,19 +48,19 @@
   $: partyCount = Array.isArray(party) ? party.length : 0;
   $: foeCount = Array.isArray(foes) ? foes.length : 0;
   function sizeForParty(n) {
-    if (n <= 1) return 9.5; // bigger when solo
-    if (n <= 2) return 8.5;
-    if (n <= 3) return 8.0;
-    if (n <= 4) return 7.5;
-    return 7.0; // 5 max party, a bit bigger than old 6rem
+    if (n <= 1) return 10.0; // slightly bigger when solo
+    if (n <= 2) return 9.0;
+    if (n <= 3) return 8.5;
+    if (n <= 4) return 8.0;
+    return 7.5; // 5 max party
   }
   function sizeForFoes(n) {
-    if (n <= 1) return 8.0;
-    if (n <= 2) return 7.5;
-    if (n <= 4) return 7.25;
-    if (n <= 6) return 6.75;
-    if (n <= 8) return 6.25;
-    return 6.0; // keep current size so 10 foes fit
+    if (n <= 1) return 8.5;
+    if (n <= 2) return 8.0;
+    if (n <= 4) return 7.75;
+    if (n <= 6) return 7.25;
+    if (n <= 8) return 6.75;
+    return 6.5; // still compact to fit many foes
   }
   $: partyPortraitSize = `${sizeForParty(partyCount)}rem`;
   $: foePortraitSize = `${sizeForFoes(foeCount)}rem`;
@@ -312,10 +312,11 @@
   }
   .combatant {
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* align stats with top of portrait block */
+    gap: 10px; /* consistent spacing between portrait and stats on both sides */
   }
   /* Ensure clear spacing on the foe side where layout is reversed */
-  .foe-column .combatant { gap: 8px; }
+  .foe-column .combatant { /* gap handled globally above */ }
   .foe-column .combatant {
     flex-direction: row-reverse;
   }
@@ -337,8 +338,8 @@
   .v { font-variant-numeric: tabular-nums; }
   .badge { display: none; }
   details.advanced { margin-top: 0.15rem; }
-  .stats.right { margin-left: 4px; text-align: left; }
-  .stats.left { margin-right: 8px; text-align: right; }
+  .stats.right { margin-left: 0; text-align: left; }
+  .stats.left { margin-right: 0; text-align: right; }
   @media (max-width: 600px) {
     .stats {
       width: 4rem;

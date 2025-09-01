@@ -1,5 +1,7 @@
 <script>
   // Renders a fighter portrait with HP bar, element chip, and status icons.
+  import { Circle as PipCircle } from 'lucide-svelte';
+
   import { getCharacterImage, getElementColor, getElementIcon } from '../systems/assetLoader.js';
   import StatusIcons from './StatusIcons.svelte';
 
@@ -22,18 +24,40 @@
 
   $: elColor = getElementColor(fighter.element);
   $: ultProgress = Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15));
+  let lowContrast = false;
+
+  // Improve ring readability for dark-type or low-brightness colors
+  function parseHex(hex) {
+    if (typeof hex !== 'string') return null;
+    const h = hex.trim();
+    const m3 = /^#([\da-fA-F])([\da-fA-F])([\da-fA-F])$/;
+    const m6 = /^#([\da-fA-F]{2})([\da-fA-F]{2})([\da-fA-F]{2})$/;
+    let r, g, b;
+    if (m6.test(h)) {
+      const m = h.match(m6);
+      r = parseInt(m[1], 16); g = parseInt(m[2], 16); b = parseInt(m[3], 16);
+    } else if (m3.test(h)) {
+      const m = h.match(m3);
+      r = parseInt(m[1] + m[1], 16); g = parseInt(m[2] + m[2], 16); b = parseInt(m[3] + m[3], 16);
+    } else {
+      return null;
+    }
+    return { r, g, b };
+  }
+  function isLowBrightness(color) {
+    const rgb = parseHex(color);
+    if (!rgb) return false;
+    const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000; // 0-255
+    return brightness < 145; // threshold tuned for dark background
+  }
+  $: lowContrast = (() => {
+    const name = String(fighter?.element || '').toLowerCase();
+    if (name === 'dark') return true;
+    return isLowBrightness(elColor);
+  })();
 </script>
 
 <div class="portrait-wrap">
-  <div class="hp-bar">
-    {#if ohDispPct > 0}
-      <div
-        class="overheal-fill"
-        style={`width: calc(${ohDispPct}% + 5px); left: -5px;`}
-      ></div>
-    {/if}
-    <div class="hp-fill" style={`width: ${hpPct}%`}></div>
-  </div>
   <div
     class="portrait-frame"
     class:ultimate-ready={fighter.ultimate_ready}
@@ -46,9 +70,17 @@
       class="portrait"
       style={`border-color: ${elColor}`}
     />
-    <div class="element-chip">
+    <div class="element-chip" class:low-contrast={lowContrast}>
       <svg class="ultimate-ring" viewBox="0 0 20 20">
         <circle class="track" cx="10" cy="10" r="9" />
+        <circle
+          class="contrast"
+          pathLength="100"
+          cx="10"
+          cy="10"
+          r="9"
+          style={`stroke-dasharray: ${ultProgress * 100} 100`}
+        />
         <circle
           class="fill"
           pathLength="100"
@@ -69,11 +101,16 @@
       <div class="passive-indicators" class:reduced={reducedMotion}>
         {#each fighter.passives as p (p.id)}
           {@const tip = `${p.id} ${p.stacks}${p.max_stacks ? `/${p.max_stacks}` : ''}`}
-          <div class="passive" aria-label={tip} title={tip}>
+          <div class="passive" class:pips-mode={(p.max_stacks && p.max_stacks <= 5)} aria-label={tip} title={tip}>
             {#if p.max_stacks && p.max_stacks <= 5}
-              <div class="pips">
+            <div class="pips">
                 {#each Array(p.max_stacks) as _, i (i)}
-                  <span class="pip" class:filled={i < p.stacks} aria-hidden="true"></span>
+                  <PipCircle
+                    class={`pip-icon${i < p.stacks ? ' filled' : ''}`}
+                    stroke="none"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  />
                 {/each}
               </div>
             {:else if p.max_stacks}
@@ -85,6 +122,15 @@
         {/each}
       </div>
     {/if}
+  </div>
+  <div class="hp-bar">
+    {#if ohDispPct > 0}
+      <div
+        class="overheal-fill"
+        style={`width: calc(${ohDispPct}% + 5px); left: -5px;`}
+      ></div>
+    {/if}
+    <div class="hp-fill" style={`width: ${hpPct}%`}></div>
   </div>
   {#if ((Array.isArray(fighter.hots) ? fighter.hots.length : 0) + (Array.isArray(fighter.dots) ? fighter.dots.length : 0) + (Array.isArray(fighter.active_effects) ? fighter.active_effects.length : 0)) > 0}
     <!-- Buff Bar: shows current HoT/DoT effects under the portrait. -->
@@ -103,23 +149,32 @@
     align-items: center;
   }
   .hp-bar {
-    width: var(--portrait-size);
-    height: 0.5rem;
+    /* Slightly narrower than portrait for breathing room, centered by parent */
+    width: calc(var(--portrait-size) - 0.75rem);
+    height: 0.4rem; /* a bit smaller */
     border: 1px solid #000;
     background: #333;
-    margin-bottom: 0.2rem;
+    margin-top: 0.35rem; /* add space below the portrait */
     position: relative;
     overflow: visible; /* allow underlay to extend slightly to the left */
+    border-radius: 3px;
   }
   .hp-fill { height: 100%; background: #0f0; position: absolute; left: 0; top: 0; }
   .overheal-fill {
-    height: calc(100% + 4px);
+    height: calc(100% + 2px);
     background: rgba(255, 255, 255, 0.92);
     position: absolute;
     left: 0;
-    top: -2px; /* slight upward offset */
+    top: -1px; /* slight upward offset */
   }
   .portrait-frame { position: relative; width: var(--portrait-size); height: var(--portrait-size); }
+  /* Scale chip and pips relative to the portrait so Battle Review auto-resizes */
+  .portrait-frame {
+    --chip-size: calc(var(--portrait-size) * 0.34);
+    /* Allow pips to scale across views while staying small */
+    --pip-size: clamp(4px, calc(var(--portrait-size) * 0.11), 10px);
+    --pip-gap: clamp(1px, calc(var(--portrait-size) * 0.02), 3px);
+  }
   .portrait {
     width: 100%;
     height: 100%;
@@ -137,14 +192,32 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    width: 24px;
-    height: 24px;
+    width: var(--chip-size);
+    height: var(--chip-size);
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    isolation: isolate; /* ensure pseudo-element stays within stacking context */
+    /* Strong background blur to improve ring/icon readability on all elements */
+    backdrop-filter: blur(12px) saturate(110%);
+    -webkit-backdrop-filter: blur(12px) saturate(110%);
   }
+  /* Remove outer fade/glow around the element chip per feedback */
+  .element-chip::before { content: none; }
   .ultimate-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
   .track {
     fill: none;
     stroke: rgba(0, 0, 0, 0.4);
     stroke-width: 2;
+  }
+  /* Contrast stroke sits behind the colored fill; only visible on low-contrast */
+  .contrast {
+    fill: none;
+    stroke: #fff;
+    stroke-opacity: 0.55;
+    stroke-width: 3;
+    opacity: 0;
+    transition: opacity 0.15s linear;
   }
   .fill {
     fill: none;
@@ -152,12 +225,14 @@
     stroke-width: 2;
     transition: stroke-dasharray 0.2s linear;
   }
-  .element-icon { width: 18px; height: 18px; display: block; }
+  .element-chip.low-contrast .contrast { opacity: 1; }
+  .element-chip.low-contrast .track { stroke: rgba(255, 255, 255, 0.25); }
+  :global(.element-icon) { width: calc(var(--chip-size) * 0.5); height: calc(var(--chip-size) * 0.5); display: block; }
 
   .passive-indicators {
     position: absolute;
     bottom: 2px;
-    right: 28px;
+    right: calc(var(--chip-size) + 6px);
     display: flex;
     gap: 2px;
     pointer-events: none;
@@ -176,24 +251,32 @@
     font-size: 0.6rem;
     line-height: 1;
   }
-  .pips { display: flex; gap: 1px; }
-  .pip {
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s, background 0.2s;
+  /* Pips layout: remove baseline gap and make compact */
+  .pips { display: flex; gap: var(--pip-gap); line-height: 0; }
+  :global(.pip-icon) {
+    width: var(--pip-size);
+    height: var(--pip-size);
+    display: block; /* avoid baseline/descender gap that looks like a bar */
+    color: rgba(0, 0, 0, 0.55);
+    stroke: none; /* fill the lucide circle */
+    fill: currentColor;
+    transition: color 0.2s;
   }
-  .pip.filled {
-    background: var(--el-color);
-    transform: scale(1.2);
+  :global(.pip-icon.filled) {
+    color: var(--el-color);
+    /* No scale to keep pips small and tidy */
   }
-  .passive-indicators.reduced .pip {
-    transition: none;
+  /* When rendering pips, remove the glass background so no dark bar shows */
+  .passive.pips-mode {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    min-width: 0;
+    height: auto;
   }
-  .passive-indicators.reduced .pip.filled {
-    transform: none;
-  }
+  .passive-indicators.reduced :global(.pip-icon) { transition: none; }
+  .passive-indicators.reduced :global(.pip-icon.filled) { transform: none; }
 
   /* Buff Bar (stained-glass style) */
   .buff-bar {

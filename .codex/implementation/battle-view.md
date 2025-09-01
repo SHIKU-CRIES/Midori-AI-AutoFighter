@@ -8,8 +8,10 @@ party fixed to the left and foes to the right using explicit flex order.
 Visual pieces have been split into small subcomponents under
 `src/lib/battle/`:
 
-- `FighterPortrait.svelte` – portrait, HP bar, element chip and embedded
-  `StatusIcons`.
+- `FighterPortrait.svelte` – portrait, HP bar, element chip (with
+  square dark backdrop and fading outer glow) and embedded
+  `StatusIcons`. Passive stack pips render as lucide icons and tint
+  to the element color when filled.
 - `StatusIcons.svelte` – collapses duplicate HoT/DoT names into single icons
   with stack counts.
 - `EnrageIndicator.svelte` – pulsing red/blue overlay when the backend reports
