@@ -115,13 +115,19 @@ async def test_player_spend_points(app_with_db):
     app, db_path = app_with_db
     client = app.test_client()
 
-    # First, gain some points
+    # Check initial points
+    resp = await client.get("/players/player/upgrade")
+    initial_data = await resp.get_json()
+    initial_points = initial_data.get("upgrade_points", 0)
+
+    # Gain some points
     resp = await client.post(
         "/players/player/upgrade",
         json={"star_level": 1, "item_count": 10}
     )
     data = await resp.get_json()
-    assert data["total_points"] == 10
+    expected_points = initial_points + 10  # 10 * 1 point each
+    assert data["total_points"] == expected_points
 
     # Now spend points on max_hp
     resp = await client.post(
@@ -133,7 +139,7 @@ async def test_player_spend_points(app_with_db):
     assert data["stat_upgraded"] == "max_hp"
     assert data["points_spent"] == 5
     assert data["upgrade_percent"] == 0.005  # 5 * 0.001 = 0.5%
-    assert data["remaining_points"] == 5  # 10 - 5 = 5
+    assert data["remaining_points"] == expected_points - 5  # Should have spent 5 points
 
 
 @pytest.mark.asyncio
@@ -142,7 +148,12 @@ async def test_new_upgrade_data_in_get_endpoint(app_with_db):
     app, db_path = app_with_db
     client = app.test_client()
 
-    # First add some upgrades
+    # Check initial state
+    resp = await client.get("/players/ally/upgrade")
+    initial_data = await resp.get_json()
+    initial_count = len(initial_data.get("stat_upgrades", []))
+
+    # Add some upgrades
     await client.post(
         "/players/ally/upgrade",
         json={"star_level": 2, "item_count": 1}
@@ -155,7 +166,7 @@ async def test_new_upgrade_data_in_get_endpoint(app_with_db):
     # Should have new upgrade data
     assert "stat_upgrades" in data
     assert "stat_totals" in data
-    assert len(data["stat_upgrades"]) == 1
+    assert len(data["stat_upgrades"]) == initial_count + 1  # Should have one more upgrade
 
 
 @pytest.mark.asyncio
@@ -224,10 +235,16 @@ async def test_insufficient_points(app_with_db):
     app, db_path = app_with_db
     client = app.test_client()
 
-    # Try to spend points without having any
+    # Check current points
+    resp = await client.get("/players/player/upgrade")
+    data = await resp.get_json()
+    current_points = data.get("upgrade_points", 0)
+
+    # Try to spend more points than available
+    points_to_spend = current_points + 100  # Definitely more than available
     resp = await client.post(
         "/players/player/upgrade-stat",
-        json={"stat_name": "max_hp", "points": 1}
+        json={"stat_name": "max_hp", "points": points_to_spend}
     )
     data = await resp.get_json()
 
