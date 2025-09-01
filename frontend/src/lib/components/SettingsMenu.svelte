@@ -328,11 +328,6 @@
         <label>End Run</label>
         <button on:click={handleEndRun} disabled={!runId}>End</button>
       </div>
-      <div class="control" title="End all active runs on the backend.">
-        <Power />
-        <label>End All Runs</label>
-        <button on:click={handleEndAllRuns}>End All</button>
-      </div>
     </div>
   {/if}
 

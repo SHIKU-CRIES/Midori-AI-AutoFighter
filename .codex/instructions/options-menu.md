@@ -56,10 +56,10 @@ The Options submenu lets players adjust audio levels, system behaviour, and game
   - Tooltip: `Automatically craft materials when possible.`
   - Behavior: updates the backend via `/gacha/auto-craft` and stays in sync with the Crafting menu toggle.
 
-- **End Run**
+- **End Current Run**
   - Button that terminates the active run.
   - Lucide icon: `power`
-  - Label: `End Run`
+  - Label: `End Current Run`
   - Tooltip: `End the current run.`
 
 ## Guidelines
