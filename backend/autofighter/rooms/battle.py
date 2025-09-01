@@ -265,7 +265,7 @@ class BattleRoom(Room):
                     "result": "battle",
                     "party": [_serialize(m) for m in combat_party.members],
                     "foes": [_serialize(f) for f in foes],
-                    "enrage": {"active": False, "stacks": 0},
+                    "enrage": {"active": False, "stacks": 0, "turns": 0},
                     "rdr": temp_rdr,
                 }
             )
@@ -303,10 +303,10 @@ class BattleRoom(Room):
                                 f.passives.append("Enraged")
                             log.info("Enrage activated")
                         new_stacks = turn - threshold
-                        # Make enrage much stronger: each stack adds +25% damage taken
-                        # and -25% healing dealt globally.
-                        set_enrage_percent(0.25 * max(new_stacks, 0))
-                        mult = 1 + 0.4 * new_stacks
+                        # Make enrage much stronger: each stack adds +135% damage taken
+                        # and massive damage dealt bonuses.
+                        set_enrage_percent(1.35 * max(new_stacks, 0))
+                        mult = 1 + 2.0 * new_stacks
                         for i, (f, mgr) in enumerate(zip(foes, foe_effects, strict=False)):
                             if enrage_mods[i] is not None:
                                 enrage_mods[i].remove()
@@ -391,6 +391,7 @@ class BattleRoom(Room):
                                     "enrage": {
                                         "active": enrage_active,
                                         "stacks": enrage_stacks,
+                                        "turns": enrage_stacks,
                                     },
                                     "rdr": temp_rdr,
                                 }
@@ -454,7 +455,7 @@ class BattleRoom(Room):
                             from autofighter.effects import DamageOverTime
                             for mgr in party_effects:
                                 for _ in range(stacks_to_add):
-                                    dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.05)
+                                    dmg_per_tick = int(max(mgr.stats.max_hp, 1) * 0.10)
                                     mgr.add_dot(
                                         DamageOverTime(
                                             "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
@@ -462,7 +463,7 @@ class BattleRoom(Room):
                                     )
                             for mgr, foe_obj in zip(foe_effects, foes, strict=False):
                                 for _ in range(stacks_to_add):
-                                    dmg_per_tick = int(max(foe_obj.max_hp, 1) * 0.05)
+                                    dmg_per_tick = int(max(foe_obj.max_hp, 1) * 0.10)
                                     mgr.add_dot(
                                         DamageOverTime(
                                             "Enrage Bleed", dmg_per_tick, 10, "enrage_bleed"
@@ -482,7 +483,7 @@ class BattleRoom(Room):
                                 "result": "battle",
                                 "party": [_serialize(m) for m in combat_party.members],
                                 "foes": [_serialize(f) for f in foes],
-                                "enrage": {"active": enrage_active, "stacks": enrage_stacks},
+                                "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                                 "rdr": temp_rdr,
                             }
                         )
@@ -595,7 +596,7 @@ class BattleRoom(Room):
                         "result": "battle",
                         "party": [_serialize(m) for m in combat_party.members],
                         "foes": [_serialize(f) for f in foes],
-                        "enrage": {"active": enrage_active, "stacks": enrage_stacks},
+                        "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                                 "rdr": temp_rdr,
                         "ended": True,
                     }
@@ -667,7 +668,7 @@ class BattleRoom(Room):
                 "foes": foes_data,
                 "room_number": self.node.index,
                 "exp_reward": exp_reward,
-                "enrage": {"active": enrage_active, "stacks": enrage_stacks},
+                "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                         "rdr": temp_rdr,
             }
         # Pick cards with per-item star rolls; ensure unique choices not already owned
@@ -763,7 +764,7 @@ class BattleRoom(Room):
             "room_number": self.node.index,
             "battle_index": getattr(battle_logger, "battle_index", 0),
             "exp_reward": exp_reward,
-            "enrage": {"active": enrage_active, "stacks": enrage_stacks},
+            "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                 "rdr": party.rdr,
         }
 
