@@ -15,10 +15,7 @@ from ..party import Party
 from ..passives import discover
 from ..stats import Stats
 
-# Balance caps for foe stats to prevent runaway scaling
-FOE_MAX_CRIT_RATE: float = 0.12       # 12% max crit chance
-FOE_MAX_CRIT_DAMAGE: float = 2.5      # 250% max crit multiplier
-FOE_MAX_EFFECT_RESIST: float = 0.25   # 25% max effect resistance
+# Action caps for foes to prevent runaway turn economy
 FOE_MAX_ACTIONS_PER_TURN: int = 1     # 1 action per turn
 FOE_MAX_ACTION_POINTS: int = 1        # start and cap at very low AP
 
@@ -99,25 +96,12 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     except Exception:
         pass
 
-    # Apply post-scale clamps specifically for foes to keep difficulty sane
+    # Apply post-scale clamps for foes' action economy
     if isinstance(obj, FoeBase):
-        try:
-            cr = getattr(obj, "crit_rate", None)
-            if isinstance(cr, (int, float)):
-                obj.crit_rate = float(min(max(0.0, cr), FOE_MAX_CRIT_RATE))
-        except Exception:
-            pass
-        try:
-            cd = getattr(obj, "crit_damage", None)
-            if isinstance(cd, (int, float)):
-                # keep at least 2.0 (200%), but cap high values aggressively
-                obj.crit_damage = float(min(max(2.0, cd), FOE_MAX_CRIT_DAMAGE))
-        except Exception:
-            pass
         try:
             er = getattr(obj, "effect_resistance", None)
             if isinstance(er, (int, float)):
-                obj.effect_resistance = float(min(max(0.0, er), FOE_MAX_EFFECT_RESIST))
+                obj.effect_resistance = float(max(0.0, er))
         except Exception:
             pass
         try:
