@@ -5,7 +5,27 @@ Balanced Diet: Luna enjoying a balanced diet, holding a rustic plate stacked wit
 Battle Meditation: Luna seated cross-legged, battle meditation flowing, a faint aura swirling around her as she grips a carved wooden focus, channeling calm amid chaos.
 Bulwark Totem: Luna planting a bulwark totem, a stout wooden pillar studded with iron nails and protective runes, its base rooted in the earth like a guardian.
 
-Calm Beads: 
-Coated Armor: 
+=== Missing Cards Art ===
+adamantine_band
+arc_lightning
+arcane_repeater
+balanced_diet
+battle_meditation
+bulwark_totem
+critical_focus
+critical_overdrive
+critical_transfer
+elemental_spark
+iron_guard
+iron_resolve
+iron_resurgence
+mystic_aegis
+overclock
+swift_footwork
+vital_surge
+
+=== Missing Relics Art ===
+None detected — relic art glyphs present for plugin relics.
+
 
 
