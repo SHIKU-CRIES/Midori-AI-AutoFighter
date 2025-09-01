@@ -32,6 +32,8 @@ automatically discover 5★ and 6★ recruits.
 Each player and foe defines `prompt` and `about` strings with placeholder text
 to support future character-specific prompts.
 
+Passives generally shouldn't be capped unless a designer explicitly specifies a limit.
+
 - **Ally** (B, random) – applies `ally_passive` on load to grant ally-specific bonuses.
 - **Becca** (B, random) – builds high attack but takes more damage from lower defense.
 - **Bubbles** (A, random) – starts with a default item and applies `bubbles_passive`.
@@ -39,7 +41,7 @@ to support future character-specific prompts.
 - **Chibi** (A, random) – gains four times the normal benefit from Vitality.
 - **Graygray** (B, random) – applies `graygray_passive`.
 - **Hilander** (A, random) – builds increased crit rate and crit damage.
-- **Kboshi** (A, random) – randomly changes damage type.
+- **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses.
 - **Lady Darkness** (B, Dark) – baseline fighter themed around darkness.
 - **Lady Echo** (B, Lightning) – baseline fighter themed around echoes.
 - **Lady Fire and Ice** (B, Fire or Ice) – baseline fighter themed around fire and ice.

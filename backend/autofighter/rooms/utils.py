@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import fields
 import math
 import random
@@ -12,7 +11,7 @@ from plugins.foes._base import FoeBase
 
 from ..mapgen import MapNode
 from ..party import Party
-from ..passives import discover
+from ..passives import PassiveRegistry
 from ..stats import Stats
 
 # Action caps for foes to prevent runaway turn economy
@@ -298,16 +297,8 @@ def _serialize(obj: Stats) -> dict[str, Any]:
 
     data.pop("dots", None)
     data.pop("hots", None)
-    counts = Counter(data.pop("passives", []))
-    registry = discover()
-    data["passives"] = [
-        {
-            "id": pid,
-            "stacks": count,
-            "max_stacks": getattr(registry.get(pid), "max_stacks", None),
-        }
-        for pid, count in counts.items()
-    ]
+    registry = PassiveRegistry()
+    data["passives"] = registry.describe(obj)
 
     mgr = getattr(obj, "effect_manager", None)
     dots = []

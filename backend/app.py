@@ -7,8 +7,8 @@ import traceback
 from game import GachaManager  # noqa: F401  # re-export for tests
 from game import _apply_player_customization  # noqa: F401
 from game import _assign_damage_type  # noqa: F401
+from game import _describe_passives  # noqa: F401
 from game import _load_player_customization  # noqa: F401
-from game import _passive_names  # noqa: F401
 from game import _run_battle  # noqa: F401
 from game import _scale_stats  # noqa: F401
 from game import battle_snapshots  # noqa: F401

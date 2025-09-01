@@ -14,11 +14,10 @@ class HilanderCriticalFerment:
     id = "hilander_critical_ferment"
     name = "Critical Ferment"
     trigger = "hit_landed"  # Triggers when Hilander lands a hit
-    max_stacks = 1  # Only one instance per character
 
     async def apply(self, target: "Stats") -> None:
         """Apply crit building mechanics for Hilander."""
-        # Build 5% crit rate and 10% crit damage each hit, stacking up to 20 times
+        # Build 5% crit rate and 10% crit damage each hit
 
         # Count existing ferment stacks
         ferment_stacks = sum(
@@ -26,24 +25,23 @@ class HilanderCriticalFerment:
             if effect.name.startswith(f"{self.id}_crit_stack")
         )
 
-        if ferment_stacks < 20:  # Cap at 20 stacks
-            # Add a new stack
-            stack_id = ferment_stacks + 1
-            crit_rate_bonus = StatEffect(
-                name=f"{self.id}_crit_stack_{stack_id}_rate",
-                stat_modifiers={"crit_rate": 0.05},  # +5% crit rate
-                duration=-1,  # Permanent until consumed
-                source=self.id,
-            )
-            target.add_effect(crit_rate_bonus)
+        # Add a new stack
+        stack_id = ferment_stacks + 1
+        crit_rate_bonus = StatEffect(
+            name=f"{self.id}_crit_stack_{stack_id}_rate",
+            stat_modifiers={"crit_rate": 0.05},  # +5% crit rate
+            duration=-1,  # Permanent until consumed
+            source=self.id,
+        )
+        target.add_effect(crit_rate_bonus)
 
-            crit_damage_bonus = StatEffect(
-                name=f"{self.id}_crit_stack_{stack_id}_damage",
-                stat_modifiers={"crit_damage": 0.1},  # +10% crit damage
-                duration=-1,  # Permanent until consumed
-                source=self.id,
-            )
-            target.add_effect(crit_damage_bonus)
+        crit_damage_bonus = StatEffect(
+            name=f"{self.id}_crit_stack_{stack_id}_damage",
+            stat_modifiers={"crit_damage": 0.1},  # +10% crit damage
+            duration=-1,  # Permanent until consumed
+            source=self.id,
+        )
+        target.add_effect(crit_damage_bonus)
 
     async def on_critical_hit(self, target: "Stats") -> None:
         """Handle critical hit - unleash Aftertaste and consume one stack."""
@@ -77,3 +75,12 @@ class HilanderCriticalFerment:
                 if not (effect.name == f"{self.id}_crit_stack_{highest_stack}_rate" or
                        effect.name == f"{self.id}_crit_stack_{highest_stack}_damage")
             ]
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current ferment stacks for Hilander."""
+        return sum(
+            1
+            for effect in getattr(target, "_active_effects", [])
+            if effect.name.startswith(f"{cls.id}_crit_stack_") and effect.name.endswith("_rate")
+        )

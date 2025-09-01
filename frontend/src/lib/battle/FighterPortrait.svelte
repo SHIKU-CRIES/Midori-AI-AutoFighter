@@ -114,7 +114,7 @@
                 {/each}
               </div>
             {:else if p.max_stacks}
-              <span class="count">{p.stacks}/{p.max_stacks}</span>
+              <span class="count">{p.stacks > p.max_stacks ? `${p.stacks}+` : p.stacks}/{p.max_stacks}</span>
             {:else}
               <span class="count">{p.stacks}</span>
             {/if}

@@ -338,6 +338,16 @@ class Stats:
         # Set current HP to new max HP
         self.hp = self.max_hp
 
+    async def _trigger_level_up_passives(self) -> None:
+        """Trigger passive registry for level up events."""
+        try:
+            # Import locally to avoid circular imports
+            from autofighter.passives import PassiveRegistry
+            registry = PassiveRegistry()
+            await registry.trigger_level_up(self, new_level=self.level)
+        except Exception as e:
+            log.warning("Error triggering level_up passives: %s", e)
+
     def gain_exp(self, amount: int) -> None:
         if self.level < 1000:
             amount *= 10
@@ -347,6 +357,15 @@ class Stats:
             self.exp -= needed
             self.level += 1
             self._on_level_up()
+            # Trigger level up passives asynchronously
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self._trigger_level_up_passives())
+            except Exception:
+                # If no event loop is running, skip passive triggers
+                pass
 
     def add_ultimate_charge(self, amount: int = 1) -> None:
         """Increase ultimate charge, capping at 15."""

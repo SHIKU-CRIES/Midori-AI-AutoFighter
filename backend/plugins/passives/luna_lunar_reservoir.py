@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
+from autofighter.stats import StatEffect
+
 if TYPE_CHECKING:
     from autofighter.stats import Stats
 
@@ -13,7 +15,7 @@ class LunaLunarReservoir:
     id = "luna_lunar_reservoir"
     name = "Lunar Reservoir"
     trigger = "action_taken"  # Triggers when Luna takes any action
-    max_stacks = 1  # Only one instance per character
+    max_stacks = 200  # Show charge level 0-200
 
     # Class-level tracking of charge points for each entity
     _charge_points: ClassVar[dict[int, int]] = {}
@@ -30,11 +32,6 @@ class LunaLunarReservoir:
         self._charge_points[entity_id] += 1
         current_charge = self._charge_points[entity_id]
 
-        # Cap at 200 charge points
-        if current_charge > 200:
-            self._charge_points[entity_id] = 200
-            current_charge = 200
-
         # Determine attack count based on charge level
         if current_charge < 35:
             target.actions_per_turn = 2
@@ -47,10 +44,33 @@ class LunaLunarReservoir:
         else:  # 85+ charge
             target.actions_per_turn = 32
 
-        # Handle boosted mode (200+ charge)
-        if current_charge >= 200:
-            # In boosted mode, spend 50 charge per turn
-            self._charge_points[entity_id] = max(0, current_charge - 50)
+        # Soft cap bonus: each stack past 200 gives 0.025% dodge odds
+        if current_charge > 200:
+            stacks_past_soft_cap = current_charge - 200
+            dodge_bonus = stacks_past_soft_cap * 0.00025  # 0.025% per stack
+
+            dodge_effect = StatEffect(
+                name=f"{self.id}_dodge_bonus",
+                stat_modifiers={"dodge_odds": dodge_bonus},
+                duration=-1,  # Permanent for rest of fight
+                source=self.id,
+            )
+            target.add_effect(dodge_effect)
+
+    async def on_turn_end(self, target: "Stats") -> None:
+        """Handle charge spending at end of turn when in boosted mode."""
+        entity_id = id(target)
+
+        # Initialize charge if not present
+        if entity_id not in self._charge_points:
+            self._charge_points[entity_id] = 0
+            return
+
+        current_charge = self._charge_points[entity_id]
+
+        # Spend 50 charge per turn when above 200 (boosted mode)
+        if current_charge > 200:
+            self._charge_points[entity_id] = max(200, current_charge - 50)
 
     @classmethod
     def get_charge(cls, target: "Stats") -> int:
@@ -64,4 +84,10 @@ class LunaLunarReservoir:
         if entity_id not in cls._charge_points:
             cls._charge_points[entity_id] = 0
 
-        cls._charge_points[entity_id] = min(200, cls._charge_points[entity_id] + amount)
+        # Remove hard cap - allow unlimited stacking
+        cls._charge_points[entity_id] += amount
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current charge points for UI display."""
+        return cls._charge_points.get(id(target), 0)

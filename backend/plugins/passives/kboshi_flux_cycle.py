@@ -16,7 +16,6 @@ class KboshiFluxCycle:
     id = "kboshi_flux_cycle"
     name = "Flux Cycle"
     trigger = "turn_start"  # Triggers at start of Kboshi's turn
-    max_stacks = 1  # Only one instance per character
 
     # Track accumulated damage bonuses and HoT stacks per entity
     _damage_stacks: ClassVar[dict[int, int]] = {}
@@ -82,3 +81,8 @@ class KboshiFluxCycle:
     def get_hot_stacks(cls, target: "Stats") -> int:
         """Get current HoT stacks."""
         return cls._hot_stacks.get(id(target), 0)
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current damage bonus stacks."""
+        return cls.get_damage_stacks(target)

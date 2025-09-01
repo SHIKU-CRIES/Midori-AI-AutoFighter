@@ -42,10 +42,11 @@ def test_serialize_effect_details():
         }
     ]
     assert any(
-        p["id"] == "attack_up" and p["stacks"] == 1 and p["max_stacks"] is None
+        p["id"] == "attack_up" and p["stacks"] == 1 and p["max_stacks"] == 1
         for p in data["passives"]
     )
     assert any(
         p["id"] == "luna_lunar_reservoir" and p["stacks"] == 2 and p["max_stacks"] == 1
         for p in data["passives"]
     )
+    assert all("name" in p for p in data["passives"])
