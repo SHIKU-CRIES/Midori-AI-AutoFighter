@@ -248,17 +248,17 @@ def test_enhanced_map_endpoint_current_state():
             response_json = response_data.get_json()
 
             assert status_code == 200
-            
+
             # Verify traditional map and party data still exists
             assert "map" in response_json
             assert "party" in response_json
             assert response_json["map"]["current"] == 1
             assert response_json["party"] == ["player"]
-            
+
             # Verify new current_state section exists
             assert "current_state" in response_json
             current_state = response_json["current_state"]
-            
+
             # Test current_state provides authoritative information
             assert current_state["current_index"] == 1
             assert current_state["current_room_type"] == "battle-weak"
@@ -266,7 +266,7 @@ def test_enhanced_map_endpoint_current_state():
             assert current_state["awaiting_next"] is False
             assert current_state["awaiting_card"] is False
             assert current_state["awaiting_relic"] is False
-            
+
             # Verify room_data is null when no active battle
             assert current_state["room_data"] is None
 
@@ -342,13 +342,13 @@ def test_enhanced_map_endpoint_with_awaiting_next():
 
             assert status_code == 200
             current_state = response_json["current_state"]
-            
+
             # Verify awaiting_next state is correctly reported
             assert current_state["awaiting_next"] is True
             assert current_state["current_index"] == 1
             assert current_state["current_room_type"] == "battle-weak"
             assert current_state["next_room_type"] == "rest"
-            
+
             # Verify room_data includes awaiting info
             room_data = current_state["room_data"]
             assert room_data is not None
