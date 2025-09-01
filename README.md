@@ -16,37 +16,43 @@ The easiest way to run Midori AI AutoFighter is with Docker Compose. Choose one 
 docker compose up --build frontend backend
 ```
 
-**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
+**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
 
 ### Option 2: LLM-Enhanced Version with NVIDIA GPU Support
 
 For users with NVIDIA graphics cards who want LLM-powered chat features:
 
+> **⚠️ Note:** If you have already started the standard version, run `docker compose down` first to stop the existing backend.
+
 ```bash
 docker compose --profile llm-cuda up --build
 ```
 
-**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
+**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
 
 ### Option 3: LLM-Enhanced Version with AMD GPU Support
 
 For users with AMD graphics cards who want LLM-powered chat features:
 
+> **⚠️ Note:** If you have already started the standard version, run `docker compose down` first to stop the existing backend.
+
 ```bash
 docker compose --profile llm-amd up --build
 ```
 
-**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
+**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
 
 ### Option 4: LLM-Enhanced Version with CPU-Only Support
 
 For users who want LLM-powered chat features but don't have a compatible GPU:
 
+> **⚠️ Note:** If you have already started the standard version, run `docker compose down` first to stop the existing backend.
+
 ```bash
 docker compose --profile llm-cpu up --build
 ```
 
-**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
+**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
 
 ## Alternative Installation: Development Setup
 
@@ -73,6 +79,7 @@ curl -fsSL https://bun.sh/install | bash
 1. **Start the Backend** (in one terminal):
    ```bash
    cd backend
+   uv venv
    uv run app.py
    ```
    
@@ -85,7 +92,7 @@ curl -fsSL https://bun.sh/install | bash
    bun run dev
    ```
 
-**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
+**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
 
 ## Getting Help
 

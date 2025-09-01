@@ -32,7 +32,7 @@ The interface adapts automatically based on viewport width.
 When LLM dependencies are installed, the application provides:
 
 - **Model Testing**: Test LLM models through the settings menu (async-friendly to prevent backend lockup)
-- **Chat Rooms**: AI-powered chat interactions with party members
+- **Chat Rooms**: LLM-powered chat interactions with party members
 - **Player/Foe Memory**: Persistent conversation memory using ChromaDB vector storage
 - **Centralized Management**: Single torch availability check on startup with consistent error handling
 
@@ -75,7 +75,7 @@ DoT and HoT plugins manage ongoing damage or recovery. Effect hit rate that grea
 
 ### Battle Room
 
-Start a run in a battle scene that renders placeholder models, triggers party passives, and runs event-driven stat-based attacks against a `Slime` or any non-party player character scaled by floor, room, Pressure level, and loop count. Foes are procedurally named by prefixing a themed adjective plugin to a player name. Adjective plugins are auto-discovered from files in `plugins/themedadj`, allowing new adjectives to be added without modifying package code. Each adjective applies its stat tweaks through a persistent `StatModifier` buff so base values are restored when the foe falls. Foes inherit from a dedicated `FoeBase` that mirrors player stats but starts with negligible mitigation and vitality; the default `Slime` reduces them by 90% on spawn, while player-derived foes gain `FoeBase` behaviors like turn-based regeneration. The scene shows floating damage numbers and status icons and flashes red and blue with an Enraged buff after 100 turns (500 for floor bosses). Each victory presents three unused cards of the appropriate star rank. Selecting one adds it to the party, and card and relic bonuses are applied at the start of the next battle.
+Start a run in a battle scene that renders character portraits and data, triggers party passives, and runs event-driven stat-based attacks against a `Slime` or any non-party player character scaled by floor, room, Pressure level, and loop count. Foes are procedurally named by prefixing a themed adjective plugin to a player name. Adjective plugins are auto-discovered from files in `plugins/themedadj`, allowing new adjectives to be added without modifying package code. Each adjective applies its stat tweaks through a persistent `StatModifier` buff so base values are restored when the foe falls. Foes inherit from a dedicated `FoeBase` that mirrors player stats but starts with negligible mitigation and vitality; the default `Slime` reduces them by 90% on spawn, while player-derived foes gain `FoeBase` behaviors like turn-based regeneration. The scene shows floating damage numbers and status icons and flashes red and blue with an Enraged buff after 100 turns (500 for floor bosses). Each victory presents three unused cards of the appropriate star rank. Selecting one adds it to the party, and card and relic bonuses are applied at the start of the next battle.
 
 Base battles spawn one foe plus one more for every five Pressure, up to ten. Party size can add bonus enemies: parties of two have a 35% chance to face one extra foe; parties of three roll 35% for two extras else 75% for one. Larger groups follow the same pattern, always capped at ten foes. Boss encounters ignore these rules and always spawn exactly one foe.
 
