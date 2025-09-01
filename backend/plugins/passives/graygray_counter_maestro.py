@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import ClassVar
 
 from autofighter.stats import StatEffect
 
@@ -14,21 +15,42 @@ class GraygrayCounterMaestro:
     id = "graygray_counter_maestro"
     name = "Counter Maestro"
     trigger = "damage_taken"  # Triggers when Graygray takes damage
-    max_stacks = 1  # Only one instance per character
+    max_stacks = 50  # Soft cap - show counter attack stacks with diminished returns past 50
+
+    # Track successful counter attacks for +5% attack stacks
+    _counter_stacks: ClassVar[dict[int, int]] = {}
 
     async def apply(self, target: "Stats") -> None:
         """Apply counter-attack mechanics for Graygray."""
+        entity_id = id(target)
+
+        # Initialize counter stack tracking if not present
+        if entity_id not in self._counter_stacks:
+            self._counter_stacks[entity_id] = 0
+
         # This will be called when Graygray takes damage
         # We need the attacker info, which should be passed via the event system
 
         # For now, implement the core mechanic - we'll need to extend this
         # when we have proper damage event handling
 
-        # Grant +5% attack buff after counter
+        # Increment counter stacks (each successful counter grants attack bonus)
+        self._counter_stacks[entity_id] += 1
+        current_stacks = self._counter_stacks[entity_id]
+
+        # Apply cumulative attack buff with soft cap logic
+        # First 50 stacks: +5% attack per stack
+        # Stacks past 50: +2.5% attack per stack (diminished returns)
+        base_attack_buff = min(current_stacks, 50) * 0.05
+        excess_stacks = max(0, current_stacks - 50)
+        excess_attack_buff = excess_stacks * 0.025
+
+        total_attack_multiplier = base_attack_buff + excess_attack_buff
+
         attack_buff = StatEffect(
-            name=f"{self.id}_attack_buff",
-            stat_modifiers={"atk": int(target.atk * 0.05)},
-            duration=1,  # One turn
+            name=f"{self.id}_attack_stacks",
+            stat_modifiers={"atk": int(target.atk * total_attack_multiplier)},
+            duration=-1,  # Permanent for rest of fight
             source=self.id,
         )
         target.add_effect(attack_buff)
@@ -57,3 +79,8 @@ class GraygrayCounterMaestro:
             trigger_on_hit=False,  # Avoid recursive triggers
             action_name="Counter Attack"
         )
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current counter stacks for UI display."""
+        return cls._counter_stacks.get(id(target), 0)

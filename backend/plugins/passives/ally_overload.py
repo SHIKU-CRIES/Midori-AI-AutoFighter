@@ -15,7 +15,7 @@ class AllyOverload:
     id = "ally_overload"
     name = "Overload"
     trigger = "action_taken"  # Triggers when Ally takes any action
-    max_stacks = 1  # Only one instance per character
+    max_stacks = 120  # Soft cap - show charge level with diminished returns past 120
 
     # Class-level tracking of overload charge and stance for each entity
     _overload_charge: ClassVar[dict[int, int]] = {}
@@ -35,7 +35,16 @@ class AllyOverload:
             target.actions_per_turn = 2
 
         # Build 10 Overload charge per pair of strikes
-        self._overload_charge[entity_id] += 10
+        base_charge_gain = 10
+
+        # Soft cap: past 120, gain charge at reduced rate (50% effectiveness)
+        current_charge = self._overload_charge[entity_id]
+        if current_charge > 120:
+            charge_gain = base_charge_gain * 0.5  # Diminished returns
+        else:
+            charge_gain = base_charge_gain
+
+        self._overload_charge[entity_id] += charge_gain
 
         # Check if Overload can be triggered (100+ charge)
         current_charge = self._overload_charge[entity_id]
@@ -142,3 +151,8 @@ class AllyOverload:
     def is_overload_active(cls, target: "Stats") -> bool:
         """Check if Overload stance is active."""
         return cls._overload_active.get(id(target), False)
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current overload charge for UI display."""
+        return cls._overload_charge.get(id(target), 0)

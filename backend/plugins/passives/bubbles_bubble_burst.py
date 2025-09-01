@@ -15,7 +15,7 @@ class BubblesBubbleBurst:
     id = "bubbles_bubble_burst"
     name = "Bubble Burst"
     trigger = "turn_start"  # Triggers at start of Bubbles' turn
-    max_stacks = 1  # Only one instance per character
+    max_stacks = 20  # Soft cap - show attack buff stacks with diminished returns past 20
 
     # Track bubble stacks per enemy target
     _bubble_stacks: ClassVar[dict[int, dict[int, int]]] = {}  # bubbles_id -> {target_id -> stacks}
@@ -53,10 +53,20 @@ class BubblesBubbleBurst:
         if bubbles_id in self._bubble_stacks and trigger_enemy_id in self._bubble_stacks[bubbles_id]:
             self._bubble_stacks[bubbles_id][trigger_enemy_id] = 0
 
-        # Grant Bubbles permanent +10% attack buff
+        # Grant Bubbles permanent attack buff with soft cap logic
+        current_stacks = len([e for e in bubbles._active_effects if 'burst_bonus' in e.name])
+
+        # Determine buff strength based on current stacks (soft cap at 20)
+        if current_stacks >= 20:
+            # Past soft cap: reduced effectiveness (5% instead of 10%)
+            attack_buff_multiplier = 0.05
+        else:
+            # Normal effectiveness
+            attack_buff_multiplier = 0.1
+
         attack_buff = StatEffect(
-            name=f"{self.id}_burst_bonus_{len([e for e in bubbles._active_effects if 'burst_bonus' in e.name])}",
-            stat_modifiers={"atk": int(bubbles.atk * 0.1)},
+            name=f"{self.id}_burst_bonus_{current_stacks}",
+            stat_modifiers={"atk": int(bubbles.atk * attack_buff_multiplier)},
             duration=-1,  # Permanent
             source=self.id,
         )
@@ -74,3 +84,14 @@ class BubblesBubbleBurst:
         if bubbles_id not in cls._bubble_stacks:
             return 0
         return cls._bubble_stacks[bubbles_id].get(enemy_id, 0)
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current attack buff stacks for UI display."""
+        # Count permanent attack buff effects from bubble bursts
+        return len([e for e in target._active_effects if e.name.startswith(f"{cls.id}_burst_bonus")])
+
+    @classmethod
+    def get_attack_buff_stacks(cls, target: "Stats") -> int:
+        """Get current number of permanent attack buffs from bubble bursts."""
+        return cls.get_stacks(target)

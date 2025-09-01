@@ -15,7 +15,7 @@ class CarlyGuardiansAegis:
     id = "carly_guardians_aegis"
     name = "Guardian's Aegis"
     trigger = "turn_start"  # Triggers at start of turn for healing
-    max_stacks = 1  # Only one instance per character
+    max_stacks = 50  # Soft cap - show mitigation stacks with diminished returns past 50
 
     # Class-level tracking of mitigation stacks gained from being hit
     _mitigation_stacks: ClassVar[dict[int, int]] = {}
@@ -41,13 +41,22 @@ class CarlyGuardiansAegis:
         )
         target.add_effect(heal_effect)
 
-        # Apply accumulated mitigation stacks from previous hits
+        # Apply accumulated mitigation stacks from previous hits with soft cap logic
         if self._mitigation_stacks[entity_id] > 0:
-            mitigation_bonus = self._mitigation_stacks[entity_id] * 0.02  # 2% per stack
+            current_stacks = self._mitigation_stacks[entity_id]
+
+            # Base mitigation from first 50 stacks (2% per stack)
+            base_mitigation = min(current_stacks, 50) * 0.02
+
+            # Soft cap: stacks past 50 give reduced benefit (1% instead of 2%)
+            excess_stacks = max(0, current_stacks - 50)
+            excess_mitigation = excess_stacks * 0.01
+
+            total_mitigation = base_mitigation + excess_mitigation
 
             mitigation_effect = StatEffect(
                 name=f"{self.id}_mitigation_stacks",
-                stat_modifiers={"mitigation": mitigation_bonus},
+                stat_modifiers={"mitigation": total_mitigation},
                 duration=-1,  # Permanent for rest of fight
                 source=self.id,
             )
@@ -56,6 +65,10 @@ class CarlyGuardiansAegis:
     async def on_damage_taken(self, target: "Stats", attacker: "Stats", damage: int) -> None:
         """Handle Carly's damage mitigation mechanics when hit."""
         entity_id = id(target)
+
+        # Initialize mitigation stack tracking if not present
+        if entity_id not in self._mitigation_stacks:
+            self._mitigation_stacks[entity_id] = 0
 
         # Apply mitigation twice (square mitigation)
         # This would need integration with damage calculation system
@@ -110,4 +123,9 @@ class CarlyGuardiansAegis:
     @classmethod
     def get_mitigation_stacks(cls, target: "Stats") -> int:
         """Get current mitigation stacks for an entity."""
+        return cls._mitigation_stacks.get(id(target), 0)
+
+    @classmethod
+    def get_stacks(cls, target: "Stats") -> int:
+        """Return current mitigation stacks for UI display."""
         return cls._mitigation_stacks.get(id(target), 0)
