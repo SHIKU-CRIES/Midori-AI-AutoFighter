@@ -211,7 +211,7 @@
   <div class="party-column" style={`--portrait-size: ${partyPortraitSize}` }>
     {#each party as member (member.id)}
       <div class="combatant">
-        <FighterPortrait fighter={member} />
+        <FighterPortrait fighter={member} {reducedMotion} />
         {#if showHud}
           <div class="stats right stained-glass-panel">
             <div class="name">{(member.name ?? member.id)} ({member.level ?? 1})</div>
@@ -261,7 +261,7 @@
               </details>
             </div>
           {/if}
-          <FighterPortrait fighter={foe} />
+          <FighterPortrait fighter={foe} {reducedMotion} />
         </div>
       {/each}
     </div>

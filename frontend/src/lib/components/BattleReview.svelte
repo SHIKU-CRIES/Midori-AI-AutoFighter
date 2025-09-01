@@ -15,6 +15,7 @@
   export let foes = [];
   export let partyData = [];
   export let foeData = [];
+  export let reducedMotion = false;
 
   const dispatch = createEventDispatcher();
   let summary = { damage_by_type: {} };
@@ -855,7 +856,7 @@
             {:else if tab.entity}
               {@const _tabFighter = toDisplayFighter(tab.entity)}
               <div style="--portrait-size: 3rem;">
-                <FighterPortrait fighter={_tabFighter} />
+                <FighterPortrait fighter={_tabFighter} {reducedMotion} />
               </div>
             {:else}
               <User size={20} />
@@ -1266,7 +1267,7 @@
               {#if currentTab.entity}
                 {@const _fighter = toDisplayFighter(currentTab.entity)}
                 <div style="--portrait-size: 4.5rem;">
-                  <FighterPortrait fighter={_fighter} />
+                  <FighterPortrait fighter={_fighter} {reducedMotion} />
                 </div>
               {/if}
               <h3>{currentTab.label} Breakdown</h3>

@@ -58,6 +58,11 @@ describe('BattleView layout and polling', () => {
     expect(statusIcons).toContain('stack inside');
   });
 
+  test('displays passive stack indicators', () => {
+    expect(fighterPortrait).toContain('fighter.passives');
+    expect(fighterPortrait).toContain('passive-indicators');
+  });
+
   test('uses normalized element for portraits', () => {
     expect(fighterPortrait).toContain('getElementIcon(fighter.element)');
     expect(fighterPortrait).toContain('getElementColor(fighter.element)');

@@ -5,7 +5,12 @@
 includes an `id`, optional `name`, `stacks`, `turns`, and `source` along
 with `damage` or `healing` values. `StatusIcons.svelte` and
 `FighterPortrait.svelte` consume these arrays to render icons with stack
-counts and tooltips showing effect details.
+counts and tooltips showing effect details. Fighter portraits now also
+display passive stack indicators beside the element chip: passives with
+five or fewer maximum stacks render pips that fill as stacks accrue,
+larger finite stacks show `current/max`, and unlimited stacks display the
+raw count. These indicators respect Reduced Motion settings and expose
+tooltips for screen readers and mouse users.
 
 ## Stained-Glass Palette
 
