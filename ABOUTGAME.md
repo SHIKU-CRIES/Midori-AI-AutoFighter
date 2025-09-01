@@ -50,7 +50,7 @@ The game auto-discovers classes under `plugins/` and `mods/` by `plugin_type` an
 
 ### Player Creator
 
-Use the in-game editor to pick a body and hair style, choose a hair color and accessory, and distribute 100 stat points. Spending 100 of each damage type's 4★ upgrade items grants one extra stat point. The result is stored in the encrypted `save.db` database for new runs.
+Use the in-game editor to set your pronouns, choose a damage type, and distribute 100 stat points across HP, attack, and defense. Each stat point provides a +1% increase. Spending 100 of each damage type's 4★ upgrade items grants one extra stat point. The customization is stored in the encrypted `save.db` database for new runs.
 
 ### Stat Screen
 
@@ -95,7 +95,7 @@ Entering a shop heals the party by 5% of its combined max HP. Buy upgrade items 
 
 ### Battle Review and Chat
 
-Chat interactions with party members occur at the end of battles in the battle review screen. When LLM dependencies are installed, players can engage in AI-powered conversations with characters to enhance the narrative experience.
+Chat interactions with party members are planned to be moved to rest rooms with a limit of approximately 6 messages per visit. When LLM dependencies are installed, players can engage in AI-powered conversations with characters to enhance the narrative experience.
 
 ### Per-instance Memory
 
@@ -153,7 +153,7 @@ The repository includes automated GitHub Actions workflows to build standalone g
 ./build.sh llm-cpu
 ```
 
-Builds are automatically created on every push and releases are generated for version tags. Download the latest builds from the [Releases page](../../releases).
+Builds are created for version tags and can be manually triggered via workflow dispatch. Download the latest builds from the [Releases page](../../releases).
 
 ### Desktop Builds
 
