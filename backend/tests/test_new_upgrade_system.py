@@ -38,7 +38,19 @@ def app_with_db(tmp_path, monkeypatch):
     )
     conn.execute(
         "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("dark_2", 5),  # 5 2-star dark items (in case ally gets dark)
+    )
+    conn.execute(
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
         ("light_1", 10),  # 10 1-star light items for player points
+    )
+    conn.execute(
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("wind_1", 10),  # 10 1-star wind items for player points
+    )
+    conn.execute(
+        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+        ("generic_1", 10),  # 10 1-star generic items for player points
     )
     conn.commit()
     conn.close()
