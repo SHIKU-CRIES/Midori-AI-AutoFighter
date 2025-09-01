@@ -16,7 +16,7 @@ The easiest way to run Midori AI AutoFighter is with Docker Compose. Choose one 
 docker compose up --build frontend backend
 ```
 
-**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
+**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
 ### Option 2: AI-Enhanced Version with NVIDIA GPU Support
 
@@ -26,7 +26,7 @@ For users with NVIDIA graphics cards who want AI-powered chat features:
 docker compose --profile llm-cuda up --build
 ```
 
-**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
+**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
 ### Option 3: AI-Enhanced Version with AMD GPU Support
 
@@ -36,7 +36,7 @@ For users with AMD graphics cards who want AI-powered chat features:
 docker compose --profile llm-amd up --build
 ```
 
-**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
+**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
 ### Option 4: AI-Enhanced Version with CPU-Only Support
 
@@ -46,9 +46,7 @@ For users who want AI-powered chat features but don't have a compatible GPU:
 docker compose --profile llm-cpu up --build
 ```
 
-**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
-
-**Note:** Replace `YOUR_SYSTEM_IP` with your computer's IP address (usually `localhost` or `127.0.0.1` if running locally).
+**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
 ## Alternative Installation: Development Setup
 
@@ -81,7 +79,7 @@ curl -fsSL https://bun.sh/install | bash
    bun run dev
    ```
 
-**Access the game:** Open your web browser and go to `http://YOUR_SYSTEM_IP:59001`
+**Access the game:** Open your web browser and go to `http://localhost:59001` (or `http://YOUR_SYSTEM_IP:59001` if accessing from another device)
 
 ## Getting Help
 
@@ -89,6 +87,12 @@ curl -fsSL https://bun.sh/install | bash
 - **Development:** See [DEVELOPMENT.md](DEVELOPMENT.md) for development environment setup
 - **Building:** See [BUILD.md](BUILD.md) for building standalone executables
 - **Issues:** Report bugs or request features on [GitHub Issues](../../issues)
+
+## Troubleshooting
+
+**Docker Compose fails with DNS/network errors:** This is a known issue in some environments. Use the alternative UV & Bun installation method instead.
+
+**Services won't start:** Make sure ports 59001 and 59002 are not being used by other applications.
 
 ## Download Prebuilt Versions
 
