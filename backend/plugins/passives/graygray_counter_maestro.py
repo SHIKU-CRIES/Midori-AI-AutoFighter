@@ -15,7 +15,7 @@ class GraygrayCounterMaestro:
     id = "graygray_counter_maestro"
     name = "Counter Maestro"
     trigger = "damage_taken"  # Triggers when Graygray takes damage
-    max_stacks = 50  # Show counter attack stacks (reasonable max around 50)
+    max_stacks = 50  # Soft cap - show counter attack stacks with diminished returns past 50
 
     # Track successful counter attacks for +5% attack stacks
     _counter_stacks: ClassVar[dict[int, int]] = {}
@@ -34,14 +34,22 @@ class GraygrayCounterMaestro:
         # For now, implement the core mechanic - we'll need to extend this
         # when we have proper damage event handling
 
-        # Increment counter stacks (each successful counter grants +5% attack)
+        # Increment counter stacks (each successful counter grants attack bonus)
         self._counter_stacks[entity_id] += 1
         current_stacks = self._counter_stacks[entity_id]
 
-        # Apply cumulative +5% attack buff per counter
+        # Apply cumulative attack buff with soft cap logic
+        # First 50 stacks: +5% attack per stack
+        # Stacks past 50: +2.5% attack per stack (diminished returns)
+        base_attack_buff = min(current_stacks, 50) * 0.05
+        excess_stacks = max(0, current_stacks - 50)
+        excess_attack_buff = excess_stacks * 0.025
+
+        total_attack_multiplier = base_attack_buff + excess_attack_buff
+
         attack_buff = StatEffect(
             name=f"{self.id}_attack_stacks",
-            stat_modifiers={"atk": int(target.atk * 0.05 * current_stacks)},
+            stat_modifiers={"atk": int(target.atk * total_attack_multiplier)},
             duration=-1,  # Permanent for rest of fight
             source=self.id,
         )

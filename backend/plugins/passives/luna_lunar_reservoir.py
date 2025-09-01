@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
+from autofighter.stats import StatEffect
+
 if TYPE_CHECKING:
     from autofighter.stats import Stats
 
@@ -30,11 +32,6 @@ class LunaLunarReservoir:
         self._charge_points[entity_id] += 1
         current_charge = self._charge_points[entity_id]
 
-        # Cap at 200 charge points
-        if current_charge > 200:
-            self._charge_points[entity_id] = 200
-            current_charge = 200
-
         # Determine attack count based on charge level
         if current_charge < 35:
             target.actions_per_turn = 2
@@ -47,10 +44,18 @@ class LunaLunarReservoir:
         else:  # 85+ charge
             target.actions_per_turn = 32
 
-        # Handle boosted mode (200+ charge)
-        if current_charge >= 200:
-            # In boosted mode, spend 50 charge per turn
-            self._charge_points[entity_id] = max(0, current_charge - 50)
+        # Soft cap bonus: each stack past 200 gives 0.025% dodge odds
+        if current_charge > 200:
+            stacks_past_soft_cap = current_charge - 200
+            dodge_bonus = stacks_past_soft_cap * 0.00025  # 0.025% per stack
+
+            dodge_effect = StatEffect(
+                name=f"{self.id}_dodge_bonus",
+                stat_modifiers={"dodge_odds": dodge_bonus},
+                duration=-1,  # Permanent for rest of fight
+                source=self.id,
+            )
+            target.add_effect(dodge_effect)
 
     @classmethod
     def get_charge(cls, target: "Stats") -> int:
@@ -64,7 +69,8 @@ class LunaLunarReservoir:
         if entity_id not in cls._charge_points:
             cls._charge_points[entity_id] = 0
 
-        cls._charge_points[entity_id] = min(200, cls._charge_points[entity_id] + amount)
+        # Remove hard cap - allow unlimited stacking
+        cls._charge_points[entity_id] += amount
 
     @classmethod
     def get_stacks(cls, target: "Stats") -> int:

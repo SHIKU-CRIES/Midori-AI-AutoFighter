@@ -15,7 +15,7 @@ class BubblesBubbleBurst:
     id = "bubbles_bubble_burst"
     name = "Bubble Burst"
     trigger = "turn_start"  # Triggers at start of Bubbles' turn
-    max_stacks = 20  # Show attack buff stacks (each bubble burst gives +10% attack)
+    max_stacks = 20  # Soft cap - show attack buff stacks with diminished returns past 20
 
     # Track bubble stacks per enemy target
     _bubble_stacks: ClassVar[dict[int, dict[int, int]]] = {}  # bubbles_id -> {target_id -> stacks}
@@ -53,10 +53,20 @@ class BubblesBubbleBurst:
         if bubbles_id in self._bubble_stacks and trigger_enemy_id in self._bubble_stacks[bubbles_id]:
             self._bubble_stacks[bubbles_id][trigger_enemy_id] = 0
 
-        # Grant Bubbles permanent +10% attack buff
+        # Grant Bubbles permanent attack buff with soft cap logic
+        current_stacks = len([e for e in bubbles._active_effects if 'burst_bonus' in e.name])
+
+        # Determine buff strength based on current stacks (soft cap at 20)
+        if current_stacks >= 20:
+            # Past soft cap: reduced effectiveness (5% instead of 10%)
+            attack_buff_multiplier = 0.05
+        else:
+            # Normal effectiveness
+            attack_buff_multiplier = 0.1
+
         attack_buff = StatEffect(
-            name=f"{self.id}_burst_bonus_{len([e for e in bubbles._active_effects if 'burst_bonus' in e.name])}",
-            stat_modifiers={"atk": int(bubbles.atk * 0.1)},
+            name=f"{self.id}_burst_bonus_{current_stacks}",
+            stat_modifiers={"atk": int(bubbles.atk * attack_buff_multiplier)},
             duration=-1,  # Permanent
             source=self.id,
         )
