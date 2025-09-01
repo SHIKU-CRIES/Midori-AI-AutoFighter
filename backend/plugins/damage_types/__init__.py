@@ -39,7 +39,8 @@ def get_damage_type(name: str) -> DamageTypeBase:
 
 
 def load_damage_type(name: str) -> DamageTypeBase:
-    return _load_cls(name)()
+    # Capitalize the first letter to match class names
+    return _load_cls(name.capitalize())()
 
 
 __all__ = [

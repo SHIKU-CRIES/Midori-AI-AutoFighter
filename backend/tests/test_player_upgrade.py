@@ -21,6 +21,12 @@ def app_with_db(tmp_path, monkeypatch):
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
     conn.execute(
+        "CREATE TABLE IF NOT EXISTS damage_types (id TEXT PRIMARY KEY, type TEXT)"
+    )
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS upgrade_items (id TEXT PRIMARY KEY, count INTEGER NOT NULL)"
+    )
+    conn.execute(
         "INSERT OR REPLACE INTO damage_types (id, type) VALUES (?, ?)",
         ("player", "fire"),
     )

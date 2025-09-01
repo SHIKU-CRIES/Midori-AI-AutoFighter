@@ -161,24 +161,72 @@ def _load_upgrade_level(pid: str) -> int:
     return int(row[0]) if row else 0
 
 
+def _load_individual_stat_upgrades(pid: str) -> dict[str, float]:
+    """Load individual stat upgrades from the new system."""
+    with get_save_manager().connection() as conn:
+        # Create table if it doesn't exist
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS player_stat_upgrades (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id TEXT NOT NULL,
+                stat_name TEXT NOT NULL,
+                upgrade_percent REAL NOT NULL,
+                source_star INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Sum up all upgrades per stat
+        cur = conn.execute("""
+            SELECT stat_name, SUM(upgrade_percent)
+            FROM player_stat_upgrades
+            WHERE player_id = ?
+            GROUP BY stat_name
+        """, (pid,))
+
+        return {row[0]: float(row[1]) for row in cur.fetchall()}
+
+
 def _apply_player_upgrades(player: PlayerBase) -> None:
+    # Apply legacy level-based upgrades (backward compatibility)
     level = _load_upgrade_level(player.id)
-    if level <= 0:
-        return
-    mult = 1 + level * 0.05
-    mod = create_stat_buff(
-        player,
-        name="upgrade",
-        turns=10**9,
-        id="upgrade_bonus",
-        max_hp_mult=mult,
-        atk_mult=mult,
-        defense_mult=mult,
-    )
-    player.mods.append(mod.id)
+    if level > 0:
+        mult = 1 + level * 0.05
+        mod = create_stat_buff(
+            player,
+            name="upgrade_legacy",
+            turns=10**9,
+            id="upgrade_bonus_legacy",
+            max_hp_mult=mult,
+            atk_mult=mult,
+            defense_mult=mult,
+        )
+        player.mods.append(mod.id)
+
+    # Apply new individual stat upgrades
+    stat_upgrades = _load_individual_stat_upgrades(player.id)
+    if stat_upgrades:
+        # Create multiplier dict for create_stat_buff
+        multipliers = {}
+        for stat_name, upgrade_percent in stat_upgrades.items():
+            # Convert percentage to multiplier (e.g., 0.05 = 5% -> 1.05 multiplier)
+            multipliers[f"{stat_name}_mult"] = 1 + upgrade_percent
+
+        if multipliers:
+            mod = create_stat_buff(
+                player,
+                name="upgrade_individual",
+                turns=10**9,
+                id="upgrade_bonus_individual",
+                **multipliers
+            )
+            player.mods.append(mod.id)
 
 def _assign_damage_type(player: PlayerBase) -> None:
     with get_save_manager().connection() as conn:
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS damage_types (id TEXT PRIMARY KEY, type TEXT)"
+        )
         cur = conn.execute("SELECT type FROM damage_types WHERE id = ?", (player.id,))
         row = cur.fetchone()
         if row:
