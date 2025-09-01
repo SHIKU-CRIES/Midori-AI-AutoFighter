@@ -27,6 +27,7 @@
   }
 
   let cardsDone = false;
+  let showNextButton = false;
   $: showCards = cards.length > 0 && !cardsDone;
   $: showRelics = relics.length > 0 && (cards.length === 0 || cardsDone);
   $: remaining = (showCards ? cards.length : 0) + (showRelics ? relics.length : 0);
@@ -53,6 +54,17 @@
   // Cleanup timer on unmount
   import { onDestroy } from 'svelte';
   onDestroy(() => clearTimeout(autoTimer));
+
+  // Show Next Room button when there's loot but no choices
+  $: {
+    const noChoices = remaining === 0;
+    const hasLoot = (gold > 0) || (Array.isArray(items) && items.length > 0);
+    showNextButton = noChoices && hasLoot;
+  }
+
+  function handleNextRoom() {
+    dispatch('nextRoom'); // Changed from 'next' to 'nextRoom' to match expected event
+  }
 </script>
 
 <style>
@@ -124,6 +136,31 @@
     animation: overlay-card-fade 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--delay, 0ms);
   }
+
+  .next-button {
+    margin-top: 1rem;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(145deg, #4a90e2, #357abd);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+  }
+
+  .next-button:hover {
+    background: linear-gradient(145deg, #5ba0f2, #4a90e2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  }
+
+  .next-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
   
 </style>
 
@@ -162,5 +199,9 @@
   {#if gold}
     <div class="status">Gold +{gold}</div>
   {/if}
-  <!-- Next button removed; auto-advance remains when no choices/loot -->
+  
+  {#if showNextButton}
+    <button class="next-button" on:click={handleNextRoom}>Next Room</button>
+  {/if}
+  <!-- Auto-advance remains when no choices/loot -->
 </div>

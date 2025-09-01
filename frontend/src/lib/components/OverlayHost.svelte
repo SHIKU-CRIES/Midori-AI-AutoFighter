@@ -225,10 +225,11 @@
       <RewardOverlay
         cards={roomData.card_choices || []}
         relics={roomData.relic_choices || []}
-        items={[]}
-        gold={0}
+        items={roomData.loot?.items || []}
+        gold={roomData.loot?.gold || 0}
         on:select={(e) => dispatch('rewardSelect', e.detail)}
         on:next={() => dispatch('nextRoom')}
+        on:nextRoom={() => dispatch('lootAcknowledge')}
       />
     </PopupWindow>
   </OverlaySurface>

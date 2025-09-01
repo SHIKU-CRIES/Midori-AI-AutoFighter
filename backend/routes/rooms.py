@@ -142,7 +142,7 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         if next_type is not None:
             payload["next_room"] = next_type
         return jsonify(payload)
-    if state.get("awaiting_card") or state.get("awaiting_relic"):
+    if state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot"):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return jsonify(snap)
@@ -326,7 +326,7 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         if next_type is not None:
             payload["next_room"] = next_type
         return jsonify(payload)
-    if state.get("awaiting_card") or state.get("awaiting_relic"):
+    if state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot"):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return jsonify(snap)

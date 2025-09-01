@@ -313,6 +313,9 @@ async def _run_battle(
                 "party": [],
                 "foes": [],
                 "awaiting_next": False,
+                "awaiting_card": False,
+                "awaiting_relic": False,
+                "awaiting_loot": False,
             }
             try:
                 await asyncio.to_thread(save_map, run_id, state)
@@ -338,6 +341,7 @@ async def _run_battle(
             if result.get("result") == "defeat":
                 state["awaiting_card"] = False
                 state["awaiting_relic"] = False
+                state["awaiting_loot"] = False
                 state["awaiting_next"] = False
                 try:
                     await asyncio.to_thread(save_map, run_id, state)
@@ -349,6 +353,7 @@ async def _run_battle(
                             "current_index": state["current"],
                             "awaiting_card": False,
                             "awaiting_relic": False,
+                            "awaiting_loot": False,
                             "awaiting_next": False,
                             "next_room": None,
                             "ended": True,
@@ -366,12 +371,28 @@ async def _run_battle(
                 return
             has_card_choices = bool(result.get("card_choices"))
             has_relic_choices = bool(result.get("relic_choices"))
+            # Check if there's loot to review (gold or items)
+            has_loot = bool(result.get("loot", {}).get("gold", 0) > 0 or
+                           len(result.get("loot", {}).get("items", [])) > 0)
+
             if has_card_choices or has_relic_choices:
                 state["awaiting_card"] = has_card_choices
                 state["awaiting_relic"] = has_relic_choices
+                state["awaiting_loot"] = False
+                state["awaiting_next"] = False
+                next_type = None
+            elif has_loot:
+                # If there's loot but no card/relic choices, wait for loot acknowledgment
+                state["awaiting_card"] = False
+                state["awaiting_relic"] = False
+                state["awaiting_loot"] = True
                 state["awaiting_next"] = False
                 next_type = None
             else:
+                # No choices and no loot, ready to advance immediately
+                state["awaiting_card"] = False
+                state["awaiting_relic"] = False
+                state["awaiting_loot"] = False
                 state["awaiting_next"] = True
                 next_type = (
                     rooms[state["current"] + 1].room_type
@@ -389,6 +410,7 @@ async def _run_battle(
                     "current_index": state["current"],
                     "awaiting_card": state.get("awaiting_card", False),
                     "awaiting_relic": state.get("awaiting_relic", False),
+                    "awaiting_loot": state.get("awaiting_loot", False),
                     "awaiting_next": state.get("awaiting_next", False),
                 }
             )
@@ -403,6 +425,9 @@ async def _run_battle(
                 "party": [],
                 "foes": [],
                 "awaiting_next": False,
+                "awaiting_card": False,
+                "awaiting_relic": False,
+                "awaiting_loot": False,
             }
     finally:
         battle_tasks.pop(run_id, None)

@@ -464,9 +464,9 @@
           if (snap?.ended && snap?.result === 'defeat') {
             handleDefeat();
           }
-          // Auto-advance if awaiting_next without any reward choices present
+          // Auto-advance if awaiting_next without any reward choices or loot present
           try {
-            if (!rewardsReady && snap?.awaiting_next && runId) {
+            if (!rewardsReady && snap?.awaiting_next && !snap?.awaiting_loot && runId) {
               await handleNextRoom();
             }
           } catch {}
@@ -543,10 +543,10 @@
           stopBattlePoll();
           return;
         }
-        // If backend reports awaiting_next without choices, force-advance
+        // If backend reports awaiting_next without choices or loot, force-advance
         try {
           const noChoices = ((data?.card_choices?.length || 0) === 0) && ((data?.relic_choices?.length || 0) === 0);
-          if (data?.awaiting_next && noChoices && runId) {
+          if (data?.awaiting_next && noChoices && !data?.awaiting_loot && runId) {
             await handleNextRoom();
             return;
           }
@@ -581,11 +581,11 @@
         battleActive = false;
         if (typeof window !== 'undefined') window.afBattleActive = false; // Update global state for ping indicator
         stopBattlePoll();
-        // Non-battle rooms that are immediately ready to advance (no choices)
+        // Non-battle rooms that are immediately ready to advance (no choices, no loot)
         // should auto-advance to avoid getting stuck.
         try {
           const noChoices = ((data?.card_choices?.length || 0) === 0) && ((data?.relic_choices?.length || 0) === 0);
-          if (data?.awaiting_next && noChoices && runId) {
+          if (data?.awaiting_next && noChoices && !data?.awaiting_loot && runId) {
             await handleNextRoom();
             return;
           }
@@ -789,6 +789,30 @@
     }
   }
 
+  async function handleLootAcknowledge() {
+    if (!runId) return;
+    try {
+      // Import and call the acknowledgeLoot function
+      const { acknowledgeLoot } = await import('$lib/systems/runApi.js');
+      await acknowledgeLoot(runId);
+      // After acknowledging loot, the backend should set awaiting_next=true
+      // Refresh the room data to reflect the updated state
+      const { roomAction } = await import('$lib/systems/runApi.js');
+      const refreshed = await roomAction(runId, 'battle', 'snapshot');
+      if (refreshed) {
+        roomData = refreshed;
+        // If the backend now indicates awaiting_next, proceed to next room
+        if (refreshed.awaiting_next) {
+          await handleNextRoom();
+        }
+      }
+    } catch (e) {
+      // Show error if loot acknowledgment fails
+      const { openOverlay } = await import('$lib/systems/OverlayController.js');
+      openOverlay('error', { message: e.message, traceback: e.stack || '' });
+    }
+  }
+
   async function handleForceNextRoom() {
     if (!runId) return;
     // Force-advance regardless of current overlay/state; safety for stuck awaiting_next
@@ -905,6 +929,7 @@
     on:restCraft={handleRestCraft}
     on:restLeave={handleRestLeave}
     on:nextRoom={handleNextRoom}
+    on:lootAcknowledge={handleLootAcknowledge}
     on:endRun={handleRunEnd}
     on:forceNextRoom={handleForceNextRoom}
     on:saveParty={handlePartySave}
