@@ -24,6 +24,15 @@ def test_blazing_torment_stacks():
     assert target.dots.count("blazing_torment") == 2
 
 
+def test_high_hit_rate_applies_multiple_stacks(monkeypatch):
+    attacker = Stats(atk=50, effect_hit_rate=3.5, damage_type=Fire())
+    target = Stats(effect_resistance=0.1)
+    manager = EffectManager(target)
+    monkeypatch.setattr(effects.random, "random", lambda: 0.0)
+    manager.maybe_inflict_dot(attacker, 50)
+    assert target.dots.count("blazing_torment") >= 3
+
+
 @pytest.mark.asyncio
 async def test_damage_and_heal_events():
     bus = EventBus()
