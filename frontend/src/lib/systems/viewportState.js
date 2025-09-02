@@ -6,7 +6,6 @@ import { getPlayers } from './api.js';
 import {
   getCharacterPlaylist,
   getMusicTracks,
-  getRandomMusicTrack,
   getFallbackPlaylist,
   shuffle,
 } from './music.js';
@@ -84,6 +83,8 @@ export function rewardOpen(roomData, _battleActive) {
   return Boolean(hasCards || hasRelics);
 }
 
+const battlePollCounts = new Map();
+
 export function selectBattleMusic({ roomType, party = [], foes = [] }) {
   const type = String(roomType || '');
   const category =
@@ -104,31 +105,45 @@ export function selectBattleMusic({ roomType, party = [], foes = [] }) {
     return getFallbackPlaylist('normal');
   }
 
+  const key = `${type}`;
+  if (type.startsWith('battle')) {
+    const ready = (party?.length || 0) > 0 && (foes?.length || 0) > 0;
+    const count = battlePollCounts.get(key) || 0;
+    if (!ready || count < 2) {
+      battlePollCounts.set(key, count + 1);
+      const fb = getFallbackPlaylist(category);
+      return fb.length ? fb : [];
+    }
+    battlePollCounts.delete(key);
+  }
+
   const candidates = [];
 
-  function addCandidate(entity, weight = 1) {
+  function addCandidate(entity) {
     const name = typeof entity === 'string' ? entity : entity?.id || entity?.name;
     if (!name) return;
-    const list = getCharacterPlaylist(String(name).toLowerCase(), category);
-    if (list.length) candidates.push({ list, weight });
+    const id = String(name).toLowerCase();
+    const list = getCharacterPlaylist(id, category);
+    if (!list.length) return;
+    const weight = id === 'luna' ? 3 : 1;
+    candidates.push({ list, weight });
   }
 
-  party.forEach(p => addCandidate(p));
-  foes.forEach(f => addCandidate(f));
-
-  // If Luna is present and has tracks for this category, prefer Luna deterministically
-  const hasLuna = [...party, ...foes].some((e) => String((typeof e === 'string' ? e : (e?.id || e?.name)) || '').toLowerCase() === 'luna');
-  if (hasLuna) {
-    const lunaList = getCharacterPlaylist('luna', category);
-    if (lunaList.length) return lunaList;
-  }
+  party.forEach(addCandidate);
+  foes.forEach(addCandidate);
 
   if (candidates.length === 0) {
     const fb = getFallbackPlaylist(category);
     return fb.length ? fb : [];
   }
 
-  // If multiple characters have playlists, just pick the first deterministically
+  // Weighted random draw
+  const total = candidates.reduce((sum, c) => sum + c.weight, 0);
+  let roll = Math.random() * total;
+  for (const c of candidates) {
+    roll -= c.weight;
+    if (roll < 0) return c.list;
+  }
   return candidates[0].list;
 }
 
@@ -140,6 +155,8 @@ function hasAudio() {
 let gameAudio;
 let currentMusicVolume = 50;
 let currentPlaylist = [];
+// Keep unshuffled source so repeated calls with the same playlist don't restart
+let originalPlaylist = [];
 let playlistIndex = 0;
 let playlistLoop = true;
 // No cross-context reuse to avoid mismatched character music between fights
@@ -239,14 +256,23 @@ function playNextTrack(session = playSession) {
 
 export function startGameMusic(volume, playlist = [], loop = true) {
   if (typeof volume === 'number') currentMusicVolume = volume;
-  // Bump session to cancel any in-flight callbacks and stop current audio
+  const newSource = Array.isArray(playlist) ? playlist.slice() : [];
+  const samePlaylist =
+    newSource.length === originalPlaylist.length &&
+    newSource.every((src, i) => src === originalPlaylist[i]) &&
+    loop === playlistLoop;
+  if (samePlaylist && gameAudio) {
+    _applyMusicVolumeNow();
+    return;
+  }
+  const oldAudio = gameAudio;
+  originalPlaylist = newSource;
+  // Advance session so old callbacks no-op
   playSession += 1;
   const sessionForStart = playSession;
-  // Safe to call in SSR; no-op if audio is unavailable
-  const stopPromise = _stopGameAudio(false, DEFAULT_FADE_OUT_MS, sessionForStart);
   // Prepare new playlist immediately
-  if (Array.isArray(playlist) && playlist.length > 0) {
-    currentPlaylist = shuffle(playlist);
+  if (newSource.length > 0) {
+    currentPlaylist = shuffle(newSource);
     playlistIndex = 0;
     playlistLoop = loop;
   } else {
@@ -255,11 +281,12 @@ export function startGameMusic(volume, playlist = [], loop = true) {
   _musicLog('playlist', { session: sessionForStart, count: currentPlaylist.length });
   if (!hasAudio()) return;
   nextFadeInMs = DEFAULT_FADE_IN_MS;
-  // Start only after prior audio finishes fading/stopping
-  Promise.resolve(stopPromise).then(() => {
-    if (sessionForStart !== playSession) return; // superseded
-    playNextTrack(sessionForStart);
-  });
+  playNextTrack(sessionForStart);
+  if (oldAudio) {
+    _fadeOutAudio(oldAudio, DEFAULT_FADE_OUT_MS).finally(() => {
+      try { oldAudio.pause(); } catch {}
+    });
+  }
 }
 
 export function applyMusicVolume(volume) {
@@ -374,4 +401,25 @@ function _fadeInCurrent(ms, session) {
   };
   if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(step);
   else setTimeout(() => step(), 0);
+}
+
+function _fadeOutAudio(audio, ms) {
+  if (!audio) return Promise.resolve();
+  return new Promise((resolve) => {
+    const start = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const initial = (() => { try { return audio.volume; } catch { return 1; } })();
+    const step = (nowTs) => {
+      const now = typeof nowTs === 'number' ? nowTs : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+      const t = Math.max(0, Math.min(1, (now - start) / ms));
+      try { audio.volume = initial * (1 - t); } catch {}
+      if (t < 1 && audio) {
+        if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(step);
+        else setTimeout(() => step(), 16);
+      } else {
+        resolve();
+      }
+    };
+    if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(step);
+    else setTimeout(() => step(), 0);
+  });
 }
