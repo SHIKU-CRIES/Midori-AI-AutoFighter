@@ -453,6 +453,8 @@ class Stats:
         amount = max(int(amount), 1)
         if critical and attacker is not None:
             log.info("Critical hit! %s -> %s for %s", attacker.id, self.id, amount)
+            # Emit critical hit event for battle logging
+            BUS.emit("critical_hit", attacker, self, amount, action_name or "attack")
         original_amount = amount
         self.last_damage_taken = amount
         self.damage_taken += amount
@@ -462,6 +464,9 @@ class Stats:
             shield_absorbed = min(amount, self.shields)
             self.shields -= shield_absorbed
             amount -= shield_absorbed
+            # Emit shield absorbed event for battle logging
+            if shield_absorbed > 0:
+                BUS.emit("shield_absorbed", self, shield_absorbed, "shield")
 
         # Apply remaining damage to HP
         if amount > 0:

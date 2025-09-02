@@ -185,6 +185,45 @@
     availableTabs = tabs;
   }
 
+  // Process actions to combine ultimate damage with normal attacks
+  function processActionData(actions) {
+    if (!actions) return {};
+    
+    const processed = { ...actions };
+    let normalAttackTotal = processed['Normal Attack'] || 0;
+    
+    // Combine all ultimate damage types with Normal Attack
+    const ultimateActions = Object.keys(processed).filter(action => 
+      action.toLowerCase().includes('ultimate') || 
+      action.toLowerCase().includes('ult')
+    );
+    
+    for (const ultimateAction of ultimateActions) {
+      normalAttackTotal += processed[ultimateAction];
+      delete processed[ultimateAction];
+    }
+    
+    // Also combine DoT damage with Normal Attack
+    const dotActions = Object.keys(processed).filter(action => 
+      action.toLowerCase().includes('dot') || 
+      action.toLowerCase().includes('bleed') ||
+      action.toLowerCase().includes('burn') ||
+      action.toLowerCase().includes('poison') ||
+      action.toLowerCase().includes('erosion')
+    );
+    
+    for (const dotAction of dotActions) {
+      normalAttackTotal += processed[dotAction];
+      delete processed[dotAction];
+    }
+    
+    if (normalAttackTotal > 0) {
+      processed['Normal Attack'] = normalAttackTotal;
+    }
+    
+    return processed;
+  }
+
   // Get entity-specific data for a tab
   function getEntityData(entityId) {
     if (!summary) return null;
@@ -204,7 +243,12 @@
       }, {});
       return {
         damage: totalDamageByType(),
-        actions: {},
+        actions: processActionData(Object.values(summary.damage_by_action || {}).reduce((acc, cur) => {
+          for (const [action, amt] of Object.entries(cur || {})) {
+            acc[action] = (acc[action] || 0) + amt;
+          }
+          return acc;
+        }, {})),
         criticals: Object.values(summary.critical_hits || {}).reduce((a, b) => a + b, 0),
         criticalDamage: Object.values(summary.critical_damage || {}).reduce((a, b) => a + b, 0),
         shieldAbsorbed: Object.values(summary.shield_absorbed || {}).reduce((a, b) => a + b, 0),
@@ -223,7 +267,7 @@
 
     return {
       damage: summary.damage_by_type?.[entityId] || {},
-      actions: summary.damage_by_action?.[entityId] || {},
+      actions: processActionData(summary.damage_by_action?.[entityId] || {}),
       criticals: summary.critical_hits?.[entityId] || 0,
       criticalDamage: summary.critical_damage?.[entityId] || 0,
       shieldAbsorbed: summary.shield_absorbed?.[entityId] || 0,
