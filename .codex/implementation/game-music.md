@@ -25,15 +25,23 @@ category is omitted the file falls under `other`.
 first foe's `boss` playlist overrides and plays if present, otherwise the global
 library is used. For regular battles the party and foes contribute their playlists
 and a weighted roll chooses one. Foes named `Luna` receive a weight of 3 while all
-others use 1, giving Luna's themes a higher chance to play.
+others use 1, giving Luna's themes a higher chance to play. Battle music only
+switches after the backend has reported combatants several times so transitions
+occur after full data is available.
 
 ## Shuffling and playback
 
 `startGameMusic()` shuffles the selected playlist with a Fisher–Yates algorithm and
-loops it. When the playlist ends it reshuffles before replaying; if no playlist is
-active a random track is chosen from the full library. Because assets are discovered
-recursively, any additional files dropped into `assets/music` are picked up and
-participate in this shuffle automatically.
+crossfades between the previous and next track using two `Audio` instances. When the
+playlist ends it reshuffles before replaying; if no playlist is active a random
+track is chosen from the full library. Because assets are discovered recursively,
+any additional files dropped into `assets/music` are picked up and participate in
+this shuffle automatically.
+
+To prevent abrupt stops during room transitions, `startGameMusic` caches the
+unshuffled playlist. Repeated calls with the same list simply reapply volume,
+allowing the current track to continue until it ends or a new playlist is
+requested.
 
 Headless environments may not support audio playback; tests rely on Bun's no-op
 `Audio` implementation so CI runs without sound hardware.
