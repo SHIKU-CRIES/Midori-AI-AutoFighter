@@ -21,8 +21,8 @@ DIMINISHING_RETURNS_CONFIG = {
     'atk': {'threshold': 100, 'scaling_factor': 100.0, 'base_offset': 0},
     'defense': {'threshold': 100, 'scaling_factor': 100.0, 'base_offset': 0},
 
-    # Crit rate, mitigation, vitality: 100x reduction per 1% over 2%
-    'crit_rate': {'threshold': 0.01, 'scaling_factor': 100.0, 'base_offset': 0.02},
+    # Crit rate: 100x reduction per 1% over 75%
+    'crit_rate': {'threshold': 0.01, 'scaling_factor': 100.0, 'base_offset': 0.75},
     'mitigation': {'threshold': 0.01, 'scaling_factor': 100.0, 'base_offset': 0.02},
     'vitality': {'threshold': 0.01, 'scaling_factor': 100.0, 'base_offset': 0.02},
 

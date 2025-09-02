@@ -48,20 +48,21 @@ class TestDiminishingReturnsCalculation:
         assert abs(calculate_diminishing_returns('defense', 100) - expected_100) < 1e-6
 
     def test_percentage_stat_scaling(self):
-        """Test crit rate, mitigation, vitality: 100x per 1% over 2%."""
-        # At base (2%) or below: full effectiveness
-        assert calculate_diminishing_returns('crit_rate', 0.02) == 1.0
-        assert calculate_diminishing_returns('crit_rate', 0.01) == 1.0  # Below base
+        """Test crit rate: 100x per 1% over 75%. Mitigation, vitality: 100x per 1% over 2%."""
+        # Crit rate at base (75%) or below: full effectiveness
+        assert calculate_diminishing_returns('crit_rate', 0.75) == 1.0
+        assert calculate_diminishing_returns('crit_rate', 0.50) == 1.0  # Below base
 
-        # At 3% (1% over base): 1/100 effectiveness
+        # At 76% (1% over base): 1/100 effectiveness
+        expected_76pct = 1.0 / (100.0 ** 1)
+        assert abs(calculate_diminishing_returns('crit_rate', 0.76) - expected_76pct) < 1e-6
+
+        # At 77% (2% over base): 1/10000 effectiveness
+        expected_77pct = 1.0 / (100.0 ** 2)
+        assert abs(calculate_diminishing_returns('crit_rate', 0.77) - expected_77pct) < 1e-6
+
+        # Mitigation and vitality still use 2% base
         expected_3pct = 1.0 / (100.0 ** 1)
-        assert abs(calculate_diminishing_returns('crit_rate', 0.03) - expected_3pct) < 1e-6
-
-        # At 4% (2% over base): 1/10000 effectiveness
-        expected_4pct = 1.0 / (100.0 ** 2)
-        assert abs(calculate_diminishing_returns('crit_rate', 0.04) - expected_4pct) < 1e-6
-
-        # Same rules for mitigation and vitality
         assert calculate_diminishing_returns('mitigation', 0.03) == expected_3pct
         assert calculate_diminishing_returns('vitality', 0.03) == expected_3pct
 
@@ -187,15 +188,15 @@ class TestBuffScalingIntegration:
 
     def test_percentage_stat_buff_scaling(self):
         """Test scaling for percentage-based stats."""
-        # High crit rate character (4% = 2% over base)
+        # High crit rate character (77% = 2% over 75% base)
         stats = Stats()
-        stats.set_base_stat('crit_rate', 0.04)
-        expected_scaling = 1.0 / (100.0 ** 2)  # 2 steps over 2% base
+        stats.set_base_stat('crit_rate', 0.77)
+        expected_scaling = 1.0 / (100.0 ** 2)  # 2 steps over 75% base
 
         create_stat_buff(stats, crit_rate=0.01, turns=1, name="crit_buff")
         expected_buff = 0.01 * expected_scaling
 
-        assert abs(stats.crit_rate - (0.04 + expected_buff)) < 1e-6
+        assert abs(stats.crit_rate - (0.77 + expected_buff)) < 1e-6
 
     def test_multiple_buffs_accumulate_scaling(self):
         """Test that multiple buffs each get their own scaling."""
