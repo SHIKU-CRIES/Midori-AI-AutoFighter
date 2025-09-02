@@ -14,7 +14,7 @@ class PhantomAlly(CardBase):
     stars: int = 5
     effects: dict[str, float] = field(default_factory=lambda: {"atk": 15.0})
     about: str = (
-        "+1500% ATK; on the first turn, summon a temporary copy of a random ally."
+        "+1500% ATK; on the first turn, summon a permanent copy of a random ally."
     )
 
     async def apply(self, party):
@@ -26,13 +26,13 @@ class PhantomAlly(CardBase):
         original = random.choice(party.members)
 
         # Create phantom using the new summons system
-        # Phantoms are full-strength copies (multiplier=1.0) but temporary (1 turn)
+        # Phantoms are full-strength copies (multiplier=1.0) that last the entire battle
         summon = SummonManager.create_summon(
             summoner=original,
             summon_type="phantom",
             source=self.id,
             stat_multiplier=1.0,  # Full strength copy
-            turns_remaining=1,  # Only lasts one turn
+            turns_remaining=-1,  # Lasts the entire battle
             max_summons=1,
         )
 
@@ -48,7 +48,19 @@ class PhantomAlly(CardBase):
                     "hp": summon.hp,
                     "max_hp": summon.max_hp,
                     "atk": summon.atk,
-                    "defense": summon.defense
+                    "defense": summon.defense,
+                    "crit_rate": summon.crit_rate,
+                    "crit_damage": summon.crit_damage,
+                    "effect_hit_rate": summon.effect_hit_rate,
+                    "effect_resistance": summon.effect_resistance,
+                    "mitigation": summon.mitigation,
+                    "vitality": summon.vitality,
+                    "dodge_odds": summon.dodge_odds,
+                    "regain": summon.regain,
+                    "damage_type": getattr(summon.damage_type, 'id', 'Generic'),
+                    "ultimate_charge": summon.ultimate_charge,
+                    "level": summon.level,
+                    "actions_per_turn": summon.actions_per_turn
                 },
                 "atk_bonus_applied": 1500
             })

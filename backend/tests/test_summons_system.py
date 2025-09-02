@@ -201,7 +201,7 @@ async def test_phantom_ally_new_system(monkeypatch):
 
     assert phantom is not None
     assert phantom.summon_source == "phantom_ally"
-    assert phantom.turns_remaining == 1  # Should be temporary
+    assert phantom.turns_remaining == -1  # Should last the entire battle
 
 
 @pytest.mark.asyncio
