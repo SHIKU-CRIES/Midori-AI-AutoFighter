@@ -219,43 +219,14 @@
     availableTabs = tabs;
   }
 
-  // Process actions to combine ultimate damage with normal attacks
+  // Process actions - now preserves individual action types for detailed breakdown
   function processActionData(actions) {
     if (!actions) return {};
     
-    const processed = { ...actions };
-    let normalAttackTotal = processed['Normal Attack'] || 0;
-    
-    // Combine all ultimate damage types with Normal Attack
-    const ultimateActions = Object.keys(processed).filter(action => 
-      action.toLowerCase().includes('ultimate') || 
-      action.toLowerCase().includes('ult')
-    );
-    
-    for (const ultimateAction of ultimateActions) {
-      normalAttackTotal += processed[ultimateAction];
-      delete processed[ultimateAction];
-    }
-    
-    // Also combine DoT damage with Normal Attack
-    const dotActions = Object.keys(processed).filter(action => 
-      action.toLowerCase().includes('dot') || 
-      action.toLowerCase().includes('bleed') ||
-      action.toLowerCase().includes('burn') ||
-      action.toLowerCase().includes('poison') ||
-      action.toLowerCase().includes('erosion')
-    );
-    
-    for (const dotAction of dotActions) {
-      normalAttackTotal += processed[dotAction];
-      delete processed[dotAction];
-    }
-    
-    if (normalAttackTotal > 0) {
-      processed['Normal Attack'] = normalAttackTotal;
-    }
-    
-    return processed;
+    // Return actions as-is to preserve detailed breakdown
+    // Previously this function was combining ultimates and DoTs into "Normal Attack"
+    // which was hiding the very data users want to see in "Damage by Action"
+    return { ...actions };
   }
 
   // Get entity-specific data for a tab
@@ -1041,22 +1012,8 @@
               </div>
 
               <!-- Action Type Breakdown by Party -->
-              {#if (summary?.damage_by_action || summary?.ultimate_damage_by_action) && (Object.keys(summary.damage_by_action || {}).length > 0 || Object.keys(summary.ultimate_damage_by_action || {}).length > 0)}
-                {@const allActionsByEntity = (() => {
-                  const normal = summary.damage_by_action || {};
-                  const ult = summary.ultimate_damage_by_action || {};
-                  const out = {};
-                  for (const [id, actions] of Object.entries(normal)) {
-                    out[id] = { ...actions };
-                  }
-                  for (const [id, actions] of Object.entries(ult)) {
-                    const bucket = out[id] || (out[id] = {});
-                    for (const [action, dmg] of Object.entries(actions || {})) {
-                      bucket[action] = (bucket[action] || 0) + (dmg || 0);
-                    }
-                  }
-                  return out;
-                })()}
+              {#if summary?.damage_by_action && Object.keys(summary.damage_by_action).length > 0}
+                {@const allActionsByEntity = summary.damage_by_action || {}}
                 {@const partyActions = Object.entries(allActionsByEntity)
                   .filter(([id]) => (summary.party_members || []).includes(id))
                   .reduce((acc, [id, actions]) => {
