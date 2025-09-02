@@ -44,7 +44,7 @@ class EchoingDrum(RelicBase):
             safe_async_task(target.apply_damage(dmg, attacker=attacker))
 
         BUS.subscribe("battle_start", _battle_start)
-        BUS.subscribe("attack_used", _attack)
+        BUS.subscribe("action_used", _attack)
 
     def describe(self, stacks: int) -> str:
         pct = 25 * stacks
