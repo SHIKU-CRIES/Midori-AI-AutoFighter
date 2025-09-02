@@ -21,6 +21,8 @@
   // For now, allow up to +100% overheal to display visually.
   const OH_CAP_UI = 100;
   $: ohDispPct = Math.min(ohPct, OH_CAP_UI);
+  $: hpHue = (hpPct / 100) * 120;
+  $: hpColor = `hsl(${hpHue}, 100%, 45%)`;
 
   $: elColor = getElementColor(fighter.element);
   $: ultProgress = Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15));
@@ -123,14 +125,14 @@
       </div>
     {/if}
   </div>
-  <div class="hp-bar">
+  <div class="hp-bar" class:reduced={reducedMotion}>
     {#if ohDispPct > 0}
       <div
         class="overheal-fill"
         style={`width: calc(${ohDispPct}% + 5px); left: -5px;`}
       ></div>
     {/if}
-    <div class="hp-fill" style={`width: ${hpPct}%`}></div>
+    <div class="hp-fill" style={`width: ${hpPct}%; background-color: ${hpColor};`}></div>
   </div>
   {#if ((Array.isArray(fighter.hots) ? fighter.hots.length : 0) + (Array.isArray(fighter.dots) ? fighter.dots.length : 0) + (Array.isArray(fighter.active_effects) ? fighter.active_effects.length : 0)) > 0}
     <!-- Buff Bar: shows current HoT/DoT effects under the portrait. -->
@@ -159,13 +161,25 @@
     overflow: visible; /* allow underlay to extend slightly to the left */
     border-radius: 3px;
   }
-  .hp-fill { height: 100%; background: #0f0; position: absolute; left: 0; top: 0; }
+  .hp-fill {
+    height: 100%;
+    background: #0f0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 0.3s linear, background-color 0.3s linear;
+  }
   .overheal-fill {
     height: calc(100% + 2px);
     background: rgba(255, 255, 255, 0.92);
     position: absolute;
     left: 0;
     top: -1px; /* slight upward offset */
+    transition: width 0.3s linear;
+  }
+  .hp-bar.reduced .hp-fill,
+  .hp-bar.reduced .overheal-fill {
+    transition: none;
   }
   .portrait-frame { position: relative; width: var(--portrait-size); height: var(--portrait-size); }
   /* Scale chip and pips relative to the portrait so Battle Review auto-resizes */
