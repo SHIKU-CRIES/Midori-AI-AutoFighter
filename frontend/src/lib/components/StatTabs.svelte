@@ -107,60 +107,31 @@
   } else {
     editorVals = null;
   }
-  // Compute displayed stats including persistent upgrades (from backend
-  // upgrade_totals) and, for the Player, live editor deltas.
+  // Compute displayed stats - use backend-computed stats which already include all effects
   $: {
     const statsObj = previewChar?.stats || {};
     const baseStats = statsObj.base_stats || {};
-    const upg = statsObj.upgrade_totals || {};
     const result = { ...statsObj };
 
-    // Helper to apply upgrades to a base stat
-    function applyUpgrades(stat, baseVal) {
-      const pct = Number(upg?.[stat] || 0);
-      if (['max_hp', 'atk', 'defense', 'regain'].includes(stat)) {
-        return Number(baseVal) * (1 + pct);
-      }
-      // percentage/multiplier-like stats use additive
-      return Number(baseVal) + pct;
-    }
-
-    // Start from base_stats to build a clean upgraded view
-    const bMax = Number(baseStats.max_hp ?? statsObj.max_hp ?? 0);
-    const bAtk = Number(baseStats.atk ?? statsObj.atk ?? 0);
-    const bDef = Number(baseStats.defense ?? statsObj.defense ?? 0);
-
-    let dMax = applyUpgrades('max_hp', bMax);
-    let dAtk = applyUpgrades('atk', bAtk);
-    let dDef = applyUpgrades('defense', bDef);
-
-    // Apply live editor deltas for Player only
+    // For the player character only, apply live editor preview changes on top of computed stats
     if (isPlayer && editorVals) {
       const saved = savedEditor || { hp: 0, attack: 0, defense: 0 };
       const hpDelta = (Number(editorVals.hp) || 0) - (Number(saved.hp) || 0);
       const atkDelta = (Number(editorVals.attack) || 0) - (Number(saved.attack) || 0);
       const defDelta = (Number(editorVals.defense) || 0) - (Number(saved.defense) || 0);
-      dMax = Math.round(dMax * (1 + hpDelta / 100));
-      dAtk = Math.round(dAtk * (1 + atkDelta / 100));
-      dDef = Math.round(dDef * (1 + defDelta / 100));
-    }
-
-    // Preserve HP ratio against upgraded max
-    const hpRatioBase = Number(statsObj.hp) / Math.max(1, Number(statsObj.max_hp || bMax));
-    const newHp = Math.round(dMax * Math.max(0, Math.min(1, isFinite(hpRatioBase) ? hpRatioBase : 1)));
-
-    // Assign computed values
-    result.max_hp = Math.round(dMax);
-    result.hp = newHp;
-    result.atk = Math.round(dAtk);
-    result.defense = Math.round(dDef);
-
-    // Compute rate/multiplier-like displays from base + upgrades
-    const rateStats = ['crit_rate', 'effect_hit_rate', 'effect_resistance', 'dodge_odds'];
-    const multStats = ['crit_damage', 'mitigation', 'vitality'];
-    for (const s of [...rateStats, ...multStats]) {
-      const baseVal = baseStats?.[s] ?? statsObj?.[s] ?? 0;
-      result[s] = applyUpgrades(s, baseVal);
+      
+      // Apply deltas to the already-computed stats (not base stats)
+      const currentMax = Number(statsObj.max_hp) || Number(baseStats.max_hp) || 1000;
+      const currentAtk = Number(statsObj.atk) || Number(baseStats.atk) || 100;
+      const currentDef = Number(statsObj.defense) || Number(baseStats.defense) || 50;
+      
+      result.max_hp = Math.round(currentMax * (1 + hpDelta / 100));
+      result.atk = Math.round(currentAtk * (1 + atkDelta / 100));
+      result.defense = Math.round(currentDef * (1 + defDelta / 100));
+      
+      // Preserve HP ratio against upgraded max
+      const hpRatioBase = Number(statsObj.hp) / Math.max(1, currentMax);
+      result.hp = Math.round(result.max_hp * Math.max(0, Math.min(1, isFinite(hpRatioBase) ? hpRatioBase : 1)));
     }
 
     viewStats = result;
