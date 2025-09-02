@@ -34,6 +34,28 @@ class Fire(DamageTypeBase):
             dmg *= math.sqrt(5)
         return dmg
 
+    async def ultimate(self, actor, allies, enemies) -> bool:
+        """Fire ultimate: Deal massive damage to all enemies, scaling with missing HP."""
+        if not getattr(actor, "use_ultimate", lambda: False)():
+            return False
+
+        if not enemies:
+            return False
+
+        # Fire ultimate damage scales with the caster's missing HP
+        missing_ratio = 1 - (actor.hp / max(actor.max_hp, 1))
+        base_damage = int(getattr(actor, "atk", 0))
+        ult_damage = int(base_damage * (1.5 + missing_ratio))
+
+        for enemy in enemies:
+            if getattr(enemy, "hp", 0) <= 0:
+                continue
+
+            # Deal fire ultimate damage
+            await enemy.apply_damage(ult_damage, attacker=actor, action_name="Fire Ultimate")
+
+        return True
+
     def _on_ultimate_used(self, user: Stats) -> None:
         if getattr(user, "damage_type", None) is not self:
             return
