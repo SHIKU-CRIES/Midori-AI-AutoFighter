@@ -11,7 +11,7 @@ from plugins.players._base import PlayerBase
 class LadyDarkness(PlayerBase):
     id = "lady_darkness"
     name = "LadyDarkness"
-    char_type = CharacterType.B
+    char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Dark)
     passives: list[str] = field(default_factory=lambda: ["lady_darkness_eclipsing_veil"])

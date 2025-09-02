@@ -11,6 +11,6 @@ from plugins.players._base import PlayerBase
 class LadyOfFire(PlayerBase):
     id = "lady_of_fire"
     name = "LadyOfFire"
-    char_type = CharacterType.B
+    char_type: CharacterType = CharacterType.B
     damage_type: DamageTypeBase = field(default_factory=Fire)
     passives: list[str] = field(default_factory=lambda: ["lady_of_fire_infernal_momentum"])

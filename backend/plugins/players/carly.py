@@ -11,7 +11,7 @@ from plugins.players._base import PlayerBase
 class Carly(PlayerBase):
     id = "carly"
     name = "Carly"
-    char_type = CharacterType.B
+    char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Light)
     stat_gain_map: dict[str, str] = field(

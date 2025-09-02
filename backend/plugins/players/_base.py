@@ -50,6 +50,8 @@ class PlayerBase(Stats):
     char_type: CharacterType = CharacterType.C
     prompt: str = "Player prompt placeholder"
     about: str = "Player description placeholder"
+    voice_sample: str | None = None
+    voice_gender: str | None = None
 
     exp: int = 1
     level: int = 1
@@ -74,6 +76,13 @@ class PlayerBase(Stats):
     lrm_memory: object | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
+        if self.voice_gender is None:
+            self.voice_gender = {
+                CharacterType.A: "male",
+                CharacterType.B: "female",
+                CharacterType.C: "neutral",
+            }.get(self.char_type)
+
         # Initialize base stats with PlayerBase defaults
         self._base_max_hp = 1000
         self._base_atk = 100
@@ -160,26 +169,26 @@ class PlayerBase(Stats):
         return True
 
 
-    async def send_lrm_message(self, message: str) -> str:
+    async def send_lrm_message(self, message: str) -> dict[str, object]:
         import asyncio
+        from pathlib import Path
 
         from llms.torch_checker import is_torch_available
+        from tts import generate_voice
 
         if not is_torch_available():
-            # Return empty response but still save context
             response = ""
             self.lrm_memory.save_context({"input": message}, {"output": response})
-            return response
+            return {"text": response, "voice": None}
 
         try:
             from llms.loader import load_llm
-            # Load LLM in thread pool to avoid blocking the event loop
             llm = await asyncio.to_thread(load_llm)
         except Exception:
-            # Fallback to empty LLM if loading fails
             class _LLM:
                 async def generate_stream(self, text: str):
                     yield ""
+
             llm = _LLM()
 
         context = self.lrm_memory.load_memory_variables({}).get("history", "")
@@ -188,8 +197,20 @@ class PlayerBase(Stats):
         async for chunk in llm.generate_stream(prompt):
             chunks.append(chunk)
         response = "".join(chunks)
+
+        voice_path: str | None = None
+        audio = await asyncio.to_thread(
+            generate_voice, response, self.voice_sample
+        )
+        if audio:
+            voices = Path("assets/voices")
+            voices.mkdir(parents=True, exist_ok=True)
+            fname = f"{getattr(self, 'id', type(self).__name__)}.wav"
+            (voices / fname).write_bytes(audio)
+            voice_path = f"/assets/voices/{fname}"
+
         self.lrm_memory.save_context({"input": message}, {"output": response})
-        return response
+        return {"text": response, "voice": voice_path}
 
     async def receive_lrm_message(self, message: str) -> None:
         self.lrm_memory.save_context({"input": ""}, {"output": message})

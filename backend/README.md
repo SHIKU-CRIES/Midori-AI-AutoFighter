@@ -23,6 +23,16 @@ uv run app.py
 
 `load_llm()` returns an object exposing an asynchronous `generate_stream` method.
 
+## Text-to-Speech
+
+`backend/tts.py` wraps an optional `ChatterboxTTS` model and exposes
+`generate_voice(text, audio_prompt_path=None)`. Player and foe plugins may
+define a `voice_sample` pointing to a reference clip. `voice_gender` defaults to
+"male", "female", or "neutral" based on the character's `char_type` but can be
+overridden if needed. When dialogue is produced (e.g. in chat rooms or LLM
+messages) the backend saves the generated voice to `assets/voices/<id>.wav` and
+returns the relative URL in API responses.
+
 ## LRM Configuration
 
 `GET /config/lrm` returns the current model and available `ModelName` values. `POST /config/lrm` saves a new choice in the `options` table, and `POST /config/lrm/test` runs the stored model on a stateless prompt and returns its raw reply. Chat rooms load the persisted model and forward the party context and user message, returning the LRM's response alongside existing room fields.
