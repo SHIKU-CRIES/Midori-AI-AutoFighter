@@ -7,10 +7,32 @@ export const overlayView = writable('main');
 export const overlayData = writable({});
 const stack = [];
 
+function normalizeErrorPayload(data = {}) {
+  try {
+    const out = { ...(data || {}) };
+    let msg = out.message;
+    // Accept numbers or strings; trim whitespace/newlines
+    if (msg == null) msg = '';
+    msg = String(msg).trim();
+    // If it's just digits (possibly very large), present a clearer message
+    if (/^\d+$/.test(msg)) {
+      msg = `An unexpected error occurred (code ${msg}).`;
+    }
+    out.message = msg;
+    if (typeof out.traceback === 'string') out.traceback = out.traceback.trim();
+    // Always log normalized errors to aid debugging
+    try { console.error('openOverlay(error):', out); } catch {}
+    return out;
+  } catch {
+    return data || {};
+  }
+}
+
 export function openOverlay(view, data = {}) {
-  stack.push({ view: get(overlayView), data: get(overlayData) });
+  const prev = { view: get(overlayView), data: get(overlayData) };
+  stack.push(prev);
   overlayView.set(view);
-  overlayData.set(data);
+  overlayData.set(view === 'error' ? normalizeErrorPayload(data) : data);
 }
 
 export function backOverlay() {
