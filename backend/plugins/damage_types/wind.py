@@ -91,6 +91,7 @@ class Wind(DamageTypeBase):
                 except Exception:
                     pass
                 # Yield briefly to keep event loop responsive during large hit counts
+                # Yield on every hit as requested
                 await asyncio.sleep(0)
 
         # Clean up the temporary buff immediately after the sequence

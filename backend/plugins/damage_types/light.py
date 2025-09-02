@@ -40,12 +40,25 @@ class Light(DamageTypeBase):
             if mgr is None:
                 mgr = EffectManager(ally)
                 ally.effect_manager = mgr
+
+            # Remove all DoTs including Shadow Siphon
             for dot in list(mgr.dots):
                 try:
                     mgr.dots.remove(dot)
                     ally.dots.remove(dot.id)
                 except ValueError:
                     pass
+
+            # Ensure Shadow Siphon is completely removed
+            from plugins.damage_effects import SHADOW_SIPHON_ID
+            try:
+                if SHADOW_SIPHON_ID in ally.dots:
+                    ally.dots.remove(SHADOW_SIPHON_ID)
+                # Also remove from effect manager dots by id
+                mgr.dots = [d for d in mgr.dots if getattr(d, "id", "") != SHADOW_SIPHON_ID]
+            except (AttributeError, ValueError):
+                pass
+
             missing = ally.max_hp - ally.hp
             if missing > 0:
                 await ally.apply_healing(missing, healer=actor)

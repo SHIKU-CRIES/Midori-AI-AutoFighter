@@ -4,6 +4,12 @@ from typing import TYPE_CHECKING
 from typing import ClassVar
 
 from autofighter.stats import StatEffect
+from plugins.damage_types.dark import Dark
+from plugins.damage_types.fire import Fire
+from plugins.damage_types.ice import Ice
+from plugins.damage_types.light import Light
+from plugins.damage_types.lightning import Lightning
+from plugins.damage_types.wind import Wind
 
 if TYPE_CHECKING:
     from autofighter.stats import Stats
@@ -21,6 +27,9 @@ class KboshiFluxCycle:
     _damage_stacks: ClassVar[dict[int, int]] = {}
     _hot_stacks: ClassVar[dict[int, int]] = {}
 
+    # Available damage types for switching
+    _damage_types = [Fire, Ice, Wind, Lightning, Light, Dark]
+
     async def apply(self, target: "Stats") -> None:
         """Apply Flux Cycle element switching mechanics for Kboshi."""
         entity_id = id(target)
@@ -32,7 +41,25 @@ class KboshiFluxCycle:
 
         # High chance to switch to random damage type
         if random.random() < 0.8:  # 80% chance to switch
-            # Element successfully changed - remove accumulated stacks and apply mitigation debuff
+            # Get current damage type
+            current_type_id = getattr(target.damage_type, 'id', 'Dark')  # Default to Dark for Kboshi
+
+            # Filter out current type to ensure we actually switch
+            available_types = [dt for dt in self._damage_types
+                             if dt().id != current_type_id]
+
+            # If no different types available (shouldn't happen), use all types
+            if not available_types:
+                available_types = self._damage_types
+
+            # Select random new damage type
+            new_damage_type_class = random.choice(available_types)
+            new_damage_type = new_damage_type_class()
+
+            # Actually switch the damage type
+            target.damage_type = new_damage_type
+
+            # Element successfully changed - remove accumulated stacks
             if self._damage_stacks[entity_id] > 0 or self._hot_stacks[entity_id] > 0:
                 # Remove existing bonus effects
                 target._active_effects = [
@@ -41,14 +68,9 @@ class KboshiFluxCycle:
                        not effect.name.startswith(f"{self.id}_hot_heal")
                 ]
 
-                # Apply brief mitigation debuff to all foes (would need foe access)
-                # For now, just reset stacks
+                # Reset stacks
                 self._damage_stacks[entity_id] = 0
                 self._hot_stacks[entity_id] = 0
-
-            # Switch damage type (would need damage type system integration)
-            # For now, just indicate successful switch
-            pass
         else:
             # Element failed to change - gain damage bonus and HoT
             self._damage_stacks[entity_id] += 1

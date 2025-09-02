@@ -59,7 +59,7 @@ class StellarCompass(RelicBase):
                         "total_crits_accumulated": state["gold"] / (0.015 * party.relics.count(self.id)) if party.relics.count(self.id) > 0 else 0
                     })
 
-            BUS.subscribe("crit_hit", _crit)
+            BUS.subscribe("critical_hit", _crit)
             BUS.subscribe("gold_earned", _gold)
 
     def describe(self, stacks: int) -> str:

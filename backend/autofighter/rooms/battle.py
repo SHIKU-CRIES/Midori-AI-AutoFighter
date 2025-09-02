@@ -335,6 +335,8 @@ class BattleRoom(Room):
                     await registry.trigger("turn_start", member)
                     # Also trigger the enhanced turn_start method with battle context
                     await registry.trigger_turn_start(member, turn=turn, party=combat_party.members, foes=foes, enrage_active=enrage_active)
+                    # Emit BUS event for relics that subscribe to turn_start
+                    BUS.emit("turn_start", member)
                     log.debug("%s turn start", member.id)
                     await member.maybe_regain(turn)
                     # If all foes died earlier in this round, stop taking actions
@@ -538,6 +540,8 @@ class BattleRoom(Room):
                     target_effect = party_effects[pidx]
                     foe_mgr = foe_effects[foe_idx]
                     await registry.trigger("turn_start", acting_foe)
+                    # Emit BUS event for relics that subscribe to turn_start
+                    BUS.emit("turn_start", acting_foe)
                     log.debug("%s turn start targeting %s", acting_foe.id, target.id)
                     await acting_foe.maybe_regain(turn)
                     dt = getattr(acting_foe, "damage_type", None)
