@@ -158,11 +158,23 @@ async def test_kboshi_flux_cycle_passive():
     kboshi.passives = ["kboshi_flux_cycle"]
 
     # Trigger turn start multiple times to test element switching
-    for _ in range(5):
+    switched_count = 0
+    attempts = 20  # Test multiple times since switching is probabilistic (80%)
+
+    for _ in range(attempts):
+        prev_type = kboshi.damage_type.id
         await registry.trigger("turn_start", kboshi)
 
-    # Should have processed without error
-    # Actual element switching would need damage type system integration
+        # Check if type changed
+        if kboshi.damage_type.id != prev_type:
+            switched_count += 1
+
+    # With 80% switch chance over 20 attempts, we should see multiple switches
+    assert switched_count > 0, "Kboshi should switch damage types occasionally"
+
+    # Verify the damage type is one of the valid types
+    valid_types = ["Fire", "Ice", "Wind", "Lightning", "Light", "Dark"]
+    assert kboshi.damage_type.id in valid_types, f"Damage type should be one of {valid_types}, got {kboshi.damage_type.id}"
 
 
 @pytest.mark.asyncio
