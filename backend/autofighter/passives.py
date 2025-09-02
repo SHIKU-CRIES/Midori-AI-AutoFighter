@@ -58,25 +58,33 @@ class PassiveRegistry:
         counts = Counter(target.passives)
         for pid, count in counts.items():
             cls = self._registry.get(pid)
-            if cls is None or getattr(cls, "trigger", None) != "damage_taken":
+            if cls is None:
                 continue
 
             passive_instance = cls()
 
-            # Special handling for counter-attack passives
-            if hasattr(passive_instance, "counter_attack") and attacker is not None:
+            # Check if passive has on_damage_taken method (regardless of trigger type)
+            if hasattr(passive_instance, "on_damage_taken"):
                 stacks = min(count, getattr(cls, "max_stacks", count))
                 for _ in range(stacks):
-                    await passive_instance.counter_attack(target, attacker, damage)
+                    await passive_instance.on_damage_taken(target, attacker, damage)
 
-            # Regular passive application with enhanced context
-            stacks = min(count, getattr(cls, "max_stacks", count))
-            for _ in range(stacks):
-                try:
-                    await passive_instance.apply(target, attacker=attacker, damage=damage)
-                except TypeError:
-                    # Fall back to simple apply for existing passives
-                    await passive_instance.apply(target)
+            # Also trigger passives with explicit damage_taken trigger
+            if getattr(cls, "trigger", None) == "damage_taken":
+                # Special handling for counter-attack passives
+                if hasattr(passive_instance, "counter_attack") and attacker is not None:
+                    stacks = min(count, getattr(cls, "max_stacks", count))
+                    for _ in range(stacks):
+                        await passive_instance.counter_attack(target, attacker, damage)
+
+                # Regular passive application with enhanced context
+                stacks = min(count, getattr(cls, "max_stacks", count))
+                for _ in range(stacks):
+                    try:
+                        await passive_instance.apply(target, attacker=attacker, damage=damage)
+                    except TypeError:
+                        # Fall back to simple apply for existing passives
+                        await passive_instance.apply(target)
 
     async def trigger_turn_end(self, target) -> None:
         """Trigger turn end events for passives that need end-of-turn processing."""
