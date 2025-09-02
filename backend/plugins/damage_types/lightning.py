@@ -33,13 +33,13 @@ class Lightning(DamageTypeBase):
     def ultimate(self, attacker, target) -> bool:
         if not getattr(attacker, "use_ultimate", lambda: False)():
             return False
-        
+
         # Lightning ultimate deals damage to the target and applies DoTs
         base_damage = int(getattr(attacker, "atk", 0))
         if base_damage > 0:
             # Use asyncio to handle the async damage application
             asyncio.create_task(target.apply_damage(base_damage, attacker=attacker, action_name="Lightning Ultimate"))
-        
+
         mgr = getattr(target, "effect_manager", None)
         if mgr is not None:
             types = ["Fire", "Ice", "Wind", "Lightning", "Light", "Dark"]
