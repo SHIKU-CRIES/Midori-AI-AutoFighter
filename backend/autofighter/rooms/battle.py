@@ -702,16 +702,30 @@ class BattleRoom(Room):
         # Pick cards with per-item star rolls; ensure unique choices not already owned
         selected_cards: list = []
         attempts = 0
+        log.info("Starting card selection for run %s, party has %d cards", 
+                 getattr(combat_party, 'cards', []), len(getattr(combat_party, 'cards', [])))
         while len(selected_cards) < 3 and attempts < 30:
             attempts += 1
-            cstars = _apply_rdr_to_stars(_pick_card_stars(self), temp_rdr)
+            base_stars = _pick_card_stars(self)
+            cstars = _apply_rdr_to_stars(base_stars, temp_rdr)
+            log.debug("Card selection attempt %d: base_stars=%d, rdr_stars=%d", attempts, base_stars, cstars)
             one = card_choices(combat_party, cstars, count=1)
+            log.debug("  card_choices returned %d options", len(one))
             if not one:
+                log.debug("  No cards available for star level %d", cstars)
                 continue
             c = one[0]
+            log.debug("  Candidate card: %s (%s) - %d stars", c.id, c.name, c.stars)
             if any(x.id == c.id for x in selected_cards):
+                log.debug("  Card %s already selected, skipping", c.id)
                 continue
             selected_cards.append(c)
+            log.debug("  Added card: %s", c.id)
+        log.info("Card selection complete: %d cards selected after %d attempts", len(selected_cards), attempts)
+        if selected_cards:
+            log.info("Selected cards: %s", [c.id for c in selected_cards])
+        else:
+            log.warning("No cards were selected!")
         choice_data = [
             {"id": c.id, "name": c.name, "stars": c.stars, "about": c.about}
             for c in selected_cards

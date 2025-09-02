@@ -128,6 +128,11 @@ class AllyOverload:
         """Handle end-of-turn Overload mechanics."""
         entity_id = id(target)
 
+        # Initialize if not present
+        if entity_id not in self._overload_charge:
+            self._overload_charge[entity_id] = 0
+            self._overload_active[entity_id] = False
+
         if self._overload_active[entity_id]:
             # Drain 20 charge per turn while active
             self._overload_charge[entity_id] = max(0, self._overload_charge[entity_id] - 20)
@@ -139,6 +144,12 @@ class AllyOverload:
     async def on_defeat(self, target: "Stats") -> None:
         """Handle Overload deactivation on defeat."""
         entity_id = id(target)
+        
+        # Initialize if not present
+        if entity_id not in self._overload_charge:
+            self._overload_charge[entity_id] = 0
+            self._overload_active[entity_id] = False
+            
         if self._overload_active[entity_id]:
             await self._deactivate_overload(target)
 
