@@ -42,7 +42,7 @@ class KboshiFluxCycle:
         # High chance to switch to random damage type
         if random.random() < 0.8:  # 80% chance to switch
             # Get current damage type
-            current_type_id = getattr(target.damage_type, 'id', 'Generic')
+            current_type_id = getattr(target.damage_type, 'id', 'Dark')  # Default to Dark for Kboshi
 
             # Filter out current type to ensure we actually switch
             available_types = [dt for dt in self._damage_types

@@ -46,19 +46,7 @@ class Wind(DamageTypeBase):
         a_mgr.add_modifier(eh_mod)
 
         # Determine dynamic hit count (allow cards/relics to override via attributes)
-        # Scale down hits for performance with many enemies
-        base_hits = int(getattr(actor, "wind_ultimate_hits", getattr(actor, "ultimate_hits", 25)) or 25)
-        enemy_count = len([foe for foe in enemies if getattr(foe, "hp", 0) > 0])
-        # Scale hits down when fighting many enemies to maintain performance
-        # 1-4 enemies: full hits, 5-8 enemies: 80%, 9-12 enemies: 60%, 13+ enemies: 40%
-        if enemy_count <= 4:
-            hits = base_hits
-        elif enemy_count <= 8:
-            hits = max(1, int(base_hits * 0.8))
-        elif enemy_count <= 12:
-            hits = max(1, int(base_hits * 0.6))
-        else:
-            hits = max(1, int(base_hits * 0.4))
+        hits = int(getattr(actor, "wind_ultimate_hits", getattr(actor, "ultimate_hits", 25)) or 25)
         hits = max(1, hits)
 
         # Strike each living enemy with a total budget equal to actor.atk distributed
@@ -103,9 +91,8 @@ class Wind(DamageTypeBase):
                 except Exception:
                     pass
                 # Yield briefly to keep event loop responsive during large hit counts
-                # Only yield every few hits when there are many enemies to reduce overhead
-                if i % max(1, hits // 10) == 0:
-                    await asyncio.sleep(0)
+                # Yield on every hit as requested
+                await asyncio.sleep(0)
 
         # Clean up the temporary buff immediately after the sequence
         try:
