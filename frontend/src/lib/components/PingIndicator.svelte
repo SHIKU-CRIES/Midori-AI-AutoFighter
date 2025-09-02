@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
+  import { getApiBase } from '$lib/systems/backendDiscovery.js';
 
   let pingStatus = 'unknown'; // 'healthy', 'degraded', 'error', 'unknown'
   let pingTime = null;
@@ -8,6 +9,7 @@
   let interval;
   let lastUpdateTime = 0;
   let pos = { top: '1.2rem', left: '1.2rem' };
+  let apiBase = null;
 
   // Check if we're in combat by looking for battle-related elements or state
   function checkCombatState() {
@@ -23,20 +25,18 @@
     }
   }
 
-  // Derive a sensible backend base when not provided via env. This avoids
-  // using 'localhost' when accessed over LAN.
-  const DEFAULT_BACKEND = (typeof window !== 'undefined')
-    ? `${location.protocol}//${location.hostname}:59002`
-    : 'http://localhost:59002';
-  const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_BACKEND;
-
   async function checkBackendHealth() {
     if (!browser) return;
     
     try {
+      // Get the current API base (will auto-discover if needed)
+      if (!apiBase) {
+        apiBase = await getApiBase();
+      }
+      
       const startTime = performance.now();
-      // Use absolute backend base; the dev server at 59001 doesn't proxy /api
-      const response = await fetch(`${API_BASE}/api/performance/health`, {
+      // Use the discovered backend base
+      const response = await fetch(`${apiBase}/api/performance/health`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
