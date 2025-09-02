@@ -707,7 +707,13 @@ class BattleLogger:
                 "critical_hits": self.summary.critical_hits,
                 "critical_damage": self.summary.critical_damage,
                 "resources_spent": self.summary.resources_spent,
-                "resources_gained": self.summary.resources_gained
+                "resources_gained": self.summary.resources_gained,
+
+                # Combat tracking data (missing from original export)
+                "kills": self.summary.kills,
+                "dot_kills": self.summary.dot_kills,
+                "ultimates_used": self.summary.ultimates_used,
+                "ultimate_failures": self.summary.ultimate_failures
             }
 
             # Write summary JSON
