@@ -449,21 +449,47 @@
   .icon-column {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.5rem;
+    /* Add subtle scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.3) rgba(0,0,0,0.1);
+  }
+  
+  .icon-column::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .icon-column::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 3px;
+  }
+  
+  .icon-column::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+  }
+  
+  .icon-column::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
   }
 
   .icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
-    height: 3rem;
+    width: 3.5rem;
+    height: 3.5rem;
     background: rgba(255,255,255,0.1);
     color: #ccc;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
   }
 
   .icon-btn:hover {
@@ -855,7 +881,7 @@
               <svelte:component this={tab.icon} size={20} />
             {:else if tab.entity}
               {@const _tabFighter = toDisplayFighter(tab.entity)}
-              <div style="--portrait-size: 3.5rem;">
+              <div style="--portrait-size: 3rem;">
                 <FighterPortrait fighter={_tabFighter} {reducedMotion} />
               </div>
             {:else}
