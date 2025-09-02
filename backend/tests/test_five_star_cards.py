@@ -28,7 +28,15 @@ async def test_phantom_ally_summon_lifecycle(monkeypatch):
     party = Party(members=[a, b])
     await PhantomAlly().apply(party)
     assert len(party.members) == 3
-    assert any(m.id.endswith("_phantom") for m in party.members)
+    # Check that one member is a phantom summon
+    phantom_found = False
+    for member in party.members:
+        if hasattr(member, 'summon_type') and member.summon_type == "phantom":
+            phantom_found = True
+            break
+    assert phantom_found
+
+    # Test cleanup - emit battle end to trigger summon removal
     BUS.emit("battle_end", FoeBase())
     assert len(party.members) == 2
 

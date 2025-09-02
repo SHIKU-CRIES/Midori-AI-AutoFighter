@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 from typing import ClassVar
 
 from autofighter.stats import StatEffect
+from autofighter.summons import SummonManager
+from plugins.damage_types import load_damage_type
 
 if TYPE_CHECKING:
     from autofighter.stats import Stats
@@ -18,12 +20,11 @@ class BeccaMenagerieBond:
     max_stacks = 1  # Only one instance per character
 
     # Class-level tracking of summon state and spirit bonuses
-    _active_summon: ClassVar[dict[int, str]] = {}  # entity_id -> summon_type
     _summon_cooldown: ClassVar[dict[int, int]] = {}  # entity_id -> turns_remaining
     _spirit_stacks: ClassVar[dict[int, int]] = {}  # entity_id -> spirit_count
     _last_summon: ClassVar[dict[int, str]] = {}  # entity_id -> last_summon_type
 
-    # Available jellyfish types (simplified)
+    # Available jellyfish types
     JELLYFISH_TYPES = ["healing", "electric", "poison", "shielding"]
 
     async def apply(self, target: "Stats") -> None:
@@ -34,7 +35,6 @@ class BeccaMenagerieBond:
         if entity_id not in self._summon_cooldown:
             self._summon_cooldown[entity_id] = 0
             self._spirit_stacks[entity_id] = 0
-            self._active_summon[entity_id] = None
 
         # Apply spirit bonuses from previous summons
         current_spirit_stacks = self._spirit_stacks[entity_id]
@@ -54,19 +54,20 @@ class BeccaMenagerieBond:
             )
             target.add_effect(spirit_effect)
 
-            # Apply same bonuses to active pet if present
-            if self._active_summon[entity_id]:
-                pet_effect = StatEffect(
-                    name=f"{self.id}_pet_spirit_bonuses",
-                    stat_modifiers={
-                        "atk": spirit_attack_bonus,
-                        "defense": spirit_defense_bonus,
-                    },
-                    duration=-1,  # Permanent for rest of encounter
-                    source=self.id,
-                )
-                # In full implementation, this would be applied to the actual summon entity
-                target.add_effect(pet_effect)
+            # Apply same bonuses to active summons via summon manager
+            summons = SummonManager.get_summons(getattr(target, 'id', str(id(target))))
+            for summon in summons:
+                if summon.summon_source == self.id:  # Only affect our jellyfish
+                    pet_effect = StatEffect(
+                        name=f"{self.id}_pet_spirit_bonuses",
+                        stat_modifiers={
+                            "atk": spirit_attack_bonus,
+                            "defense": spirit_defense_bonus,
+                        },
+                        duration=-1,  # Permanent for rest of encounter
+                        source=self.id,
+                    )
+                    summon.add_effect(pet_effect)
 
         # Handle summon cooldown
         if self._summon_cooldown[entity_id] > 0:
@@ -75,6 +76,12 @@ class BeccaMenagerieBond:
     async def summon_jellyfish(self, target: "Stats", jellyfish_type: str = None) -> bool:
         """Summon a jellyfish by spending 10% current HP."""
         entity_id = id(target)
+        target_id = getattr(target, 'id', str(id(target)))
+
+        # Initialize if not present
+        if entity_id not in self._summon_cooldown:
+            self._summon_cooldown[entity_id] = 0
+            self._spirit_stacks[entity_id] = 0
 
         # Check cooldown
         if self._summon_cooldown[entity_id] > 0:
@@ -86,67 +93,89 @@ class BeccaMenagerieBond:
             return False  # Not enough HP
 
         # Pay HP cost using proper damage system
-        await target.apply_damage(hp_cost, target, trigger_on_hit=False)
-
-        # If changing jellyfish type, previous one becomes a spirit
-        if self._active_summon[entity_id] and jellyfish_type != self._active_summon[entity_id]:
-            await self._create_spirit(target)
+        target.hp -= hp_cost
 
         # Select jellyfish type if not specified
         if jellyfish_type is None:
             import random
             jellyfish_type = random.choice(self.JELLYFISH_TYPES)
 
-        # Create new summon
-        self._active_summon[entity_id] = jellyfish_type
-        self._last_summon[entity_id] = jellyfish_type
-        self._summon_cooldown[entity_id] = 1  # One turn cooldown
+        # If changing jellyfish type, previous one becomes a spirit
+        current_summons = SummonManager.get_summons(target_id)
+        jellyfish_summons = [s for s in current_summons if s.summon_source == self.id]
 
-        # Create summon with 50% of Becca's base stats
-        summon_stats = {
-            "hp": int(target.max_hp * 0.5),
-            "atk": int(target.atk * 0.5),
-            "defense": int(target.defense * 0.5),
+        if jellyfish_summons and jellyfish_type != self._last_summon.get(entity_id):
+            # Remove old summon and create spirit
+            for old_summon in jellyfish_summons:
+                SummonManager.remove_summon(old_summon, "replaced")
+            await self._create_spirit(target)
+
+        # Determine damage type based on jellyfish type
+        damage_type = self._get_jellyfish_damage_type(jellyfish_type)
+
+        # Create new summon using summons system
+        summon = SummonManager.create_summon(
+            summoner=target,
+            summon_type=f"jellyfish_{jellyfish_type}",
+            source=self.id,
+            stat_multiplier=0.5,  # 50% of Becca's stats as specified
+            turns_remaining=-1,  # Permanent until replaced or defeated
+            override_damage_type=damage_type,
+            max_summons=1,  # Only one jellyfish at a time
+        )
+
+        if summon:
+            self._last_summon[entity_id] = jellyfish_type
+            self._summon_cooldown[entity_id] = 1  # One turn cooldown
+            return True
+
+        return False
+
+    def _get_jellyfish_damage_type(self, jellyfish_type: str):
+        """Get appropriate damage type for jellyfish type."""
+        type_mapping = {
+            "electric": "Lightning",
+            "poison": "Dark",
+            "healing": "Light",
+            "shielding": "Ice",
         }
-
-        # Apply summon-specific effects (simplified)
-        await self._apply_summon_effects(target, jellyfish_type, summon_stats)
-
-        return True
+        damage_type_name = type_mapping.get(jellyfish_type, "Generic")
+        try:
+            return load_damage_type(damage_type_name)
+        except Exception:
+            from plugins.damage_types.generic import Generic
+            return Generic()
 
     async def _create_spirit(self, target: "Stats") -> None:
         """Create a spirit from the previous summon."""
         entity_id = id(target)
         self._spirit_stacks[entity_id] += 1
 
-        # Remove active summon
-        self._active_summon[entity_id] = None
-
-    async def _apply_summon_effects(self, target: "Stats", jellyfish_type: str, stats: dict) -> None:
-        """Apply summon-specific effects based on jellyfish type."""
-        # Create a general summon effect (in full implementation, would create actual summon entity)
-        summon_effect = StatEffect(
-            name=f"{self.id}_active_summon_{jellyfish_type}",
-            stat_modifiers={
-                "summon_atk": stats["atk"],
-                "summon_hp": stats["hp"],
-                "summon_defense": stats["defense"],
-            },
-            duration=-1,  # Until summon is replaced or defeated
-            source=self.id,
-        )
-        target.add_effect(summon_effect)
-
     async def on_summon_defeat(self, target: "Stats") -> None:
         """Handle summon defeat - still creates a spirit."""
-        entity_id = id(target)
-        if self._active_summon[entity_id]:
+        target_id = getattr(target, 'id', str(id(target)))
+
+        # Check if any of our jellyfish were defeated
+        current_summons = SummonManager.get_summons(target_id)
+        jellyfish_summons = [s for s in current_summons if s.summon_source == self.id]
+
+        if not jellyfish_summons:  # Our jellyfish was defeated
             await self._create_spirit(target)
 
     @classmethod
-    def get_active_summon(cls, target: "Stats") -> str:
+    def get_active_summon_type(cls, target: "Stats") -> str:
         """Get current active summon type."""
-        return cls._active_summon.get(id(target), None)
+        target_id = getattr(target, 'id', str(id(target)))
+        summons = SummonManager.get_summons(target_id)
+        jellyfish_summons = [s for s in summons if s.summon_source == cls.id]
+
+        if jellyfish_summons:
+            summon_type = jellyfish_summons[0].summon_type
+            # Extract jellyfish type from summon_type (e.g., "jellyfish_electric" -> "electric")
+            if summon_type.startswith("jellyfish_"):
+                return summon_type[10:]  # Remove "jellyfish_" prefix
+
+        return None
 
     @classmethod
     def get_spirit_stacks(cls, target: "Stats") -> int:
