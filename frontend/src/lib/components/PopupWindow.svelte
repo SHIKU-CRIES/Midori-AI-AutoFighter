@@ -64,8 +64,10 @@
     /* center within overlay */
     margin: auto;
     width: min(var(--max-w), 90%);
+    /* Let height shrink to fit content, but cap it */
     max-height: var(--max-h);
-    height: min(var(--max-h), 100%);
+    /* Enable vertical scrolling when content exceeds max height */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     /* allow children to shrink and scroll within */
@@ -73,15 +75,12 @@
   }
 
   .inner {
-    /* take available height inside the popup box */
-    flex: 1 1 auto;
-    min-height: 0; /* critical for nested scroll areas in flexbox */
-    display: flex;
+    /* allow content to size naturally inside the box */
+    display: block;
   }
 
   .content-wrap {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex; /* allow MenuPanel's 100% height to resolve */
+    /* natural content sizing; MenuPanel manages its own overflow */
+    display: block;
   }
 </style>
