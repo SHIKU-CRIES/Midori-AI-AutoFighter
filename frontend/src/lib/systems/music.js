@@ -1,15 +1,16 @@
 // Music loader for background tracks
 // Tracks are provided by the lead developer in ./assets/music
 
-const glob = typeof import.meta.glob === 'function'
-  ? import.meta.glob
-  : () => ({})
-;
-const musicModules = glob('../assets/music/**/*.{mp3,ogg,wav}', {
-  eager: true,
-  import: 'default',
-  query: '?url'
-});
+// Use import.meta.glob directly (must not alias) so Vite can statically replace it
+let musicModules = {};
+try {
+  musicModules = import.meta.glob('../assets/music/**/*.{mp3,ogg,wav}', {
+    eager: true,
+    as: 'url'
+  });
+} catch {
+  musicModules = {};
+}
 
 // Character-specific library (supports any top-level folder except 'fallback')
 const characterLibrary = {};

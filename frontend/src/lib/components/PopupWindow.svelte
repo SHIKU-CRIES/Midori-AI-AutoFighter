@@ -65,6 +65,7 @@
     margin: auto;
     width: min(var(--max-w), 90%);
     max-height: var(--max-h);
+    height: min(var(--max-h), 100%);
     display: flex;
     flex-direction: column;
     /* allow children to shrink and scroll within */
