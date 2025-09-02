@@ -20,17 +20,22 @@ class KillerInstinct(RelicBase):
     def apply(self, party) -> None:
         super().apply(party)
 
+        stacks = party.relics.count(self.id)
         buffs: dict[int, tuple[PlayerBase, object]] = {}
 
         def _ultimate(user) -> None:
+            atk_pct = 75 * stacks
+            atk_mult = 1 + (0.75 * stacks)
+
             # Emit relic effect event for ultimate ATK boost
-            BUS.emit("relic_effect", "killer_instinct", user, "ultimate_atk_boost", 75, {
-                "atk_percentage": 75,
+            BUS.emit("relic_effect", "killer_instinct", user, "ultimate_atk_boost", atk_pct, {
+                "atk_percentage": atk_pct,
                 "trigger": "ultimate_used",
-                "duration": "1_turn"
+                "duration": "1_turn",
+                "stacks": stacks
             })
 
-            mod = create_stat_buff(user, name=f"{self.id}_atk", atk_mult=1.75, turns=1)
+            mod = create_stat_buff(user, name=f"{self.id}_atk", atk_mult=atk_mult, turns=1)
             user.effect_manager.add_modifier(mod)
             buffs[id(user)] = (user, mod)
 

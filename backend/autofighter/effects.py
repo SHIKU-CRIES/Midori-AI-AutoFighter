@@ -204,7 +204,7 @@ def create_stat_buff(
             mults[key[:-5]] = float(value)
         else:
             deltas[key] = float(value)
-    # Note: Diminishing returns always apply; bypass is ignored by design.
+    # Pass through the bypass_diminishing parameter to StatModifier
     effect = StatModifier(
         stats=stats,
         name=name,
@@ -212,7 +212,7 @@ def create_stat_buff(
         id=id or name,
         deltas=deltas or None,
         multipliers=mults or None,
-        bypass_diminishing=False,
+        bypass_diminishing=bypass_diminishing,
     )
     effect.apply()
     return effect

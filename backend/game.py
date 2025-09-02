@@ -129,6 +129,7 @@ def _apply_player_customization(player: PlayerBase) -> None:
         name="customization",
         turns=10**9,
         id="player_custom",
+        bypass_diminishing=True,  # Player customization should not be subject to diminishing returns
         **multipliers,
     )
     player.mods.append(mod.id)

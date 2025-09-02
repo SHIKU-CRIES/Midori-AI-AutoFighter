@@ -16,9 +16,9 @@ class OmegaCore(RelicBase):
     id: str = "omega_core"
     name: str = "Omega Core"
     stars: int = 5
-    effects: dict[str, float] = field(default_factory=lambda: {"atk": 5.0, "defense": 5.0})
+    effects: dict[str, float] = field(default_factory=lambda: {"atk": 6.0, "defense": 6.0})
     about: str = (
-        "Multiplies all stats for a short time before draining ally health."
+        "Multiplies all stats for the entire fight before draining ally health."
     )
 
     def apply(self, party) -> None:
@@ -93,10 +93,6 @@ class OmegaCore(RelicBase):
                 mod = state["mods"].pop(id(member), None)
                 if mod:
                     mod.remove()
-                    if mod in member.effect_manager.mods:
-                        member.effect_manager.mods.remove(mod)
-                    if mod.id in member.mods:
-                        member.mods.remove(mod.id)
             state["mods"].clear()
 
         BUS.subscribe("battle_start", _battle_start)

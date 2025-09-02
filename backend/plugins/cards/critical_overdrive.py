@@ -33,8 +33,9 @@ class CriticalOverdrive(CardBase):
                     target.effect_manager.mods.remove(mod)
             if stacks > 0:
                 extra_rate = 0.10
-                current = target.crit_rate
-                excess = max(0.0, current + extra_rate - 1.0)
+                # Use base crit rate to avoid compounding with other effects
+                base_crit = getattr(target, 'base_crit_rate', 0.05)  # Default 5% base crit rate
+                excess = max(0.0, base_crit + extra_rate - 1.0)
                 new_mod = create_stat_buff(
                     target,
                     name=f"{self.id}_{pid}",
