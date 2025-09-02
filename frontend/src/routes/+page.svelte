@@ -116,6 +116,7 @@
             // If it's a battle and has snapshot data, start battle state
             if (data.current_state.room_data.result === 'battle' && !data.current_state.awaiting_next) {
               battleActive = true;
+              stopStatePoll(); // Stop state polling when battle starts
               startBattlePoll();
             }
           }
@@ -128,6 +129,11 @@
         }
         
         saveRunState(runId);
+        
+        // Start state polling after successful sync (if not in battle)
+        if (!battleActive) {
+          startStatePoll();
+        }
       } catch (e) {
         // If run restoration fails due to backend unavailability, keep the runId for later retry
         if (saved?.runId) {
@@ -184,6 +190,7 @@
               // If it's a battle and not awaiting next, start battle state
               if (data.current_state.room_data.result === 'battle' && !data.current_state.awaiting_next) {
                 battleActive = true;
+                stopStatePoll(); // Stop state polling when battle starts
                 startBattlePoll();
               }
             }
@@ -208,6 +215,11 @@
       if (!battleActive && !roomData) {
         enterRoom();
       }
+      
+      // Force backend state sync and start state polling when clicking run button
+      if (runId && !battleActive) {
+        startStatePoll();
+      }
     } else {
       openOverlay('party-start');
     }
@@ -227,6 +239,7 @@
     nextRoom = '';
     battleActive = false;
     stopBattlePoll();
+    stopStatePoll();
     homeOverlay();
     clearRunState();
   }
@@ -250,6 +263,10 @@
       window.afHaltSync = false;
       window.afBattleActive = false; // Initialize battle state
     }
+    
+    // Stop any existing polling when starting a new run
+    stopStatePoll();
+    stopBattlePoll();
 
     // Check for active/live runs first
     try {
@@ -274,6 +291,11 @@
           saveRunState(runId);
           homeOverlay();
           await enterRoom();
+          
+          // Start state polling after resuming existing run (if not in battle)
+          if (!battleActive) {
+            startStatePoll();
+          }
           return;
         }
       }
@@ -292,6 +314,11 @@
     saveRunState(runId);
     homeOverlay();
     await enterRoom();
+    
+    // Start state polling after successfully starting new run (if not in battle)
+    if (!battleActive) {
+      startStatePoll();
+    }
   }
 
   async function handleLoadExistingRun(e) {
@@ -311,6 +338,11 @@
       backOverlay();
       homeOverlay();
       await enterRoom();
+      
+      // Start state polling after loading existing run (if not in battle)
+      if (!battleActive) {
+        startStatePoll();
+      }
     } catch (e) {
       backOverlay();
     }
@@ -411,6 +443,7 @@
   }
 
   let battleTimer;
+  let stateTimer;
   const STALL_TICKS = 60 * 3;
   let stalledTicks = 0;
 
@@ -430,6 +463,13 @@
     }
   }
 
+  function startBattlePoll() {
+    stopBattlePoll(); // Clear any existing timer
+    if (battleActive && !haltSync && runId) {
+      pollBattle();
+    }
+  }
+
   async function pollBattle() {
     if (!battleActive || haltSync || !runId) return;
     try {
@@ -441,6 +481,8 @@
         battleActive = false;
         stopBattlePoll();
         stalledTicks = 0;
+        // Start state polling when battle ends with error
+        startStatePoll();
         // Surface backend-declared errors via popup
         try { openOverlay('error', { message: snap.error, traceback: '' }); } catch {}
         return;
@@ -462,6 +504,12 @@
           if (typeof snap.current_index === 'number') currentIndex = snap.current_index;
           if (snap.current_room) currentRoomType = snap.current_room;
           stalledTicks = 0;
+          
+          // Start state polling when battle ends (unless defeated)
+          if (!(snap?.ended && snap?.result === 'defeat')) {
+            startStatePoll();
+          }
+          
           // If run ended in defeat, immediately return home and show defeat popup
           if (snap?.ended && snap?.result === 'defeat') {
             handleDefeat();
@@ -484,6 +532,8 @@
           battleActive = false;
           stopBattlePoll();
           roomData = { ...snap, error: 'Battle results could not be fetched.' };
+          // Start state polling when battle stalls
+          startStatePoll();
           if (dev || !browser) {
             const { warn } = await import('$lib/systems/logger.js');
             warn('Battle results could not be fetched.');
@@ -502,6 +552,77 @@
     }
     if (battleActive && !haltSync && runId) {
       battleTimer = setTimeout(pollBattle, 1000 / 60);
+    }
+  }
+
+  function stopStatePoll() {
+    if (stateTimer) {
+      clearTimeout(stateTimer);
+      stateTimer = null;
+    }
+  }
+
+  async function pollState() {
+    // Don't poll if we're in battle, halted, in menu, or no runId
+    if (battleActive || haltSync || !runId) return;
+    
+    // Don't poll if we're in a menu/overlay (not 'main')
+    try {
+      const { get } = await import('svelte/store');
+      const { overlayView } = await import('$lib/systems/OverlayController.js');
+      const currentView = get(overlayView);
+      if (currentView !== 'main') return;
+    } catch {
+      // If we can't check overlay state, continue
+    }
+
+    try {
+      const data = await getMap(runId);
+      if (!data) {
+        // Run no longer exists, clear local state
+        handleRunEnd();
+        return;
+      }
+
+      // Update state from backend (backend is source of truth)
+      selectedParty = data.party || selectedParty;
+      mapRooms = data.map.rooms || [];
+      
+      // Use backend's current_state as source of truth
+      if (data.current_state) {
+        currentIndex = data.current_state.current_index || 0;
+        currentRoomType = data.current_state.current_room_type || '';
+        nextRoom = data.current_state.next_room_type || '';
+        
+        // Update room data if available
+        if (data.current_state.room_data) {
+          roomData = data.current_state.room_data;
+          
+          // If backend indicates we should be in battle but we're not, start battle
+          if (data.current_state.room_data.result === 'battle' && !data.current_state.awaiting_next && !battleActive) {
+            battleActive = true;
+            pollBattle(); // Start battle polling
+            return; // Exit state polling when battle starts
+          }
+        }
+      }
+      
+      saveRunState(runId);
+    } catch (e) {
+      // Don't show overlays for polling errors to avoid spam
+      console.warn('State polling failed:', e.message);
+    }
+
+    // Schedule next state poll if conditions are still met
+    if (!battleActive && !haltSync && runId) {
+      stateTimer = setTimeout(pollState, 5000); // Poll every 5 seconds
+    }
+  }
+
+  function startStatePoll() {
+    stopStatePoll(); // Clear any existing timer
+    if (!battleActive && !haltSync && runId) {
+      stateTimer = setTimeout(pollState, 5000);
     }
   }
 
@@ -583,6 +704,8 @@
         battleActive = false;
         if (typeof window !== 'undefined') window.afBattleActive = false; // Update global state for ping indicator
         stopBattlePoll();
+        // Start state polling for non-battle rooms
+        startStatePoll();
         // Non-battle rooms that are immediately ready to advance (no choices, no loot)
         // should auto-advance to avoid getting stuck.
         try {
@@ -722,6 +845,8 @@
     lastBattleSnapshot = null;
     battleActive = false;
     stopBattlePoll();
+    // Start state polling when advancing room
+    startStatePoll();
     try {
       const res = await advanceRoom(runId);
       if (res && typeof res.current_index === 'number') {
@@ -828,6 +953,8 @@
     lastBattleSnapshot = null;
     battleActive = false;
     stopBattlePoll();
+    // Start state polling when force advancing room
+    startStatePoll();
     try {
       const res = await advanceRoom(runId);
       if (res && typeof res.current_index === 'number') {
