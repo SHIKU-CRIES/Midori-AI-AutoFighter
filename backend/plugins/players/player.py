@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class Player(PlayerBase):
     id = "player"
     name = "Player"
-    char_type = CharacterType.C
+    char_type: CharacterType = CharacterType.C
     damage_type: DamageTypeBase = field(default_factory=Fire)
     prompt: str = "Player prompt placeholder"
     about: str = "Player description placeholder"

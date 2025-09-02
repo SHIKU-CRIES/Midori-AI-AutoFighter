@@ -19,6 +19,8 @@
     roomInfo,
     startGameMusic,
     applyMusicVolume,
+    playVoice,
+    applyVoiceVolume,
     stopGameMusic,
   } from '../systems/viewportState.js';
   import { rewardOpen as computeRewardOpen } from '../systems/viewportState.js';
@@ -80,6 +82,8 @@
 
   $: selectedParty = mapSelectedParty(roster, selected);
   $: applyMusicVolume(musicVolume);
+  $: applyVoiceVolume(voiceVolume);
+  $: roomData?.voice && playVoice(roomData.voice, voiceVolume);
   $: info = roomInfo(mapRooms, currentIndex, currentRoomType, roomData);
   $: rewardOpen = computeRewardOpen(roomData, battleActive);
   $: reviewOpen = Boolean(roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive);

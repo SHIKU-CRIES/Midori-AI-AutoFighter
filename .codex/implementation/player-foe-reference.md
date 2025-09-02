@@ -9,6 +9,11 @@ run. Use `send_lrm_message` to interact with the LRM and `receive_lrm_message`
 to log replies. Conversations remain isolated between combatants and reset for
 new runs.
 
+Each plugin may optionally define a `voice_sample`. `voice_gender` defaults to
+an appropriate value based on the character's `char_type` but can be
+overridden. When dialogue is generated, `generate_voice()` uses these hints and
+writes the resulting audio to `assets/voices/<id>.wav`.
+
 ## LLM Integration
 
 Both players and foes support LLM interactions through their `lrm_memory` system:
