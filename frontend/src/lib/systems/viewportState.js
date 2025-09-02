@@ -80,6 +80,8 @@ export function rewardOpen(roomData, _battleActive) {
 
 let gameAudio;
 let currentMusicVolume = 50;
+let voiceAudio;
+let currentVoiceVolume = 50;
 
 export function startGameMusic(volume) {
   if (typeof volume === 'number') currentMusicVolume = volume;
@@ -97,6 +99,29 @@ export function applyMusicVolume(volume) {
   currentMusicVolume = typeof volume === 'number' ? volume : currentMusicVolume;
   if (gameAudio) {
     gameAudio.volume = currentMusicVolume / 100;
+  }
+}
+
+export function playVoice(src, volume) {
+  if (!src) return;
+  if (typeof volume === 'number') currentVoiceVolume = volume;
+  stopVoice();
+  voiceAudio = new Audio(src);
+  voiceAudio.volume = currentVoiceVolume / 100;
+  voiceAudio.play().catch(() => {});
+}
+
+export function applyVoiceVolume(volume) {
+  currentVoiceVolume = typeof volume === 'number' ? volume : currentVoiceVolume;
+  if (voiceAudio) {
+    voiceAudio.volume = currentVoiceVolume / 100;
+  }
+}
+
+export function stopVoice() {
+  if (voiceAudio) {
+    try { voiceAudio.pause(); } catch {}
+    voiceAudio = null;
   }
 }
 

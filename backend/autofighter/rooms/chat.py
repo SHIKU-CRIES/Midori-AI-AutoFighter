@@ -7,6 +7,7 @@ from typing import Any
 from llms.loader import ModelName
 from llms.loader import load_llm
 from options import get_option
+from tts import generate_voice
 
 from ..party import Party
 from ..passives import PassiveRegistry
@@ -35,10 +36,25 @@ class ChatRoom(Room):
         reply = ""
         async for chunk in llm.generate_stream(prompt):
             reply += chunk
+
+        voice_path: str | None = None
+        sample = None
+        if party.members:
+            sample = getattr(party.members[0], "voice_sample", None)
+        audio = await asyncio.to_thread(generate_voice, reply, sample)
+        if audio:
+            from pathlib import Path
+
+            voices = Path("assets/voices")
+            voices.mkdir(parents=True, exist_ok=True)
+            fname = "chat.wav"
+            (voices / fname).write_bytes(audio)
+            voice_path = f"/assets/voices/{fname}"
         return {
             "result": "chat",
             "message": message,
             "response": reply,
+            "voice": voice_path,
             "party": party_data,
             "gold": party.gold,
             "relics": party.relics,

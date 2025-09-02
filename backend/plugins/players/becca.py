@@ -11,7 +11,7 @@ from plugins.players._base import PlayerBase
 class Becca(PlayerBase):
     id = "becca"
     name = "Becca"
-    char_type = CharacterType.B
+    char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("Becca")

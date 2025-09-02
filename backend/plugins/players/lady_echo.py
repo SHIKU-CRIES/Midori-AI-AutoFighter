@@ -11,7 +11,7 @@ from plugins.players._base import PlayerBase
 class LadyEcho(PlayerBase):
     id = "lady_echo"
     name = "LadyEcho"
-    char_type = CharacterType.B
+    char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Lightning)
     passives: list[str] = field(default_factory=lambda: ["lady_echo_resonant_static"])
