@@ -18,6 +18,7 @@
     roomLabel,
     roomInfo,
     startGameMusic,
+    selectBattleMusic,
     applyMusicVolume,
     playVoice,
     applyVoiceVolume,
@@ -87,6 +88,20 @@
   $: info = roomInfo(mapRooms, currentIndex, currentRoomType, roomData);
   $: rewardOpen = computeRewardOpen(roomData, battleActive);
   $: reviewOpen = Boolean(roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive);
+
+  let lastMusicKey = '';
+  $: {
+    const key = `${currentRoomType}|${battleActive}|${roomData?.battle_index || 0}`;
+    if (key !== lastMusicKey) {
+      lastMusicKey = key;
+      const playlist = selectBattleMusic({
+        roomType: currentRoomType || roomData?.current_room,
+        party: roomData?.party || [],
+        foes: roomData?.foes || [],
+      });
+      startGameMusic(musicVolume, playlist);
+    }
+  }
 </script>
 
 <style>

@@ -3,7 +3,11 @@
 // room metadata helpers, and background music control.
 import { loadSettings } from './settingsStorage.js';
 import { getPlayers } from './api.js';
-import { getRandomMusicTrack } from './music.js';
+import {
+  getCharacterPlaylist,
+  getMusicTracks,
+  getRandomMusicTrack,
+} from './music.js';
 
 export async function loadInitialState() {
   const saved = loadSettings();
@@ -78,21 +82,97 @@ export function rewardOpen(roomData, _battleActive) {
   return Boolean(hasCards || hasRelics);
 }
 
+export function selectBattleMusic({ roomType, party = [], foes = [] }) {
+  const type = String(roomType || '');
+  const category =
+    type === 'battle-weak'
+      ? 'weak'
+      : type === 'battle-boss-floor'
+        ? 'boss'
+        : 'normal';
+
+  if (type === 'battle-boss-floor') {
+    const boss = foes?.[0];
+    const name = typeof boss === 'string' ? boss : boss?.id || boss?.name;
+    const playlist = getCharacterPlaylist(String(name || '').toLowerCase(), 'boss');
+    if (playlist.length) return playlist;
+    return getMusicTracks();
+  }
+
+  const candidates = [];
+
+  function addCandidate(entity, weight = 1) {
+    const name = typeof entity === 'string' ? entity : entity?.id || entity?.name;
+    if (!name) return;
+    const list = getCharacterPlaylist(String(name).toLowerCase(), category);
+    if (list.length) candidates.push({ list, weight });
+  }
+
+  party.forEach(p => addCandidate(p));
+  foes.forEach(f => {
+    const id = typeof f === 'string' ? f : f?.id || f?.name;
+    const weight = String(id).toLowerCase() === 'luna' ? 3 : 1;
+    addCandidate(id, weight);
+  });
+
+  if (candidates.length === 0) {
+    const generic = getCharacterPlaylist('generic', category);
+    return generic.length ? generic : getMusicTracks();
+  }
+
+  const total = candidates.reduce((sum, c) => sum + c.weight, 0);
+  let roll = Math.random() * total;
+  for (const c of candidates) {
+    roll -= c.weight;
+    if (roll <= 0) return c.list;
+  }
+  return candidates[0].list;
+}
+
 let gameAudio;
 let currentMusicVolume = 50;
+let currentPlaylist = [];
+let playlistIndex = 0;
+let playlistLoop = true;
+
 let voiceAudio;
 let currentVoiceVolume = 50;
 
-export function startGameMusic(volume) {
-  if (typeof volume === 'number') currentMusicVolume = volume;
-  stopGameMusic();
-  const src = getRandomMusicTrack();
+function playNextTrack() {
+  const src =
+    currentPlaylist.length > 0
+      ? currentPlaylist[playlistIndex]
+      : getRandomMusicTrack();
   if (!src) return;
   gameAudio = new Audio(src);
-  // Always use the latest requested volume
   applyMusicVolume(currentMusicVolume);
-  gameAudio.addEventListener('ended', () => startGameMusic());
+  gameAudio.addEventListener('ended', () => {
+    if (currentPlaylist.length > 0) {
+      playlistIndex += 1;
+      if (playlistIndex >= currentPlaylist.length) {
+        if (playlistLoop) {
+          playlistIndex = 0;
+        } else {
+          currentPlaylist = [];
+        }
+      }
+    }
+    playNextTrack();
+  });
   gameAudio.play().catch(() => {});
+}
+
+export function startGameMusic(volume, playlist = [], loop = true) {
+  if (typeof volume === 'number') currentMusicVolume = volume;
+  stopGameMusic();
+  if (Array.isArray(playlist) && playlist.length > 0) {
+    currentPlaylist = playlist;
+    playlistIndex = 0;
+    playlistLoop = loop;
+  } else {
+    currentPlaylist = [];
+  }
+  playNextTrack();
 }
 
 export function applyMusicVolume(volume) {
@@ -133,7 +213,6 @@ export function stopGameMusic() {
 }
 
 export function resumeGameMusic() {
-  // Try to start or resume playback after a user gesture
   try {
     if (gameAudio) {
       if (gameAudio.paused) {
@@ -141,7 +220,7 @@ export function resumeGameMusic() {
         gameAudio.play().catch(() => {});
       }
     } else {
-      startGameMusic();
+      startGameMusic(currentMusicVolume, currentPlaylist, playlistLoop);
     }
   } catch {}
 }
