@@ -203,6 +203,7 @@ def _apply_player_upgrades(player: PlayerBase) -> None:
             name="upgrade_individual",
             turns=10**9,
             id="upgrade_bonus_individual",
+            bypass_diminishing=True,  # Player upgrades from items should not be subject to diminishing returns
             **{**deltas, **mults},
         )
         player.mods.append(mod.id)
