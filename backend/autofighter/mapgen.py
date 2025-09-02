@@ -20,7 +20,15 @@ class MapNode:
 
     @classmethod
     def from_dict(cls, data: dict) -> MapNode:
-        return cls(**data)
+        # Provide default values for missing fields to handle legacy data
+        return cls(
+            room_id=data.get('room_id', 0),
+            room_type=data.get('room_type', 'battle-weak'),
+            floor=data.get('floor', 1),
+            index=data.get('index', 0),
+            loop=data.get('loop', 1),
+            pressure=data.get('pressure', 0)
+        )
 
 
 class MapGenerator:
