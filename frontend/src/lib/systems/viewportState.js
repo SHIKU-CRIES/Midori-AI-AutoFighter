@@ -7,6 +7,7 @@ import {
   getCharacterPlaylist,
   getMusicTracks,
   getRandomMusicTrack,
+  shuffle,
 } from './music.js';
 
 export async function loadInitialState() {
@@ -151,6 +152,7 @@ function playNextTrack() {
       playlistIndex += 1;
       if (playlistIndex >= currentPlaylist.length) {
         if (playlistLoop) {
+          currentPlaylist = shuffle(currentPlaylist);
           playlistIndex = 0;
         } else {
           currentPlaylist = [];
@@ -166,7 +168,7 @@ export function startGameMusic(volume, playlist = [], loop = true) {
   if (typeof volume === 'number') currentMusicVolume = volume;
   stopGameMusic();
   if (Array.isArray(playlist) && playlist.length > 0) {
-    currentPlaylist = playlist;
+    currentPlaylist = shuffle(playlist);
     playlistIndex = 0;
     playlistLoop = loop;
   } else {

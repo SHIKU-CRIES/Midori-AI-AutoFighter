@@ -17,5 +17,6 @@ tracks for the next room transition.
 - **Fallback**
   - When no character has music, generic library tracks are returned.
 
-The chosen playlist is passed to `startGameMusic` which handles sequential
-playback and looping.
+The chosen playlist is passed to `startGameMusic` which accepts a track list,
+shuffles it, and plays tracks sequentially. When looping, the playlist is
+reshuffled after each cycle to avoid repetition.
