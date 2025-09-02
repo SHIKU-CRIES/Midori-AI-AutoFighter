@@ -90,11 +90,19 @@
 
   let lastMusicKey = '';
   $: {
-    // Change music per room type and battle index (new fights),
-    // avoiding restarts on reward overlays or UI toggles.
+    // Change music per room type and battle index (new fights) and
+    // rerun when party/foe combatants change to trigger character themes.
     const typeKey = String(currentRoomType || roomData?.current_room || '');
     const battleKey = String(roomData?.battle_index || 0);
-    const key = `${typeKey}|${battleKey}`;
+    const partyKey = (roomData?.party || [])
+      .map((p) => (typeof p === 'string' ? p : p.id || p.name))
+      .sort()
+      .join(',');
+    const foeKey = (roomData?.foes || [])
+      .map((f) => (typeof f === 'string' ? f : f.id || f.name))
+      .sort()
+      .join(',');
+    const key = `${typeKey}|${battleKey}|${partyKey}|${foeKey}`;
     if (key !== lastMusicKey) {
       lastMusicKey = key;
       const playlist = selectBattleMusic({

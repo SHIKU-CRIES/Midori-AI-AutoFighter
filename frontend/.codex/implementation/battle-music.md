@@ -4,9 +4,9 @@ Describes how the frontend selects playlists for combat.
 
 ## selectBattleMusic
 `selectBattleMusic({ roomType, party, foes })` returns a playlist of music
-tracks for the next room transition. Battle playlists are only evaluated after
-the backend has reported fighters for the room a few times, keeping the
-fallback music active until complete data is available.
+tracks for the next room transition. When both party and foe data are present,
+character-specific playlists are evaluated immediately. Until battler
+information arrives, generic fallback tracks continue playing.
 
 - **Boss rooms** (`roomType === 'battle-boss-floor'`)
   - Always returns the boss's `boss` playlist.
@@ -20,9 +20,9 @@ fallback music active until complete data is available.
   - When no character has music, generic library tracks are returned.
 
 The chosen playlist is passed to `startGameMusic` which accepts a track list,
-shuffles it, and crossfades from the previous selection. When fighters appear,
-the player transitions from fallback tracks to character themes via crossfade.
-If `startGameMusic` receives the same playlist again during scene changes, it
-simply reapplies volume, allowing the current music to keep playing until it
-naturally ends or a new playlist is requested. When looping, the playlist is
-reshuffled after each cycle to avoid repetition.
+shuffles it, and crossfades from the previous selection. GameViewport tracks
+party and foe identifiers so that when fighter data appears or changes, a new
+playlist is requested. If `startGameMusic` receives the same playlist again
+during scene changes, it simply reapplies volume, allowing the current music to
+keep playing until it naturally ends or a new playlist is requested. When
+looping, the playlist is reshuffled after each cycle to avoid repetition.

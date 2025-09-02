@@ -1,7 +1,11 @@
 // Music loader for background tracks
 // Tracks are provided by the lead developer in ./assets/music
 
-const musicModules = import.meta.glob('../assets/music/**/*.{mp3,ogg,wav}', {
+const glob = typeof import.meta.glob === 'function'
+  ? import.meta.glob
+  : () => ({})
+;
+const musicModules = glob('../assets/music/**/*.{mp3,ogg,wav}', {
   eager: true,
   import: 'default',
   query: '?url'
@@ -64,4 +68,4 @@ export function getFallbackPlaylist(category = 'normal') {
   return [...tracks];
 }
 
-export { characterLibrary };
+export { characterLibrary, fallbackLibrary };
