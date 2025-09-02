@@ -143,8 +143,8 @@ class ParadoxHourglass(RelicBase):
     def describe(self, stacks: int) -> str:
         div = 4 + (stacks - 1)
         mult = 3 + (stacks - 1)
-        kill = min(stacks, 4)
+        max_kill = min(stacks, 4)
         return (
-            f"60% chance to sacrifice up to {kill} random allies (max 4). "
+            f"60% chance to sacrifice up to {max_kill} random allies (max 4, min 1 survivor). "
             f"Survivors gain {mult}x stats and foes' DEF is divided by {div}."
         )
