@@ -47,7 +47,8 @@ export function getCharacterPlaylist(charName, category = 'normal') {
   const key = String(charName || '').toLowerCase();
   const charMusic = characterLibrary[key] ?? {};
   const tracks = charMusic[category] ?? [];
-  return shuffle(tracks);
+  // Return in indexed order; caller decides if and when to shuffle
+  return [...tracks];
 }
 
 export function getRandomMusicTrack(charName, category = 'normal') {
@@ -59,7 +60,8 @@ export function getRandomMusicTrack(charName, category = 'normal') {
 
 export function getFallbackPlaylist(category = 'normal') {
   const tracks = fallbackLibrary[category] ?? [];
-  return shuffle(tracks);
+  // Return in indexed order; caller decides if and when to shuffle
+  return [...tracks];
 }
 
 export { characterLibrary };

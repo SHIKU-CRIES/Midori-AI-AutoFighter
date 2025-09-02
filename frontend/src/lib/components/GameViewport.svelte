@@ -90,11 +90,15 @@
 
   let lastMusicKey = '';
   $: {
-    const key = `${currentRoomType}|${battleActive}|${roomData?.battle_index || 0}`;
+    // Change music per room type and battle index (new fights),
+    // avoiding restarts on reward overlays or UI toggles.
+    const typeKey = String(currentRoomType || roomData?.current_room || '');
+    const battleKey = String(roomData?.battle_index || 0);
+    const key = `${typeKey}|${battleKey}`;
     if (key !== lastMusicKey) {
       lastMusicKey = key;
       const playlist = selectBattleMusic({
-        roomType: currentRoomType || roomData?.current_room,
+        roomType: typeKey,
         party: roomData?.party || [],
         foes: roomData?.foes || [],
       });

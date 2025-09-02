@@ -114,23 +114,21 @@ export function selectBattleMusic({ roomType, party = [], foes = [] }) {
   }
 
   party.forEach(p => addCandidate(p));
-  foes.forEach(f => {
-    const id = typeof f === 'string' ? f : f?.id || f?.name;
-    const weight = String(id).toLowerCase() === 'luna' ? 3 : 1;
-    addCandidate(id, weight);
-  });
+  foes.forEach(f => addCandidate(f));
+
+  // If Luna is present and has tracks for this category, prefer Luna deterministically
+  const hasLuna = [...party, ...foes].some((e) => String((typeof e === 'string' ? e : (e?.id || e?.name)) || '').toLowerCase() === 'luna');
+  if (hasLuna) {
+    const lunaList = getCharacterPlaylist('luna', category);
+    if (lunaList.length) return lunaList;
+  }
 
   if (candidates.length === 0) {
     const fb = getFallbackPlaylist(category);
     return fb.length ? fb : [];
   }
 
-  const total = candidates.reduce((sum, c) => sum + c.weight, 0);
-  let roll = Math.random() * total;
-  for (const c of candidates) {
-    roll -= c.weight;
-    if (roll <= 0) return c.list;
-  }
+  // If multiple characters have playlists, just pick the first deterministically
   return candidates[0].list;
 }
 
