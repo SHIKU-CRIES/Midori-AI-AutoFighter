@@ -469,8 +469,13 @@ class Stats:
                 BUS.emit("shield_absorbed", self, shield_absorbed, "shield")
 
         # Apply remaining damage to HP
+        old_hp = self.hp
         if amount > 0:
             self.hp = max(self.hp - amount, 0)
+
+        # Emit kill event if this damage killed the target
+        if old_hp > 0 and self.hp <= 0 and attacker is not None:
+            BUS.emit("entity_killed", self, attacker, original_amount, "death", {"killer_id": getattr(attacker, "id", "unknown")})
 
         # Trigger passive registry for damage taken events
         if original_amount > 0:
@@ -489,7 +494,7 @@ class Stats:
             BUS.emit_batched("damage_dealt", attacker, self, original_amount, "attack", None, None, action_name)
         return original_amount
 
-    async def apply_healing(self, amount: int, healer: Optional["Stats"] = None) -> int:
+    async def apply_healing(self, amount: int, healer: Optional["Stats"] = None, source_type: str = "heal", source_name: Optional[str] = None) -> int:
         def _ensure(obj: "Stats") -> DamageTypeBase:
             dt = getattr(obj, "damage_type", Generic())
             if isinstance(dt, str):
@@ -544,7 +549,7 @@ class Stats:
         # Use batched emission for high-frequency healing events
         BUS.emit_batched("heal_received", self, healer, amount)
         if healer is not None:
-            BUS.emit_batched("heal", healer, self, amount)
+            BUS.emit_batched("heal", healer, self, amount, source_type, source_name)
         return amount
 
     def enable_overheal(self) -> None:

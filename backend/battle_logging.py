@@ -348,6 +348,20 @@ class BattleLogger:
                 self.summary.healing_by_source[source_type] = {}
             self.summary.healing_by_source[source_type][healer_id] = self.summary.healing_by_source[source_type].get(healer_id, 0) + amount
 
+            # ALSO track healing in damage_by_action so it shows up in "Damage by Action" UI
+            # Determine the action name based on source type
+            action_name = "Healing"
+            if source_type == "hot":
+                action_name = "HoT Healing"
+            elif source_type == "ultimate":
+                action_name = f"{source_name or 'Ultimate'} Healing"
+            elif source_name:
+                action_name = f"{source_name} Healing"
+
+            if healer_id not in self.summary.damage_by_action:
+                self.summary.damage_by_action[healer_id] = {}
+            self.summary.damage_by_action[healer_id][action_name] = self.summary.damage_by_action[healer_id].get(action_name, 0) + amount
+
     def _on_hit_landed(self, attacker, target, amount, source_type="attack", source_name=None, action_name=None):
         """Handle hit landed event."""
         attacker_id = getattr(attacker, 'id', str(attacker))

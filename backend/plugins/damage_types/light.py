@@ -61,7 +61,7 @@ class Light(DamageTypeBase):
 
             missing = ally.max_hp - ally.hp
             if missing > 0:
-                await ally.apply_healing(missing, healer=actor)
+                await ally.apply_healing(missing, healer=actor, source_type="ultimate", source_name="Light Ultimate")
         for enemy in enemies:
             if enemy.hp <= 0:
                 continue

@@ -269,13 +269,22 @@ class BattleRoom(Room):
                     "rdr": temp_rdr,
                 }
             )
-        # Helper to pace actions: ensure at least 0.5s per actor action
+        # Helper to pace actions: dynamic pacing based on combatant count
         async def _pace(start_time: float) -> None:
             try:
                 elapsed = asyncio.get_event_loop().time() - start_time
             except Exception:
                 elapsed = 0.0
-            wait = 0.5 - elapsed
+
+            # Reduce wait time when there are many combatants to improve performance
+            total_combatants = len(combat_party.members) + len(foes)
+            if total_combatants > 8:
+                # Scale down wait time: 0.5s -> 0.1s for 8+ combatants
+                base_wait = max(0.1, 0.5 - (total_combatants - 8) * 0.05)
+            else:
+                base_wait = 0.5
+
+            wait = base_wait - elapsed
             if wait > 0:
                 try:
                     await asyncio.sleep(wait)
