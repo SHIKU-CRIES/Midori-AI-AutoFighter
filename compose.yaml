@@ -7,6 +7,8 @@ services:
       - "59001:59001"
     volumes:
       - ./frontend:/app
+    networks:
+      - autofighter-network
   backend: &backend-base
     build:
       context: ./backend
@@ -19,6 +21,8 @@ services:
     volumes:
       - ./backend:/app
       - ${HOME}/.cache:/.cache
+    networks:
+      - autofighter-network
   backend-llm-cuda:
     deploy:
       resources:
@@ -37,6 +41,8 @@ services:
       - "59002:59002" # conflicts with default backend
     environment:
       - UV_EXTRA=llm-cuda
+    networks:
+      - autofighter-network
     profiles:
       - llm-cuda
   backend-llm-amd:
@@ -50,6 +56,8 @@ services:
       - "59002:59002" # conflicts with default backend
     environment:
       - UV_EXTRA=llm-amd
+    networks:
+      - autofighter-network
     profiles:
       - llm-amd
   backend-llm-cpu:
@@ -63,5 +71,11 @@ services:
       - "59002:59002" # conflicts with default backend
     environment:
       - UV_EXTRA=llm-cpu
+    networks:
+      - autofighter-network
     profiles:
       - llm-cpu
+
+networks:
+  autofighter-network:
+    driver: bridge

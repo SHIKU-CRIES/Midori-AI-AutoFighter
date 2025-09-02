@@ -1,10 +1,25 @@
 import { openOverlay } from './OverlayController.js';
+import { getApiBase } from './backendDiscovery.js';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:59002';
+// Dynamic API base - will be resolved via backend discovery
+let API_BASE = null;
+
+async function ensureApiBase() {
+  if (!API_BASE) {
+    API_BASE = await getApiBase();
+  }
+  return API_BASE;
+}
 
 async function handleFetch(url, options = {}, parser = (r) => r.json()) {
+  // Ensure we have the API base before making the request
+  const apiBase = await ensureApiBase();
+  
+  // If url is relative, prepend the API base
+  const fullUrl = url.startsWith('http') ? url : `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
+  
   try {
-    const res = await fetch(url, options);
+    const res = await fetch(fullUrl, options);
     if (!res.ok) {
       let data;
       try { data = await res.json(); } catch {}
@@ -28,18 +43,20 @@ async function handleFetch(url, options = {}, parser = (r) => r.json()) {
 
 export async function getBackendFlavor() {
   try {
-    const data = await handleFetch(`${API_BASE}/`, { cache: 'no-store', noOverlay: true });
+    const data = await handleFetch(`/`, { cache: 'no-store', noOverlay: true });
     return data.flavor;
   } catch (e) {
     // Show a dedicated overlay when the backend isn't reachable/ready
-    openOverlay('backend-not-ready', { apiBase: API_BASE, message: e?.message || 'Backend unavailable' });
+    const apiBase = await ensureApiBase();
+    openOverlay('backend-not-ready', { apiBase, message: e?.message || 'Backend unavailable' });
     throw e;
   }
 }
 
 // Health check for the backend performance endpoint
 export async function getBackendHealth() {
-  const url = `${API_BASE}/api/performance/health`;
+  const apiBase = await ensureApiBase();
+  const url = `${apiBase}/api/performance/health`;
   try {
     const networkMsStart = performance.now();
     const res = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
@@ -60,16 +77,16 @@ export async function getBackendHealth() {
 }
 
 export async function getPlayers() {
-  return handleFetch(`${API_BASE}/players`, { cache: 'no-store' });
+  return handleFetch(`/players`, { cache: 'no-store' });
 }
 
 export async function getGacha() {
-  return handleFetch(`${API_BASE}/gacha`, { cache: 'no-store' });
+  return handleFetch(`/gacha`, { cache: 'no-store' });
 }
 
 export async function pullGacha(count = 1) {
   return handleFetch(
-    `${API_BASE}/gacha/pull`,
+    `/gacha/pull`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -79,7 +96,7 @@ export async function pullGacha(count = 1) {
 }
 
 export async function setAutoCraft(enabled) {
-  return handleFetch(`${API_BASE}/gacha/auto-craft`, {
+  return handleFetch(`/gacha/auto-craft`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ enabled })
@@ -87,18 +104,18 @@ export async function setAutoCraft(enabled) {
 }
 
 export async function craftItems() {
-  return handleFetch(`${API_BASE}/gacha/craft`, {
+  return handleFetch(`/gacha/craft`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
 }
 
 export async function getPlayerConfig() {
-  return handleFetch(`${API_BASE}/player/editor`, { cache: 'no-store' });
+  return handleFetch(`/player/editor`, { cache: 'no-store' });
 }
 
 export async function savePlayerConfig(config) {
-  return handleFetch(`${API_BASE}/player/editor`, {
+  return handleFetch(`/player/editor`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(config)
@@ -107,7 +124,7 @@ export async function savePlayerConfig(config) {
 
 export async function endRun(runId) {
   return handleFetch(
-    `${API_BASE}/run/${runId}`,
+    `/run/${runId}`,
     { method: 'DELETE' },
     (r) => r.ok
   );
@@ -115,37 +132,37 @@ export async function endRun(runId) {
 
 export async function endAllRuns() {
   return handleFetch(
-    `${API_BASE}/runs`,
+    `/runs`,
     { method: 'DELETE' },
     (r) => r.ok
   );
 }
 
 export async function wipeData() {
-  return handleFetch(`${API_BASE}/save/wipe`, { method: 'POST' });
+  return handleFetch(`/save/wipe`, { method: 'POST' });
 }
 
 export async function exportSave() {
   return handleFetch(
-    `${API_BASE}/save/backup`,
+    `/save/backup`,
     { cache: 'no-store' },
     (r) => r.blob()
   );
 }
 
 export async function importSave(file) {
-  return handleFetch(`${API_BASE}/save/restore`, {
+  return handleFetch(`/save/restore`, {
     method: 'POST',
     body: await file.arrayBuffer()
   });
 }
 
 export async function getLrmConfig() {
-  return handleFetch(`${API_BASE}/config/lrm`, { cache: 'no-store' });
+  return handleFetch(`/config/lrm`, { cache: 'no-store' });
 }
 
 export async function setLrmModel(model) {
-  return handleFetch(`${API_BASE}/config/lrm`, {
+  return handleFetch(`/config/lrm`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ model })
@@ -153,7 +170,7 @@ export async function setLrmModel(model) {
 }
 
 export async function testLrmModel(prompt) {
-  return handleFetch(`${API_BASE}/config/lrm/test`, {
+  return handleFetch(`/config/lrm/test`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt })
@@ -162,22 +179,22 @@ export async function testLrmModel(prompt) {
 
 // Catalog: card/relic metadata for inventory and builders
 export async function getCardCatalog() {
-  const data = await handleFetch(`${API_BASE}/catalog/cards`, { cache: 'no-store', noOverlay: true });
+  const data = await handleFetch(`/catalog/cards`, { cache: 'no-store', noOverlay: true });
   return data.cards || [];
 }
 
 export async function getRelicCatalog() {
-  const data = await handleFetch(`${API_BASE}/catalog/relics`, { cache: 'no-store', noOverlay: true });
+  const data = await handleFetch(`/catalog/relics`, { cache: 'no-store', noOverlay: true });
   return data.relics || [];
 }
 
 export async function getUpgrade(id) {
-  return handleFetch(`${API_BASE}/players/${id}/upgrade`, { cache: 'no-store' });
+  return handleFetch(`/players/${id}/upgrade`, { cache: 'no-store' });
 }
 
 // New upgrade API: requires star_level (1-4) and item_count (>=1)
 export async function upgradeCharacter(id, starLevel, itemCount = 1) {
-  return handleFetch(`${API_BASE}/players/${id}/upgrade`, {
+  return handleFetch(`/players/${id}/upgrade`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ star_level: starLevel, item_count: itemCount })
@@ -186,7 +203,7 @@ export async function upgradeCharacter(id, starLevel, itemCount = 1) {
 
 // Spend player upgrade points on a specific stat (player only)
 export async function upgradePlayerStat(points, statName = 'atk') {
-  return handleFetch(`${API_BASE}/players/player/upgrade-stat`, {
+  return handleFetch(`/players/player/upgrade-stat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ points, stat_name: statName })
