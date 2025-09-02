@@ -175,10 +175,20 @@ export async function getUpgrade(id) {
   return handleFetch(`${API_BASE}/players/${id}/upgrade`, { cache: 'no-store' });
 }
 
-export async function upgradeCharacter(id) {
+// New upgrade API: requires star_level (1-4) and item_count (>=1)
+export async function upgradeCharacter(id, starLevel, itemCount = 1) {
   return handleFetch(`${API_BASE}/players/${id}/upgrade`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({})
+    body: JSON.stringify({ star_level: starLevel, item_count: itemCount })
+  });
+}
+
+// Spend player upgrade points on a specific stat (player only)
+export async function upgradePlayerStat(points, statName = 'atk') {
+  return handleFetch(`${API_BASE}/players/player/upgrade-stat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ points, stat_name: statName })
   });
 }

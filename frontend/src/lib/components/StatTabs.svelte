@@ -49,6 +49,7 @@
   let previewChar;
   let isPlayer = false;
   let editorVals = null; // { pronouns, damageType, hp, attack, defense }
+  let savedEditor = null; // snapshot of saved config to compute deltas
   let viewStats = {};    // stats object used for display (with overrides when player)
   let loadingEditorCfg = false;
   let saveTimer = null;
@@ -85,6 +86,7 @@
             attack: Number(cfg?.attack) || 0,
             defense: Number(cfg?.defense) || 0,
           };
+          savedEditor = { ...editorVals };
           try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
         } catch {
           // Fallback to preview runtime stats if config fetch fails
@@ -95,6 +97,7 @@
             attack: (previewChar.stats?.atk ?? 0),
             defense: (previewChar.stats?.defense ?? 0),
           };
+          savedEditor = { pronouns: editorVals.pronouns, damageType: editorVals.damageType, hp: 0, attack: 0, defense: 0 };
           try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
         } finally {
           loadingEditorCfg = false;
@@ -104,32 +107,63 @@
   } else {
     editorVals = null;
   }
-  // Compute displayed stats. For the Player, treat editor values as percent
-  // modifiers on base stats (1 point = +1%). Preserve current HP ratio.
+  // Compute displayed stats including persistent upgrades (from backend
+  // upgrade_totals) and, for the Player, live editor deltas.
   $: {
-    const base = previewChar?.stats || {};
-    if (isPlayer && editorVals) {
-      const baseMax = getBaseStat(previewChar, 'max_hp') ?? base.max_hp ?? 0;
-      const baseAtk = getBaseStat(previewChar, 'atk') ?? base.atk ?? 0;
-      const baseDef = getBaseStat(previewChar, 'defense') ?? base.defense ?? 0;
-      const hpPct = Number(editorVals.hp) || 0;
-      const atkPct = Number(editorVals.attack) || 0;
-      const defPct = Number(editorVals.defense) || 0;
-      const newMax = Math.round(baseMax * (1 + hpPct / 100));
-      const hpRatio = baseMax > 0 ? Math.min(1, Math.max(0, (base.hp ?? baseMax) / baseMax)) : 1;
-      const newHp = Math.round(newMax * hpRatio);
-      const newAtk = Math.round(baseAtk * (1 + atkPct / 100));
-      const newDef = Math.round(baseDef * (1 + defPct / 100));
-      viewStats = {
-        ...base,
-        max_hp: newMax,
-        hp: newHp,
-        atk: newAtk,
-        defense: newDef,
-      };
-    } else {
-      viewStats = { ...base };
+    const statsObj = previewChar?.stats || {};
+    const baseStats = statsObj.base_stats || {};
+    const upg = statsObj.upgrade_totals || {};
+    const result = { ...statsObj };
+
+    // Helper to apply upgrades to a base stat
+    function applyUpgrades(stat, baseVal) {
+      const pct = Number(upg?.[stat] || 0);
+      if (['max_hp', 'atk', 'defense', 'regain'].includes(stat)) {
+        return Number(baseVal) * (1 + pct);
+      }
+      // percentage/multiplier-like stats use additive
+      return Number(baseVal) + pct;
     }
+
+    // Start from base_stats to build a clean upgraded view
+    const bMax = Number(baseStats.max_hp ?? statsObj.max_hp ?? 0);
+    const bAtk = Number(baseStats.atk ?? statsObj.atk ?? 0);
+    const bDef = Number(baseStats.defense ?? statsObj.defense ?? 0);
+
+    let dMax = applyUpgrades('max_hp', bMax);
+    let dAtk = applyUpgrades('atk', bAtk);
+    let dDef = applyUpgrades('defense', bDef);
+
+    // Apply live editor deltas for Player only
+    if (isPlayer && editorVals) {
+      const saved = savedEditor || { hp: 0, attack: 0, defense: 0 };
+      const hpDelta = (Number(editorVals.hp) || 0) - (Number(saved.hp) || 0);
+      const atkDelta = (Number(editorVals.attack) || 0) - (Number(saved.attack) || 0);
+      const defDelta = (Number(editorVals.defense) || 0) - (Number(saved.defense) || 0);
+      dMax = Math.round(dMax * (1 + hpDelta / 100));
+      dAtk = Math.round(dAtk * (1 + atkDelta / 100));
+      dDef = Math.round(dDef * (1 + defDelta / 100));
+    }
+
+    // Preserve HP ratio against upgraded max
+    const hpRatioBase = Number(statsObj.hp) / Math.max(1, Number(statsObj.max_hp || bMax));
+    const newHp = Math.round(dMax * Math.max(0, Math.min(1, isFinite(hpRatioBase) ? hpRatioBase : 1)));
+
+    // Assign computed values
+    result.max_hp = Math.round(dMax);
+    result.hp = newHp;
+    result.atk = Math.round(dAtk);
+    result.defense = Math.round(dDef);
+
+    // Compute rate/multiplier-like displays from base + upgrades
+    const rateStats = ['crit_rate', 'effect_hit_rate', 'effect_resistance', 'dodge_odds'];
+    const multStats = ['crit_damage', 'mitigation', 'vitality'];
+    for (const s of [...rateStats, ...multStats]) {
+      const baseVal = baseStats?.[s] ?? statsObj?.[s] ?? 0;
+      result[s] = applyUpgrades(s, baseVal);
+    }
+
+    viewStats = result;
   }
 
   function toggleMember() {
@@ -217,14 +251,14 @@
           <div><span>Regain</span><span>{formatStat(sel.stats.regain ?? sel.stats.regain_rate, getBaseStat(sel, 'regain'))}</span></div>
         {:else if activeTab === 'Offense'}
           <div><span>ATK</span><span>{formatStat(viewStats.atk, getBaseStat(sel, 'atk'))}</span></div>
-          <div><span>CRIT Rate</span><span>{formatStat((sel.stats.critRate ?? sel.stats.crit_rate ?? 0), getBaseStat(sel, 'crit_rate'), '%')}</span></div>
-          <div><span>CRIT DMG</span><span>{formatStat((sel.stats.critDamage ?? sel.stats.crit_damage ?? 0), getBaseStat(sel, 'crit_damage'), '%')}</span></div>
-          <div><span>Effect Hit Rate</span><span>{formatStat((sel.stats.effectHit ?? sel.stats.effect_hit_rate ?? 0), getBaseStat(sel, 'effect_hit_rate'), '%')}</span></div>
+          <div><span>CRIT Rate</span><span>{formatStat(viewStats.crit_rate, getBaseStat(sel, 'crit_rate'), '%')}</span></div>
+          <div><span>CRIT DMG</span><span>{formatStat(viewStats.crit_damage, getBaseStat(sel, 'crit_damage'), '%')}</span></div>
+          <div><span>Effect Hit Rate</span><span>{formatStat(viewStats.effect_hit_rate, getBaseStat(sel, 'effect_hit_rate'), '%')}</span></div>
         {:else if activeTab === 'Defense'}
           <div><span>DEF</span><span>{formatStat(viewStats.defense, getBaseStat(sel, 'defense'))}</span></div>
-          <div><span>Mitigation</span><span>{formatMult(sel.stats.mitigation, getBaseStat(sel, 'mitigation'))}</span></div>
-          <div><span>Dodge Odds</span><span>{formatStat(sel.stats.dodge_odds, getBaseStat(sel, 'dodge_odds'), '%')}</span></div>
-          <div><span>Effect Resist</span><span>{formatStat(sel.stats.effectResist ?? sel.stats.effect_resistance, getBaseStat(sel, 'effect_resistance'), '%')}</span></div>
+          <div><span>Mitigation</span><span>{formatMult(viewStats.mitigation, getBaseStat(sel, 'mitigation'))}</span></div>
+          <div><span>Dodge Odds</span><span>{formatStat(viewStats.dodge_odds, getBaseStat(sel, 'dodge_odds'), '%')}</span></div>
+          <div><span>Effect Resist</span><span>{formatStat(viewStats.effect_resistance, getBaseStat(sel, 'effect_resistance'), '%')}</span></div>
         {:else if activeTab === 'Effects'}
           {#if sel.stats.active_effects && sel.stats.active_effects.length > 0}
             <div class="effects-header">Active Effects:</div>
@@ -283,7 +317,9 @@
             />
           </div>
         {/if}
-        <UpgradePanel id={sel.id} element={sel.element} />
+        <UpgradePanel id={sel.id} element={sel.element}
+          on:upgraded={() => { try { dispatch('refresh-roster'); } catch {} }}
+        />
       </div>
     {/each}
   {/if}

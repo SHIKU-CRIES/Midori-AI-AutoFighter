@@ -125,6 +125,10 @@
 
   onMount(async () => {
     background = getHourlyBackground();
+    await refreshRoster();
+  });
+
+  async function refreshRoster() {
     try {
       const data = await getPlayers();
       function resolveElement(p) {
@@ -132,6 +136,8 @@
         if (e && typeof e !== 'string') e = e.id || e.name;
         return e && !/generic/i.test(String(e)) ? e : 'Generic';
       }
+      const oldPreview = previewId;
+      const oldSelected = [...selected];
       roster = data.players
         .map((p) => ({
           id: p.id,
@@ -144,27 +150,24 @@
         }))
         .filter((p) => p.owned || p.is_player)
         .sort((a, b) => (a.is_player ? -1 : b.is_player ? 1 : 0));
-      selected = selected.filter((id) => roster.some((c) => c.id === id));
+      // Restore selection and preview where possible
+      selected = oldSelected.filter((id) => roster.some((c) => c.id === id));
       const player = roster.find((p) => p.is_player);
-      if (player) {
-        if (selected.length === 0) {
-          selected = [player.id];
-        }
-        previewId = selected[0] ?? player.id;
-      }
+      const defaultPreview = player ? player.id : (roster[0]?.id || null);
+      previewId = selected[0] ?? oldPreview ?? defaultPreview;
     } catch (e) {
       if (dev || !browser) {
         const { error } = await import('$lib/systems/logger.js');
         error('Unable to load roster. Is the backend running on 59002?');
       }
     }
-  });
+  }
 
   function toggleMember(id) {
     if (!id) return;
     if (selected.includes(id)) {
       selected = selected.filter((c) => c !== id);
-    } else if (selected.length < 4) {
+    } else if (selected.length < 5) {
       selected = [...selected, id];
     }
   }
@@ -196,6 +199,7 @@
             // Bubble an editor change so top-level editorState stays in sync for Start Run
             try { dispatch('editorChange', { damageType: el }); } catch {}
           }}
+          on:refresh-roster={refreshRoster}
         />
         <div class="party-actions-inline">
           {#if actionLabel === 'Start Run'}

@@ -110,6 +110,7 @@ class StatModifier:
     deltas: dict[str, float] | None = None
     multipliers: dict[str, float] | None = None
     _effect_applied: bool = field(init=False, default=False)
+    bypass_diminishing: bool = False
 
     def apply(self) -> None:
         """Apply configured modifiers to the stats object using StatEffect with diminishing returns."""
@@ -121,11 +122,12 @@ class StatModifier:
 
         # Handle additive deltas with diminishing returns scaling
         for name, value in (self.deltas or {}).items():
-            current_value = get_current_stat_value(self.stats, name)
-            scaling_factor = calculate_diminishing_returns(name, current_value)
-
-            # Apply diminishing returns to the buff value
-            scaled_value = value * scaling_factor
+            if self.bypass_diminishing:
+                scaled_value = value
+            else:
+                current_value = get_current_stat_value(self.stats, name)
+                scaling_factor = calculate_diminishing_returns(name, current_value)
+                scaled_value = value * scaling_factor
             stat_modifiers[name] = stat_modifiers.get(name, 0) + scaled_value
 
         # Handle multiplicative changes by converting to additive with diminishing returns
@@ -141,9 +143,12 @@ class StatModifier:
                 additive_change = base_value * (multiplier - 1.0)
 
                 # Apply diminishing returns scaling to the additive change
-                current_value = get_current_stat_value(self.stats, name)
-                scaling_factor = calculate_diminishing_returns(name, current_value)
-                scaled_change = additive_change * scaling_factor
+                if self.bypass_diminishing:
+                    scaled_change = additive_change
+                else:
+                    current_value = get_current_stat_value(self.stats, name)
+                    scaling_factor = calculate_diminishing_returns(name, current_value)
+                    scaled_change = additive_change * scaling_factor
 
                 stat_modifiers[name] = stat_modifiers.get(name, 0) + scaled_change
 
@@ -182,6 +187,7 @@ def create_stat_buff(
     name: str = "buff",
     turns: int = 1,
     id: str | None = None,
+    bypass_diminishing: bool = False,
     **modifiers: float,
 ) -> StatModifier:
     """Create and apply a :class:`StatModifier` to ``stats``.
@@ -198,6 +204,7 @@ def create_stat_buff(
             mults[key[:-5]] = float(value)
         else:
             deltas[key] = float(value)
+    # Note: Diminishing returns always apply; bypass is ignored by design.
     effect = StatModifier(
         stats=stats,
         name=name,
@@ -205,6 +212,7 @@ def create_stat_buff(
         id=id or name,
         deltas=deltas or None,
         multipliers=mults or None,
+        bypass_diminishing=False,
     )
     effect.apply()
     return effect

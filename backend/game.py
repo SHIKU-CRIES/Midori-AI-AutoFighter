@@ -170,24 +170,41 @@ def _load_individual_stat_upgrades(pid: str) -> dict[str, float]:
 
 
 def _apply_player_upgrades(player: PlayerBase) -> None:
-    # Apply individual stat upgrades
-    stat_upgrades = _load_individual_stat_upgrades(player.id)
-    if stat_upgrades:
-        # Create multiplier dict for create_stat_buff
-        multipliers = {}
-        for stat_name, upgrade_percent in stat_upgrades.items():
-            # Convert percentage to multiplier (e.g., 0.05 = 5% -> 1.05 multiplier)
-            multipliers[f"{stat_name}_mult"] = 1 + upgrade_percent
+    """Apply individual stat upgrades as a persistent, non-diminished effect.
 
-        if multipliers:
-            mod = create_stat_buff(
-                player,
-                name="upgrade_individual",
-                turns=10**9,
-                id="upgrade_bonus_individual",
-                **multipliers
-            )
-            player.mods.append(mod.id)
+    Keeps base stats unchanged so UI can show deltas (e.g., 5% (+2%)).
+    """
+    stat_upgrades = _load_individual_stat_upgrades(player.id)
+    if not stat_upgrades:
+        return
+
+    percent_stats = {"crit_rate", "effect_hit_rate", "effect_resistance", "dodge_odds"}
+    multiplier_like_stats = {"crit_damage", "mitigation", "vitality"}
+    flat_stats = {"max_hp", "atk", "defense", "regain"}
+
+    deltas: dict[str, float] = {}
+    mults: dict[str, float] = {}
+    for stat_name, upgrade_percent in stat_upgrades.items():
+        if stat_name in flat_stats:
+            mults[f"{stat_name}_mult"] = 1.0 + float(upgrade_percent)
+        elif stat_name in multiplier_like_stats:
+            # Treat as absolute additive (e.g., crit_damage +0.20 for +20%)
+            deltas[stat_name] = deltas.get(stat_name, 0.0) + float(upgrade_percent)
+        elif stat_name in percent_stats:
+            deltas[stat_name] = deltas.get(stat_name, 0.0) + float(upgrade_percent)
+        else:
+            # Default additive
+            deltas[stat_name] = deltas.get(stat_name, 0.0) + float(upgrade_percent)
+
+    if deltas or mults:
+        mod = create_stat_buff(
+            player,
+            name="upgrade_individual",
+            turns=10**9,
+            id="upgrade_bonus_individual",
+            **{**deltas, **mults},
+        )
+        player.mods.append(mod.id)
 
 def _assign_damage_type(player: PlayerBase) -> None:
     with get_save_manager().connection() as conn:

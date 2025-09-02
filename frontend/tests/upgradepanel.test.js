@@ -3,11 +3,12 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 describe('UpgradePanel component', () => {
-  test('contains upgrade UI', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/UpgradePanel.svelte'), 'utf8');
+  test('contains new upgrade UI hooks', () => {
+    // Note: file path reflects the component location in src/lib/components
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/UpgradePanel.svelte'), 'utf8');
     expect(content).toContain('data-testid="upgrade-panel"');
-    expect(content).toContain('Upgrade Level');
-    expect(content).toContain('Cost: 20×4★ or 100×3★ or 500×2★ or 1000×1★');
-    expect(content).toContain('button');
+    expect(content).toContain('Use items'); // section label
+    expect(content).toContain('Convert to Points'); // player flow button text
+    expect(content).toContain('Spend points'); // player stat spend UI
   });
 });

@@ -95,6 +95,30 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
             data["vitality"] = float(getattr(obj, "vitality"))
             data["regain"] = int(getattr(obj, "regain"))
             data["dodge_odds"] = float(getattr(obj, "dodge_odds"))
+            # Surface active effects (buffs/debuffs), including upgrade modifiers
+            try:
+                effects = []
+                for eff in getattr(obj, "get_active_effects", lambda: [])() or []:
+                    # Eff might be a StatEffect or compatible object
+                    effects.append({
+                        "id": getattr(eff, "name", "effect"),
+                        "name": getattr(eff, "name", "effect"),
+                        "duration": getattr(eff, "duration", -1),
+                        "source": getattr(eff, "source", "unknown"),
+                        "modifiers": dict(getattr(eff, "stat_modifiers", {})),
+                    })
+                data["active_effects"] = effects
+            except Exception:
+                data["active_effects"] = []
+            # Also surface upgrade totals per stat so the UI can present
+            # base vs upgraded values without depending on effect scaling.
+            try:
+                totals: dict[str, float] = {}
+                for up in _get_player_stat_upgrades(getattr(obj, 'id', '')):
+                    totals[up["stat_name"]] = totals.get(up["stat_name"], 0.0) + float(up["upgrade_percent"])
+                data["upgrade_totals"] = totals
+            except Exception:
+                data["upgrade_totals"] = {}
         except Exception:
             # If any property access fails, leave as-is
             pass

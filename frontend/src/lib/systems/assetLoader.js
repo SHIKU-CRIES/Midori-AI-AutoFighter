@@ -133,23 +133,72 @@ function getHourSeed() {
          now.getHours();
 }
 
-// Get random image from character folder or fallback
+// Known folder aliases when the on-disk folder name differs from character id
+const CHARACTER_ASSET_ALIASES = {
+  lady_echo: 'echo'
+};
+
+// Get image from character folder or fallback
 export function getCharacterImage(characterId, _isPlayer = false) {
-  // Stable selection per character so portraits don't flicker on re-render
   if (!characterId) return defaultFallback;
+
+  // Resolve folder alias when id differs from asset folder
+  const key = CHARACTER_ASSET_ALIASES[characterId] || characterId;
+
+  // If this is the Mimic, always mirror the Player's chosen image for this session
+  if (characterId === 'mimic') {
+    // Return cached player image if present
+    const cachedPlayer = characterImageCache.get('player');
+    if (cachedPlayer) return cachedPlayer;
+    // Otherwise, choose and cache the player's image using the same rules
+    const playerList = characterAssets['player'];
+    if (Array.isArray(playerList) && playerList.length > 0) {
+      const rnd = Math.floor(Math.random() * playerList.length);
+      const chosen = playerList[rnd];
+      characterImageCache.set('player', chosen);
+      return chosen;
+    }
+    if (fallbackAssets.length > 0) {
+      const rnd = Math.floor(Math.random() * fallbackAssets.length);
+      const chosen = fallbackAssets[rnd];
+      characterImageCache.set('player', chosen);
+      return chosen;
+    }
+    characterImageCache.set('player', defaultFallback);
+    return defaultFallback;
+  }
+
+  // First, return any cached image (prevents reload flicker on re-renders)
   const cached = characterImageCache.get(characterId);
   if (cached) return cached;
 
-  // Dedicated images
-  if (characterAssets[characterId] && characterAssets[characterId].length > 0) {
-    const images = characterAssets[characterId];
+  // Lady Echo and Player: choose a random image once per page load, then cache
+  if (_isPlayer === true || characterId === 'lady_echo') {
+    const list = characterAssets[key];
+    if (Array.isArray(list) && list.length > 0) {
+      const rnd = Math.floor(Math.random() * list.length);
+      const chosen = list[rnd];
+      characterImageCache.set(characterId, chosen);
+      return chosen;
+    }
+    if (fallbackAssets.length > 0) {
+      const rnd = Math.floor(Math.random() * fallbackAssets.length);
+      const chosen = fallbackAssets[rnd];
+      characterImageCache.set(characterId, chosen);
+      return chosen;
+    }
+    characterImageCache.set(characterId, defaultFallback);
+    return defaultFallback;
+  }
+
+  if (characterAssets[key] && characterAssets[key].length > 0) {
+    const images = characterAssets[key];
     const idx = stringHashIndex(characterId, images.length);
     const chosen = images[idx];
     characterImageCache.set(characterId, chosen);
     return chosen;
   }
 
-  // Fallback images (stable per id)
   if (fallbackAssets.length > 0) {
     const idx = stringHashIndex(characterId, fallbackAssets.length);
     const chosen = fallbackAssets[idx];
@@ -157,7 +206,6 @@ export function getCharacterImage(characterId, _isPlayer = false) {
     return chosen;
   }
 
-  // Final fallback - repository logo
   characterImageCache.set(characterId, defaultFallback);
   return defaultFallback;
 }

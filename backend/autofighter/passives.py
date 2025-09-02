@@ -29,9 +29,16 @@ class PassiveRegistry:
     def __init__(self) -> None:
         self._registry = discover()
 
-    async def trigger(self, event: str, target, **kwargs) -> None:
-        """Trigger passives for a given event with optional context."""
-        counts = Counter(target.passives)
+    async def trigger(self, event: str, owner, **kwargs) -> None:
+        """Trigger passives for a given event with optional context.
+
+        Notes:
+            The second parameter was renamed from `target` to `owner` to avoid
+            collisions with a `target=` keyword argument commonly passed in
+            `**kwargs` (e.g., the target of an action). This prevents the
+            "multiple values for argument 'target'" error.
+        """
+        counts = Counter(owner.passives)
         for pid, count in counts.items():
             cls = self._registry.get(pid)
             if cls is None or getattr(cls, "trigger", None) != event:
@@ -41,10 +48,10 @@ class PassiveRegistry:
                 passive_instance = cls()
                 # Try to call apply with context, fall back to simple apply for compatibility
                 try:
-                    await passive_instance.apply(target, stack_index=stack_idx, **kwargs)
+                    await passive_instance.apply(owner, stack_index=stack_idx, **kwargs)
                 except TypeError:
                     # Fall back to simple apply for existing passives that don't accept kwargs
-                    await passive_instance.apply(target)
+                    await passive_instance.apply(owner)
 
     async def trigger_damage_taken(self, target, attacker: Optional[Any] = None, damage: int = 0) -> None:
         """Trigger passives specifically for damage taken events."""
@@ -131,21 +138,25 @@ class PassiveRegistry:
         counts = Counter(target.passives)
         for pid, count in counts.items():
             cls = self._registry.get(pid)
-            if cls is None or getattr(cls, "trigger", None) != "turn_start":
+            if cls is None:
                 continue
 
             passive_instance = cls()
 
             # Special handling for turn start passives
-            if hasattr(passive_instance, "on_turn_start"):
+            if getattr(cls, "trigger", None) == "turn_start" and hasattr(passive_instance, "on_turn_start"):
                 stacks = min(count, getattr(cls, "max_stacks", count))
                 for _ in range(stacks):
                     await passive_instance.on_turn_start(target, **kwargs)
 
-            # Regular passive application
-            stacks = min(count, getattr(cls, "max_stacks", count))
-            for _ in range(stacks):
-                await passive_instance.apply(target, **kwargs)
+            # Regular passive application only for turn_start passives; be lenient with kwargs
+            if getattr(cls, "trigger", None) == "turn_start":
+                stacks = min(count, getattr(cls, "max_stacks", count))
+                for _ in range(stacks):
+                    try:
+                        await passive_instance.apply(target, **kwargs)
+                    except TypeError:
+                        await passive_instance.apply(target)
 
     async def trigger_level_up(self, target, **kwargs) -> None:
         """Trigger level up events for passives that respond to leveling."""
@@ -193,5 +204,3 @@ class PassiveRegistry:
                 }
             )
         return info
-
-
