@@ -5,7 +5,11 @@ import { openOverlay } from '$lib';
 /** @type {import('@sveltejs/kit').HandleClientError} */
 export function handleError({ error, event }) {
   try {
-    const message = error?.message ?? String(error ?? 'Unknown error');
+    let message = error?.message ?? String(error ?? 'Unknown error');
+    // If the message looks like a bare number, wrap it with context for clarity
+    if (/^\d+$/.test(String(message || ''))) {
+      message = `Unexpected error (code ${message})`;
+    }
     const traceback = error?.stack ?? '';
     openOverlay('error', { message, traceback });
     console.error('Client error:', message, '\n', traceback, '\nAt:', event?.url?.href);
@@ -24,9 +28,13 @@ if (typeof window !== 'undefined') {
   });
   window.addEventListener('unhandledrejection', (ev) => {
     const reason = ev?.reason;
-    const msg = reason?.message || String(reason || 'Unhandled rejection');
+    let msg = reason?.message || String(reason || 'Unhandled rejection');
+    if (/^\d+$/.test(String(msg || ''))) {
+      msg = `Unhandled rejection (code ${msg})`;
+    }
     const stack = reason?.stack || '';
     openOverlay('error', { message: msg, traceback: stack });
+    // Also log the raw reason object for debugging odd cases
+    try { console.error('Unhandled rejection raw reason:', reason); } catch {}
   });
 }
-

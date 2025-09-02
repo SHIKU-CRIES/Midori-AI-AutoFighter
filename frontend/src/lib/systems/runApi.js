@@ -9,10 +9,19 @@ async function handleFetch(url, options = {}) {
   try {
     const res = await fetch(url, options);
     if (!res.ok) {
-      let data;
+      let data; let message = ''; let traceback = '';
       try { data = await res.json(); } catch {}
-      const message = data?.message || `HTTP error ${res.status}`;
-      const traceback = data?.traceback || '';
+      if (data && typeof data === 'object') {
+        message = data.message || '';
+        traceback = data.traceback || '';
+      }
+      if (!message) {
+        try {
+          const text = await res.text();
+          message = (text && text.trim()) || '';
+        } catch {}
+      }
+      if (!message) message = `HTTP error ${res.status}`;
       // Suppress global error overlays for 404s; callers may treat them as transient
       if (res.status !== 404) {
         openOverlay('error', { message, traceback });
@@ -26,7 +35,8 @@ async function handleFetch(url, options = {}) {
     return res.json();
   } catch (e) {
     if (!e.overlayShown) {
-      openOverlay('error', { message: e.message, traceback: e.stack || '' });
+      const msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
+      openOverlay('error', { message: msg, traceback: e?.stack || '' });
     }
     throw e;
   }
@@ -49,10 +59,19 @@ export async function getMap(runId) {
     const res = await fetch(`${API_BASE}/map/${runId}`, { cache: 'no-store' });
     if (res.status === 404) return null;
     if (!res.ok) {
-      let data;
+      let data; let message = ''; let traceback = '';
       try { data = await res.json(); } catch {}
-      const message = data?.message || `HTTP error ${res.status}`;
-      const traceback = data?.traceback || '';
+      if (data && typeof data === 'object') {
+        message = data.message || '';
+        traceback = data.traceback || '';
+      }
+      if (!message) {
+        try {
+          const text = await res.text();
+          message = (text && text.trim()) || '';
+        } catch {}
+      }
+      if (!message) message = `HTTP error ${res.status}`;
       openOverlay('error', { message, traceback });
       const err = new Error(message);
       err.overlayShown = true;
@@ -61,7 +80,8 @@ export async function getMap(runId) {
     return res.json();
   } catch (e) {
     if (!e.overlayShown) {
-      openOverlay('error', { message: e.message, traceback: e.stack || '' });
+      const msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
+      openOverlay('error', { message: msg, traceback: e?.stack || '' });
     }
     throw e;
   }
@@ -139,9 +159,13 @@ export async function getBattleSummary(runId, index) {
     throw err;
   }
   if (!res.ok) {
-    let data;
+    let data; let message = '';
     try { data = await res.json(); } catch {}
-    const message = data?.message || `HTTP error ${res.status}`;
+    if (data && typeof data === 'object') message = data.message || '';
+    if (!message) {
+      try { const text = await res.text(); message = (text && text.trim()) || ''; } catch {}
+    }
+    if (!message) message = `HTTP error ${res.status}`;
     const err = new Error(message);
     err.status = res.status;
     err.overlayShown = true;
@@ -160,9 +184,13 @@ export async function getBattleEvents(runId, index) {
     throw err;
   }
   if (!res.ok) {
-    let data;
+    let data; let message = '';
     try { data = await res.json(); } catch {}
-    const message = data?.message || `HTTP error ${res.status}`;
+    if (data && typeof data === 'object') message = data.message || '';
+    if (!message) {
+      try { const text = await res.text(); message = (text && text.trim()) || ''; } catch {}
+    }
+    if (!message) message = `HTTP error ${res.status}`;
     const err = new Error(message);
     err.status = res.status;
     err.overlayShown = true;
