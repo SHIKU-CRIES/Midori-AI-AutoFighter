@@ -22,9 +22,15 @@ async function handleFetch(url, options = {}) {
         } catch {}
       }
       if (!message) message = `HTTP error ${res.status}`;
+      // Normalize bare numeric bodies to a descriptive error
+      const trimmed = String(message || '').trim();
+      if (/^\d+$/.test(trimmed)) {
+        message = `Unexpected backend error (code ${trimmed}) during ${options?.method || 'GET'} ${url}`;
+      }
       // Suppress global error overlays for 404s; callers may treat them as transient
       if (res.status !== 404) {
         openOverlay('error', { message, traceback });
+        try { console.error('API error:', { url, status: res.status, message, traceback }); } catch {}
       }
       const err = new Error(message);
       err.status = res.status;
@@ -35,8 +41,13 @@ async function handleFetch(url, options = {}) {
     return res.json();
   } catch (e) {
     if (!e.overlayShown) {
-      const msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
+      let msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
+      msg = String(msg || '').trim();
+      if (/^\d+$/.test(msg)) {
+        msg = `Unexpected error (code ${msg}) during ${options?.method || 'GET'} ${url}`;
+      }
       openOverlay('error', { message: msg, traceback: e?.stack || '' });
+      try { console.error('Fetch failure:', { url, message: msg }); } catch {}
     }
     throw e;
   }
@@ -72,7 +83,12 @@ export async function getMap(runId) {
         } catch {}
       }
       if (!message) message = `HTTP error ${res.status}`;
+      const trimmed = String(message || '').trim();
+      if (/^\d+$/.test(trimmed)) {
+        message = `Unexpected backend error (code ${trimmed}) during GET ${API_BASE}/map/${runId}`;
+      }
       openOverlay('error', { message, traceback });
+      try { console.error('API error:', { endpoint: 'getMap', runId, status: res.status, message }); } catch {}
       const err = new Error(message);
       err.overlayShown = true;
       throw err;
@@ -80,8 +96,13 @@ export async function getMap(runId) {
     return res.json();
   } catch (e) {
     if (!e.overlayShown) {
-      const msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
+      let msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
+      msg = String(msg || '').trim();
+      if (/^\d+$/.test(msg)) {
+        msg = `Unexpected error (code ${msg}) during GET ${API_BASE}/map/${runId}`;
+      }
       openOverlay('error', { message: msg, traceback: e?.stack || '' });
+      try { console.error('getMap failure:', { runId, message: msg }); } catch {}
     }
     throw e;
   }
@@ -166,6 +187,10 @@ export async function getBattleSummary(runId, index) {
       try { const text = await res.text(); message = (text && text.trim()) || ''; } catch {}
     }
     if (!message) message = `HTTP error ${res.status}`;
+    const trimmed = String(message || '').trim();
+    if (/^\d+$/.test(trimmed)) {
+      message = `Unexpected backend error (code ${trimmed}) during GET ${url}`;
+    }
     const err = new Error(message);
     err.status = res.status;
     err.overlayShown = true;
@@ -191,6 +216,10 @@ export async function getBattleEvents(runId, index) {
       try { const text = await res.text(); message = (text && text.trim()) || ''; } catch {}
     }
     if (!message) message = `HTTP error ${res.status}`;
+    const trimmed = String(message || '').trim();
+    if (/^\d+$/.test(trimmed)) {
+      message = `Unexpected backend error (code ${trimmed}) during GET ${url}`;
+    }
     const err = new Error(message);
     err.status = res.status;
     err.overlayShown = true;

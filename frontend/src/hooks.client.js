@@ -22,9 +22,14 @@ export function handleError({ error, event }) {
 // As an additional safety net, capture window-level errors
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (ev) => {
-    const msg = ev?.error?.message || ev?.message || 'Unexpected error';
-    const stack = ev?.error?.stack || '';
+    let msg = ev?.error?.message || ev?.message || 'Unexpected error';
+    msg = String(msg ?? '').trim();
+    if (/^\d+$/.test(msg)) {
+      msg = `Unexpected error (code ${msg})`;
+    }
+    const stack = (ev?.error?.stack || '').trim();
     openOverlay('error', { message: msg, traceback: stack });
+    try { console.error('Window error event:', ev?.error || ev); } catch {}
   });
   window.addEventListener('unhandledrejection', (ev) => {
     const reason = ev?.reason;
