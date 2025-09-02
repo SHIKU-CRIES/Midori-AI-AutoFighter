@@ -19,6 +19,7 @@
 
 <OverlaySurface {zIndex}>
   <div class="box" style={`--max-w: ${maxWidth}; --max-h: ${maxHeight}` }>
+  <div class="inner">
   <MenuPanel {padding}>
     {#if title}
       <header class="head">
@@ -28,6 +29,7 @@
     {/if}
     <slot />
   </MenuPanel>
+  </div>
   </div>
 </OverlaySurface>
 
@@ -63,5 +65,14 @@
     max-height: var(--max-h);
     display: flex;
     flex-direction: column;
+    /* allow children to shrink and scroll within */
+    min-height: 0;
+  }
+
+  .inner {
+    /* take available height inside the popup box */
+    flex: 1 1 auto;
+    min-height: 0; /* critical for nested scroll areas in flexbox */
+    display: flex;
   }
 </style>

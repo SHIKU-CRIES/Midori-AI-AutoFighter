@@ -222,6 +222,8 @@
     }
     runId = '';
     roomData = null;
+    // Drop any retained snapshot to free memory and avoid stale data
+    lastBattleSnapshot = null;
     nextRoom = '';
     battleActive = false;
     stopBattlePoll();
@@ -716,6 +718,8 @@
     }
     // Close reward overlay and unmount previous BattleView immediately
     roomData = null;
+    // GC last battle snapshot so review/combat viewer state doesn't linger
+    lastBattleSnapshot = null;
     battleActive = false;
     stopBattlePoll();
     try {
@@ -820,6 +824,8 @@
     if (typeof window !== 'undefined') window.afHaltSync = false;
     // Clear current snapshot to avoid stale gating
     roomData = null;
+    // Also clear any retained battle snapshot to free memory
+    lastBattleSnapshot = null;
     battleActive = false;
     stopBattlePoll();
     try {

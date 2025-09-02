@@ -25,6 +25,7 @@
   import FloatingLoot from './FloatingLoot.svelte';
   import CombatViewer from './CombatViewer.svelte';
   import { rewardOpen as computeRewardOpen } from '../systems/viewportState.js';
+  import { getBattleSummary } from '../systems/runApi.js';
 
   export let selected = [];
   export let runId = '';
@@ -52,6 +53,54 @@
     roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive &&
     typeof roomData.battle_index === 'number' && roomData.battle_index > 0
   );
+  // Force BattleReview to fully unmount/remount per battle to GC internal state
+  $: reviewKey = `${runId}|${roomData?.battle_index || 0}`;
+
+  // Gate showing the review until the battle summary is ready
+  let reviewReady = false;
+  let reviewSummary = null;
+  let reviewLoadingToken = 0;
+  async function waitForReview(runId, battleIndex, tokenRef) {
+    // Retry a few times while backend finalizes logs
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    for (let attempt = 0; attempt < 10; attempt++) {
+      // If another request superseded this one, stop
+      if (tokenRef.value !== reviewLoadingToken) return;
+      try {
+        const res = await getBattleSummary(runId, battleIndex);
+        if (tokenRef.value !== reviewLoadingToken) return;
+        reviewSummary = res || { damage_by_type: {} };
+        reviewReady = true;
+        return;
+      } catch (err) {
+        // 404 expected briefly; keep retrying
+        if (err?.status !== 404) {
+          // For non-404 errors, stop waiting and let UI fall back later
+          reviewSummary = null;
+          reviewReady = true; // allow overlay to open rather than hang
+          return;
+        }
+      }
+      await sleep(attempt < 5 ? 350 : 700);
+    }
+    // After max retries, allow overlay to open even if empty
+    reviewSummary = null;
+    reviewReady = true;
+  }
+
+  $: if (reviewOpen) {
+    // Start loading for this battle
+    reviewReady = false;
+    reviewSummary = null;
+    const tokenRef = { value: ++reviewLoadingToken };
+    if (runId && roomData?.battle_index > 0) {
+      waitForReview(runId, roomData.battle_index, tokenRef);
+    }
+  } else {
+    // Reset gate when review is not open
+    reviewReady = false;
+    reviewSummary = null;
+  }
 
   // Hint to pause battle snapshot polling globally while rewards are open
   $: {
@@ -235,7 +284,7 @@
   </OverlaySurface>
 {/if}
 
-{#if reviewOpen && !rewardOpen}
+{#if reviewOpen && !rewardOpen && reviewReady}
   <OverlaySurface zIndex={1100}>
     <PopupWindow
       title="Battle Review"
@@ -244,15 +293,18 @@
       zIndex={1100}
       on:close={() => dispatch('nextRoom')}
     >
-      <BattleReview
-        runId={runId}
-        battleIndex={roomData?.battle_index || 0}
-        partyData={(battleSnapshot?.party && battleSnapshot?.party.length) ? battleSnapshot.party : (roomData?.party || [])}
-        foeData={(battleSnapshot?.foes && battleSnapshot?.foes.length) ? battleSnapshot.foes : (roomData?.foes || [])}
-        cards={[]}
-        relics={[]}
-        {reducedMotion}
-      />
+      {#key reviewKey}
+        <BattleReview
+          runId={runId}
+          battleIndex={roomData?.battle_index || 0}
+          prefetchedSummary={reviewSummary}
+          partyData={(battleSnapshot?.party && battleSnapshot?.party.length) ? battleSnapshot.party : (roomData?.party || [])}
+          foeData={(battleSnapshot?.foes && battleSnapshot?.foes.length) ? battleSnapshot.foes : (roomData?.foes || [])}
+          cards={[]}
+          relics={[]}
+          {reducedMotion}
+        />
+      {/key}
       <div class="stained-glass-row" style="justify-content: flex-end; margin-top: 0.75rem;">
         <button class="icon-btn" on:click={() => dispatch('nextRoom')}>Next Room</button>
       </div>

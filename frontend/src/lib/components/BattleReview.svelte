@@ -16,6 +16,8 @@
   export let partyData = [];
   export let foeData = [];
   export let reducedMotion = false;
+  // Optional: summary may be prefetched by OverlayHost to avoid flashing/loading
+  export let prefetchedSummary = null;
 
   const dispatch = createEventDispatcher();
   let summary = { damage_by_type: {} };
@@ -26,6 +28,13 @@
   // Tab system for entity-specific breakdowns
   let activeTab = 'overview';
   let availableTabs = [];
+  // Track which battle summary we've loaded to refresh reactively
+  let lastLoadedKey = '';
+  // Derived state holders with safe defaults so template can render immediately
+  let overviewTotals = {};
+  let overviewGrand = 0;
+  let currentTab = null;
+  let entityData = null;
 
   const elements = ['Generic', 'Light', 'Dark', 'Wind', 'Lightning', 'Fire', 'Ice'];
   
@@ -106,30 +115,55 @@
       )
   );
 
+  // Shared loader with retry (used on mount and on prop changes)
+  async function loadSummaryWithRetry(curRunId, curBattleIndex, signal) {
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    for (let attempt = 0; attempt < 10 && !(signal?.cancelled); attempt++) {
+      try {
+        const res = await getBattleSummary(curRunId, curBattleIndex);
+        if (signal?.cancelled) return;
+        summary = res || { damage_by_type: {} };
+        return;
+      } catch (err) {
+        // 404 is expected briefly while the backend writes logs
+        if (err?.status !== 404) {
+          console.warn('Battle summary fetch failed', err?.message || err);
+          return;
+        }
+      }
+      await sleep(attempt < 5 ? 400 : 800);
+    }
+  }
+
   onMount(async () => {
     // Require a positive battleIndex; avoid hammering 404s for index 0 or undefined
     if (!runId || battleIndex == null || battleIndex <= 0) return;
-    let cancelled = false;
-    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-    async function loadWithRetry() {
-      for (let attempt = 0; attempt < 10 && !cancelled; attempt++) {
-        try {
-          const res = await getBattleSummary(runId, battleIndex);
-          summary = res || { damage_by_type: {} };
-          return;
-        } catch (err) {
-          // 404 is expected briefly while the backend writes logs
-          if (err?.status !== 404) {
-            console.warn('Battle summary fetch failed', err?.message || err);
-            return;
-          }
-        }
-        await sleep(attempt < 5 ? 400 : 800);
-      }
+    const currentKey = `${runId}|${battleIndex}`;
+    // If parent provided a prefetched summary for this battle, use it and skip fetch
+    if (prefetchedSummary) {
+      summary = prefetchedSummary || { damage_by_type: {} };
+      lastLoadedKey = currentKey;
+      return;
     }
-    loadWithRetry();
-    return () => { cancelled = true; };
+    lastLoadedKey = currentKey;
+    const signal = { cancelled: false };
+    await loadSummaryWithRetry(runId, battleIndex, signal);
+    return () => { signal.cancelled = true; };
   });
+
+  // Reactively refresh when runId or battleIndex changes (component stays mounted between battles)
+  $: if (runId && battleIndex != null && battleIndex > 0) {
+    const currentKey = `${runId}|${battleIndex}`;
+    if (currentKey !== lastLoadedKey) {
+      lastLoadedKey = currentKey;
+      const signal = { cancelled: false };
+      // Clear previous summary to avoid showing stale totals while loading
+      summary = { damage_by_type: {} };
+      // Keep the user on their current tab; data will update in-place
+      // Fire and forget (errors are logged in loader)
+      loadSummaryWithRetry(runId, battleIndex, signal);
+    }
+  }
 
   // Build mapping of outgoing effects by source id so effects are grouped
   // with the character/foe that created them (not just who currently has them).
@@ -297,7 +331,8 @@
   }
 
   // Derived overview totals to avoid recomputation and ensure immediate reactivity
-  $: overviewTotals = totalDamageByType();
+  // Explicitly depend on `summary` so Svelte recomputes when it changes
+  $: { const _dep = summary; overviewTotals = totalDamageByType(); }
   $: overviewGrand = Object.values(overviewTotals).reduce((a, b) => a + b, 0);
 
   function primaryElement(id) {
@@ -348,7 +383,8 @@
 
   // Calculate tab and entity data reactively
   $: currentTab = availableTabs.find(t => t.id === activeTab);
-  $: entityData = getEntityData(activeTab);
+  // Explicit dependency on `summary` so the right-side stats panel updates on load
+  $: { const _dep2 = summary; entityData = getEntityData(activeTab); }
 
   // Build a safe fighter object for portraits in tabs (ensures id/element/hp exist)
   function toDisplayFighter(entity) {
