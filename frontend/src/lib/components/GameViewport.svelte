@@ -61,7 +61,6 @@
     ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } =
       init.settings);
     roster = init.roster;
-    startGameMusic(musicVolume);
     // Ensure music starts after first user gesture if autoplay was blocked
     try {
       const { resumeGameMusic } = await import('../systems/viewportState.js');

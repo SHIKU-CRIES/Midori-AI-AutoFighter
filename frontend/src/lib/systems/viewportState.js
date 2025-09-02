@@ -7,6 +7,7 @@ import {
   getCharacterPlaylist,
   getMusicTracks,
   getRandomMusicTrack,
+  getFallbackPlaylist,
   shuffle,
 } from './music.js';
 
@@ -97,7 +98,10 @@ export function selectBattleMusic({ roomType, party = [], foes = [] }) {
     const name = typeof boss === 'string' ? boss : boss?.id || boss?.name;
     const playlist = getCharacterPlaylist(String(name || '').toLowerCase(), 'boss');
     if (playlist.length) return playlist;
-    return getMusicTracks();
+    // Fallback: use fallback library (boss first, then normal)
+    const fbBoss = getFallbackPlaylist('boss');
+    if (fbBoss.length) return fbBoss;
+    return getFallbackPlaylist('normal');
   }
 
   const candidates = [];
@@ -117,8 +121,8 @@ export function selectBattleMusic({ roomType, party = [], foes = [] }) {
   });
 
   if (candidates.length === 0) {
-    const generic = getCharacterPlaylist('generic', category);
-    return generic.length ? generic : getMusicTracks();
+    const fb = getFallbackPlaylist(category);
+    return fb.length ? fb : [];
   }
 
   const total = candidates.reduce((sum, c) => sum + c.weight, 0);
@@ -130,24 +134,89 @@ export function selectBattleMusic({ roomType, party = [], foes = [] }) {
   return candidates[0].list;
 }
 
+// In SSR, global Audio is not defined. Guard all audio operations.
+function hasAudio() {
+  return typeof Audio !== 'undefined';
+}
+
 let gameAudio;
 let currentMusicVolume = 50;
 let currentPlaylist = [];
 let playlistIndex = 0;
 let playlistLoop = true;
+// No cross-context reuse to avoid mismatched character music between fights
+
+// Session guard to prevent overlapping music instances when playlists change
+// or resume events race with new starts. Any stale callbacks from older
+// sessions will no-op when they observe a mismatched token.
+let playSession = 0;
+
+// Fade control. We apply a multiplicative fade factor to the base volume
+// so user volume changes during fades are respected.
+let musicFadeFactor = 1; // 0..1
+const DEFAULT_FADE_OUT_MS = 400;
+const DEFAULT_FADE_IN_MS = 650;
+let nextFadeInMs = 0;
 
 let voiceAudio;
 let currentVoiceVolume = 50;
 
-function playNextTrack() {
-  const src =
-    currentPlaylist.length > 0
-      ? currentPlaylist[playlistIndex]
-      : getRandomMusicTrack();
-  if (!src) return;
+function _musicLog(event, payload = {}) {
+  try {
+    // Keep logs compact and consistent for debugging overlap
+    console.info(`[music] ${event}`, payload);
+  } catch {}
+}
+
+function _applyMusicVolumeNow() {
+  if (!gameAudio) return;
+  let level = (Number(currentMusicVolume) || 0) / 100;
+  level = Math.max(0, Math.min(1, level));
+  let fade = Number(musicFadeFactor);
+  if (!Number.isFinite(fade)) fade = 1;
+  fade = Math.max(0, Math.min(1, fade));
+  const vol = Math.max(0, Math.min(1, level * fade));
+  try { gameAudio.volume = vol; } catch {}
+}
+
+function playNextTrack(session = playSession) {
+  if (!hasAudio()) return;
+  if (session !== playSession) return; // stale call
+  let src = '';
+  if (currentPlaylist.length > 0) {
+    src = currentPlaylist[playlistIndex];
+  } else {
+    // Prefer fallback normal category; if empty, any fallback track
+    const fb = getFallbackPlaylist('normal');
+    if (fb.length) {
+      src = fb[Math.floor(Math.random() * fb.length)];
+    } else {
+      const any = getMusicTracks();
+      src = any.length ? any[Math.floor(Math.random() * any.length)] : '';
+    }
+  }
+  if (!src) { _musicLog('start-skip', { session, reason: 'no-src', hadPlaylist: currentPlaylist.length > 0 }); return; }
   gameAudio = new Audio(src);
-  applyMusicVolume(currentMusicVolume);
-  gameAudio.addEventListener('ended', () => {
+  // If a fade-in is requested for this start, begin from silence
+  if (nextFadeInMs > 0) {
+    musicFadeFactor = 0;
+  } else {
+    musicFadeFactor = 1;
+  }
+  _applyMusicVolumeNow();
+  _musicLog('start', {
+    session,
+    src,
+    index: playlistIndex,
+    playlistLength: currentPlaylist.length,
+    loop: playlistLoop,
+    volume: (Number(currentMusicVolume) || 0) / 100,
+    fadeFactor: musicFadeFactor,
+    fadeInMs: nextFadeInMs,
+  });
+  const onEnded = () => {
+    if (session !== playSession) return; // ignore if superseded
+    _musicLog('ended', { session, src, index: playlistIndex, playlistLength: currentPlaylist.length });
     if (currentPlaylist.length > 0) {
       playlistIndex += 1;
       if (playlistIndex >= currentPlaylist.length) {
@@ -159,14 +228,25 @@ function playNextTrack() {
         }
       }
     }
-    playNextTrack();
-  });
+    playNextTrack(session);
+  };
+  gameAudio.addEventListener('ended', onEnded);
   gameAudio.play().catch(() => {});
+  // Kick off fade-in after playback starts
+  if (nextFadeInMs > 0) {
+    _fadeInCurrent(nextFadeInMs, session);
+    nextFadeInMs = 0;
+  }
 }
 
 export function startGameMusic(volume, playlist = [], loop = true) {
   if (typeof volume === 'number') currentMusicVolume = volume;
-  stopGameMusic();
+  // Bump session to cancel any in-flight callbacks and stop current audio
+  playSession += 1;
+  const sessionForStart = playSession;
+  // Safe to call in SSR; no-op if audio is unavailable
+  const stopPromise = _stopGameAudio(false, DEFAULT_FADE_OUT_MS, sessionForStart);
+  // Prepare new playlist immediately
   if (Array.isArray(playlist) && playlist.length > 0) {
     currentPlaylist = shuffle(playlist);
     playlistIndex = 0;
@@ -174,18 +254,24 @@ export function startGameMusic(volume, playlist = [], loop = true) {
   } else {
     currentPlaylist = [];
   }
-  playNextTrack();
+  _musicLog('playlist', { session: sessionForStart, count: currentPlaylist.length });
+  if (!hasAudio()) return;
+  nextFadeInMs = DEFAULT_FADE_IN_MS;
+  // Start only after prior audio finishes fading/stopping
+  Promise.resolve(stopPromise).then(() => {
+    if (sessionForStart !== playSession) return; // superseded
+    playNextTrack(sessionForStart);
+  });
 }
 
 export function applyMusicVolume(volume) {
   currentMusicVolume = typeof volume === 'number' ? volume : currentMusicVolume;
-  if (gameAudio) {
-    gameAudio.volume = currentMusicVolume / 100;
-  }
+  _applyMusicVolumeNow();
 }
 
 export function playVoice(src, volume) {
   if (!src) return;
+  if (!hasAudio()) return;
   if (typeof volume === 'number') currentVoiceVolume = volume;
   stopVoice();
   voiceAudio = new Audio(src);
@@ -208,21 +294,86 @@ export function stopVoice() {
 }
 
 export function stopGameMusic() {
-  if (gameAudio) {
-    try { gameAudio.pause(); } catch {}
-    gameAudio = null;
-  }
+  // Also advance session so any pending callbacks become no-ops
+  playSession += 1;
+  _stopGameAudio(false, DEFAULT_FADE_OUT_MS, playSession);
 }
 
 export function resumeGameMusic() {
+  if (!hasAudio()) return;
   try {
     if (gameAudio) {
       if (gameAudio.paused) {
-        gameAudio.volume = currentMusicVolume / 100;
+        _applyMusicVolumeNow();
         gameAudio.play().catch(() => {});
       }
     } else {
       startGameMusic(currentMusicVolume, currentPlaylist, playlistLoop);
     }
   } catch {}
+}
+
+function _stopGameAudio(bumpSession = false, fadeMs = 0, session = playSession) {
+  if (bumpSession) playSession += 1;
+  const localSession = session;
+  if (!gameAudio) return;
+  if (!hasAudio()) { gameAudio = null; return; }
+  const src = gameAudio?.src || '';
+  const t = (() => { try { return gameAudio?.currentTime || 0; } catch { return 0; } })();
+  _musicLog('stop-request', { session: localSession, src, fadeMs, at: t });
+  if (fadeMs > 0) {
+    return _fadeOutCurrent(fadeMs, localSession).finally(() => {
+      if (localSession !== playSession) return;
+      try { gameAudio?.pause(); } catch {}
+      gameAudio = null;
+      musicFadeFactor = 1; // reset
+      _musicLog('stopped', { session: localSession, src });
+    });
+  } else {
+    try { gameAudio.pause(); } catch {}
+    gameAudio = null;
+    musicFadeFactor = 1;
+    _musicLog('stopped', { session: localSession, src });
+    return Promise.resolve();
+  }
+}
+
+function _fadeOutCurrent(ms, session) {
+  if (!gameAudio) return Promise.resolve();
+  return new Promise((resolve) => {
+    const start = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const step = (nowTs) => {
+      if (session !== playSession) return resolve();
+      const now = typeof nowTs === 'number' ? nowTs : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+      const t = Math.max(0, Math.min(1, (now - start) / ms));
+      musicFadeFactor = Math.max(0, Math.min(1, 1 - t));
+      _applyMusicVolumeNow();
+      if (t < 1 && gameAudio) {
+        if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(step);
+        else setTimeout(() => step(), 16);
+      } else {
+        resolve();
+      }
+    };
+    if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(step);
+    else setTimeout(() => step(), 0);
+  });
+}
+
+function _fadeInCurrent(ms, session) {
+  if (!gameAudio) return;
+  const start = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  const step = (nowTs) => {
+    if (session !== playSession) return;
+    const now = typeof nowTs === 'number' ? nowTs : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+    const t = Math.max(0, Math.min(1, (now - start) / ms));
+    musicFadeFactor = Math.max(0, Math.min(1, t));
+    _applyMusicVolumeNow();
+    if (t < 1 && gameAudio) {
+      if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(step);
+      else setTimeout(() => step(), 16);
+    }
+  };
+  if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(step);
+  else setTimeout(() => step(), 0);
 }

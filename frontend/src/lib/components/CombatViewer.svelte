@@ -893,13 +893,9 @@
     opacity: 0.8;
   }
 
-  h2, h3 {
+  h2 {
     color: #fff;
     margin: 0 0 1rem 0;
-  }
-
-  h3 {
-    font-size: 1.1rem;
   }
 
   p {

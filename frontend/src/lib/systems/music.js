@@ -7,18 +7,26 @@ const musicModules = import.meta.glob('../assets/music/**/*.{mp3,ogg,wav}', {
   query: '?url'
 });
 
-const musicLibrary = {};
+// Character-specific library (supports any top-level folder except 'fallback')
+const characterLibrary = {};
+// Fallback library used when a character has no music (or is not explicitly supported)
+const fallbackLibrary = {};
 
 for (const [path, url] of Object.entries(musicModules)) {
   const parts = path.split('/');
   const character = parts[3];
   const category = parts[4] ?? 'other';
-
   if (!character || !category) continue;
 
-  musicLibrary[character] ??= {};
-  musicLibrary[character][category] ??= [];
-  musicLibrary[character][category].push(url);
+  const key = character.toLowerCase();
+  if (key === 'fallback') {
+    fallbackLibrary[category] ??= [];
+    fallbackLibrary[category].push(url);
+  } else {
+    characterLibrary[key] ??= {};
+    characterLibrary[key][category] ??= [];
+    characterLibrary[key][category].push(url);
+  }
 }
 
 export function shuffle(array) {
@@ -31,11 +39,13 @@ export function shuffle(array) {
 }
 
 export function getMusicTracks() {
-  return Object.values(musicModules);
+  // Return all fallback tracks across categories as a flat list
+  return Object.values(fallbackLibrary).flat();
 }
 
 export function getCharacterPlaylist(charName, category = 'normal') {
-  const charMusic = musicLibrary[charName] ?? {};
+  const key = String(charName || '').toLowerCase();
+  const charMusic = characterLibrary[key] ?? {};
   const tracks = charMusic[category] ?? [];
   return shuffle(tracks);
 }
@@ -47,4 +57,9 @@ export function getRandomMusicTrack(charName, category = 'normal') {
   return tracks[index];
 }
 
-export { musicLibrary };
+export function getFallbackPlaylist(category = 'normal') {
+  const tracks = fallbackLibrary[category] ?? [];
+  return shuffle(tracks);
+}
+
+export { characterLibrary };
