@@ -483,11 +483,44 @@ class EffectManager:
                 if eff.id in names:
                     names.remove(eff.id)
 
+        # Enhanced stat modifier processing with parallelization
         expired_mods: list[StatModifier] = []
-        for mod in self.mods:
-            self._console.log(f"[yellow]{self.stats.id} {mod.name} tick[/]")
-            if not mod.tick():
-                expired_mods.append(mod)
+
+        # Batch logging for performance when many stat modifiers are present
+        if len(self.mods) > 10:
+            self._console.log(f"[yellow]{self.stats.id} processing {len(self.mods)} stat modifiers[/]")
+
+        # Choose processing strategy based on number of modifiers
+        if len(self.mods) > 15:
+            # Parallel processing for large numbers of stat modifiers
+            async def tick_modifier(mod):
+                if len(self.mods) <= 10:
+                    self._console.log(f"[yellow]{self.stats.id} {mod.name} tick[/]")
+                return mod.tick(), mod
+
+            # Process in batches to avoid overwhelming the event loop
+            batch_size = 30
+            for i in range(0, len(self.mods), batch_size):
+                batch = self.mods[i:i + batch_size]
+                results = await asyncio.gather(*[tick_modifier(mod) for mod in batch])
+                for still_active, mod in results:
+                    if not still_active:
+                        expired_mods.append(mod)
+                # Early termination: if character dies, stop processing remaining modifiers
+                if self.stats.hp <= 0:
+                    break
+        else:
+            # Sequential processing for smaller numbers of modifiers
+            for mod in self.mods:
+                if len(self.mods) <= 10:
+                    self._console.log(f"[yellow]{self.stats.id} {mod.name} tick[/]")
+                if not mod.tick():
+                    expired_mods.append(mod)
+                # Early termination: if character dies, stop processing
+                if self.stats.hp <= 0:
+                    break
+
+        # Clean up expired modifiers
         for mod in expired_mods:
             # Emit effect expired event for stat modifiers
             from autofighter.stats import BUS
@@ -500,6 +533,102 @@ class EffectManager:
             self.mods.remove(mod)
             if mod.id in self.stats.mods:
                 self.stats.mods.remove(mod.id)
+
+        # Process passive abilities if available
+        await self._tick_passives(others)
+
+    async def _tick_passives(self, others: Optional["EffectManager"] = None) -> None:
+        """
+        Enhanced passive processing with parallelization when beneficial.
+        Integrates passive ability processing into the effect manager for better performance.
+        """
+        if not hasattr(self.stats, 'passives') or not self.stats.passives:
+            return
+
+        from collections import Counter
+
+        from autofighter.passives import discover
+
+        # Get passive counts and registry
+        counts = Counter(self.stats.passives)
+        registry = discover()
+
+        # Filter to only turn-based passives that need tick processing
+        tick_passives = []
+        for pid, count in counts.items():
+            cls = registry.get(pid)
+            if cls is None:
+                continue
+            # Check if passive has any tick-related methods
+            if hasattr(cls, 'on_turn_end') or hasattr(cls, 'tick') or getattr(cls, 'trigger', None) == 'turn_end':
+                stacks = min(count, getattr(cls, 'max_stacks', count))
+                for _ in range(stacks):
+                    tick_passives.append((pid, cls))
+
+        if not tick_passives:
+            return
+
+        # Batch logging for performance when many passives need processing
+        if len(tick_passives) > 10:
+            self._console.log(f"[blue]{self.stats.id} processing {len(tick_passives)} passive abilities[/]")
+
+        # Choose processing strategy based on number of passives
+        if len(tick_passives) > 15:
+            # Parallel processing for large numbers of passives
+            async def process_passive(passive_data):
+                pid, cls = passive_data
+                if len(tick_passives) <= 10:
+                    self._console.log(f"[blue]{self.stats.id} {pid} passive tick[/]")
+
+                passive_instance = cls()
+                # Try turn end processing first
+                if hasattr(passive_instance, 'on_turn_end'):
+                    await passive_instance.on_turn_end(self.stats)
+                # Fall back to tick method if available
+                elif hasattr(passive_instance, 'tick'):
+                    await passive_instance.tick(self.stats)
+                # Fall back to general apply for turn_end triggers
+                elif getattr(cls, 'trigger', None) == 'turn_end':
+                    try:
+                        await passive_instance.apply(self.stats)
+                    except TypeError:
+                        # Handle passives that don't accept extra args
+                        pass
+
+                return True  # Passives don't expire from ticking
+
+            # Process in batches to avoid overwhelming the event loop
+            batch_size = 20
+            for i in range(0, len(tick_passives), batch_size):
+                batch = tick_passives[i:i + batch_size]
+                await asyncio.gather(*[process_passive(passive_data) for passive_data in batch])
+                # Early termination: if character dies, stop processing
+                if self.stats.hp <= 0:
+                    break
+        else:
+            # Sequential processing for smaller numbers of passives
+            for pid, cls in tick_passives:
+                if len(tick_passives) <= 10:
+                    self._console.log(f"[blue]{self.stats.id} {pid} passive tick[/]")
+
+                passive_instance = cls()
+                # Try turn end processing first
+                if hasattr(passive_instance, 'on_turn_end'):
+                    await passive_instance.on_turn_end(self.stats)
+                # Fall back to tick method if available
+                elif hasattr(passive_instance, 'tick'):
+                    await passive_instance.tick(self.stats)
+                # Fall back to general apply for turn_end triggers
+                elif getattr(cls, 'trigger', None) == 'turn_end':
+                    try:
+                        await passive_instance.apply(self.stats)
+                    except TypeError:
+                        # Handle passives that don't accept extra args
+                        pass
+
+                # Early termination: if character dies, stop processing
+                if self.stats.hp <= 0:
+                    break
         if self.stats.hp <= 0 and others is not None:
             for eff in list(self.dots):
                 on_death = getattr(eff, "on_death", None)
