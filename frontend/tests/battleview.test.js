@@ -68,6 +68,11 @@ describe('BattleView layout and polling', () => {
     expect(fighterPortrait).toContain('getElementColor(fighter.element)');
   });
 
+  test('pulses ultimate ring when ready', () => {
+    expect(fighterPortrait).toContain('ult-ready-pulse');
+    expect(fighterPortrait).toContain('@keyframes ult-pulse');
+  });
+
   test('polling respects framerate settings', async () => {
     async function measure(fps) {
       const pollDelay = 1000 / fps;

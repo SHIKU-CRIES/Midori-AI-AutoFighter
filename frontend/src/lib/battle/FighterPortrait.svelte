@@ -25,6 +25,16 @@
   $: elColor = getElementColor(fighter.element);
   $: ultProgress = Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15));
   let lowContrast = false;
+  let prevUltReady = false;
+  let showUltPulse = false;
+
+  $: if (fighter.ultimate_ready && !prevUltReady && !reducedMotion) {
+    showUltPulse = true;
+    setTimeout(() => {
+      showUltPulse = false;
+    }, 600);
+  }
+  $: prevUltReady = fighter.ultimate_ready;
 
   // Improve ring readability for dark-type or low-brightness colors
   function parseHex(hex) {
@@ -71,6 +81,9 @@
       style={`border-color: ${elColor}`}
     />
     <div class="element-chip" class:low-contrast={lowContrast}>
+      {#if showUltPulse}
+        <div class="ult-ready-pulse"></div>
+      {/if}
       <svg class="ultimate-ring" viewBox="0 0 20 20">
         <circle class="track" cx="10" cy="10" r="9" />
         <circle
@@ -205,6 +218,21 @@
   /* Remove outer fade/glow around the element chip per feedback */
   .element-chip::before { content: none; }
   .ultimate-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ult-ready-pulse {
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 2px solid var(--el-color);
+    box-shadow: 0 0 6px var(--el-color);
+    opacity: 0.8;
+    animation: ult-pulse 0.6s ease-out;
+    pointer-events: none;
+    z-index: -1;
+  }
+  @keyframes ult-pulse {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(1.6); opacity: 0; }
+  }
   .track {
     fill: none;
     stroke: rgba(0, 0, 0, 0.4);

@@ -10,7 +10,10 @@ display passive stack indicators beside the element chip: passives with
 five or fewer maximum stacks render pips that fill as stacks accrue,
 larger finite stacks show `current/max`, and unlimited stacks display the
 raw count. These indicators respect Reduced Motion settings and expose
-tooltips for screen readers and mouse users.
+tooltips for screen readers and mouse users. When a fighter's ultimate
+becomes ready, an element-colored pulse briefly radiates from the
+ultimate ring in `FighterPortrait`; this animation is skipped when
+Reduced Motion is enabled.
 
 ## Stained-Glass Palette
 
