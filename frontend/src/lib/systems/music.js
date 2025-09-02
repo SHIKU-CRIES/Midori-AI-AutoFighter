@@ -21,7 +21,7 @@ for (const [path, url] of Object.entries(musicModules)) {
   musicLibrary[character][category].push(url);
 }
 
-function shuffle(array) {
+export function shuffle(array) {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
