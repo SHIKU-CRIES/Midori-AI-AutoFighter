@@ -20,6 +20,7 @@
 <OverlaySurface {zIndex}>
   <div class="box" style={`--max-w: ${maxWidth}; --max-h: ${maxHeight}` }>
   <div class="inner">
+  <div class="content-wrap">
   <MenuPanel {padding}>
     {#if title}
       <header class="head">
@@ -29,6 +30,7 @@
     {/if}
     <slot />
   </MenuPanel>
+  </div>
   </div>
   </div>
 </OverlaySurface>
@@ -74,5 +76,11 @@
     flex: 1 1 auto;
     min-height: 0; /* critical for nested scroll areas in flexbox */
     display: flex;
+  }
+
+  .content-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex; /* allow MenuPanel's 100% height to resolve */
   }
 </style>

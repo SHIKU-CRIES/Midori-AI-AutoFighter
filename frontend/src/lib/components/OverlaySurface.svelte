@@ -1,6 +1,8 @@
 <script>
   export let padding = '0.4rem 0.75rem 0.75rem 0.75rem';
   export let zIndex = 1000;
+  // When true, disable scrolling on the overlay surface itself; let inner content manage scroll
+  export let noScroll = false;
 </script>
 
 <style>
@@ -17,6 +19,10 @@
   /* allow vertical scrolling; hide stray horizontal scrollbars */
   overflow-x: hidden;
   overflow-y: auto;
+  }
+
+  .surface.no-scroll {
+    overflow-y: hidden;
   }
 
   /* Themed scrollbars for overlay surface (fallback when panels don't manage scroll) */
@@ -42,6 +48,6 @@
   }
 </style>
 
-<div class="surface" style={`--padding: ${padding}; --z: ${zIndex}`}>
+<div class="surface" class:no-scroll={noScroll} style={`--padding: ${padding}; --z: ${zIndex}`}>
   <slot />
 </div>

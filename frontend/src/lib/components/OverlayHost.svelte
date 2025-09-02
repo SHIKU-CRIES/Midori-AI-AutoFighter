@@ -263,11 +263,11 @@
 {/if}
 
 {#if rewardOpen}
-  <OverlaySurface zIndex={1100}>
+  <OverlaySurface zIndex={1100} noScroll={true}>
     <PopupWindow
       title={(roomData?.card_choices?.length || 0) > 0 ? 'Choose a Card' : 'Choose a Relic'}
       maxWidth="880px"
-      maxHeight="95vh"
+      maxHeight="100%"
       zIndex={1100}
       on:close={() => { /* block closing while choices remain */ }}
     >
@@ -285,11 +285,11 @@
 {/if}
 
 {#if reviewOpen && !rewardOpen && reviewReady}
-  <OverlaySurface zIndex={1100}>
+  <OverlaySurface zIndex={1100} noScroll={true}>
     <PopupWindow
       title="Battle Review"
       maxWidth="1200px"
-      maxHeight="95vh"
+      maxHeight="100%"
       zIndex={1100}
       on:close={() => dispatch('nextRoom')}
     >
