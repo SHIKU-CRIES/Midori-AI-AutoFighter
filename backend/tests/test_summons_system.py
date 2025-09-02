@@ -1,0 +1,353 @@
+"""
+Tests for the unified summons system.
+"""
+
+from pathlib import Path
+import sys
+
+import pytest
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+import llms.torch_checker as torch_checker
+
+from autofighter.party import Party
+from autofighter.stats import BUS
+from autofighter.summons import Summon
+from autofighter.summons import SummonManager
+from plugins.cards.phantom_ally import PhantomAlly
+from plugins.damage_types.lightning import Lightning
+from plugins.foes._base import FoeBase
+from plugins.passives.becca_menagerie_bond import BeccaMenagerieBond
+from plugins.players.ally import Ally
+from plugins.players.becca import Becca
+
+
+@pytest.mark.asyncio
+async def test_summon_creation_basic(monkeypatch):
+    """Test basic summon creation with stat inheritance."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    # Create summoner
+    summoner = Ally()
+    summoner.id = "test_summoner"
+    # Set base stats directly
+    summoner._base_atk = 100
+    summoner._base_max_hp = 200
+    summoner._base_defense = 50
+
+    # Create summon
+    summon = Summon.create_from_summoner(
+        summoner=summoner,
+        summon_type="test",
+        source="test_source",
+        stat_multiplier=0.5
+    )
+
+    # Verify stat inheritance
+    assert summon.atk == 50  # 50% of 100
+    assert summon.max_hp == 100  # 50% of 200
+    assert summon.defense == 25  # 50% of 50
+    assert summon.summoner_id == "test_summoner"
+    assert summon.summon_type == "test"
+    assert summon.summon_source == "test_source"
+    assert summon.id == "test_summoner_test_summon"
+
+
+@pytest.mark.asyncio
+async def test_summon_manager_creation_and_tracking(monkeypatch):
+    """Test SummonManager summon creation and tracking."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    # Clean up any existing state
+    SummonManager.cleanup()
+
+    summoner = Ally()
+    summoner.id = "test_summoner"
+
+    # Create summon via manager
+    summon = SummonManager.create_summon(
+        summoner=summoner,
+        summon_type="test",
+        source="test_source"
+    )
+
+    assert summon is not None
+    assert summon.summoner_id == "test_summoner"
+
+    # Verify tracking
+    tracked_summons = SummonManager.get_summons("test_summoner")
+    assert len(tracked_summons) == 1
+    assert tracked_summons[0].id == summon.id
+
+
+@pytest.mark.asyncio
+async def test_summon_manager_limits(monkeypatch):
+    """Test summon limits are enforced."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    summoner = Ally()
+    summoner.id = "test_summoner"
+
+    # Create first summon (should succeed)
+    summon1 = SummonManager.create_summon(
+        summoner=summoner,
+        summon_type="test1",
+        source="test_source",
+        max_summons=1
+    )
+    assert summon1 is not None
+
+    # Try to create second summon (should fail due to limit)
+    summon2 = SummonManager.create_summon(
+        summoner=summoner,
+        summon_type="test2",
+        source="test_source",
+        max_summons=1
+    )
+    assert summon2 is None
+
+    # Should still only have one summon
+    tracked_summons = SummonManager.get_summons("test_summoner")
+    assert len(tracked_summons) == 1
+
+
+@pytest.mark.asyncio
+async def test_summon_battle_lifecycle(monkeypatch):
+    """Test summon cleanup during battle events."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    summoner = Ally()
+    summoner.id = "test_summoner"
+
+    # Create temporary summon
+    summon = SummonManager.create_summon(
+        summoner=summoner,
+        summon_type="temporary",
+        source="test_source",
+        turns_remaining=1
+    )
+    assert summon is not None
+
+    # Should be tracked
+    assert len(SummonManager.get_summons("test_summoner")) == 1
+
+    # Emit battle end - temporary summons should be cleaned up
+    BUS.emit("battle_end", FoeBase())
+
+    # Should be removed
+    assert len(SummonManager.get_summons("test_summoner")) == 0
+
+
+@pytest.mark.asyncio
+async def test_summon_turn_expiration(monkeypatch):
+    """Test summon expiration based on turn count."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    summoner = Ally()
+    summoner.id = "test_summoner"
+
+    # Create summon with 2 turn duration
+    summon = SummonManager.create_summon(
+        summoner=summoner,
+        summon_type="timed",
+        source="test_source",
+        turns_remaining=2
+    )
+
+    assert len(SummonManager.get_summons("test_summoner")) == 1
+
+    # First turn
+    BUS.emit("turn_start", summoner)
+    assert len(SummonManager.get_summons("test_summoner")) == 1
+    assert summon.turns_remaining == 1
+
+    # Second turn - should expire
+    BUS.emit("turn_start", summoner)
+    assert len(SummonManager.get_summons("test_summoner")) == 0
+
+
+@pytest.mark.asyncio
+async def test_phantom_ally_new_system(monkeypatch):
+    """Test PhantomAlly card using new summons system."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    # Create party
+    ally = Ally()
+    ally.id = "ally"
+    becca = Becca()
+    becca.id = "becca"
+    party = Party(members=[ally, becca])
+
+    # Apply PhantomAlly card
+    await PhantomAlly().apply(party)
+
+    # Should have 3 members now (2 original + 1 phantom)
+    assert len(party.members) == 3
+
+    # One should be a phantom summon
+    phantom = None
+    for member in party.members:
+        if hasattr(member, 'summon_type') and member.summon_type == "phantom":
+            phantom = member
+            break
+
+    assert phantom is not None
+    assert phantom.summon_source == "phantom_ally"
+    assert phantom.turns_remaining == 1  # Should be temporary
+
+
+@pytest.mark.asyncio
+async def test_becca_jellyfish_summoning(monkeypatch):
+    """Test Becca's jellyfish summoning using new system."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    # Create Becca
+    becca = Becca()
+    becca.id = "becca"
+    becca.hp = 100
+    becca._base_max_hp = 100
+
+    # Create passive instance
+    passive = BeccaMenagerieBond()
+
+    # Test jellyfish summoning
+    success = await passive.summon_jellyfish(becca, "electric")
+    assert success is True
+
+    # Should have paid HP cost
+    assert becca.hp == 90  # 100 - 10% = 90
+
+    # Should have created summon
+    summons = SummonManager.get_summons("becca")
+    assert len(summons) == 1
+
+    jellyfish = summons[0]
+    assert jellyfish.summon_type == "jellyfish_electric"
+    assert jellyfish.summon_source == "becca_menagerie_bond"
+    assert jellyfish.damage_type.__class__.__name__ == "Lightning"
+
+
+@pytest.mark.asyncio
+async def test_becca_jellyfish_replacement_creates_spirit(monkeypatch):
+    """Test that replacing jellyfish creates spirit stacks."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    # Create Becca
+    becca = Becca()
+    becca.id = "becca"
+    becca.hp = 100
+    becca._base_max_hp = 100
+
+    passive = BeccaMenagerieBond()
+
+    # Summon first jellyfish
+    await passive.summon_jellyfish(becca, "electric")
+    assert passive.get_spirit_stacks(becca) == 0
+
+    # Wait for cooldown
+    passive._summon_cooldown[id(becca)] = 0
+    becca.hp = 100  # Reset HP
+
+    # Summon different jellyfish (should create spirit)
+    await passive.summon_jellyfish(becca, "healing")
+    assert passive.get_spirit_stacks(becca) == 1
+
+    # Should still have one summon (replaced)
+    summons = SummonManager.get_summons("becca")
+    assert len(summons) == 1
+    assert summons[0].summon_type == "jellyfish_healing"
+
+
+@pytest.mark.asyncio
+async def test_damage_type_inheritance(monkeypatch):
+    """Test that summons inherit damage types correctly."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    # Create summoner with Lightning damage type
+    summoner = Ally()
+    summoner.id = "lightning_summoner"
+    summoner.damage_type = Lightning()
+
+    # Create multiple summons to test probability
+    lightning_count = 0
+    total_summons = 20
+
+    for i in range(total_summons):
+        summon = Summon.create_from_summoner(
+            summoner=summoner,
+            summon_type=f"test_{i}",
+            source="test"
+        )
+        if summon.damage_type.__class__.__name__ == "Lightning":
+            lightning_count += 1
+
+    # Should have high percentage of Lightning damage types (around 70%)
+    # Allow some variance due to randomness - at least 30% should be Lightning
+    assert lightning_count >= 6  # At least 30% should be Lightning (lower bound due to randomness)
+
+
+@pytest.mark.asyncio
+async def test_summon_party_integration(monkeypatch):
+    """Test that summons are properly added to parties for battle."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    # Create party
+    ally = Ally()
+    ally.id = "ally"
+    party = Party(members=[ally])
+
+    # Create summon
+    summon = SummonManager.create_summon(
+        summoner=ally,
+        summon_type="test",
+        source="test_source"
+    )
+
+    # Add summons to party
+    added = SummonManager.add_summons_to_party(party)
+
+    assert added == 1
+    assert len(party.members) == 2
+    assert summon in party.members
+
+
+@pytest.mark.asyncio
+async def test_summon_defeat_cleanup(monkeypatch):
+    """Test that summons are cleaned up when summoner is defeated."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    summoner = Ally()
+    summoner.id = "test_summoner"
+
+    # Create summon
+    SummonManager.create_summon(
+        summoner=summoner,
+        summon_type="test",
+        source="test_source"
+    )
+
+    assert len(SummonManager.get_summons("test_summoner")) == 1
+
+    # Emit entity defeat for summoner
+    BUS.emit("entity_defeat", summoner)
+
+    # Summons should be cleaned up
+    assert len(SummonManager.get_summons("test_summoner")) == 0
