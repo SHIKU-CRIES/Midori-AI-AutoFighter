@@ -589,6 +589,9 @@ class BattleRoom(Room):
                     # Trigger action_taken passives for the acting foe
                     await registry.trigger("action_taken", acting_foe)
                     acting_foe.add_ultimate_charge(acting_foe.actions_per_turn)
+                    # Wind-aligned foes gain charge from ally actions too
+                    for ally in foes:
+                        ally.handle_ally_action(acting_foe)
                     await registry.trigger("turn_end", acting_foe, party=combat_party.members, foes=foes)
                     await registry.trigger_turn_end(acting_foe)
                     if _EXTRA_TURNS.get(id(acting_foe), 0) > 0 and acting_foe.hp > 0:

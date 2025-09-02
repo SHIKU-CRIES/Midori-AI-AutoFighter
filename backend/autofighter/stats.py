@@ -376,11 +376,16 @@ class Stats:
             self.ultimate_ready = True
 
     def handle_ally_action(self, actor: "Stats") -> None:
-        """Grant bonus charge when an ally takes an action."""
+        """Grant bonus ultimate charge when a teammate takes an action.
+
+        Wind-aligned characters gain charge whenever another member of their
+        team acts. The acting entity already gains charge from the battle loop,
+        so we only grant this bonus to allies (not self) to avoid double-counting.
+        """
         if actor is self:
             return
         dt = getattr(self, "damage_type", None)
-        if getattr(dt, "id", "").lower() == "ice":
+        if getattr(dt, "id", "").lower() == "wind":
             self.add_ultimate_charge(actor.actions_per_turn)
 
 
