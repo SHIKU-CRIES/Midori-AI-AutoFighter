@@ -83,8 +83,6 @@ export function rewardOpen(roomData, _battleActive) {
   return Boolean(hasCards || hasRelics);
 }
 
-const battlePollCounts = new Map();
-
 export function selectBattleMusic({ roomType, party = [], foes = [] }) {
   const type = String(roomType || '');
   const category =
@@ -105,16 +103,12 @@ export function selectBattleMusic({ roomType, party = [], foes = [] }) {
     return getFallbackPlaylist('normal');
   }
 
-  const key = `${type}`;
   if (type.startsWith('battle')) {
     const ready = (party?.length || 0) > 0 && (foes?.length || 0) > 0;
-    const count = battlePollCounts.get(key) || 0;
-    if (!ready || count < 2) {
-      battlePollCounts.set(key, count + 1);
+    if (!ready) {
       const fb = getFallbackPlaylist(category);
       return fb.length ? fb : [];
     }
-    battlePollCounts.delete(key);
   }
 
   const candidates = [];
