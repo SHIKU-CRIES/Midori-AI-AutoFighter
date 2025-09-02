@@ -69,43 +69,6 @@
     return JSON.stringify(a) !== JSON.stringify(b);
   }
 
-  function pctRatio(val) {
-    if (typeof val !== 'number' || !isFinite(val)) return '0%';
-    return `${(val * 100).toFixed(2)}%`;
-  }
-
-  function pctOdds(val) {
-    if (typeof val !== 'number' || !isFinite(val)) return '0%';
-    return `${(val * 100).toFixed(2)}%`;
-  }
-
-  function pctFromMultiplier(mult) {
-    if (typeof mult !== 'number' || !isFinite(mult)) return '0%';
-    return `${((mult - 1) * 100).toFixed(2)}%`;
-  }
-
-  function formatMitigation(val) {
-    if (typeof val !== 'number' || !isFinite(val)) return '-';
-    // Rule: 100 = 1x (no mitigation). <100 means more damage taken, >100 reduces damage.
-    if (val >= 10) {
-      return `x${(val / 100).toFixed(2)}`;
-    }
-    // If value is already a small multiplier (e.g., 1.0), show directly.
-    return `x${val.toFixed(2)}`;
-  }
-
-  // General multiplier formatter (e.g., Vitality)
-  function formatMultiplier(val) {
-    if (typeof val !== 'number' || !isFinite(val)) return '-';
-    if (val >= 10) return `x${(val / 100).toFixed(2)}`;
-    return `x${val.toFixed(2)}`;
-  }
-
-  function fmt2(val) {
-    if (typeof val !== 'number' || !isFinite(val)) return '0.00';
-    return Number(val).toFixed(2);
-  }
-
   function guessElementFromId(id) {
     const s = (id || '').toLowerCase();
     if (s.includes('lightning')) return 'Lightning';
@@ -136,6 +99,31 @@
           snap.foes = Object.values(snap.enemies);
         }
       }
+      // Map summons to their owners
+      const partySummons = new Map();
+      if (snap && snap.party_summons) {
+        const arr = Array.isArray(snap.party_summons)
+          ? snap.party_summons
+          : Object.values(snap.party_summons);
+        for (const s of arr) {
+          const owner = s?.owner_id;
+          if (!owner) continue;
+          if (!partySummons.has(owner)) partySummons.set(owner, []);
+          partySummons.get(owner).push(s);
+        }
+      }
+      const foeSummons = new Map();
+      if (snap && snap.foe_summons) {
+        const arr = Array.isArray(snap.foe_summons)
+          ? snap.foe_summons
+          : Object.values(snap.foe_summons);
+        for (const s of arr) {
+          const owner = s?.owner_id;
+          if (!owner) continue;
+          if (!foeSummons.has(owner)) foeSummons.set(owner, []);
+          foeSummons.get(owner).push(s);
+        }
+      }
       // removed console logging to avoid snapshot/round-trip spam
       // Do not overwrite party/foes directly; we enrich below to preserve
       // existing per-entity element data and avoid regressions.
@@ -157,7 +145,7 @@
             }
           }
           const resolved = typeof elem === 'string' ? elem : (elem?.id || elem?.name || 'Generic');
-          return { ...m, element: resolved };
+          return { ...m, element: resolved, summons: partySummons.get(m.id) || [] };
         });
         if (differs(enriched, party)) party = enriched;
       }
@@ -175,7 +163,7 @@
             const prev = prevById.get(f.id);
             resolved = prev?.element || prev?.damage_type || '';
           }
-          return { ...f, element: resolved };
+          return { ...f, element: resolved, summons: foeSummons.get(f.id) || [] };
         });
         if (differs(enrichedFoes, foes)) foes = enrichedFoes;
       }
@@ -212,25 +200,15 @@
     {#each party as member (member.id)}
       <div class="combatant">
         <FighterPortrait fighter={member} {reducedMotion} />
-        {#if showHud}
-          <div class="stats right stained-glass-panel">
-            <div class="name">{(member.name ?? member.id)} ({member.level ?? 1})</div>
-            <div class="row"><span class="k">HP</span> <span class="v">{member.hp}/{member.max_hp}{member.shields > 0 ? ` (+${member.shields})` : ''}</span></div>
-            <div class="row"><span class="k">VIT</span> <span class="v">{formatMultiplier(member.vitality)}</span></div>
-            <div class="row"><span class="k">ATK</span> <span class="v">{member.atk}</span></div>
-            <div class="row"><span class="k">DEF</span> <span class="v">{member.defense}</span></div>
-            <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(member.mitigation)}</span></div>
-            <div class="row"><span class="k">CRate</span> <span class="v">{pctOdds(member.crit_rate)}</span></div>
-            <div class="row"><span class="k">CDmg</span> <span class="v">{pctFromMultiplier(member.crit_damage)}</span></div>
-            <div class="row"><span class="k">E.Hit</span> <span class="v">{pctRatio(member.effect_hit_rate)}</span></div>
-            <div class="row"><span class="k">E.Res</span> <span class="v">{pctOdds(member.effect_resistance)}</span></div>
-            <div class="row small"><span class="k">AP</span> <span class="v">{member.action_points ?? 0}</span> <span class="k">/ APT</span> <span class="v">{member.actions_per_turn ?? 1}</span></div>
-            <details class="advanced">
-              <summary>Combat stats</summary>
-              <div class="row small"><span class="k">Dmg Dealt</span> <span class="v">{member.damage_dealt ?? 0}</span></div>
-              <div class="row small"><span class="k">Dmg Taken</span> <span class="v">{member.damage_taken ?? 0}</span></div>
-              <div class="row small"><span class="k">Kills</span> <span class="v">{member.kills ?? 0}</span></div>
-            </details>
+        {#if member.summons?.length}
+          <div class="summon-list right">
+            {#each member.summons as summon (summon.id)}
+              <FighterPortrait
+                fighter={summon}
+                {reducedMotion}
+                style="--portrait-size: calc(var(--portrait-size) * 0.6)"
+              />
+            {/each}
           </div>
         {/if}
       </div>
@@ -240,25 +218,15 @@
     <div class="foe-column" style={`--portrait-size: ${foePortraitSize}` }>
       {#each foes as foe (foe.id)}
         <div class="combatant">
-          {#if showHud}
-            <div class="stats left stained-glass-panel">
-              <div class="name">{(foe.name ?? foe.id)} ({foe.level ?? 1})</div>
-              <div class="row"><span class="k">HP</span> <span class="v">{foe.hp}/{foe.max_hp}{foe.shields > 0 ? ` (+${foe.shields})` : ''}</span></div>
-              <div class="row"><span class="k">VIT</span> <span class="v">{formatMultiplier(foe.vitality)}</span></div>
-              <div class="row"><span class="k">ATK</span> <span class="v">{foe.atk}</span></div>
-              <div class="row"><span class="k">DEF</span> <span class="v">{foe.defense}</span></div>
-              <div class="row"><span class="k">MIT</span> <span class="v">{formatMitigation(foe.mitigation)}</span></div>
-              <div class="row"><span class="k">CRate</span> <span class="v">{pctOdds(foe.crit_rate)}</span></div>
-              <div class="row"><span class="k">CDmg</span> <span class="v">{pctFromMultiplier(foe.crit_damage)}</span></div>
-              <div class="row"><span class="k">E.Hit</span> <span class="v">{pctRatio(foe.effect_hit_rate)}</span></div>
-              <div class="row"><span class="k">E.Res</span> <span class="v">{pctOdds(foe.effect_resistance)}</span></div>
-              <div class="row small"><span class="k">AP</span> <span class="v">{foe.action_points ?? 0}</span> <span class="k">/ APT</span> <span class="v">{foe.actions_per_turn ?? 1}</span></div>
-              <details class="advanced">
-                <summary>Combat stats</summary>
-                <div class="row small"><span class="k">Dmg Dealt</span> <span class="v">{foe.damage_dealt ?? 0}</span></div>
-                <div class="row small"><span class="k">Dmg Taken</span> <span class="v">{foe.damage_taken ?? 0}</span></div>
-                <div class="row small"><span class="k">Kills</span> <span class="v">{foe.kills ?? 0}</span></div>
-              </details>
+          {#if foe.summons?.length}
+            <div class="summon-list left">
+              {#each foe.summons as summon (summon.id)}
+                <FighterPortrait
+                  fighter={summon}
+                  {reducedMotion}
+                  style="--portrait-size: calc(var(--portrait-size) * 0.6)"
+                />
+              {/each}
             </div>
           {/if}
           <FighterPortrait fighter={foe} {reducedMotion} />
@@ -312,38 +280,22 @@
   }
   .combatant {
     display: flex;
-    align-items: flex-start; /* align stats with top of portrait block */
-    gap: 10px; /* consistent spacing between portrait and stats on both sides */
+    align-items: center;
+    gap: 10px;
   }
-  /* Ensure clear spacing on the foe side where layout is reversed */
-  .foe-column .combatant { /* gap handled globally above */ }
-  .foe-column .combatant {
+  .summon-list {
+    display: flex;
+    gap: 0.25rem;
+  }
+  .summon-list.right {
+    flex-direction: row;
+  }
+  .summon-list.left {
     flex-direction: row-reverse;
   }
-  .stats {
-    font-size: 0.7rem;
-    width: var(--portrait-size);
-    flex: 0 0 var(--portrait-size); /* prevent overlap/shrink under portrait */
-  }
-  .stats .name {
-    font-weight: 600;
-    margin-bottom: 0.2rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .row { display: flex; justify-content: space-between; gap: 0.25rem; }
-  .row.small { font-size: 0.65rem; }
-  .k { opacity: 0.85; }
-  .v { font-variant-numeric: tabular-nums; }
-  .badge { display: none; }
-  details.advanced { margin-top: 0.15rem; }
-  .stats.right { margin-left: 0; text-align: left; }
-  .stats.left { margin-right: 0; text-align: right; }
   @media (max-width: 600px) {
-    .stats {
-      width: 4rem;
-      font-size: 0.6rem;
+    .summon-list {
+      gap: 0.2rem;
     }
   }
 </style>

@@ -6,7 +6,6 @@ import { getPlayers } from './api.js';
 import {
   getCharacterPlaylist,
   getMusicTracks,
-  getRandomMusicTrack,
   getFallbackPlaylist,
   shuffle,
 } from './music.js';
