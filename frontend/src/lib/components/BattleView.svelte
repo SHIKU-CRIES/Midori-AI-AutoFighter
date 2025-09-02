@@ -1,5 +1,6 @@
 <script>
-  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher, tick } from 'svelte';
+  import { scale } from 'svelte/transition';
   import { roomAction } from '$lib';
   import { getRandomBackground } from '../systems/assetLoader.js';
   import FighterPortrait from '../battle/FighterPortrait.svelte';
@@ -24,6 +25,14 @@
     heal: 'HealOne1'
   };
   let effectCue = '';
+  function queueEffect(name) {
+    if (!name || reducedMotion) return;
+    effectCue = name;
+    tick().then(() => {
+      effectCue = '';
+    });
+  }
+  let knownSummons = new Set();
   const dispatch = createEventDispatcher();
   let pollDelay = 1000 / framerate;
   $: pollDelay = 1000 / framerate;
@@ -39,7 +48,7 @@
   }
   $: if (logs.length) {
     const evt = logToEvent(logs[logs.length - 1]);
-    if (evt && logAnimations[evt]) effectCue = logAnimations[evt];
+    if (evt && logAnimations[evt]) queueEffect(logAnimations[evt]);
   }
   $: flashDuration = reducedMotion ? 20 : 10;
   $: if (!active) clearTimeout(timer);
@@ -78,6 +87,20 @@
     if (s.includes('ice')) return 'Ice';
     if (s.includes('wind')) return 'Wind';
     return 'Generic';
+  }
+
+  function detectSummons(pSummons, fSummons) {
+    const all = new Set([
+      ...Array.from(pSummons.values()).flat().map((s) => s.id),
+      ...Array.from(fSummons.values()).flat().map((s) => s.id)
+    ]);
+    for (const id of all) {
+      if (!knownSummons.has(id)) {
+        queueEffect('SummonSpawn');
+        break;
+      }
+    }
+    knownSummons = all;
   }
 
   async function fetchSnapshot() {
@@ -124,6 +147,7 @@
           foeSummons.get(owner).push(s);
         }
       }
+      detectSummons(partySummons, foeSummons);
       // removed console logging to avoid snapshot/round-trip spam
       // Do not overwrite party/foes directly; we enrich below to preserve
       // existing per-entity element data and avoid regressions.
@@ -203,11 +227,16 @@
         {#if member.summons?.length}
           <div class="summon-list right">
             {#each member.summons as summon (summon.id)}
-              <FighterPortrait
-                fighter={summon}
-                {reducedMotion}
-                style="--portrait-size: calc(var(--portrait-size) * 0.6)"
-              />
+              <div
+                in:scale={{ duration: reducedMotion ? 0 : 200 }}
+                class="summon-entry"
+              >
+                <FighterPortrait
+                  fighter={summon}
+                  {reducedMotion}
+                  style="--portrait-size: calc(var(--portrait-size) * 0.6)"
+                />
+              </div>
             {/each}
           </div>
         {/if}
@@ -221,11 +250,16 @@
           {#if foe.summons?.length}
             <div class="summon-list left">
               {#each foe.summons as summon (summon.id)}
-                <FighterPortrait
-                  fighter={summon}
-                  {reducedMotion}
-                  style="--portrait-size: calc(var(--portrait-size) * 0.6)"
-                />
+                <div
+                  in:scale={{ duration: reducedMotion ? 0 : 200 }}
+                  class="summon-entry"
+                >
+                  <FighterPortrait
+                    fighter={summon}
+                    {reducedMotion}
+                    style="--portrait-size: calc(var(--portrait-size) * 0.6)"
+                  />
+                </div>
               {/each}
             </div>
           {/if}
@@ -286,6 +320,9 @@
   .summon-list {
     display: flex;
     gap: 0.25rem;
+  }
+  .summon-entry {
+    display: flex;
   }
   .summon-list.right {
     flex-direction: row;
