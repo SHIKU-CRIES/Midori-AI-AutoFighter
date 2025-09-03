@@ -15,6 +15,30 @@ build/      # Build scripts and configuration
 .codex/     # Documentation and contributor guides
 ```
 
+## Game Screenshots and Walkthrough
+
+The following screenshots demonstrate the game's user interface and progression system:
+
+### Main Menu
+![Main Menu](.codex/screenshots/bc1bba42.png)
+
+The main menu features the character against a beautiful medieval town background with navigation icons for different game modes including Run, Party, Pulls, Craft, Settings, and Feedback.
+
+### Party Selection
+![Party Selection](.codex/screenshots/60f87099.png)
+
+The party selection screen shows available characters with a futuristic cityscape background. Players can customize character stats, damage types, and elemental items before starting a run.
+
+### Game Map - Room 1
+![Room 1 Map](.codex/screenshots/a454caa3.png)
+
+The game map displays the current room status including pressure level, floor, and room type. Players can see upcoming battle types and make strategic decisions.
+
+### Battle Completion
+![Battle Complete](.codex/screenshots/e2dec6e5.png)
+
+After completing a battle, the game displays "Awaiting next room..." indicating the player can proceed to the next challenge. This demonstrates the new UI-centric architecture where the backend controls the progression flow.
+
 ## Game Features
 
 ### Responsive Layout
