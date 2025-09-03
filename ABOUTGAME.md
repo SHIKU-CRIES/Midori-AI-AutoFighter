@@ -17,27 +17,58 @@ build/      # Build scripts and configuration
 
 ## Game Screenshots and Walkthrough
 
-The following screenshots demonstrate the game's user interface and progression system:
+The following screenshots demonstrate the game's user interface and progression system with the new UI-centric architecture:
 
 ### Main Menu
-![Main Menu](.codex/screenshots/bc1bba42.png)
+![Main Menu](.codex/screenshots/47913221.png)
 
 The main menu features the character against a beautiful medieval town background with navigation icons for different game modes including Run, Party, Pulls, Craft, Settings, and Feedback.
 
-### Party Selection
-![Party Selection](.codex/screenshots/60f87099.png)
+### Party Selection (Expanded View)
+![Party Selection](.codex/screenshots/833933d2.png)
 
-The party selection screen shows available characters with a futuristic cityscape background. Players can customize character stats, damage types, and elemental items before starting a run.
+The enhanced party selection screen shows available characters with detailed customization options. Players can set pronouns, damage types, distribute stat points, and manage elemental items before starting a run. The interface includes tabs for Core, Offense, Defense, and Effects stats.
 
-### Game Map - Room 1
-![Room 1 Map](.codex/screenshots/a454caa3.png)
+### Game Map - Room Progression
+![Room 1 Map](.codex/screenshots/70830817.png)
 
-The game map displays the current room status including pressure level, floor, and room type. Players can see upcoming battle types and make strategic decisions.
+The game map displays the current room status including pressure level, floor, and room type. The interface shows "Pressure 0 / Floor 1 / Room 1 / Weak Battle" with navigation arrows and battle type indicators. Players can access Battle, Party Menu, Combat Viewer, Inventory, and Settings from this screen.
 
-### Battle Completion
-![Battle Complete](.codex/screenshots/e2dec6e5.png)
+### Settings Screen
+![Settings Screen](.codex/screenshots/b99d5637.png)
 
-After completing a battle, the game displays "Awaiting next room..." indicating the player can proceed to the next challenge. This demonstrates the new UI-centric architecture where the backend controls the progression flow.
+The settings overlay provides comprehensive options with Audio, System, and Gameplay tabs. The Audio tab shows volume controls for SFX, Music, and Voice with slider controls. The overlay design maintains the stained-glass aesthetic while providing clear functionality.
+
+### Inventory Management
+![Inventory Screen](.codex/screenshots/cf77bed4.png)
+
+The inventory overlay allows players to manage their items, cards, and resources. The interface follows the same design language as other overlays with clean typography and accessible controls.
+
+### Combat Viewer Interface
+![Combat Viewer](.codex/screenshots/82f6df6b.png)
+
+The combat viewer provides detailed battle analysis with sections for Party and Foes. Players can view DoTs, HoTs, Buffs, Debuffs, Relics, Cards, and Passives. The interface includes character selection and effect filtering capabilities.
+
+### UI-Centric Architecture Features
+
+The new architecture demonstrates several key improvements:
+
+- **Backend-Controlled Progression**: The backend determines what UI mode to display through the `/ui` endpoint
+- **Sequential Reward Flow**: Card selection → Relic selection → Battle review → Room advancement
+- **Overlay State Protection**: UI polling respects when users are in settings/menus
+- **Unified Actions**: All game interactions use the `/ui/action` endpoint
+- **Eliminated runId Tracking**: Frontend no longer needs to manage session state
+
+### Reward Screen Progression
+
+The sequential reward system works as follows:
+
+1. **Card Selection Screen**: When battles offer card rewards, backend sets mode to "card_selection"
+2. **Relic Selection Screen**: After card selection, backend automatically advances to "relic_selection" if available
+3. **Battle Review Screen**: Final summary screen showing battle results and "Next Room" button
+4. **Room Advancement**: Only available after completing all reward screens
+
+This ensures players experience all available rewards in the proper sequence without frontend complexity.
 
 ## Game Features
 
