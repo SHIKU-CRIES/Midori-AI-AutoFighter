@@ -169,6 +169,8 @@ class SummonManager:
         turns_remaining: int = -1,
         override_damage_type: Optional[DamageTypeBase] = None,
         max_summons: int = 1,
+        force_create: bool = False,
+        min_health_threshold: float = 0.25,
     ) -> Optional[Summon]:
         """Create a new summon and add it to tracking.
 
@@ -180,9 +182,11 @@ class SummonManager:
             turns_remaining: Duration (-1 = permanent)
             override_damage_type: Specific damage type
             max_summons: Maximum summons this summoner can have
+            force_create: If True, bypass smart decision logic and create anyway
+            min_health_threshold: Health threshold for existing summons to be considered viable
 
         Returns:
-            The created summon, or None if limit exceeded
+            The created summon, or None if limit exceeded or smart logic says not to create
         """
         cls.initialize()
 
@@ -196,7 +200,30 @@ class SummonManager:
         # Check summon limit
         if len(cls._active_summons[summoner_id]) >= max_summons:
             log.debug(f"Summon limit ({max_summons}) reached for {summoner_id}")
-            return None
+
+            # If we're at the limit and not forcing, check if we should replace existing summons
+            if not force_create:
+                decision = cls.should_resummon(summoner_id, min_health_threshold)
+                if not decision['should_resummon']:
+                    log.info(f"Skipping summon creation for {summoner_id}: {decision['reason']}")
+                    return None
+                else:
+                    log.info(f"Proceeding with summon replacement for {summoner_id}: {decision['reason']}")
+                    # Remove the least viable existing summon to make room
+                    existing_summons = cls.get_summons(summoner_id)
+                    if existing_summons:
+                        # Find the summon with lowest health percentage
+                        worst_summon = min(existing_summons,
+                                         key=lambda s: s.hp / s.max_hp if s.max_hp > 0 else 0)
+                        cls.remove_summon(worst_summon, "replaced_by_healthier_summon")
+            elif force_create:
+                # Force creation by removing an existing summon
+                existing_summons = cls._active_summons[summoner_id]
+                if existing_summons:
+                    old_summon = existing_summons[0]  # Remove first summon
+                    cls.remove_summon(old_summon, "forced_replacement")
+                else:
+                    return None
 
         # Create the summon
         summon = Summon.create_from_summoner(
@@ -216,6 +243,135 @@ class SummonManager:
     def get_summons(cls, summoner_id: str) -> List[Summon]:
         """Get all active summons for a summoner."""
         return cls._active_summons.get(summoner_id, []).copy()
+
+    @classmethod
+    def evaluate_summon_viability(cls, summon: Summon, min_health_percent: float = 0.25) -> dict:
+        """Evaluate if a summon is still viable and worth keeping.
+
+        Args:
+            summon: The summon to evaluate
+            min_health_percent: Minimum health percentage to consider viable (default 25%)
+
+        Returns:
+            Dict with viability assessment:
+            {
+                'viable': bool,  # Overall viability
+                'health_good': bool,  # Health above threshold
+                'time_remaining': int,  # Turns remaining (-1 for permanent)
+                'expiring_soon': bool,  # Will expire in 1-2 turns
+                'recommendation': str  # Human readable recommendation
+            }
+        """
+        if not summon or summon.hp <= 0:
+            return {
+                'viable': False,
+                'health_good': False,
+                'time_remaining': 0,
+                'expiring_soon': True,
+                'recommendation': "Summon is dead or missing"
+            }
+
+        health_percent = summon.hp / summon.max_hp if summon.max_hp > 0 else 0
+        health_good = health_percent >= min_health_percent
+
+        time_remaining = summon.turns_remaining
+        expiring_soon = time_remaining > 0 and time_remaining <= 2
+
+        # Determine overall viability
+        viable = health_good and not expiring_soon
+
+        # Generate recommendation
+        if not health_good:
+            recommendation = f"Low health ({health_percent:.1%}), consider replacing"
+        elif expiring_soon:
+            recommendation = f"Expiring in {time_remaining} turn(s), prepare replacement"
+        elif viable:
+            recommendation = f"Healthy ({health_percent:.1%}), keep current summon"
+        else:
+            recommendation = "Unknown state"
+
+        return {
+            'viable': viable,
+            'health_good': health_good,
+            'time_remaining': time_remaining,
+            'expiring_soon': expiring_soon,
+            'recommendation': recommendation
+        }
+
+    @classmethod
+    def should_resummon(
+        cls,
+        summoner_id: str,
+        min_health_threshold: float = 0.25,
+        consider_expiration: bool = True
+    ) -> dict:
+        """Determine if a summoner should create a new summon based on existing summon state.
+
+        Args:
+            summoner_id: ID of the summoner
+            min_health_threshold: Minimum health percentage for summons to be considered viable
+            consider_expiration: Whether to factor in summon expiration time
+
+        Returns:
+            Dict with recommendation:
+            {
+                'should_resummon': bool,  # Whether to create a new summon
+                'reason': str,  # Reason for the recommendation
+                'existing_summons': list,  # List of existing summon evaluations
+                'viable_count': int  # Number of viable existing summons
+            }
+        """
+        existing_summons = cls.get_summons(summoner_id)
+
+        if not existing_summons:
+            return {
+                'should_resummon': True,
+                'reason': "No existing summons",
+                'existing_summons': [],
+                'viable_count': 0
+            }
+
+        # Evaluate each existing summon
+        evaluations = []
+        viable_count = 0
+
+        for summon in existing_summons:
+            eval_result = cls.evaluate_summon_viability(summon, min_health_threshold)
+            evaluations.append({
+                'summon_id': summon.id,
+                'summon_type': summon.summon_type,
+                'evaluation': eval_result
+            })
+
+            if eval_result['viable']:
+                viable_count += 1
+
+        # Decision logic
+        if viable_count > 0:
+            reason = f"Have {viable_count} viable summon(s), avoid unnecessary resummoning"
+            should_resummon = False
+        else:
+            # Check specific reasons why existing summons aren't viable
+            low_health = any(not e['evaluation']['health_good'] for e in evaluations)
+            expiring = any(e['evaluation']['expiring_soon'] for e in evaluations)
+
+            if low_health and expiring:
+                reason = "Existing summons are low health and expiring soon"
+            elif low_health:
+                reason = "Existing summons have low health"
+            elif expiring:
+                reason = "Existing summons are expiring soon"
+            else:
+                reason = "Existing summons are not viable"
+
+            should_resummon = True
+
+        return {
+            'should_resummon': should_resummon,
+            'reason': reason,
+            'existing_summons': evaluations,
+            'viable_count': viable_count
+        }
 
     @classmethod
     def remove_summon(cls, summon: Summon, reason: str = "unknown") -> bool:
