@@ -1017,6 +1017,16 @@
   async function pollUIState() {
     if (haltSync) return;
     
+    // Don't poll if we're in a menu/overlay (not 'main') - same protection as old pollState
+    try {
+      const { get } = await import('svelte/store');
+      const { overlayView } = await import('$lib/systems/OverlayController.js');
+      const currentView = get(overlayView);
+      if (currentView !== 'main') return;
+    } catch {
+      // If we can't check overlay state, continue
+    }
+    
     try {
       const newUIState = await getUIState();
       uiState = newUIState;
