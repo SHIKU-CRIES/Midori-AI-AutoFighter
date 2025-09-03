@@ -237,22 +237,48 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
                 return jsonify({"error": "No active run"}), 400
 
             room_id = params.get("room_id", "0")
-            result = await room_action(run_id, room_id)
+            result = await room_action(run_id, room_id, params)
             return result
 
         elif action == "advance_room":
             if not run_id:
                 return jsonify({"error": "No active run"}), 400
 
-            # Check if we're advancing from battle_review mode
+            # Check if we're advancing from any reward mode
             state, rooms = await asyncio.to_thread(load_map, run_id)
             progression = state.get("reward_progression")
-            if progression and progression.get("current_step") == "battle_review":
-                # Complete the battle_review step and finish progression
-                progression["completed"].append("battle_review")
-                state["awaiting_next"] = True
-                del state["reward_progression"]
+
+            if progression and progression.get("current_step"):
+                current_step = progression["current_step"]
+
+                # Complete the current step and advance progression
+                progression["completed"].append(current_step)
+
+                # Find next step in progression
+                available = progression.get("available", [])
+                completed = progression.get("completed", [])
+                next_steps = [step for step in available if step not in completed]
+
+                if next_steps:
+                    # Move to next step in progression
+                    progression["current_step"] = next_steps[0]
+                    state["reward_progression"] = progression
+                else:
+                    # All progression steps completed, ready to advance room
+                    state["awaiting_next"] = True
+                    state["awaiting_card"] = False
+                    state["awaiting_relic"] = False
+                    state["awaiting_loot"] = False
+                    del state["reward_progression"]
+
                 await asyncio.to_thread(save_map, run_id, state)
+
+                # If we still have progression steps, return the updated state
+                if next_steps:
+                    return jsonify({
+                        "progression_advanced": True,
+                        "current_step": next_steps[0]
+                    })
 
             result = await advance_room(run_id)
             return result
@@ -261,23 +287,53 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
             if not run_id:
                 return jsonify({"error": "No active run"}), 400
 
-            card_id = params.get("card_id")
+            card_id = params.get("card_id") or params.get("card")
             if not card_id:
                 return jsonify({"error": "Missing card_id"}), 400
 
-            result = await select_card(run_id)
-            return result
+            # Create a mock request object for select_card function
+            from quart import request as current_request
+
+            # Temporarily patch request data for select_card function
+            original_get_json = current_request.get_json
+
+            async def mock_get_json(silent=True):
+                return {"card": card_id}
+
+            current_request.get_json = mock_get_json
+
+            try:
+                result = await select_card(run_id)
+                return result
+            finally:
+                # Restore original method
+                current_request.get_json = original_get_json
 
         elif action == "choose_relic":
             if not run_id:
                 return jsonify({"error": "No active run"}), 400
 
-            relic_id = params.get("relic_id")
+            relic_id = params.get("relic_id") or params.get("relic")
             if not relic_id:
                 return jsonify({"error": "Missing relic_id"}), 400
 
-            result = await select_relic(run_id)
-            return result
+            # Create a mock request object for select_relic function
+            from quart import request as current_request
+
+            # Temporarily patch request data for select_relic function
+            original_get_json = current_request.get_json
+
+            async def mock_get_json(silent=True):
+                return {"relic": relic_id}
+
+            current_request.get_json = mock_get_json
+
+            try:
+                result = await select_relic(run_id)
+                return result
+            finally:
+                # Restore original method
+                current_request.get_json = original_get_json
 
         else:
             return jsonify({"error": f"Unknown action: {action}"}), 400

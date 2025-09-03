@@ -413,8 +413,123 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
 
 
 @bp.post("/rooms/<run_id>/<room_id>/action")
-async def room_action(run_id: str, room_id: str) -> tuple[str, int, dict[str, str]]:
-    data = await request.get_json(silent=True) or {}
-    return jsonify(
-        {"run_id": run_id, "room_id": room_id, "action": data.get("action", "noop")}
-    )
+async def room_action(run_id: str, room_id: str, action_data: dict[str, Any] = None) -> tuple[str, int, dict[str, str]]:
+    """Route room actions to appropriate room-specific handlers based on current room type."""
+    if action_data is None:
+        action_data = {}
+
+    # Load current game state to determine room type
+    state, rooms = await asyncio.to_thread(load_map, run_id)
+    if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
+        return jsonify({"error": "No current room or run ended"}), 400
+
+    current_node = rooms[int(state.get("current", 0))]
+    room_type = current_node.room_type
+
+    # Prepare action data in the format expected by room handlers
+    # Convert action_data to the request format expected by room endpoints
+    if action_data.get("type") == "battle" and action_data.get("action_type") == "start":
+        # This is a battle start request
+        request_data = {"action": ""}  # Empty action starts the battle
+    else:
+        # Pass through other action data
+        request_data = action_data
+
+    # Route to appropriate room handler based on room type
+    if room_type in {"battle-weak", "battle-normal"}:
+        # Create a mock request object for battle_room function
+        from quart import request as current_request
+
+        # Temporarily patch request data for battle_room function
+        original_get_json = current_request.get_json
+
+        async def mock_get_json(silent=True):
+            return request_data
+
+        current_request.get_json = mock_get_json
+
+        try:
+            result = await battle_room(run_id)
+            return result
+        finally:
+            # Restore original method
+            current_request.get_json = original_get_json
+
+    elif room_type == "battle-boss-floor":
+        # Create a mock request object for boss_room function
+        from quart import request as current_request
+
+        # Temporarily patch request data for boss_room function
+        original_get_json = current_request.get_json
+
+        async def mock_get_json(silent=True):
+            return request_data
+
+        current_request.get_json = mock_get_json
+
+        try:
+            result = await boss_room(run_id)
+            return result
+        finally:
+            # Restore original method
+            current_request.get_json = original_get_json
+
+    elif room_type == "shop":
+        # Create a mock request object for shop_room function
+        from quart import request as current_request
+
+        # Temporarily patch request data for shop_room function
+        original_get_json = current_request.get_json
+
+        async def mock_get_json(silent=True):
+            return request_data
+
+        current_request.get_json = mock_get_json
+
+        try:
+            result = await shop_room(run_id)
+            return result
+        finally:
+            # Restore original method
+            current_request.get_json = original_get_json
+
+    elif room_type == "rest":
+        # Create a mock request object for rest_room function
+        from quart import request as current_request
+
+        # Temporarily patch request data for rest_room function
+        original_get_json = current_request.get_json
+
+        async def mock_get_json(silent=True):
+            return request_data
+
+        current_request.get_json = mock_get_json
+
+        try:
+            result = await rest_room(run_id)
+            return result
+        finally:
+            # Restore original method
+            current_request.get_json = original_get_json
+
+    elif room_type == "chat":
+        # Create a mock request object for chat_room function
+        from quart import request as current_request
+
+        # Temporarily patch request data for chat_room function
+        original_get_json = current_request.get_json
+
+        async def mock_get_json(silent=True):
+            return request_data
+
+        current_request.get_json = mock_get_json
+
+        try:
+            result = await chat_room(run_id)
+            return result
+        finally:
+            # Restore original method
+            current_request.get_json = original_get_json
+
+    else:
+        return jsonify({"error": f"Unsupported room type: {room_type}"}), 400
