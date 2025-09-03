@@ -55,7 +55,6 @@ async function handleFetch(url, options = {}) {
     return res.json();
   } catch (e) {
     if (!e.overlayShown) {
-      const apiBase = await ensureApiBase();
       let msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
       msg = String(msg || '').trim();
       if (/^\d+$/.test(msg)) {
@@ -77,11 +76,10 @@ export async function getUIState() {
     return await handleFetch('/ui');
   } catch (e) {
     if (!e.overlayShown) {
-      const apiBase = await ensureApiBase();
       let msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
       msg = String(msg || '').trim();
       if (/^\d+$/.test(msg)) {
-        msg = `Unexpected error (code ${msg}) during GET ${apiBase}/ui`;
+        msg = `Unexpected error (code ${msg}) during getUIState`;
       }
       openOverlay('error', { message: msg, traceback: e?.stack || '' });
       try { console.error('getUIState failure:', { message: msg }); } catch {}
@@ -104,11 +102,10 @@ export async function sendAction(action, params = {}) {
     });
   } catch (e) {
     if (!e.overlayShown) {
-      const apiBase = await ensureApiBase();
       let msg = (typeof e?.message === 'string' && e.message) || String(e ?? 'Unknown error');
       msg = String(msg || '').trim();
       if (/^\d+$/.test(msg)) {
-        msg = `Unexpected error (code ${msg}) during POST ${apiBase}/ui/action`;
+        msg = `Unexpected error (code ${msg}) during sendAction ${action}`;
       }
       openOverlay('error', { message: msg, traceback: e?.stack || '' });
       try { console.error('sendAction failure:', { action, params, message: msg }); } catch {}
@@ -172,7 +169,7 @@ export async function chooseRelic(relicId) {
 /**
  * @deprecated Use getUIState() instead
  */
-export async function getMap(runId) {
+export async function getMap(_runId) {
   const uiState = await getUIState();
   if (uiState.mode === 'menu') {
     return null; // Simulate run not found
