@@ -127,7 +127,9 @@
       if (snap && snap.party_summons) {
         const arr = Array.isArray(snap.party_summons)
           ? snap.party_summons
-          : Object.values(snap.party_summons);
+          : Object.entries(snap.party_summons).flatMap(([owner, list]) =>
+              (Array.isArray(list) ? list : [list]).map(s => ({ owner_id: owner, ...s })),
+            );
         for (const s of arr) {
           const owner = s?.owner_id;
           if (!owner) continue;
@@ -139,7 +141,9 @@
       if (snap && snap.foe_summons) {
         const arr = Array.isArray(snap.foe_summons)
           ? snap.foe_summons
-          : Object.values(snap.foe_summons);
+          : Object.entries(snap.foe_summons).flatMap(([owner, list]) =>
+              (Array.isArray(list) ? list : [list]).map(s => ({ owner_id: owner, ...s })),
+            );
         for (const s of arr) {
           const owner = s?.owner_id;
           if (!owner) continue;

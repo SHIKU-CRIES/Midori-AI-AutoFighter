@@ -238,6 +238,49 @@ async def test_becca_jellyfish_summoning(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_becca_summon_added_to_party(monkeypatch):
+    """Summoning a jellyfish adds it to the party for battle."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    becca = Becca()
+    becca.id = "becca"
+    party = Party(members=[becca])
+
+    passive = BeccaMenagerieBond()
+
+    await passive.summon_jellyfish(becca, "electric", party)
+
+    # Party should now include the summon
+    assert len(party.members) == 2
+    summon = next(m for m in party.members if m is not becca)
+    assert summon.summon_source == "becca_menagerie_bond"
+
+
+@pytest.mark.asyncio
+async def test_collect_summons_grouped_by_owner(monkeypatch):
+    """Ensure snapshot helper groups summons by summoner id."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    becca = Becca()
+    becca.id = "becca"
+    party = Party(members=[becca])
+    passive = BeccaMenagerieBond()
+
+    await passive.summon_jellyfish(becca, "electric", party)
+
+    from routes.rooms import _collect_summons
+
+    grouped = _collect_summons(party.members)
+    assert "becca" in grouped
+    assert len(grouped["becca"]) == 1
+    assert grouped["becca"][0]["owner_id"] == "becca"
+
+
+@pytest.mark.asyncio
 async def test_becca_jellyfish_replacement_creates_spirit(monkeypatch):
     """Test that replacing jellyfish creates spirit stacks."""
     monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)

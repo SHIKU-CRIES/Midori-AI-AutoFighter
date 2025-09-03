@@ -6,7 +6,7 @@
 - Backgrounds rotate hourly using a seeded random selector and fall back to the repository logo when none are available.
 - `getElementIcon` and `getElementColor` expose consistent damage type icons and colors for Fire, Ice, Lightning, Light, Dark, Wind, and Generic types.
 
-The loader is shared by the party picker, map display, and battle view so character images and type colors stay in sync across the UI. URL handling is normalized so root-relative or absolute URLs are not re-resolved, preventing malformed `file://` URLs in non-browser contexts.
+The loader lives in `frontend/src/lib/systems/assetLoader.js` and is shared by the party picker, map display, and battle view so character images and type colors stay in sync across the UI. URL handling is normalized so root-relative or absolute URLs are not re-resolved, preventing malformed `file://` URLs in non-browser contexts. IDs beginning with `jellyfish_` are aliased to the base `jellyfish` art folder so summons can reuse bundled portraits.
 
 ## Testing
 - `bun test frontend/tests/assetloader.test.js`

@@ -7,6 +7,7 @@ from autofighter.summons import SummonManager
 from plugins.damage_types import load_damage_type
 
 if TYPE_CHECKING:
+    from autofighter.party import Party
     from autofighter.stats import Stats
 
 
@@ -73,8 +74,17 @@ class BeccaMenagerieBond:
         if self._summon_cooldown[entity_id] > 0:
             self._summon_cooldown[entity_id] -= 1
 
-    async def summon_jellyfish(self, target: "Stats", jellyfish_type: str = None) -> bool:
-        """Summon a jellyfish by spending 10% current HP."""
+    async def summon_jellyfish(
+        self,
+        target: "Stats",
+        jellyfish_type: str | None = None,
+        party: "Party | None" = None,
+    ) -> bool:
+        """Summon a jellyfish by spending 10% current HP.
+
+        If a ``party`` is provided, the new summon will be appended so it can
+        participate in combat immediately.
+        """
         entity_id = id(target)
         target_id = getattr(target, 'id', str(id(target)))
 
@@ -125,6 +135,8 @@ class BeccaMenagerieBond:
         )
 
         if summon:
+            if party is not None:
+                SummonManager.add_summons_to_party(party)
             self._last_summon[entity_id] = jellyfish_type
             self._summon_cooldown[entity_id] = 1  # One turn cooldown
             return True

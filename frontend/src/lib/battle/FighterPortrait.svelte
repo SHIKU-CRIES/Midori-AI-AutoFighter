@@ -77,7 +77,7 @@
     style={`--el-color: ${elColor}`}
   >
     <img
-      src={getCharacterImage(fighter.id)}
+      src={getCharacterImage(fighter.summon_type || fighter.id)}
       alt=""
       class="portrait"
       style={`border-color: ${elColor}`}
