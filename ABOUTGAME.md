@@ -15,6 +15,46 @@ build/      # Build scripts and configuration
 .codex/     # Documentation and contributor guides
 ```
 
+## Game Screenshots and Walkthrough
+
+The following screenshots demonstrate the game's user interface and progression system with comprehensive testing of the fully functional combat system:
+
+### Main Menu - Character Selection
+![Main Menu](.codex/screenshots/a87d7423.png)
+
+The main menu features a beautiful anime-style character with a mystical halo set against an enchanting forest background. The interface provides clear navigation options for different game modes including Run, Party, Pulls, Craft, Settings, and Feedback. The atmospheric lighting and detailed character design showcase the game's high-quality visual presentation.
+
+### Party Selection - Character Customization
+![Party Selection](.codex/screenshots/3af616fb.png)
+
+The party selection interface demonstrates comprehensive character customization against a stunning fantasy landscape background featuring floating islands and crystalline formations. Players can manage character rosters (Player with Fire element, LadyDarkness with Dark element), configure damage types, distribute stat points using intuitive sliders for HP/Attack/Defense, and manage elemental items with detailed star rating systems. The interface includes full character stats display (HP: 1000/1000, EXP, Vitality, Regain) and upgrade point management for character progression.
+
+### Settings Interface - Audio Controls
+![Settings Screen](.codex/screenshots/cde0fb0d.png)
+
+The settings overlay provides comprehensive audio management with dedicated controls for SFX Volume, Music Volume, and Voice Volume. The interface features a clean, modern design with tabbed navigation (Audio, System, Gameplay) while maintaining the beautiful character backdrop. The overlay demonstrates proper UI layering and accessibility with clear visual feedback for all interactive elements.
+
+### Card Reward Selection - Battle Completion
+![Card Rewards](.codex/screenshots/b11a85b2.png)
+
+The card reward interface appears after successful battle completion, showcasing three beautifully illustrated reward cards against the medieval town backdrop. Players can choose from **Thick Skin** (+3% bleed resist), **Honed Point** (+4% atk), or **Mindful Tassel** (+3% effect hit rate). Each card features detailed artwork and clear statistical benefits, demonstrating the working reward progression system after combat victories.
+
+### Inventory Management 
+![Inventory](.codex/screenshots/171ed5c8.png)
+
+The inventory interface provides access to collected items, cards, and character progression tracking. This screen becomes available during active runs and allows players to manage their collected resources and review battle rewards.
+
+### Reward Screen Progression
+
+The sequential reward system works as follows:
+
+1. **Card Selection Screen**: When battles offer card rewards, backend sets mode to "card_selection"
+2. **Relic Selection Screen**: After card selection, backend automatically advances to "relic_selection" if available
+3. **Battle Review Screen**: Final summary screen showing battle results and "Next Room" button
+4. **Room Advancement**: Only available after completing all reward screens
+
+This ensures players experience all available rewards in the proper sequence without frontend complexity.
+
 ## Game Features
 
 ### Responsive Layout
