@@ -486,9 +486,7 @@
   async function pollBattle() {
     if (!battleActive || haltSync || !runId) return;
     try {
-      // Use runApi.roomAction directly for proper battle action format
-      const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-      const snap = mapStatuses(await runApiRoomAction(runId, 'battle', 'snapshot'));
+      const snap = mapStatuses(await roomAction("0", {"action": "snapshot"}));
       lastBattleSnapshot = snap || lastBattleSnapshot;
       if (snap?.error) {
         roomData = snap;
@@ -666,9 +664,7 @@
     }
     try {
       // Fetch first, then decide whether to show rewards or start battle polling.
-      // Use runApi.roomAction directly for proper room action format  
-      const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-      const data = mapStatuses(await runApiRoomAction(runId, endpoint));
+      const data = mapStatuses(await roomAction("0", ""));
       roomData = data;
       if (data?.error) {
         // Show error popup for successful-but-error payloads
@@ -709,9 +705,7 @@
           // Try to fetch the saved battle snapshot (e.g., after refresh while awaiting rewards).
           try {
             if (haltSync || !runId) return;
-            // Use runApi.roomAction directly for proper battle action format
-            const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-            const snap = mapStatuses(await runApiRoomAction(runId, 'battle', 'snapshot'));
+            const snap = mapStatuses(await roomAction("0", {"action": "snapshot"}));
             const snapHasRewards = hasRewards(snap);
             if (snapHasRewards) {
               roomData = snap;
@@ -750,9 +744,7 @@
     } catch (e) {
       try {
         if (haltSync || !runId) return;
-        // Use runApi.roomAction directly for proper battle action format
-        const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-        const snap = mapStatuses(await runApiRoomAction(runId, 'battle', 'snapshot'));
+        const snap = mapStatuses(await roomAction("0", {"action": "snapshot"}));
         roomData = snap;
         battleActive = false;
         stopBattlePoll();
@@ -803,22 +795,16 @@
   }
   async function handleShopBuy(item) {
     if (!runId) return;
-    // Use runApi.roomAction directly for proper shop item format
-    const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-    roomData = await runApiRoomAction(runId, 'shop', item);
+    roomData = await roomAction("0", item);
   }
   async function handleShopReroll() {
     if (!runId) return;
-    // Use runApi.roomAction directly for proper shop action format
-    const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-    roomData = await runApiRoomAction(runId, 'shop', 'reroll');
+    roomData = await roomAction("0", {"action": "reroll"});
   }
   async function handleShopLeave() {
     if (!runId) return;
-    // Use runApi.roomAction directly for proper shop action format
-    const { roomAction: runApiRoomAction, advanceRoom: runApiAdvanceRoom } = await import('$lib/systems/runApi.js');
-    await runApiRoomAction(runId, 'shop', 'leave');
-    const res = await runApiAdvanceRoom(runId);
+    await roomAction("0", {"action": "leave"});
+    const res = await advanceRoom();
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
       // Refresh map data when advancing floors
@@ -838,28 +824,20 @@
   }
   async function handleRestPull() {
     if (!runId) return;
-    // Use runApi.roomAction directly for proper rest action format
-    const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-    roomData = await runApiRoomAction(runId, 'rest', 'pull');
+    roomData = await roomAction("0", {"action": "pull"});
   }
   async function handleRestSwap() {
     if (!runId) return;
-    // Use runApi.roomAction directly for proper rest action format
-    const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-    roomData = await runApiRoomAction(runId, 'rest', 'swap');
+    roomData = await roomAction("0", {"action": "swap"});
   }
   async function handleRestCraft() {
     if (!runId) return;
-    // Use runApi.roomAction directly for proper rest action format
-    const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-    roomData = await runApiRoomAction(runId, 'rest', 'craft');
+    roomData = await roomAction("0", {"action": "craft"});
   }
   async function handleRestLeave() {
     if (!runId) return;
-    // Use runApi.roomAction directly for proper rest action format
-    const { roomAction: runApiRoomAction, advanceRoom: runApiAdvanceRoom } = await import('$lib/systems/runApi.js');
-    await runApiRoomAction(runId, 'rest', 'leave');
-    const res = await runApiAdvanceRoom(runId);
+    await roomAction("0", {"action": "leave"});
+    const res = await advanceRoom();
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
       // Refresh map data when advancing floors
@@ -946,9 +924,7 @@
       // If not ready (e.g., server 400), refresh snapshot so rewards remain visible.
       try {
         if (haltSync || !runId) return;
-        // Use runApi.roomAction directly for proper battle action format
-        const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
-        const snap = mapStatuses(await runApiRoomAction(runId, 'battle', 'snapshot'));
+        const snap = mapStatuses(await roomAction("0", {"action": "snapshot"}));
         roomData = snap;
         // If the backend still indicates we're awaiting the next room and
         // there are no choices to make, attempt the advance again.
@@ -998,8 +974,7 @@
       await acknowledgeLoot(runId);
       // After acknowledging loot, the backend should set awaiting_next=true
       // Refresh the room data to reflect the updated state
-      const { roomAction } = await import('$lib/systems/runApi.js');
-      const refreshed = await roomAction(runId, 'battle', 'snapshot');
+      const refreshed = await roomAction("0", {"action": "snapshot"});
       if (refreshed) {
         roomData = refreshed;
         // If the backend now indicates awaiting_next, proceed to next room

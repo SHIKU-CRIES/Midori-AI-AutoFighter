@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 
+from game import battle_snapshots
 from game import load_map
 from game import load_party
 from game import save_map
@@ -12,7 +13,6 @@ from quart import request
 
 from autofighter.cards import award_card
 from autofighter.relics import award_relic
-from game import battle_snapshots
 
 bp = Blueprint("rewards", __name__)
 
