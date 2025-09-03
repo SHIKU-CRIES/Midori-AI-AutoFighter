@@ -14,6 +14,8 @@
     getMap,
     updateParty,
     getActiveRuns,
+    getUIState,
+    sendAction,
     loadRunState, 
     saveRunState, 
     clearRunState,
@@ -147,8 +149,15 @@
       backendFlavor = await getBackendFlavor();
       window.backendFlavor = backendFlavor;
       
-      // Backend is ready, sync with backend state
-      await syncWithBackend();
+      // Backend is ready, try new UI state approach first
+      try {
+        await pollUIState();
+        startUIStatePoll();
+      } catch (e) {
+        // Fall back to existing sync approach
+        console.warn('UI state polling failed, falling back to existing sync:', e);
+        await syncWithBackend();
+      }
     } catch (e) {
       // Backend not ready, but still attempt to restore run state for later
       if (saved?.runId) {
@@ -986,6 +995,94 @@
     },
     battleActive
   );
+
+  // NEW UI API APPROACH: Simplified state management
+  let uiState = null;
+  let uiStateTimer = null;
+  
+  function stopUIStatePoll() {
+    if (uiStateTimer) {
+      clearTimeout(uiStateTimer);
+      uiStateTimer = null;
+    }
+  }
+
+  function startUIStatePoll() {
+    stopUIStatePoll();
+    if (!haltSync) {
+      pollUIState();
+    }
+  }
+
+  async function pollUIState() {
+    if (haltSync) return;
+    
+    try {
+      const newUIState = await getUIState();
+      uiState = newUIState;
+      
+      // Update local state based on UI state  
+      if (uiState.mode === 'menu') {
+        // No active run, clear local state
+        runId = '';
+        roomData = null;
+        battleActive = false;
+        clearRunState();
+      } else if (uiState.mode === 'playing') {
+        // Active run, update state from backend
+        runId = uiState.active_run || '';
+        if (uiState.game_state) {
+          const gameState = uiState.game_state;
+          selectedParty = gameState.party || selectedParty;
+          mapRooms = gameState.map?.rooms || [];
+          
+          if (gameState.current_state) {
+            currentIndex = gameState.current_state.current_index || 0;
+            currentRoomType = gameState.current_state.current_room_type || '';
+            nextRoom = gameState.current_state.next_room_type || '';
+            roomData = gameState.current_state.room_data || null;
+          }
+          
+          saveRunState(runId);
+        }
+      } else if (uiState.mode === 'battle') {
+        // Battle mode - backend will handle battle state
+        battleActive = true;
+        if (typeof window !== 'undefined') window.afBattleActive = true;
+      } else {
+        // Other modes like card_selection, relic_selection, etc.
+        battleActive = false;
+        if (typeof window !== 'undefined') window.afBattleActive = false;
+        if (uiState.game_state?.current_state?.room_data) {
+          roomData = uiState.game_state.current_state.room_data;
+        }
+      }
+      
+      // Continue polling (simplified - no complex battle state management)
+      if (!haltSync) {
+        uiStateTimer = setTimeout(pollUIState, 1000); // Poll every second
+      }
+      
+    } catch (e) {
+      console.warn('UI state polling failed:', e);
+      // Retry after delay
+      if (!haltSync) {
+        uiStateTimer = setTimeout(pollUIState, 2000);
+      }
+    }
+  }
+
+  // Simple UI action helper
+  async function performUIAction(action, params = {}) {
+    try {
+      await sendAction(action, params);
+      // Immediately poll for updated state
+      await pollUIState();
+    } catch (e) {
+      console.error('UI action failed:', action, e);
+      throw e;
+    }
+  }
 
 </script>
 

@@ -17,13 +17,13 @@ export { default as PopupWindow } from './components/PopupWindow.svelte';
 export { layoutForWidth } from './systems/layout.js';
 export {
   startRun,
-  updateParty,
   roomAction,
   chooseCard,
   chooseRelic,
-  pauseCombat,
-  resumeCombat
-} from './systems/runApi.js';
+  advanceRoom,
+  getUIState,
+  sendAction
+} from './systems/uiApi.js';
 export { default as NavBar } from './components/NavBar.svelte';
 export { default as OverlayHost } from './components/OverlayHost.svelte';
 export {
@@ -50,11 +50,13 @@ export {
   endAllRuns
 } from './systems/api.js';
 
-// Export additional run API functions
+// Export additional run API functions (backward compatibility)
 export {
-  advanceRoom,
   getMap,
-  getActiveRuns
+  getActiveRuns,
+  updateParty,
+  pauseCombat,
+  resumeCombat
 } from './systems/runApi.js';
 
 // Export state management functions
