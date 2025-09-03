@@ -816,9 +816,9 @@
   async function handleShopLeave() {
     if (!runId) return;
     // Use runApi.roomAction directly for proper shop action format
-    const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
+    const { roomAction: runApiRoomAction, advanceRoom: runApiAdvanceRoom } = await import('$lib/systems/runApi.js');
     await runApiRoomAction(runId, 'shop', 'leave');
-    const res = await advanceRoom(runId);
+    const res = await runApiAdvanceRoom(runId);
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
       // Refresh map data when advancing floors
@@ -857,9 +857,9 @@
   async function handleRestLeave() {
     if (!runId) return;
     // Use runApi.roomAction directly for proper rest action format
-    const { roomAction: runApiRoomAction } = await import('$lib/systems/runApi.js');
+    const { roomAction: runApiRoomAction, advanceRoom: runApiAdvanceRoom } = await import('$lib/systems/runApi.js');
     await runApiRoomAction(runId, 'rest', 'leave');
-    const res = await advanceRoom(runId);
+    const res = await runApiAdvanceRoom(runId);
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
       // Refresh map data when advancing floors
