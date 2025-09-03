@@ -409,21 +409,35 @@ async def _run_battle(
             has_loot = bool(result.get("loot", {}).get("gold", 0) > 0 or
                            len(result.get("loot", {}).get("items", [])) > 0)
 
-            if has_card_choices or has_relic_choices:
+            # Set up reward progression sequence for proper UI flow
+            if has_card_choices or has_relic_choices or has_loot:
+                progression = {
+                    "available": [],
+                    "completed": [],
+                    "current_step": None
+                }
+
+                # Build sequence of steps based on what rewards are available
+                if has_card_choices:
+                    progression["available"].append("card")
+                if has_relic_choices:
+                    progression["available"].append("relic")
+                if has_loot:
+                    progression["available"].append("loot")
+                # Always end with battle review to allow room advancement
+                progression["available"].append("battle_review")
+
+                # Start with first available step
+                progression["current_step"] = progression["available"][0]
+
+                state["reward_progression"] = progression
                 state["awaiting_card"] = has_card_choices
                 state["awaiting_relic"] = has_relic_choices
-                state["awaiting_loot"] = False
-                state["awaiting_next"] = False
-                next_type = None
-            elif has_loot:
-                # If there's loot but no card/relic choices, wait for loot acknowledgment
-                state["awaiting_card"] = False
-                state["awaiting_relic"] = False
-                state["awaiting_loot"] = True
+                state["awaiting_loot"] = has_loot
                 state["awaiting_next"] = False
                 next_type = None
             else:
-                # No choices and no loot, ready to advance immediately
+                # No rewards at all, ready to advance immediately
                 state["awaiting_card"] = False
                 state["awaiting_relic"] = False
                 state["awaiting_loot"] = False

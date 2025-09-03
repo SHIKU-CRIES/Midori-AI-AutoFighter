@@ -7,6 +7,7 @@ from typing import Any
 from game import battle_snapshots
 from game import get_save_manager
 from game import load_map
+from game import save_map
 from quart import Blueprint
 from quart import jsonify
 from quart import request
@@ -40,7 +41,20 @@ def determine_ui_mode(game_state: dict[str, Any]) -> str:
     current_state = game_state.get("current_state", {})
     room_data = current_state.get("room_data")
 
-    # Check for awaiting states
+    # Check for reward progression sequence first
+    progression = current_state.get("reward_progression")
+    if progression and progression.get("current_step"):
+        step = progression["current_step"]
+        if step == "card":
+            return "card_selection"
+        elif step == "relic":
+            return "relic_selection"
+        elif step == "loot":
+            return "loot"
+        elif step == "battle_review":
+            return "battle_review"
+
+    # Check for legacy awaiting states (for backward compatibility)
     if current_state.get("awaiting_card"):
         return "card_selection"
     elif current_state.get("awaiting_relic"):
@@ -81,6 +95,8 @@ def get_available_actions(mode: str, game_state: dict[str, Any]) -> list[str]:
     elif mode == "relic_selection":
         return ["choose_relic"]
     elif mode == "loot":
+        return ["advance_room"]
+    elif mode == "battle_review":
         return ["advance_room"]
     else:
         return []
@@ -157,6 +173,7 @@ async def get_ui_state() -> tuple[str, int, dict[str, Any]]:
                 "awaiting_card": state.get("awaiting_card", False),
                 "awaiting_relic": state.get("awaiting_relic", False),
                 "awaiting_loot": state.get("awaiting_loot", False),
+                "reward_progression": state.get("reward_progression"),
                 "room_data": current_room_data
             }
         }
@@ -226,6 +243,16 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
         elif action == "advance_room":
             if not run_id:
                 return jsonify({"error": "No active run"}), 400
+
+            # Check if we're advancing from battle_review mode
+            state, rooms = await asyncio.to_thread(load_map, run_id)
+            progression = state.get("reward_progression")
+            if progression and progression.get("current_step") == "battle_review":
+                # Complete the battle_review step and finish progression
+                progression["completed"].append("battle_review")
+                state["awaiting_next"] = True
+                del state["reward_progression"]
+                await asyncio.to_thread(save_map, run_id, state)
 
             result = await advance_room(run_id)
             return result
