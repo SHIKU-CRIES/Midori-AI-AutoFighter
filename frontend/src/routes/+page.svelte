@@ -234,13 +234,15 @@
     }
   }
 
-  function handleRunEnd() {
+  async function handleRunEnd() {
     // Halt any in-flight battle snapshot polling ASAP
     haltSync = true;
     if (typeof window !== 'undefined') {
       window.afHaltSync = true;
       window.afBattleActive = false; // Update battle state for ping indicator
     }
+    // Proactively ask backend to end any active runs to avoid lingering state
+    try { await endAllRuns(); } catch {}
     runId = '';
     roomData = null;
     // Drop any retained snapshot to free memory and avoid stale data
@@ -357,7 +359,9 @@
     }
   }
 
-  function handleStartNewRun() {
+  async function handleStartNewRun() {
+    // Ensure we truly start fresh: end any active runs first
+    try { await endAllRuns(); } catch {}
     openOverlay('party-start');
   }
 
@@ -574,6 +578,14 @@
   async function pollState() {
     // Don't poll if we're in battle, halted, in menu, or no runId
     if (battleActive || haltSync || !runId) return;
+    // Pause polling while rewards overlay is open
+    try {
+      if (typeof window !== 'undefined' && window.afRewardOpen === true) return;
+    } catch {}
+    // Also pause polling while Battle Review overlay is open
+    try {
+      if (typeof window !== 'undefined' && window.afReviewOpen === true) return;
+    } catch {}
     
     // Don't poll if we're in a menu/overlay (not 'main')
     try {
@@ -630,6 +642,10 @@
 
   function startStatePoll() {
     stopStatePoll(); // Clear any existing timer
+    // Do not schedule polling while Reward or Battle Review overlays are open
+    try {
+      if (typeof window !== 'undefined' && (window.afReviewOpen === true || window.afRewardOpen === true)) return;
+    } catch {}
     if (!battleActive && !haltSync && runId) {
       stateTimer = setTimeout(pollState, 5000);
     }
@@ -756,14 +772,21 @@
   }
 
   async function handleRewardSelect(detail) {
-    if (!runId) return;
     let res;
     if (detail.type === 'card') {
-      res = await chooseCard(runId, detail.id);
-      if (roomData) roomData.card_choices = [];
+      // chooseCard now routes via /ui/action and does not take runId
+      res = await chooseCard(detail.id);
+      // Trigger Svelte reactivity by reassigning the object reference
+      if (roomData) {
+        roomData = { ...roomData, card_choices: [] };
+      }
     } else if (detail.type === 'relic') {
-      res = await chooseRelic(runId, detail.id);
-      if (roomData) roomData.relic_choices = [];
+      // chooseRelic now routes via /ui/action and does not take runId
+      res = await chooseRelic(detail.id);
+      // Trigger Svelte reactivity by reassigning the object reference
+      if (roomData) {
+        roomData = { ...roomData, relic_choices: [] };
+      }
     }
     if (res && res.next_room) {
       nextRoom = res.next_room;
@@ -854,10 +877,19 @@
     lastBattleSnapshot = null;
     battleActive = false;
     stopBattlePoll();
-    // Start state polling when advancing room
-    startStatePoll();
+    // Do not start state polling here; we'll advance and enter the next room
+    // directly to avoid timing races that can require extra clicks.
     try {
-      const res = await advanceRoom(runId);
+      // Advance progression until the backend actually advances the room.
+      // This collapses any remaining progression steps (e.g., loot → review)
+      // so a single click proceeds.
+      let res = await advanceRoom(runId);
+      let guard = 0;
+      while (res && res.progression_advanced && guard++ < 5) {
+        // Small delay to allow state write
+        await new Promise((r) => setTimeout(r, 50));
+        res = await advanceRoom(runId);
+      }
       if (res && typeof res.current_index === 'number') {
         currentIndex = res.current_index;
         // When advancing floors, the mapRooms data becomes stale
@@ -883,6 +915,10 @@
         const isBattleSnapshot = roomData && (roomData.result === 'battle' || roomData.result === 'boss');
         const progressed = (roomData && (!isBattleSnapshot || battleActive));
         if (progressed) break;
+      }
+      // If we still haven't progressed, resume polling to recover gracefully
+      if (!roomData) {
+        startStatePoll();
       }
     } catch (e) {
       // If not ready (e.g., server 400), refresh snapshot so rewards remain visible.
@@ -917,6 +953,9 @@
               const isBattleSnapshot = roomData && (roomData.result === 'battle' || roomData.result === 'boss');
               const progressed = (roomData && (!isBattleSnapshot || battleActive));
               if (progressed) break;
+            }
+            if (!roomData) {
+              startStatePoll();
             }
             return;
           } catch {}

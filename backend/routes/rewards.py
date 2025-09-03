@@ -12,6 +12,7 @@ from quart import request
 
 from autofighter.cards import award_card
 from autofighter.relics import award_relic
+from game import battle_snapshots
 
 bp = Blueprint("rewards", __name__)
 
@@ -61,6 +62,19 @@ async def select_card(run_id: str) -> tuple[str, int, dict[str, str]]:
     )
     await asyncio.to_thread(save_map, run_id, state)
     await asyncio.to_thread(save_party, run_id, party)
+
+    # Keep the live battle snapshot in sync so the frontend doesn't show
+    # stale card choices after a selection.
+    try:
+        snap = battle_snapshots.get(run_id)
+        if isinstance(snap, dict):
+            snap = dict(snap)
+            # Clear card choices; leave relic choices and loot intact
+            snap["card_choices"] = []
+            battle_snapshots[run_id] = snap
+    except Exception:
+        # Never let snapshot sync failures break reward selection
+        pass
     card_data = {"id": card.id, "name": card.name, "stars": card.stars}
     return jsonify({"card": card_data, "cards": party.cards, "next_room": next_type})
 
@@ -110,6 +124,19 @@ async def select_relic(run_id: str) -> tuple[str, int, dict[str, str]]:
     )
     await asyncio.to_thread(save_map, run_id, state)
     await asyncio.to_thread(save_party, run_id, party)
+
+    # Keep the live battle snapshot in sync so the frontend doesn't show
+    # stale relic choices after a selection.
+    try:
+        snap = battle_snapshots.get(run_id)
+        if isinstance(snap, dict):
+            snap = dict(snap)
+            # Clear relic choices; leave loot intact
+            snap["relic_choices"] = []
+            battle_snapshots[run_id] = snap
+    except Exception:
+        # Do not fail selection due to snapshot sync
+        pass
     relic_data = {"id": relic.id, "name": relic.name, "stars": relic.stars}
     return jsonify({"relic": relic_data, "relics": party.relics, "next_room": next_type})
 

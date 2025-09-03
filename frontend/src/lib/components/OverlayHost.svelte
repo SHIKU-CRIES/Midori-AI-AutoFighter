@@ -108,6 +108,12 @@
       if (typeof window !== 'undefined') window.afRewardOpen = Boolean(rewardOpen);
     } catch {}
   }
+  // Hint to pause state polling while the Battle Review overlay is open
+  $: {
+    try {
+      if (typeof window !== 'undefined') window.afReviewOpen = Boolean(reviewOpen && reviewReady);
+    } catch {}
+  }
 
   function titleForItem(item) {
     if (!item) return '';

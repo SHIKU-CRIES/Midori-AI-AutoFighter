@@ -38,6 +38,10 @@
 
   let activeTab = 'audio';
 
+  // Feedback for End Run action
+  let endingRun = false;
+  let endRunStatus = '';
+
   // Backend health (moved from floating ping indicator)
   let healthStatus = 'unknown'; // 'healthy' | 'degraded' | 'error' | 'unknown'
   let healthPing = null;
@@ -142,6 +146,8 @@
   async function handleEndRun() {
     if (runId) {
       try {
+        endingRun = true;
+        endRunStatus = 'Ending run…';
         // Immediately halt any battle snapshot polling while ending the run
         try { if (typeof window !== 'undefined') window.afHaltSync = true; } catch {}
         await endRun(runId);
@@ -153,10 +159,15 @@
             await endAllRuns();
           }
         } catch {}
+        endRunStatus = 'Run ended';
       } catch (e) {
         console.error('Failed to end run', e);
+        endRunStatus = 'Failed to end run';
       } finally {
+        endingRun = false;
         dispatch('endRun');
+        // Clear status after a short delay so users see feedback
+        try { setTimeout(() => (endRunStatus = ''), 1200); } catch {}
       }
     }
   }
@@ -326,7 +337,10 @@
       <div class="control" title="End the current run.">
         <Power />
         <label>End Run</label>
-        <button on:click={handleEndRun} disabled={!runId}>End</button>
+        <button on:click={handleEndRun} disabled={!runId || endingRun}>{endingRun ? 'Ending…' : 'End'}</button>
+        {#if endRunStatus}
+          <span class="status" data-testid="endrun-status">{endRunStatus}</span>
+        {/if}
       </div>
     </div>
   {/if}
