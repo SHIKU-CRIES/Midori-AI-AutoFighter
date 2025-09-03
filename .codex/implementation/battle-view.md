@@ -11,7 +11,8 @@ Visual pieces have been split into small subcomponents under
 - `FighterPortrait.svelte` – portrait, HP bar, element chip (circular dark
   backdrop with a strong background blur; no outer glow) and embedded
   `StatusIcons`. Passive stack pips render as vector icons and tint to the
-  element color when filled.
+  element color when filled. Portrait resolution prefers `fighter.summon_type`
+  when present so summons can reuse shared art folders.
 - `StatusIcons.svelte` – collapses duplicate HoT/DoT names into single icons
   with stack counts.
 - `EnrageIndicator.svelte` – pulsing red/blue overlay when the backend reports
@@ -55,6 +56,10 @@ fixed interval and the polling delay honors 30/60/120 fps settings without a
 `NavBar` shows a stained-glass status panel with a
 spinner while updates are in flight. Incoming party and foe arrays are compared
 to the previous snapshot to avoid unnecessary re-renders.
+
+Summon data is provided through `party_summons` and `foe_summons` objects keyed
+by the summoner's id. The view flattens these maps into arrays grouped by owner
+so that summoned units render alongside their summoners.
 
 ## Testing
 - `bun test frontend/tests/battleview.test.js`

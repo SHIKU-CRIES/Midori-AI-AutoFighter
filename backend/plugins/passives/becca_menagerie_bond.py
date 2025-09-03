@@ -7,6 +7,7 @@ from autofighter.summons import SummonManager
 from plugins.damage_types import load_damage_type
 
 if TYPE_CHECKING:
+    from autofighter.party import Party
     from autofighter.stats import Stats
 
 
@@ -73,8 +74,17 @@ class BeccaMenagerieBond:
         if self._summon_cooldown[entity_id] > 0:
             self._summon_cooldown[entity_id] -= 1
 
-    async def summon_jellyfish(self, target: "Stats", jellyfish_type: str = None) -> bool:
-        """Summon a jellyfish by spending 10% current HP."""
+    async def summon_jellyfish(
+        self,
+        target: "Stats",
+        jellyfish_type: str | None = None,
+        party: "Party | None" = None,
+    ) -> bool:
+        """Summon a jellyfish by spending 10% current HP.
+
+        If a ``party`` is provided, the new summon will be appended so it can
+        participate in combat immediately.
+        """
         entity_id = id(target)
         target_id = getattr(target, 'id', str(id(target)))
 
@@ -91,6 +101,18 @@ class BeccaMenagerieBond:
         hp_cost = int(target.hp * 0.1)
         if target.hp <= hp_cost:
             return False  # Not enough HP
+
+        # Use the enhanced decision logic from SummonManager
+        # But still allow jellyfish type changes (which is Becca's unique mechanic)
+        decision = SummonManager.should_resummon(target_id, min_health_threshold=0.3)
+        current_summons = SummonManager.get_summons(target_id)
+        jellyfish_summons = [s for s in current_summons if s.summon_source == self.id]
+
+        # If we have viable jellyfish and we're not changing type, skip summoning
+        if (not decision['should_resummon'] and
+            jellyfish_type == self._last_summon.get(entity_id) and
+            jellyfish_summons):
+            return False
 
         # Pay HP cost using proper damage system
         target.hp -= hp_cost
@@ -125,6 +147,8 @@ class BeccaMenagerieBond:
         )
 
         if summon:
+            if party is not None:
+                SummonManager.add_summons_to_party(party)
             self._last_summon[entity_id] = jellyfish_type
             self._summon_cooldown[entity_id] = 1  # One turn cooldown
             return True

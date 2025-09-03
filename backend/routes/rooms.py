@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import copy
+from typing import Any
 
 from battle_logging import get_current_run_logger
 from battle_logging import start_run_logging
@@ -27,9 +28,23 @@ from autofighter.rooms import _build_foes
 from autofighter.rooms import _choose_foe
 from autofighter.rooms import _scale_stats
 from autofighter.rooms import _serialize
+from autofighter.summons import SummonManager
 from plugins.damage_types import load_damage_type
 
 bp = Blueprint("rooms", __name__)
+
+
+def _collect_summons(
+    entities: list,
+) -> dict[str, list[dict[str, Any]]]:
+    snapshots: dict[str, list[dict[str, Any]]] = {}
+    for ent in entities:
+        sid = getattr(ent, "id", str(id(ent)))
+        for summon in SummonManager.get_summons(sid):
+            snap = _serialize(summon)
+            snap["owner_id"] = sid
+            snapshots.setdefault(sid, []).append(snap)
+    return snapshots
 
 
 @bp.post("/rooms/<run_id>/battle")
@@ -181,6 +196,8 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         "result": "battle",
         "party": [_serialize(m) for m in combat_party.members],
         "foes": [_serialize(f) for f in foes],
+        "party_summons": _collect_summons(combat_party.members),
+        "foe_summons": _collect_summons(foes),
         "gold": party.gold,
         "relics": party.relics,
         "cards": party.cards,
@@ -372,6 +389,8 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         "result": "boss",
         "party": [_serialize(m) for m in combat_party.members],
         "foes": [_serialize(f) for f in foes],
+        "party_summons": _collect_summons(combat_party.members),
+        "foe_summons": _collect_summons(foes),
         "gold": party.gold,
         "relics": party.relics,
         "cards": party.cards,

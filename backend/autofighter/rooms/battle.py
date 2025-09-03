@@ -22,6 +22,7 @@ from autofighter.effects import create_stat_buff
 from autofighter.mapgen import MapNode
 from autofighter.relics import apply_relics
 from autofighter.relics import relic_choices
+from autofighter.summons import SummonManager
 from plugins.damage_types import ALL_DAMAGE_TYPES
 
 from ..party import Party
@@ -234,6 +235,18 @@ class BattleRoom(Room):
         exp_reward = 0
         credited_foe_ids: set[str] = set()
 
+        def _collect_summons(
+            entities: list[Stats],
+        ) -> dict[str, list[dict[str, Any]]]:
+            snapshots: dict[str, list[dict[str, Any]]] = {}
+            for ent in entities:
+                sid = getattr(ent, "id", str(id(ent)))
+                for summon in SummonManager.get_summons(sid):
+                    snap = _serialize(summon)
+                    snap["owner_id"] = sid
+                    snapshots.setdefault(sid, []).append(snap)
+            return snapshots
+
         def _credit_if_dead(foe_obj) -> None:
             nonlocal exp_reward, temp_rdr
             try:
@@ -265,6 +278,8 @@ class BattleRoom(Room):
                     "result": "battle",
                     "party": [_serialize(m) for m in combat_party.members],
                     "foes": [_serialize(f) for f in foes],
+                    "party_summons": _collect_summons(combat_party.members),
+                    "foe_summons": _collect_summons(foes),
                     "enrage": {"active": False, "stacks": 0, "turns": 0},
                     "rdr": temp_rdr,
                 }
@@ -401,6 +416,8 @@ class BattleRoom(Room):
                                     "result": "battle",
                                     "party": [_serialize(m) for m in combat_party.members],
                                     "foes": [_serialize(f) for f in foes],
+                                    "party_summons": _collect_summons(combat_party.members),
+                                    "foe_summons": _collect_summons(foes),
                                     "enrage": {
                                         "active": enrage_active,
                                         "stacks": enrage_stacks,
@@ -506,6 +523,8 @@ class BattleRoom(Room):
                                 "result": "battle",
                                 "party": [_serialize(m) for m in combat_party.members],
                                 "foes": [_serialize(f) for f in foes],
+                                "party_summons": _collect_summons(combat_party.members),
+                                "foe_summons": _collect_summons(foes),
                                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                                 "rdr": temp_rdr,
                             }
@@ -624,8 +643,10 @@ class BattleRoom(Room):
                         "result": "battle",
                         "party": [_serialize(m) for m in combat_party.members],
                         "foes": [_serialize(f) for f in foes],
+                        "party_summons": _collect_summons(combat_party.members),
+                        "foe_summons": _collect_summons(foes),
                         "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
-                                "rdr": temp_rdr,
+                        "rdr": temp_rdr,
                         "ended": True,
                     }
                 )
@@ -677,6 +698,8 @@ class BattleRoom(Room):
                     pass
         party_data = [_serialize(p) for p in party.members]
         foes_data = [_serialize(f) for f in foes]
+        party_summons = _collect_summons(party.members)
+        foe_summons = _collect_summons(foes)
         if all(m.hp <= 0 for m in combat_party.members):
             loot = {
                 "gold": 0,
@@ -687,6 +710,7 @@ class BattleRoom(Room):
             return {
                 "result": "defeat",
                 "party": party_data,
+                "party_summons": party_summons,
                 "gold": party.gold,
                 "relics": party.relics,
                 "cards": party.cards,
@@ -694,6 +718,7 @@ class BattleRoom(Room):
                 "relic_choices": [],
                 "loot": loot,
                 "foes": foes_data,
+                "foe_summons": foe_summons,
                 "room_number": self.node.index,
                 "exp_reward": exp_reward,
                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
@@ -702,7 +727,7 @@ class BattleRoom(Room):
         # Pick cards with per-item star rolls; ensure unique choices not already owned
         selected_cards: list = []
         attempts = 0
-        log.info("Starting card selection for run %s, party has %d cards", 
+        log.info("Starting card selection for run %s, party has %d cards",
                  getattr(combat_party, 'cards', []), len(getattr(combat_party, 'cards', [])))
         while len(selected_cards) < 3 and attempts < 30:
             attempts += 1
@@ -796,6 +821,7 @@ class BattleRoom(Room):
         return {
             "result": "boss" if self.strength > 1.0 else "battle",
             "party": party_data,
+            "party_summons": party_summons,
             "gold": party.gold,
             "relics": party.relics,
             "cards": party.cards,
@@ -803,6 +829,7 @@ class BattleRoom(Room):
             "relic_choices": relic_choice_data,
             "loot": loot,
             "foes": foes_data,
+            "foe_summons": foe_summons,
             "room_number": self.node.index,
             "battle_index": getattr(battle_logger, "battle_index", 0),
             "exp_reward": exp_reward,

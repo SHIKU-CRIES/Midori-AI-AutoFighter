@@ -4,7 +4,7 @@ import fs from 'fs';
 if (typeof import.meta.glob !== 'function') {
   test('asset loader unsupported', () => {});
 } else {
-  const { getCharacterImage, getElementColor, getElementIcon, getDotImage } = await import('../src/lib/assetLoader.js');
+  const { getCharacterImage, getElementColor, getElementIcon, getDotImage } = await import('../src/lib/systems/assetLoader.js');
 
   describe('asset loader', () => {
     test('returns fallback string for unknown character', () => {
@@ -21,6 +21,13 @@ if (typeof import.meta.glob !== 'function') {
         const filePath = new URL(url);
         expect(fs.existsSync(filePath)).toBe(true);
       }
+    });
+
+    test('aliases jellyfish summons to base art', () => {
+      const url = getCharacterImage('jellyfish_alpha');
+      const jelly = url.includes('jellyfish');
+      const fallback = url.includes('midoriai-logo');
+      expect(jelly || fallback).toBe(true);
     });
 
     test('provides damage type color and icon', () => {

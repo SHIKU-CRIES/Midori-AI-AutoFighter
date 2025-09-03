@@ -15,6 +15,10 @@ poll for results:
   crashes. On failure the battle flag is cleared, map and party data are saved,
   and the snapshot records the `error` with `awaiting_next` set to `false` so
   runs do not hang.
+- Snapshots expose active summons through `party_summons` and `foe_summons`.
+  Both maps are keyed by the owning combatant's id and store arrays of
+  serialized summons. Each summon snapshot also includes an `owner_id` for
+  convenience.
 
 These snapshots are stored in `game.battle_snapshots` and polled by the
 frontend during combat.
