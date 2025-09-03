@@ -377,8 +377,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
-    /* Make portraits smaller so bars are clearly visible */
-    --portrait-size: 5rem;
+    /* Default portrait size within review */
+    --portrait-size: 6rem;
   }
   .layout.review {
     width: 100%;
@@ -532,8 +532,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 4.5rem;
+    height: 4.5rem;
     background: rgba(255,255,255,0.1);
     color: #ccc;
     border: none;
@@ -932,7 +932,7 @@
               <svelte:component this={tab.icon} size={20} />
             {:else if tab.entity}
               {@const _tabFighter = toDisplayFighter(tab.entity)}
-              <div style="--portrait-size: 3rem;">
+              <div style="--portrait-size: 4rem;">
                 <FighterPortrait fighter={_tabFighter} {reducedMotion} />
               </div>
             {:else}
@@ -1329,7 +1329,7 @@
             <div class="entity-header">
               {#if currentTab.entity}
                 {@const _fighter = toDisplayFighter(currentTab.entity)}
-                <div style="--portrait-size: 5rem;">
+                <div style="--portrait-size: 7rem;">
                   <FighterPortrait fighter={_fighter} {reducedMotion} />
                 </div>
               {/if}
