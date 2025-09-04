@@ -114,7 +114,7 @@ def test_get_map_endpoint_after_restart():
     """Test that the /map/<run_id> endpoint works after restart."""
     import asyncio
 
-    from routes.runs import get_map
+    from services.run_service import get_map
 
     # Use a temporary database file
     with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp_db:
@@ -166,10 +166,7 @@ def test_get_map_endpoint_after_restart():
 
         # Test the get_map endpoint
         async def test_endpoint():
-            response_data, status_code, headers = await get_map(run_id)
-            response_json = response_data.get_json()
-
-            assert status_code == 200
+            response_json = await get_map(run_id)
             assert "map" in response_json
             assert "party" in response_json
             assert response_json["map"]["current"] == 2
@@ -191,7 +188,7 @@ def test_enhanced_map_endpoint_current_state():
     """Test that the enhanced /map/<run_id> endpoint includes current_state section."""
     import asyncio
 
-    from routes.runs import get_map
+    from services.run_service import get_map
 
     # Use a temporary database file
     with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp_db:
@@ -244,10 +241,7 @@ def test_enhanced_map_endpoint_current_state():
 
         # Test the enhanced endpoint
         async def test_enhanced_endpoint():
-            response_data, status_code, headers = await get_map(run_id)
-            response_json = response_data.get_json()
-
-            assert status_code == 200
+            response_json = await get_map(run_id)
 
             # Verify traditional map and party data still exists
             assert "map" in response_json
@@ -285,7 +279,7 @@ def test_enhanced_map_endpoint_with_awaiting_next():
     """Test enhanced /map endpoint when awaiting_next is True."""
     import asyncio
 
-    from routes.runs import get_map
+    from services.run_service import get_map
 
     # Use a temporary database file
     with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp_db:
@@ -337,10 +331,7 @@ def test_enhanced_map_endpoint_with_awaiting_next():
 
         # Test the enhanced endpoint with awaiting_next
         async def test_awaiting_next():
-            response_data, status_code, headers = await get_map(run_id)
-            response_json = response_data.get_json()
-
-            assert status_code == 200
+            response_json = await get_map(run_id)
             current_state = response_json["current_state"]
 
             # Verify awaiting_next state is correctly reported
@@ -371,7 +362,7 @@ def test_run_not_found():
     """Test that non-existent runs return 404."""
     import asyncio
 
-    from routes.runs import get_map
+    from services.run_service import get_map
 
     # Use a temporary database file
     with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as tmp_db:
@@ -391,8 +382,8 @@ def test_run_not_found():
 
         # Test with non-existent run
         async def test_endpoint():
-            response_data, status_code, headers = await get_map('nonexistent-run')
-            assert status_code == 404
+            with pytest.raises(ValueError):
+                await get_map('nonexistent-run')
 
         asyncio.run(test_endpoint())
 

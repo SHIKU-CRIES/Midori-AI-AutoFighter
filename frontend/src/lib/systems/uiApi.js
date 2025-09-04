@@ -193,3 +193,46 @@ export async function getActiveRuns() {
   }
   return { runs: [] };
 }
+
+/**
+ * Update the current party selection on the backend.
+ * @param {Array} party - List of party member IDs
+ */
+export async function updateParty(party) {
+  return await sendAction('update_party', { party });
+}
+
+/**
+ * Retrieve a battle summary for the current run.
+ * @param {number} battleIndex - Index of the battle to fetch
+ */
+export async function getBattleSummary(battleIndex) {
+  return handleFetch(`/battles/${battleIndex}/summary`, { cache: 'no-store' });
+}
+
+/**
+ * Retrieve detailed battle events for the current run.
+ * @param {number} battleIndex - Index of the battle to fetch
+ */
+export async function getBattleEvents(battleIndex) {
+  return handleFetch(`/battles/${battleIndex}/events`, { cache: 'no-store' });
+}
+
+/**
+ * Fetch catalog data for relics, cards, DoTs, and HoTs.
+ */
+export async function getCatalogData() {
+  const [relics, cards, dots, hots] = await Promise.all([
+    handleFetch(`/catalog/relics`),
+    handleFetch(`/catalog/cards`),
+    handleFetch(`/catalog/dots`),
+    handleFetch(`/catalog/hots`),
+  ]);
+
+  return {
+    relics: relics.relics || [],
+    cards: cards.cards || [],
+    dots: dots.dots || [],
+    hots: hots.hots || [],
+  };
+}
