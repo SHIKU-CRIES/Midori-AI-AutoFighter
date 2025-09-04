@@ -131,13 +131,16 @@ export async function startRun(party, damageType = '', pressure = 0) {
 /**
  * Perform a room action.
  * @param {string} roomId - The room ID (typically "0" for current room)
- * @param {string} actionData - Action-specific data
+ * @param {object|string} actionData - Action-specific data
  */
-export async function roomAction(roomId = "0", actionData = "") {
-  return await sendAction('room_action', { 
-    room_id: roomId, 
-    action: actionData 
-  });
+export async function roomAction(roomId = '0', actionData = {}) {
+  const params = { room_id: roomId };
+  if (actionData && typeof actionData === 'object') {
+    Object.assign(params, actionData);
+  } else if (actionData) {
+    params.action = actionData;
+  }
+  return await sendAction('room_action', params);
 }
 
 /**

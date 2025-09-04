@@ -793,15 +793,15 @@
   }
   async function handleShopBuy(item) {
     if (!runId) return;
-    roomData = await roomAction("0", item);
+    roomData = await roomAction('0', { id: item.id, cost: item.cost });
   }
   async function handleShopReroll() {
     if (!runId) return;
-    roomData = await roomAction("0", {"action": "reroll"});
+    roomData = await roomAction('0', { action: 'reroll' });
   }
   async function handleShopLeave() {
     if (!runId) return;
-    await roomAction("0", {"action": "leave"});
+    await roomAction('0', { action: 'leave' });
     const res = await advanceRoom();
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
