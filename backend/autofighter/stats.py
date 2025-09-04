@@ -119,8 +119,8 @@ class Stats:
     # Effects system
     _active_effects: list[StatEffect] = field(default_factory=list, init=False)
 
-    level_up_gains: dict[str, int] = field(
-        default_factory=lambda: {"max_hp": 10, "atk": 5, "defense": 3}
+    level_up_gains: dict[str, float] = field(
+        default_factory=lambda: {"max_hp": 10.0, "atk": 5.0, "defense": 3.0}
     )
 
     def __post_init__(self):
@@ -225,7 +225,7 @@ class Stats:
 
     def _calculate_stat_modifier(self, stat_name: str) -> Union[int, float]:
         """Calculate the total modifier for a stat from all active effects."""
-        total = 0
+        total: float = 0.0
         for effect in self._active_effects:
             if stat_name in effect.stat_modifiers:
                 total += effect.stat_modifiers[stat_name]
@@ -329,7 +329,7 @@ class Stats:
             current_base = self.get_base_stat(stat_name)
             if isinstance(current_base, (int, float)) and current_base > 0:
                 new_val = current_base * (1 + inc)
-                self.set_base_stat(stat_name, type(current_base)(new_val))
+                self.set_base_stat(stat_name, new_val)
 
         # Apply fixed gains from level_up_gains to base stats
         for stat, base in self.level_up_gains.items():
