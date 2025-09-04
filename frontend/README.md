@@ -13,6 +13,10 @@ bun dev
 The development server runs at `http://localhost:59001` and displays a
 high‑contrast icon grid powered by `lucide-svelte`.
 
+At startup the dev server probes common backend hosts and exposes the first
+reachable one as `VITE_API_BASE` and through an `/api-base` endpoint. The
+browser reads this value instead of scanning the network directly.
+
 - Party: Opens a responsive party picker overlay that fetches available
   characters and lets you add/remove allies with one click. Selected members
   are now clearly indicated by an element‑tinted ambient sweep behind their

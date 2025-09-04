@@ -1,16 +1,11 @@
 <script>
   import PopupWindow from './PopupWindow.svelte';
-  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
 
   export let apiBase = '';
   export let message = 'Backend is not ready yet.';
 
   const dispatch = createEventDispatcher();
-
-  let attempts = 0;
-  let retryIntervalMs = 3000;
-  let timerId;
-  let checking = false;
 
   function retry() {
     window.location.reload();
@@ -19,46 +14,17 @@
   function close() {
     dispatch('close');
   }
-
-  async function checkBackend() {
-    if (checking) return;
-    checking = true;
-    attempts += 1;
-    try {
-      const res = await fetch(`${apiBase}/`, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        if (data && data.flavor) {
-          // Backend is ready; reload to re-run initialization flow
-          window.location.reload();
-          return;
-        }
-      }
-    } catch {}
-    checking = false;
-  }
-
-  onMount(() => {
-    // Kick off an immediate check, then poll periodically.
-    checkBackend();
-    timerId = setInterval(checkBackend, retryIntervalMs);
-  });
-
-  onDestroy(() => {
-    if (timerId) clearInterval(timerId);
-  });
 </script>
 
 <PopupWindow title="Backend Not Ready" on:close={close}>
   <div style="padding: 0.5rem 0.25rem; line-height: 1.4;">
-    <p>The Web UI cannot reach the backend yet.</p>
+    <p>The Web UI cannot reach the backend.</p>
     <p><strong>API:</strong> {apiBase}</p>
     <p style="opacity: 0.85;">{message}</p>
     <p style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
       <span class="spinner" aria-hidden="true"></span>
-      <span>Please start the backend service. Auto retrying...</span>
+      <span>Start the backend service then choose Retry.</span>
     </p>
-    <p style="opacity: 0.7; font-size: 0.85rem; margin: 0.25rem 0 0;">Attempts: {attempts}</p>
     <div class="stained-glass-row" style="justify-content: flex-end; margin-top: 0.75rem;">
       <button class="icon-btn" on:click={retry}>Retry</button>
       <button class="icon-btn" on:click={close}>Close</button>

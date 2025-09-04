@@ -21,6 +21,8 @@ import {
   chooseRelic
 } from '../src/lib/uiApi.js';
 
+process.env.VITE_API_BASE = 'http://backend.test';
+
 // Helper to mock fetch
 function createFetch(response, ok = true, status = 200) {
   return mock(async () => ({ ok, status, json: async () => response }));
