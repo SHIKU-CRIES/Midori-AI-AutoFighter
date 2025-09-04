@@ -6,7 +6,7 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
   import MenuPanel from './MenuPanel.svelte';
-  import { getCatalogData } from '../systems/runApi.js';
+  import { getCatalogData } from '../systems/uiApi.js';
   import { getElementColor, getCharacterImage } from '../systems/assetLoader.js';
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';

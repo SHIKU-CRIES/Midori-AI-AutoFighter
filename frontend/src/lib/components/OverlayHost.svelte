@@ -25,7 +25,7 @@
   import FloatingLoot from './FloatingLoot.svelte';
   import CombatViewer from './CombatViewer.svelte';
   import { rewardOpen as computeRewardOpen } from '../systems/viewportState.js';
-  import { getBattleSummary } from '../systems/runApi.js';
+  import { getBattleSummary } from '../systems/uiApi.js';
 
   export let selected = [];
   export let runId = '';
@@ -60,14 +60,14 @@
   let reviewReady = false;
   let reviewSummary = null;
   let reviewLoadingToken = 0;
-  async function waitForReview(runId, battleIndex, tokenRef) {
+  async function waitForReview(battleIndex, tokenRef) {
     // Retry a few times while backend finalizes logs
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     for (let attempt = 0; attempt < 10; attempt++) {
       // If another request superseded this one, stop
       if (tokenRef.value !== reviewLoadingToken) return;
       try {
-        const res = await getBattleSummary(runId, battleIndex);
+        const res = await getBattleSummary(battleIndex);
         if (tokenRef.value !== reviewLoadingToken) return;
         reviewSummary = res || { damage_by_type: {} };
         reviewReady = true;
@@ -93,8 +93,8 @@
     reviewReady = false;
     reviewSummary = null;
     const tokenRef = { value: ++reviewLoadingToken };
-    if (runId && roomData?.battle_index > 0) {
-      waitForReview(runId, roomData.battle_index, tokenRef);
+    if (roomData?.battle_index > 0) {
+      waitForReview(roomData.battle_index, tokenRef);
     }
   } else {
     // Reset gate when review is not open

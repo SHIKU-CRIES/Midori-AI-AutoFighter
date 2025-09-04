@@ -9,7 +9,7 @@ const mockAdvanceRoom = vi.fn();
 const mockGetMap = vi.fn();
 
 // Mock the API module
-vi.mock('../src/lib/runApi.js', () => ({
+vi.mock('../src/lib/uiApi.js', () => ({
   advanceRoom: mockAdvanceRoom,
   getMap: mockGetMap,
   roomAction: vi.fn(),
@@ -48,14 +48,13 @@ describe('Room advancement and floor transitions', () => {
     });
 
     // Simulate the floor advancement logic
-    const runId = 'test-run';
-    const res = await mockAdvanceRoom(runId);
+    const res = await mockAdvanceRoom();
     
     expect(res.current_index).toBe(1);
     expect(res.next_room).toBe('battle-normal');
 
     // Simulate refreshing map data
-    const mapData = await mockGetMap(runId);
+    const mapData = await mockGetMap();
     expect(mapData.map.rooms).toHaveLength(3);
     expect(mapData.map.rooms[1].floor).toBe(2);
     expect(mapData.map.rooms[1].room_type).toBe('battle-normal');
@@ -80,13 +79,12 @@ describe('Room advancement and floor transitions', () => {
       party: ['player']
     });
 
-    const runId = 'test-run';
-    const res = await mockAdvanceRoom(runId);
+    const res = await mockAdvanceRoom();
     
     expect(res.current_index).toBe(5);
     expect(res.next_room).toBe('shop');
 
-    const mapData = await mockGetMap(runId);
+    const mapData = await mockGetMap();
     expect(mapData.map.rooms[1].room_type).toBe('shop');
     expect(mapData.map.rooms[1].floor).toBe(1);
   });

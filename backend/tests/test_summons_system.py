@@ -272,7 +272,7 @@ async def test_collect_summons_grouped_by_owner(monkeypatch):
 
     await passive.summon_jellyfish(becca, "electric", party)
 
-    from routes.rooms import _collect_summons
+    from services.room_service import _collect_summons
 
     grouped = _collect_summons(party.members)
     assert "becca" in grouped

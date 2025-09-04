@@ -4,7 +4,7 @@
   import RewardCard from './RewardCard.svelte';
   import CurioChoice from './CurioChoice.svelte';
   import { getElementColor, getDotImage, getDotElement } from '../systems/assetLoader.js';
-  import { getBattleSummary, getBattleEvents } from '../systems/runApi.js';
+  import { getBattleSummary, getBattleEvents } from '../systems/uiApi.js';
   import { Sparkles, Shield, CreditCard, Zap, Flame, Heart, Coins, TrendingUp, User, Swords, Skull, XOctagon, HeartOff } from 'lucide-svelte';
 
   export let runId = '';
@@ -116,11 +116,11 @@
   );
 
   // Shared loader with retry (used on mount and on prop changes)
-  async function loadSummaryWithRetry(curRunId, curBattleIndex, signal) {
+  async function loadSummaryWithRetry(curBattleIndex, signal) {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     for (let attempt = 0; attempt < 10 && !(signal?.cancelled); attempt++) {
       try {
-        const res = await getBattleSummary(curRunId, curBattleIndex);
+        const res = await getBattleSummary(curBattleIndex);
         if (signal?.cancelled) return;
         summary = res || { damage_by_type: {} };
         return;
@@ -147,7 +147,7 @@
     }
     lastLoadedKey = currentKey;
     const signal = { cancelled: false };
-    await loadSummaryWithRetry(runId, battleIndex, signal);
+    await loadSummaryWithRetry(battleIndex, signal);
     return () => { signal.cancelled = true; };
   });
 
@@ -161,7 +161,7 @@
       summary = { damage_by_type: {} };
       // Keep the user on their current tab; data will update in-place
       // Fire and forget (errors are logged in loader)
-      loadSummaryWithRetry(runId, battleIndex, signal);
+      loadSummaryWithRetry(battleIndex, signal);
     }
   }
 
@@ -329,7 +329,7 @@
     if (showEvents && events.length === 0 && runId && battleIndex != null) {
       loadingEvents = true;
       try {
-        const data = await getBattleEvents(runId, battleIndex);
+        const data = await getBattleEvents(battleIndex);
         events = Array.isArray(data) ? data : [];
       } catch (e) {
         // swallow; optional view

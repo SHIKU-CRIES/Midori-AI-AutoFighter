@@ -14,9 +14,6 @@ from game import load_map
 from game import load_party
 from game import save_map
 from game import save_party
-from quart import Blueprint
-from quart import jsonify
-from quart import request
 
 from autofighter.party import Party
 from autofighter.rooms import BattleRoom
@@ -31,12 +28,8 @@ from autofighter.rooms import _serialize
 from autofighter.summons import SummonManager
 from plugins.damage_types import load_damage_type
 
-bp = Blueprint("rooms", __name__)
 
-
-def _collect_summons(
-    entities: list,
-) -> dict[str, list[dict[str, Any]]]:
+def _collect_summons(entities: list) -> dict[str, list[dict[str, Any]]]:
     snapshots: dict[str, list[dict[str, Any]]] = {}
     for ent in entities:
         sid = getattr(ent, "id", str(id(ent)))
@@ -47,36 +40,30 @@ def _collect_summons(
     return snapshots
 
 
-@bp.post("/rooms/<run_id>/battle")
-async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
-    data = await request.get_json(silent=True) or {}
+async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     action = data.get("action", "")
 
     if action == "snapshot":
         snap = battle_snapshots.get(run_id)
         if snap is None:
-            return jsonify({"error": "no battle"}), 404
-        return jsonify(snap)
+            raise LookupError("no battle")
+        return snap
 
     if action == "pause":
-        # Pause battle by stopping the battle task
         if run_id in battle_tasks:
             task = battle_tasks[run_id]
             if not task.done():
                 task.cancel()
-            # Mark the battle as paused in the snapshot
             snap = battle_snapshots.get(run_id, {})
             snap["paused"] = True
             battle_snapshots[run_id] = snap
-        return jsonify({"result": "paused"})
+        return {"result": "paused"}
 
     if action == "resume":
-        # Resume battle by restarting the battle task if it was cancelled
         snap = battle_snapshots.get(run_id)
         if snap and snap.get("paused"):
             snap["paused"] = False
             battle_snapshots[run_id] = snap
-            # Restart battle task if needed
             if run_id not in battle_tasks or battle_tasks[run_id].done():
                 party = await asyncio.to_thread(load_party, run_id)
                 state, rooms = await asyncio.to_thread(load_map, run_id)
@@ -93,7 +80,7 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
                         cards=party.cards,
                         rdr=party.rdr,
                     )
-                    # Restart the battle task with proper arguments/signature
+
                     async def progress(snapshot: dict[str, dict | list]) -> None:
                         battle_snapshots[run_id] = snapshot
 
@@ -101,7 +88,8 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
                         _run_battle(run_id, room, foes, combat_party, {}, state, rooms, progress)
                     )
                     battle_tasks[run_id] = task
-        return jsonify({"result": "resumed"})
+        return {"result": "resumed"}
+
     party = await asyncio.to_thread(load_party, run_id)
     try:
         with get_save_manager().connection() as conn:
@@ -116,39 +104,35 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     except Exception:
         pass
     state, rooms = await asyncio.to_thread(load_map, run_id)
-    # Ensure run logging is initialized for this run (survives server restarts)
     try:
         logger = get_current_run_logger()
-        if logger is None or getattr(logger, 'run_id', None) != run_id:
+        if logger is None or getattr(logger, "run_id", None) != run_id:
             start_run_logging(run_id)
     except Exception:
         pass
     if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
-        # If we have a recent snapshot, return it
         snap = battle_snapshots.get(run_id)
         if snap is not None:
-            return jsonify(snap)
-        # Otherwise, indicate awaiting_next so clients can advance the run
+            return snap
         current_idx = int(state.get("current", 0))
         current_room = rooms[-1].room_type if rooms else None
-        payload = {
+        return {
             "result": "battle",
             "awaiting_next": True,
             "current_index": current_idx,
             "current_room": current_room,
             "next_room": None,
         }
-        return jsonify(payload)
     node = rooms[state["current"]]
     if node.room_type not in {"battle-weak", "battle-normal"}:
-        return jsonify({"error": "invalid room"}), 400
+        raise ValueError("invalid room")
     if state.get("awaiting_next"):
         next_type = (
             rooms[state["current"] + 1].room_type
             if state["current"] + 1 < len(rooms)
             else None
         )
-        payload = {
+        payload: dict[str, Any] = {
             "result": "battle",
             "awaiting_next": True,
             "current_index": state.get("current", 0),
@@ -156,29 +140,27 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         }
         if next_type is not None:
             payload["next_room"] = next_type
-        return jsonify(payload)
+        return payload
     if state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot"):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
-            return jsonify(snap)
+            return snap
         party_data = [_serialize(m) for m in party.members]
-        return jsonify(
-            {
-                "result": "battle",
-                "party": party_data,
-                "foes": [],
-                "gold": party.gold,
-                "relics": party.relics,
-                "cards": party.cards,
-                "card_choices": [],
-                "relic_choices": [],
-                "enrage": {"active": False, "stacks": 0},
-                "rdr": party.rdr,
-            }
-        )
+        return {
+            "result": "battle",
+            "party": party_data,
+            "foes": [],
+            "gold": party.gold,
+            "relics": party.relics,
+            "cards": party.cards,
+            "card_choices": [],
+            "relic_choices": [],
+            "enrage": {"active": False, "stacks": 0},
+            "rdr": party.rdr,
+        }
     if run_id in battle_tasks:
         snap = battle_snapshots.get(run_id, {"result": "battle"})
-        return jsonify(snap)
+        return snap
     state["battle"] = True
     await asyncio.to_thread(save_map, run_id, state)
     room = BattleRoom(node)
@@ -216,29 +198,25 @@ async def battle_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         _run_battle(run_id, room, foes, party, data, state, rooms, progress)
     )
     battle_tasks[run_id] = task
-    return jsonify(battle_snapshots[run_id])
+    return battle_snapshots[run_id]
 
 
-@bp.post("/rooms/<run_id>/shop")
-async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
-    data = await request.get_json(silent=True) or {}
+async def shop_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     state, rooms = await asyncio.to_thread(load_map, run_id)
-    # Guard against empty or out-of-range room indices (e.g., after end-of-run)
     if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
-            return jsonify(snap)
-        return jsonify({"error": "run ended or room out of range"}), 404
+            return snap
+        raise LookupError("run ended or room out of range")
     node = rooms[state["current"]]
     if node.room_type != "shop":
-        return jsonify({"error": "invalid room"}), 400
+        raise ValueError("invalid room")
     stock_state = state.setdefault("shop_stock", {})
     node_stock = stock_state.get(str(node.room_id))
     if node_stock is not None:
         setattr(node, "stock", node_stock)
     room = ShopRoom(node)
     party = await asyncio.to_thread(load_party, run_id)
-    # resolve is async; must await to get the result dict
     result = await room.resolve(party, data)
     stock_state[str(node.room_id)] = getattr(node, "stock", [])
     state["shop_stock"] = stock_state
@@ -258,19 +236,16 @@ async def shop_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     payload = {**result}
     if next_type is not None:
         payload["next_room"] = next_type
-    return jsonify(payload)
+    return payload
 
 
-@bp.post("/rooms/<run_id>/rest")
-async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
-    data = await request.get_json(silent=True) or {}
+async def rest_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     state, rooms = await asyncio.to_thread(load_map, run_id)
     node = rooms[state["current"]]
     if node.room_type != "rest":
-        return jsonify({"error": "invalid room"}), 400
+        raise ValueError("invalid room")
     room = RestRoom(node)
     party = await asyncio.to_thread(load_party, run_id)
-    # resolve is async; must await to get the result dict
     result = await room.resolve(party, data)
     action = data.get("action", "")
     next_type = None
@@ -288,20 +263,17 @@ async def rest_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     payload = {**result}
     if next_type is not None:
         payload["next_room"] = next_type
-    return jsonify(payload)
+    return payload
 
 
-@bp.post("/rooms/<run_id>/chat")
-async def chat_room(run_id: str) -> tuple[str, int, dict[str, str]]:
-    data = await request.get_json(silent=True) or {}
+async def chat_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     state, rooms = await asyncio.to_thread(load_map, run_id)
     node = rooms[state["current"]]
     if node.room_type != "chat":
-        return jsonify({"error": "invalid room"}), 400
+        raise ValueError("invalid room")
     room = ChatRoom(node)
     party = await asyncio.to_thread(load_party, run_id)
     result = await room.resolve(party, data)
-    # Chat rooms should also be leaveable
     state["awaiting_next"] = True
     next_type = (
         rooms[state["current"] + 1].room_type
@@ -310,38 +282,34 @@ async def chat_room(run_id: str) -> tuple[str, int, dict[str, str]]:
     )
     await asyncio.to_thread(save_map, run_id, state)
     await asyncio.to_thread(save_party, run_id, party)
-    return jsonify({**result, "next_room": next_type})
+    return {**result, "next_room": next_type}
 
 
-@bp.post("/rooms/<run_id>/boss")
-async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
-    data = await request.get_json(silent=True) or {}
-    # Support polling snapshots via the boss endpoint too
+async def boss_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     action = data.get("action", "")
     if action == "snapshot":
         snap = battle_snapshots.get(run_id)
         if snap is None:
-            return jsonify({"error": "no battle"}), 404
-        return jsonify(snap)
+            raise LookupError("no battle")
+        return snap
 
     state, rooms = await asyncio.to_thread(load_map, run_id)
-    # Ensure run logging is initialized for this run
     try:
         logger = get_current_run_logger()
-        if logger is None or getattr(logger, 'run_id', None) != run_id:
+        if logger is None or getattr(logger, "run_id", None) != run_id:
             start_run_logging(run_id)
     except Exception:
         pass
     node = rooms[state["current"]]
     if node.room_type != "battle-boss-floor":
-        return jsonify({"error": "invalid room"}), 400
+        raise ValueError("invalid room")
     if state.get("awaiting_next"):
         next_type = (
             rooms[state["current"] + 1].room_type
             if state["current"] + 1 < len(rooms)
             else None
         )
-        payload = {
+        payload: dict[str, Any] = {
             "result": "boss",
             "awaiting_next": True,
             "current_index": state.get("current", 0),
@@ -349,28 +317,24 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         }
         if next_type is not None:
             payload["next_room"] = next_type
-        return jsonify(payload)
+        return payload
     if state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot"):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
-            return jsonify(snap)
+            return snap
         party = await asyncio.to_thread(load_party, run_id)
         party_data = [_serialize(m) for m in party.members]
-        return jsonify(
-            {
-                "result": "boss",
-                "party": party_data,
-                "foes": [],
-                "gold": party.gold,
-                "relics": party.relics,
-                "cards": party.cards,
-                "card_choices": [],
-                "relic_choices": [],
-                "enrage": {"active": False, "stacks": 0},
-            }
-        )
-
-    # Mirror battle flow: prime snapshot, then resolve in background task
+        return {
+            "result": "boss",
+            "party": party_data,
+            "foes": [],
+            "gold": party.gold,
+            "relics": party.relics,
+            "cards": party.cards,
+            "card_choices": [],
+            "relic_choices": [],
+            "enrage": {"active": False, "stacks": 0},
+        }
     state["battle"] = True
     await asyncio.to_thread(save_map, run_id, state)
     room = BossRoom(node)
@@ -409,127 +373,29 @@ async def boss_room(run_id: str) -> tuple[str, int, dict[str, str]]:
         _run_battle(run_id, room, foes, party, data, state, rooms, progress)
     )
     battle_tasks[run_id] = task
-    return jsonify(battle_snapshots[run_id])
+    return battle_snapshots[run_id]
 
 
-@bp.post("/rooms/<run_id>/<room_id>/action")
-async def room_action(run_id: str, room_id: str, action_data: dict[str, Any] = None) -> tuple[str, int, dict[str, str]]:
-    """Route room actions to appropriate room-specific handlers based on current room type."""
+async def room_action(run_id: str, room_id: str, action_data: dict[str, Any] | None = None) -> dict[str, Any]:
     if action_data is None:
         action_data = {}
-
-    # Load current game state to determine room type
     state, rooms = await asyncio.to_thread(load_map, run_id)
     if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
-        return jsonify({"error": "No current room or run ended"}), 400
-
+        raise ValueError("No current room or run ended")
     current_node = rooms[int(state.get("current", 0))]
     room_type = current_node.room_type
-
-    # Prepare action data in the format expected by room handlers
-    # Convert action_data to the request format expected by room endpoints
     if action_data.get("type") == "battle" and action_data.get("action_type") == "start":
-        # This is a battle start request
-        request_data = {"action": ""}  # Empty action starts the battle
+        request_data = {"action": ""}
     else:
-        # Pass through other action data
         request_data = action_data
-
-    # Route to appropriate room handler based on room type
     if room_type in {"battle-weak", "battle-normal"}:
-        # Create a mock request object for battle_room function
-        from quart import request as current_request
-
-        # Temporarily patch request data for battle_room function
-        original_get_json = current_request.get_json
-
-        async def mock_get_json(silent=True):
-            return request_data
-
-        current_request.get_json = mock_get_json
-
-        try:
-            result = await battle_room(run_id)
-            return result
-        finally:
-            # Restore original method
-            current_request.get_json = original_get_json
-
-    elif room_type == "battle-boss-floor":
-        # Create a mock request object for boss_room function
-        from quart import request as current_request
-
-        # Temporarily patch request data for boss_room function
-        original_get_json = current_request.get_json
-
-        async def mock_get_json(silent=True):
-            return request_data
-
-        current_request.get_json = mock_get_json
-
-        try:
-            result = await boss_room(run_id)
-            return result
-        finally:
-            # Restore original method
-            current_request.get_json = original_get_json
-
-    elif room_type == "shop":
-        # Create a mock request object for shop_room function
-        from quart import request as current_request
-
-        # Temporarily patch request data for shop_room function
-        original_get_json = current_request.get_json
-
-        async def mock_get_json(silent=True):
-            return request_data
-
-        current_request.get_json = mock_get_json
-
-        try:
-            result = await shop_room(run_id)
-            return result
-        finally:
-            # Restore original method
-            current_request.get_json = original_get_json
-
-    elif room_type == "rest":
-        # Create a mock request object for rest_room function
-        from quart import request as current_request
-
-        # Temporarily patch request data for rest_room function
-        original_get_json = current_request.get_json
-
-        async def mock_get_json(silent=True):
-            return request_data
-
-        current_request.get_json = mock_get_json
-
-        try:
-            result = await rest_room(run_id)
-            return result
-        finally:
-            # Restore original method
-            current_request.get_json = original_get_json
-
-    elif room_type == "chat":
-        # Create a mock request object for chat_room function
-        from quart import request as current_request
-
-        # Temporarily patch request data for chat_room function
-        original_get_json = current_request.get_json
-
-        async def mock_get_json(silent=True):
-            return request_data
-
-        current_request.get_json = mock_get_json
-
-        try:
-            result = await chat_room(run_id)
-            return result
-        finally:
-            # Restore original method
-            current_request.get_json = original_get_json
-
-    else:
-        return jsonify({"error": f"Unsupported room type: {room_type}"}), 400
+        return await battle_room(run_id, request_data)
+    if room_type == "battle-boss-floor":
+        return await boss_room(run_id, request_data)
+    if room_type == "shop":
+        return await shop_room(run_id, request_data)
+    if room_type == "rest":
+        return await rest_room(run_id, request_data)
+    if room_type == "chat":
+        return await chat_room(run_id, request_data)
+    raise ValueError(f"Unsupported room type: {room_type}")
