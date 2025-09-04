@@ -51,6 +51,20 @@ describe('api calls', () => {
     expect(result).toEqual({ result: 'battle', party: [], foes: [] });
   });
 
+  test('roomAction buy reduces gold and removes item', async () => {
+    const fetchMock = mock(async (url, options) => {
+      const body = JSON.parse(options.body);
+      expect(body).toEqual({
+        action: 'room_action',
+        params: { room_id: '0', id: 'r1', cost: 10 }
+      });
+      return { ok: true, status: 200, json: async () => ({ result: 'shop', gold: 90, stock: [] }) };
+    });
+    global.fetch = fetchMock;
+    const result = await roomAction('0', { id: 'r1', cost: 10 });
+    expect(result).toEqual({ result: 'shop', gold: 90, stock: [] });
+  });
+
   test('roomAction throws on HTTP error', async () => {
     global.fetch = createFetch({}, false, 500);
     await expect(roomAction('0', 'attack')).rejects.toThrow('HTTP error 500');
