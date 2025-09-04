@@ -22,7 +22,9 @@ export {
   chooseRelic,
   advanceRoom,
   getUIState,
-  sendAction
+  sendAction,
+  getMap,
+  getActiveRuns
 } from './systems/uiApi.js';
 export { default as NavBar } from './components/NavBar.svelte';
 export { default as OverlayHost } from './components/OverlayHost.svelte';
@@ -49,15 +51,6 @@ export {
   getBackendFlavor,
   endAllRuns
 } from './systems/api.js';
-
-// Export additional run API functions (backward compatibility)
-export {
-  getMap,
-  getActiveRuns,
-  updateParty,
-  pauseCombat,
-  resumeCombat
-} from './systems/runApi.js';
 
 // Export state management functions
 export {

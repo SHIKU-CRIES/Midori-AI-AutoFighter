@@ -19,7 +19,7 @@ import {
   roomAction,
   chooseCard,
   chooseRelic
-} from '../src/lib/runApi.js';
+} from '../src/lib/uiApi.js';
 
 // Helper to mock fetch
 function createFetch(response, ok = true, status = 200) {
@@ -35,7 +35,7 @@ describe('api calls', () => {
 
   test('updateParty sends party', async () => {
     global.fetch = createFetch({ status: 'ok' });
-    const result = await updateParty('abc', ['sample_player']);
+    const result = await updateParty(['sample_player']);
     expect(result).toEqual({ status: 'ok' });
   });
 
@@ -47,13 +47,13 @@ describe('api calls', () => {
 
   test('roomAction posts action', async () => {
     global.fetch = createFetch({ result: 'battle', party: [], foes: [] });
-    const result = await roomAction('abc', 'battle', 'attack');
+    const result = await roomAction('0', 'attack');
     expect(result).toEqual({ result: 'battle', party: [], foes: [] });
   });
 
   test('roomAction throws on HTTP error', async () => {
     global.fetch = createFetch({}, false, 500);
-    await expect(roomAction('abc', 'battle', 'attack')).rejects.toThrow('HTTP error 500');
+    await expect(roomAction('0', 'attack')).rejects.toThrow('HTTP error 500');
   });
 
   test('getPlayerConfig fetches editor data', async () => {
@@ -90,14 +90,14 @@ describe('api calls', () => {
   test('chooseCard posts card selection', async () => {
     const payload = { card: { id: 'c1', name: 'Card', stars: 1 }, cards: ['c1'] };
     global.fetch = createFetch(payload);
-    const result = await chooseCard('abc', 'c1');
+    const result = await chooseCard('c1');
     expect(result).toEqual(payload);
   });
 
   test('chooseRelic posts relic selection', async () => {
     const payload = { relic: { id: 'r1', name: 'Relic', stars: 1 }, relics: ['r1'] };
     global.fetch = createFetch(payload);
-    const result = await chooseRelic('abc', 'r1');
+    const result = await chooseRelic('r1');
     expect(result).toEqual(payload);
   });
 

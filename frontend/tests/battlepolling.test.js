@@ -20,7 +20,7 @@ describe('battle polling', () => {
       homeOverlay: () => {}
     }));
 
-    const { roomAction } = await import('../src/lib/runApi.js');
+    const { roomAction } = await import('../src/lib/uiApi.js');
     global.fetch = mock(async () => ({ ok: false, status: 404, json: async () => ({ message: 'run ended' }) }));
 
     const content = readFileSync(join(import.meta.dir, '../src/routes/+page.svelte'), 'utf8');

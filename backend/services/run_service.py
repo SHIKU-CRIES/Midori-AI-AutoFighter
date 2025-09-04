@@ -7,9 +7,6 @@ from pathlib import Path
 import random
 from uuid import uuid4
 
-from battle_logging import end_run_logging
-
-# Import battle logging
 from battle_logging import start_run_logging
 from game import _assign_damage_type
 from game import _describe_passives
@@ -20,50 +17,25 @@ from game import get_fernet
 from game import get_save_manager
 from game import load_map
 from game import save_map
-from quart import Blueprint
-from quart import jsonify
-from quart import request
 
 from autofighter.mapgen import MapGenerator
 from plugins import players as player_plugins
 
-bp = Blueprint("runs", __name__)
 
+async def start_run(
+    members: list[str],
+    damage_type: str = "",
+    pressure: int = 0,
+) -> dict[str, object]:
+    """Create a new run and return its initial state."""
+    damage_type = (damage_type or "").capitalize()
 
-@bp.get("/runs")
-async def list_runs() -> tuple[str, int, dict[str, object]]:
-    """List all active/live runs that haven't been deleted due to defeat."""
-    def get_all_runs():
-        with get_save_manager().connection() as conn:
-            cur = conn.execute("SELECT id, party, map FROM runs")
-            return cur.fetchall()
-
-    rows = await asyncio.to_thread(get_all_runs)
-    runs = []
-    for row in rows:
-        run_id, party_json, map_json = row
-        party_data = json.loads(party_json) if party_json else {}
-        map_data = json.loads(map_json) if map_json else {}
-        runs.append({
-            "run_id": run_id,
-            "party": party_data.get("members", []),
-            "map": map_data
-        })
-    return jsonify({"runs": runs})
-
-
-@bp.post("/run/start")
-async def start_run() -> tuple[str, int, dict[str, object]]:
-    data = await request.get_json(silent=True) or {}
-    members: list[str] = data.get("party", [])
-    damage_type = (data.get("damage_type") or "").capitalize()
-    pressure = int(data.get("pressure", 0))
     if (
         "player" not in members
         or not 1 <= len(members) <= 5
         or len(set(members)) != len(members)
     ):
-        return jsonify({"error": "invalid party"}), 400
+        raise ValueError("invalid party")
 
     def get_owned_players():
         with get_save_manager().connection() as conn:
@@ -73,11 +45,12 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
     owned = await asyncio.to_thread(get_owned_players)
     for mid in members:
         if mid != "player" and mid not in owned:
-            return jsonify({"error": "unowned character"}), 400
+            raise ValueError("unowned character")
+
     if damage_type:
         allowed = {"Light", "Dark", "Wind", "Lightning", "Fire", "Ice"}
         if damage_type not in allowed:
-            return jsonify({"error": "invalid damage type"}), 400
+            raise ValueError("invalid damage type")
 
         def set_damage_type():
             with get_save_manager().connection() as conn:
@@ -87,9 +60,8 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
                 )
 
         await asyncio.to_thread(set_damage_type)
-    run_id = str(uuid4())
 
-    # Start run logging
+    run_id = str(uuid4())
     start_run_logging(run_id)
 
     generator = MapGenerator(run_id, pressure=pressure)
@@ -163,72 +135,20 @@ async def start_run() -> tuple[str, int, dict[str, object]]:
                     }
                 )
                 break
-    return jsonify({"run_id": run_id, "map": state, "party": party_info})
+    return {"run_id": run_id, "map": state, "party": party_info}
 
 
-@bp.put("/party/<run_id>")
-async def update_party(run_id: str) -> tuple[str, int, dict[str, object]]:
-    data = await request.get_json(silent=True) or {}
-    members = data.get("party", [])
-    gold = data.get("gold", 0)
-    relics = data.get("relics", [])
-    cards = data.get("cards", [])
-    rdr = data.get("rdr", 1.0)
-    if (
-        "player" not in members
-        or not 1 <= len(members) <= 5
-        or len(set(members)) != len(members)
-    ):
-        return jsonify({"error": "invalid party"}), 400
-
-    def get_owned_players():
-        with get_save_manager().connection() as conn:
-            cur = conn.execute("SELECT id FROM owned_players")
-            return {row[0] for row in cur.fetchall()}
-
-    owned = await asyncio.to_thread(get_owned_players)
-    for mid in members:
-        if mid != "player" and mid not in owned:
-            return jsonify({"error": "unowned character"}), 400
-    party = {
-        "members": members,
-        "gold": gold,
-        "relics": relics,
-        "cards": cards,
-        "exp": dict.fromkeys(members, 0),
-        "level": dict.fromkeys(members, 1),
-        "rdr": rdr,
-    }
-
-    def update_party_data():
-        with get_save_manager().connection() as conn:
-            conn.execute(
-                "UPDATE runs SET party = ? WHERE id = ?",
-                (json.dumps(party), run_id),
-            )
-
-    await asyncio.to_thread(update_party_data)
-    return jsonify({"party": members})
-
-
-@bp.get("/map/<run_id>")
-async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
-    # Ensure run logging is initialized for this run (handles server restarts)
+async def get_map(run_id: str) -> dict[str, object]:
     try:
-        from battle_logging import (  # local import to avoid cycles
-            get_current_run_logger,
-        )
-        from battle_logging import start_run_logging  # local import to avoid cycles
+        from battle_logging import get_current_run_logger  # local import
         logger = get_current_run_logger()
-        if logger is None or getattr(logger, 'run_id', None) != run_id:
+        if logger is None or getattr(logger, "run_id", None) != run_id:
             start_run_logging(run_id)
     except Exception:
         pass
-
-    # Load map and party data
     state, rooms = await asyncio.to_thread(load_map, run_id)
     if not state:
-        return jsonify({"error": "run not found"}), 404
+        raise ValueError("run not found")
 
     def get_party_data():
         with get_save_manager().connection() as conn:
@@ -238,7 +158,6 @@ async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
 
     party_state = await asyncio.to_thread(get_party_data)
 
-    # Determine current room state and what the frontend should display
     current_index = int(state.get("current", 0))
     current_room_data = None
     current_room_type = None
@@ -247,26 +166,25 @@ async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
     if rooms and 0 <= current_index < len(rooms):
         current_node = rooms[current_index]
         current_room_type = current_node.room_type
-
-        # Get next room type if available
         if current_index + 1 < len(rooms):
             next_room_type = rooms[current_index + 1].room_type
-
-        # Check if there's an active battle snapshot
         snap = battle_snapshots.get(run_id)
-        if snap is not None and current_room_type in {'battle-weak', 'battle-normal', 'battle-boss-floor'}:
+        if snap is not None and current_room_type in {
+            "battle-weak",
+            "battle-normal",
+            "battle-boss-floor",
+        }:
             current_room_data = snap
         elif state.get("awaiting_next"):
-            # Provide basic state when awaiting next room
             current_room_data = {
-                "result": current_room_type.replace('-', '_') if current_room_type else "unknown",
+                "result": current_room_type.replace("-", "_") if current_room_type else "unknown",
                 "awaiting_next": True,
                 "current_index": current_index,
                 "current_room": current_room_type,
-                "next_room": next_room_type
+                "next_room": next_room_type,
             }
 
-    response = {
+    return {
         "map": state,
         "party": party_state.get("members", []),
         "current_state": {
@@ -277,93 +195,25 @@ async def get_map(run_id: str) -> tuple[str, int, dict[str, object]]:
             "awaiting_card": state.get("awaiting_card", False),
             "awaiting_relic": state.get("awaiting_relic", False),
             "awaiting_loot": state.get("awaiting_loot", False),
-            "room_data": current_room_data
-        }
+            "room_data": current_room_data,
+        },
     }
 
-    return jsonify(response)
 
-
-@bp.delete("/run/<run_id>")
-async def end_run(run_id: str) -> tuple[str, int, dict[str, str]]:
-    task = battle_tasks.pop(run_id, None)
-    try:
-        if task is not None and not task.done():
-            task.cancel()
-            try:
-                await asyncio.sleep(0.001)
-            except Exception:
-                pass
-    except Exception:
-        pass
-    battle_snapshots.pop(run_id, None)
-
-    def delete_run():
-        with get_save_manager().connection() as conn:
-            cur = conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
-            return cur.rowcount
-
-    # End run logging before deleting
-    end_run_logging()
-
-    rowcount = await asyncio.to_thread(delete_run)
-    if rowcount == 0:
-        return jsonify({"error": "run not found"}), 404
-    return jsonify({"status": "ended"})
-
-
-@bp.delete("/runs")
-async def end_all_runs() -> tuple[str, int, dict[str, object]]:
-    """End all active runs: cancel battle tasks, clear snapshots, and delete rows."""
-    # Cancel any active battle tasks
-    cancelled = 0
-    try:
-        tasks = list(battle_tasks.items())
-        for run_id, task in tasks:
-            if task is not None and not task.done():
-                try:
-                    task.cancel()
-                    cancelled += 1
-                except Exception:
-                    pass
-        if tasks:
-            try:
-                await asyncio.sleep(0.001)
-            except Exception:
-                pass
-    except Exception:
-        pass
-    battle_tasks.clear()
-    battle_snapshots.clear()
-
-    def delete_all():
-        with get_save_manager().connection() as conn:
-            cur = conn.execute("SELECT COUNT(*) FROM runs")
-            count = cur.fetchone()[0]
-            conn.execute("DELETE FROM runs")
-            return count
-
-    # End run logging (global)
-    try:
-        end_run_logging()
-    except Exception:
-        pass
-
-    deleted = await asyncio.to_thread(delete_all)
-    return jsonify({"status": "ended", "deleted": deleted, "cancelled_tasks": cancelled})
-
-
-@bp.post("/run/<run_id>/next")
-async def advance_room(run_id: str) -> tuple[str, int, dict[str, object]]:
+async def advance_room(run_id: str) -> dict[str, object]:
     state, rooms = await asyncio.to_thread(load_map, run_id)
-    if state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot"):
-        return jsonify({"error": "awaiting reward"}), 400
-    if not state.get("awaiting_next"):
-        return jsonify({"error": "not ready"}), 400
+    if not rooms:
+        raise ValueError("run not found")
+
+    # Reset live battle state when advancing
+    battle_snapshots.pop(run_id, None)
+    task = battle_tasks.pop(run_id, None)
+    if task and not task.done():
+        task.cancel()
+
     state["current"] += 1
     state["awaiting_next"] = False
 
-    # If we have advanced past the end of the current floor, generate a new floor.
     if state["current"] >= len(rooms):
         try:
             last = rooms[-1]
@@ -373,22 +223,23 @@ async def advance_room(run_id: str) -> tuple[str, int, dict[str, object]]:
         except Exception:
             next_floor, loop, pressure = 1, 1, 0
 
-        # Generate the next floor using a seed derived from run_id and floor
-        generator = MapGenerator(f"{run_id}-floor-{next_floor}", floor=next_floor, loop=loop, pressure=pressure)
+        generator = MapGenerator(
+            f"{run_id}-floor-{next_floor}", floor=next_floor, loop=loop, pressure=pressure
+        )
         nodes = generator.generate_floor()
         state["rooms"] = [n.to_dict() for n in nodes]
-        state["current"] = 1  # enter at room index 1 (after start)
+        state["current"] = 1
         next_type = nodes[state["current"]].room_type if state["current"] < len(nodes) else None
     else:
-        # Continue within the current floor
-        next_type = rooms[state["current"]].room_type if state["current"] < len(rooms) else None
+        next_type = (
+            rooms[state["current"]].room_type if state["current"] < len(rooms) else None
+        )
 
     await asyncio.to_thread(save_map, run_id, state)
-    return jsonify({"next_room": next_type, "current_index": state["current"]})
+    return {"next_room": next_type, "current_index": state["current"]}
 
 
-@bp.get("/run/<run_id>/battles/<int:index>/summary")
-async def get_battle_summary(run_id: str, index: int):
+async def get_battle_summary(run_id: str, index: int) -> dict[str, object] | None:
     summary_path = (
         Path(__file__).resolve().parents[1]
         / "logs"
@@ -400,14 +251,12 @@ async def get_battle_summary(run_id: str, index: int):
         / "battle_summary.json"
     )
     if not summary_path.exists():
-        return jsonify({"error": "summary not found"}), 404
-
+        return None
     data = await asyncio.to_thread(summary_path.read_text)
-    return jsonify(json.loads(data))
+    return json.loads(data)
 
 
-@bp.get("/run/<run_id>/battles/<int:index>/events")
-async def get_battle_events(run_id: str, index: int):
+async def get_battle_events(run_id: str, index: int) -> dict[str, object] | None:
     events_path = (
         Path(__file__).resolve().parents[1]
         / "logs"
@@ -419,14 +268,12 @@ async def get_battle_events(run_id: str, index: int):
         / "events.json"
     )
     if not events_path.exists():
-        return jsonify({"error": "events not found"}), 404
-
+        return None
     data = await asyncio.to_thread(events_path.read_text)
-    return jsonify(json.loads(data))
+    return json.loads(data)
 
 
-@bp.post("/save/wipe")
-async def wipe_save() -> tuple[str, int, dict[str, str]]:
+async def wipe_save() -> None:
     def do_wipe():
         manager = get_save_manager()
         manager.db_path.unlink(missing_ok=True)
@@ -442,11 +289,9 @@ async def wipe_save() -> tuple[str, int, dict[str, str]]:
             )
 
     await asyncio.to_thread(do_wipe)
-    return jsonify({"status": "wiped"})
 
 
-@bp.get("/save/backup")
-async def backup_save() -> tuple[bytes, int, dict[str, str]]:
+async def backup_save() -> bytes:
     def get_backup_data():
         with get_save_manager().connection() as conn:
             conn.execute(
@@ -465,25 +310,19 @@ async def backup_save() -> tuple[bytes, int, dict[str, str]]:
     digest = hashlib.sha256(data.encode()).hexdigest()
     package = json.dumps({"hash": digest, "data": data}).encode()
     token = get_fernet().encrypt(package)
-    headers = {
-        "Content-Type": "application/octet-stream",
-        "Content-Disposition": "attachment; filename=backup.afsave",
-    }
-    return token, 200, headers
+    return token
 
 
-@bp.post("/save/restore")
-async def restore_save() -> tuple[str, int, dict[str, str]]:
-    blob = await request.get_data()
+async def restore_save(blob: bytes) -> None:
     try:
         package = get_fernet().decrypt(blob)
         obj = json.loads(package)
-    except Exception:
-        return jsonify({"error": "invalid backup"}), 400
+    except Exception as exc:  # noqa: BLE001
+        raise ValueError("invalid backup") from exc
     data = obj.get("data", "")
     digest = obj.get("hash", "")
     if hashlib.sha256(data.encode()).hexdigest() != digest:
-        return jsonify({"error": "hash mismatch"}), 400
+        raise ValueError("hash mismatch")
     payload = json.loads(data)
 
     def restore_data():
@@ -508,4 +347,3 @@ async def restore_save() -> tuple[str, int, dict[str, str]]:
             )
 
     await asyncio.to_thread(restore_data)
-    return jsonify({"status": "restored"})

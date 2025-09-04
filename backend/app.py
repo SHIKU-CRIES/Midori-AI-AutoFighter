@@ -33,8 +33,6 @@ from routes.gacha import bp as gacha_bp
 from routes.performance import perf_bp as performance_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp
-from routes.rooms import bp as rooms_bp
-from routes.runs import bp as runs_bp
 from routes.ui import bp as ui_bp
 
 configure_logging()
@@ -48,8 +46,6 @@ app = Quart(__name__)
 app.register_blueprint(assets_bp)
 app.register_blueprint(gacha_bp)
 app.register_blueprint(players_bp)
-app.register_blueprint(runs_bp)
-app.register_blueprint(rooms_bp)
 app.register_blueprint(rewards_bp)
 app.register_blueprint(config_bp)
 app.register_blueprint(catalog_bp)

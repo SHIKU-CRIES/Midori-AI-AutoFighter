@@ -15,6 +15,6 @@ describe('Party persistence', () => {
 
   test('saves updated party to backend', () => {
     const content = readFileSync(join(import.meta.dir, '../src/routes/+page.svelte'), 'utf8');
-    expect(content).toContain('updateParty(runId, selectedParty)');
+    expect(content).toContain('updateParty(selectedParty)');
   });
 });

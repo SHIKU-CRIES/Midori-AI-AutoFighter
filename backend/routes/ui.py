@@ -11,12 +11,13 @@ from game import save_map
 from quart import Blueprint
 from quart import jsonify
 from quart import request
-
-from routes.rewards import select_card
-from routes.rewards import select_relic
-from routes.rooms import room_action
-from routes.runs import advance_room
-from routes.runs import start_run
+from services.reward_service import select_card
+from services.reward_service import select_relic
+from services.room_service import room_action
+from services.run_service import advance_room
+from services.run_service import get_battle_events
+from services.run_service import get_battle_summary
+from services.run_service import start_run
 
 bp = Blueprint("ui", __name__)
 
@@ -210,35 +211,27 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
         run_id = get_default_active_run()
 
         if action == "start_run":
-            # Start a new run - need to pass data in request format
-            from quart import request as current_request
-
-            # Temporarily patch request data for start_run function
-            original_get_json = current_request.get_json
-
-            async def mock_get_json(silent=True):
-                return {
-                    "party": params.get("party", ["player"]),
-                    "damage_type": params.get("damage_type", ""),
-                    "pressure": params.get("pressure", 0)
-                }
-
-            current_request.get_json = mock_get_json
-
+            members = params.get("party", ["player"])
+            damage_type = params.get("damage_type", "")
+            pressure = params.get("pressure", 0)
             try:
-                result = await start_run()
-                return result
-            finally:
-                # Restore original method
-                current_request.get_json = original_get_json
+                result = await start_run(members, damage_type, pressure)
+            except ValueError as exc:
+                return jsonify({"error": str(exc)}), 400
+            return jsonify(result)
 
         elif action == "room_action":
             if not run_id:
                 return jsonify({"error": "No active run"}), 400
 
             room_id = params.get("room_id", "0")
-            result = await room_action(run_id, room_id, params)
-            return result
+            try:
+                result = await room_action(run_id, room_id, params)
+            except LookupError as exc:
+                return jsonify({"error": str(exc)}), 404
+            except ValueError as exc:
+                return jsonify({"error": str(exc)}), 400
+            return jsonify(result)
 
         elif action == "advance_room":
             if not run_id:
@@ -280,8 +273,11 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
                         "current_step": next_steps[0]
                     })
 
-            result = await advance_room(run_id)
-            return result
+            try:
+                result = await advance_room(run_id)
+            except ValueError as exc:
+                return jsonify({"error": str(exc)}), 400
+            return jsonify(result)
 
         elif action == "choose_card":
             if not run_id:
@@ -291,23 +287,11 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
             if not card_id:
                 return jsonify({"error": "Missing card_id"}), 400
 
-            # Create a mock request object for select_card function
-            from quart import request as current_request
-
-            # Temporarily patch request data for select_card function
-            original_get_json = current_request.get_json
-
-            async def mock_get_json(silent=True):
-                return {"card": card_id}
-
-            current_request.get_json = mock_get_json
-
             try:
-                result = await select_card(run_id)
-                return result
-            finally:
-                # Restore original method
-                current_request.get_json = original_get_json
+                result = await select_card(run_id, card_id)
+            except ValueError as exc:
+                return jsonify({"error": str(exc)}), 400
+            return jsonify(result)
 
         elif action == "choose_relic":
             if not run_id:
@@ -317,26 +301,36 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
             if not relic_id:
                 return jsonify({"error": "Missing relic_id"}), 400
 
-            # Create a mock request object for select_relic function
-            from quart import request as current_request
-
-            # Temporarily patch request data for select_relic function
-            original_get_json = current_request.get_json
-
-            async def mock_get_json(silent=True):
-                return {"relic": relic_id}
-
-            current_request.get_json = mock_get_json
-
             try:
-                result = await select_relic(run_id)
-                return result
-            finally:
-                # Restore original method
-                current_request.get_json = original_get_json
+                result = await select_relic(run_id, relic_id)
+            except ValueError as exc:
+                return jsonify({"error": str(exc)}), 400
+            return jsonify(result)
 
         else:
             return jsonify({"error": f"Unknown action: {action}"}), 400
 
     except Exception as e:
         return jsonify({"error": f"Action failed: {str(e)}"}), 500
+
+
+@bp.get("/battles/<int:index>/summary")
+async def battle_summary(index: int):
+    run_id = get_default_active_run()
+    if not run_id:
+        return jsonify({"error": "No active run"}), 404
+    data = await get_battle_summary(run_id, index)
+    if data is None:
+        return jsonify({"error": "summary not found"}), 404
+    return jsonify(data)
+
+
+@bp.get("/battles/<int:index>/events")
+async def battle_events(index: int):
+    run_id = get_default_active_run()
+    if not run_id:
+        return jsonify({"error": "No active run"}), 404
+    data = await get_battle_events(run_id, index)
+    if data is None:
+        return jsonify({"error": "events not found"}), 404
+    return jsonify(data)

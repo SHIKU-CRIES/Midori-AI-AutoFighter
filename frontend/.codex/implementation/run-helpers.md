@@ -1,10 +1,13 @@
 # Run Helpers
 
 - `src/lib/runState.js`: utilities for saving and loading run identifiers in `localStorage`.
-- `src/lib/runApi.js`: thin wrappers around backend endpoints used during a run (start, room actions, rewards).
-  `handleFetch` attaches HTTP status codes to thrown errors and suppresses
-  the error overlay on `404` responses so polling can end quietly when a run
-  disappears.
+- `src/lib/systems/uiApi.js`: primary UI-centric API for starting runs,
+  performing room actions, advancing rooms, updating parties, fetching battle
+  summaries/events, catalog lookups, and selecting rewards.
+  `handleFetch` normalizes backend errors and reports them via the overlay
+  system.
+- The legacy `runApi.js` module has been removed; all callers should use
+  the `uiApi` helpers.
 - `src/lib/MainMenu.svelte`: renders the stained glass side menu from a list of items.
 - `src/lib/RunButtons.svelte`: module script exporting `buildRunMenu` for constructing the menu item list. Inventory was removed from this menu and moved to the in‑run NavBar.
 - `src/lib/api.js`: `getBackendFlavor()` reports which backend flavor is active.

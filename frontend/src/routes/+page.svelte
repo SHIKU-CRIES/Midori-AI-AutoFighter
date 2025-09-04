@@ -12,20 +12,18 @@
     chooseRelic,
     advanceRoom,
     getMap,
-    updateParty,
     getActiveRuns,
     getUIState,
     sendAction,
-    loadRunState, 
-    saveRunState, 
+    loadRunState,
+    saveRunState,
     clearRunState,
     FEEDBACK_URL,
-    openOverlay, 
-    backOverlay, 
-    homeOverlay,
-    pauseCombat,
-    resumeCombat
+    openOverlay,
+    backOverlay,
+    homeOverlay
   } from '$lib';
+  import { updateParty } from '$lib/systems/uiApi.js';
   import { buildRunMenu } from '$lib/components/RunButtons.svelte';
   import { browser, dev } from '$app/environment';
 
@@ -372,7 +370,7 @@
 
   async function handlePartySave() {
     if (runId) {
-      await updateParty(runId, selectedParty);
+      await updateParty(selectedParty);
     }
     backOverlay();
   }
@@ -434,11 +432,11 @@
     openOverlay('combat-viewer');
   }
 
-  // Combat pause/resume functions using real API
+  // Combat pause/resume functions using roomAction
   async function handlePauseCombat() {
     if (!runId) return;
     try {
-      await pauseCombat(runId);
+      await roomAction('0', 'pause');
       console.log('Combat paused');
     } catch (error) {
       console.error('Failed to pause combat:', error);
@@ -448,7 +446,7 @@
   async function handleResumeCombat() {
     if (!runId) return;
     try {
-      await resumeCombat(runId);
+      await roomAction('0', 'resume');
       console.log('Combat resumed');
     } catch (error) {
       console.error('Failed to resume combat:', error);
@@ -883,12 +881,12 @@
       // Advance progression until the backend actually advances the room.
       // This collapses any remaining progression steps (e.g., loot → review)
       // so a single click proceeds.
-      let res = await advanceRoom(runId);
+      let res = await advanceRoom();
       let guard = 0;
       while (res && res.progression_advanced && guard++ < 5) {
         // Small delay to allow state write
         await new Promise((r) => setTimeout(r, 50));
-        res = await advanceRoom(runId);
+        res = await advanceRoom();
       }
       if (res && typeof res.current_index === 'number') {
         currentIndex = res.current_index;
@@ -931,7 +929,7 @@
         const noChoices = ((snap?.card_choices?.length || 0) === 0) && ((snap?.relic_choices?.length || 0) === 0);
         if (snap?.awaiting_next && noChoices) {
           try {
-            const res2 = await advanceRoom(runId);
+            const res2 = await advanceRoom();
             if (res2 && typeof res2.current_index === 'number') {
               currentIndex = res2.current_index;
               // Refresh map data for retry attempts too
@@ -968,25 +966,7 @@
 
   async function handleLootAcknowledge() {
     if (!runId) return;
-    try {
-      // Import and call the acknowledgeLoot function
-      const { acknowledgeLoot } = await import('$lib/systems/runApi.js');
-      await acknowledgeLoot(runId);
-      // After acknowledging loot, the backend should set awaiting_next=true
-      // Refresh the room data to reflect the updated state
-      const refreshed = await roomAction("0", {"action": "snapshot"});
-      if (refreshed) {
-        roomData = refreshed;
-        // If the backend now indicates awaiting_next, proceed to next room
-        if (refreshed.awaiting_next) {
-          await handleNextRoom();
-        }
-      }
-    } catch (e) {
-      // Show error if loot acknowledgment fails
-      const { openOverlay } = await import('$lib/systems/OverlayController.js');
-      openOverlay('error', { message: e.message, traceback: e.stack || '' });
-    }
+    await handleNextRoom();
   }
 
   async function handleForceNextRoom() {
@@ -1003,7 +983,7 @@
     // Start state polling when force advancing room
     startStatePoll();
     try {
-      const res = await advanceRoom(runId);
+      const res = await advanceRoom();
       if (res && typeof res.current_index === 'number') {
         currentIndex = res.current_index;
         if (res.next_room) currentRoomType = res.next_room;
