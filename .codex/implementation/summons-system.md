@@ -18,6 +18,8 @@ The Midori AI AutoFighter now has a unified summons system that provides a consi
 - Event-driven cleanup (battle end, summoner defeat, turn expiration)
 - Configurable summon limits per summoner
 - Integration with party system for battle participation
+  (summons fight alongside the party but are excluded from party snapshots
+  and reported separately under `party_summons` to avoid duplicate listings)
 - Thread-safe class-level tracking
 
 ### Key Features

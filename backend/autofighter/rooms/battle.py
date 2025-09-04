@@ -22,6 +22,7 @@ from autofighter.effects import create_stat_buff
 from autofighter.mapgen import MapNode
 from autofighter.relics import apply_relics
 from autofighter.relics import relic_choices
+from autofighter.summons import Summon
 from autofighter.summons import SummonManager
 from plugins.damage_types import ALL_DAMAGE_TYPES
 
@@ -276,7 +277,11 @@ class BattleRoom(Room):
             await progress(
                 {
                     "result": "battle",
-                    "party": [_serialize(m) for m in combat_party.members],
+                    "party": [
+                        _serialize(m)
+                        for m in combat_party.members
+                        if not isinstance(m, Summon)
+                    ],
                     "foes": [_serialize(f) for f in foes],
                     "party_summons": _collect_summons(combat_party.members),
                     "foe_summons": _collect_summons(foes),
@@ -414,7 +419,11 @@ class BattleRoom(Room):
                             await progress(
                                 {
                                     "result": "battle",
-                                    "party": [_serialize(m) for m in combat_party.members],
+                                    "party": [
+                                        _serialize(m)
+                                        for m in combat_party.members
+                                        if not isinstance(m, Summon)
+                                    ],
                                     "foes": [_serialize(f) for f in foes],
                                     "party_summons": _collect_summons(combat_party.members),
                                     "foe_summons": _collect_summons(foes),
@@ -521,7 +530,11 @@ class BattleRoom(Room):
                         await progress(
                             {
                                 "result": "battle",
-                                "party": [_serialize(m) for m in combat_party.members],
+                                "party": [
+                                    _serialize(m)
+                                    for m in combat_party.members
+                                    if not isinstance(m, Summon)
+                                ],
                                 "foes": [_serialize(f) for f in foes],
                                 "party_summons": _collect_summons(combat_party.members),
                                 "foe_summons": _collect_summons(foes),
@@ -641,7 +654,11 @@ class BattleRoom(Room):
                 await progress(
                     {
                         "result": "battle",
-                        "party": [_serialize(m) for m in combat_party.members],
+                        "party": [
+                            _serialize(m)
+                            for m in combat_party.members
+                            if not isinstance(m, Summon)
+                        ],
                         "foes": [_serialize(f) for f in foes],
                         "party_summons": _collect_summons(combat_party.members),
                         "foe_summons": _collect_summons(foes),
