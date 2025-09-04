@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from collections import Counter
+import logging
 from pathlib import Path
 from typing import Any
 from typing import Optional
 
 from plugins import PluginLoader
+
+log = logging.getLogger(__name__)
 
 PASSIVE_LOADER: PluginLoader | None = None
 PASSIVE_REGISTRY: dict[str, type] | None = None
@@ -185,7 +188,15 @@ class PassiveRegistry:
             # Regular passive application
             stacks = min(count, getattr(cls, "max_stacks", count))
             for _ in range(stacks):
-                await passive_instance.apply(target, **kwargs)
+                try:
+                    await passive_instance.apply(target, **kwargs)
+                except TypeError:
+                    try:
+                        await passive_instance.apply(target)
+                    except TypeError:
+                        log.warning(
+                            "Passive %s incompatible with level_up kwargs", pid
+                        )
 
     def describe(self, target) -> list[dict[str, Any]]:
         """Return structured information for a target's passives."""
