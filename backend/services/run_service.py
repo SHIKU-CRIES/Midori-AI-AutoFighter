@@ -205,6 +205,13 @@ async def advance_room(run_id: str) -> dict[str, object]:
     if not rooms:
         raise ValueError("run not found")
 
+    if (
+        state.get("awaiting_card")
+        or state.get("awaiting_relic")
+        or state.get("awaiting_loot")
+    ):
+        raise ValueError("pending rewards must be collected before advancing")
+
     # Reset live battle state when advancing
     battle_snapshots.pop(run_id, None)
     task = battle_tasks.pop(run_id, None)

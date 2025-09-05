@@ -242,8 +242,18 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
             if not run_id:
                 return jsonify({"error": "No active run"}), 400
 
-            # Check if we're advancing from any reward mode
+            # Load current map state to ensure rewards are resolved
             state, rooms = await asyncio.to_thread(load_map, run_id)
+            if (
+                state.get("awaiting_card")
+                or state.get("awaiting_relic")
+                or state.get("awaiting_loot")
+            ):
+                return (
+                    jsonify({"error": "Cannot advance room while rewards are pending"}),
+                    400,
+                )
+
             progression = state.get("reward_progression")
 
             if progression and progression.get("current_step"):
