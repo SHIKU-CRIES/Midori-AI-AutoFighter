@@ -16,7 +16,7 @@
 - `card_choices` (array): up to three card options with `id`, `name`, and `stars`.
 - `relic_choices` (array): up to three relic options with `id`, `name`, and `stars`.
 - `loot` (object): summary of rewards with `gold`, `card_choices`, `relic_choices`, and `items` arrays.
-- `foes` (array): stats for spawned foes.
+- `foes` (array): stats for spawned foes. Each foe entry includes a `rank` string such as `"normal"` or `"boss"` indicating encounter difficulty.
 
 Generic damage types are reserved for the Luna player character; other combatants use elemental types such as Fire, Ice, Lightning, Light, Dark, or Wind.
 
@@ -107,7 +107,8 @@ Example:
       "passives": [],
       "dots": [],
       "hots": [],
-      "gold": 0
+      "gold": 0,
+      "rank": "normal"
     }
   ]
 }

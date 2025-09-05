@@ -69,6 +69,8 @@ for details.
 
 Player and foe base classes assign a random damage type when none is
 specified, and battles respect these preset elements without rolling new ones.
+Foe data returned from battle endpoints now includes a `rank` string such as
+`normal` or `boss` so clients can distinguish encounter difficulty.
 
 Foe balance: foes receive a 10× debuff to core stats (HP, ATK, DEF) before
 room scaling is applied. This global pre‑scale adjustment happens in
