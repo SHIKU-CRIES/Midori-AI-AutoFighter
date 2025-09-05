@@ -2,6 +2,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { describe, test, expect, mock } from 'bun:test';
 
+process.env.VITE_API_BASE = 'http://backend.test';
+
 describe('battle polling', () => {
   test('stops on error snapshots', () => {
     const content = readFileSync(
