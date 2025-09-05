@@ -13,6 +13,8 @@ from battle_logging import end_battle_logging
 
 # Import battle logging
 from battle_logging import start_battle_logging
+from services.user_level_service import gain_user_exp
+from services.user_level_service import get_user_level
 
 from autofighter.cards import apply_cards
 from autofighter.cards import card_choices
@@ -710,6 +712,11 @@ class BattleRoom(Room):
                 except Exception:
                     # Do not let EXP calculation break battle resolution
                     pass
+            try:
+                level = get_user_level()
+                gain_user_exp(int(exp_reward / max(1, level)))
+            except Exception:
+                pass
         party_data = [_serialize(p) for p in party.members]
         foes_data = [_serialize(f) for f in foes]
         party_summons = _collect_summons(party.members)

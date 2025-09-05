@@ -596,3 +596,27 @@ def add_status_hook(hook: StatusHook) -> None:
 def apply_status_hooks(stats: "Stats") -> None:
     for hook in STATUS_HOOKS:
         hook(stats)
+
+
+def _apply_user_level(stats: "Stats") -> None:
+    from services.user_level_service import get_user_level
+
+    try:
+        level = get_user_level()
+        mult = 1 + level * 0.01
+        stats._base_max_hp = int(stats._base_max_hp * mult)
+        stats._base_atk = int(stats._base_atk * mult)
+        stats._base_defense = int(stats._base_defense * mult)
+        stats._base_crit_rate *= mult
+        stats._base_crit_damage *= mult
+        stats._base_effect_hit_rate *= mult
+        stats._base_mitigation *= mult
+        stats._base_regain = int(stats._base_regain * mult)
+        stats._base_dodge_odds *= mult
+        stats._base_effect_resistance *= mult
+        stats._base_vitality *= mult
+    except Exception:
+        pass
+
+
+add_status_hook(_apply_user_level)
