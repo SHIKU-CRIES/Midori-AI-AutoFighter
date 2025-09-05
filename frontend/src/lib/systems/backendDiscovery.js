@@ -7,7 +7,7 @@ export async function getApiBase() {
     return cached;
   }
 
-  const envBase = (import.meta.env && import.meta.env.VITE_API_BASE) || process.env.VITE_API_BASE;
+  const envBase = import.meta.env && import.meta.env.VITE_API_BASE;
   if (envBase) {
     cached = envBase;
     return cached;
