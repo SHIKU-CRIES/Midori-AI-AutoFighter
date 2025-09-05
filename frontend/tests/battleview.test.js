@@ -73,6 +73,10 @@ describe('BattleView layout and polling', () => {
     expect(fighterPortrait).toContain('@keyframes ult-pulse');
   });
 
+  test('accepts optional rank tag prop', () => {
+    expect(fighterPortrait).toContain('rankTag');
+  });
+
   test('polling respects framerate settings', async () => {
     async function measure(fps) {
       const pollDelay = 1000 / fps;
