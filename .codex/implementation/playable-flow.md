@@ -6,7 +6,7 @@ endpoint with the selected party. The backend creates a run in the encrypted
 `AF_DB_PASSWORD`) and returns a `run_id` with the initial map layout.
 
 After confirming the lineup in a modal PartyPicker, the client immediately
-switches to the map view showing upcoming rooms. The confirmation buttons sit in a stained-glass row so they match other UI controls. A matching stained-glass bar in the top-left now provides quick navigation: the diamond icon returns home, the user icon opens the Player Editor, the cog opens Settings, and the arrow steps back to the prior view. Players can reopen the map at
+switches to the map view showing upcoming rooms. The confirmation buttons sit in a stained-glass row so they match other UI controls. A matching stained-glass bar in the top-left now provides quick navigation: the diamond icon returns home, the user icon opens the Character Editor, the cog opens Settings, and the arrow steps back to the prior view. Players can reopen the map at
 any time via the **Map** button, which fetches the latest floor state and
 renders nodes in `MapDisplay.svelte` with the boss at the top, the current room highlighted at the bottom, and future rooms grayed out. The **Edit** button loads the player's
 configuration and opens `PlayerEditor` so pronouns, damage type, and starting

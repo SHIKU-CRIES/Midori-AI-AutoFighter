@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { getUpgrade, upgradeCharacter, upgradePlayerStat } from '../systems/api.js';
+  import { getUpgrade, upgradeCharacter, upgradeStat } from '../systems/api.js';
   import { createEventDispatcher } from 'svelte';
   import { getElementColor } from '../systems/assetLoader.js';
 
@@ -12,7 +12,7 @@
   let items = {};
   let statUpgrades = [];
   let statTotals = {};
-  let upgradePoints = null; // only for player
+  let upgradePoints = 0;
   let loading = true;
   let starLevel = 4;
   let itemCount = 1;
@@ -32,7 +32,7 @@
       items = data.items || {};
       statUpgrades = data.stat_upgrades || [];
       statTotals = data.stat_totals || {};
-      upgradePoints = typeof data.upgrade_points === 'number' ? data.upgrade_points : null;
+      upgradePoints = Number(data.upgrade_points) || 0;
     } finally {
       loading = false;
     }
@@ -60,19 +60,17 @@
     try {
       await upgradeCharacter(id, Number(starLevel), Number(itemCount));
       await load();
-      message = isPlayer() ? 'Converted to upgrade points.' : 'Applied random stat boosts.';
-      // Notify parent to refresh displayed stats/roster
+      message = 'Converted to upgrade points.';
       dispatch('upgraded', { id, starLevel: Number(starLevel), itemCount: Number(itemCount) });
     } catch (e) {
       message = e?.message || 'Upgrade failed';
     }
   }
 
-  async function spendPlayerPoints() {
-    if (!isPlayer()) return;
+  async function spendPointsFn() {
     message = '';
     try {
-      const res = await upgradePlayerStat(Number(spendPoints), String(spendStat));
+      const res = await upgradeStat(id, Number(spendPoints), String(spendStat));
       await load();
       message = `Upgraded ${res?.stat_upgraded || spendStat} by ${(res?.upgrade_percent ?? 0) * 100}%`;
       dispatch('upgraded', { id, spent: Number(spendPoints), stat: String(spendStat) });
@@ -91,12 +89,10 @@
       <div class="label">Element items</div>
       <div class="value">{element}: 1★ {have1}, 2★ {have2}, 3★ {have3}, 4★ {have4}</div>
     </div>
-    {#if isPlayer() && upgradePoints !== null}
-      <div class="row"><div class="label">Upgrade points</div><div class="value">{upgradePoints}</div></div>
-    {/if}
+    <div class="row"><div class="label">Upgrade points</div><div class="value">{upgradePoints}</div></div>
 
     <div class="section">
-      <div class="label">Use items</div>
+      <div class="label">Convert items</div>
       <div class="controls">
         <label>Star
           <select bind:value={starLevel} class="themed">
@@ -109,36 +105,30 @@
         <label>Count
           <input type="number" min="1" bind:value={itemCount} class="themed" />
         </label>
-        <button class="themed" on:click={useItems} disabled={!canUse}>
-          {isPlayer() ? 'Convert to Points' : 'Use Items'}
-        </button>
+        <button class="themed" on:click={useItems} disabled={!canUse}>Convert to Points</button>
       </div>
-      <div class="hint">
-        Player: converts any element items into points. Others: must match {element}.
-      </div>
+      <div class="hint">Player can convert any element items; others must match {element}.</div>
     </div>
 
-    {#if isPlayer()}
-      <div class="section">
-        <div class="label">Spend points</div>
-        <div class="controls">
-          <label>Stat
-            <select bind:value={spendStat} class="themed">
-              {#each UPGRADEABLE_STATS as s}
-                <option value={s}>{s}</option>
-              {/each}
-            </select>
-          </label>
-          <label>Points
-            <input type="number" min="1" bind:value={spendPoints} class="themed" />
-          </label>
-          <button class="themed" on:click={spendPlayerPoints} disabled={!upgradePoints || spendPoints < 1}>Spend</button>
-        </div>
-        {#if Object.keys(statTotals).length}
-          <div class="hint">Totals: {Object.entries(statTotals).map(([k,v]) => `${k}: ${(v*100).toFixed(2)}%`).join(', ')}</div>
-        {/if}
+    <div class="section">
+      <div class="label">Spend points</div>
+      <div class="controls">
+        <label>Stat
+          <select bind:value={spendStat} class="themed">
+            {#each UPGRADEABLE_STATS as s}
+              <option value={s}>{s}</option>
+            {/each}
+          </select>
+        </label>
+        <label>Points
+          <input type="number" min="1" bind:value={spendPoints} class="themed" />
+        </label>
+        <button class="themed" on:click={spendPointsFn} disabled={!upgradePoints || spendPoints < 1}>Spend</button>
       </div>
-    {/if}
+      {#if Object.keys(statTotals).length}
+        <div class="hint">Totals: {Object.entries(statTotals).map(([k,v]) => `${k}: ${(v*100).toFixed(2)}%`).join(', ')}</div>
+      {/if}
+    </div>
 
     {#if message}
       <div class="msg">{message}</div>

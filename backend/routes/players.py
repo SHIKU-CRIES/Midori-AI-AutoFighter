@@ -4,7 +4,6 @@ import asyncio
 from dataclasses import fields
 import json
 import logging
-import random
 from typing import Dict
 from typing import List
 
@@ -292,6 +291,8 @@ async def get_player_editor() -> tuple[str, int, dict[str, object]]:
             "hp": stats.get("hp", 0),
             "attack": stats.get("attack", 0),
             "defense": stats.get("defense", 0),
+            "crit_rate": stats.get("crit_rate", 0),
+            "crit_damage": stats.get("crit_damage", 0),
         }
     )
 
@@ -305,9 +306,11 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
         hp = int(data.get("hp", 0))
         attack = int(data.get("attack", 0))
         defense = int(data.get("defense", 0))
+        crit_rate = int(data.get("crit_rate", 0))
+        crit_damage = int(data.get("crit_damage", 0))
     except (TypeError, ValueError):
         return jsonify({"error": "invalid stats"}), 400
-    total = hp + attack + defense
+    total = hp + attack + defense + crit_rate + crit_damage
     if len(pronouns) > 15:
         return jsonify({"error": "invalid pronouns"}), 400
     allowed = {"Light", "Dark", "Wind", "Lightning", "Fire", "Ice"}
@@ -317,12 +320,14 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
         return jsonify({"error": "over-allocation"}), 400
 
     log.debug(
-        "Updating player editor: pronouns=%s, damage_type=%s, hp=%d, attack=%d, defense=%d",
+        "Updating player editor: pronouns=%s, damage_type=%s, hp=%d, attack=%d, defense=%d, crit_rate=%d, crit_damage=%d",
         pronouns,
         damage_type,
         hp,
         attack,
         defense,
+        crit_rate,
+        crit_damage,
     )
 
     def update_player_data():
@@ -338,7 +343,13 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
                 "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
                 (
                     "player_stats",
-                    json.dumps({"hp": hp, "attack": attack, "defense": defense}),
+                    json.dumps({
+                        "hp": hp,
+                        "attack": attack,
+                        "defense": defense,
+                        "crit_rate": crit_rate,
+                        "crit_damage": crit_damage,
+                    }),
                 ),
             )
             if damage_type:
@@ -354,7 +365,6 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
 
 # Constants for new upgrade system
 UPGRADEABLE_STATS = ["max_hp", "atk", "defense", "crit_rate", "crit_damage"]
-STAT_BOOST_PERCENTAGES = {1: 0.001, 2: 0.02, 3: 0.03, 4: 0.04}  # 0.1%, 2%, 3%, 4%
 PLAYER_POINTS_VALUES = {1: 1, 2: 150, 3: 22500, 4: 3375000}
 
 
@@ -421,17 +431,6 @@ def _add_player_upgrade_points(player_id: str, points: int):
         conn.commit()
 
 
-def _add_stat_upgrade(player_id: str, stat_name: str, upgrade_percent: float, source_star: int):
-    """Add a stat upgrade record for a player."""
-    with get_save_manager().connection() as conn:
-        _create_upgrade_tables()
-        conn.execute("""
-            INSERT INTO player_stat_upgrades (player_id, stat_name, upgrade_percent, source_star)
-            VALUES (?, ?, ?, ?)
-        """, (player_id, stat_name, upgrade_percent, source_star))
-        conn.commit()
-
-
 def _spend_player_upgrade_points(player_id: str, points: int, stat_name: str, upgrade_percent: float) -> bool:
     """Spend upgrade points for a specific stat upgrade. Returns True if successful."""
     with get_save_manager().connection() as conn:
@@ -469,16 +468,11 @@ async def get_player_upgrade(pid: str):
             stat_name = upgrade["stat_name"]
             stat_totals[stat_name] = stat_totals.get(stat_name, 0) + upgrade["upgrade_percent"]
 
-        result = {
+        return {
             "stat_upgrades": stat_upgrades,
             "stat_totals": stat_totals,
+            "upgrade_points": _get_player_upgrade_points(pid),
         }
-
-        # If this is the player character, include points
-        if pid == "player":
-            result["upgrade_points"] = _get_player_upgrade_points(pid)
-
-        return result
 
     new_data = await asyncio.to_thread(fetch_new_upgrade_data)
 
@@ -522,64 +516,40 @@ async def upgrade_player(pid: str):
         return jsonify({"error": "item_count must be at least 1"}), 400
 
     def perform_upgrade():
+        total_points = 0
+        consumed_items = {}
+        points_per_item = PLAYER_POINTS_VALUES[star_level]
+
         if pid == "player":
-            # Player character: use any damage type items for points
-            total_points = 0
-            consumed_items = {}
-
-            # Try to consume items of the specified star level from any damage type
-            points_per_item = PLAYER_POINTS_VALUES[star_level]
             items_needed = item_count
-
-            # Check all damage types for items of this star level
             for damage_type in ["generic", "light", "dark", "wind", "lightning", "fire", "ice"]:
                 item_key = f"{damage_type}_{star_level}"
                 available = items.get(item_key, 0)
-
                 if available > 0:
-                    consume_count = min(available, items_needed)
-                    items[item_key] -= consume_count
-                    consumed_items[item_key] = consume_count
-                    total_points += consume_count * points_per_item
-                    items_needed -= consume_count
-
+                    consume = min(available, items_needed)
+                    items[item_key] -= consume
+                    consumed_items[item_key] = consume
+                    total_points += consume * points_per_item
+                    items_needed -= consume
                     if items_needed <= 0:
                         break
-
             if items_needed > 0:
                 return {"error": f"insufficient {star_level}★ items (need {item_count}, found {item_count - items_needed})"}
-
-            # Add points to player
-            _add_player_upgrade_points(pid, total_points)
-
-            return {
-                "points_gained": total_points,
-                "items_consumed": consumed_items,
-                "total_points": _get_player_upgrade_points(pid)
-            }
         else:
-            # Other characters: must match damage type, give random stat boost
-            element = inst.element_id.lower()  # Convert to lowercase to match item keys
+            element = inst.element_id.lower()
             item_key = f"{element}_{star_level}"
-
             if items.get(item_key, 0) < item_count:
                 return {"error": f"insufficient {element} {star_level}★ items"}
-
-            # Consume items and apply random stat upgrades
             items[item_key] -= item_count
-            upgrade_percent = STAT_BOOST_PERCENTAGES[star_level]
-            upgrades_applied = []
+            consumed_items[item_key] = item_count
+            total_points = item_count * points_per_item
 
-            for _ in range(item_count):
-                # Pick random stat
-                stat_name = random.choice(UPGRADEABLE_STATS)
-                _add_stat_upgrade(pid, stat_name, upgrade_percent, star_level)
-                upgrades_applied.append({"stat": stat_name, "percent": upgrade_percent})
-
-            return {
-                "upgrades_applied": upgrades_applied,
-                "items_consumed": {item_key: item_count}
-            }
+        _add_player_upgrade_points(pid, total_points)
+        return {
+            "points_gained": total_points,
+            "items_consumed": consumed_items,
+            "total_points": _get_player_upgrade_points(pid),
+        }
 
     result = await asyncio.to_thread(perform_upgrade)
 
@@ -592,7 +562,7 @@ async def upgrade_player(pid: str):
     # Get updated information
     new_data = await asyncio.to_thread(lambda: {
         "stat_upgrades": _get_player_stat_upgrades(pid),
-        "upgrade_points": _get_player_upgrade_points(pid) if pid == "player" else None
+        "upgrade_points": _get_player_upgrade_points(pid),
     })
 
     return jsonify({
@@ -604,9 +574,7 @@ async def upgrade_player(pid: str):
 
 @bp.post("/players/<pid>/upgrade-stat")
 async def upgrade_player_stat(pid: str):
-    """Spend upgrade points on a specific stat (player character only)."""
-    if pid != "player":
-        return jsonify({"error": "stat upgrades only available for player character"}), 400
+    """Spend upgrade points on a specific stat."""
 
     data = await request.get_json(silent=True) or {}
     stat_name = data.get("stat_name")

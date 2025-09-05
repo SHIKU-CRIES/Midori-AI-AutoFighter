@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 import sqlcipher3
 
+POINTS_VALUES = {1: 1, 2: 150, 3: 22500, 4: 3375000}
 
 @pytest.fixture()
 def app_with_db(tmp_path, monkeypatch):
@@ -58,54 +59,37 @@ def app_with_db(tmp_path, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_character_random_stat_upgrade(app_with_db):
-    """Test that non-player characters get random stat upgrades."""
+async def test_character_point_conversion(app_with_db):
+    """Non-player characters convert items into upgrade points."""
     app, db_path = app_with_db
     client = app.test_client()
 
-    # Test new API: upgrade ally character with 2-star items
     resp = await client.post(
         "/players/ally/upgrade",
         json={"star_level": 2, "item_count": 2}
     )
     data = await resp.get_json()
 
-    # Should successfully upgrade
-    assert "upgrades_applied" in data
-    assert len(data["upgrades_applied"]) == 2  # 2 upgrades
-
-    # Each upgrade should be 2% (0.02)
-    for upgrade in data["upgrades_applied"]:
-        assert upgrade["percent"] == 0.02
-        assert upgrade["stat"] in ["max_hp", "atk", "defense", "crit_rate", "crit_damage"]
-
-    # Should consume 2 fire_2 items
+    expected = POINTS_VALUES[2] * 2
+    assert data["points_gained"] == expected
+    assert data["total_points"] == expected
     assert data["items_consumed"]["fire_2"] == 2
-
-    # Check remaining items
-    assert data["items"]["fire_2"] == 3  # 5 - 2 = 3
-
-    # Check that stat upgrades are recorded
-    assert "stat_upgrades" in data
-    assert len(data["stat_upgrades"]) == 2
+    assert "upgrades_applied" not in data
 
 
 @pytest.mark.asyncio
 async def test_player_points_system(app_with_db):
-    """Test that player character gets points instead of direct upgrades."""
+    """Player character also converts items into upgrade points."""
     app, db_path = app_with_db
     client = app.test_client()
 
-    # Test new API: upgrade player character with 1-star items
     resp = await client.post(
         "/players/player/upgrade",
         json={"star_level": 1, "item_count": 5}
     )
     data = await resp.get_json()
 
-    # Should gain points (1 point per 1-star item)
-    assert "points_gained" in data
-    assert data["points_gained"] == 5  # 5 * 1 = 5 points
+    assert data["points_gained"] == 5
     assert data["total_points"] == 5
 
 
@@ -143,30 +127,46 @@ async def test_player_spend_points(app_with_db):
 
 
 @pytest.mark.asyncio
-async def test_new_upgrade_data_in_get_endpoint(app_with_db):
-    """Test that GET endpoint returns new upgrade data."""
+async def test_ally_spend_points(app_with_db):
+    """Non-player characters can also spend points."""
     app, db_path = app_with_db
     client = app.test_client()
 
-    # Check initial state
-    resp = await client.get("/players/ally/upgrade")
-    initial_data = await resp.get_json()
-    initial_count = len(initial_data.get("stat_upgrades", []))
-
-    # Add some upgrades
     await client.post(
         "/players/ally/upgrade",
         json={"star_level": 2, "item_count": 1}
     )
 
-    # Get upgrade data
+    resp = await client.post(
+        "/players/ally/upgrade-stat",
+        json={"stat_name": "atk", "points": POINTS_VALUES[2]}
+    )
+    data = await resp.get_json()
+
+    assert data["stat_upgraded"] == "atk"
+    assert data["points_spent"] == POINTS_VALUES[2]
+
+
+@pytest.mark.asyncio
+async def test_new_upgrade_data_in_get_endpoint(app_with_db):
+    """GET endpoint surfaces upgrades and points."""
+    app, db_path = app_with_db
+    client = app.test_client()
+
+    await client.post(
+        "/players/ally/upgrade",
+        json={"star_level": 2, "item_count": 1}
+    )
+    await client.post(
+        "/players/ally/upgrade-stat",
+        json={"stat_name": "atk", "points": POINTS_VALUES[2]}
+    )
+
     resp = await client.get("/players/ally/upgrade")
     data = await resp.get_json()
 
-    # Should have new upgrade data
-    assert "stat_upgrades" in data
-    assert "stat_totals" in data
-    assert len(data["stat_upgrades"]) == initial_count + 1  # Should have one more upgrade
+    assert data["upgrade_points"] == 0
+    assert data["stat_totals"]["atk"] == pytest.approx(POINTS_VALUES[2] * 0.001)
 
 
 @pytest.mark.asyncio

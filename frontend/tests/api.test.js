@@ -8,11 +8,12 @@ import {
   setAutoCraft,
   getUpgrade,
   upgradeCharacter,
+  upgradeStat,
   wipeData,
   getLrmConfig,
   setLrmModel,
   testLrmModel
-} from '../src/lib/api.js';
+} from '../src/lib/systems/api.js';
 import {
   startRun,
   updateParty,
@@ -157,5 +158,11 @@ describe('api calls', () => {
     global.fetch = createFetch({ level: 1, items: {} });
     const result = await upgradeCharacter('player');
     expect(result).toEqual({ level: 1, items: {} });
+  });
+
+  test('upgradeStat spends points', async () => {
+    global.fetch = createFetch({ stat_upgraded: 'atk', points_spent: 1 });
+    const result = await upgradeStat('player', 1, 'atk');
+    expect(result).toEqual({ stat_upgraded: 'atk', points_spent: 1 });
   });
 });

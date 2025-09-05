@@ -13,7 +13,7 @@
   import CraftingMenu from './CraftingMenu.svelte';
   import BattleReview from './BattleReview.svelte';
   import RewardOverlay from './RewardOverlay.svelte';
-  import PlayerEditor from './PlayerEditor.svelte';
+  import CharacterEditor from './CharacterEditor.svelte';
   import InventoryPanel from './InventoryPanel.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import RunChooser from './RunChooser.svelte';
@@ -223,7 +223,7 @@
 
 {#if $overlayView === 'editor'}
   <OverlaySurface zIndex={1300}>
-    <PlayerEditor
+    <CharacterEditor
       {...editorState}
       on:close={() => dispatch('back')}
       on:save={(e) => { dispatch('editorSave', e.detail); dispatch('back'); }}

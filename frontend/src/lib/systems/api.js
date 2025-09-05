@@ -110,6 +110,7 @@ export async function craftItems() {
   });
 }
 
+// Player customization (pronouns, damage_type, hp, attack, defense, crit_rate, crit_damage)
 export async function getPlayerConfig() {
   return handleFetch(`/player/editor`, { cache: 'no-store' });
 }
@@ -201,9 +202,9 @@ export async function upgradeCharacter(id, starLevel, itemCount = 1) {
   });
 }
 
-// Spend player upgrade points on a specific stat (player only)
-export async function upgradePlayerStat(points, statName = 'atk') {
-  return handleFetch(`/players/player/upgrade-stat`, {
+// Spend upgrade points on a specific stat for the given character
+export async function upgradeStat(id, points, statName = 'atk') {
+  return handleFetch(`/players/${id}/upgrade-stat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ points, stat_name: statName })

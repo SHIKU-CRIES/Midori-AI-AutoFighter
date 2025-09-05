@@ -1,21 +1,16 @@
 <script>
   /*
-   * PlayerEditor.svelte
+   * CharacterEditor.svelte
    *
-   * Edits the player's customization:
-   * - Pronouns (string, ≤15 chars)
-   * - Damage Type (Light, Dark, Wind, Lightning, Fire, Ice)
-   * - Percent modifiers for HP, Attack, Defense (sum ≤ 100)
+   * Reusable editor for tweaking player or NPC starting stats.
+   * - Optional pronouns/damage type fields (for the player)
+   * - Percent modifiers for HP, Attack, Defense, Crit Rate, Crit Damage
+   *   (total allocation ≤ 100)
    *
    * Modes:
    * - Standalone (default): wrapped in MenuPanel with Save/Close controls.
    * - Embedded (embedded=true): no panel chrome or nav buttons; emits 'change'
    *   on every input so parents can reflect live values (without saving).
-   *
-   * Plans:
-   * - Add optional auto‑save toggle or an inline Save/Reset row in embedded
-   *   mode.
-   * - Validate and display remaining points shared with any future upgrades.
    */
   import MenuPanel from './MenuPanel.svelte';
   import { createEventDispatcher } from 'svelte';
@@ -24,16 +19,28 @@
   export let hp = 0;
   export let attack = 0;
   export let defense = 0;
+  export let critRate = 0;
+  export let critDamage = 0;
   // When embedded inside another panel, hide header/actions and outer panel chrome
   export let embedded = false;
+  // When false, hide pronouns/damageType fields (for non-player characters)
+  export let showIdentity = true;
   const maxPoints = 100;
   const dispatch = createEventDispatcher();
 
-  $: remaining = maxPoints - hp - attack - defense;
+  $: remaining = maxPoints - hp - attack - defense - critRate - critDamage;
 
   // Notify parent about any change in embedded mode so it can recompute stats
   function broadcastChange() {
-    dispatch('change', { pronouns, damageType, hp: +hp, attack: +attack, defense: +defense });
+    dispatch('change', {
+      pronouns,
+      damageType,
+      hp: +hp,
+      attack: +attack,
+      defense: +defense,
+      critRate: +critRate,
+      critDamage: +critDamage,
+    });
   }
 
   function close() { dispatch('close'); }
@@ -44,31 +51,35 @@
       hp: +hp,
       attack: +attack,
       defense: +defense,
+      critRate: +critRate,
+      critDamage: +critDamage,
     });
   }
 </script>
 
 {#if !embedded}
-<MenuPanel data-testid="player-editor" padding="0.75rem">
+<MenuPanel data-testid="character-editor" padding="0.75rem">
   <div class="editor">
     <header class="editor-header">
-      <h3>Player Editor</h3>
+      <h3>Character Editor</h3>
       <div class="spacer" />
       <button class="mini" on:click={close} title="Close">✕</button>
     </header>
-    <div class="grid">
-      <label for="pronouns">Pronouns</label>
-      <input id="pronouns" type="text" maxlength="15" bind:value={pronouns} />
-      <label for="damage">Damage Type</label>
-      <select id="damage" bind:value={damageType}>
-        <option>Light</option>
-        <option>Dark</option>
-        <option>Wind</option>
-        <option>Lightning</option>
-        <option>Fire</option>
-        <option>Ice</option>
-      </select>
-    </div>
+    {#if showIdentity}
+      <div class="grid">
+        <label for="pronouns">Pronouns</label>
+        <input id="pronouns" type="text" maxlength="15" bind:value={pronouns} />
+        <label for="damage">Damage Type</label>
+        <select id="damage" bind:value={damageType}>
+          <option>Light</option>
+          <option>Dark</option>
+          <option>Wind</option>
+          <option>Lightning</option>
+          <option>Fire</option>
+          <option>Ice</option>
+        </select>
+      </div>
+    {/if}
     <div class="stats">
       <p class="remaining">Points remaining: {remaining}</p>
       <div class="stat-row">
@@ -83,6 +94,14 @@
         <label for="defense">Defense: {defense}%</label>
         <input id="defense" type="range" min="0" max={defense + remaining} bind:value={defense} />
       </div>
+      <div class="stat-row">
+        <label for="critRate">Crit Rate: {critRate}%</label>
+        <input id="critRate" type="range" min="0" max={critRate + remaining} bind:value={critRate} />
+      </div>
+      <div class="stat-row">
+        <label for="critDamage">Crit Damage: {critDamage}%</label>
+        <input id="critDamage" type="range" min="0" max={critDamage + remaining} bind:value={critDamage} />
+      </div>
     </div>
     <div class="actions">
       <p class="hint">Note: Changes affect the roster panel immediately and apply to new runs. Ongoing battles won’t update mid-fight.</p>
@@ -92,20 +111,22 @@
   </div>
 </MenuPanel>
 {:else}
-<div class="editor editor-embedded" data-testid="player-editor">
-  <div class="grid">
-    <label for="pronouns">Pronouns</label>
-    <input id="pronouns" type="text" maxlength="15" bind:value={pronouns} on:input={broadcastChange} />
-    <label for="damage">Damage Type</label>
-    <select id="damage" bind:value={damageType} on:change={broadcastChange}>
-      <option>Light</option>
-      <option>Dark</option>
-      <option>Wind</option>
-      <option>Lightning</option>
-      <option>Fire</option>
-      <option>Ice</option>
-    </select>
-  </div>
+<div class="editor editor-embedded" data-testid="character-editor">
+  {#if showIdentity}
+    <div class="grid">
+      <label for="pronouns">Pronouns</label>
+      <input id="pronouns" type="text" maxlength="15" bind:value={pronouns} on:input={broadcastChange} />
+      <label for="damage">Damage Type</label>
+      <select id="damage" bind:value={damageType} on:change={broadcastChange}>
+        <option>Light</option>
+        <option>Dark</option>
+        <option>Wind</option>
+        <option>Lightning</option>
+        <option>Fire</option>
+        <option>Ice</option>
+      </select>
+    </div>
+  {/if}
   <div class="stats">
     <p class="remaining">Points remaining: {remaining}</p>
     <div class="stat-row">
@@ -119,6 +140,14 @@
     <div class="stat-row">
       <label for="defense">Defense: {defense}%</label>
       <input id="defense" type="range" min="0" max={defense + remaining} bind:value={defense} on:input={broadcastChange} />
+    </div>
+    <div class="stat-row">
+      <label for="critRate">Crit Rate: {critRate}%</label>
+      <input id="critRate" type="range" min="0" max={critRate + remaining} bind:value={critRate} on:input={broadcastChange} />
+    </div>
+    <div class="stat-row">
+      <label for="critDamage">Crit Damage: {critDamage}%</label>
+      <input id="critDamage" type="range" min="0" max={critDamage + remaining} bind:value={critDamage} on:input={broadcastChange} />
     </div>
   </div>
 </div>

@@ -1,7 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 export { default as PartyPicker } from './components/PartyPicker.svelte';
-export { default as PlayerEditor } from './components/PlayerEditor.svelte';
+export { default as CharacterEditor } from './components/CharacterEditor.svelte';
 export { default as InventoryPanel } from './components/InventoryPanel.svelte';
 export { default as RoomView } from './components/RoomView.svelte';
 export { default as OverlaySurface } from './components/OverlaySurface.svelte';
