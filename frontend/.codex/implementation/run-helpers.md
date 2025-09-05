@@ -6,6 +6,9 @@
   summaries/events, catalog lookups, and selecting rewards.
   `handleFetch` normalizes backend errors and reports them via the overlay
   system.
+  `advanceRoom` first loads the current run state and refuses to send the
+  action while any `awaiting_*` reward flags are true, preventing accidental
+  progression past unclaimed rewards.
 - The legacy `runApi.js` module has been removed; all callers should use
   the `uiApi` helpers.
 - `src/lib/MainMenu.svelte`: renders the stained glass side menu from a list of items.

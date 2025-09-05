@@ -4,7 +4,9 @@ import asyncio
 import json
 from typing import Any
 
+from battle_logging import end_run_logging
 from game import battle_snapshots
+from game import battle_tasks
 from game import get_save_manager
 from game import load_map
 from game import save_map
@@ -15,9 +17,12 @@ from services.reward_service import select_card
 from services.reward_service import select_relic
 from services.room_service import room_action
 from services.run_service import advance_room
+from services.run_service import backup_save
 from services.run_service import get_battle_events
 from services.run_service import get_battle_summary
+from services.run_service import restore_save
 from services.run_service import start_run
+from services.run_service import wipe_save
 
 bp = Blueprint("ui", __name__)
 
@@ -237,8 +242,18 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
             if not run_id:
                 return jsonify({"error": "No active run"}), 400
 
-            # Check if we're advancing from any reward mode
+            # Load current map state to ensure rewards are resolved
             state, rooms = await asyncio.to_thread(load_map, run_id)
+            if (
+                state.get("awaiting_card")
+                or state.get("awaiting_relic")
+                or state.get("awaiting_loot")
+            ):
+                return (
+                    jsonify({"error": "Cannot advance room while rewards are pending"}),
+                    400,
+                )
+
             progression = state.get("reward_progression")
 
             if progression and progression.get("current_step"):
@@ -334,3 +349,131 @@ async def battle_events(index: int):
     if data is None:
         return jsonify({"error": "events not found"}), 404
     return jsonify(data)
+
+
+@bp.post("/run/start")
+async def start_run_endpoint() -> tuple[str, int, dict[str, Any]]:
+    """Start a new run. Alternative endpoint that matches test expectations."""
+    try:
+        data = await request.get_json()
+        members = data.get("party", ["player"])
+        damage_type = data.get("damage_type", "")
+        pressure = data.get("pressure", 0)
+
+        try:
+            result = await start_run(members, damage_type, pressure)
+            return jsonify(result), 200
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to start run: {str(e)}"}), 500
+
+
+@bp.delete("/run/<run_id>")
+async def end_run(run_id: str) -> tuple[str, int, dict[str, Any]]:
+    """End a specific run by deleting it from the database."""
+    def delete_run():
+        with get_save_manager().connection() as conn:
+            # Check if run exists
+            cur = conn.execute("SELECT id FROM runs WHERE id = ?", (run_id,))
+            if not cur.fetchone():
+                return False
+
+            # Delete the run
+            conn.execute("DELETE FROM runs WHERE id = ?", (run_id,))
+            return True
+
+    try:
+        # End run logging
+        end_run_logging()
+
+        # Cancel battle task if it exists (same pattern as advance_room)
+        task = battle_tasks.pop(run_id, None)
+        if task and not task.done():
+            task.cancel()
+
+        # Delete from database
+        existed = await asyncio.to_thread(delete_run)
+        if not existed:
+            return jsonify({"error": "Run not found"}), 404
+
+        # Clean up battle snapshots if they exist
+        if run_id in battle_snapshots:
+            del battle_snapshots[run_id]
+
+        return jsonify({"message": "Run ended successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to end run: {str(e)}"}), 500
+
+
+@bp.delete("/runs")
+async def end_all_runs() -> tuple[str, int, dict[str, Any]]:
+    """End all runs by deleting them from the database."""
+    def delete_all_runs():
+        with get_save_manager().connection() as conn:
+            # Get count of runs before deletion
+            cur = conn.execute("SELECT COUNT(*) FROM runs")
+            count = cur.fetchone()[0]
+
+            # Delete all runs
+            conn.execute("DELETE FROM runs")
+            return count
+
+    try:
+        # End run logging
+        end_run_logging()
+
+        # Cancel all battle tasks (same pattern as advance_room)
+        for run_id, task in list(battle_tasks.items()):
+            if task and not task.done():
+                task.cancel()
+        battle_tasks.clear()
+
+        # Delete from database
+        deleted_count = await asyncio.to_thread(delete_all_runs)
+
+        # Clean up all battle snapshots
+        battle_snapshots.clear()
+
+        return jsonify({
+            "message": f"Ended {deleted_count} run(s) successfully",
+            "deleted_count": deleted_count
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to end runs: {str(e)}"}), 500
+
+
+@bp.get("/save/backup")
+async def backup_save_endpoint() -> tuple[str, int, dict[str, Any]]:
+    """Export save data as an encrypted backup."""
+    try:
+        backup_data = await backup_save()
+        return backup_data, 200, {"Content-Type": "application/octet-stream"}
+    except Exception as e:
+        return jsonify({"error": f"Failed to backup save: {str(e)}"}), 500
+
+
+@bp.post("/save/restore")
+async def restore_save_endpoint() -> tuple[str, int, dict[str, Any]]:
+    """Restore save data from an encrypted backup."""
+    try:
+        blob = await request.get_data()
+        await restore_save(blob)
+        return jsonify({"message": "Save restored successfully"}), 200
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Failed to restore save: {str(e)}"}), 500
+
+
+@bp.post("/save/wipe")
+async def wipe_save_endpoint() -> tuple[str, int, dict[str, Any]]:
+    """Wipe all save data and recreate the database."""
+    try:
+        await wipe_save()
+        return jsonify({"message": "Save wiped successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to wipe save: {str(e)}"}), 500

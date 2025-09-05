@@ -801,7 +801,10 @@
   }
   async function handleShopLeave() {
     if (!runId) return;
-    await roomAction('0', { action: 'leave' });
+    roomData = await roomAction('0', { action: 'leave' });
+    if (roomData?.awaiting_card || roomData?.awaiting_relic || roomData?.awaiting_loot) {
+      return;
+    }
     const res = await advanceRoom();
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
@@ -834,7 +837,10 @@
   }
   async function handleRestLeave() {
     if (!runId) return;
-    await roomAction("0", {"action": "leave"});
+    roomData = await roomAction("0", {"action": "leave"});
+    if (roomData?.awaiting_card || roomData?.awaiting_relic || roomData?.awaiting_loot) {
+      return;
+    }
     const res = await advanceRoom();
     if (res && typeof res.current_index === 'number') {
       currentIndex = res.current_index;
@@ -860,8 +866,13 @@
     haltSync = false;
     if (typeof window !== 'undefined') window.afHaltSync = false;
     // If rewards are still present, don't attempt to advance.
-    // Only block if there are still selectable choices (cards/relics).
-    if ((roomData?.card_choices?.length || 0) > 0 || (roomData?.relic_choices?.length || 0) > 0) {
+    const awaitingRewards =
+      (roomData?.card_choices?.length || 0) > 0 ||
+      (roomData?.relic_choices?.length || 0) > 0 ||
+      roomData?.awaiting_card ||
+      roomData?.awaiting_relic ||
+      roomData?.awaiting_loot;
+    if (awaitingRewards) {
       return;
     }
     // If the run has ended (defeat), clear state and show defeat popup immediately

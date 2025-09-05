@@ -20,6 +20,10 @@ poll for results:
   serialized summons. Each summon snapshot also includes an `owner_id` for
   convenience.
 
+- Foe snapshots include a `rank` field describing encounter difficulty.
+  Supported ranks are `"normal"`, `"prime"`, `"glitched prime"`, `"boss"`, and
+  `"glitched boss"`.
+
 These snapshots are stored in `game.battle_snapshots` and polled by the
 frontend during combat.
 
