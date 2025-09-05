@@ -63,7 +63,7 @@
   }
 
   function handleNextRoom() {
-    dispatch('nextRoom'); // Changed from 'next' to 'nextRoom' to match expected event
+    dispatch('lootAcknowledge');
   }
 </script>
 

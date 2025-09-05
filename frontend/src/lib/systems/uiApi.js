@@ -176,6 +176,16 @@ export async function chooseRelic(relicId) {
   return await sendAction('choose_relic', { relic_id: relicId });
 }
 
+/**
+ * Acknowledge and collect room loot.
+ * @param {string} runId - The current run identifier
+ */
+export async function acknowledgeLoot(runId) {
+  return await handleFetch(`/rewards/loot/${runId}`, {
+    method: 'POST'
+  });
+}
+
 // For backward compatibility with existing code, we can provide fallback functions
 // that use the old API format but internally use the new UI API
 

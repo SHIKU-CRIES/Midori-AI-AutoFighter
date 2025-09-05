@@ -23,7 +23,7 @@
     backOverlay,
     homeOverlay
   } from '$lib';
-  import { updateParty } from '$lib/systems/uiApi.js';
+  import { updateParty, acknowledgeLoot } from '$lib/systems/uiApi.js';
   import { buildRunMenu } from '$lib/components/RunButtons.svelte';
   import { browser, dev } from '$app/environment';
 
@@ -977,6 +977,7 @@
 
   async function handleLootAcknowledge() {
     if (!runId) return;
+    await acknowledgeLoot(runId);
     await handleNextRoom();
   }
 

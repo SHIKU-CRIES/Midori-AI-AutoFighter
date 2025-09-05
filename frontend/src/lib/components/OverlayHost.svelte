@@ -284,7 +284,7 @@
         gold={roomData.loot?.gold || 0}
         on:select={(e) => dispatch('rewardSelect', e.detail)}
         on:next={() => dispatch('nextRoom')}
-        on:nextRoom={() => dispatch('nextRoom')}
+        on:lootAcknowledge={() => dispatch('lootAcknowledge')}
       />
     </PopupWindow>
   </OverlaySurface>
