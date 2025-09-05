@@ -276,33 +276,42 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
             if progression and progression.get("current_step"):
                 current_step = progression["current_step"]
 
-                # Complete the current step and advance progression
-                progression["completed"].append(current_step)
-
-                # Find next step in progression
-                available = progression.get("available", [])
-                completed = progression.get("completed", [])
-                next_steps = [step for step in available if step not in completed]
-
-                if next_steps:
-                    # Move to next step in progression
-                    progression["current_step"] = next_steps[0]
-                    state["reward_progression"] = progression
-                else:
-                    # All progression steps completed, ready to advance room
+                # Special handling for battle_review step - it's informational only
+                if current_step == "battle_review":
+                    # Complete battle_review and any remaining steps automatically
                     state["awaiting_next"] = True
                     state["awaiting_card"] = False
                     state["awaiting_relic"] = False
                     state["awaiting_loot"] = False
                     del state["reward_progression"]
+                else:
+                    # Complete the current step and advance progression
+                    progression["completed"].append(current_step)
+
+                    # Find next step in progression
+                    available = progression.get("available", [])
+                    completed = progression.get("completed", [])
+                    next_steps = [step for step in available if step not in completed]
+
+                    if next_steps:
+                        # Move to next step in progression
+                        progression["current_step"] = next_steps[0]
+                        state["reward_progression"] = progression
+                    else:
+                        # All progression steps completed, ready to advance room
+                        state["awaiting_next"] = True
+                        state["awaiting_card"] = False
+                        state["awaiting_relic"] = False
+                        state["awaiting_loot"] = False
+                        del state["reward_progression"]
 
                 await asyncio.to_thread(save_map, run_id, state)
 
                 # If we still have progression steps, return the updated state
-                if next_steps:
+                if current_step != "battle_review" and progression and progression.get("current_step"):
                     return jsonify({
                         "progression_advanced": True,
-                        "current_step": next_steps[0]
+                        "current_step": progression["current_step"]
                     })
 
             try:

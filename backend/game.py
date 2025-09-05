@@ -426,18 +426,29 @@ async def _run_battle(
                     progression["available"].append("relic")
                 if has_loot:
                     progression["available"].append("loot")
-                # Always end with battle review to allow room advancement
-                progression["available"].append("battle_review")
 
-                # Start with first available step
-                progression["current_step"] = progression["available"][0]
+                # If there are no actual reward choices, allow immediate advancement
+                if not (has_card_choices or has_relic_choices or has_loot):
+                    # No rewards at all, ready to advance immediately
+                    state["awaiting_card"] = False
+                    state["awaiting_relic"] = False
+                    state["awaiting_loot"] = False
+                    state["awaiting_next"] = True
+                    next_type = (
+                        rooms[state["current"] + 1].room_type
+                        if state["current"] + 1 < len(rooms)
+                        else None
+                    )
+                else:
+                    # Start with first available step
+                    progression["current_step"] = progression["available"][0]
 
-                state["reward_progression"] = progression
-                state["awaiting_card"] = has_card_choices
-                state["awaiting_relic"] = has_relic_choices
-                state["awaiting_loot"] = has_loot
-                state["awaiting_next"] = False
-                next_type = None
+                    state["reward_progression"] = progression
+                    state["awaiting_card"] = has_card_choices
+                    state["awaiting_relic"] = has_relic_choices
+                    state["awaiting_loot"] = has_loot
+                    state["awaiting_next"] = False
+                    next_type = None
             else:
                 # No rewards at all, ready to advance immediately
                 state["awaiting_card"] = False

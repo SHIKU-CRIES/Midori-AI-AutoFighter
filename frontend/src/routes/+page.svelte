@@ -866,13 +866,23 @@
     // Ensure syncing is enabled when advancing to the next room
     haltSync = false;
     if (typeof window !== 'undefined') window.afHaltSync = false;
-    // If there are outstanding card/relic choices, don't attempt to advance.
-    const awaitingCardOrRelic =
-      (roomData?.card_choices?.length || 0) > 0 ||
-      (roomData?.relic_choices?.length || 0) > 0 ||
-      roomData?.awaiting_card ||
-      roomData?.awaiting_relic;
-    if (awaitingCardOrRelic) return;
+    
+    // Check if we're currently in battle review mode by checking if review is open
+    const inBattleReview = Boolean(
+      roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive &&
+      typeof roomData.battle_index === 'number' && roomData.battle_index > 0
+    );
+    
+    // If not in battle review, check for outstanding card/relic choices
+    if (!inBattleReview) {
+      const awaitingCardOrRelic =
+        (roomData?.card_choices?.length || 0) > 0 ||
+        (roomData?.relic_choices?.length || 0) > 0 ||
+        roomData?.awaiting_card ||
+        roomData?.awaiting_relic;
+      if (awaitingCardOrRelic) return;
+    }
+    
     // If only loot remains, acknowledge it before advancing so the backend clears the gate.
     try {
       const hasLoot = Boolean((roomData?.loot?.gold || 0) > 0 || (roomData?.loot?.items || []).length > 0);
