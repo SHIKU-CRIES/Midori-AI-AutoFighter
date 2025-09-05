@@ -134,6 +134,35 @@ def _scale_stats(obj: Stats, node: MapNode, strength: float = 1.0) -> None:
     except Exception:
         pass
 
+    # Apply pressure-based defense scaling for foes with randomness
+    try:
+        if isinstance(obj, FoeBase) and node.pressure > 0:
+            d = getattr(obj, "defense", None)
+            if isinstance(d, (int, float)):
+                # Calculate pressure-based defense: pressure * 10 with randomness
+                # For pressure=5: target 41-75 (base 50 with range -18% to +50%)
+                pressure_base_def = node.pressure * 10
+                min_factor = 0.82  # -18% (50 * 0.82 = 41)
+                max_factor = 1.50  # +50% (50 * 1.50 = 75)
+                random_factor = random.uniform(min_factor, max_factor)
+                pressure_defense = int(pressure_base_def * random_factor)
+
+                # Set the defense to be at least the pressure-based value
+                # but also respect any higher value from other scaling
+                current_def = int(d)
+                final_defense = max(current_def, pressure_defense)
+
+                try:
+                    setattr(obj, "defense", type(d)(final_defense))
+                except Exception:
+                    # As a fallback, adjust base stat
+                    try:
+                        obj.set_base_stat("defense", final_defense)
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
     try:
         if isinstance(obj, FoeBase):
             vit = getattr(obj, "vitality", None)
