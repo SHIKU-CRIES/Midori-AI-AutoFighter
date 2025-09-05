@@ -73,7 +73,9 @@ Each foe defeated during a battle temporarily raises the party's rare drop rate
 by 55% for that room, increasing gold rewards and element-based item drops.
 
 Foes also expose a `rank` field to describe encounter tier. Supported ranks are
-`normal`, `prime`, `glitched prime`, `boss`, and `glitched boss`.
+`normal`, `prime`, `glitched prime`, `boss`, and `glitched boss`. Battle and
+boss room responses include this field for every foe so the frontend can render
+appropriate tags or behaviors.
  
 They are procedurally named by prefixing a randomly selected adjective plugin
 from `plugins/themedadj` to a player name. Adjective plugins are
