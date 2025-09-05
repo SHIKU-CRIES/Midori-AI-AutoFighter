@@ -6,6 +6,7 @@ from typing import Any
 
 from battle_logging import end_run_logging
 from game import battle_snapshots
+from game import battle_tasks
 from game import get_save_manager
 from game import load_map
 from game import save_map
@@ -377,6 +378,11 @@ async def end_run(run_id: str) -> tuple[str, int, dict[str, Any]]:
         # End run logging
         end_run_logging()
 
+        # Cancel battle task if it exists (same pattern as advance_room)
+        task = battle_tasks.pop(run_id, None)
+        if task and not task.done():
+            task.cancel()
+
         # Delete from database
         existed = await asyncio.to_thread(delete_run)
         if not existed:
@@ -408,6 +414,12 @@ async def end_all_runs() -> tuple[str, int, dict[str, Any]]:
     try:
         # End run logging
         end_run_logging()
+
+        # Cancel all battle tasks (same pattern as advance_room)
+        for run_id, task in list(battle_tasks.items()):
+            if task and not task.done():
+                task.cancel()
+        battle_tasks.clear()
 
         # Delete from database
         deleted_count = await asyncio.to_thread(delete_all_runs)
