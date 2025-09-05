@@ -109,6 +109,7 @@ async def test_players_and_rooms(app_with_db):
     foe = battle_data["foes"][0]
     assert foe["id"] != "player"
     assert "atk" in foe
+    assert "rank" in foe
 
     map_state = (await (await client.get(f"/map/{run_id}")).get_json())["map"]
     assert map_state["battle"] is False
