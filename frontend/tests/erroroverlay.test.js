@@ -1,5 +1,5 @@
 import { describe, expect, test, mock } from 'bun:test';
-import { getPlayers } from '../src/lib/api.js';
+import { getPlayers } from '../src/lib/systems/api.js';
 import { overlayView, overlayData, homeOverlay } from '../src/lib/OverlayController.js';
 import { get } from 'svelte/store';
 import { readFileSync } from 'fs';

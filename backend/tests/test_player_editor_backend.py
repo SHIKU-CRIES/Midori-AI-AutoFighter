@@ -77,9 +77,11 @@ def test_player_editor_endpoints(base_url: str):
     test_settings = {
         "pronouns": "they",
         "damage_type": "Fire",
-        "hp": 60,
+        "hp": 50,
         "attack": 20,
-        "defense": 20
+        "defense": 20,
+        "crit_rate": 5,
+        "crit_damage": 5,
     }
     status, data = make_request(f"{base_url}/player/editor", "PUT", test_settings)
     print(f"   PUT /player/editor -> Status: {status}")
@@ -97,7 +99,7 @@ def test_player_editor_endpoints(base_url: str):
     if status == 200:
         print(f"   Saved settings: {data}")
         # Check if the settings match what we sent
-        for key in ["hp", "attack", "defense"]:
+        for key in ["hp", "attack", "defense", "crit_rate", "crit_damage"]:
             if data.get(key) != test_settings[key]:
                 print(f"   WARNING: {key} mismatch! Expected {test_settings[key]}, got {data.get(key)}")
     else:
@@ -114,13 +116,15 @@ def test_player_editor_endpoints(base_url: str):
         defense_stats = data.get("stats", {}).get("defense", {})
 
         print(f"   Core stats: HP={core.get('hp')}, Max HP={core.get('max_hp')}")
-        print(f"   Offense stats: ATK={offense.get('atk')}")
+        print(f"   Offense stats: ATK={offense.get('atk')}, CRIT Rate={offense.get('crit_rate')}, CRIT DMG={offense.get('crit_damage')}")
         print(f"   Defense stats: DEF={defense_stats.get('defense')}")
 
         # Calculate expected values
-        expected_max_hp = int(1000 * 1.6)  # 60% boost
+        expected_max_hp = int(1000 * 1.5)  # 50% boost
         expected_atk = int(100 * 1.2)      # 20% boost
         expected_def = int(50 * 1.2)       # 20% boost
+        expected_cr = 0.05 * 1.05
+        expected_cd = 2.0 * 1.05
 
         print("\n   Expected values:")
         print(f"   Max HP: {expected_max_hp} (got {core.get('max_hp')})")
@@ -142,6 +146,16 @@ def test_player_editor_endpoints(base_url: str):
             print("   ✓ DEF is correct!")
         else:
             print("   ✗ DEF mismatch - customization may not be applied")
+
+        if abs(offense.get('crit_rate', 0) - expected_cr) < 1e-6:
+            print("   ✓ CRIT Rate is correct!")
+        else:
+            print("   ✗ CRIT Rate mismatch")
+
+        if abs(offense.get('crit_damage', 0) - expected_cd) < 1e-6:
+            print("   ✓ CRIT DMG is correct!")
+        else:
+            print("   ✗ CRIT DMG mismatch")
 
     else:
         print(f"   Error: {data}")

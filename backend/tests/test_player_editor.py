@@ -35,6 +35,8 @@ async def test_player_editor_update_and_fetch(app_with_db):
             "hp": 10,
             "attack": 20,
             "defense": 30,
+            "crit_rate": 15,
+            "crit_damage": 5,
         },
     )
     assert resp.status_code == 200
@@ -47,6 +49,8 @@ async def test_player_editor_update_and_fetch(app_with_db):
         "hp": 10,
         "attack": 20,
         "defense": 30,
+        "crit_rate": 15,
+        "crit_damage": 5,
     }
 
     stats_resp = await client.get("/player/stats")
@@ -57,6 +61,8 @@ async def test_player_editor_update_and_fetch(app_with_db):
     assert core["hp"] == 1100 and core["max_hp"] == 1100
     assert offense["atk"] == 120
     assert defense_block["defense"] == 65
+    assert offense["crit_rate"] == pytest.approx(0.0575, rel=1e-3)
+    assert offense["crit_damage"] == pytest.approx(2.1, rel=1e-3)
 
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
@@ -77,6 +83,8 @@ async def test_player_editor_validation(app_with_db):
             "hp": 200,
             "attack": 0,
             "defense": 0,
+            "crit_rate": 0,
+            "crit_damage": 0,
         },
     )
     assert resp.status_code == 400
@@ -95,6 +103,8 @@ async def test_player_editor_snapshot_during_run(app_with_db):
             "hp": 10,
             "attack": 0,
             "defense": 0,
+            "crit_rate": 0,
+            "crit_damage": 0,
         },
     )
     resp = await client.post("/run/start", json={"party": ["player"]})
@@ -108,6 +118,8 @@ async def test_player_editor_snapshot_during_run(app_with_db):
             "hp": 0,
             "attack": 20,
             "defense": 0,
+            "crit_rate": 0,
+            "crit_damage": 0,
         },
     )
     assert resp2.status_code == 200

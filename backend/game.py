@@ -81,7 +81,7 @@ def _describe_passives(obj: Stats | list[str]) -> list[dict[str, Any]]:
 
 def _load_player_customization() -> tuple[str, dict[str, int]]:
     pronouns = ""
-    stats: dict[str, int] = {"hp": 0, "attack": 0, "defense": 0}
+    stats: dict[str, int] = {"hp": 0, "attack": 0, "defense": 0, "crit_rate": 0, "crit_damage": 0}
     with get_save_manager().connection() as conn:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
@@ -109,6 +109,8 @@ def _apply_player_customization(player: PlayerBase) -> None:
         "max_hp_mult": 1 + loaded.get("hp", 0) * 0.01,
         "atk_mult": 1 + loaded.get("attack", 0) * 0.01,
         "defense_mult": 1 + loaded.get("defense", 0) * 0.01,
+        "crit_rate_mult": 1 + loaded.get("crit_rate", 0) * 0.01,
+        "crit_damage_mult": 1 + loaded.get("crit_damage", 0) * 0.01,
     }
 
     log.debug(

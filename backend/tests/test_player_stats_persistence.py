@@ -27,7 +27,15 @@ async def test_player_stats_persist_between_battles(app_with_db):
 
     await client.put(
         "/player/editor",
-        json={"pronouns": "they", "damage_type": "Fire", "hp": 10, "attack": 20, "defense": 30},
+        json={
+            "pronouns": "they",
+            "damage_type": "Fire",
+            "hp": 10,
+            "attack": 20,
+            "defense": 30,
+            "crit_rate": 10,
+            "crit_damage": 5,
+        },
     )
     resp = await client.post("/run/start", json={"party": ["player"]})
     run_id = (await resp.get_json())["run_id"]

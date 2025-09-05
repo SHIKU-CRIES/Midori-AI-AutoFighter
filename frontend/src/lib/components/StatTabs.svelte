@@ -4,25 +4,17 @@
    *
    * Renders the character stats panel used by the Party Picker (right column).
    * Features:
-   * - Tabbed view (Core, Offense, Defense, Effects).
-   * - Shows the currently previewed character's stats and effects.
-   * - When the previewed character is the Player, embeds a slim Player Editor
-   *   inside the panel (no overlay, no nav buttons) to tweak player starting
-   *   percent mods. The editor sends live changes that this component uses to
-   *   calculate preview values without saving.
-   * - Always shows an "Upgrade Character: Placeholder" note below (all chars)
-   *   as a staging area for the future per‑character upgrade UI.
-   *
-   * Plans:
-   * - Wire a real per‑character upgrade flow underneath the placeholder (e.g.,
-   *   item consumption, star‑based progression) and display available upgrades.
-   * - Provide a compact save/apply control for the embedded player editor, or
-   *   auto‑save changes to the backend with clear feedback.
-   * - Move editor placement to a fixed sub‑section if we add more widgets.
+   * - Tabbed view (Core, Offense, Defense).
+   * - Shows the currently previewed character's stats.
+   * - Embeds a slim Character Editor inside the panel for both player and
+   *   non‑player characters, allowing percent tweaks to HP, Attack, Defense,
+   *   Crit Rate, and Crit Damage. Player changes auto‑save via API.
+   * - Renders an `UpgradePanel` beneath the editor so any character can convert
+   *   items into upgrade points and spend them on specific stats.
    */
   import { getElementIcon, getElementColor } from '../systems/assetLoader.js';
   import { createEventDispatcher } from 'svelte';
-  import PlayerEditor from './PlayerEditor.svelte';
+  import CharacterEditor from './CharacterEditor.svelte';
   import UpgradePanel from './UpgradePanel.svelte';
   import { getPlayerConfig, savePlayerConfig } from '../systems/api.js';
 
@@ -41,14 +33,14 @@
   export let previewId;
   export let selected = [];
 
-  const statTabs = ['Core', 'Offense', 'Defense', 'Effects'];
+  const statTabs = ['Core', 'Offense', 'Defense'];
   let activeTab = 'Core';
   const dispatch = createEventDispatcher();
 
   // Previewed character and inline editor overlay state
   let previewChar;
   let isPlayer = false;
-  let editorVals = null; // { pronouns, damageType, hp, attack, defense }
+  let editorVals = null; // { pronouns, damageType, hp, attack, defense, critRate, critDamage }
   let savedEditor = null; // snapshot of saved config to compute deltas
   let viewStats = {};    // stats object used for display (with overrides when player)
   let loadingEditorCfg = false;
@@ -64,6 +56,8 @@
           hp: Number(editorVals.hp) || 0,
           attack: Number(editorVals.attack) || 0,
           defense: Number(editorVals.defense) || 0,
+          crit_rate: Number(editorVals.critRate) || 0,
+          crit_damage: Number(editorVals.critDamage) || 0,
         });
       } catch {}
     }, 400);
@@ -73,36 +67,55 @@
   $: previewChar = roster.find(r => r.id === previewId);
   $: isPlayer = !!previewChar?.is_player;
   // Lazy‑load the saved Player Editor config when the player is selected.
-  $: if (isPlayer && previewChar) {
-    if (!editorVals && !loadingEditorCfg) {
-      loadingEditorCfg = true;
-      (async () => {
-        try {
-          const cfg = await getPlayerConfig();
-          editorVals = {
-            pronouns: cfg?.pronouns || '',
-            damageType: cfg?.damage_type || 'Light',
-            hp: Number(cfg?.hp) || 0,
-            attack: Number(cfg?.attack) || 0,
-            defense: Number(cfg?.defense) || 0,
-          };
-          savedEditor = { ...editorVals };
-          try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
-        } catch {
-          // Fallback to preview runtime stats if config fetch fails
-          editorVals = {
-            pronouns: previewChar.pronouns || '',
-            damageType: previewChar.element || 'Light',
-            hp: (previewChar.stats?.max_hp ?? previewChar.stats?.hp ?? 0),
-            attack: (previewChar.stats?.atk ?? 0),
-            defense: (previewChar.stats?.defense ?? 0),
-          };
-          savedEditor = { pronouns: editorVals.pronouns, damageType: editorVals.damageType, hp: 0, attack: 0, defense: 0 };
-          try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
-        } finally {
-          loadingEditorCfg = false;
-        }
-      })();
+  $: if (previewChar) {
+    if (isPlayer) {
+      if (!editorVals && !loadingEditorCfg) {
+        loadingEditorCfg = true;
+        (async () => {
+          try {
+            const cfg = await getPlayerConfig();
+            editorVals = {
+              pronouns: cfg?.pronouns || '',
+              damageType: cfg?.damage_type || 'Light',
+              hp: Number(cfg?.hp) || 0,
+              attack: Number(cfg?.attack) || 0,
+              defense: Number(cfg?.defense) || 0,
+              critRate: Number(cfg?.crit_rate) || 0,
+              critDamage: Number(cfg?.crit_damage) || 0,
+            };
+            savedEditor = { ...editorVals };
+            try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
+          } catch {
+            // Fallback to preview runtime stats if config fetch fails
+            editorVals = {
+              pronouns: previewChar.pronouns || '',
+              damageType: previewChar.element || 'Light',
+              hp: 0,
+              attack: 0,
+              defense: 0,
+              critRate: 0,
+              critDamage: 0,
+            };
+            savedEditor = { pronouns: editorVals.pronouns, damageType: editorVals.damageType, hp: 0, attack: 0, defense: 0, critRate: 0, critDamage: 0 };
+            try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
+          } finally {
+            loadingEditorCfg = false;
+          }
+        })();
+      }
+    } else {
+      if (!editorVals || editorVals.pronouns !== (previewChar.pronouns || '')) {
+        editorVals = {
+          pronouns: previewChar.pronouns || '',
+          damageType: previewChar.element || 'Light',
+          hp: 0,
+          attack: 0,
+          defense: 0,
+          critRate: 0,
+          critDamage: 0,
+        };
+        savedEditor = { pronouns: editorVals.pronouns, damageType: editorVals.damageType, hp: 0, attack: 0, defense: 0, critRate: 0, critDamage: 0 };
+      }
     }
   } else {
     editorVals = null;
@@ -113,22 +126,28 @@
     const baseStats = statsObj.base_stats || {};
     const result = { ...statsObj };
 
-    // For the player character only, apply live editor preview changes on top of computed stats
-    if (isPlayer && editorVals) {
-      const saved = savedEditor || { hp: 0, attack: 0, defense: 0 };
+    // Apply live editor preview changes on top of computed stats
+    if (editorVals) {
+      const saved = savedEditor || { hp: 0, attack: 0, defense: 0, critRate: 0, critDamage: 0 };
       const hpDelta = (Number(editorVals.hp) || 0) - (Number(saved.hp) || 0);
       const atkDelta = (Number(editorVals.attack) || 0) - (Number(saved.attack) || 0);
       const defDelta = (Number(editorVals.defense) || 0) - (Number(saved.defense) || 0);
-      
+      const critRateDelta = (Number(editorVals.critRate) || 0) - (Number(saved.critRate) || 0);
+      const critDamageDelta = (Number(editorVals.critDamage) || 0) - (Number(saved.critDamage) || 0);
+
       // Apply deltas to the already-computed stats (not base stats)
       const currentMax = Number(statsObj.max_hp) || Number(baseStats.max_hp) || 1000;
       const currentAtk = Number(statsObj.atk) || Number(baseStats.atk) || 100;
       const currentDef = Number(statsObj.defense) || Number(baseStats.defense) || 50;
-      
+      const currentCritRate = Number(statsObj.crit_rate) || Number(baseStats.crit_rate) || 0.05;
+      const currentCritDamage = Number(statsObj.crit_damage) || Number(baseStats.crit_damage) || 2.0;
+
       result.max_hp = Math.round(currentMax * (1 + hpDelta / 100));
       result.atk = Math.round(currentAtk * (1 + atkDelta / 100));
       result.defense = Math.round(currentDef * (1 + defDelta / 100));
-      
+      result.crit_rate = currentCritRate * (1 + critRateDelta / 100);
+      result.crit_damage = currentCritDamage * (1 + critDamageDelta / 100);
+
       // Preserve HP ratio against upgraded max
       const hpRatioBase = Number(statsObj.hp) / Math.max(1, currentMax);
       result.hp = Math.round(result.max_hp * Math.max(0, Math.min(1, isFinite(hpRatioBase) ? hpRatioBase : 1)));
@@ -230,28 +249,6 @@
           <div><span>Mitigation</span><span>{formatMult(viewStats.mitigation, getBaseStat(sel, 'mitigation'))}</span></div>
           <div><span>Dodge Odds</span><span>{formatStat(viewStats.dodge_odds, getBaseStat(sel, 'dodge_odds'), '%')}</span></div>
           <div><span>Effect Resist</span><span>{formatStat(viewStats.effect_resistance, getBaseStat(sel, 'effect_resistance'), '%')}</span></div>
-        {:else if activeTab === 'Effects'}
-          {#if sel.stats.active_effects && sel.stats.active_effects.length > 0}
-            <div class="effects-header">Active Effects:</div>
-            {#each sel.stats.active_effects as effect}
-              <div class="effect-item">
-                <div class="effect-name">{effect.name}</div>
-                <div class="effect-source">Source: {effect.source}</div>
-                {#if effect.duration > 0}
-                  <div class="effect-duration">Duration: {effect.duration} turns</div>
-                {/if}
-                <div class="effect-modifiers">
-                  {#each Object.entries(effect.modifiers) as [stat, value]}
-                    <span class="modifier" class:negative={value < 0} class:positive={value >= 0}>
-                      {stat}: {value >= 0 ? '+' : ''}{value}
-                    </span>
-                  {/each}
-                </div>
-              </div>
-            {/each}
-          {:else}
-            <div class="no-effects">No active effects</div>
-          {/if}
         {/if}
       </div>
     {/each}
@@ -267,27 +264,23 @@
   {/if}
   {#if previewId}
     {#each roster.filter(r => r.id === previewId) as sel}
-      <!--
-        Inline editor/upgrade region:
-        - Divider separates stats list from interactive controls/notes.
-        - Player Editor shows only for the Player (no nav, embedded=true).
-        - Upgrade placeholder shows for all characters (future upgrades hub).
-      -->
+      <!-- Inline editor and upgrade region -->
       <div class="hello-anchor">
         <div class="inline-divider" aria-hidden="true"></div>
-        {#if sel.is_player}
-          <div class="editor-wrap">
-            <PlayerEditor
-              embedded={true}
-              pronouns={editorVals?.pronouns || ''}
-              damageType={editorVals?.damageType || 'Light'}
-              hp={editorVals?.hp || 0}
-              attack={editorVals?.attack || 0}
-              defense={editorVals?.defense || 0}
-              on:change={(e) => { editorVals = e.detail; if (isPlayer) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } scheduleSave(); }}
-            />
-          </div>
-        {/if}
+        <div class="editor-wrap">
+          <CharacterEditor
+            embedded={true}
+            showIdentity={sel.is_player}
+            pronouns={editorVals?.pronouns || ''}
+            damageType={editorVals?.damageType || 'Light'}
+            hp={editorVals?.hp || 0}
+            attack={editorVals?.attack || 0}
+            defense={editorVals?.defense || 0}
+            critRate={editorVals?.critRate || 0}
+            critDamage={editorVals?.critDamage || 0}
+            on:change={(e) => { editorVals = e.detail; if (sel.is_player) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } scheduleSave(); }}
+          />
+        </div>
         <UpgradePanel id={sel.id} element={sel.element}
           on:upgraded={() => { try { dispatch('refresh-roster'); } catch {} }}
         />
@@ -384,64 +377,4 @@ button.confirm {
 
 /* Inline container occupying 50% of the stats panel width */
 .editor-wrap { width: 100%; }
-
-/* Effects tab styles */
-.effects-header {
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 0.5rem;
-}
-
-.effect-item {
-  background: rgba(255,255,255,0.1);
-  padding: 0.75rem;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
-  border-left: 3px solid #4a9eff;
-}
-
-.effect-name {
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 0.25rem;
-}
-
-.effect-source {
-  font-size: 0.9rem;
-  color: #ccc;
-  margin-bottom: 0.25rem;
-}
-
-.effect-duration {
-  font-size: 0.9rem;
-  color: #ffeb3b;
-  margin-bottom: 0.5rem;
-}
-
-.effect-modifiers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.modifier {
-  background: rgba(0,0,0,0.3);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  color: #4caf50;
-  border: 1px solid rgba(76, 175, 80, 0.3);
-}
-
-.modifier.negative {
-  color: #f44336;
-  border-color: rgba(244, 67, 54, 0.3);
-}
-
-.no-effects {
-  color: #888;
-  font-style: italic;
-  text-align: center;
-  padding: 2rem;
-}
 </style>

@@ -6,7 +6,7 @@ The Svelte `PartyPicker` component lets players choose up to four allies before 
 
 - **`PartyRoster`** – lists owned characters and handles selection. Rows tint the outline and element icon with `getElementColor` for quick damage-type recognition. Selection uses two-way binding on `previewId` so the parent can preview or modify the party.
 - **`PlayerPreview`** – shows a large portrait of the currently selected character or a placeholder message when none is chosen.
-- **`StatTabs`** – renders a tabbed stats panel with Core, Offense, and Defense groups and exposes a **Add to party** / **Remove from party** toggle via a `toggle` event.
+- **`StatTabs`** – renders a tabbed stats panel (Core, Offense, Defense) and embeds a reusable **`CharacterEditor`** for both players and NPCs. Sliders allow adjusting HP, Attack, Defense, Crit Rate, and Crit Damage, with player changes auto‑saved via the backend. A **Add to party** / **Remove from party** toggle is exposed via a `toggle` event.
 
 The layout uses percentage-based columns so the roster, preview, and stats panels all shrink with the viewport. Content is wrapped in `MenuPanel`, which sizes itself just under the overlay surface to avoid a surrounding scrollbar. Preview portraits scale without a minimum size so they remain visible on small screens.
 

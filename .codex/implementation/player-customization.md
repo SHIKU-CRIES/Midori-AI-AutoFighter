@@ -1,12 +1,12 @@
-# Player Editor
+# Character Editor
 
-`PlayerEditor` now connects to backend endpoints and is launched from the main
+The `CharacterEditor` connects to backend endpoints and is launched from the main
 menu's **Edit** button or automatically before a run, so players can set custom
 pronouns up to 15 characters, pick a starting damage type—Light, Dark, Wind,
 Lightning, Fire, or Ice—and allocate stat points before starting a run.
 
 - Players start with 100 base points and may gain bonus points from owning 100 of each damage type's 4★ upgrade items.
-- Sliders for HP, Attack, and Defense clamp so the sum never exceeds the available pool.
+- Sliders for HP, Attack, Defense, Crit Rate, and Crit Damage clamp so the sum never exceeds the available pool.
 - Each point grants a 1% multiplier to the chosen stat, doubling it at 100 points.
 - A label displays remaining points.
 - The Confirm button is disabled until the 100 base points are spent. Bonus points are optional and unspent amounts stay in the inventory.
@@ -29,6 +29,6 @@ Player customization is applied during character instantiation rather than as te
 
 ## Persistence notes
 
-The component dispatches numeric `hp`, `attack`, and `defense` values alongside a `damageType` field that the page converts to the API's `damage_type` key, so edited stats persist after saving and reloading.
+The component dispatches numeric `hp`, `attack`, `defense`, `critRate`, and `critDamage` values alongside a `damageType` field that the page converts to the API's keys, so edited stats persist after saving and reloading.
 
 Customization is applied during player instantiation, ensuring consistent stats while maintaining all editor functionality.
