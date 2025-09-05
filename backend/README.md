@@ -62,6 +62,11 @@ names. Run state is stored through the `SaveManager` in `backend/save.db` by
 default; `compose.yaml` bind-mounts the `backend/` directory so the database is
 persisted on the host.
 
+Room advancement is blocked until all post-battle rewards are resolved
+(`awaiting_card`, `awaiting_relic`, and `awaiting_loot`, which is rarely set
+because loot auto-collects). See `.codex/implementation/reward-progression.md`
+for details.
+
 Player and foe base classes assign a random damage type when none is
 specified, and battles respect these preset elements without rolling new ones.
 
