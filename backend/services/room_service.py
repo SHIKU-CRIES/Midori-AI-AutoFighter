@@ -41,21 +41,20 @@ def _collect_summons(entities: list) -> dict[str, list[dict[str, Any]]]:
 
 
 async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
-    print(f"DEBUG: battle_room called for {run_id} with data: {data}")
     action = data.get("action", "")
 
+    # Flag to track if this is a restart scenario (snapshot requested but none exists)
+    is_restart_scenario = False
+
     if action == "snapshot":
-        print("DEBUG: Action is snapshot, checking for existing snap")
         snap = battle_snapshots.get(run_id)
         if snap is not None:
-            print("DEBUG: Found existing snapshot, returning it")
             return snap
-        print("DEBUG: No existing snapshot, clearing action")
+        is_restart_scenario = True
         action = ""
         data = {k: v for k, v in data.items() if k != "action"}
 
     if action == "pause":
-        print("DEBUG: Action is pause")
         if run_id in battle_tasks:
             task = battle_tasks[run_id]
             if not task.done():
@@ -66,7 +65,6 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
         return {"result": "paused"}
 
     if action == "resume":
-        print("DEBUG: Action is resume")
         snap = battle_snapshots.get(run_id)
         if snap and snap.get("paused"):
             snap["paused"] = False
@@ -97,7 +95,6 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
                     battle_tasks[run_id] = task
         return {"result": "resumed"}
 
-    print("DEBUG: Loading party and state")
     party = await asyncio.to_thread(load_party, run_id)
     try:
         with get_save_manager().connection() as conn:
@@ -119,7 +116,6 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     except Exception:
         pass
     if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
-        print(f"DEBUG: Invalid rooms/range. rooms={len(rooms) if rooms else None}, current={state.get('current')}")
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return snap
@@ -132,14 +128,10 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
             "current_room": current_room,
             "next_room": None,
         }
-    print(f"DEBUG: Valid room range, current={state.get('current')}, rooms={len(rooms)}")
     node = rooms[state["current"]]
-    print(f"DEBUG: Current room type: {node.room_type}")
     if node.room_type not in {"battle-weak", "battle-normal"}:
-        print(f"DEBUG: Invalid room type: {node.room_type}")
         raise ValueError("invalid room")
     if state.get("awaiting_next"):
-        print("DEBUG: awaiting_next is True - EARLY RETURN")
         next_type = (
             rooms[state["current"] + 1].room_type
             if state["current"] + 1 < len(rooms)
@@ -154,13 +146,9 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
         if next_type is not None:
             payload["next_room"] = next_type
         return payload
-    print("DEBUG: awaiting_next is False")
-    awaiting_card = state.get("awaiting_card")
-    awaiting_relic = state.get("awaiting_relic") 
-    awaiting_loot = state.get("awaiting_loot")
-    print(f"DEBUG: awaiting_card={awaiting_card}, awaiting_relic={awaiting_relic}, awaiting_loot={awaiting_loot}")
-    if awaiting_card or awaiting_relic or awaiting_loot:
-        print("DEBUG: awaiting card/relic/loot is True - EARLY RETURN")
+
+    # Only check awaiting flags if this is NOT a restart scenario
+    if not is_restart_scenario and (state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot")):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return snap
@@ -177,12 +165,9 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
             "enrage": {"active": False, "stacks": 0},
             "rdr": party.rdr,
         }
-    print("DEBUG: awaiting card/relic/loot is False")
     if run_id in battle_tasks:
-        print("DEBUG: run_id in battle_tasks - EARLY RETURN")
         snap = battle_snapshots.get(run_id, {"result": "battle"})
         return snap
-    print("DEBUG: run_id NOT in battle_tasks, proceeding to create battle")
     state["battle"] = True
     await asyncio.to_thread(save_map, run_id, state)
     room = BattleRoom(node)
@@ -216,13 +201,10 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     async def progress(snapshot: dict[str, dict | list]) -> None:
         battle_snapshots[run_id] = snapshot
 
-    print(f"DEBUG battle_room: Creating task for {run_id}")
     task = asyncio.create_task(
         _run_battle(run_id, room, foes, party, data, state, rooms, progress)
     )
-    print(f"DEBUG battle_room: Task created, adding to battle_tasks")
     battle_tasks[run_id] = task
-    print(f"DEBUG battle_room: Task added, battle_tasks now has {run_id}: {run_id in battle_tasks}")
     return battle_snapshots[run_id]
 
 
@@ -312,10 +294,15 @@ async def chat_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
 
 async def boss_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     action = data.get("action", "")
+
+    # Flag to track if this is a restart scenario (snapshot requested but none exists)
+    is_restart_scenario = False
+
     if action == "snapshot":
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return snap
+        is_restart_scenario = True
         action = ""
         data = {k: v for k, v in data.items() if k != "action"}
 
@@ -344,7 +331,9 @@ async def boss_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
         if next_type is not None:
             payload["next_room"] = next_type
         return payload
-    if state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot"):
+
+    # Only check awaiting flags if this is NOT a restart scenario
+    if not is_restart_scenario and (state.get("awaiting_card") or state.get("awaiting_relic") or state.get("awaiting_loot")):
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return snap
