@@ -239,6 +239,7 @@
       on:resumeCombat={() => dispatch('resumeCombat')}
       on:rewardSelect={(e) => dispatch('rewardSelect', e.detail)}
       on:nextRoom={() => dispatch('nextRoom')}
+      on:lootAcknowledge={() => dispatch('lootAcknowledge')}
       on:editorSave={(e) => dispatch('editorSave', e.detail)}
       on:editorChange={(e) => dispatch('editorChange', e.detail)}
       on:loadRun={(e) => dispatch('loadRun', e.detail)}
