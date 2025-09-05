@@ -92,4 +92,15 @@ describe('state polling', () => {
     // Verify that battle end starts state polling  
     expect(content).toContain('// Start state polling when battle ends');
   });
+
+  test('UI state polling stops when run ends', async () => {
+    const content = readFileSync(
+      join(import.meta.dir, '../src/routes/+page.svelte'),
+      'utf8'
+    );
+    
+    // Verify that handleRunEnd calls stopUIStatePoll to stop UI state polling
+    expect(content).toContain('stopUIStatePoll();');
+    expect(content).toMatch(/stopStatePoll\(\);[\s\S]*?stopUIStatePoll\(\);/);
+  });
 });

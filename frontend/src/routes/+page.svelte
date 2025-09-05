@@ -249,6 +249,7 @@
     battleActive = false;
     stopBattlePoll();
     stopStatePoll();
+    stopUIStatePoll();
     homeOverlay();
     clearRunState();
   }
