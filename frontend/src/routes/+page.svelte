@@ -866,16 +866,20 @@
     // Ensure syncing is enabled when advancing to the next room
     haltSync = false;
     if (typeof window !== 'undefined') window.afHaltSync = false;
-    // If rewards are still present, don't attempt to advance.
-    const awaitingRewards =
+    // If there are outstanding card/relic choices, don't attempt to advance.
+    const awaitingCardOrRelic =
       (roomData?.card_choices?.length || 0) > 0 ||
       (roomData?.relic_choices?.length || 0) > 0 ||
       roomData?.awaiting_card ||
-      roomData?.awaiting_relic ||
-      roomData?.awaiting_loot;
-    if (awaitingRewards) {
-      return;
-    }
+      roomData?.awaiting_relic;
+    if (awaitingCardOrRelic) return;
+    // If only loot remains, acknowledge it before advancing so the backend clears the gate.
+    try {
+      const hasLoot = Boolean((roomData?.loot?.gold || 0) > 0 || (roomData?.loot?.items || []).length > 0);
+      if (roomData?.awaiting_loot || hasLoot) {
+        try { await acknowledgeLoot(runId); } catch { /* ignore if already acknowledged */ }
+      }
+    } catch { /* no-op */ }
     // If the run has ended (defeat), clear state and show defeat popup immediately
     if (roomData?.ended) {
       handleDefeat();
@@ -1088,10 +1092,12 @@
         }
       } else if (uiState.mode === 'battle') {
         // Battle mode - backend will handle battle state
+        runId = uiState.active_run || runId || '';
         battleActive = true;
         if (typeof window !== 'undefined') window.afBattleActive = true;
       } else {
         // Other modes like card_selection, relic_selection, etc.
+        runId = uiState.active_run || runId || '';
         battleActive = false;
         if (typeof window !== 'undefined') window.afBattleActive = false;
         if (uiState.game_state?.current_state?.room_data) {

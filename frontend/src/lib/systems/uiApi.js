@@ -149,7 +149,8 @@ export async function roomAction(roomId = '0', actionData = {}) {
 export async function advanceRoom() {
   const state = await getUIState();
   const gs = state?.game_state || {};
-  if (gs.awaiting_card || gs.awaiting_relic || gs.awaiting_loot) {
+  const cs = gs?.current_state || {};
+  if (cs.awaiting_card || cs.awaiting_relic || cs.awaiting_loot) {
     const message = 'Cannot advance room until all rewards are collected.';
     openOverlay('error', { message, traceback: '' });
     const err = new Error(message);
