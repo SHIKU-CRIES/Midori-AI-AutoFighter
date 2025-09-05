@@ -24,6 +24,7 @@ from game import save_party  # noqa: F401
 from llms.torch_checker import is_torch_available
 from logging_config import configure_logging
 from quart import Quart
+from quart import Response
 from quart import jsonify
 from quart import request
 from routes.assets import bp as assets_bp
@@ -56,7 +57,7 @@ BACKEND_FLAVOR = os.getenv("UV_EXTRA", "default")
 
 
 @app.get("/")
-async def status() -> tuple[str, int, dict[str, str]]:
+async def status() -> Response:
     return jsonify({"status": "ok", "flavor": BACKEND_FLAVOR})
 
 
