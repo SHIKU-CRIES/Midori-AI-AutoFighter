@@ -71,6 +71,9 @@ three roll 35% for two extras and, if that fails, 75% for one. Larger parties
 continue this sequence, and the total foe count never exceeds ten.
 Each foe defeated during a battle temporarily raises the party's rare drop rate
 by 55% for that room, increasing gold rewards and element-based item drops.
+
+Foes also expose a `rank` field to describe encounter tier. Supported ranks are
+`normal`, `prime`, `glitched prime`, `boss`, and `glitched boss`.
  
 They are procedurally named by prefixing a randomly selected adjective plugin
 from `plugins/themedadj` to a player name. Adjective plugins are

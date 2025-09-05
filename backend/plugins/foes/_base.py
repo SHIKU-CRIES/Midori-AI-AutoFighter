@@ -13,6 +13,15 @@ from autofighter.stats import Stats
 from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
 
+# Supported foe rank values for upcoming features
+SUPPORTED_RANKS = (
+    "normal",
+    "prime",
+    "glitched prime",
+    "boss",
+    "glitched boss",
+)
+
 # Module-level cache to avoid repeatedly loading SentenceTransformer
 _EMBEDDINGS: object | None = None
 
@@ -75,6 +84,9 @@ class FoeBase(Stats):
     kills: int = 1
 
     last_damage_taken: int = 1
+
+    # Encounter rank indicating foe difficulty
+    rank: str = "normal"
 
     passives: list[str] = field(default_factory=list)
     dots: list[str] = field(default_factory=list)

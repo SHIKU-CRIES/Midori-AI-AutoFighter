@@ -270,6 +270,7 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "effect_resistance": 0.0,
             "shields": 0,
             "overheal_enabled": False,
+            "rank": "normal",
         }
 
     # Build a dict without dataclasses.asdict to avoid deepcopy of complex fields
@@ -311,6 +312,7 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "effect_resistance": float(getattr(obj, "effect_resistance", 0.0) or 0.0),
             "shields": int(getattr(obj, "shields", 0) or 0),
             "overheal_enabled": bool(getattr(obj, "overheal_enabled", False)),
+            "rank": getattr(obj, "rank", "normal"),
         }
 
     # Remove non-serializable fields introduced by plugins (e.g., runtime memory)
@@ -323,6 +325,7 @@ def _serialize(obj: Stats) -> dict[str, Any]:
         data["name"] = obj.name
     if hasattr(obj, "char_type"):
         data["char_type"] = getattr(obj.char_type, "value", obj.char_type)
+    data["rank"] = getattr(obj, "rank", "normal")
 
     data.pop("dots", None)
     data.pop("hots", None)
@@ -452,7 +455,9 @@ def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
     capped to the number of unique candidates.
     """
     if "boss" in node.room_type:
-        return [_choose_foe(party)]
+        foe = _choose_foe(party)
+        foe.rank = "glitched boss" if "glitched" in node.room_type else "boss"
+        return [foe]
 
     base = min(10, 1 + node.pressure // 5)
     extras = 0
@@ -504,4 +509,9 @@ def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
     k = min(desired, len(pool))
     chosen_classes = random.sample(pool, k=k)
     foes = [cls() for cls in chosen_classes]
+    for foe in foes:
+        if "prime" in node.room_type:
+            foe.rank = "glitched prime" if "glitched" in node.room_type else "prime"
+        elif "glitched" in node.room_type:
+            foe.rank = "glitched prime"
     return foes
