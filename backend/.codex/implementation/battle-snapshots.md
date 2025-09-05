@@ -24,6 +24,10 @@ poll for results:
   Supported ranks are `"normal"`, `"prime"`, `"glitched prime"`, `"boss"`, and
   `"glitched boss"`.
 
+- Requesting a battle `snapshot` with none available will now start the fight
+  using the current room state and return the newly created snapshot instead of
+  raising an error.
+
 These snapshots are stored in `game.battle_snapshots` and polled by the
 frontend during combat.
 

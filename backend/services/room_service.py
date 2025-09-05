@@ -45,9 +45,10 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
 
     if action == "snapshot":
         snap = battle_snapshots.get(run_id)
-        if snap is None:
-            raise LookupError("no battle")
-        return snap
+        if snap is not None:
+            return snap
+        action = ""
+        data = {k: v for k, v in data.items() if k != "action"}
 
     if action == "pause":
         if run_id in battle_tasks:
@@ -289,9 +290,10 @@ async def boss_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     action = data.get("action", "")
     if action == "snapshot":
         snap = battle_snapshots.get(run_id)
-        if snap is None:
-            raise LookupError("no battle")
-        return snap
+        if snap is not None:
+            return snap
+        action = ""
+        data = {k: v for k, v in data.items() if k != "action"}
 
     state, rooms = await asyncio.to_thread(load_map, run_id)
     try:
