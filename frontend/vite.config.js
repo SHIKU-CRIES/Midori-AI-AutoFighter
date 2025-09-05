@@ -2,7 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
-function backendDiscoveryPlugin() {
+async function discoverBackend() {
   const services = [
     'http://backend:59002',
     'http://backend-llm-cuda:59002',
@@ -11,7 +11,10 @@ function backendDiscoveryPlugin() {
     'http://localhost:59002'
   ];
 
-  let resolved = process.env.VITE_API_BASE;
+  // Check if backend is already set via environment
+  if (process.env.VITE_API_BASE) {
+    return process.env.VITE_API_BASE;
+  }
 
   async function probe(url) {
     try {
@@ -22,43 +25,56 @@ function backendDiscoveryPlugin() {
     }
   }
 
+  for (const url of services) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await probe(url)) {
+      console.log(`[backend] discovered ${url}, proxying via /api`);
+      return url;
+    }
+  }
+  
+  console.log(`[backend] no backend found, defaulting to localhost:59002`);
+  return 'http://localhost:59002';
+}
+
+function backendDiscoveryPlugin() {
   return {
     name: 'backend-discovery',
-    async configureServer(server) {
-      if (!resolved) {
-        for (const url of services) {
-          // eslint-disable-next-line no-await-in-loop
-          if (await probe(url)) {
-            resolved = url;
-            break;
-          }
-        }
-        if (!resolved) {
-          resolved = 'http://localhost:59002';
-        }
-        process.env.VITE_API_BASE = resolved;
-        console.log(`[backend] using ${resolved}`);
-      }
-
+    configureServer(server) {
+      // Return /api as the API base for the frontend
       server.middlewares.use('/api-base', (_req, res) => {
-        res.end(resolved);
+        res.end('/api');
       });
     }
   };
 }
 
-export default defineConfig({
-        plugins: [
-                sveltekit(),
-                viteStaticCopy({
-                        targets: [
-                                {
-                                        src: 'node_modules/@zaniar/effekseer-webgl-wasm/effekseer.wasm',
-                                        dest: ''
-                                }
-                        ]
-                }),
-                backendDiscoveryPlugin()
-        ],
-        assetsInclude: ['**/*.efkefc']
+export default defineConfig(async () => {
+  // Discover backend during config time
+  const backendUrl = await discoverBackend();
+  
+  return {
+    plugins: [
+      sveltekit(),
+      viteStaticCopy({
+        targets: [
+          {
+            src: 'node_modules/@zaniar/effekseer-webgl-wasm/effekseer.wasm',
+            dest: ''
+          }
+        ]
+      }),
+      backendDiscoveryPlugin()
+    ],
+    server: {
+      proxy: {
+        '/api': {
+          target: backendUrl,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '')
+        }
+      }
+    },
+    assetsInclude: ['**/*.efkefc']
+  };
 });
