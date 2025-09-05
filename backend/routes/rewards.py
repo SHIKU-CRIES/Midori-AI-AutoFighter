@@ -10,7 +10,7 @@ from services.reward_service import select_relic as select_relic_service
 bp = Blueprint("rewards", __name__)
 
 
-@bp.post("/cards/<run_id>")
+@bp.post("/rewards/cards/<run_id>")
 async def select_card(run_id: str):
     data = await request.get_json(silent=True) or {}
     card_id = data.get("card")
@@ -21,7 +21,7 @@ async def select_card(run_id: str):
     return jsonify(result)
 
 
-@bp.post("/relics/<run_id>")
+@bp.post("/rewards/relics/<run_id>")
 async def select_relic(run_id: str):
     data = await request.get_json(silent=True) or {}
     relic_id = data.get("relic")
@@ -32,7 +32,7 @@ async def select_relic(run_id: str):
     return jsonify(result)
 
 
-@bp.post("/loot/<run_id>")
+@bp.post("/rewards/loot/<run_id>")
 async def acknowledge_loot(run_id: str):
     try:
         result = await acknowledge_loot_service(run_id)
