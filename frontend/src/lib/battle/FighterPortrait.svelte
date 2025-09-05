@@ -7,6 +7,9 @@
 
   export let fighter = {};
   export let reducedMotion = false;
+  // Optional rank identifier; reserved for future badge rendering
+  // eslint-disable-next-line no-unused-vars
+  export let rankTag = null;
   $: passiveTip = (fighter.passives || [])
     .map((p) => `${p.id}${p.stacks > 1 ? ` x${p.stacks}` : ''}`)
     .join(', ');
