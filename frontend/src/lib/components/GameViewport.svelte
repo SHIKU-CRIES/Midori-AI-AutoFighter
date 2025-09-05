@@ -42,6 +42,7 @@
 
   let randomBg = '';
   let roster = [];
+  let userState = { level: 1, exp: 0, next_level_exp: 100 };
   let sfxVolume = 50;
   let musicVolume = 50;
   let voiceVolume = 50;
@@ -61,6 +62,7 @@
     ({ sfxVolume, musicVolume, voiceVolume, framerate, autocraft, reducedMotion } =
       init.settings);
     roster = init.roster;
+    userState = init.user;
     // Ensure music starts after first user gesture if autoplay was blocked
     try {
       const { resumeGameMusic } = await import('../systems/viewportState.js');
@@ -180,6 +182,18 @@
     white-space: nowrap;
   }
   .arrow { margin: 0 0.5rem; opacity: 0.9; }
+  .user-level-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: #222;
+  }
+  .user-level-bar .fill {
+    height: 100%;
+    background: linear-gradient(red, green);
+  }
 </style>
 
 <div class="viewport-wrap">
@@ -256,5 +270,14 @@
       on:snapshot-start={() => (snapshotLoading = true)}
       on:snapshot-end={() => (snapshotLoading = false)}
     />
+    <div class="user-level-bar">
+      <div
+        class="fill"
+        style={`width: ${Math.min(
+          100,
+          100 * (userState.exp / userState.next_level_exp)
+        )}%`}
+      />
+    </div>
   </div>
 </div>

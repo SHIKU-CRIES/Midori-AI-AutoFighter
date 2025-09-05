@@ -21,6 +21,7 @@ export async function loadInitialState() {
     reducedMotion: saved.reducedMotion ?? false,
   };
   let roster = [];
+  let user = { level: 1, exp: 0, next_level_exp: 100 };
   try {
     const data = await getPlayers();
     function resolveElement(p) {
@@ -29,10 +30,11 @@ export async function loadInitialState() {
       return e && !/generic/i.test(String(e)) ? e : 'Generic';
     }
     roster = data.players.map(p => ({ id: p.id, element: resolveElement(p) }));
+    user = data.user || user;
   } catch {
     roster = [];
   }
-  return { settings, roster };
+  return { settings, roster, user };
 }
 
 export function mapSelectedParty(roster, selected) {

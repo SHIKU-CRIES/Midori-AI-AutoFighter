@@ -16,6 +16,7 @@ from game import get_save_manager
 from quart import Blueprint
 from quart import jsonify
 from quart import request
+from services.user_level_service import get_user_state
 
 from autofighter.gacha import GachaManager
 from autofighter.stats import apply_status_hooks
@@ -169,7 +170,7 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
                 "stats": stats,
             }
         )
-    return jsonify({"players": roster})
+    return jsonify({"players": roster, "user": get_user_state()})
 
 
 @bp.get("/player/stats")
@@ -275,7 +276,7 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
         "base_stats": base_stats,
         "active_effects": active_effects,
     }
-    return jsonify({"stats": stats, "refresh_rate": refresh})
+    return jsonify({"stats": stats, "refresh_rate": refresh, "user": get_user_state()})
 
 
 @bp.get("/player/editor")
