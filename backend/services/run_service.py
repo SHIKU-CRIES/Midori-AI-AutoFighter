@@ -277,7 +277,7 @@ async def wipe_save() -> None:
     def do_wipe():
         manager = get_save_manager()
         manager.db_path.unlink(missing_ok=True)
-        manager.migrate(Path(__file__).resolve().parent / "migrations")
+        manager.migrate(Path(__file__).resolve().parent.parent / "migrations")
         persona = random.choice(["lady_darkness", "lady_light"])
         with manager.connection() as conn:
             conn.execute("INSERT INTO owned_players (id) VALUES (?)", (persona,))
