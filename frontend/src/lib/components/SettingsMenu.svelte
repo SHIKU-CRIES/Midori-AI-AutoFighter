@@ -144,12 +144,14 @@
 
 
   async function handleEndRun() {
+    endingRun = true;
+    endRunStatus = runId ? 'Ending run…' : 'Ending all runs…';
+    // Immediately halt any battle snapshot polling while ending the run
+    try { if (typeof window !== 'undefined') window.afHaltSync = true; } catch {}
+
+    let ended = false;
     if (runId) {
       try {
-        endingRun = true;
-        endRunStatus = 'Ending run…';
-        // Immediately halt any battle snapshot polling while ending the run
-        try { if (typeof window !== 'undefined') window.afHaltSync = true; } catch {}
         await endRun(runId);
         // Verify deletion; if the run persists, fall back to end-all
         try {
@@ -157,19 +159,34 @@
           const stillActive = Array.isArray(data?.runs) && data.runs.some(r => r.run_id === runId);
           if (stillActive) {
             await endAllRuns();
+            endRunStatus = 'Run force-ended';
+          } else {
+            endRunStatus = 'Run ended';
           }
-        } catch {}
-        endRunStatus = 'Run ended';
+          ended = true;
+        } catch {
+          endRunStatus = 'Run ended';
+          ended = true;
+        }
       } catch (e) {
         console.error('Failed to end run', e);
-        endRunStatus = 'Failed to end run';
-      } finally {
-        endingRun = false;
-        dispatch('endRun');
-        // Clear status after a short delay so users see feedback
-        try { setTimeout(() => (endRunStatus = ''), 1200); } catch {}
       }
     }
+
+    if (!ended) {
+      try {
+        await endAllRuns();
+        endRunStatus = 'Run force-ended';
+      } catch (e) {
+        console.error('Failed to force end runs', e);
+        endRunStatus = 'Failed to end run';
+      }
+    }
+
+    endingRun = false;
+    dispatch('endRun');
+    // Clear status after a short delay so users see feedback
+    try { setTimeout(() => (endRunStatus = ''), 1200); } catch {}
   }
 
   async function handleEndAllRuns() {
@@ -337,7 +354,7 @@
       <div class="control" title="End the current run.">
         <Power />
         <label>End Run</label>
-        <button on:click={handleEndRun} disabled={!runId || endingRun}>{endingRun ? 'Ending…' : 'End'}</button>
+        <button on:click={handleEndRun} disabled={endingRun}>{endingRun ? 'Ending…' : 'End'}</button>
         {#if endRunStatus}
           <span class="status" data-testid="endrun-status">{endRunStatus}</span>
         {/if}
