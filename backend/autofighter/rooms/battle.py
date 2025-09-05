@@ -197,7 +197,7 @@ class BattleRoom(Room):
             member.effect_manager = mgr
             party_effects.append(mgr)
 
-        # Start battle logging BEFORE emitting any events so participants are captured
+        # Start battle logging once before emitting any events so participants are captured
         battle_logger = start_battle_logging()
         try:
             if battle_logger is not None:
@@ -214,9 +214,6 @@ class BattleRoom(Room):
         for f in foes:
             await BUS.emit_async("battle_start", f)
             await registry.trigger("battle_start", f, party=combat_party.members, foes=foes)
-
-        # Start battle logging
-        battle_logger = start_battle_logging()
 
         log.info(
             "Battle start: %s vs %s",
