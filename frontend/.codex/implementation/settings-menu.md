@@ -13,3 +13,7 @@ for each category:
 checks it for `"llm"` to decide whether the LLM tab should appear. When
 the flavor string omits `"llm"`, the component skips `getLrmConfig()`
 and hides the model selector and test button.
+
+The Gameplay tab's **End Run** button now attempts to end the current run by
+ID and falls back to clearing all runs when the ID is missing or the targeted
+request fails.
