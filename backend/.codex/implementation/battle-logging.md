@@ -42,7 +42,7 @@ Each battle summary includes:
 The system is automatically integrated into the battle flow:
 
 1. **Run starts**: `start_run_logging(run_id)` is called when a new run begins
-2. **Battle starts**: `start_battle_logging()` is called when a battle begins
+2. **Battle starts**: `start_battle_logging()` is called once after the party and foes are determined, before any battle events
 3. **Battle ends**: `end_battle_logging(result)` is called when a battle ends
 4. **Run ends**: `end_run_logging()` is called when a run ends
 
@@ -148,6 +148,7 @@ Total Events: 45
 - Does not interfere with existing logging to `backend.log`
 - Logs are organized by run ID and battle index for easy navigation
 - Each battle gets its own logger instance to prevent interference
+- Call `start_battle_logging()` only once per battle after participants are set; additional calls finalize the previous battle as "interrupted"
 
 ## Battle Review API
 
