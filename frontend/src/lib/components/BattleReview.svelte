@@ -110,7 +110,7 @@
   $: foesDisplay = (foeData && foeData.length
     ? foeData
     : (foes && foes.length
-        ? foes.map(id => ({ id }))
+        ? foes.map(f => (typeof f === 'object' ? { ...f } : { id: f }))
         : (summary.foes || []).map(id => ({ id }))
       )
   );
@@ -207,9 +207,11 @@
     // Add foe tabs
     for (const foe of foesDisplay || []) {
       if (foe.id) {
+        const name = foe.name || foe.id;
+        const label = foe.rank ? `${name} — ${foe.rank}` : name;
         tabs.push({
           id: foe.id,
-          label: foe.name || foe.id,
+          label,
           type: 'foe',
           entity: foe
         });
