@@ -24,6 +24,8 @@ class BeccaMenagerieBond:
     _summon_cooldown: ClassVar[dict[int, int]] = {}  # entity_id -> turns_remaining
     _spirit_stacks: ClassVar[dict[int, int]] = {}  # entity_id -> spirit_count
     _last_summon: ClassVar[dict[int, str]] = {}  # entity_id -> last_summon_type
+    _applied_spirit_stacks: ClassVar[dict[int, int]] = {}
+    _buffed_summons: ClassVar[dict[int, set[int]]] = {}
 
     # Available jellyfish types
     JELLYFISH_TYPES = ["healing", "electric", "poison", "shielding"]
@@ -36,13 +38,20 @@ class BeccaMenagerieBond:
         if entity_id not in self._summon_cooldown:
             self._summon_cooldown[entity_id] = 0
             self._spirit_stacks[entity_id] = 0
+            self._applied_spirit_stacks[entity_id] = 0
+            self._buffed_summons[entity_id] = set()
 
-        # Apply spirit bonuses from previous summons
         current_spirit_stacks = self._spirit_stacks[entity_id]
-        if current_spirit_stacks > 0:
-            # +5% attack and defense per spirit stack
-            spirit_attack_bonus = int(target.atk * 0.05 * current_spirit_stacks)
-            spirit_defense_bonus = int(target.defense * 0.05 * current_spirit_stacks)
+        applied_stacks = self._applied_spirit_stacks.get(entity_id, 0)
+
+        summons = SummonManager.get_summons(getattr(target, "id", str(id(target))))
+        jellyfish_summons = [s for s in summons if s.summon_source == self.id]
+        current_ids = {id(s) for s in jellyfish_summons}
+        buffed_ids = self._buffed_summons.setdefault(entity_id, set())
+
+        if current_spirit_stacks != applied_stacks:
+            spirit_attack_bonus = int(target._base_atk * 0.05 * current_spirit_stacks)
+            spirit_defense_bonus = int(target._base_defense * 0.05 * current_spirit_stacks)
 
             spirit_effect = StatEffect(
                 name=f"{self.id}_spirit_bonuses",
@@ -50,25 +59,44 @@ class BeccaMenagerieBond:
                     "atk": spirit_attack_bonus,
                     "defense": spirit_defense_bonus,
                 },
-                duration=-1,  # Permanent for rest of encounter
+                duration=-1,
                 source=self.id,
             )
             target.add_effect(spirit_effect)
 
-            # Apply same bonuses to active summons via summon manager
-            summons = SummonManager.get_summons(getattr(target, 'id', str(id(target))))
-            for summon in summons:
-                if summon.summon_source == self.id:  # Only affect our jellyfish
-                    pet_effect = StatEffect(
-                        name=f"{self.id}_pet_spirit_bonuses",
-                        stat_modifiers={
-                            "atk": spirit_attack_bonus,
-                            "defense": spirit_defense_bonus,
-                        },
-                        duration=-1,  # Permanent for rest of encounter
-                        source=self.id,
-                    )
-                    summon.add_effect(pet_effect)
+            for summon in jellyfish_summons:
+                pet_effect = StatEffect(
+                    name=f"{self.id}_pet_spirit_bonuses",
+                    stat_modifiers={
+                        "atk": spirit_attack_bonus,
+                        "defense": spirit_defense_bonus,
+                    },
+                    duration=-1,
+                    source=self.id,
+                )
+                summon.add_effect(pet_effect)
+
+            self._applied_spirit_stacks[entity_id] = current_spirit_stacks
+            self._buffed_summons[entity_id] = current_ids
+        else:
+            new_ids = current_ids - buffed_ids
+            if new_ids:
+                spirit_attack_bonus = int(target._base_atk * 0.05 * current_spirit_stacks)
+                spirit_defense_bonus = int(target._base_defense * 0.05 * current_spirit_stacks)
+                for summon in jellyfish_summons:
+                    if id(summon) in new_ids:
+                        pet_effect = StatEffect(
+                            name=f"{self.id}_pet_spirit_bonuses",
+                            stat_modifiers={
+                                "atk": spirit_attack_bonus,
+                                "defense": spirit_defense_bonus,
+                            },
+                            duration=-1,
+                            source=self.id,
+                        )
+                        summon.add_effect(pet_effect)
+                buffed_ids.update(new_ids)
+            buffed_ids.intersection_update(current_ids)
 
         # Handle summon cooldown
         if self._summon_cooldown[entity_id] > 0:
