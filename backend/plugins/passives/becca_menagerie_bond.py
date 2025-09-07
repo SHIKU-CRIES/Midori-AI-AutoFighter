@@ -82,6 +82,12 @@ class BeccaMenagerieBond:
         - Works for foes as well (no party passed); UI still shows foe summons
         """
         party = kwargs.get("party")
+        # Accept either a Party object or a raw members list for compatibility
+        if party is not None and not hasattr(party, "members"):
+            class _PartyShim:
+                def __init__(self, members):
+                    self.members = members
+            party = _PartyShim(party)
         try:
             await self.summon_jellyfish(target, party=party)
         except Exception:

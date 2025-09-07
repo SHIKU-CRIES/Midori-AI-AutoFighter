@@ -492,6 +492,23 @@ class BattleRoom(Room):
                     await BUS.emit_async("action_used", member, tgt_foe, dmg)
                     # Trigger action_taken passives for the acting member
                     await registry.trigger("action_taken", member, target=tgt_foe, damage=dmg, party=combat_party.members, foes=foes)
+                    # Sync any new summons into party/foes so they can act this round
+                    try:
+                        from autofighter.summons import SummonManager
+                        # Add party-side summons
+                        SummonManager.add_summons_to_party(combat_party)
+                        # Add foe-side summons to foes list with effect managers
+                        for foe_owner in list(foes):
+                            owner_id = getattr(foe_owner, 'id', str(id(foe_owner)))
+                            for s in SummonManager.get_summons(owner_id):
+                                if s not in foes:
+                                    foes.append(s)
+                                    mgr = EffectManager(s)
+                                    s.effect_manager = mgr
+                                    foe_effects.append(mgr)
+                                    enrage_mods.append(None)
+                    except Exception:
+                        pass
                     member.add_ultimate_charge(member.actions_per_turn)
                     for ally in combat_party.members:
                         ally.handle_ally_action(member)
@@ -534,7 +551,11 @@ class BattleRoom(Room):
                                     for m in combat_party.members
                                     if not isinstance(m, Summon)
                                 ],
-                                "foes": [_serialize(f) for f in foes],
+                                "foes": [
+                                    _serialize(f)
+                                    for f in foes
+                                    if not isinstance(f, Summon)
+                                ],
                                 "party_summons": _collect_summons(combat_party.members),
                                 "foe_summons": _collect_summons(foes),
                                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
@@ -632,6 +653,21 @@ class BattleRoom(Room):
                     await BUS.emit_async("action_used", acting_foe, target, dmg)
                     # Trigger action_taken passives for the acting foe
                     await registry.trigger("action_taken", acting_foe)
+                    # Sync any new summons created by foes
+                    try:
+                        from autofighter.summons import SummonManager
+                        SummonManager.add_summons_to_party(combat_party)
+                        for foe_owner in list(foes):
+                            owner_id = getattr(foe_owner, 'id', str(id(foe_owner)))
+                            for s in SummonManager.get_summons(owner_id):
+                                if s not in foes:
+                                    foes.append(s)
+                                    mgr = EffectManager(s)
+                                    s.effect_manager = mgr
+                                    foe_effects.append(mgr)
+                                    enrage_mods.append(None)
+                    except Exception:
+                        pass
                     acting_foe.add_ultimate_charge(acting_foe.actions_per_turn)
                     # Wind-aligned foes gain charge from ally actions too
                     for ally in foes:
@@ -658,7 +694,11 @@ class BattleRoom(Room):
                             for m in combat_party.members
                             if not isinstance(m, Summon)
                         ],
-                        "foes": [_serialize(f) for f in foes],
+                        "foes": [
+                            _serialize(f)
+                            for f in foes
+                            if not isinstance(f, Summon)
+                        ],
                         "party_summons": _collect_summons(combat_party.members),
                         "foe_summons": _collect_summons(foes),
                         "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
@@ -738,7 +778,7 @@ class BattleRoom(Room):
                 "card_choices": [],
                 "relic_choices": [],
                 "loot": loot,
-                "foes": foes_data,
+                "foes": [fd for f, fd in zip(foes, foes_data, strict=False) if not isinstance(f, Summon)],
                 "foe_summons": foe_summons,
                 "room_number": self.node.index,
                 "exp_reward": exp_reward,
@@ -850,7 +890,7 @@ class BattleRoom(Room):
             "card_choices": choice_data,
             "relic_choices": relic_choice_data,
             "loot": loot,
-            "foes": foes_data,
+            "foes": [fd for f, fd in zip(foes, foes_data, strict=False) if not isinstance(f, Summon)],
             "foe_summons": foe_summons,
             "room_number": self.node.index,
             "battle_index": getattr(battle_logger, "battle_index", 0),
