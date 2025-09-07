@@ -70,7 +70,7 @@ export function roomInfo(mapRooms, currentIndex, currentRoomType, roomData) {
   return {
     pressure: cur?.pressure ?? roomData?.pressure ?? 0,
     floorNumber: cur?.floor ?? 1,
-    roomNumber: cur?.index ?? currentIndex ?? 0,
+    roomNumber: (cur?.index ?? currentIndex ?? 0) + 1,
     currentType: currentRoomType || roomData?.current_room || '',
     nextType: nxt?.room_type || (roomData?.next_room ?? ''),
   };
