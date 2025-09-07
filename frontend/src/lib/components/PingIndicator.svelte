@@ -36,7 +36,7 @@
       
       const startTime = performance.now();
       // Use the discovered backend base
-      const response = await fetch(`${apiBase}/api/performance/health`, {
+      const response = await fetch(`${apiBase}/performance/health`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',

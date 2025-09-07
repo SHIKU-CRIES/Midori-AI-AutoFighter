@@ -16,7 +16,7 @@ export async function getBackendFlavor() {
 export async function getBackendHealth() {
   try {
     const networkMsStart = performance.now();
-    const data = await httpRequest('/api/performance/health', {
+    const data = await httpRequest('/performance/health', {
       method: 'GET',
       headers: { 'Accept': 'application/json' }
     }, null, true); // suppress overlay for health checks
