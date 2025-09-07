@@ -24,6 +24,7 @@ class BeccaMenagerieBond:
     _summon_cooldown: ClassVar[dict[int, int]] = {}  # entity_id -> turns_remaining
     _spirit_stacks: ClassVar[dict[int, int]] = {}  # entity_id -> spirit_count
     _last_summon: ClassVar[dict[int, str]] = {}  # entity_id -> last_summon_type
+    _applied_spirit_stacks: ClassVar[dict[int, int]] = {}
 
     # Available jellyfish types
     JELLYFISH_TYPES = ["healing", "electric", "poison", "shielding"]
@@ -36,13 +37,14 @@ class BeccaMenagerieBond:
         if entity_id not in self._summon_cooldown:
             self._summon_cooldown[entity_id] = 0
             self._spirit_stacks[entity_id] = 0
+            self._applied_spirit_stacks[entity_id] = 0
 
-        # Apply spirit bonuses from previous summons
+        # Apply spirit bonuses only when new stacks appear
         current_spirit_stacks = self._spirit_stacks[entity_id]
-        if current_spirit_stacks > 0:
-            # +5% attack and defense per spirit stack
-            spirit_attack_bonus = int(target.atk * 0.05 * current_spirit_stacks)
-            spirit_defense_bonus = int(target.defense * 0.05 * current_spirit_stacks)
+        applied_stacks = self._applied_spirit_stacks.get(entity_id, 0)
+        if current_spirit_stacks != applied_stacks:
+            spirit_attack_bonus = int(target._base_atk * 0.05 * current_spirit_stacks)
+            spirit_defense_bonus = int(target._base_defense * 0.05 * current_spirit_stacks)
 
             spirit_effect = StatEffect(
                 name=f"{self.id}_spirit_bonuses",
@@ -50,25 +52,26 @@ class BeccaMenagerieBond:
                     "atk": spirit_attack_bonus,
                     "defense": spirit_defense_bonus,
                 },
-                duration=-1,  # Permanent for rest of encounter
+                duration=-1,
                 source=self.id,
             )
             target.add_effect(spirit_effect)
 
-            # Apply same bonuses to active summons via summon manager
-            summons = SummonManager.get_summons(getattr(target, 'id', str(id(target))))
+            summons = SummonManager.get_summons(getattr(target, "id", str(id(target))))
             for summon in summons:
-                if summon.summon_source == self.id:  # Only affect our jellyfish
+                if summon.summon_source == self.id:
                     pet_effect = StatEffect(
                         name=f"{self.id}_pet_spirit_bonuses",
                         stat_modifiers={
                             "atk": spirit_attack_bonus,
                             "defense": spirit_defense_bonus,
                         },
-                        duration=-1,  # Permanent for rest of encounter
+                        duration=-1,
                         source=self.id,
                     )
                     summon.add_effect(pet_effect)
+
+            self._applied_spirit_stacks[entity_id] = current_spirit_stacks
 
         # Handle summon cooldown
         if self._summon_cooldown[entity_id] > 0:
