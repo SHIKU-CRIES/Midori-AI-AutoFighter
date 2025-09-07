@@ -2,7 +2,7 @@
 // Replaces the run-specific API with a simpler state-based approach
 
 import { openOverlay } from './OverlayController.js';
-import { httpRequest, httpGet, httpPost } from './httpClient.js';
+import { httpGet, httpPost } from './httpClient.js';
 
 /**
  * Get the complete UI state from the backend.

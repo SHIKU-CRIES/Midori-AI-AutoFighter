@@ -1,5 +1,5 @@
 import { openOverlay } from './OverlayController.js';
-import { httpRequest, httpGet, httpPost, httpPut, httpDelete, httpBlob } from './httpClient.js';
+import { httpRequest, httpGet, httpPost, httpPut, httpBlob } from './httpClient.js';
 
 export async function getBackendFlavor() {
   try {
