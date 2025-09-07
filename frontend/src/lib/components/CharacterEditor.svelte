@@ -25,7 +25,7 @@
   export let embedded = false;
   // When false, hide pronouns/damageType fields (for non-player characters)
   export let showIdentity = true;
-  const maxPoints = 100;
+  export let maxPoints = 100;
   const dispatch = createEventDispatcher();
 
   $: remaining = maxPoints - hp - attack - defense - critRate - critDamage;
