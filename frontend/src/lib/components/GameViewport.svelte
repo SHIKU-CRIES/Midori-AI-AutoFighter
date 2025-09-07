@@ -267,7 +267,6 @@
       on:shopLeave={() => dispatch('shopLeave')}
       on:restPull={() => dispatch('restPull')}
       on:restSwap={() => dispatch('restSwap')}
-      on:restCraft={() => dispatch('restCraft')}
       on:restLeave={() => dispatch('restLeave')}
       on:snapshot-start={() => (snapshotLoading = true)}
       on:snapshot-end={() => (snapshotLoading = false)}

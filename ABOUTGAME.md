@@ -22,7 +22,7 @@ The following screenshots demonstrate the game's user interface and progression 
 ### Main Menu - Character Selection
 ![Main Menu](.codex/screenshots/a87d7423.png)
 
-The main menu features a beautiful anime-style character with a mystical halo set against an enchanting forest background. The interface provides clear navigation options for different game modes including Run, Party, Pulls, Craft, Settings, and Feedback. The atmospheric lighting and detailed character design showcase the game's high-quality visual presentation.
+The main menu features a beautiful anime-style character with a mystical halo set against an enchanting forest background. The interface provides clear navigation options for different game modes including Run, Party, Pulls, Settings, and Feedback. The atmospheric lighting and detailed character design showcase the game's high-quality visual presentation.
 
 ### Party Selection - Character Customization
 ![Party Selection](.codex/screenshots/3af616fb.png)

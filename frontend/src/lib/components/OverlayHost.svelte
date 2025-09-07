@@ -10,7 +10,6 @@
   import PopupWindow from './PopupWindow.svelte';
   import PartyPicker from './PartyPicker.svelte';
   import PullsMenu from './PullsMenu.svelte';
-  import CraftingMenu from './CraftingMenu.svelte';
   import BattleReview from './BattleReview.svelte';
   import RewardOverlay from './RewardOverlay.svelte';
   import CharacterEditor from './CharacterEditor.svelte';
@@ -215,12 +214,6 @@
   </OverlaySurface>
 {/if}
 
-{#if $overlayView === 'craft'}
-  <OverlaySurface zIndex={1300}>
-    <CraftingMenu on:close={() => dispatch('back')} />
-  </OverlaySurface>
-{/if}
-
 {#if $overlayView === 'editor'}
   <OverlaySurface zIndex={1300}>
     <CharacterEditor
@@ -338,7 +331,6 @@
       reducedMotion={reducedMotion}
       on:pull={() => dispatch('restPull')}
       on:swap={() => dispatch('restSwap')}
-      on:craft={() => dispatch('restCraft')}
       on:close={() => dispatch('restLeave')}
     />
   </OverlaySurface>
