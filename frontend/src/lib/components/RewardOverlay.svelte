@@ -161,6 +161,64 @@
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
+
+  .next-room-overlay {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1500;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .next-button.overlay {
+    margin: 0;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 2rem;
+    background: linear-gradient(145deg, #4CAF50, #45a049);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3), 0 2px 6px rgba(76, 175, 80, 0.4);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .next-button.overlay:hover {
+    background: linear-gradient(145deg, #5CBF60, #4CAF50);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4), 0 4px 10px rgba(76, 175, 80, 0.5);
+  }
+
+  .next-button.overlay:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3), 0 2px 6px rgba(76, 175, 80, 0.4);
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .next-room-overlay {
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      transform: none;
+      text-align: center;
+    }
+
+    .next-button.overlay {
+      width: 100%;
+      padding: 1rem;
+    }
+  }
   
 </style>
 
@@ -201,7 +259,9 @@
   {/if}
   
   {#if showNextButton}
-    <button class="next-button" on:click={handleNextRoom}>Next Room</button>
+    <div class="next-room-overlay">
+      <button class="next-button overlay" on:click={handleNextRoom}>Next Room</button>
+    </div>
   {/if}
   <!-- Auto-advance remains when no choices/loot -->
 </div>
