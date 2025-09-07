@@ -12,6 +12,7 @@
   import OverlayHost from './OverlayHost.svelte';
   import { getHourlyBackground } from '../systems/assetLoader.js';
   import MainMenu from './MainMenu.svelte';
+  import AboutGamePanel from './AboutGamePanel.svelte';
   import {
     loadInitialState,
     mapSelectedParty,
@@ -225,6 +226,7 @@
     {/if}
     {#if $overlayView === 'main' && !battleActive && !rewardOpen && !reviewOpen}
       <MainMenu {items} />
+      <AboutGamePanel {userState} />
     {/if}
     {#if runId && roomData && !(((roomData.result === 'battle') || (roomData.result === 'boss')) && !battleActive)}
       <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
