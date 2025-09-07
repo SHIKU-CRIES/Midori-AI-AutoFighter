@@ -13,7 +13,7 @@
   import { getElementIcon, getElementColor } from '../systems/assetLoader.js';
   import { createEventDispatcher } from 'svelte';
   import CharacterEditor from './CharacterEditor.svelte';
-  import { getPlayerConfig, savePlayerConfig } from '../systems/api.js';
+  import { getPlayerConfig, savePlayerConfig, getUpgrade, upgradeCharacter } from '../systems/api.js';
 
   /**
    * Renders the stats panel with category tabs and a toggle control.
@@ -43,6 +43,12 @@
   let loadingEditorCfg = false;
   let saveTimer = null;
   let lastPreviewId = null; // track last character ID to detect switches
+
+  // Upgrade system state
+  let upgradeData = null;
+  let loadingUpgrade = false;
+  let upgradeMessage = '';
+
   function scheduleSave() {
     if (!isPlayer || !editorVals) return;
     clearTimeout(saveTimer);
@@ -61,9 +67,68 @@
     }, 400);
   }
 
+  // Load upgrade data for the current character
+  async function loadUpgradeData() {
+    if (!previewChar) {
+      upgradeData = null;
+      return;
+    }
+    
+    loadingUpgrade = true;
+    upgradeMessage = '';
+    try {
+      upgradeData = await getUpgrade(previewChar.id);
+    } catch (e) {
+      upgradeData = null;
+      upgradeMessage = 'Failed to load upgrade data';
+    } finally {
+      loadingUpgrade = false;
+    }
+  }
+
+  // Handle spending 4-star items to increase point cap
+  async function handleUpgrade() {
+    if (!previewChar || !canUpgrade) return;
+    
+    upgradeMessage = '';
+    try {
+      await upgradeCharacter(previewChar.id, 4, 1);
+      await loadUpgradeData(); // Refresh upgrade data
+      upgradeMessage = 'Upgrade successful! +1 point to allocation cap.';
+    } catch (e) {
+      upgradeMessage = e?.message || 'Upgrade failed';
+    }
+  }
+
   // Resolve selected entry and whether it's the Player
   $: previewChar = roster.find(r => r.id === previewId);
   $: isPlayer = !!previewChar?.is_player;
+
+  // Load upgrade data when character changes
+  $: if (previewChar && lastPreviewId !== previewId) {
+    loadUpgradeData();
+  }
+
+  // Check if character can upgrade (has 4-star items available)
+  $: canUpgrade = (() => {
+    if (!upgradeData?.items || loadingUpgrade) return false;
+    
+    const items = upgradeData.items;
+    if (isPlayer) {
+      // Player can use 4-star items of any element
+      return Object.entries(items)
+        .filter(([k]) => k.endsWith('_4'))
+        .some(([, v]) => (v || 0) > 0);
+    } else {
+      // Other characters need 4-star items matching their element
+      const element = previewChar.element?.toLowerCase() || '';
+      return (items[`${element}_4`] || 0) > 0;
+    }
+  })();
+
+  // Calculate max points (base 100 + upgrade points)
+  $: maxPoints = 100 + (upgradeData?.upgrade_points || 0);
+
   // Lazy‑load the saved Player Editor config when the player is selected.
   $: if (previewChar) {
     // Reset editor state when switching characters
@@ -277,6 +342,7 @@
           <CharacterEditor
             embedded={true}
             showIdentity={sel.is_player}
+            maxPoints={maxPoints}
             pronouns={editorVals?.pronouns || ''}
             damageType={editorVals?.damageType || 'Light'}
             hp={editorVals?.hp || 0}
@@ -286,6 +352,22 @@
             critDamage={editorVals?.critDamage || 0}
             on:change={(e) => { editorVals = e.detail; if (sel.is_player) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } scheduleSave(); }}
           />
+          
+          <!-- Upgrade button for spending 4-star items -->
+          {#if canUpgrade && !loadingUpgrade}
+            <div class="upgrade-section">
+              <button class="upgrade-btn" on:click={handleUpgrade}>
+                ⭐ Upgrade (+1 Point Cap)
+              </button>
+              <p class="upgrade-hint">Spend 1x 4★ damage item to increase allocation cap</p>
+            </div>
+          {/if}
+          
+          {#if upgradeMessage}
+            <div class="upgrade-message" class:success={upgradeMessage.includes('successful')}>
+              {upgradeMessage}
+            </div>
+          {/if}
         </div>
       </div>
     {/each}
@@ -380,4 +462,55 @@ button.confirm {
 
 /* Inline container occupying 50% of the stats panel width */
 .editor-wrap { width: 100%; }
+
+/* Upgrade section styling */
+.upgrade-section {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.upgrade-btn {
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #000;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  align-self: flex-start;
+}
+
+.upgrade-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+}
+
+.upgrade-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #ccc;
+  opacity: 0.8;
+}
+
+.upgrade-message {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: rgba(255, 0, 0, 0.1);
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  color: #ffaaaa;
+}
+
+.upgrade-message.success {
+  background: rgba(0, 255, 0, 0.1);
+  border-color: rgba(0, 255, 0, 0.3);
+  color: #aaffaa;
+}
 </style>
