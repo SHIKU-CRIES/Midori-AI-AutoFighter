@@ -316,7 +316,18 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
     allowed = {"Light", "Dark", "Wind", "Lightning", "Fire", "Ice"}
     if damage_type and damage_type not in allowed:
         return jsonify({"error": "invalid damage type"}), 400
-    if total > 100:
+
+    # Calculate max allowed points including upgrade bonuses
+    upgrade_points = _get_player_upgrade_points("player")
+    upgrade_count = upgrade_points // 3375000  # Each 4-star item = 3,375,000 points = +1 cap
+    max_allowed = 100 + upgrade_count
+
+    log.debug(
+        "Player editor validation: total=%d, upgrade_points=%d, upgrade_count=%d, max_allowed=%d",
+        total, upgrade_points, upgrade_count, max_allowed
+    )
+
+    if total > max_allowed:
         return jsonify({"error": "over-allocation"}), 400
 
     log.debug(
