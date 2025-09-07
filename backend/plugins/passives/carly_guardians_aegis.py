@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import ClassVar
+from typing import Optional
 
 from autofighter.stats import StatEffect
 
@@ -17,47 +18,78 @@ class CarlyGuardiansAegis:
     trigger = "turn_start"  # Triggers at start of turn for healing
     max_stacks = 50  # Soft cap - show mitigation stacks with diminished returns past 50
 
-    # Class-level tracking of mitigation stacks gained from being hit
+    # Class-level tracking of mitigation stacks and converted defense stacks
     _mitigation_stacks: ClassVar[dict[int, int]] = {}
+    _attack_baseline: ClassVar[dict[int, int]] = {}
+    _defense_stacks: ClassVar[dict[int, int]] = {}
 
-    async def apply(self, target: "Stats") -> None:
-        """Apply Carly's Guardian's Aegis healing mechanics."""
+    async def apply(self, target: "Stats", party: Optional[list["Stats"]] = None, **_: object) -> None:
+        """Apply Carly's Guardian's Aegis healing and conversion mechanics."""
         entity_id = id(target)
 
-        # Initialize mitigation stack tracking if not present
+        # Initialize tracking dictionaries
         if entity_id not in self._mitigation_stacks:
             self._mitigation_stacks[entity_id] = 0
+        if entity_id not in self._attack_baseline:
+            # Record Carly's starting base attack to measure future growth
+            self._attack_baseline[entity_id] = int(target.get_base_stat("atk"))
+        if entity_id not in self._defense_stacks:
+            self._defense_stacks[entity_id] = 0
 
-        # Heal the most injured ally each turn
-        # This would need party system integration to find allies
-        # For now, apply a small self-heal based on defense
+        # Convert any attack growth into permanent defense stacks
+        base_atk = self._attack_baseline[entity_id]
+        current_atk = int(target.get_base_stat("atk"))
+        growth = current_atk - base_atk
+        if growth > 0:
+            self._defense_stacks[entity_id] += growth
+            target.set_base_stat("atk", base_atk)
+
+            stacks = self._defense_stacks[entity_id]
+            base_defense = min(stacks, 50)
+            excess_stacks = max(0, stacks - 50)
+            defense_bonus = base_defense + excess_stacks * 0.5
+
+            defense_effect = StatEffect(
+                name=f"{self.id}_defense_stacks",
+                stat_modifiers={"defense": defense_bonus},
+                duration=-1,
+                source=self.id,
+            )
+            target.add_effect(defense_effect)
+
+        # Heal the most injured ally or self if none injured
         defense_based_heal = int(target.defense * 0.1)
+        injured: Optional["Stats"] = None
+        if party:
+            injured = min(
+                (a for a in party if a.hp < a.max_hp),
+                key=lambda a: a.hp / a.max_hp,
+                default=None,
+            )
+        recipient = injured if injured is not None else target
+
+        await recipient.apply_healing(defense_based_heal, healer=target)
 
         heal_effect = StatEffect(
             name=f"{self.id}_defense_heal",
             stat_modifiers={"hp": defense_based_heal},
-            duration=1,  # One turn healing
+            duration=1,
             source=self.id,
         )
-        target.add_effect(heal_effect)
+        recipient.add_effect(heal_effect)
 
         # Apply accumulated mitigation stacks from previous hits with soft cap logic
         if self._mitigation_stacks[entity_id] > 0:
             current_stacks = self._mitigation_stacks[entity_id]
-
-            # Base mitigation from first 50 stacks (2% per stack)
             base_mitigation = min(current_stacks, 50) * 0.02
-
-            # Soft cap: stacks past 50 give reduced benefit (1% instead of 2%)
             excess_stacks = max(0, current_stacks - 50)
             excess_mitigation = excess_stacks * 0.01
-
             total_mitigation = base_mitigation + excess_mitigation
 
             mitigation_effect = StatEffect(
                 name=f"{self.id}_mitigation_stacks",
                 stat_modifiers={"mitigation": total_mitigation},
-                duration=-1,  # Permanent for rest of fight
+                duration=-1,
                 source=self.id,
             )
             target.add_effect(mitigation_effect)
@@ -96,26 +128,27 @@ class CarlyGuardiansAegis:
         )
         target.add_effect(taunt_effect)
 
-    async def on_ultimate_use(self, target: "Stats", allies: list["Stats"]) -> None:
-        """Handle ultimate ability effects - grant mitigation to allies."""
-        # Grant all allies mitigation equal to half of Carly's own
-        mitigation_to_share = target.mitigation * 0.5
+    async def on_ultimate_use(self, target: "Stats", party: list["Stats"]) -> None:
+        """Handle ultimate ability effects - distribute mitigation to allies."""
+        allies = [member for member in party if member is not target]
+        if not allies:
+            return
 
+        total_share = target.mitigation * 0.5
+        per_ally = total_share / len(allies)
         for ally in allies:
-            if ally != target:  # Don't apply to self
-                ally_mitigation_effect = StatEffect(
-                    name=f"{self.id}_shared_mitigation",
-                    stat_modifiers={"mitigation": mitigation_to_share},
-                    duration=3,  # Three turns
-                    source=self.id,
-                )
-                ally.add_effect(ally_mitigation_effect)
+            ally_mitigation_effect = StatEffect(
+                name=f"{self.id}_shared_mitigation",
+                stat_modifiers={"mitigation": per_ally},
+                duration=3,
+                source=self.id,
+            )
+            ally.add_effect(ally_mitigation_effect)
 
-        # Reduce Carly's mitigation by the same amount
         mitigation_reduction_effect = StatEffect(
             name=f"{self.id}_mitigation_reduction",
-            stat_modifiers={"mitigation": -mitigation_to_share},
-            duration=3,  # Three turns
+            stat_modifiers={"mitigation": -total_share},
+            duration=3,
             source=self.id,
         )
         target.add_effect(mitigation_reduction_effect)
