@@ -108,11 +108,22 @@ class MimicPlayerCopy:
             target.add_effect(level_bonus_effect)
 
     def _on_effect_applied(self, effect_name: str, entity, details: dict | None = None) -> None:
-        """Remove external stat buffs applied to the Mimic."""
+        """Remove only positive stat buffs applied to the Mimic."""
         if self._target_id is None or id(entity) != self._target_id:
             return
+
         if details and details.get("effect_type") == "stat_modifier":
-            if not effect_name.startswith(f"{self.id}_"):
+            if effect_name.startswith(f"{self.id}_"):
+                return
+
+            deltas = details.get("deltas", {}) or {}
+            multipliers = details.get("multipliers", {}) or {}
+
+            is_buff = any(delta > 0 for delta in deltas.values()) or any(
+                mult > 1 for mult in multipliers.values()
+            )
+
+            if is_buff:
                 entity.remove_effect_by_name(effect_name)
 
     async def on_battle_start(self, target: "Stats", battle_participants: list) -> None:
