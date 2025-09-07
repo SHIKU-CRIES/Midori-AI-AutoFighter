@@ -5,7 +5,6 @@ import {
   savePlayerConfig,
   getGacha,
   pullGacha,
-  setAutoCraft,
   getUpgrade,
   upgradeCharacter,
   upgradeStat,
@@ -101,12 +100,6 @@ describe('api calls', () => {
     global.fetch = fetchMock;
     const result = await pullGacha(5);
     expect(result).toEqual({ results: [], pity: 0 });
-  });
-
-  test('setAutoCraft posts flag', async () => {
-    global.fetch = createFetch({ status: 'ok', auto_craft: true });
-    const result = await setAutoCraft(true);
-    expect(result).toEqual({ status: 'ok', auto_craft: true });
   });
 
   test('chooseCard posts card selection', async () => {

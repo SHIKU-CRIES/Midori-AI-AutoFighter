@@ -36,7 +36,7 @@ browser reads this value instead of scanning the network directly.
   active battle.
 - Pulls: Calls `/gacha/pull` so players can recruit 5★ or 6★ characters or
   earn 1★–4★ upgrade items between runs. Pity raises the odds of higher‑tier
-  items; an auto‑craft toggle is available in Settings.
+  items and upgrade materials auto‑craft in the background.
 - Inventory: Displays cards, relics, and upgrade materials in the in‑run
   top‑left NavBar (disabled during battles).
 - Feedback: Opens a pre‑filled GitHub issue in a new tab.

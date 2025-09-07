@@ -117,65 +117,6 @@ async def test_pull_six_star(app_with_db):
     assert data["results"][0]["id"] == "lady_fire_and_ice"
 
 
-@pytest.mark.asyncio
-async def test_auto_craft_setting(app_with_db):
-    app, db_path = app_with_db
-    client = app.test_client()
-    conn = sqlcipher3.connect(db_path)
-    conn.execute("PRAGMA key = 'testkey'")
-    conn.execute(
-        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
-        ("ticket", 1)
-    )
-    conn.execute(
-        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
-        ("fire_1", 125)
-    )
-    conn.commit()
-    with patch(
-        "autofighter.gacha.random.random", side_effect=[0.5, 1.0, 0.0]
-    ), patch("autofighter.gacha.random.choice", return_value="fire"):
-        resp = await client.post("/gacha/pull", json={"count": 1})
-    data = await resp.get_json()
-    assert data["items"]["fire_1"] == 126
-    assert "fire_2" not in data["items"]
-
-    resp = await client.post("/gacha/auto-craft", json={"enabled": True})
-    assert (await resp.get_json())["auto_craft"] is True
-    conn.execute(
-        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
-        ("ticket", 1)
-    )
-    conn.execute(
-        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
-        ("fire_1", 125)
-    )
-    conn.commit()
-    with patch(
-        "autofighter.gacha.random.random", side_effect=[0.5, 1.0, 0.0]
-    ), patch("autofighter.gacha.random.choice", return_value="fire"):
-        resp = await client.post("/gacha/pull", json={"count": 1})
-    data = await resp.get_json()
-    assert data["items"]["fire_1"] == 1
-    assert data["items"]["fire_2"] == 1
-
-
-@pytest.mark.asyncio
-async def test_manual_craft_endpoint(app_with_db):
-    app, db_path = app_with_db
-    client = app.test_client()
-    conn = sqlcipher3.connect(db_path)
-    conn.execute("PRAGMA key = 'testkey'")
-    conn.execute(
-        "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
-        ("fire_1", 125)
-    )
-    conn.commit()
-    resp = await client.post("/gacha/craft")
-    data = await resp.get_json()
-    assert data["items"].get("fire_1", 0) == 0
-    assert data["items"]["fire_2"] == 1
-
 
 @pytest.mark.asyncio
 async def test_pity_scales_item_rarity(app_with_db):

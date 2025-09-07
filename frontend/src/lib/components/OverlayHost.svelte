@@ -35,7 +35,6 @@
   export let musicVolume = 50;
   export let voiceVolume = 50;
   export let framerate = 60;
-  export let autocraft = false;
   export let reducedMotion = false;
   export let selectedParty = [];
   export let battleActive = false;
@@ -251,7 +250,6 @@
       {musicVolume}
       {voiceVolume}
       {framerate}
-      {autocraft}
       {reducedMotion}
       {runId}
       {backendFlavor}
