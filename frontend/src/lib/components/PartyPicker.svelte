@@ -199,6 +199,7 @@
             // Bubble an editor change so top-level editorState stays in sync for Start Run
             try { dispatch('editorChange', { damageType: el }); } catch {}
           }}
+          on:editor-change={(e) => dispatch('editorChange', e.detail)}
           on:refresh-roster={refreshRoster}
         />
         <div class="party-actions-inline">

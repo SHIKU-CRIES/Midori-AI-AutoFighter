@@ -7,9 +7,11 @@ import logging
 from typing import Dict
 from typing import List
 
+from game import _apply_character_customization
 from game import _apply_player_customization
 from game import _apply_player_upgrades
 from game import _assign_damage_type
+from game import _load_character_customization
 from game import _load_player_customization
 from game import get_save_manager
 from quart import Blueprint
@@ -155,8 +157,7 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
         cls = getattr(player_plugins, name)
         inst = cls()
         await asyncio.to_thread(_assign_damage_type, inst)
-        if inst.id == "player":
-            await asyncio.to_thread(_apply_player_customization, inst)
+        await asyncio.to_thread(_apply_character_customization, inst, inst.id)
         await asyncio.to_thread(_apply_player_upgrades, inst)
         stats = _serialize_stats(inst)
         roster.append(
@@ -371,6 +372,78 @@ async def update_player_editor() -> tuple[str, int, dict[str, str]]:
 
     await asyncio.to_thread(update_player_data)
     log.debug("Player customization saved successfully")
+    return jsonify({"status": "ok"})
+
+
+@bp.get("/players/<pid>/editor")
+async def get_character_editor(pid: str):
+    """Fetch saved stat allocations for a specific character."""
+
+    inst = None
+    for name in player_plugins.__all__:
+        cls = getattr(player_plugins, name)
+        if getattr(cls, "id", name) == pid:
+            inst = cls()
+            break
+    if inst is None:
+        return jsonify({"error": "unknown player"}), 404
+
+    stats = await asyncio.to_thread(_load_character_customization, pid)
+    return jsonify(
+        {
+            "hp": stats.get("hp", 0),
+            "attack": stats.get("attack", 0),
+            "defense": stats.get("defense", 0),
+            "crit_rate": stats.get("crit_rate", 0),
+            "crit_damage": stats.get("crit_damage", 0),
+        }
+    )
+
+
+@bp.put("/players/<pid>/editor")
+async def update_character_editor(pid: str):
+    """Save stat allocations for a specific character."""
+
+    data = await request.get_json(silent=True) or {}
+    try:
+        hp = int(data.get("hp", 0))
+        attack = int(data.get("attack", 0))
+        defense = int(data.get("defense", 0))
+        crit_rate = int(data.get("crit_rate", 0))
+        crit_damage = int(data.get("crit_damage", 0))
+    except (TypeError, ValueError):
+        return jsonify({"error": "invalid stats"}), 400
+
+    total = hp + attack + defense + crit_rate + crit_damage
+    upgrade_points = _get_player_upgrade_points(pid)
+    upgrade_count = upgrade_points // 3375000
+    max_allowed = 100 + upgrade_count
+    if total > max_allowed:
+        return jsonify({"error": "over-allocation"}), 400
+
+    def update_data():
+        payload = {
+            "hp": hp,
+            "attack": attack,
+            "defense": defense,
+            "crit_rate": crit_rate,
+            "crit_damage": crit_damage,
+        }
+        with get_save_manager().connection() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
+            )
+            conn.execute(
+                "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
+                (f"player_stats_{pid}", json.dumps(payload)),
+            )
+            if pid == "player":
+                conn.execute(
+                    "INSERT OR REPLACE INTO options (key, value) VALUES (?, ?)",
+                    ("player_stats", json.dumps(payload)),
+                )
+
+    await asyncio.to_thread(update_data)
     return jsonify({"status": "ok"})
 
 

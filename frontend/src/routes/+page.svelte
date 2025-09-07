@@ -38,6 +38,7 @@
   let viewportBg = '';
   let nextRoom = '';
 
+  let editorConfigs = {};
   let editorState = { pronouns: '', damageType: 'Light', hp: 0, attack: 0, defense: 0 };
   let battleActive = false;
   // When true, suppress backend syncing/polling (e.g., during defeat popup)
@@ -315,7 +316,8 @@
     }
 
     // No active runs found, start a new run
-    const data = await startRun(selectedParty, editorState.damageType, pressure);
+    const dmgType = editorConfigs.player?.damageType || editorState.damageType;
+    const data = await startRun(selectedParty, dmgType, pressure);
     runId = data.run_id;
     mapRooms = data.map.rooms || [];
     currentIndex = data.map.current || 0;
@@ -386,6 +388,7 @@
       attack: data.attack,
       defense: data.defense,
     };
+    editorConfigs.player = { ...editorState };
     openOverlay('editor');
   }
 
@@ -396,6 +399,7 @@
       attack: +e.detail.attack,
       defense: +e.detail.defense,
     };
+    editorConfigs.player = { ...editorState };
     await savePlayerConfig({
       pronouns: editorState.pronouns,
       damage_type: editorState.damageType,
@@ -406,8 +410,16 @@
   }
 
   function handleEditorChange(e) {
-    // Lightweight in-memory sync from embedded editor (damage type, etc.)
-    editorState = { ...editorState, ...e.detail };
+    const detail = e.detail || {};
+    if (detail.id) {
+      editorConfigs[detail.id] = { ...(editorConfigs[detail.id] || {}), ...detail.config };
+      if (detail.id === 'player') {
+        editorState = { ...editorState, ...detail.config };
+      }
+    } else {
+      editorState = { ...editorState, ...detail };
+      editorConfigs.player = { ...(editorConfigs.player || {}), ...detail };
+    }
   }
 
   async function openPulls() {

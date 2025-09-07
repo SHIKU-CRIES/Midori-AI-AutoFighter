@@ -14,5 +14,11 @@ These allocations persist as an effect descriptor rather than by mutating the
 player's base stats. When a run loads, the saved parameters rebuild a
 long-lived `StatModifier` to apply the chosen multipliers.
 
+Additional endpoints `GET /players/<pid>/editor` and `PUT /players/<pid>/editor`
+persist stat allocations for any roster character. These calls mirror the
+player editor but omit pronouns and damage type. Stats are stored in the save
+data under keys like `player_stats_<pid>` so each character maintains its own
+allocation record.
+
 ## Testing
 - `uv run pytest backend/tests/test_player_editor.py`
