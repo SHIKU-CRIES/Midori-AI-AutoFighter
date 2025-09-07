@@ -81,6 +81,7 @@ async def test_battle_rewards_defeat(app_with_db, monkeypatch):
             "exp_reward": 0,
             "enrage": {"active": False, "stacks": 0},
             "rdr": party.rdr,
+            "ended": True,
         }
 
     monkeypatch.setattr(BattleRoom, "resolve", fake_resolve)
