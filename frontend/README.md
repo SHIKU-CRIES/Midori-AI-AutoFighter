@@ -35,8 +35,10 @@ browser reads this value instead of scanning the network directly.
   (open the Party overlay to refresh), but do not retroactively modify an
   active battle.
 - Pulls: Calls `/gacha/pull` so players can recruit 5★ or 6★ characters or
-  earn 1★–4★ upgrade items between runs. Pity raises the odds of higher‑tier
-  items; auto‑crafting is an optional toggle under Crafting.
+  earn 1★–4★ upgrade items between runs. Buttons for **Pull 1**, **Pull 5**, and
+  **Pull 10** spend tickets in those amounts and are disabled if you lack
+  enough. Pity raises the odds of higher‑tier items; auto‑crafting is an
+  optional toggle under Crafting.
 - Craft: Lists upgrade items, shows 125×/10× requirements, and offers
   `/gacha/craft` and `/gacha/auto-craft`. The Craft button is disabled until
   enough materials exist.

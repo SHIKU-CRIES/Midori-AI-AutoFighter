@@ -42,6 +42,7 @@
   <p>Tickets: {items.ticket || 0}</p>
   <div class="actions">
     <button disabled={loading || (items.ticket || 0) < 1} on:click={() => pull(1)}>Pull 1</button>
+    <button disabled={loading || (items.ticket || 0) < 5} on:click={() => pull(5)}>Pull 5</button>
     <button disabled={loading || (items.ticket || 0) < 10} on:click={() => pull(10)}>Pull 10</button>
     <button on:click={close}>Done</button>
   </div>
