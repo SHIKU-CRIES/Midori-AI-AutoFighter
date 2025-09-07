@@ -36,8 +36,7 @@ class Fire(DamageTypeBase):
         return dmg
 
     async def ultimate(self, actor: Stats, allies: list[Stats], enemies: list[Stats]) -> bool:
-        if not getattr(actor, "use_ultimate", lambda: False)():
-            return False
+        await super().ultimate(actor, allies, enemies)
         base = getattr(actor, "atk", 0)
         living = [foe for foe in enemies if getattr(foe, "hp", 0) > 0]
         if base <= 0 or not living:
