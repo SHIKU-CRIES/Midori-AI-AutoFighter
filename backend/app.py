@@ -47,11 +47,11 @@ app = Quart(__name__)
 app.register_blueprint(assets_bp)
 app.register_blueprint(gacha_bp)
 app.register_blueprint(players_bp)
-app.register_blueprint(rewards_bp, url_prefix='/api')
+app.register_blueprint(rewards_bp)
 app.register_blueprint(config_bp)
 app.register_blueprint(catalog_bp)
 app.register_blueprint(ui_bp)
-app.register_blueprint(performance_bp, url_prefix='/api/performance')
+app.register_blueprint(performance_bp, url_prefix='/performance')
 
 BACKEND_FLAVOR = os.getenv("UV_EXTRA", "default")
 

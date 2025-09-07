@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import traceback
 from typing import Any
 
 from battle_logging import end_run_logging
@@ -25,6 +26,30 @@ from services.run_service import start_run
 from services.run_service import wipe_save
 
 bp = Blueprint("ui", __name__)
+
+
+def create_error_response(message: str, status_code: int = 400, include_traceback: bool = False) -> tuple[str, int, dict[str, Any]]:
+    """Create a consistent error response format."""
+    error_data = {
+        "error": message,
+        "status": "error"
+    }
+
+    if include_traceback:
+        error_data["traceback"] = traceback.format_exc()
+
+    return jsonify(error_data), status_code
+
+
+def validate_action_params(action: str, params: dict, required_fields: list[str]) -> str | None:
+    """Validate that required parameters are present for an action.
+
+    Returns None if validation passes, or error message if validation fails.
+    """
+    missing_fields = [field for field in required_fields if not params.get(field)]
+    if missing_fields:
+        return f"Action '{action}' missing required parameters: {', '.join(missing_fields)}"
+    return None
 
 
 def get_default_active_run() -> str | None:
@@ -227,37 +252,48 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
     """Handle UI actions and dispatch to appropriate backend functions."""
     try:
         data = await request.get_json()
+        if not data:
+            return create_error_response("Request body must be valid JSON", 400)
+
         action = data.get("action")
+        if not action:
+            return create_error_response("Missing 'action' field in request", 400)
+
         params = data.get("params", {})
 
         run_id = get_default_active_run()
 
         if action == "start_run":
+            # Validate start_run parameters
             members = params.get("party", ["player"])
             damage_type = params.get("damage_type", "")
             pressure = params.get("pressure", 0)
+
+            if not isinstance(members, list):
+                return create_error_response("Party must be a list of member IDs", 400)
+
             try:
                 result = await start_run(members, damage_type, pressure)
+                return jsonify(result)
             except ValueError as exc:
-                return jsonify({"error": str(exc)}), 400
-            return jsonify(result)
+                return create_error_response(str(exc), 400)
 
         elif action == "room_action":
             if not run_id:
-                return jsonify({"error": "No active run"}), 400
+                return create_error_response("No active run", 400)
 
             room_id = params.get("room_id", "0")
             try:
                 result = await room_action(run_id, room_id, params)
+                return jsonify(result)
             except LookupError as exc:
-                return jsonify({"error": str(exc)}), 404
+                return create_error_response(str(exc), 404)
             except ValueError as exc:
-                return jsonify({"error": str(exc)}), 400
-            return jsonify(result)
+                return create_error_response(str(exc), 400)
 
         elif action == "advance_room":
             if not run_id:
-                return jsonify({"error": "No active run"}), 400
+                return create_error_response("No active run", 400)
 
             # Load current map state to ensure rewards are resolved
             state, rooms = await asyncio.to_thread(load_map, run_id)
@@ -266,10 +302,7 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
                 or state.get("awaiting_relic")
                 or state.get("awaiting_loot")
             ):
-                return (
-                    jsonify({"error": "Cannot advance room while rewards are pending"}),
-                    400,
-                )
+                return create_error_response("Cannot advance room while rewards are pending", 400)
 
             progression = state.get("reward_progression")
 
@@ -316,53 +349,55 @@ async def handle_ui_action() -> tuple[str, int, dict[str, Any]]:
 
             try:
                 result = await advance_room(run_id)
+                return jsonify(result)
             except ValueError as exc:
-                return jsonify({"error": str(exc)}), 400
-            return jsonify(result)
+                return create_error_response(str(exc), 400)
 
         elif action == "choose_card":
             if not run_id:
-                return jsonify({"error": "No active run"}), 400
+                return create_error_response("No active run", 400)
 
             card_id = params.get("card_id") or params.get("card")
             if not card_id:
-                return jsonify({"error": "Missing card_id"}), 400
+                return create_error_response("Missing required parameter: card_id", 400)
 
             try:
                 result = await select_card(run_id, card_id)
+                return jsonify(result)
             except ValueError as exc:
-                return jsonify({"error": str(exc)}), 400
-            return jsonify(result)
+                return create_error_response(str(exc), 400)
 
         elif action == "choose_relic":
             if not run_id:
-                return jsonify({"error": "No active run"}), 400
+                return create_error_response("No active run", 400)
 
             relic_id = params.get("relic_id") or params.get("relic")
             if not relic_id:
-                return jsonify({"error": "Missing relic_id"}), 400
+                return create_error_response("Missing required parameter: relic_id", 400)
 
             try:
                 result = await select_relic(run_id, relic_id)
+                return jsonify(result)
             except ValueError as exc:
-                return jsonify({"error": str(exc)}), 400
-            return jsonify(result)
+                return create_error_response(str(exc), 400)
 
         else:
-            return jsonify({"error": f"Unknown action: {action}"}), 400
+            return create_error_response(f"Unknown action: {action}", 400)
 
     except Exception as e:
-        return jsonify({"error": f"Action failed: {str(e)}"}), 500
+        return create_error_response(f"Action failed: {str(e)}", 500, include_traceback=True)
 
 
 @bp.get("/battles/<int:index>/summary")
 async def battle_summary(index: int):
     run_id = get_default_active_run()
     if not run_id:
-        return jsonify({"error": "No active run"}), 404
+        return create_error_response("No active run", 404)
+
     data = await get_battle_summary(run_id, index)
     if data is None:
-        return jsonify({"error": "summary not found"}), 404
+        return create_error_response("Battle summary not found", 404)
+
     return jsonify(data)
 
 
@@ -370,10 +405,12 @@ async def battle_summary(index: int):
 async def battle_events(index: int):
     run_id = get_default_active_run()
     if not run_id:
-        return jsonify({"error": "No active run"}), 404
+        return create_error_response("No active run", 404)
+
     data = await get_battle_events(run_id, index)
     if data is None:
-        return jsonify({"error": "events not found"}), 404
+        return create_error_response("Battle events not found", 404)
+
     return jsonify(data)
 
 
