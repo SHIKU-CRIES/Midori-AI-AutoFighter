@@ -35,9 +35,8 @@ browser reads this value instead of scanning the network directly.
   (open the Party overlay to refresh), but do not retroactively modify an
   active battle.
 - Pulls: Calls `/gacha/pull` so players can recruit 5★ or 6★ characters or
-  earn 1★–4★ upgrade items between runs. Results now open an overlay that
-  reveals each pull one at a time. Pity raises the odds of higher‑tier items;
-  an auto‑craft toggle is available in Settings.
+  earn 1★–4★ upgrade items between runs. Pity raises the odds of higher‑tier
+  items and upgrade materials auto‑craft in the background.
 - Inventory: Displays cards, relics, and upgrade materials in the in‑run
   top‑left NavBar (disabled during battles).
 - Feedback: Opens a pre‑filled GitHub issue in a new tab.
