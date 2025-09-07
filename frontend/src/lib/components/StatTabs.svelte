@@ -13,7 +13,7 @@
   import { getElementIcon, getElementColor } from '../systems/assetLoader.js';
   import { createEventDispatcher } from 'svelte';
   import CharacterEditor from './CharacterEditor.svelte';
-  import { getPlayerConfig, savePlayerConfig, getUpgrade, upgradeCharacter } from '../systems/api.js';
+  import { getPlayerConfig, savePlayerConfig, getCharacterConfig, saveCharacterConfig, getUpgrade, upgradeCharacter } from '../systems/api.js';
 
   /**
    * Renders the stats panel with category tabs and a toggle control.
@@ -43,6 +43,7 @@
   let loadingEditorCfg = false;
   let saveTimer = null;
   let lastPreviewId = null; // track last character ID to detect switches
+  const editorConfigs = new Map();
 
   // Upgrade system state
   let upgradeData = null;
@@ -50,19 +51,28 @@
   let upgradeMessage = '';
 
   function scheduleSave() {
-    if (!isPlayer || !editorVals) return;
+    if (!editorVals || !previewChar) return;
     clearTimeout(saveTimer);
     saveTimer = setTimeout(async () => {
+      const payload = {
+        pronouns: editorVals.pronouns || '',
+        damage_type: editorVals.damageType || 'Light',
+        hp: Number(editorVals.hp) || 0,
+        attack: Number(editorVals.attack) || 0,
+        defense: Number(editorVals.defense) || 0,
+        crit_rate: Number(editorVals.critRate) || 0,
+        crit_damage: Number(editorVals.critDamage) || 0,
+      };
       try {
-        await savePlayerConfig({
-          pronouns: editorVals.pronouns || '',
-          damage_type: editorVals.damageType || 'Light',
-          hp: Number(editorVals.hp) || 0,
-          attack: Number(editorVals.attack) || 0,
-          defense: Number(editorVals.defense) || 0,
-          crit_rate: Number(editorVals.critRate) || 0,
-          crit_damage: Number(editorVals.critDamage) || 0,
-        });
+        await saveCharacterConfig(previewChar.id, payload);
+        if (isPlayer) {
+          await savePlayerConfig(payload);
+        }
+        editorConfigs.set(previewChar.id, { ...editorVals });
+        savedEditor = { ...editorVals };
+        if (!isPlayer) {
+          dispatch('refresh-roster');
+        }
       } catch {}
     }, 400);
   }
@@ -133,61 +143,59 @@
 
   // Lazy‑load the saved Player Editor config when the player is selected.
   $: if (previewChar) {
-    // Reset editor state when switching characters
     if (lastPreviewId !== previewId) {
       editorVals = null;
       loadingEditorCfg = false;
       lastPreviewId = previewId;
     }
-    
-    if (isPlayer) {
-      if (!editorVals && !loadingEditorCfg) {
-        loadingEditorCfg = true;
-        (async () => {
-          try {
-            const cfg = await getPlayerConfig();
-            editorVals = {
-              pronouns: cfg?.pronouns || '',
-              damageType: cfg?.damage_type || 'Light',
-              hp: Number(cfg?.hp) || 0,
-              attack: Number(cfg?.attack) || 0,
-              defense: Number(cfg?.defense) || 0,
-              critRate: Number(cfg?.crit_rate) || 0,
-              critDamage: Number(cfg?.crit_damage) || 0,
-            };
-            savedEditor = { ...editorVals };
-            try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
-          } catch {
-            // Fallback to preview runtime stats if config fetch fails
-            editorVals = {
-              pronouns: previewChar.pronouns || '',
-              damageType: previewChar.element || 'Light',
-              hp: 0,
-              attack: 0,
-              defense: 0,
-              critRate: 0,
-              critDamage: 0,
-            };
-            savedEditor = { pronouns: editorVals.pronouns, damageType: editorVals.damageType, hp: 0, attack: 0, defense: 0, critRate: 0, critDamage: 0 };
-            try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
-          } finally {
-            loadingEditorCfg = false;
+
+    const cached = editorConfigs.get(previewChar.id);
+    if (cached) {
+      editorVals = { ...cached };
+      savedEditor = { ...cached };
+    } else if (!loadingEditorCfg) {
+      loadingEditorCfg = true;
+      (async () => {
+        try {
+          let cfg;
+          if (isPlayer) {
+            cfg = await getPlayerConfig();
+          } else {
+            cfg = await getCharacterConfig(previewChar.id);
           }
-        })();
-      }
-    } else {
-      if (!editorVals || editorVals.pronouns !== (previewChar.pronouns || '')) {
-        editorVals = {
-          pronouns: previewChar.pronouns || '',
-          damageType: previewChar.element || 'Light',
-          hp: 0,
-          attack: 0,
-          defense: 0,
-          critRate: 0,
-          critDamage: 0,
-        };
-        savedEditor = { pronouns: editorVals.pronouns, damageType: editorVals.damageType, hp: 0, attack: 0, defense: 0, critRate: 0, critDamage: 0 };
-      }
+          editorVals = {
+            pronouns: isPlayer ? (cfg?.pronouns || '') : (previewChar.pronouns || ''),
+            damageType: isPlayer ? (cfg?.damage_type || 'Light') : (previewChar.element || 'Light'),
+            hp: Number(cfg?.hp) || 0,
+            attack: Number(cfg?.attack) || 0,
+            defense: Number(cfg?.defense) || 0,
+            critRate: Number(cfg?.crit_rate) || 0,
+            critDamage: Number(cfg?.crit_damage) || 0,
+          };
+          savedEditor = { ...editorVals };
+          editorConfigs.set(previewChar.id, { ...editorVals });
+          if (isPlayer) {
+            try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
+          }
+        } catch {
+          editorVals = {
+            pronouns: previewChar.pronouns || '',
+            damageType: previewChar.element || 'Light',
+            hp: 0,
+            attack: 0,
+            defense: 0,
+            critRate: 0,
+            critDamage: 0,
+          };
+          savedEditor = { ...editorVals };
+          editorConfigs.set(previewChar.id, { ...editorVals });
+          if (isPlayer) {
+            try { dispatch('preview-element', { element: editorVals.damageType }); } catch {}
+          }
+        } finally {
+          loadingEditorCfg = false;
+        }
+      })();
     }
   } else {
     editorVals = null;
@@ -352,7 +360,7 @@
             defense={editorVals?.defense || 0}
             critRate={editorVals?.critRate || 0}
             critDamage={editorVals?.critDamage || 0}
-            on:change={(e) => { editorVals = e.detail; if (sel.is_player) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } scheduleSave(); }}
+            on:change={(e) => { editorVals = e.detail; editorConfigs.set(previewId, { ...editorVals }); if (sel.is_player) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } dispatch('editor-change', { id: previewId, config: editorVals }); scheduleSave(); }}
           />
           
           <!-- Upgrade button for spending 4-star items -->

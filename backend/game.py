@@ -79,9 +79,35 @@ def _describe_passives(obj: Stats | list[str]) -> list[dict[str, Any]]:
         return registry.describe(temp)
     return registry.describe(obj)
 
+def _load_character_customization(pid: str) -> dict[str, int]:
+    """Load saved stat allocations for a character."""
+
+    stats: dict[str, int] = {
+        "hp": 0,
+        "attack": 0,
+        "defense": 0,
+        "crit_rate": 0,
+        "crit_damage": 0,
+    }
+
+    key = f"player_stats_{pid}" if pid != "player" else "player_stats"
+    with get_save_manager().connection() as conn:
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
+        )
+        cur = conn.execute("SELECT value FROM options WHERE key = ?", (key,))
+        row = cur.fetchone()
+        if row:
+            try:
+                stats.update(json.loads(row[0]))
+            except (TypeError, ValueError, json.JSONDecodeError):
+                pass
+    return stats
+
+
 def _load_player_customization() -> tuple[str, dict[str, int]]:
     pronouns = ""
-    stats: dict[str, int] = {"hp": 0, "attack": 0, "defense": 0, "crit_rate": 0, "crit_damage": 0}
+    stats = _load_character_customization("player")
     with get_save_manager().connection() as conn:
         conn.execute(
             "CREATE TABLE IF NOT EXISTS options (key TEXT PRIMARY KEY, value TEXT)"
@@ -92,19 +118,13 @@ def _load_player_customization() -> tuple[str, dict[str, int]]:
         row = cur.fetchone()
         if row:
             pronouns = row[0]
-        cur = conn.execute("SELECT value FROM options WHERE key = ?", ("player_stats",))
-        row = cur.fetchone()
-        if row:
-            try:
-                stats.update(json.loads(row[0]))
-            except (TypeError, ValueError, json.JSONDecodeError):
-                pass
     return pronouns, stats
 
-def _apply_player_customization(player: PlayerBase) -> None:
-    """Apply saved customization multipliers to a player."""
 
-    _, loaded = _load_player_customization()
+def _apply_character_customization(player: PlayerBase, pid: str) -> None:
+    """Apply saved customization multipliers to any character."""
+
+    loaded = _load_character_customization(pid)
     multipliers = {
         "max_hp_mult": 1 + loaded.get("hp", 0) * 0.01,
         "atk_mult": 1 + loaded.get("attack", 0) * 0.01,
@@ -114,8 +134,8 @@ def _apply_player_customization(player: PlayerBase) -> None:
     }
 
     log.debug(
-        "Applying player customization: player_id=%s, multipliers=%s",
-        player.id,
+        "Applying customization: player_id=%s, multipliers=%s",
+        pid,
         multipliers,
     )
 
@@ -144,6 +164,12 @@ def _apply_player_customization(player: PlayerBase) -> None:
         player.atk,
         player.defense,
     )
+
+
+def _apply_player_customization(player: PlayerBase) -> None:
+    """Apply saved customization for the main player character."""
+
+    _apply_character_customization(player, "player")
 
 
 def _load_individual_stat_upgrades(pid: str) -> dict[str, float]:
@@ -253,11 +279,10 @@ def load_party(run_id: str) -> Party:
                         inst.damage_type = load_damage_type(
                             snapshot.get("damage_type", inst.element_id)
                         )
-                    _apply_player_customization(inst)
-                    _apply_player_upgrades(inst)
                 else:
                     _assign_damage_type(inst)
-                    _apply_player_upgrades(inst)
+                _apply_character_customization(inst, inst.id)
+                _apply_player_upgrades(inst)
                 target_level = int(level_map.get(pid, 1) or 1)
                 if target_level > 1:
                     for _ in range(target_level - 1):

@@ -59,6 +59,15 @@ export async function savePlayerConfig(config) {
   return httpPut('/player/editor', config);
 }
 
+// Per-character stat customization
+export async function getCharacterConfig(id) {
+  return httpGet(`/players/${id}/editor`, { cache: 'no-store' });
+}
+
+export async function saveCharacterConfig(id, config) {
+  return httpPut(`/players/${id}/editor`, config);
+}
+
 export async function endRun(runId) {
   return httpRequest(`/run/${runId}`, { method: 'DELETE' }, (r) => r.ok);
 }
