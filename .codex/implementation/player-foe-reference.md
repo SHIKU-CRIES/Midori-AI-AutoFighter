@@ -41,7 +41,8 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 
 - **Ally** (B, random) – applies `ally_passive` on load to grant ally-specific bonuses.
 - **Becca** (B, random) – builds high attack but takes more damage from lower defense.
-- **Bubbles** (A, random) – starts with a default item and applies `bubbles_passive`.
+- **Bubbles** (A, random) – starts with a default item and applies `bubbles_bubble_burst`,
+  switching elements each turn and bursting after three hits per foe.
 - **Carly** (B, Light) – applies `carly_passive`.
 - **Chibi** (A, random) – gains four times the normal benefit from Vitality.
 - **Graygray** (B, random) – applies `graygray_passive`.
