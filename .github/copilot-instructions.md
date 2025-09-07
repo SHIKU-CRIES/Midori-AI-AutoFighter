@@ -19,16 +19,7 @@ Midori AI AutoFighter is a web-based auto-battler game with a Svelte frontend an
 
 ## Required Tools Installation
 
-### Always install these tools before starting development:
-
-```bash
-# Install uv for Python dependency management
-python3 -m pip install uv
-
-# Install bun for Node.js tooling
-curl -fsSL https://bun.sh/install | bash
-source ~/.bashrc
-```
+Tools are now autoinstalled into your dev env.
 
 **CRITICAL**: Always use `uv` for Python and `bun` for Node.js. Never use `pip` or `npm` directly as they are slower and not compatible with the repository's tooling.
 
@@ -270,7 +261,6 @@ cd frontend && bun run lint:fix
 3. If unrelated, document and proceed
 
 ### Development Environment Issues
-1. Reinstall tools: `python3 -m pip install uv --upgrade`
 2. Clear caches: `uv cache clean`
 3. Restart development servers
 
