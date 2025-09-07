@@ -94,4 +94,14 @@ describe('battle polling', () => {
     expect(cleared).toBe(true);
     expect(setTimeoutCalled).toBe(false);
   });
+
+  test('defeat snapshot triggers defeat overlay and stops polling', () => {
+    const content = readFileSync(
+      join(import.meta.dir, '../src/routes/+page.svelte'),
+      'utf8'
+    );
+    expect(content).toContain("snap?.result === 'defeat'");
+    expect(content).toMatch(/battleActive = false;\n\s+stopBattlePoll\(\);/);
+    expect(content).toMatch(/if \(snap\?\.result === 'defeat'\) {\n\s+handleDefeat\(\);\n\s+}/);
+  });
 });

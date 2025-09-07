@@ -500,7 +500,7 @@
         return;
       }
       const snapHasRewards = hasRewards(snap);
-      const snapCompleted = Boolean(snap?.awaiting_next) || Boolean(snap?.next_room) || (snap?.ended && snap?.result === 'defeat');
+      const snapCompleted = Boolean(snap?.awaiting_next) || Boolean(snap?.next_room) || snap?.result === 'defeat';
       const partyDead = Array.isArray(snap?.party) && snap.party.length > 0 && snap.party.every(m => (m?.hp ?? 1) <= 0);
       const foesDead = Array.isArray(snap?.foes) && snap.foes.length > 0 && snap.foes.every(f => (f?.hp ?? 1) <= 0);
       const combatOver = partyDead || foesDead;
@@ -518,12 +518,12 @@
           stalledTicks = 0;
           
           // Start state polling when battle ends (unless defeated)
-          if (!(snap?.ended && snap?.result === 'defeat')) {
+          if (snap?.result !== 'defeat') {
             startStatePoll();
           }
-          
+
           // If run ended in defeat, immediately return home and show defeat popup
-          if (snap?.ended && snap?.result === 'defeat') {
+          if (snap?.result === 'defeat') {
             handleDefeat();
           }
           // Auto-advance if awaiting_next without any reward choices or loot present
@@ -671,7 +671,7 @@
         return;
       }
       // If this response indicates a defeated run, stop syncing and show popup.
-      if (data?.ended && data?.result === 'defeat') {
+      if (data?.result === 'defeat') {
         handleDefeat();
         return;
       }
