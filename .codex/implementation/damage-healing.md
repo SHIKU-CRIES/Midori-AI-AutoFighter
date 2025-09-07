@@ -4,6 +4,7 @@ Summaries of elemental damage behaviors and ongoing effect plugins.
 
 ## Elemental Damage
 
+- **[Generic](../../backend/plugins/damage_types/generic.py)** – Baseline element with an ultimate that splits the user's attack into 64 rapid strikes on a single target, counting each hit as a separate action.
 - **[Fire](../../backend/plugins/damage_types/fire.py)** – Scales damage by missing HP and applies [Blazing Torment](../../backend/plugins/dots/blazing_torment.py), a stackable DoT that ticks when the target acts. Its ultimate hits every foe with the caster's attack and rolls Blazing Torment on each, then adds a drain stack that burns the user for 5% max HP per stack at the start of their turns.
 - **[Ice](../../backend/plugins/damage_types/ice.py)** – Inflicts [Frozen Wound](../../backend/plugins/dots/frozen_wound.py), reducing `actions_per_turn` and adding a 1% miss chance per stack. Some abilities instead use [Cold Wound](../../backend/plugins/dots/cold_wound.py) which caps at five stacks.
 - **[Lightning](../../backend/plugins/damage_types/lightning.py)** – Pops every active DoT for 25% of its damage on hit and applies [Charged Decay](../../backend/plugins/dots/charged_decay.py), a DoT that stuns on its final tick.
