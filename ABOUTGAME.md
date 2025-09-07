@@ -158,7 +158,7 @@ The roster in `plugins/players/` currently includes and each entry lists its `Ch
 - Bubbles (A, random damage type)
 - Carly (B, Light) – converts attack growth into defense
 - Chibi (A, Lightning)
-- Graygray (B, random damage type)
+- Graygray (B, random damage type) – retaliates with Counter Maestro after taking damage
 - Hilander (A, random damage type)
 - Kboshi (A, random damage type)
 - Lady Darkness (B, Dark)

@@ -1,6 +1,6 @@
 # Midori AI AutoFighter
 
-A web-based auto-battler game featuring strategic party management, elemental combat, and character progression.
+A web-based auto-battler game featuring strategic party management, elemental combat, and character progression. Characters like Graygray now react to incoming attacks with passives such as Counter Maestro.
 
 ## Quick Start with Docker Compose (Recommended)
 

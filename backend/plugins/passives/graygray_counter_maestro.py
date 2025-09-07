@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import ClassVar
+from typing import Optional
 
 from autofighter.stats import StatEffect
 
@@ -20,19 +21,18 @@ class GraygrayCounterMaestro:
     # Track successful counter attacks for +5% attack stacks
     _counter_stacks: ClassVar[dict[int, int]] = {}
 
-    async def apply(self, target: "Stats") -> None:
-        """Apply counter-attack mechanics for Graygray."""
+    async def apply(
+        self,
+        target: "Stats",
+        attacker: Optional["Stats"] = None,
+        damage: int = 0,
+    ) -> None:
+        """Apply counter-attack mechanics for Graygray and retaliate."""
         entity_id = id(target)
 
         # Initialize counter stack tracking if not present
         if entity_id not in self._counter_stacks:
             self._counter_stacks[entity_id] = 0
-
-        # This will be called when Graygray takes damage
-        # We need the attacker info, which should be passed via the event system
-
-        # For now, implement the core mechanic - we'll need to extend this
-        # when we have proper damage event handling
 
         # Increment counter stacks (each successful counter grants attack bonus)
         self._counter_stacks[entity_id] += 1
@@ -63,6 +63,10 @@ class GraygrayCounterMaestro:
             source=self.id,
         )
         target.add_effect(mitigation_buff)
+
+        # Retaliate after applying buffs
+        if attacker is not None:
+            await self.counter_attack(target, attacker, damage)
 
     async def counter_attack(self, defender: "Stats", attacker: "Stats", damage_received: int) -> None:
         """Perform the actual counter attack."""
