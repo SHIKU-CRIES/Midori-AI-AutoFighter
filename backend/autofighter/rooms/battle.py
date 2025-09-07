@@ -743,7 +743,8 @@ class BattleRoom(Room):
                 "room_number": self.node.index,
                 "exp_reward": exp_reward,
                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
-                        "rdr": temp_rdr,
+                "rdr": temp_rdr,
+                "ended": True,
             }
         # Pick cards with per-item star rolls; ensure unique choices not already owned
         selected_cards: list = []

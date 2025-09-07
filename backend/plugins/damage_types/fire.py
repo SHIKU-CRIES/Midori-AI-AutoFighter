@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import math
 
 from autofighter.effects import DamageOverTime
+from autofighter.effects import EffectManager
 from autofighter.stats import BUS
 from autofighter.stats import Stats
 from plugins import damage_effects
@@ -33,6 +34,24 @@ class Fire(DamageTypeBase):
         if self._drain_stacks > 0:
             dmg *= math.sqrt(5)
         return dmg
+
+    async def ultimate(self, actor: Stats, allies: list[Stats], enemies: list[Stats]) -> bool:
+        await super().ultimate(actor, allies, enemies)
+        base = getattr(actor, "atk", 0)
+        living = [foe for foe in enemies if getattr(foe, "hp", 0) > 0]
+        if base <= 0 or not living:
+            return True
+        for foe in living:
+            dealt = await foe.apply_damage(base, attacker=actor, action_name="Fire Ultimate")
+            mgr = getattr(foe, "effect_manager", None)
+            if mgr is None:
+                mgr = EffectManager(foe)
+                foe.effect_manager = mgr
+            try:
+                mgr.maybe_inflict_dot(actor, dealt)
+            except Exception:
+                pass
+        return True
 
     def _on_ultimate_used(self, user: Stats) -> None:
         if getattr(user, "damage_type", None) is not self:

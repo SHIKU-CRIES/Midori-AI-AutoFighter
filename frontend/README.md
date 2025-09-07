@@ -50,8 +50,9 @@ During combat, party members appear in a left column and foes on the right,
 with HP, Attack, Defense, Mitigation, and Crit rate listed beside each
 portrait. HoT/DoT markers render below each portrait and collapse duplicate
 effects into a single icon with a stack count. The previous blue/red enrage
-flashing was replaced by subtle, color‑shifting orbs that float during combat
-and gracefully fade after battles; Reduced Motion disables their animation.
+flashing was replaced by red/blue rain lines that intensify with enrage and
+gracefully fade after battles. At very high enrage the whole screen rains more
+densely; Reduced Motion lowers density and disables animation.
 
 After each battle, a review overlay presents per-combatant damage graphs by
 element and lists any card or relic rewards. `CardArt.svelte` and

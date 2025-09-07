@@ -1,6 +1,10 @@
 # Midori AI AutoFighter
 
-A web-based auto-battler game featuring strategic party management, elemental combat, and character progression.
+A web-based auto-battler game featuring strategic party management, elemental combat, and character progression. Characters like Graygray now react to incoming attacks with passives such as Counter Maestro.
+
+### Character Update
+
+- Carly's Guardian's Aegis now heals the most injured ally, converts attack growth into defense stacks, and shares mitigation with allies on ultimate.
 
 ## Quick Start with Docker Compose (Recommended)
 

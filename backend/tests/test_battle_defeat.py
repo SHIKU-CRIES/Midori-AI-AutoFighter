@@ -21,6 +21,7 @@ async def test_battle_resolve_reports_defeat():
     foe.id = "dummy"
     result = await room.resolve(party, {}, foe=foe)
     assert result["result"] == "defeat"
+    assert result["ended"] is True
 
 
 @pytest.fixture()
@@ -46,7 +47,7 @@ async def test_run_battle_handles_defeat_cleanup(app_with_db, monkeypatch):
     client = app.test_client()
 
     async def fake_resolve(self, party, data, progress, foe=None):
-        return {"result": "defeat"}
+        return {"result": "defeat", "ended": True}
 
     monkeypatch.setattr(BattleRoom, "resolve", fake_resolve)
 

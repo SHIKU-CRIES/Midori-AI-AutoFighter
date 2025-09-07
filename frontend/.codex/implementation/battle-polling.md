@@ -9,6 +9,10 @@ snapshot, and logs a warning so the reward overlay or reset flow can proceed.
 If a snapshot includes an `error` field, polling halts immediately and the
 error state is surfaced without waiting for combat-over indicators.
 
+Snapshots reporting `result: 'defeat'` are treated as complete even if an
+`ended` flag is missing. The poller stops immediately and the defeat overlay
+is shown.
+
 Network failures now cause `handleRunEnd` when the backend reports the run has
 ended. `pollBattle` watches for thrown errors whose message contains
 "run ended" or whose status code is `404` and stops polling without queuing
