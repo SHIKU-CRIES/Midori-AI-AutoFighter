@@ -1,8 +1,12 @@
 from dataclasses import dataclass
+from random import choice
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
+from autofighter.effects import EffectManager
 from autofighter.stats import StatEffect
+from plugins.damage_types import ALL_DAMAGE_TYPES
+from plugins.damage_types import load_damage_type
 
 if TYPE_CHECKING:
     from autofighter.stats import Stats
@@ -21,10 +25,9 @@ class BubblesBubbleBurst:
     _bubble_stacks: ClassVar[dict[int, dict[int, int]]] = {}  # bubbles_id -> {target_id -> stacks}
 
     async def apply(self, target: "Stats") -> None:
-        """Apply Bubbles' random element switching mechanics."""
-        # Switch damage type randomly each turn
-        # This would need damage type system integration
-        pass
+        """Switch to a new random damage type each turn."""
+        dtype_name = choice(ALL_DAMAGE_TYPES)
+        target.damage_type = load_damage_type(dtype_name)
 
     async def on_hit_enemy(self, bubbles: "Stats", enemy: "Stats") -> None:
         """Apply bubble stack when hitting an enemy."""
@@ -72,8 +75,20 @@ class BubblesBubbleBurst:
         )
         bubbles.add_effect(attack_buff)
 
-        # Area damage and DoT would need battle system integration
-        # This would deal damage to all combatants and apply DoT to enemies
+        # Damage all combatants
+        allies = list(getattr(bubbles, "allies", []))
+        enemies = list(getattr(bubbles, "enemies", []))
+        if bubbles not in allies:
+            allies.insert(0, bubbles)
+        damage = int(getattr(bubbles, "atk", 0))
+        for combatant in allies + enemies:
+            await combatant.apply_damage(damage, attacker=bubbles, action_name="Bubble Burst")
+            if combatant in enemies:
+                mgr = getattr(combatant, "effect_manager", None)
+                if mgr is None:
+                    mgr = EffectManager(combatant)
+                    combatant.effect_manager = mgr
+                mgr.maybe_inflict_dot(bubbles, damage)
 
     @classmethod
     def get_bubble_stacks(cls, bubbles: "Stats", enemy: "Stats") -> int:
