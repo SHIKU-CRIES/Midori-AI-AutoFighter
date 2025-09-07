@@ -2,11 +2,6 @@
 
 A web-based auto-battler game featuring strategic party management, elemental combat, and character progression. Characters like Graygray now react to incoming attacks with passives such as Counter Maestro, building counter stacks and unleashing a max-HP burst every 50 hits.
 
-### Character Update
-
-- Carly's Guardian's Aegis now heals the most injured ally, converts attack growth into defense stacks, and shares mitigation with allies on ultimate.
-- Kboshi's Flux Cycle now applies a one-turn mitigation debuff to all foes when his element changes.
-
 ## Quick Start with Docker Compose (Recommended)
 
 The easiest way to run Midori AI AutoFighter is with Docker Compose. Choose one of the four variants below:
