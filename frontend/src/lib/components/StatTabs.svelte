@@ -126,8 +126,10 @@
     }
   })();
 
-  // Calculate max points (base 100 + upgrade points)
-  $: maxPoints = 100 + (upgradeData?.upgrade_points || 0);
+  // Calculate max points (base 100 + upgrade count)
+  // Each 4-star item costs 3,375,000 points, convert back to upgrade count
+  $: upgradeCount = Math.floor((upgradeData?.upgrade_points || 0) / 3375000);
+  $: maxPoints = 100 + upgradeCount;
 
   // Lazy‑load the saved Player Editor config when the player is selected.
   $: if (previewChar) {
