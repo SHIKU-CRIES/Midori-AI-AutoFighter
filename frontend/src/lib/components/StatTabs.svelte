@@ -42,6 +42,7 @@
   let viewStats = {};    // stats object used for display (with overrides when player)
   let loadingEditorCfg = false;
   let saveTimer = null;
+  let lastPreviewId = null; // track last character ID to detect switches
   function scheduleSave() {
     if (!isPlayer || !editorVals) return;
     clearTimeout(saveTimer);
@@ -65,6 +66,13 @@
   $: isPlayer = !!previewChar?.is_player;
   // Lazy‑load the saved Player Editor config when the player is selected.
   $: if (previewChar) {
+    // Reset editor state when switching characters
+    if (lastPreviewId !== previewId) {
+      editorVals = null;
+      loadingEditorCfg = false;
+      lastPreviewId = previewId;
+    }
+    
     if (isPlayer) {
       if (!editorVals && !loadingEditorCfg) {
         loadingEditorCfg = true;
@@ -116,6 +124,7 @@
     }
   } else {
     editorVals = null;
+    lastPreviewId = null;
   }
   // Compute displayed stats - use backend-computed stats which already include all effects
   $: {
