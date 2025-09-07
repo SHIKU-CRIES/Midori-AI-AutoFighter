@@ -1,3 +1,8 @@
+<script context="module">
+  // Cache per-character editor values across component instances
+  export const editorConfigs = new Map();
+</script>
+
 <script>
   /*
    * StatTabs.svelte
@@ -43,7 +48,6 @@
   let loadingEditorCfg = false;
   let saveTimer = null;
   let lastPreviewId = null; // track last character ID to detect switches
-  const editorConfigs = new Map();
 
   // Upgrade system state
   let upgradeData = null;
