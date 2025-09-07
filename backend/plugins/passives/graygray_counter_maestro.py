@@ -38,6 +38,17 @@ class GraygrayCounterMaestro:
         self._counter_stacks[entity_id] += 1
         current_stacks = self._counter_stacks[entity_id]
 
+        # Unleash burst damage for every 50 stacks accumulated
+        while current_stacks >= 50 and attacker is not None:
+            self._counter_stacks[entity_id] -= 50
+            await attacker.apply_damage(
+                target.max_hp,
+                attacker=target,
+                trigger_on_hit=False,
+                action_name="Counter Maestro Burst",
+            )
+            current_stacks = self._counter_stacks[entity_id]
+
         # Apply cumulative attack buff with soft cap logic
         # First 50 stacks: +5% attack per stack
         # Stacks past 50: +2.5% attack per stack (diminished returns)
