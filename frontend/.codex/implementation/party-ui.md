@@ -22,7 +22,8 @@ Implementation details:
 - `StatTabs.svelte` now embeds an `UpgradePanel` beneath the stats list,
   showing upgrade level and per-star item counts with a button disabled until
   enough materials are available (20×4★ or 100×3★ or 500×2★ or 1000×1★).
-- `StatTabs.svelte` caches per-character stat editor values and persists
-  allocations through `/players/<id>/editor` so non-player tweaks are saved
-  across sessions.
+- `StatTabs.svelte` caches per-character stat editor values in a module-scoped
+  `Map` keyed by character ID and persists allocations through
+  `/players/<id>/editor` so non-player tweaks are saved across sessions and
+  restored when reopening the editor or switching characters.
 
