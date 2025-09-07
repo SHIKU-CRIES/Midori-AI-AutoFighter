@@ -144,7 +144,8 @@ export function getCharacterImage(characterId, _isPlayer = false) {
 
   // Resolve folder alias when id differs from asset folder
   let key = CHARACTER_ASSET_ALIASES[characterId] || characterId;
-  if (key.startsWith('jellyfish_')) key = 'jellyfish';
+  // Ensure key is a string before calling startsWith
+  if (typeof key === 'string' && key.startsWith('jellyfish_')) key = 'jellyfish';
 
   // If this is the Mimic, always mirror the Player's chosen image for this session
   if (characterId === 'mimic') {
