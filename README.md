@@ -5,6 +5,7 @@ A web-based auto-battler game featuring strategic party management, elemental co
 ### Character Update
 
 - Carly's Guardian's Aegis now heals the most injured ally, converts attack growth into defense stacks, and shares mitigation with allies on ultimate.
+- Kboshi's Flux Cycle now applies a one-turn mitigation debuff to all foes when his element changes.
 
 ## Quick Start with Docker Compose (Recommended)
 

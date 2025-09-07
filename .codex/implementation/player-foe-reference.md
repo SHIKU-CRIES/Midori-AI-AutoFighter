@@ -46,7 +46,7 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 - **Chibi** (A, random) – gains four times the normal benefit from Vitality.
 - **Graygray** (B, random) – applies `graygray_counter_maestro`, counterattacking when hit and unleashing a max-HP burst every 50 stacks.
 - **Hilander** (A, random) – builds increased crit rate and crit damage.
-- **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses.
+- **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses. Switching elements consumes stacks and inflicts a brief mitigation debuff on all foes.
 - **Lady Darkness** (B, Dark) – baseline fighter themed around darkness.
 - **Lady Echo** (B, Lightning) – baseline fighter themed around echoes.
 - **Lady Fire and Ice** (B, Fire or Ice) – baseline fighter themed around fire and ice.
