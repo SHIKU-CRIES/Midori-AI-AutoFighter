@@ -12,6 +12,7 @@
   import PullsMenu from './PullsMenu.svelte';
   import BattleReview from './BattleReview.svelte';
   import RewardOverlay from './RewardOverlay.svelte';
+  import PullResultsOverlay from './PullResultsOverlay.svelte';
   import CharacterEditor from './CharacterEditor.svelte';
   import Inventory from './Inventory.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
@@ -211,6 +212,12 @@
 {#if $overlayView === 'pulls'}
   <OverlaySurface zIndex={1300}>
     <PullsMenu on:close={() => dispatch('back')} />
+  </OverlaySurface>
+{/if}
+
+{#if $overlayView === 'pull-results'}
+  <OverlaySurface zIndex={1400}>
+    <PullResultsOverlay results={$overlayData.results || []} on:close={() => dispatch('back')} />
   </OverlaySurface>
 {/if}
 

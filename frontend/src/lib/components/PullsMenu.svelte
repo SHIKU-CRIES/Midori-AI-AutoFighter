@@ -8,7 +8,6 @@
   const dispatch = createEventDispatcher();
   let pity = 0;
   let items = {};
-  let results = [];
   let loading = false;
   onMount(async () => {
     const data = await getGacha();
@@ -21,7 +20,10 @@
       const data = await pullGacha(count);
       pity = data.pity;
       items = data.items;
-      results = data.results || [];
+      const results = data.results || [];
+      if (results.length) {
+        openOverlay('pull-results', { results });
+      }
     } catch (err) {
       if (dev || !browser) {
         const { error } = await import('$lib/systems/logger.js');
@@ -46,13 +48,6 @@
     <button disabled={loading || (items.ticket || 0) < 10} on:click={() => pull(10)}>Pull 10</button>
     <button on:click={close}>Done</button>
   </div>
-  {#if results.length}
-    <ul>
-      {#each results as r}
-        <li>{r.type}: {r.id} ({r.rarity}★){#if r.stacks} x{r.stacks}{/if}</li>
-      {/each}
-    </ul>
-  {/if}
 </MenuPanel>
 
 <style>
@@ -66,9 +61,5 @@
     background: #0a0a0a;
     color: #fff;
     padding: 0.3rem 0.6rem;
-  }
-  ul {
-    margin: 0;
-    padding-left: 1rem;
   }
 </style>
