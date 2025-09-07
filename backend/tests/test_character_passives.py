@@ -3,6 +3,7 @@ import pytest
 from autofighter.passives import PassiveRegistry
 from autofighter.stats import Stats
 from plugins.damage_types.generic import Generic
+from plugins.passives.mezzy_gluttonous_bulwark import MezzyGluttonousBulwark
 
 
 @pytest.mark.asyncio
@@ -61,18 +62,23 @@ async def test_graygray_counter_maestro_passive():
 
 @pytest.mark.asyncio
 async def test_mezzy_gluttonous_bulwark_passive():
-    """Test Mezzy's Gluttonous Bulwark passive damage reduction."""
+    """Test Mezzy's Gluttonous Bulwark passive siphons from allies."""
     registry = PassiveRegistry()
 
-    # Create Mezzy with the passive
     mezzy = Stats(hp=2000, damage_type=Generic())
+    ally = Stats(hp=2000, damage_type=Generic())
     mezzy.passives = ["mezzy_gluttonous_bulwark"]
+    mezzy.allies = [ally]
 
-    # Trigger turn start to apply passive effects
     await registry.trigger("turn_start", mezzy)
+    first = MezzyGluttonousBulwark._siphoned_stats[id(ally)]["atk"]
 
-    # Mezzy should have received damage reduction and other effects
-    assert len(mezzy._active_effects) > 0
+    await registry.trigger("turn_start", mezzy)
+    second = MezzyGluttonousBulwark._siphoned_stats[id(ally)]["atk"]
+
+    assert second > first
+    assert any(e.name.startswith("mezzy_gluttonous_bulwark_gain") for e in mezzy._active_effects)
+    assert any(e.name.startswith("mezzy_gluttonous_bulwark_siphon") for e in ally._active_effects)
 
 
 @pytest.mark.asyncio

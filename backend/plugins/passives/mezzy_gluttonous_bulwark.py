@@ -20,7 +20,7 @@ class MezzyGluttonousBulwark:
     # Class-level tracking of siphoned stats per ally
     _siphoned_stats: ClassVar[dict[int, dict[str, int]]] = {}
 
-    async def apply(self, target: "Stats") -> None:
+    async def apply(self, target: "Stats", allies: list["Stats"] | None = None, **_: object) -> None:
         """Apply Mezzy's bulk and siphoning mechanics."""
         # Apply 20% damage reduction (permanent while passive is active)
         damage_reduction = StatEffect(
@@ -50,9 +50,10 @@ class MezzyGluttonousBulwark:
         )
         target.add_effect(debuff_immunity)
 
-        # Siphon from allies if we have access to them
-        # In a real battle system, this would be triggered by turn events
-        # For now, this handles the basic setup
+        if allies is None:
+            allies = list(getattr(target, "allies", []))
+        if allies:
+            await self.siphon_from_allies(target, allies)
 
     async def siphon_from_allies(self, mezzy: "Stats", allies: list["Stats"]) -> None:
         """Siphon stats from allies whose HP exceeds 20% of Mezzy's max HP."""
