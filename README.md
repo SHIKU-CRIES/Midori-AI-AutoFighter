@@ -101,11 +101,6 @@ curl -fsSL https://bun.sh/install | bash
 - **Building:** See [BUILD.md](BUILD.md) for building standalone executables
 - **Issues:** Report bugs or request features on [GitHub Issues](../../issues)
 
-## Player Roster
-
-- **Mezzy** – Gluttonous Bulwark siphons stats from healthy allies each turn while boosting her own resilience.
-  See `.codex/implementation/player-foe-reference.md` for the full roster.
-
 ## Troubleshooting
 
 **Docker Compose fails with DNS/network errors:** This is a known issue in some environments. Use the alternative UV & Bun installation method instead.
