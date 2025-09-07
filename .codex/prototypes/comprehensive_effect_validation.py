@@ -16,9 +16,9 @@ import time
 backend_dir = Path(__file__).resolve().parents[2] / "backend"
 sys.path.insert(0, str(backend_dir))
 
-from autofighter.effects import DamageOverTime
-from autofighter.effects import EffectManager
-from autofighter.effects import HealingOverTime
+from autofighter.effects import DamageOverTime  # noqa: E402
+from autofighter.effects import EffectManager  # noqa: E402
+from autofighter.effects import HealingOverTime  # noqa: E402
 
 
 class MockStats:

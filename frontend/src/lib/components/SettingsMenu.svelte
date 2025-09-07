@@ -62,8 +62,8 @@
     }
   }
 
-  // Keep autocraft in sync with backend flag so this toggle
-  // mirrors the Crafting menu's auto-craft behavior.
+  // Keep autocraft in sync with the backend flag so this toggle
+  // reflects the current server state.
   onMount(async () => {
     try {
       const state = await getGacha();
