@@ -1,14 +1,18 @@
 <script>
   import { onMount } from 'svelte';
-  import { getCardCatalog, getRelicCatalog } from '../systems/api.js';
+  import { CreditCard, Gem, Hammer, Box } from 'lucide-svelte';
+  import { getCardCatalog, getRelicCatalog, getGacha } from '../systems/api.js';
+  import { stackItems, formatName } from '../systems/craftingUtils.js';
   import CardArt from './CardArt.svelte';
   import CurioChoice from './CurioChoice.svelte';
 
   export let cards = [];
   export let relics = [];
+  // Upgrade materials are loaded from gacha inventory (backend), not passed in
+  let materials = {}; // key -> count
 
-  // Current tab and selected item state
-  let activeTab = 'cards';
+  // Current tab and selected item state (Upgrades first by default)
+  let activeTab = 'materials';
   let selectedItem = null;
   
   // Catalog metadata
@@ -18,9 +22,14 @@
 
   onMount(async () => {
     try {
-      const [cardList, relicList] = await Promise.all([getCardCatalog(), getRelicCatalog()]);
+      const [cardList, relicList, gacha] = await Promise.all([
+        getCardCatalog(),
+        getRelicCatalog(),
+        getGacha()
+      ]);
       cardMeta = Object.fromEntries(cardList.map(c => [c.id, c]));
       relicMeta = Object.fromEntries(relicList.map(r => [r.id, r]));
+      materials = stackItems(gacha?.items || {});
     } catch (e) {
       // Silently ignore; components will fallback to id-only display
     }
@@ -46,6 +55,7 @@
   // Processed data
   $: cardEntries = count(cards || []);
   $: relicEntries = count(relics || []);
+  $: materialEntries = Object.entries(materials || {}); // [key, qty]
 
   $: sortedCards = [...cardEntries].sort((a, b) => {
     const [idA] = a; const [idB] = b;
@@ -64,15 +74,17 @@
   // Get total counts
   $: cardCount = cards?.length || 0;
   $: relicCount = relics?.length || 0;
+  $: materialCount = (materialEntries || []).reduce((sum, [, qty]) => sum + (qty | 0), 0);
 
-  // Star rating colors
+  // Star rating colors (match CardArt.svelte palette exactly)
   const getStarColor = (stars) => {
-    switch(stars) {
-      case 5: return '#FFD700'; // Gold
-      case 4: return '#9B59B6'; // Purple  
-      case 3: return '#3498DB'; // Blue
-      case 2: return '#2ECC71'; // Green
-      default: return '#95A5A6'; // Gray
+    switch (Number(stars) || 1) {
+      case 6: return '#FFD700'; // Gold
+      case 5: return '#FF3B30'; // Red
+      case 4: return '#800080'; // Purple
+      case 3: return '#228B22'; // Green
+      case 2: return '#1E90FF'; // Blue
+      default: return '#808080'; // Gray
     }
   };
 
@@ -88,7 +100,7 @@
         quantity: qty,
         meta: cardMeta[id]
       };
-    } else {
+    } else if (type === 'relic') {
       selectedItem = {
         id,
         type: 'relic',
@@ -98,8 +110,21 @@
         quantity: qty,
         meta: relicMeta[id]
       };
+    } else {
+      // material
+      selectedItem = {
+        id,
+        type: 'material',
+        name: formatName(id),
+        stars: parseInt(String(id).split('_')[1] || '1', 10),
+        description: 'Upgrade material used for character enhancements.',
+        quantity: qty,
+        meta: null
+      };
     }
   };
+  // Utility: remove visual star glyphs from strings for text-only fields
+  const stripStars = (s) => String(s || '').replace(/★+/g, '').replace(/\s{2,}/g, ' ').trim();
 
   // Set initial selection when data loads
   $: if (metaReady && !selectedItem) {
@@ -109,6 +134,9 @@
     } else if (activeTab === 'relics' && sortedRelics.length > 0) {
       const [id, qty] = sortedRelics[0];
       selectItem(id, 'relic', qty);
+    } else if (activeTab === 'materials' && materialEntries.length > 0) {
+      const [id, qty] = materialEntries[0];
+      selectItem(id, 'material', qty);
     }
   }
 
@@ -123,8 +151,31 @@
     } else if (tab === 'relics' && sortedRelics.length > 0) {
       const [id, qty] = sortedRelics[0];
       selectItem(id, 'relic', qty);
+    } else if (tab === 'materials' && materialEntries.length > 0) {
+      const [id, qty] = materialEntries[0];
+      selectItem(id, 'material', qty);
     }
   };
+
+  // Icons for materials
+  const rawIconModules = import.meta.glob('../assets/items/*/*.png', { eager: true, import: 'default', query: '?url' });
+  const iconModules = Object.fromEntries(Object.entries(rawIconModules).map(([path, src]) => [path, new URL(src, import.meta.url).href]));
+  const fallbackIcon = new URL('../assets/items/generic/generic1.png', import.meta.url).href;
+  function onIconError(event) { event.target.src = fallbackIcon; }
+  function getMaterialIcon(key) {
+    const [rawElement, rawRank] = String(key).split('_');
+    const element = String(rawElement || '').toLowerCase();
+    const rank = String(rawRank || '').replace(/[^0-9]/g, '') || '1';
+    const rankPath = `../assets/items/${element}/${rank}.png`;
+    if (iconModules[rankPath]) return iconModules[rankPath];
+    const elementPrefix = `../assets/items/${element}/`;
+    const elementKeys = Object.keys(iconModules).filter((p) => p.startsWith(elementPrefix));
+    const genericRankPath = `${elementPrefix}generic${rank}.png`;
+    if (iconModules[genericRankPath]) return iconModules[genericRankPath];
+    if (elementKeys.length > 0) return iconModules[elementKeys[0]];
+    const genericPath = `../assets/items/generic/generic${rank}.png`;
+    return iconModules[genericPath] || fallbackIcon;
+  }
 </script>
 
 <div class="star-rail-inventory">
@@ -133,10 +184,18 @@
     <div class="tab-row">
       <button 
         class="tab" 
+        class:active={activeTab === 'materials'}
+        on:click={() => switchTab('materials')}
+      >
+        <svelte:component this={Hammer} class="tab-icon" size={18} />
+        Upgrades ({materialCount})
+      </button>
+      <button 
+        class="tab" 
         class:active={activeTab === 'cards'}
         on:click={() => switchTab('cards')}
       >
-        <span class="tab-icon">🃏</span>
+        <svelte:component this={CreditCard} class="tab-icon" size={18} />
         Cards ({cardCount})
       </button>
       <button 
@@ -144,7 +203,7 @@
         class:active={activeTab === 'relics'}
         on:click={() => switchTab('relics')}
       >
-        <span class="tab-icon">💎</span>
+        <svelte:component this={Gem} class="tab-icon" size={18} />
         Relics ({relicCount})
       </button>
     </div>
@@ -170,7 +229,7 @@
               </div>
             </button>
           {/each}
-        {:else}
+        {:else if activeTab === 'relics'}
           {#each sortedRelics as [id, qty]}
             <button 
               class="grid-item" 
@@ -186,6 +245,20 @@
               </div>
             </button>
           {/each}
+        {:else}
+          {#each materialEntries as [key, qty]}
+            <button 
+              class="grid-item material" 
+              class:selected={selectedItem?.id === key && selectedItem?.type === 'material'}
+              on:click={() => selectItem(key, 'material', qty)}
+              style={`--accent: ${getStarColor(parseInt(String(key).split('_')[1] || '1', 10))}`}
+            >
+              <div class="item-icon material">
+                <img src={getMaterialIcon(key)} alt={key} on:error={onIconError} />
+              </div>
+              <div class="material-qty">×{qty}</div>
+            </button>
+          {/each}
         {/if}
       </div>
     </div>
@@ -193,8 +266,8 @@
     <!-- Right side: Detail panel -->
     <div class="detail-panel">
       {#if selectedItem}
-        <div class="detail-header">
-          <h3 class="item-name">{selectedItem.name}</h3>
+          <div class="detail-header">
+          <h3 class="item-name">{stripStars(selectedItem.name)}</h3>
           <div class="item-meta">
             <div class="item-stars-large" style="color: {getStarColor(selectedItem.stars)}">
               {'★'.repeat(selectedItem.stars)}
@@ -207,23 +280,27 @@
           {#if selectedItem.type === 'card'}
             <CardArt entry={{ 
               id: selectedItem.id, 
-              name: selectedItem.name, 
+              name: stripStars(selectedItem.name), 
               stars: selectedItem.stars, 
-              about: selectedItem.description 
-            }} type="card" />
-          {:else}
-            <CurioChoice entry={{ 
+              about: stripStars(selectedItem.description) 
+            }} type="card" showTitle={false} showAbout={false} imageOnly={true} fluid={true} quiet={true} />
+          {:else if selectedItem.type === 'relic'}
+            <CardArt entry={{ 
               id: selectedItem.id, 
-              name: selectedItem.name, 
+              name: stripStars(selectedItem.name), 
               stars: selectedItem.stars, 
-              about: selectedItem.description 
-            }} />
+              about: stripStars(selectedItem.description) 
+            }} type="relic" roundIcon={false} showTitle={false} showAbout={false} imageOnly={true} fluid={true} quiet={true} />
+          {:else}
+            <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
+              <img src={getMaterialIcon(selectedItem.id)} alt={selectedItem.id} on:error={onIconError} style="max-width:100%; max-height:100%; object-fit:contain;" />
+            </div>
           {/if}
         </div>
 
         <div class="detail-description">
           <h4>Description</h4>
-          <p>{selectedItem.description}</p>
+          <p>{stripStars(selectedItem.description)}</p>
         </div>
 
         {#if selectedItem.meta}
@@ -232,7 +309,9 @@
             <div class="stats-grid">
               <div class="stat-row">
                 <span class="stat-label">Type:</span>
-                <span class="stat-value">{selectedItem.type === 'card' ? 'Ability Card' : 'Equipment Relic'}</span>
+                <span class="stat-value">{
+                  selectedItem.type === 'card' ? 'Ability Card' : selectedItem.type === 'relic' ? 'Equipment Relic' : 'Upgrade Material'
+                }</span>
               </div>
               <div class="stat-row">
                 <span class="stat-label">Rarity:</span>
@@ -247,7 +326,7 @@
         {/if}
       {:else}
         <div class="no-selection">
-          <div class="no-selection-icon">📦</div>
+          <svelte:component this={Box} class="no-selection-icon" size={48} />
           <p>Select an item to view details</p>
         </div>
       {/if}
@@ -359,8 +438,55 @@
 
   .item-quantity {
     font-size: 0.7rem;
-    color: rgba(255,255,255,0.8);
+    color: rgba(255,255,255,0.88);
     margin-top: 0.25rem;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Helvetica Neue, Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  /* Materials use themed color backgrounds like cards/relics (whole tile filled) */
+  .grid-item.material {
+    background: color-mix(in oklab, var(--accent, #708090) 35%, black);
+    border-color: color-mix(in oklab, var(--accent, #708090) 40%, transparent);
+    box-shadow: none; /* reduce heavy outline ring */
+  }
+  .item-icon.material {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+  }
+  .item-icon.material img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .material-qty {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    background: rgba(0,0,0,0.70);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    line-height: 1.1rem;
+    padding: 0 0.35rem;
+    min-width: 1.25rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Helvetica Neue, Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
 
   .item-stars {
@@ -408,11 +534,15 @@
 
   .detail-preview {
     display: flex;
+    align-items: stretch;
     justify-content: center;
-    padding: 1rem;
+    padding: 0;
+    height: 320px;
     background: rgba(0,0,0,0.2);
     border: 1px solid rgba(255,255,255,0.1);
   }
+  /* Ensure embedded CardArt fills the preview area */
+  .detail-preview :global(.card-art) { width: 100%; height: 100%; flex: 1 1 auto; }
 
   .detail-description h4,
   .detail-stats h4 {

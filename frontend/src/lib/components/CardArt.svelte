@@ -7,6 +7,14 @@
   export let compact = false;
   // When true, suppress ambient marks and border twinkles for cleaner embedding (e.g., shop)
   export let quiet = false;
+  // When false, suppress the title in the card header (viewer usage)
+  export let showTitle = true;
+  // When true, fill parent container instead of fixed pixel size
+  export let fluid = false;
+  // When false, suppress the about panel under the glyph
+  export let showAbout = true;
+  // When true, render only the artwork area filling the container (no title/about)
+  export let imageOnly = false;
   import { getHourlyBackground } from '../systems/assetLoader.js';
   import { getGlyphArt } from '../systems/rewardLoader.js';
   const starColors = {
@@ -21,6 +29,9 @@
   $: width = compact ? 60 : (size === 'small' ? 140 : 280);
   // Fixed card height so top box can be exactly 50%
   $: cardHeight = compact ? 60 : (size === 'small' ? 320 : 440);
+  // Styles used for outer wrapper; if fluid, stretch to parent
+  $: widthStyle = fluid ? '100%' : `${width}px`;
+  $: heightStyle = fluid ? '100%' : `${cardHeight}px`;
   $: color = starColors[entry.stars] || starColors.fallback;
   // Background image for the interbox (top section)
   // Use special art for specific relics when available.
@@ -68,33 +79,44 @@
   $: twinkles = quiet ? [] : makeTwinkles(twinkleCount);
 </script>
 
-<div class="card-art" style={`width:${width}px; height:${cardHeight}px; --accent:${color}; --twA:${twinkleAlpha}` }>
-  <div class="topbox" style={`--accent:${color}`}>
-    <div class="title">{entry.name}</div>
-    <div class={`glyph${roundIcon ? ' round' : ''}`}>
+<div class="card-art" style={`width:${widthStyle}; height:${heightStyle}; --accent:${color}; --twA:${twinkleAlpha}` }>
+  {#if imageOnly}
+    <div class="glyph full">
       <div class="glyph-bg" style={`background-image:url(${bg})`}></div>
-      <div class="glyph-ambient">
-        {#each marks as m}
-          <span
-            class="mark"
-            style={`left:${m.left}%; top:${m.top}%; width:${m.size}px; height:${m.size}px; animation-duration:${m.duration}s; animation-delay:${m.delay}s; --dx:${m.dx}px; --dy:${m.dy}px;`}
-          />
-        {/each}
-      </div>
-      <div class="stars-overlay">{'★'.repeat(entry.stars || 0)}</div>
+      {#if entry.stars}
+        <div class="stars-overlay">{'★'.repeat(entry.stars || 0)}</div>
+      {/if}
     </div>
-  </div>
-  {#if entry.about}
-    <div class="about-box">{entry.about}</div>
+  {:else}
+    <div class="topbox" style={`--accent:${color}`}>
+      {#if showTitle}
+        <div class="title">{entry.name}</div>
+      {/if}
+      <div class={`glyph${roundIcon ? ' round' : ''}`}>
+        <div class="glyph-bg" style={`background-image:url(${bg})`}></div>
+        <div class="glyph-ambient">
+          {#each marks as m}
+            <span
+              class="mark"
+              style={`left:${m.left}%; top:${m.top}%; width:${m.size}px; height:${m.size}px; animation-duration:${m.duration}s; animation-delay:${m.delay}s; --dx:${m.dx}px; --dy:${m.dy}px;`}
+            />
+          {/each}
+        </div>
+        <div class="stars-overlay">{'★'.repeat(entry.stars || 0)}</div>
+      </div>
+    </div>
+    {#if showAbout && entry.about}
+      <div class="about-box">{entry.about}</div>
+    {/if}
+    <div class="twinkles" aria-hidden="true">
+      {#each twinkles as t}
+        <span
+          class={`twinkle s-${t.side} shape-${t.shape}`}
+          style={`--p:${t.pos}%; --s:${t.size}px; animation-duration:${t.duration}s; animation-delay:${t.delay}s;`}
+        />
+      {/each}
+    </div>
   {/if}
-  <div class="twinkles" aria-hidden="true">
-    {#each twinkles as t}
-      <span
-        class={`twinkle s-${t.side} shape-${t.shape}`}
-        style={`--p:${t.pos}%; --s:${t.size}px; animation-duration:${t.duration}s; animation-delay:${t.delay}s;`}
-      />
-    {/each}
-  </div>
 </div>
 
 <style>
@@ -218,6 +240,14 @@
     position: relative;
     margin-top: 6px;
     z-index: 1; /* glyph content base; specific layers override */
+  }
+  .glyph.full {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    border-radius: inherit;
+    border: none;
+    background: none;
   }
   /* Accent outline overlay above glyph image */
   .glyph::after {
