@@ -34,6 +34,14 @@ class Generic(DamageTypeBase):
             await BUS.emit_async(
                 "hit_landed", actor, target, dmg, "attack", "generic_ultimate"
             )
+            await registry.trigger_hit_landed(
+                actor,
+                target,
+                dmg,
+                "generic_ultimate",
+                party=allies,
+                foes=enemies,
+            )
             await registry.trigger(
                 "action_taken",
                 actor,
