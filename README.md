@@ -2,6 +2,10 @@
 
 A web-based auto-battler game featuring strategic party management, elemental combat, and character progression.
 
+### Character Update
+
+- Carly's Guardian's Aegis now heals the most injured ally, converts attack growth into defense stacks, and shares mitigation with allies on ultimate.
+
 ## Quick Start with Docker Compose (Recommended)
 
 The easiest way to run Midori AI AutoFighter is with Docker Compose. Choose one of the four variants below:
