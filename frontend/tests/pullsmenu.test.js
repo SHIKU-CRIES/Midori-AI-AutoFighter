@@ -14,5 +14,7 @@ describe('PullsMenu component', () => {
     expect(content).toContain('Pull 10');
     expect(content).toContain('(items.ticket || 0) < 1');
     expect(content).toContain('(items.ticket || 0) < 5');
+    expect(content).toContain("openOverlay('pull-results'");
+    expect(content).not.toContain('<ul>');
   });
 });
