@@ -16,15 +16,15 @@ async def test_flux_stacks_and_debuff_application():
     foes = [foe]
 
     actor.damage_type = Fire()
-    await passive.apply(actor, foes=foes)
+    await passive.apply(actor, stack_index=0, target=foe, foes=foes)
     assert passive.get_flux_stacks(actor) == 0
 
     actor.damage_type = Ice()
-    await passive.apply(actor, foes=foes)
+    await passive.apply(actor, stack_index=0, target=foe, foes=foes)
     assert passive.get_flux_stacks(actor) == 1
 
     actor.damage_type = Ice()
-    await passive.apply(actor, foes=foes)
+    await passive.apply(actor, stack_index=0, target=foe, foes=foes)
     assert passive.get_flux_stacks(actor) == 0
 
     effects = [

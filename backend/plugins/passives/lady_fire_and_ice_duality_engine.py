@@ -24,12 +24,13 @@ class LadyFireAndIceDualityEngine:
 
     async def apply(
         self,
-        target: "Stats",
+        owner: "Stats",
         *,
         foes: Iterable["Stats"] | None = None,
+        **kwargs,
     ) -> None:
         """Apply Lady Fire and Ice's duality mechanics."""
-        entity_id = id(target)
+        entity_id = id(owner)
 
         # Initialize tracking if not present
         if entity_id not in self._last_element:
@@ -37,16 +38,16 @@ class LadyFireAndIceDualityEngine:
             self._flux_stacks[entity_id] = 0
 
         # Determine current element from the damage type
-        current_element = self._determine_current_element(target)
+        current_element = self._determine_current_element(owner)
 
         # Check if alternating or using same element twice
         if self._last_element[entity_id] is not None:
             if current_element != self._last_element[entity_id]:
                 # Alternating elements - gain Elemental Flux stack
-                await self._gain_flux_stack(target)
+                await self._gain_flux_stack(owner)
             else:
                 # Same element twice - consume all stacks for effects
-                await self._consume_flux_stacks(target, foes)
+                await self._consume_flux_stacks(owner, foes)
 
         # Update last element used
         self._last_element[entity_id] = current_element
