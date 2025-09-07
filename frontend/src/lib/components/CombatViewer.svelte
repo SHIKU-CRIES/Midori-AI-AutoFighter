@@ -197,17 +197,22 @@
                 about: 'Passive ability',
                 source: 'passive',
                 stacks: 1,
-                max_stacks: 1
+                max_stacks: 1,
+                overcharged: false
               };
             }
+            const stackData = passive.stacks;
+            const count = typeof stackData === 'object' ? stackData.mitigation ?? 0 : stackData ?? 1;
+            const overcharged = typeof stackData === 'object' && stackData.overcharged;
             return {
               name: passive.name || passive.id || 'Unknown',
               id: passive.id || passive.name || 'unknown',
               duration: passive.duration || passive.turns_left || 'Permanent',
               about: passive.description || 'Passive ability',
               source: 'passive',
-              stacks: passive.stacks ?? 1,
-              max_stacks: passive.max_stacks ?? passive.stacks ?? 1
+              stacks: count,
+              max_stacks: passive.max_stacks ?? count ?? 1,
+              overcharged
             };
           });
         }
@@ -251,7 +256,11 @@
         description += ` x${effect.stacks}`;
       }
     }
-    
+
+    if (effect.overcharged) {
+      description += ' (overcharged)';
+    }
+
     return description;
   }
 
