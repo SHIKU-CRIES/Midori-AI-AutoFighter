@@ -1,6 +1,6 @@
 # Midori AI AutoFighter
 
-A web-based auto-battler game featuring strategic party management, elemental combat, and character progression. Characters like Graygray now react to incoming attacks with passives such as Counter Maestro.
+A web-based auto-battler game featuring strategic party management, elemental combat, and character progression. Characters like Graygray now react to incoming attacks with passives such as Counter Maestro, building counter stacks and unleashing a max-HP burst every 50 hits.
 
 ### Character Update
 

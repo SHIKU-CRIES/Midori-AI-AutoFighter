@@ -44,7 +44,7 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 - **Bubbles** (A, random) – starts with a default item and applies `bubbles_bubble_burst`, switching elements each turn and bursting after three hits per foe.
 - **Carly** (B, Light) – Guardian's Aegis heals the most injured ally, converts attack growth into defense, and shares mitigation on ultimate.
 - **Chibi** (A, random) – gains four times the normal benefit from Vitality.
-- **Graygray** (B, random) – applies `graygray_counter_maestro`, counterattacking when hit.
+- **Graygray** (B, random) – applies `graygray_counter_maestro`, counterattacking when hit and unleashing a max-HP burst every 50 stacks.
 - **Hilander** (A, random) – builds increased crit rate and crit damage.
 - **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses.
 - **Lady Darkness** (B, Dark) – baseline fighter themed around darkness.
