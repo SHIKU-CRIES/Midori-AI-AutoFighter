@@ -5,11 +5,16 @@
 <div class="stained-glass-side">
   {#each items as item}
     <button class="icon-btn" title={item.label} on:click={item.action} disabled={item.disabled}>
-      {#if item.icon}
-        <svelte:component this={item.icon} size={20} color="#fff" />
-      {:else}
-        <span>{item.label}</span>
-      {/if}
+      <div class="btn-content">
+        {#if item.icon}
+          <div class="icon">
+            <svelte:component this={item.icon} size={24} color="#fff" />
+          </div>
+          <span class="label">{item.label}</span>
+        {:else}
+          <span class="label">{item.label}</span>
+        {/if}
+      </div>
     </button>
   {/each}
 </div>
@@ -32,19 +37,41 @@
     max-height: calc(100% - var(--ui-top-offset) - 2.4rem);
     overflow: auto;
     align-items: center;
+    min-width: 140px;
   }
   .icon-btn {
     background: rgba(255,255,255,0.10);
     border: none;
     border-radius: 0;
-    width: 3.2rem;
-    height: 3.2rem;
+    width: 100%;
+    min-height: 3.2rem;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     cursor: pointer;
     transition: background 0.18s, box-shadow 0.18s;
     box-shadow: 0 1px 4px 0 rgba(0,40,120,0.10);
+    padding: 0.4rem 0.6rem;
+  }
+  .btn-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .label {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    white-space: nowrap;
   }
   .icon-btn:hover {
     background: rgba(120,180,255,0.22);

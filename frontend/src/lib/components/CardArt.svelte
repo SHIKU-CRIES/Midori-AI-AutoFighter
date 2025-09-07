@@ -4,6 +4,7 @@
   export let roundIcon = false;
   export let size = 'normal';
   export let hideFallback = false;
+  export let compact = false;
   // When true, suppress ambient marks and border twinkles for cleaner embedding (e.g., shop)
   export let quiet = false;
   import { getHourlyBackground } from '../systems/assetLoader.js';
@@ -17,9 +18,9 @@
     6: '#FFD700',  // gold
     fallback: '#708090'
   };
-  $: width = size === 'small' ? 140 : 280;
+  $: width = compact ? 60 : (size === 'small' ? 140 : 280);
   // Fixed card height so top box can be exactly 50%
-  $: cardHeight = size === 'small' ? 320 : 440;
+  $: cardHeight = compact ? 60 : (size === 'small' ? 320 : 440);
   $: color = starColors[entry.stars] || starColors.fallback;
   // Background image for the interbox (top section)
   // Use special art for specific relics when available.

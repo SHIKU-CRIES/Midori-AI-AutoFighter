@@ -14,7 +14,7 @@
   import BattleReview from './BattleReview.svelte';
   import RewardOverlay from './RewardOverlay.svelte';
   import CharacterEditor from './CharacterEditor.svelte';
-  import InventoryPanel from './InventoryPanel.svelte';
+  import Inventory from './Inventory.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import RunChooser from './RunChooser.svelte';
   import ShopMenu from './ShopMenu.svelte';
@@ -232,8 +232,8 @@
 {/if}
 
 {#if $overlayView === 'inventory'}
-  <PopupWindow title="Inventory" padding="0.75rem" maxWidth="1040px" zIndex={1300} on:close={() => dispatch('back')}>
-    <InventoryPanel cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
+  <PopupWindow title="Inventory" padding="0" maxWidth="1200px" zIndex={1300} on:close={() => dispatch('back')}>
+    <Inventory cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
   </PopupWindow>
 {/if}
 
