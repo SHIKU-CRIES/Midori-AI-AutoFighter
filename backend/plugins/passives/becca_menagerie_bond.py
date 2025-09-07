@@ -74,6 +74,20 @@ class BeccaMenagerieBond:
         if self._summon_cooldown[entity_id] > 0:
             self._summon_cooldown[entity_id] -= 1
 
+    async def on_action_taken(self, target: "Stats", **kwargs) -> None:
+        """Attempt to summon a jellyfish when Becca takes an action.
+
+        - Respects internal cooldown and HP cost (handled in summon_jellyfish)
+        - Adds the summon to the party immediately if party context is provided
+        - Works for foes as well (no party passed); UI still shows foe summons
+        """
+        party = kwargs.get("party")
+        try:
+            await self.summon_jellyfish(target, party=party)
+        except Exception:
+            # Be resilient: summoning failure should not break the turn
+            pass
+
     async def summon_jellyfish(
         self,
         target: "Stats",
