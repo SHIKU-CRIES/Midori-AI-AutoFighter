@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import ClassVar
+from typing import Optional
 
 from autofighter.stats import StatEffect
 
@@ -22,8 +23,13 @@ class LadyEchoResonantStatic:
     _consecutive_hits: ClassVar[dict[int, int]] = {}  # entity_id -> hit_count
     _party_crit_stacks: ClassVar[dict[int, int]] = {}  # entity_id -> crit_stacks
 
-    async def apply(self, target: "Stats") -> None:
-        """Apply Lady Echo's chain lightning scaling and consecutive hit tracking."""
+    async def apply(
+        self,
+        target: "Stats",
+        hit_target: Optional["Stats"] = None,
+        **kwargs,
+    ) -> None:
+        """Apply chain lightning scaling and consecutive hit tracking."""
         entity_id = id(target)
 
         # Initialize tracking if not present
@@ -31,10 +37,14 @@ class LadyEchoResonantStatic:
             self._consecutive_hits[entity_id] = 0
             self._party_crit_stacks[entity_id] = 0
 
-        # Apply DoT-based chain lightning damage bonus
-        # This would normally check DoTs on the target
-        # For now, simulate based on assumed DoT count
-        dot_count = self._simulate_dot_count(target)
+        # Count DoTs on the hit target (enemy) for chain damage scaling
+        dot_target = hit_target or target
+        mgr = getattr(dot_target, "effect_manager", None)
+        if mgr is not None:
+            dot_count = len(getattr(mgr, "dots", []))
+        else:
+            dot_count = len(getattr(dot_target, "dots", []))
+
         chain_damage_bonus = dot_count * 0.1  # 10% per DoT
 
         if chain_damage_bonus > 0:
@@ -58,11 +68,6 @@ class LadyEchoResonantStatic:
                 source=self.id,
             )
             target.add_effect(party_crit_effect)
-
-    def _simulate_dot_count(self, target: "Stats") -> int:
-        """Simulate DoT count on target (would normally check actual DoTs)."""
-        # Simplified simulation - in real implementation would check target's DoTs
-        return 2  # Assume 2 DoTs for demonstration
 
     async def on_hit_target(self, attacker: "Stats", target_hit: "Stats") -> None:
         """Track consecutive hits on the same target."""

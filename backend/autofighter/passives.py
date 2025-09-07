@@ -56,6 +56,15 @@ class PassiveRegistry:
                     # Fall back to simple apply for existing passives that don't accept kwargs
                     await passive_instance.apply(owner)
 
+                # If this passive provides an event-specific handler, call it too.
+                # This enables richer behaviors (e.g., on_action_taken) while
+                # preserving backward compatibility with apply-only passives.
+                if event == "action_taken" and hasattr(passive_instance, "on_action_taken"):
+                    try:
+                        await passive_instance.on_action_taken(owner, **kwargs)
+                    except TypeError:
+                        await passive_instance.on_action_taken(owner)
+
     async def trigger_damage_taken(self, target, attacker: Optional[Any] = None, damage: int = 0) -> None:
         """Trigger passives specifically for damage taken events."""
         counts = Counter(target.passives)
