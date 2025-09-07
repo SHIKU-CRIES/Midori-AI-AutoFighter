@@ -2,7 +2,6 @@ import asyncio
 from dataclasses import dataclass
 
 from autofighter.passives import PassiveRegistry
-from autofighter.stats import BUS
 from plugins.damage_types._base import DamageTypeBase
 
 
@@ -15,6 +14,8 @@ class Generic(DamageTypeBase):
     async def ultimate(self, actor, allies, enemies):
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
+
+        from autofighter.stats import BUS  # Import here to avoid circular imports
 
         registry = PassiveRegistry()
         target_pool = (
