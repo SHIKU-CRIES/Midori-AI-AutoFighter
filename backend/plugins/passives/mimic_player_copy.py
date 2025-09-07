@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
+from autofighter.stats import BUS
 from autofighter.stats import StatEffect
 
 if TYPE_CHECKING:
@@ -20,19 +21,33 @@ class MimicPlayerCopy:
     # Class-level tracking of copied stats and passives
     _copied_stats: ClassVar[dict[int, dict]] = {}  # entity_id -> copied_stats
     _copied_passive: ClassVar[dict[int, str]] = {}  # entity_id -> passive_id
+    _instances: ClassVar[dict[int, "MimicPlayerCopy"]] = {}
 
-    async def apply(self, target: "Stats") -> None:
+    def __post_init__(self) -> None:
+        self._target_id: int | None = None
+
+    async def apply(self, target: "Stats", party: list | None = None) -> None:
         """Apply Mimic's player copying mechanics."""
         entity_id = id(target)
+        self.__class__._instances[entity_id] = self
+        self._target_id = entity_id
 
         # Initialize tracking if not present
         if entity_id not in self._copied_stats:
-            # In full implementation, would find the actual player entity
-            player_stats = self._find_player_stats()
-            self._copy_player_stats(target, player_stats)
+            player_stats = self._find_player_stats(party or [])
+            if player_stats:
+                self._copy_player_stats(target, player_stats)
+
+        # Remove any external buffs to prevent stacking beyond copied effects
+        for effect in target.get_active_effects():
+            if not effect.name.startswith(f"{self.id}_"):
+                target.remove_effect_by_name(effect.name)
+
+        # Subscribe to effect application events to block future buffs
+        BUS.subscribe("effect_applied", self._on_effect_applied)
 
         # Apply 25% debuff to all copied stats
-        copied_stats = self._copied_stats[entity_id]
+        copied_stats = self._copied_stats.get(entity_id, {})
 
         # Apply copied stats with 25% reduction
         for stat_name, original_value in copied_stats.items():
@@ -50,16 +65,17 @@ class MimicPlayerCopy:
         if entity_id in self._copied_passive:
             await self._apply_copied_passive(target)
 
-    def _find_player_stats(self) -> dict:
-        """Find and return player stats (simplified)."""
-        # In full implementation, would scan the battle participants for player entity
-        # For now, return simulated player stats
-        return {
-            "max_hp": 100,
-            "atk": 50,
-            "defense": 25,
-            "mitigation": 10,
-        }
+    def _find_player_stats(self, participants: list) -> dict:
+        """Locate the player entity in the provided participants and return its stats."""
+        for entity in participants:
+            if getattr(entity, "id", None) == "player":
+                return {
+                    "max_hp": entity.max_hp,
+                    "atk": entity.atk,
+                    "defense": entity.defense,
+                    "mitigation": getattr(entity, "mitigation", 0),
+                }
+        return {}
 
     def _copy_player_stats(self, target: "Stats", player_stats: dict) -> None:
         """Copy player stats to Mimic."""
@@ -91,28 +107,44 @@ class MimicPlayerCopy:
             )
             target.add_effect(level_bonus_effect)
 
+    def _on_effect_applied(self, effect_name: str, entity, details: dict | None = None) -> None:
+        """Remove only positive stat buffs applied to the Mimic."""
+        if self._target_id is None or id(entity) != self._target_id:
+            return
+
+        if details and details.get("effect_type") == "stat_modifier":
+            if effect_name.startswith(f"{self.id}_"):
+                return
+
+            deltas = details.get("deltas", {}) or {}
+            multipliers = details.get("multipliers", {}) or {}
+
+            is_buff = any(delta > 0 for delta in deltas.values()) or any(
+                mult > 1 for mult in multipliers.values()
+            )
+
+            if is_buff:
+                entity.remove_effect_by_name(effect_name)
+
     async def on_battle_start(self, target: "Stats", battle_participants: list) -> None:
         """Copy player stats and passive when battle starts."""
-        # Find the actual player in battle participants
-        player_entity = None
-        for participant in battle_participants:
-            if hasattr(participant, 'id') and participant.id == "player":
-                player_entity = participant
-                break
-
-        if player_entity:
-            # Copy actual player stats
+        player_stats = self._find_player_stats(battle_participants)
+        if player_stats:
             entity_id = id(target)
-            self._copied_stats[entity_id] = {
-                "max_hp": player_entity.max_hp,
-                "atk": player_entity.atk,
-                "defense": player_entity.defense,
-                "mitigation": getattr(player_entity, 'mitigation', 0),
-            }
+            self._copied_stats[entity_id] = player_stats
 
-            # Copy player's passives
-            if hasattr(player_entity, 'passives') and player_entity.passives:
-                self._copied_passive[entity_id] = player_entity.passives[0]  # Copy first passive
+            # Copy player's first passive if available
+            player_entity = next(
+                (p for p in battle_participants if getattr(p, "id", None) == "player"),
+                None,
+            )
+            if player_entity and getattr(player_entity, "passives", None):
+                self._copied_passive[entity_id] = player_entity.passives[0]
+
+        # Remove any non-mimic effects to maintain stat parity
+        for effect in target.get_active_effects():
+            if not effect.name.startswith(f"{self.id}_"):
+                target.remove_effect_by_name(effect.name)
 
     @classmethod
     def get_copied_stats(cls, target: "Stats") -> dict:
