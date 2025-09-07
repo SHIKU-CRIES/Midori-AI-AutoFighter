@@ -10,8 +10,20 @@
   // Optional rank identifier; reserved for future badge rendering
   // eslint-disable-next-line no-unused-vars
   export let rankTag = null;
+  function getStackCount(stacks) {
+    return typeof stacks === 'object' ? stacks.mitigation ?? 0 : stacks ?? 0;
+  }
+
+  function isOvercharged(stacks) {
+    return typeof stacks === 'object' && stacks.overcharged;
+  }
+
   $: passiveTip = (fighter.passives || [])
-    .map((p) => `${p.id}${p.stacks > 1 ? ` x${p.stacks}` : ''}`)
+    .map((p) => {
+      const count = getStackCount(p.stacks);
+      const oc = isOvercharged(p.stacks);
+      return `${p.id}${count > 1 ? ` x${count}` : ''}${oc ? ' (overcharged)' : ''}`;
+    })
     .join(', ');
 
   // Percent helpers for HP and overheal (shields)
@@ -118,13 +130,15 @@
     {#if (fighter.passives || []).length}
       <div class="passive-indicators" class:reduced={reducedMotion}>
         {#each fighter.passives as p (p.id)}
-          {@const tip = `${p.id} ${p.stacks}${p.max_stacks ? `/${p.max_stacks}` : ''}`}
+          {@const count = getStackCount(p.stacks)}
+          {@const oc = isOvercharged(p.stacks)}
+          {@const tip = `${p.id} ${count}${p.max_stacks ? `/${p.max_stacks}` : ''}${oc ? ' (overcharged)' : ''}`}
           <div class="passive" class:pips-mode={(p.max_stacks && p.max_stacks <= 5)} aria-label={tip} title={tip}>
             {#if p.max_stacks && p.max_stacks <= 5}
             <div class="pips">
                 {#each Array(p.max_stacks) as _, i (i)}
                   <PipCircle
-                    class={`pip-icon${i < p.stacks ? ' filled' : ''}`}
+                    class={`pip-icon${i < count ? ' filled' : ''}`}
                     stroke="none"
                     fill="currentColor"
                     aria-hidden="true"
@@ -132,9 +146,9 @@
                 {/each}
               </div>
             {:else if p.max_stacks}
-              <span class="count">{p.stacks > p.max_stacks ? `${p.stacks}+` : p.stacks}/{p.max_stacks}</span>
+              <span class="count">{count > p.max_stacks ? `${count}+` : count}/{p.max_stacks}</span>
             {:else}
-              <span class="count">{p.stacks}</span>
+              <span class="count">{count}</span>
             {/if}
           </div>
         {/each}
