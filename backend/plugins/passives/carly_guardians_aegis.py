@@ -22,6 +22,7 @@ class CarlyGuardiansAegis:
     _mitigation_stacks: ClassVar[dict[int, int]] = {}
     _attack_baseline: ClassVar[dict[int, int]] = {}
     _defense_stacks: ClassVar[dict[int, int]] = {}
+    _overcharged: ClassVar[dict[int, bool]] = {}
 
     async def apply(self, target: "Stats", party: Optional[list["Stats"]] = None, **_: object) -> None:
         """Apply Carly's Guardian's Aegis healing and conversion mechanics."""
@@ -35,6 +36,23 @@ class CarlyGuardiansAegis:
             self._attack_baseline[entity_id] = int(target.get_base_stat("atk"))
         if entity_id not in self._defense_stacks:
             self._defense_stacks[entity_id] = 0
+        if entity_id not in self._overcharged:
+            self._overcharged[entity_id] = False
+
+        if self._overcharged[entity_id]:
+            self._mitigation_stacks[entity_id] = max(0, self._mitigation_stacks[entity_id] - 5)
+            if self._mitigation_stacks[entity_id] <= 10:
+                self._overcharged[entity_id] = False
+                target.remove_effect_by_name(f"{self.id}_overcharged_atk")
+            else:
+                target.remove_effect_by_name(f"{self.id}_overcharged_atk")
+                overcharge_effect = StatEffect(
+                    name=f"{self.id}_overcharged_atk",
+                    stat_modifiers={"atk": target.defense},
+                    duration=-1,
+                    source=self.id,
+                )
+                target.add_effect(overcharge_effect)
 
         # Convert any attack growth into permanent defense stacks
         base_atk = self._attack_baseline[entity_id]
@@ -101,6 +119,8 @@ class CarlyGuardiansAegis:
         # Initialize mitigation stack tracking if not present
         if entity_id not in self._mitigation_stacks:
             self._mitigation_stacks[entity_id] = 0
+        if entity_id not in self._overcharged:
+            self._overcharged[entity_id] = False
 
         # Apply mitigation twice (square mitigation)
         # This would need integration with damage calculation system
@@ -115,8 +135,18 @@ class CarlyGuardiansAegis:
         )
         target.add_effect(double_mitigation_effect)
 
-        # Gain two mitigation stacks for rest of fight
-        self._mitigation_stacks[entity_id] += 2
+        # Gain two mitigation stacks for rest of fight (unless overcharged)
+        if not self._overcharged[entity_id]:
+            self._mitigation_stacks[entity_id] += 2
+            if self._mitigation_stacks[entity_id] > 100:
+                self._overcharged[entity_id] = True
+                overcharge_effect = StatEffect(
+                    name=f"{self.id}_overcharged_atk",
+                    stat_modifiers={"atk": target.defense},
+                    duration=-1,
+                    source=self.id,
+                )
+                target.add_effect(overcharge_effect)
 
         # Apply taunt effect (force enemies to target Carly)
         # This would need battle system integration
@@ -159,6 +189,10 @@ class CarlyGuardiansAegis:
         return cls._mitigation_stacks.get(id(target), 0)
 
     @classmethod
-    def get_stacks(cls, target: "Stats") -> int:
-        """Return current mitigation stacks for UI display."""
-        return cls._mitigation_stacks.get(id(target), 0)
+    def get_stacks(cls, target: "Stats") -> dict[str, int | bool]:
+        """Return current mitigation stacks and overcharge status for UI display."""
+        entity_id = id(target)
+        return {
+            "mitigation": cls._mitigation_stacks.get(entity_id, 0),
+            "overcharged": cls._overcharged.get(entity_id, False),
+        }

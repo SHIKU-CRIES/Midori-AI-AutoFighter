@@ -92,7 +92,8 @@ async def test_carly_guardian_stack_display():
     description = registry.describe(carly)
     aegis_passive = next((p for p in description if p["id"] == "carly_guardians_aegis"), None)
     assert aegis_passive is not None
-    assert aegis_passive["stacks"] == 0
+    assert aegis_passive["stacks"]["mitigation"] == 0
+    assert aegis_passive["stacks"]["overcharged"] is False
     assert aegis_passive["max_stacks"] == 50
 
     # Simulate taking damage (which should add mitigation stacks)
@@ -105,7 +106,8 @@ async def test_carly_guardian_stack_display():
 
     description = registry.describe(carly)
     aegis_passive = next((p for p in description if p["id"] == "carly_guardians_aegis"), None)
-    assert aegis_passive["stacks"] == 4
+    assert aegis_passive["stacks"]["mitigation"] == 4
+    assert aegis_passive["stacks"]["overcharged"] is False
 
 
 @pytest.mark.asyncio
