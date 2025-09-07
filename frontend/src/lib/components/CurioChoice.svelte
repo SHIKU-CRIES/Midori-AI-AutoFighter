@@ -4,6 +4,7 @@
   export let entry = {};
   export let size = 'normal';
   export let quiet = false;
+  export let compact = false;
   const dispatch = createEventDispatcher();
   function handleClick() {
     dispatch('select', { type: 'relic', id: entry?.id, entry });
@@ -21,8 +22,8 @@
 </script>
 
 <button class="curio tooltip-trigger" aria-label={`Select relic ${entry.name || entry.id}`} {tabIndex} aria-disabled={ariaDisabled} on:click={handleClick} on:keydown={onKey}>
-  <CardArt {entry} type="relic" roundIcon={true} {size} {quiet} />
-  {#if entry.tooltip || entry.about}
+  <CardArt {entry} type="relic" roundIcon={true} {size} {quiet} {compact} />
+  {#if !compact && (entry.tooltip || entry.about)}
     <div class="tooltip">
       {entry.tooltip || entry.about}
     </div>

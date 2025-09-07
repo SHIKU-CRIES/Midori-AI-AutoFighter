@@ -21,6 +21,7 @@
       // Player Editor removed from main menu per design
       { icon: PackageOpen, label: 'Warp', action: handlers.openPulls, disabled: battleActive },
       { icon: Hammer, label: 'Craft', action: handlers.openCraft, disabled: battleActive },
+      { icon: Package, label: 'Inventory', action: handlers.openInventory, disabled: false },
       { icon: Settings, label: 'Settings', action: handlers.openSettings, disabled: false },
       { icon: MessageSquare, label: 'Feedback', action: handlers.openFeedback, disabled: false },
       // Inventory moved to in-run NavBar; remove from main menu
