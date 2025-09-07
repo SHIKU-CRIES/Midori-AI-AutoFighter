@@ -23,7 +23,7 @@ describe('Room numbering display', () => {
     expect(result1.roomNumber).toBe(1);
 
     // Test room index 9 should display as Room 10
-    const result2 = roomInfo([...Array(10).keys().map(i => ({ index: i }))], 9);
+    const result2 = roomInfo(Array.from({length: 10}, (_, i) => ({ index: i })), 9);
     expect(result2.roomNumber).toBe(10);
 
     // Test fallback to currentIndex
