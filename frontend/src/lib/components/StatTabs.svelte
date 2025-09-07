@@ -111,7 +111,7 @@
 
   // Check if character can upgrade (has 4-star items available)
   $: canUpgrade = (() => {
-    if (!upgradeData?.items || loadingUpgrade) return false;
+    if (!previewChar || !upgradeData?.items || loadingUpgrade) return false;
     
     const items = upgradeData.items;
     if (isPlayer) {
