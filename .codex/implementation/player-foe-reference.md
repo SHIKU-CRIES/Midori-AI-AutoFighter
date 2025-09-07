@@ -49,7 +49,7 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 - **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses.
 - **Lady Darkness** (B, Dark) – baseline fighter themed around darkness.
 - **Lady Echo** (B, Lightning) – baseline fighter themed around echoes.
-- **Lady Fire and Ice** (B, Fire or Ice) – baseline fighter themed around fire and ice.
+- **Lady Fire and Ice** (B, Fire or Ice) – baseline fighter themed around fire and ice. Duality Engine alternates elements to build Flux and reduces foe mitigation when repeating an element.
 - **Lady Light** (B, Light) – baseline fighter themed around light.
 - **Lady of Fire** (B, Fire) – baseline fighter themed around fire.
 - **Luna** (B, Generic) – applies `luna_passive`.

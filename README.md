@@ -5,6 +5,7 @@ A web-based auto-battler game featuring strategic party management, elemental co
 ### Character Update
 
 - Carly's Guardian's Aegis now heals the most injured ally, converts attack growth into defense stacks, and shares mitigation with allies on ultimate.
+- Lady Fire and Ice's Duality Engine now tracks current damage type and lowers foe mitigation when repeating an element.
 
 ## Quick Start with Docker Compose (Recommended)
 
