@@ -49,5 +49,7 @@ async def test_bubble_burst_stacks_and_dot():
         assert enemy2.hp < 1000
         assert enemy1.effect_manager.dots
         assert enemy2.effect_manager.dots
+        assert enemy1.effect_manager.dots[0].turns == 2
+        assert enemy2.effect_manager.dots[0].turns == 2
     finally:
         set_battle_active(False)

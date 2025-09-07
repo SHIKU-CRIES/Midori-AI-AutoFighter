@@ -391,7 +391,9 @@ class EffectManager:
             "multipliers": effect.multipliers
         })
 
-    def maybe_inflict_dot(self, attacker: Stats, damage: int) -> None:
+    def maybe_inflict_dot(
+        self, attacker: Stats, damage: int, turns: Optional[int] = None
+    ) -> None:
         """Attempt to apply one or more DoT stacks based on effect hit rate.
 
         The attacker's ``effect_hit_rate`` is processed in 100% chunks. Each
@@ -420,6 +422,9 @@ class EffectManager:
             dot = attacker.damage_type.create_dot(damage, attacker)
             if dot is None:
                 break
+
+            if turns is not None:
+                dot.turns = turns
 
             self.add_dot(dot)
             remaining -= 1.0
