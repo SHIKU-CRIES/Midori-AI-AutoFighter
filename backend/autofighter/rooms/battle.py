@@ -25,6 +25,7 @@ from autofighter.mapgen import MapNode
 from autofighter.relics import apply_relics
 from autofighter.relics import relic_choices
 from autofighter.summons import Summon
+from autofighter.summons import SummonManager
 from plugins.damage_types import ALL_DAMAGE_TYPES
 
 from ..party import Party
@@ -493,7 +494,6 @@ class BattleRoom(Room):
                     await registry.trigger("action_taken", member, target=tgt_foe, damage=dmg, party=combat_party.members, foes=foes)
                     # Sync any new summons into party/foes so they can act this round
                     try:
-                        from autofighter.summons import SummonManager
                         # Add party-side summons
                         SummonManager.add_summons_to_party(combat_party)
                         # Add foe-side summons to foes list with effect managers
@@ -654,7 +654,6 @@ class BattleRoom(Room):
                     await registry.trigger("action_taken", acting_foe)
                     # Sync any new summons created by foes
                     try:
-                        from autofighter.summons import SummonManager
                         SummonManager.add_summons_to_party(combat_party)
                         for foe_owner in list(foes):
                             owner_id = getattr(foe_owner, 'id', str(id(foe_owner)))
