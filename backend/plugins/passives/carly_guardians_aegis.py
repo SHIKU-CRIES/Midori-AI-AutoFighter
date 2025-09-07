@@ -68,6 +68,8 @@ class CarlyGuardiansAegis:
             )
         recipient = injured if injured is not None else target
 
+        await recipient.apply_healing(defense_based_heal, healer=target)
+
         heal_effect = StatEffect(
             name=f"{self.id}_defense_heal",
             stat_modifiers={"hp": defense_based_heal},

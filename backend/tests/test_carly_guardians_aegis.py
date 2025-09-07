@@ -22,6 +22,8 @@ async def test_heals_most_injured_ally():
     heal_effects_high = [e for e in ally_high.get_active_effects() if e.name == "carly_guardians_aegis_defense_heal"]
     assert heal_effects_low
     assert not heal_effects_high
+    expected_heal = int(carly.defense * 0.1)
+    assert ally_low.hp == 400 + expected_heal
 
 
 @pytest.mark.asyncio
