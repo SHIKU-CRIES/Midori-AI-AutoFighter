@@ -23,7 +23,8 @@ async def test_bubbles_random_damage_type():
 async def test_bubble_burst_stacks_and_dot():
     set_battle_active(True)
     try:
-        bubbles = Stats(hp=1000, atk=100, damage_type=load_damage_type("Fire"))
+        bubbles = Stats(hp=1000, damage_type=load_damage_type("Fire"))
+        bubbles.set_base_stat("atk", 100)
         ally = Stats(hp=1000, damage_type=Generic())
         enemy1 = Stats(hp=1000, damage_type=Generic())
         enemy2 = Stats(hp=1000, damage_type=Generic())
