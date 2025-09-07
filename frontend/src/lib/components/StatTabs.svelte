@@ -9,13 +9,10 @@
    * - Embeds a slim Character Editor inside the panel for both player and
    *   non‑player characters, allowing percent tweaks to HP, Attack, Defense,
    *   Crit Rate, and Crit Damage. Player changes auto‑save via API.
-   * - Renders an `UpgradePanel` beneath the editor so any character can convert
-   *   items into upgrade points and spend them on specific stats.
    */
   import { getElementIcon, getElementColor } from '../systems/assetLoader.js';
   import { createEventDispatcher } from 'svelte';
   import CharacterEditor from './CharacterEditor.svelte';
-  import UpgradePanel from './UpgradePanel.svelte';
   import { getPlayerConfig, savePlayerConfig } from '../systems/api.js';
 
   /**
@@ -281,9 +278,6 @@
             on:change={(e) => { editorVals = e.detail; if (sel.is_player) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } scheduleSave(); }}
           />
         </div>
-        <UpgradePanel id={sel.id} element={sel.element}
-          on:upgraded={() => { try { dispatch('refresh-roster'); } catch {} }}
-        />
       </div>
     {/each}
   {/if}
