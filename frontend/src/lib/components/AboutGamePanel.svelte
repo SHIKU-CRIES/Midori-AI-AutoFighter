@@ -1,4 +1,6 @@
 <script>
+  import { Swords, Target, Gem, Star } from 'lucide-svelte';
+  
   export let userState = { level: 1, exp: 0, next_level_exp: 100, total_playtime: 0 };
   
   // Format playtime in hours and minutes
@@ -28,10 +30,22 @@
         fight autonomously through procedurally generated dungeons.
       </p>
       <div class="features">
-        <div class="feature">⚔️ Strategic Team Building</div>
-        <div class="feature">🎯 Auto-Battle Combat</div>
-        <div class="feature">🔮 Mystical Relics & Cards</div>
-        <div class="feature">🌟 Character Progression</div>
+        <div class="feature">
+          <Swords size={16} />
+          Strategic Team Building
+        </div>
+        <div class="feature">
+          <Target size={16} />
+          Auto-Battle Combat
+        </div>
+        <div class="feature">
+          <Gem size={16} />
+          Mystical Relics & Cards
+        </div>
+        <div class="feature">
+          <Star size={16} />
+          Character Progression
+        </div>
       </div>
     </div>
   </div>
@@ -132,6 +146,9 @@
     color: rgba(255,255,255,0.8);
     text-shadow: 0 1px 1px rgba(0,0,0,0.5);
     padding: 0.2rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .stats-content {

@@ -14,7 +14,7 @@
   import BattleReview from './BattleReview.svelte';
   import RewardOverlay from './RewardOverlay.svelte';
   import CharacterEditor from './CharacterEditor.svelte';
-  import StarRailInventory from './StarRailInventory.svelte';
+  import Inventory from './Inventory.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
   import RunChooser from './RunChooser.svelte';
   import ShopMenu from './ShopMenu.svelte';
@@ -233,7 +233,7 @@
 
 {#if $overlayView === 'inventory'}
   <PopupWindow title="Inventory" padding="0" maxWidth="1200px" zIndex={1300} on:close={() => dispatch('back')}>
-    <StarRailInventory cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
+    <Inventory cards={roomData?.cards ?? []} relics={roomData?.relics ?? []} />
   </PopupWindow>
 {/if}
 
