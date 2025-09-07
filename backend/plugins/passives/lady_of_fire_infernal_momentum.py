@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import Optional
 
 from autofighter.stats import StatEffect
 
@@ -16,7 +17,12 @@ class LadyOfFireInfernalMomentum:
     trigger = "damage_taken"  # Triggers when Lady of Fire takes damage
     max_stacks = 1  # Only one instance per character
 
-    async def apply(self, target: "Stats") -> None:
+    async def apply(
+        self,
+        target: "Stats",
+        attacker: Optional["Stats"] = None,
+        damage: int = 0,
+    ) -> None:
         """Apply Lady of Fire's Infernal Momentum mechanics."""
         # Double the Fire damage type's missing HP damage bonus
         # This would need integration with the Fire damage type system
@@ -31,6 +37,9 @@ class LadyOfFireInfernalMomentum:
             source=self.id,
         )
         target.add_effect(fire_bonus_effect)
+
+        if attacker is not None:
+            await self.counter_attack(target, attacker, damage)
 
     async def counter_attack(self, target: "Stats", attacker: "Stats", damage: int) -> None:
         """Apply burn DoT to attacker when Lady of Fire takes damage."""

@@ -44,7 +44,7 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 - **Bubbles** (A, random) – starts with a default item and applies `bubbles_passive`.
 - **Carly** (B, Light) – applies `carly_passive`.
 - **Chibi** (A, random) – gains four times the normal benefit from Vitality.
-- **Graygray** (B, random) – applies `graygray_passive`.
+- **Graygray** (B, random) – applies `graygray_counter_maestro`, counterattacking when hit.
 - **Hilander** (A, random) – builds increased crit rate and crit damage.
 - **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses.
 - **Lady Darkness** (B, Dark) – baseline fighter themed around darkness.
