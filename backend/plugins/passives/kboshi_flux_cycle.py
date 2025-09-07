@@ -61,16 +61,31 @@ class KboshiFluxCycle:
 
             # Element successfully changed - remove accumulated stacks
             if self._damage_stacks[entity_id] > 0 or self._hot_stacks[entity_id] > 0:
+                stacks = self._damage_stacks[entity_id]
+
                 # Remove existing bonus effects
                 target._active_effects = [
-                    effect for effect in target._active_effects
-                    if not effect.name.startswith(f"{self.id}_damage_bonus") and
-                       not effect.name.startswith(f"{self.id}_hot_heal")
+                    effect
+                    for effect in target._active_effects
+                    if not effect.name.startswith(f"{self.id}_damage_bonus")
+                    and not effect.name.startswith(f"{self.id}_hot_heal")
                 ]
 
                 # Reset stacks
                 self._damage_stacks[entity_id] = 0
                 self._hot_stacks[entity_id] = 0
+
+                # Apply mitigation debuff to foes for one turn
+                if stacks > 0:
+                    mitigation = stacks * -0.02
+                    for foe in getattr(target, "enemies", []):
+                        debuff = StatEffect(
+                            name=f"{self.id}_mitigation_debuff",
+                            stat_modifiers={"mitigation": mitigation},
+                            duration=1,
+                            source=self.id,
+                        )
+                        foe.add_effect(debuff)
         else:
             # Element failed to change - gain damage bonus and HoT
             self._damage_stacks[entity_id] += 1
