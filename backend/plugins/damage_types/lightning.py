@@ -30,48 +30,52 @@ class Lightning(DamageTypeBase):
                     target.apply_damage(dmg, attacker=attacker, trigger_on_hit=False)
                 )
 
-    def ultimate(self, attacker, target) -> bool:
-        if not getattr(attacker, "use_ultimate", lambda: False)():
+    async def ultimate(self, actor, allies, enemies) -> bool:
+        if not getattr(actor, "use_ultimate", lambda: False)():
             return False
 
-        # Lightning ultimate deals damage to the target and applies DoTs
-        base_damage = int(getattr(attacker, "atk", 0))
-        if base_damage > 0:
-            # Use asyncio to handle the async damage application
-            asyncio.create_task(target.apply_damage(base_damage, attacker=attacker, action_name="Lightning Ultimate"))
+        # Lightning ultimate deals damage to all enemies and applies DoTs
+        base_damage = int(getattr(actor, "atk", 0))
 
-        mgr = getattr(target, "effect_manager", None)
-        if mgr is not None:
-            types = ["Fire", "Ice", "Wind", "Lightning", "Light", "Dark"]
-            dmg = int(getattr(attacker, "atk", 0) * 0.05)
-            for _ in range(10):
-                effect = damage_effects.create_dot(random.choice(types), dmg, attacker)
-                if effect is not None:
-                    mgr.add_dot(effect)
+        # Apply damage to all enemies
+        for enemy in enemies:
+            if base_damage > 0:
+                await enemy.apply_damage(base_damage, attacker=actor, action_name="Lightning Ultimate")
 
-        stacks = getattr(attacker, "_lightning_aftertaste_stacks", 0) + 1
-        attacker._lightning_aftertaste_stacks = stacks
+            # Apply random DoTs to each enemy
+            mgr = getattr(enemy, "effect_manager", None)
+            if mgr is not None:
+                types = ["Fire", "Ice", "Wind", "Lightning", "Light", "Dark"]
+                dmg = int(getattr(actor, "atk", 0) * 0.05)
+                for _ in range(10):
+                    effect = damage_effects.create_dot(random.choice(types), dmg, actor)
+                    if effect is not None:
+                        mgr.add_dot(effect)
 
-        if not hasattr(attacker, "_lightning_aftertaste_handler"):
+        # Set up aftertaste stacks
+        stacks = getattr(actor, "_lightning_aftertaste_stacks", 0) + 1
+        actor._lightning_aftertaste_stacks = stacks
+
+        if not hasattr(actor, "_lightning_aftertaste_handler"):
             def _hit(atk, tgt, amount, *_args) -> None:
-                if atk is attacker:
+                if atk is actor:
                     from plugins.effects.aftertaste import Aftertaste
 
                     asyncio.create_task(
                         Aftertaste(
-                            hits=getattr(attacker, "_lightning_aftertaste_stacks", 0)
+                            hits=getattr(actor, "_lightning_aftertaste_stacks", 0)
                         ).apply(atk, tgt)
                     )
 
             def _clear(_):
                 BUS.unsubscribe("hit_landed", _hit)
                 BUS.unsubscribe("battle_end", _clear)
-                if hasattr(attacker, "_lightning_aftertaste_stacks"):
-                    delattr(attacker, "_lightning_aftertaste_stacks")
-                if hasattr(attacker, "_lightning_aftertaste_handler"):
-                    delattr(attacker, "_lightning_aftertaste_handler")
+                if hasattr(actor, "_lightning_aftertaste_stacks"):
+                    delattr(actor, "_lightning_aftertaste_stacks")
+                if hasattr(actor, "_lightning_aftertaste_handler"):
+                    delattr(actor, "_lightning_aftertaste_handler")
 
             BUS.subscribe("hit_landed", _hit)
             BUS.subscribe("battle_end", _clear)
-            attacker._lightning_aftertaste_handler = _hit
+            actor._lightning_aftertaste_handler = _hit
         return True

@@ -88,6 +88,8 @@ Each foe defeated during a battle temporarily grants +55% `rdr` for that room, r
 
 The game auto-discovers classes under `plugins/` and `mods/` by `plugin_type` and wires them to a shared event bus. See `.codex/implementation/plugin-system.md` for loader details and examples. Player and foe plugins also expose `prompt` and `about` strings with placeholder text for future character customization.
 
+Luna's foe form is weighted to appear more frequently and may even show up as a boss when she isn't in the player's party.
+
 ### Player Creator
 
 Use the in-game editor to set your pronouns, choose a damage type, and distribute 100 stat points across HP, attack, and defense. Each stat point provides a +1% increase. Spending 100 of each damage type's 4★ upgrade items grants one extra stat point. The customization is stored in the encrypted `save.db` database for new runs.
@@ -159,7 +161,7 @@ The roster in `plugins/players/` currently includes and each entry lists its `Ch
 - Carly (B, Light) – Guardian's Aegis heals the most injured ally, converts attack growth into defense, builds mitigation stacks that can overcharge to add defense to attack while stacks decay each turn, and shares mitigation on ultimate
 - Chibi (A, Lightning)
 - Graygray (B, random damage type) – retaliates with Counter Maestro after taking damage
-- Hilander (A, random damage type)
+- Hilander (A, random damage type) – builds crit rate and damage, unleashing Aftertaste on crit; stack gain odds drop 5% per stack past 20, floored at 1%
 - Kboshi (A, random damage type)
 - Lady Darkness (B, Dark)
 - Lady Echo (B, Lightning)

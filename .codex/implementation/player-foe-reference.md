@@ -45,7 +45,7 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 - **Carly** (B, Light) – Guardian's Aegis heals the most injured ally, converts attack growth into defense, builds mitigation stacks that can overcharge to add defense to attack while stacks decay each turn, and shares mitigation on ultimate.
 - **Chibi** (A, random) – gains four times the normal benefit from Vitality.
 - **Graygray** (B, random) – applies `graygray_counter_maestro`, counterattacking when hit and unleashing a max-HP burst every 50 stacks.
-- **Hilander** (A, random) – builds increased crit rate and crit damage.
+- **Hilander** (A, random) – builds increased crit rate and crit damage, unleashing Aftertaste on crit; stack gain odds drop 5% per stack past 20, but never below 1%.
 - **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses. Switching elements consumes stacks and inflicts a brief mitigation debuff on all foes.
 - **Lady Darkness** (B, Dark) – baseline fighter themed around darkness.
 - **Lady Echo** (B, Lightning) – baseline fighter themed around echoes.
@@ -71,6 +71,9 @@ three roll 35% for two extras and, if that fails, 75% for one. Larger parties
 continue this sequence, and the total foe count never exceeds ten.
 Each foe defeated during a battle temporarily raises the party's rare drop rate
 by 55% for that room, increasing gold rewards and element-based item drops.
+
+Luna's foe variant is weighted to appear more often than other characters,
+including in boss encounters when she isn't already in the party.
 
 Foes also expose a `rank` field to describe encounter tier. Supported ranks are
 `normal`, `prime`, `glitched prime`, `boss`, and `glitched boss`. Battle and
