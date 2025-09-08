@@ -14,4 +14,9 @@ describe('StatTabs editor persistence', () => {
   test('restores cached values when switching', () => {
     expect(content).toContain('const cached = editorConfigs.get(previewChar.id)');
   });
+
+  test('shows global buff note', () => {
+    expect(content).toContain('export let userBuffPercent = 0');
+    expect(content).toContain('Global Buff: +{userBuffPercent}%');
+  });
 });

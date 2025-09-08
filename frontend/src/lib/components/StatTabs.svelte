@@ -29,11 +29,12 @@
    * - selected: array of selected character IDs
    *
    * Events:
-   * - toggle: dispatched with the previewId when Add/Remove is clicked
-   */
+  * - toggle: dispatched with the previewId when Add/Remove is clicked
+  */
   export let roster = [];
   export let previewId;
   export let selected = [];
+  export let userBuffPercent = 0;
 
   const statTabs = ['Core', 'Offense', 'Defense'];
   let activeTab = 'Core';
@@ -309,6 +310,7 @@
           style={`color: ${getElementColor((isPlayer && editorVals?.damageType) ? editorVals.damageType : sel.element)}`}
           aria-hidden="true" />
       </div>
+      <div class="buff-note">Global Buff: +{userBuffPercent}%</div>
       <div class="stats-list">
         {#if activeTab === 'Core'}
           <div>
@@ -412,6 +414,7 @@
 .char-name { font-size: 1.2rem; color: #fff; flex: 1; }
 .char-level { font-size: 1rem; color: #ccc; }
 .type-icon { width: 24px; height: 24px; }
+.buff-note { font-size: 0.85rem; color: #ccc; margin-bottom: 0.3rem; }
 .stats-list {
   display: flex;
   flex-direction: column;

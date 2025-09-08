@@ -4,17 +4,17 @@ import { join } from 'path';
 
 describe('PartyPicker component', () => {
   test('contains party picker markup', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/PartyPicker.svelte'), 'utf8');
     expect(content).toContain('data-testid="party-picker"');
   });
 
   test('includes add/remove control', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/StatTabs.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/StatTabs.svelte'), 'utf8');
     expect(content).toContain('Add to party');
   });
 
   test('references updated stat keys', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/StatTabs.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/StatTabs.svelte'), 'utf8');
     expect(content).toContain('crit_damage');
     expect(content).toContain('effect_hit_rate');
     expect(content).toContain('dodge_odds');
@@ -22,14 +22,14 @@ describe('PartyPicker component', () => {
   });
 
   test('filters unowned characters and normalizes element names', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyPicker.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/PartyPicker.svelte'), 'utf8');
     expect(content).toContain('filter((p) => p.owned || p.is_player)');
     expect(content).toContain('selected = selected.filter((id) => roster.some((c) => c.id === id))');
     expect(content).toContain('element: resolveElement(p)');
   });
 
   test('orders stats correctly', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/StatTabs.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/StatTabs.svelte'), 'utf8');
     const coreStart = content.indexOf("{#if activeTab === 'Core'}");
     const coreEnd = content.indexOf("{:else if activeTab === 'Offense'}");
     const coreSection = content.slice(coreStart, coreEnd);
@@ -42,14 +42,20 @@ describe('PartyPicker component', () => {
   });
 
   test('uses element colors for icon and outline', () => {
-    const rosterContent = readFileSync(join(import.meta.dir, '../src/lib/PartyRoster.svelte'), 'utf8');
+    const rosterContent = readFileSync(join(import.meta.dir, '../src/lib/components/PartyRoster.svelte'), 'utf8');
     expect(rosterContent).toContain('style={`border-color: ${getElementColor(char.element)}`}');
     expect(rosterContent).toContain('style={`color: ${getElementColor(char.element)}`}');
   });
 
   test('roster layout snapshot', () => {
-    const content = readFileSync(join(import.meta.dir, '../src/lib/PartyRoster.svelte'), 'utf8');
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/PartyRoster.svelte'), 'utf8');
     expect(content).toMatchSnapshot();
+  });
+
+  test('preserves preview and passes buff percent', () => {
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/PartyPicker.svelte'), 'utf8');
+    expect(content).toContain('previewId = oldPreview ?? selected[0] ?? defaultPreview;');
+    expect(content).toContain('<StatTabs {roster} {previewId} {selected} {userBuffPercent}');
   });
 });
 

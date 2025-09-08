@@ -11,6 +11,7 @@
 
   let background = '';
   let roster = [];
+  let userBuffPercent = 0;
 
   export let selected = [];
   export let compact = false;
@@ -131,6 +132,7 @@
   async function refreshRoster() {
     try {
       const data = await getPlayers();
+      userBuffPercent = data.user?.level ?? 0;
       function resolveElement(p) {
         let e = p?.element;
         if (e && typeof e !== 'string') e = e.id || e.name;
@@ -154,7 +156,7 @@
       selected = oldSelected.filter((id) => roster.some((c) => c.id === id));
       const player = roster.find((p) => p.is_player);
       const defaultPreview = player ? player.id : (roster[0]?.id || null);
-      previewId = selected[0] ?? oldPreview ?? defaultPreview;
+      previewId = oldPreview ?? selected[0] ?? defaultPreview;
     } catch (e) {
       if (dev || !browser) {
         const { error } = await import('$lib/systems/logger.js');
@@ -189,7 +191,7 @@
       <PartyRoster {roster} {selected} bind:previewId {reducedMotion} on:toggle={(e) => toggleMember(e.detail)} />
       <PlayerPreview {roster} {previewId} overrideElement={previewElementOverride} />
       <div class="right-col">
-        <StatTabs {roster} {previewId} {selected}
+        <StatTabs {roster} {previewId} {selected} {userBuffPercent}
           on:toggle={(e) => toggleMember(e.detail)}
           on:preview-element={(e) => {
             const el = e.detail.element;
