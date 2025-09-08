@@ -638,7 +638,11 @@
       saveRunState(runId);
     } catch (e) {
       // Don't show overlays for polling errors to avoid spam
-      console.warn('State polling failed:', e.message);
+      console.warn('State polling failed:', e?.message || e);
+      if (String(e?.message || '').toLowerCase().includes('run ended') || e?.status === 404) {
+        handleRunEnd();
+        return;
+      }
     }
 
     // Schedule next state poll if conditions are still met
@@ -1119,7 +1123,7 @@
       }
       
       // Continue polling (simplified - no complex battle state management)
-      if (!haltSync) {
+      if (!haltSync && uiState.mode !== 'menu') {
         uiStateTimer = setTimeout(pollUIState, 1000); // Poll every second
       }
       

@@ -28,6 +28,10 @@ poll for results:
   using the current room state and return the newly created snapshot instead of
   raising an error.
 
+- If a second battle task is detected during combat, both tasks are cancelled
+  and each run receives an error snapshot noting that a concurrent battle was
+  detected.
+
 These snapshots are stored in `game.battle_snapshots` and polled by the
 frontend during combat.
 
