@@ -1,76 +1,101 @@
-# Fix Random Ultimate Assignment System
+# Support Gacha Damage Type Persistence System
 
 **Priority**: HIGH  
-**Origin**: Character Ability Audit (17001dd5)  
-**Impact**: Major gameplay design flaw affecting 8 characters  
+**Origin**: Character Ability Audit (17001dd5) + User Clarification  
+**Impact**: Major gameplay design enhancement for gacha mechanics  
 
 ## Problem Description
 
-Eight characters (Ally, Becca, Bubbles, Chibi, Graygray, Hilander, Mezzy, Mimic) currently receive completely random ultimate abilities each time they are instantiated, making character behavior unpredictable and inconsistent with game design.
+The current random damage type assignment system is intentionally designed for gacha mechanics where players can pull different elemental variants of characters (e.g., "fire type mezzy", "ice type mezzy"). However, the implementation may need refinement to ensure:
 
-**Root Cause**: The `get_damage_type()` function in `backend/plugins/damage_types/__init__.py` falls back to `random_damage_type()` for character names that don't match any special cases or substrings.
+1. **Persistence**: Characters maintain consistent damage types within game sessions
+2. **Display**: Players can see what damage type their character instance has
+3. **Balance**: Gacha damage type assignment works as intended
 
-## Impact Analysis
+**Current System**: Characters like Ally, Becca, Bubbles, Chibi, Graygray, Hilander, Mezzy, Mimic call `get_damage_type("CharacterName")` which falls back to `random_damage_type()` when no specific mapping exists.
 
-- Characters can randomly receive any of 6 ultimate types (Light/Dark/Wind/Lightning/Fire/Ice)
-- Completely unpredictable gameplay experience
-- Impossible to balance characters or create consistent strategies
-- Lightning selection would cause crashes (see related Lightning ultimate bug)
-- Players cannot rely on character abilities
+## User Requirements (Clarified)
 
-## Tasks
+- ✅ **Random damage types are intentional** for gacha system
+- ❓ **When is damage type determined?** (at gacha pull vs character instantiation)
+- ❓ **Should damage type persist** between battle sessions?
+- ❓ **How should damage type be displayed** to players?
 
-### Design Decision Required
-- Task Master, determine whether these 8 characters should:
-  - A) Have unique character-specific ultimate implementations
-  - B) Have fixed assignments to existing damage types (e.g., Ally→Fire, Becca→Ice)
-  - C) Continue with random but document this as intended behavior
+## Design Questions to Resolve
 
-### Implementation Tasks (after design decision)
-- Coder, modify `get_damage_type()` function to provide explicit mapping for these 8 characters
-- Coder, implement character-specific damage types if option A is chosen
-- Coder, update character plugin files to reflect chosen ultimate assignments
-- Coder, add unit tests verifying consistent ultimate assignment for each character
-- Coder, update documentation to reflect actual ultimate behavior
+### 1. Damage Type Assignment Timing
+- **Option A**: Assign once during gacha pull and store persistently
+- **Option B**: Assign during character creation in each game session  
+- **Option C**: Assign during battle instantiation (current behavior)
 
-### Documentation Tasks
-- Coder, update `.codex/docs/character-passives.md` with correct ultimate information
-- Coder, update character ability compilation to reflect new assignments
+### 2. Persistence Strategy
+- **Option A**: Store damage type in character save data
+- **Option B**: Consistent within game session only
+- **Option C**: Pure random each instantiation (current)
+
+### 3. Display and UI
+- How should players know what damage type their character has?
+- Should gacha results show the damage type pulled?
+- Should character selection show damage type?
+
+## Implementation Tasks (After Design Decision)
+
+### If Option A (Persistent Gacha Assignment):
+- Coder, modify gacha system to assign and store damage types during character pull
+- Coder, update character instantiation to use stored damage type
+- Coder, add damage type display in character selection UI
+- Coder, add damage type information to gacha pull results
+
+### If Option B (Session Consistent):
+- Coder, modify character instantiation to use deterministic seeding per session
+- Coder, ensure consistent assignment within battle chains
+- Coder, add session-based damage type display
+
+### If Option C (Current Random):
+- Task Master, clarify if current implementation meets requirements
+- Coder, add real-time damage type display for players
+- Coder, document intended random behavior
 
 ## Current Affected Characters
 
-| Character | Current Behavior | Suggested Assignment |
-|-----------|------------------|---------------------|
-| Ally | Random | Fire (matches twin dagger aggressive style) |
-| Becca | Random | Wind (matches variable nature) |
-| Bubbles | Random | Ice (matches bubble/freeze theme) |
-| Chibi | Random | Lightning (matches energetic small character) |
-| Graygray | Random | Dark (matches counter/defensive style) |
-| Hilander | Random | Fire (matches critical/ferment explosive theme) |
-| Mezzy | Random | Dark (matches gluttony/drain mechanics) |
-| Mimic | Random | Generic (matches adaptive/copying nature) |
+| Character | Current Behavior | Gacha Rarity |
+|-----------|------------------|--------------|
+| Ally | Random per instantiation | 5 |
+| Becca | Random per instantiation | 5 |
+| Bubbles | Random per instantiation | 5 |
+| Chibi | Random per instantiation | 5 |
+| Graygray | Random per instantiation | 5 |
+| Hilander | Random per instantiation | 5 |
+| Mezzy | Random per instantiation | 5 |
+| Mimic | Random per instantiation | 5 |
 
 ## Acceptance Criteria
 
-- [ ] All 8 characters have predictable, consistent ultimate assignments
-- [ ] Ultimate assignments match character themes and gameplay styles
-- [ ] No more random ultimate selection for any character
-- [ ] Documentation accurately reflects ultimate assignments
-- [ ] All tests pass with new assignments
+- [ ] Design decision made on damage type assignment timing
+- [ ] Implementation aligns with intended gacha mechanics
+- [ ] Players can understand what damage type their character has
+- [ ] Damage type behavior is consistent with chosen design
+- [ ] Documentation reflects intended behavior
+- [ ] All tests pass with new implementation
 
 ## Related Files
 
 - `backend/plugins/damage_types/__init__.py` - get_damage_type function
-- `backend/plugins/players/` - All affected character files
+- `backend/autofighter/gacha.py` - Gacha system
+- `backend/plugins/players/` - Affected character files
+- Character selection and battle UI components
 - `.codex/docs/character-passives.md` - Documentation updates
-- Test files for ultimate functionality
 
 ## Dependencies
 
-This task should be completed after the Lightning ultimate bug fix to ensure all ultimate types are functional.
+This task should be completed after:
+1. ✅ Lightning ultimate bug fix (completed)
+2. User clarification on design decisions
+3. Lady Fire and Ice behavior decision
 
 ## Testing Requirements
 
-- Unit tests verifying each character gets the same ultimate type consistently
-- Integration tests verifying ultimate functionality for all assignments
-- Manual testing of character ultimate usage in battles
+- Unit tests verifying chosen damage type behavior
+- Integration tests with gacha system (if persistent)
+- Manual testing of character selection and battle usage
+- UI testing for damage type display
