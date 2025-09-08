@@ -186,6 +186,7 @@ async def test_hilander_aftertaste_and_soft_cap(monkeypatch):
     set_battle_active(False)
 
     assert target.damage_taken > damage_before
+    assert HilanderCriticalFerment.get_stacks(hilander) == 19
 
 
 @pytest.mark.asyncio
