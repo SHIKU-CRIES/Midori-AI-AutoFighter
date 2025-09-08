@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@zaniar/effekseer-webgl-wasm": "^1.62.5000",
-    "lucide-svelte": "^0.539.0"
+    "lucide-svelte": "^0.539.0",
+    "jsfxr": "*",
+    "zzfx": "*"
   }
 }
