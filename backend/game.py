@@ -363,21 +363,22 @@ async def _run_battle(
 ) -> None:
     try:
         try:
-            result = await room.resolve(party, data, progress, foes)
+            result = await room.resolve(party, data, progress, foes, run_id=run_id)
         except Exception as exc:
             state["battle"] = False
             log.exception("Battle resolution failed for %s", run_id)
-            battle_snapshots[run_id] = {
-                "result": "error",
-                "error": str(exc),
-                "ended": True,
-                "party": [],
-                "foes": [],
-                "awaiting_next": False,
-                "awaiting_card": False,
-                "awaiting_relic": False,
-                "awaiting_loot": False,
-            }
+            if run_id not in battle_snapshots:
+                battle_snapshots[run_id] = {
+                    "result": "error",
+                    "error": str(exc),
+                    "ended": True,
+                    "party": [],
+                    "foes": [],
+                    "awaiting_next": False,
+                    "awaiting_card": False,
+                    "awaiting_relic": False,
+                    "awaiting_loot": False,
+                }
             try:
                 await asyncio.to_thread(save_map, run_id, state)
                 await asyncio.to_thread(save_party, run_id, party)

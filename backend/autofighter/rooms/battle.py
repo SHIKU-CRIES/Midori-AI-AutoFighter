@@ -159,7 +159,11 @@ class BattleRoom(Room):
         data: dict[str, Any],
         progress: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
         foe: Stats | list[Stats] | None = None,
+        run_id: str | None = None,
     ) -> dict[str, Any]:
+        from game import battle_snapshots
+        from game import battle_tasks
+
         registry = PassiveRegistry()
         start_gold = party.gold
         if foe is None:
@@ -246,6 +250,24 @@ class BattleRoom(Room):
                     snap["owner_id"] = sid
                     snapshots.setdefault(sid, []).append(snap)
             return snapshots
+
+        def _abort(other_id: str) -> None:
+            msg = "concurrent battle detected"
+            snap = {
+                "result": "error",
+                "error": msg,
+                "ended": True,
+                "party": [],
+                "foes": [],
+                "awaiting_next": False,
+                "awaiting_card": False,
+                "awaiting_relic": False,
+                "awaiting_loot": False,
+            }
+            if run_id is not None:
+                battle_snapshots[run_id] = snap
+            battle_snapshots[other_id] = snap
+            raise RuntimeError(msg)
 
         async def _credit_if_dead(foe_obj) -> None:
             nonlocal exp_reward, temp_rdr
@@ -361,6 +383,16 @@ class BattleRoom(Room):
                         # Not enraged yet; ensure percent is zero
                         set_enrage_percent(0.0)
                     await registry.trigger("turn_start", member)
+                    if run_id is not None:
+                        for other_id, task in list(battle_tasks.items()):
+                            if other_id != run_id and not task.done():
+                                other_task = battle_tasks.pop(other_id, None)
+                                current_task = battle_tasks.pop(run_id, None)
+                                if other_task:
+                                    other_task.cancel()
+                                if current_task and not current_task.done():
+                                    current_task.cancel()
+                                _abort(other_id)
                     # Also trigger the enhanced turn_start method with battle context
                     await registry.trigger_turn_start(member, turn=turn, party=combat_party.members, foes=foes, enrage_active=enrage_active)
                     # Emit BUS event for relics that subscribe to turn_start - async for better performance
@@ -600,6 +632,16 @@ class BattleRoom(Room):
                     target_effect = party_effects[pidx]
                     foe_mgr = foe_effects[foe_idx]
                     await registry.trigger("turn_start", acting_foe)
+                    if run_id is not None:
+                        for other_id, task in list(battle_tasks.items()):
+                            if other_id != run_id and not task.done():
+                                other_task = battle_tasks.pop(other_id, None)
+                                current_task = battle_tasks.pop(run_id, None)
+                                if other_task:
+                                    other_task.cancel()
+                                if current_task and not current_task.done():
+                                    current_task.cancel()
+                                _abort(other_id)
                     # Emit BUS event for relics that subscribe to turn_start - async for better performance
                     await BUS.emit_async("turn_start", acting_foe)
                     log.debug("%s turn start targeting %s", acting_foe.id, target.id)
