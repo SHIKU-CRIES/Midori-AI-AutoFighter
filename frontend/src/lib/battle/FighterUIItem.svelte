@@ -109,7 +109,13 @@
             {@const count = getStackCount(p)}
             <div class="passive" class:pips-mode={(p.display === 'pips' && count <= 5)} class:spinner-mode={(p.display === 'spinner')} class:number-mode={(p.display !== 'spinner' && !(p.display === 'pips' && count <= 5))}>
               {#if p.display === 'spinner'}
-                <Spinner style="color: var(--element-color)" size="1.2rem" thickness="3px" />
+                <!-- Element-colored cube loader replacing spinner -->
+                <div class="cube-loader" style={`--cube-color: ${elColor}` } aria-hidden="true">
+                  <div class="cube"></div>
+                  <div class="cube"></div>
+                  <div class="cube"></div>
+                  <div class="cube"></div>
+                </div>
               {:else if p.display === 'pips'}
                 {#if count <= 5}
                   <div class="pips">
@@ -373,6 +379,36 @@
     min-width: 0;
     height: auto;
   }
+  /* Element-colored cube loader for spinner passives */
+  .cube-loader {
+    --cube-size: clamp(8px, calc(var(--portrait-size) * 0.08), 18px);
+    --gap: 3px;
+    width: calc((var(--cube-size) * 2) + (var(--gap) * 2));
+    height: calc((var(--cube-size) * 2) + (var(--gap) * 2));
+    position: relative;
+    transform: rotate(45deg);
+    display: inline-block;
+  }
+  .cube-loader .cube {
+    position: absolute;
+    width: var(--cube-size);
+    height: var(--cube-size);
+    margin: var(--gap);
+    background: var(--cube-color, var(--element-color, #6cf));
+    animation: cube-pulse 1.6s infinite ease-in-out;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+  .cube-loader .cube:nth-child(1) { top: 0; left: 0; animation-delay: 0s; }
+  .cube-loader .cube:nth-child(2) { top: 0; left: calc(var(--cube-size)); animation-delay: 0.15s; }
+  .cube-loader .cube:nth-child(3) { top: calc(var(--cube-size)); left: 0; animation-delay: 0.30s; }
+  .cube-loader .cube:nth-child(4) { top: calc(var(--cube-size)); left: calc(var(--cube-size)); animation-delay: 0.45s; }
+  @keyframes cube-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+  }
+  /* Respect Reduced Motion */
+  :global(.reduced) .cube-loader .cube { animation: none; }
   .passive.number-mode {
     background: rgba(0,0,0,0.35);
     box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--element-color, #6cf) 60%, black);
