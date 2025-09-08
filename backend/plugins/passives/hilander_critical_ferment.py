@@ -84,8 +84,8 @@ class HilanderCriticalFerment:
 
             for effect in ferment_effects:
                 try:
-                    parts = effect.name.split("_")
-                    stack_num = int(parts[3])
+                    parts = effect.name.rsplit("_", 3)
+                    stack_num = int(parts[2])
                     if stack_num > highest_stack:
                         highest_stack = stack_num
                 except (IndexError, ValueError):
