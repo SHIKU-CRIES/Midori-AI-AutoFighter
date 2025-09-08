@@ -54,7 +54,18 @@ async def test_run_battle_handles_defeat_cleanup(app_with_db, monkeypatch):
     start_resp = await client.post("/run/start", json={"party": ["player"]})
     run_id = (await start_resp.get_json())["run_id"]
 
-    await client.post(f"/rooms/{run_id}/battle")
+    # Start battle via UI action endpoint
+    battle_resp = await client.post("/ui/action", json={
+        "action": "room_action",
+        "params": {
+            "room_id": "0",
+            "type": "battle",
+            "action_type": "start"
+        }
+    })
+    assert battle_resp.status_code == 200
+
+    # Wait for battle task to complete
     task = app_module.battle_tasks[run_id]
     await task
 
