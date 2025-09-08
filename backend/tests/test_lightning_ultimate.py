@@ -54,7 +54,7 @@ async def test_lightning_ultimate_applies_random_dots(monkeypatch):
     assert [d.id for d in target.effect_manager.dots] == expected
 
 
-@pytest.mark.asyncio 
+@pytest.mark.asyncio
 async def test_lightning_ultimate_aftertaste_stacks(monkeypatch):
     lightning = Lightning()
     attacker = Actor()
@@ -63,7 +63,7 @@ async def test_lightning_ultimate_aftertaste_stacks(monkeypatch):
     attacker.ultimate_ready = True
     target = Stats()
     target.effect_manager = EffectManager(target)
-    
+
     # Mock apply_damage to avoid async issues
     async def mock_apply_damage(damage, attacker=None, action_name=None):
         pass
@@ -81,20 +81,20 @@ async def test_lightning_ultimate_aftertaste_stacks(monkeypatch):
     simple_calls = []
     def simple_handler(*args):
         simple_calls.append(args)
-    
+
     BUS.subscribe("hit_landed", simple_handler)
     BUS.emit("hit_landed", attacker, target, 10, "attack")
     await asyncio.sleep(0)
     print(f"Simple handler calls: {simple_calls}")
     assert len(simple_calls) > 0  # Verify BUS works
-    
+
     # Now test the ultimate
     await lightning.ultimate(attacker, [], [target])
-    
+
     # The handler should have been set up by the ultimate call
     print(f"Has handler attribute: {hasattr(attacker, '_lightning_aftertaste_handler')}")
     print(f"Stacks: {getattr(attacker, '_lightning_aftertaste_stacks', 'None')}")
-    
+
     BUS.emit("hit_landed", attacker, target, 10, "attack")
     await asyncio.sleep(0)
     assert hits == [1]

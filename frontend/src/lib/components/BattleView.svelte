@@ -306,7 +306,21 @@
                   in:scale={{ duration: reducedMotion ? 0 : 200 }}
                   class="summon-entry"
                 >
-                  <FighterUIItem fighter={summon} position="top" {reducedMotion} size="small" />
+                  <!-- Summon HP bar -->
+                  <div class="summon-hp-bar">
+                    <div class="hp-bar-container">
+                      <div 
+                        class="hp-bar-fill"
+                        style="width: {Math.max(0, Math.min(100, (summon.hp / summon.max_hp) * 100))}%; 
+                               background: {(summon.hp / summon.max_hp) <= 0.3 ? 'linear-gradient(90deg, #ff4444, #ff6666)' : 'linear-gradient(90deg, #44ffff, #66dddd)'}"
+                      ></div>
+                      {#if summon.hp < summon.max_hp}
+                        <div class="hp-text" data-position="outline">{summon.hp}</div>
+                      {/if}
+                    </div>
+                  </div>
+                  
+                  <FighterUIItem fighter={summon} position="top" {reducedMotion} size="medium" />
                 </div>
               {/each}
             </div>
@@ -355,7 +369,21 @@
                 in:scale={{ duration: reducedMotion ? 0 : 200 }}
                 class="summon-entry"
               >
-                <FighterUIItem fighter={summon} position="bottom" {reducedMotion} size="small" />
+                <!-- Summon HP bar -->
+                <div class="summon-hp-bar">
+                  <div class="hp-bar-container">
+                    <div 
+                      class="hp-bar-fill"
+                      style="width: {Math.max(0, Math.min(100, (summon.hp / summon.max_hp) * 100))}%; 
+                             background: {(summon.hp / summon.max_hp) <= 0.3 ? 'linear-gradient(90deg, #ff4444, #ff6666)' : 'linear-gradient(90deg, #44ffff, #66dddd)'}"
+                    ></div>
+                    {#if summon.hp < summon.max_hp}
+                      <div class="hp-text" data-position="outline">{summon.hp}</div>
+                    {/if}
+                  </div>
+                </div>
+                
+                <FighterUIItem fighter={summon} position="bottom" {reducedMotion} size="medium" />
               </div>
             {/each}
           </div>
@@ -576,6 +604,14 @@
 
   .summon-entry {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
+  .summon-hp-bar {
+    width: 96px; /* match medium portrait width */
+    margin-bottom: 0.125rem;
   }
 
   /* Responsive design */

@@ -36,7 +36,7 @@ class Lightning(DamageTypeBase):
 
         # Lightning ultimate deals damage to all enemies and applies DoTs
         base_damage = int(getattr(actor, "atk", 0))
-        
+
         # Apply damage to all enemies
         for enemy in enemies:
             if base_damage > 0:

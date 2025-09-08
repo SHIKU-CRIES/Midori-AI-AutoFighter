@@ -420,6 +420,9 @@ class SummonManager:
                     cls.remove_summon(summon, "battle_end")
                     total_removed += 1
 
+        # Clean up empty entries from dictionaries
+        cls._cleanup_empty_entries()
+
         if total_removed > 0:
             log.debug(f"Cleaned up {total_removed} temporary summons at battle end")
 
@@ -475,6 +478,29 @@ class SummonManager:
         cls._active_summons.clear()
         cls._summon_limits.clear()
         log.debug("SummonManager cleaned up")
+
+    @classmethod
+    def reset_all(cls):
+        """Reset all summon tracking - clears both dictionaries."""
+        cls._active_summons.clear()
+        cls._summon_limits.clear()
+        log.debug("SummonManager reset - all tracking cleared")
+
+    @classmethod
+    def _cleanup_empty_entries(cls):
+        """Remove empty entries from tracking dictionaries."""
+        # Remove summoners with no active summons
+        empty_summoners = [
+            summoner_id for summoner_id, summons in cls._active_summons.items()
+            if not summons
+        ]
+        for summoner_id in empty_summoners:
+            del cls._active_summons[summoner_id]
+            # Also remove from limits if no summons remain
+            cls._summon_limits.pop(summoner_id, None)
+
+        if empty_summoners:
+            log.debug(f"Cleaned up {len(empty_summoners)} empty summon entries")
 
 
 # Initialize the manager when module is imported
