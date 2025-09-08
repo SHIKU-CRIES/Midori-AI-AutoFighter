@@ -16,8 +16,7 @@
   // Element-specific glow effects for different damage types
   $: elementGlow = getElementGlow(fighter.element);
 
-  // Backend-driven choice: numeric actions or pips
-  $: showNumericActions = String(fighter?.actions_display || '').toLowerCase() === 'number';
+  // Old action pips display removed; no numeric/pip actions overlay.
 
   function getStackCount(p) {
     const stacks = p?.stacks;
@@ -99,40 +98,16 @@
         <div class="element-effect {elementGlow.effect}"></div>
       {/if}
     </div>
-    <!-- Overlay UI: pips (left) and ult gauge (bottom-right) -->
+    <!-- Overlay UI: pips (left), passives (middle), ult gauge (right) -->
     <div class="overlay-ui">
-      {#if showNumericActions}
-        <div class="pip-number" title="Actions per turn">
-          {Number(fighter?.actions_per_turn || 1)}
-        </div>
-      {:else}
-        <div class="pip-row" style="--pip-count: {Math.min(Number(fighter?.actions_pips_max || 5), Number(fighter?.actions_per_turn || 1))}">
-          {#each Array(Math.min(Number(fighter?.actions_pips_max || 5), Number(fighter?.actions_per_turn || 1))).fill(0) as _, i}
-            <span class="pip" class:filled={i < Number(fighter?.actions_per_turn || 1)} style="--element-color: {elColor}"></span>
-          {/each}
-        </div>
-      {/if}
-      <div
-        class="ult-gauge"
-        class:ult-ready={Boolean(fighter?.ultimate_ready)}
-        style="--element-color: {elColor}; --p: {Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15))}"
-        aria-label="Ultimate Gauge"
-      >
-        <div class="ult-fill"></div>
-        {#if !fighter?.ultimate_ready}
-          <div class="ult-pulse" style={`animation-duration: ${Math.max(0.4, 1.6 - 1.2 * Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15)))}s`}></div>
-        {/if}
-        {#if fighter?.ultimate_ready}
-          <div class="ult-glow"></div>
-        {/if}
-      </div>
+      <!-- Old "action pips" removed to avoid confusion with passive pips. -->
       {#if (fighter.passives || []).length}
         <div class="passive-indicators" class:reduced={reducedMotion}>
           {#each fighter.passives as p (p.id)}
             {@const count = getStackCount(p)}
-            <div class="passive" class:pips-mode={(p.display === 'pips' && count <= 5)}>
+            <div class="passive" class:pips-mode={(p.display === 'pips' && count <= 5)} class:spinner-mode={(p.display === 'spinner')} class:number-mode={(p.display !== 'spinner' && !(p.display === 'pips' && count <= 5))}>
               {#if p.display === 'spinner'}
-                <Spinner style="color: var(--element-color)" size="0.75rem" thickness="2px" />
+                <Spinner style="color: var(--element-color)" size="1.2rem" thickness="3px" />
               {:else if p.display === 'pips'}
                 {#if count <= 5}
                   <div class="pips">
@@ -155,6 +130,20 @@
           {/each}
         </div>
       {/if}
+      <div
+        class="ult-gauge"
+        class:ult-ready={Boolean(fighter?.ultimate_ready)}
+        style="--element-color: {elColor}; --p: {Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15))}"
+        aria-label="Ultimate Gauge"
+      >
+        <div class="ult-fill"></div>
+        {#if !fighter?.ultimate_ready}
+          <div class="ult-pulse" style={`animation-duration: ${Math.max(0.4, 1.6 - 1.2 * Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15)))}s`}></div>
+        {/if}
+        {#if fighter?.ultimate_ready}
+          <div class="ult-glow"></div>
+        {/if}
+      </div>
     </div>
   </div>
 </div>
@@ -346,8 +335,8 @@
   }
 
   .passive-indicators {
-    --pip-size: clamp(2px, calc(var(--portrait-size) * 0.07), 6px);
-    --pip-gap: clamp(1px, calc(var(--portrait-size) * 0.02), 3px);
+    --pip-size: clamp(4px, calc(var(--portrait-size) * 0.09), 12px);
+    --pip-gap: clamp(2px, calc(var(--portrait-size) * 0.03), 4px);
     display: flex;
     gap: 2px;
     pointer-events: none;
@@ -357,13 +346,13 @@
     box-shadow: var(--glass-shadow);
     border: var(--glass-border);
     backdrop-filter: var(--glass-filter);
-    padding: 0 2px;
-    min-width: 12px;
-    height: 12px;
+    padding: 0 4px;
+    min-width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.6rem;
+    font-size: 0.85rem;
     line-height: 1;
   }
   .passive.pips-mode {
@@ -373,6 +362,24 @@
     padding: 0;
     min-width: 0;
     height: auto;
+  }
+  .passive.spinner-mode {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    min-width: 0;
+    height: auto;
+  }
+  .passive.number-mode {
+    background: rgba(0,0,0,0.35);
+    box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--element-color, #6cf) 60%, black);
+    border: none;
+    backdrop-filter: none;
+    border-radius: 6px;
+    padding: 0 6px;
+    min-width: unset;
+    height: unset;
   }
   .pips { display: flex; gap: var(--pip-gap); line-height: 0; }
   :global(.pip-icon) {
@@ -387,7 +394,13 @@
   :global(.pip-icon.filled) { color: var(--element-color); }
   .passive-indicators.reduced :global(.pip-icon) { transition: none; }
   .passive-indicators.reduced :global(.pip-icon.filled) { transform: none; }
-  .count { font-size: 0.6rem; line-height: 1; }
+  .count {
+    font-size: clamp(0.9rem, calc(var(--portrait-size) * 0.11), 1.2rem);
+    line-height: 1;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+  }
 
   .pip-row {
     display: flex;

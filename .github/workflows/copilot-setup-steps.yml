@@ -51,4 +51,3 @@ jobs:
         working-directory: frontend
         run: |
           bun install
-          bun run build

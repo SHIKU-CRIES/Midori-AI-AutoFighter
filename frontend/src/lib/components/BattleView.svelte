@@ -276,6 +276,7 @@
           <!-- Buffs at the very top -->
           <div class="foe-buffs">
             {#if foe.passives?.length || foe.dots?.length || foe.hots?.length}
+              <!-- Buff bar shows HoTs, DoTs, and Passives -->
               <StatusIcons layout="bar" hots={(foe.hots || []).slice(0, 6)} dots={(foe.dots || []).slice(0, 6)} active_effects={(foe.passives || []).slice(0, 6)} />
             {/if}
           </div>
@@ -341,6 +342,7 @@
         <!-- Buffs under HP bar -->
         <div class="party-buffs">
           {#if member.passives?.length || member.dots?.length || member.hots?.length}
+            <!-- Buff bar shows HoTs, DoTs, and Passives -->
             <StatusIcons layout="bar" hots={(member.hots || []).slice(0, 6)} dots={(member.dots || []).slice(0, 6)} active_effects={(member.passives || []).slice(0, 6)} />
           {/if}
         </div>
