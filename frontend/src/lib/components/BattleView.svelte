@@ -284,6 +284,12 @@
           <!-- HP bar on top -->
           <div class="foe-hp-bar" style={`width: ${getFoeSizePx(foeCount)}px`}>
             <div class="hp-bar-container">
+              {#if Number(foe?.shields || 0) > 0 && Number(foe?.max_hp || 0) > 0}
+                <div
+                  class="overheal-fill"
+                  style={`width: calc(${Math.max(0, Math.min(100, (Number(foe.shields || 0) / Math.max(1, Number(foe.max_hp || 0))) * 100))}% + 5px); left: -5px;`}
+                ></div>
+              {/if}
               <div 
                 class="hp-bar-fill"
                 style="width: {Math.max(0, Math.min(100, (foe.hp / foe.max_hp) * 100))}%; 
@@ -309,6 +315,12 @@
                   <!-- Summon HP bar -->
                   <div class="summon-hp-bar">
                     <div class="hp-bar-container">
+                      {#if Number(summon?.shields || 0) > 0 && Number(summon?.max_hp || 0) > 0}
+                        <div
+                          class="overheal-fill"
+                          style={`width: calc(${Math.max(0, Math.min(100, (Number(summon.shields || 0) / Math.max(1, Number(summon.max_hp || 0))) * 100))}% + 5px); left: -5px;`}
+                        ></div>
+                      {/if}
                       <div 
                         class="hp-bar-fill"
                         style="width: {Math.max(0, Math.min(100, (summon.hp / summon.max_hp) * 100))}%; 
@@ -342,6 +354,12 @@
         <!-- HP bar under the photo -->
         <div class="party-hp-bar">
           <div class="hp-bar-container">
+            {#if Number(member?.shields || 0) > 0 && Number(member?.max_hp || 0) > 0}
+              <div
+                class="overheal-fill"
+                style={`width: calc(${Math.max(0, Math.min(100, (Number(member.shields || 0) / Math.max(1, Number(member.max_hp || 0))) * 100))}% + 5px); left: -5px;`}
+              ></div>
+            {/if}
             <div 
               class="hp-bar-fill"
               style="width: {Math.max(0, Math.min(100, (member.hp / member.max_hp) * 100))}%; 
@@ -372,6 +390,12 @@
                 <!-- Summon HP bar -->
                 <div class="summon-hp-bar">
                   <div class="hp-bar-container">
+                    {#if Number(summon?.shields || 0) > 0 && Number(summon?.max_hp || 0) > 0}
+                      <div
+                        class="overheal-fill"
+                        style={`width: calc(${Math.max(0, Math.min(100, (Number(summon.shields || 0) / Math.max(1, Number(summon.max_hp || 0))) * 100))}% + 5px); left: -5px;`}
+                      ></div>
+                    {/if}
                     <div 
                       class="hp-bar-fill"
                       style="width: {Math.max(0, Math.min(100, (summon.hp / summon.max_hp) * 100))}%; 
@@ -495,6 +519,20 @@
   .hp-bar-fill {
     height: 100%;
     transition: width 0.3s ease, background 0.3s ease;
+    position: relative; /* ensure z-index applies */
+    z-index: 1; /* draw above overheal/shields */
+  }
+
+  /* Overheal/shields visual overlay (similar to legacy FighterPortrait) */
+  .overheal-fill {
+    position: absolute;
+    left: 0;
+    top: -1px; /* slight upward offset */
+    height: calc(100% + 2px);
+    background: rgba(255, 255, 255, 0.92);
+    transition: width 0.3s linear;
+    pointer-events: none;
+    z-index: 0; /* below main HP fill */
   }
 
   .hp-text {
