@@ -119,15 +119,9 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
         snap = battle_snapshots.get(run_id)
         if snap is not None:
             return snap
-        current_idx = int(state.get("current", 0))
-        current_room = rooms[-1].room_type if rooms else None
-        return {
-            "result": "battle",
-            "awaiting_next": True,
-            "current_index": current_idx,
-            "current_room": current_room,
-            "next_room": None,
-        }
+        # If no rooms and no snapshot, the run likely ended or was deleted
+        # Return an error instead of creating a phantom battle
+        raise LookupError("run ended or room out of range")
     node = rooms[state["current"]]
     if node.room_type not in {"battle-weak", "battle-normal"}:
         raise ValueError("invalid room")
@@ -248,6 +242,8 @@ async def shop_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
 
 async def rest_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     state, rooms = await asyncio.to_thread(load_map, run_id)
+    if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
+        raise LookupError("run ended or room out of range")
     node = rooms[state["current"]]
     if node.room_type != "rest":
         raise ValueError("invalid room")
@@ -275,6 +271,8 @@ async def rest_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
 
 async def chat_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
     state, rooms = await asyncio.to_thread(load_map, run_id)
+    if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
+        raise LookupError("run ended or room out of range")
     node = rooms[state["current"]]
     if node.room_type != "chat":
         raise ValueError("invalid room")
@@ -313,6 +311,11 @@ async def boss_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
             start_run_logging(run_id)
     except Exception:
         pass
+    if not rooms or not (0 <= int(state.get("current", 0)) < len(rooms)):
+        snap = battle_snapshots.get(run_id)
+        if snap is not None:
+            return snap
+        raise LookupError("run ended or room out of range")
     node = rooms[state["current"]]
     if node.room_type != "battle-boss-floor":
         raise ValueError("invalid room")
