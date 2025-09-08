@@ -71,6 +71,7 @@ def get_fernet() -> Fernet:
 
 battle_tasks: dict[str, asyncio.Task] = {}
 battle_snapshots: dict[str, dict[str, Any]] = {}
+battle_locks: dict[str, asyncio.Lock] = {}
 
 def _describe_passives(obj: Stats | list[str]) -> list[dict[str, Any]]:
     registry = PassiveRegistry()
