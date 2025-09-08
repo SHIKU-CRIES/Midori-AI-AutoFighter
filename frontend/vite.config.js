@@ -25,16 +25,26 @@ async function discoverBackend() {
     }
   }
 
-  for (const url of services) {
-    // eslint-disable-next-line no-await-in-loop
-    if (await probe(url)) {
-      console.log(`[backend] discovered ${url}, proxying via /api`);
-      return url;
+  // Keep probing until one is found
+  // Small delay helper
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  let attempt = 0;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    for (const url of services) {
+      // eslint-disable-next-line no-await-in-loop
+      if (await probe(url)) {
+        console.log(`[backend] discovered ${url}, proxying via /api`);
+        return url;
+      }
     }
+    attempt += 1;
+    const waitMs = Math.min(2000, 500 + attempt * 250); // 0.5s → 2s backoff
+    console.log(`[backend] not ready yet (attempt ${attempt}), retrying in ${waitMs}ms...`);
+    // eslint-disable-next-line no-await-in-loop
+    await sleep(waitMs);
   }
-  
-  console.log(`[backend] no backend found, defaulting to localhost:59002`);
-  return 'http://localhost:59002';
 }
 
 function backendDiscoveryPlugin() {

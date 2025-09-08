@@ -10,7 +10,9 @@ bun install
 bun dev
 ```
 
-When running via Docker Compose, the `frontend/docker-entrypoint.sh` performs a one-time `bun run build` (if `build/` is missing) before starting the dev server, then waits 25 seconds to allow the backend container to finish booting. This avoids the first page load racing the backend.
+When running via Docker Compose, the `frontend/docker-entrypoint.sh` performs a one-time `bun run build` (if `build/` is missing) before starting the dev server. The build runs after `svelte-kit sync` and sets `VITE_API_BASE=/api` for static output. The entrypoint then waits 5 seconds to give the backend a head start and avoid the first page load racing the backend.
+
+The dev server’s backend discovery now keeps retrying until a backend is reachable (rather than defaulting immediately). The browser also polls `/api-base` until available, so the UI will connect automatically as soon as the backend is up.
 
 The development server runs at `http://localhost:59001` and displays a
 high‑contrast icon grid powered by `lucide-svelte`.
