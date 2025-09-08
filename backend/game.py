@@ -26,6 +26,7 @@ from autofighter.rooms import _scale_stats  # noqa: F401
 from autofighter.rooms import _serialize  # noqa: F401
 from autofighter.save_manager import SaveManager
 from autofighter.stats import Stats
+from autofighter.stats import apply_status_hooks
 from plugins import players as player_plugins
 from plugins.damage_types import load_damage_type
 from plugins.players._base import PlayerBase
@@ -295,6 +296,7 @@ def load_party(run_id: str) -> Party:
                     )
                 except Exception:
                     pass
+                apply_status_hooks(inst)
                 members.append(inst)
                 break
     party = Party(
