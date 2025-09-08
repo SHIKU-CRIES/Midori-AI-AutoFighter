@@ -36,8 +36,10 @@
   // Background image for the interbox (top section)
   // Use special art for specific relics when available.
   let bg = getHourlyBackground();
+  // Allow explicit image override for the glyph background when provided
   $: {
-    const custom = getGlyphArt(type, entry);
+    const explicit = entry?.artUrl || entry?.imageUrl || entry?.img;
+    const custom = explicit || getGlyphArt(type, entry);
     bg = custom || getHourlyBackground();
   }
   // Ambient floating gray marks under the glyph box
