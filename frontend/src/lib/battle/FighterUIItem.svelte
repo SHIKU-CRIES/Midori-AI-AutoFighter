@@ -5,12 +5,17 @@
   export let position = 'bottom'; // 'top' for foes, 'bottom' for party
   export let reducedMotion = false;
   export let size = 'normal'; // 'normal' or 'small'
+  export let sizePx = 0; // optional explicit pixel size override
 
   $: elColor = getElementColor(fighter.element);
-  $: portraitSize = size === 'small' ? '40px' : '60px';
+  // Make party (bottom) portraits larger for readability
+  $: portraitSize = sizePx ? `${sizePx}px` : (size === 'small' ? '48px' : (position === 'bottom' ? '256px' : '96px'));
   
   // Element-specific glow effects for different damage types
   $: elementGlow = getElementGlow(fighter.element);
+
+  // Backend-driven choice: numeric actions or pips
+  $: showNumericActions = String(fighter?.actions_display || '').toLowerCase() === 'number';
   
   function getElementGlow(element) {
     switch(element?.toLowerCase()) {
@@ -74,19 +79,42 @@
   style="--portrait-size: {portraitSize}; --element-color: {elColor}; --element-glow-color: {elementGlow.color}"
 >
   <div class="fighter-portrait">
-    <div 
-      class="portrait-image"
-      class:element-glow={!reducedMotion && !isDead}
-      style="background-image: url({getCharacterImage(fighter)})"
-    >
-      {#if !reducedMotion && !isDead}
+      <div 
+        class="portrait-image"
+        class:element-glow={!reducedMotion && !isDead && Boolean(fighter?.ultimate_ready)}
+        style="background-image: url({getCharacterImage(fighter?.id || fighter?.summon_type || '')})"
+      >
+      {#if !reducedMotion && !isDead && fighter?.ultimate_ready}
         <div class="element-effect {elementGlow.effect}"></div>
       {/if}
     </div>
-    
-    <!-- Element indicator -->
-    <div class="element-indicator" style="background-color: {elColor}">
-      <span class="element-icon">{getElementIcon(fighter.element)}</span>
+    <!-- Overlay UI: pips (left) and ult gauge (bottom-right) -->
+    <div class="overlay-ui">
+      {#if showNumericActions}
+        <div class="pip-number" title="Actions per turn">
+          {Number(fighter?.actions_per_turn || 1)}
+        </div>
+      {:else}
+        <div class="pip-row" style="--pip-count: {Math.min(Number(fighter?.actions_pips_max || 5), Number(fighter?.actions_per_turn || 1))}">
+          {#each Array(Math.min(Number(fighter?.actions_pips_max || 5), Number(fighter?.actions_per_turn || 1))).fill(0) as _, i}
+            <span class="pip" class:filled={i < Number(fighter?.actions_per_turn || 1)} style="--element-color: {elColor}"></span>
+          {/each}
+        </div>
+      {/if}
+      <div 
+        class="ult-gauge"
+        class:ult-ready={Boolean(fighter?.ultimate_ready)}
+        style="--element-color: {elColor}; --p: {Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15))}"
+        aria-label="Ultimate Gauge"
+      >
+        <div class="ult-fill"></div>
+        {#if !fighter?.ultimate_ready}
+          <div class="ult-pulse" style={`animation-duration: ${Math.max(0.4, 1.6 - 1.2 * Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15)))}s`}></div>
+        {/if}
+        {#if fighter?.ultimate_ready}
+          <div class="ult-glow"></div>
+        {/if}
+      </div>
     </div>
   </div>
 </div>
@@ -106,7 +134,7 @@
     border-radius: 8px;
     overflow: hidden;
     background: var(--glass-bg);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid var(--element-color, rgba(255, 255, 255, 0.3));
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
@@ -266,30 +294,142 @@
     }
   }
 
-  .element-indicator {
+  /* Overlay UI inside portrait */
+  .overlay-ui {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
+    bottom: 4px;
+    right: 4px;
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    pointer-events: none;
+  }
+
+  .pip-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-right: 2px;
+  }
+  .pip {
+    width: calc(var(--portrait-size) * 0.05);
+    height: calc(var(--portrait-size) * 0.05);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.25);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+  }
+  .pip.filled { background: color-mix(in oklab, var(--element-color, #6cf) 50%, black); }
+
+  /* Numeric actions indicator (used by Luna, Carly, etc.) */
+  .pip-number {
+    position: relative;
+    min-width: calc(var(--portrait-size) * 0.18);
+    height: calc(var(--portrait-size) * 0.18);
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    font-size: 8px;
+    font-weight: 900;
+    font-size: calc(var(--portrait-size) * 0.10);
+    color: #fff;
+    background: rgba(0,0,0,0.35);
+    box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--element-color, #6cf) 60%, black);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+    pointer-events: none;
   }
 
-  .element-icon {
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  /* Ult gauge: bottom-up fill with subtle wave */
+  .ult-gauge {
+    position: relative;
+    width: calc(var(--portrait-size) * 0.32);
+    height: calc(var(--portrait-size) * 0.32);
+    border-radius: 50%;
+    background: rgba(0,0,0,0.35);
+    overflow: hidden;
+    border: 2px solid color-mix(in oklab, var(--element-color, #6cf) 60%, black);
+  }
+  /* Soft faded-edge backdrop around the ult gauge */
+  .ult-gauge::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.45) 40%,
+      rgba(0, 0, 0, 0.25) 70%,
+      rgba(0, 0, 0, 0.00) 100%
+    );
+    filter: blur(4px);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .ult-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(var(--p, 0) * 100%);
+    /* Solid single-color fill based on the element color */
+    background: color-mix(in oklab, var(--element-color, #6cf) 68%, black);
+  }
+  /* Breathing pulse while charging; speeds up as --p increases */
+  .ult-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle,
+      color-mix(in oklab, var(--element-color, #6cf) 30%, white) 0%,
+      transparent 70%);
+    opacity: 0.15;
+    mix-blend-mode: screen;
+    animation-name: ult-breathe;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes ult-breathe {
+    0%, 100% { transform: scale(0.95); opacity: 0.12; }
+    50% { transform: scale(1.05); opacity: 0.25; }
+  }
+  /* Soft feather at the fill boundary when not full */
+  .ult-gauge:not(.ult-ready)::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 14px;
+    bottom: calc((var(--p, 0) * 100%) - 7px);
+    background: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--element-color, #6cf) 70%, black) 0%,
+      color-mix(in oklab, var(--element-color, #6cf) 35%, black) 70%,
+      rgba(0,0,0,0) 100%
+    );
+    filter: blur(3px);
+    opacity: 0.75;
+    pointer-events: none;
+  }
+  .ult-ready .ult-fill { filter: drop-shadow(0 0 8px var(--element-color)); }
+  .ult-glow {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in oklab, var(--element-color, #6cf) 50%, white) 0%, transparent 70%);
+    opacity: 0.22;
+    animation: ult-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes ult-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.25; }
+    50% { transform: scale(1.08); opacity: 0.45; }
   }
 
   /* Dead state */
   .dead .fighter-portrait {
     opacity: 0.4;
     filter: grayscale(100%);
-    border-color: rgba(255, 0, 0, 0.5);
+    /* Keep outline element-colored even when dead for consistency */
+    border-color: var(--element-color, rgba(255, 255, 255, 0.3));
   }
 
   .dead .element-effect {
@@ -313,27 +453,10 @@
     transform: none;
   }
 
-  /* Position-specific styling */
-  .top .fighter-portrait {
-    border-color: rgba(255, 100, 100, 0.5);
-  }
-
-  .bottom .fighter-portrait {
-    border-color: rgba(100, 255, 100, 0.5);
-  }
+  /* Position-specific styling removed to keep outlines element-colored */
 
   /* Responsive adjustments */
   @media (max-width: 600px) {
-    .element-indicator {
-      width: 14px;
-      height: 14px;
-      font-size: 7px;
-    }
-
-    .small .element-indicator {
-      width: 10px;
-      height: 10px;
-      font-size: 5px;
-    }
+    /* No element indicator; overlay UI scales naturally */
   }
 </style>

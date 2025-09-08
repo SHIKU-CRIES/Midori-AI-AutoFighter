@@ -7,6 +7,7 @@
   import EnrageIndicator from '../battle/EnrageIndicator.svelte';
   import BattleLog from '../battle/BattleLog.svelte';
   import BattleEffects from '../effects/BattleEffects.svelte';
+  import StatusIcons from '../battle/StatusIcons.svelte';
 
   export let runId = '';
   export let framerate = 60;
@@ -18,6 +19,18 @@
   export let showFoes = true;
 
   let foes = [];
+  $: foeCount = (foes || []).length;
+  function getFoeSizePx(count) {
+    const c = Math.max(1, Number(count || 0));
+    if (c <= 1) return 384;
+    if (c === 2) return 320;
+    if (c === 3) return 288;
+    if (c === 4) return 272;
+    if (c === 5) return 256; // match player size
+    if (c === 6) return 224;
+    if (c === 7) return 208;
+    return 192; // 8 or more
+  }
   let timer;
   let logs = [];
   
@@ -51,6 +64,24 @@
     if (l.includes('heal')) return 'heal';
     if (l.includes('damage')) return 'damage';
     return null;
+  }
+
+  // Combine passives, dots, and hots into a single list (cap will be applied in template)
+  function combineStatuses(unit) {
+    if (!unit) return [];
+    const out = [];
+    for (const p of unit.passives || []) {
+      out.push({ kind: 'passive', label: p.id, count: Number(p.stacks || 1), title: p.id });
+    }
+    for (const d of unit.dots || []) {
+      const title = `${d.id} - ${d.damage} dmg for ${d.turns} turns`;
+      out.push({ kind: 'dot', label: d.id, count: Number(d.turns || 1), title });
+    }
+    for (const h of unit.hots || []) {
+      const title = `${h.id} - ${h.healing} heal for ${h.turns} turns`;
+      out.push({ kind: 'hot', label: h.id, count: Number(h.turns || 1), title });
+    }
+    return out;
   }
 
   $: if (logs.length) {
@@ -245,37 +276,12 @@
           <!-- Buffs at the very top -->
           <div class="foe-buffs">
             {#if foe.passives?.length || foe.dots?.length || foe.hots?.length}
-              <div class="status-bar">
-                {#each (foe.passives || []).slice(0, 6) as passive}
-                  <div class="status-icon passive" title={passive.id}>
-                    <span class="status-text">{passive.id}</span>
-                    {#if passive.stacks > 1}
-                      <span class="status-count">{passive.stacks}</span>
-                    {/if}
-                  </div>
-                {/each}
-                {#each (foe.dots || []).slice(0, 6) as dot}
-                  <div class="status-icon dot" title="{dot.id} - {dot.damage} dmg for {dot.turns} turns">
-                    <span class="status-text">{dot.id}</span>
-                    {#if dot.turns > 1}
-                      <span class="status-count">{dot.turns}</span>
-                    {/if}
-                  </div>
-                {/each}
-                {#each (foe.hots || []).slice(0, 6) as hot}
-                  <div class="status-icon hot" title="{hot.id} - {hot.healing} heal for {hot.turns} turns">
-                    <span class="status-text">{hot.id}</span>
-                    {#if hot.turns > 1}
-                      <span class="status-count">{hot.turns}</span>
-                    {/if}
-                  </div>
-                {/each}
-              </div>
+              <StatusIcons layout="bar" hots={(foe.hots || []).slice(0, 6)} dots={(foe.dots || []).slice(0, 6)} active_effects={(foe.passives || []).slice(0, 6)} />
             {/if}
           </div>
           
           <!-- HP bar on top -->
-          <div class="foe-hp-bar">
+          <div class="foe-hp-bar" style={`width: ${getFoeSizePx(foeCount)}px`}>
             <div class="hp-bar-container">
               <div 
                 class="hp-bar-fill"
@@ -283,13 +289,13 @@
                        background: {(foe.hp / foe.max_hp) <= 0.3 ? 'linear-gradient(90deg, #ff4444, #ff6666)' : 'linear-gradient(90deg, #44ffff, #66dddd)'}"
               ></div>
               {#if foe.hp < foe.max_hp}
-                <div class="hp-text">{foe.hp}</div>
+                <div class="hp-text" data-position="outline">{foe.hp}</div>
               {/if}
             </div>
           </div>
           
           <!-- Character photo/portrait -->
-          <FighterUIItem fighter={foe} position="top" {reducedMotion} />
+          <FighterUIItem fighter={foe} position="top" {reducedMotion} sizePx={getFoeSizePx(foeCount)} />
           
           <!-- Summons -->
           {#if foe.summons?.length}
@@ -314,32 +320,8 @@
     {#each party as member (member.id)}
       <div class="party-container">
         <div class="party-main">
-          <!-- Character photo as base -->
+          <!-- Character photo as base (ult & pips overlay handled inside) -->
           <FighterUIItem fighter={member} position="bottom" {reducedMotion} />
-          
-          <!-- Ult gauge as circle to the right -->
-          <div class="ult-gauge-container">
-            <div 
-              class="ult-gauge"
-              class:ult-ready={member.ultimate_ready}
-              style="--element-color: {getElementColor(member.element)}"
-            >
-              <svg class="ult-circle" viewBox="0 0 36 36">
-                <path
-                  class="ult-circle-bg"
-                  d="M18 2.0845 a 15.915 15.915 0 0 1 0 31.83 a 15.915 15.915 0 0 1 0 -31.83"
-                />
-                <path
-                  class="ult-circle-fill"
-                  stroke-dasharray="{Math.max(0, Math.min(100, (member.ultimate_charge / 15) * 100))}, 100"
-                  d="M18 2.0845 a 15.915 15.915 0 0 1 0 31.83 a 15.915 15.915 0 0 1 0 -31.83"
-                />
-              </svg>
-              {#if member.ultimate_ready}
-                <div class="ult-ready-glow"></div>
-              {/if}
-            </div>
-          </div>
         </div>
         
         <!-- HP bar under the photo -->
@@ -351,7 +333,7 @@
                      background: {(member.hp / member.max_hp) <= 0.3 ? 'linear-gradient(90deg, #ff4444, #ff6666)' : 'linear-gradient(90deg, #44ffff, #66dddd)'}"
             ></div>
             {#if member.hp < member.max_hp}
-              <div class="hp-text">{member.hp}</div>
+              <div class="hp-text" data-position="outline">{member.hp}</div>
             {/if}
           </div>
         </div>
@@ -359,32 +341,7 @@
         <!-- Buffs under HP bar -->
         <div class="party-buffs">
           {#if member.passives?.length || member.dots?.length || member.hots?.length}
-            <div class="status-bar">
-              {#each (member.passives || []).slice(0, 6) as passive}
-                <div class="status-icon passive" title={passive.id}>
-                  <span class="status-text">{passive.id}</span>
-                  {#if passive.stacks > 1}
-                    <span class="status-count">{passive.stacks}</span>
-                  {/if}
-                </div>
-              {/each}
-              {#each (member.dots || []).slice(0, 6) as dot}
-                <div class="status-icon dot" title="{dot.id} - {dot.damage} dmg for {dot.turns} turns">
-                  <span class="status-text">{dot.id}</span>
-                  {#if dot.turns > 1}
-                    <span class="status-count">{dot.turns}</span>
-                  {/if}
-                </div>
-              {/each}
-              {#each (member.hots || []).slice(0, 6) as hot}
-                <div class="status-icon hot" title="{hot.id} - {hot.healing} heal for {hot.turns} turns">
-                  <span class="status-text">{hot.id}</span>
-                  {#if hot.turns > 1}
-                    <span class="status-count">{hot.turns}</span>
-                  {/if}
-                </div>
-              {/each}
-            </div>
+            <StatusIcons layout="bar" hots={(member.hots || []).slice(0, 6)} dots={(member.dots || []).slice(0, 6)} active_effects={(member.passives || []).slice(0, 6)} />
           {/if}
         </div>
 
@@ -436,6 +393,7 @@
     gap: 1rem;
     flex-wrap: wrap;
     align-items: flex-start;
+    margin-top: 10vh;
   }
 
   .foe-container {
@@ -452,7 +410,7 @@
   }
 
   .foe-hp-bar {
-    width: 80px;
+    width: 96px; /* match enlarged foe portrait width */
     margin-bottom: 0.25rem;
   }
 
@@ -478,40 +436,7 @@
     gap: 0.5rem;
   }
 
-  /* Ult gauge styling */
-  .ult-gauge-container {
-    position: relative;
-  }
-
-  .ult-gauge {
-    width: 36px;
-    height: 36px;
-    position: relative;
-  }
-
-  .ult-circle {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-  }
-
-  .ult-circle-bg {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.2);
-    stroke-width: 2;
-  }
-
-  .ult-circle-fill {
-    fill: none;
-    stroke: var(--element-color, #4CAF50);
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    transition: stroke-dasharray 0.3s ease;
-  }
-
-  .ult-ready .ult-circle-fill {
-    filter: drop-shadow(0 0 6px var(--element-color));
-  }
+  /* Ult gauge moved into portrait overlay; remove layout container rules */
 
   .ult-ready-glow {
     position: absolute;
@@ -531,10 +456,10 @@
   .hp-bar-container {
     position: relative;
     width: 100%;
-    height: 8px;
+    height: 10px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    overflow: hidden;
+    overflow: visible; /* allow HP text to sit on the outline */
   }
 
   .hp-bar-fill {
@@ -544,18 +469,41 @@
 
   .hp-text {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 0.7rem;
+    right: 4px;
+    top: -1.2em; /* sit on the bar outline, not inside the fill */
+    transform: none;
+    font-size: 1rem; /* larger for readability */
     font-weight: bold;
     color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+    padding: 0 6px;
+    line-height: 1.1;
+    border-radius: 6px; /* shape for backdrop */
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Soft faded-edge backdrop behind the HP number */
+  .hp-text::before {
+    content: '';
+    position: absolute;
+    inset: -12px; /* extend beyond text for softer falloff */
+    border-radius: 16px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.50) 40%,
+      rgba(0, 0, 0, 0.30) 70%,
+      rgba(0, 0, 0, 0.00) 100%
+    );
+    filter: blur(4px);
+    box-shadow: 0 0 16px rgba(0,0,0,0.3);
+    z-index: -1;
     pointer-events: none;
   }
 
   .party-hp-bar {
-    width: 80px;
+    width: 256px; /* match enlarged party portrait width */
   }
 
   /* Status effects */

@@ -78,6 +78,10 @@ class Stats:
     level: int = 1
     exp_multiplier: float = 1.0
     actions_per_turn: int = 1
+    # UI hint: how to display actions indicator ("pips" or "number")
+    actions_display: str = "pips"
+    # UI hint: maximum pips to render when using pips style
+    actions_pips_max: int = 5
 
     # Base stats (immutable during battle, only change on level up or permanent upgrades)
     _base_max_hp: int = field(default=1000, init=False)

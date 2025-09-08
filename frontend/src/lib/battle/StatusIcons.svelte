@@ -52,7 +52,7 @@
   }
   // internal state for bar layout paging
   let startIndex = 0;
-  const pageSize = 3;
+  const pageSize = 6; // Show up to 6 icons max per bar
   $: effects = [
     ...(Array.isArray(hots) ? hots.map((e) => ({ type: 'hot', data: e })) : []),
     ...(Array.isArray(dots) ? dots.map((e) => ({ type: 'dot', data: e })) : []),

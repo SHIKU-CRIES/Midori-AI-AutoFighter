@@ -18,4 +18,5 @@ class Carly(PlayerBase):
         default_factory=lambda: {"atk": "defense"}
     )
     passives: list[str] = field(default_factory=lambda: ["carly_guardians_aegis"])
-
+    # UI hint: show numeric actions indicator
+    actions_display: str = "number"
