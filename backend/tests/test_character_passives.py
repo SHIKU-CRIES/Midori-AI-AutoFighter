@@ -1,8 +1,15 @@
+import asyncio
+import random
+
 import pytest
 
 from autofighter.passives import PassiveRegistry
+from autofighter.stats import BUS
 from autofighter.stats import Stats
+from autofighter.stats import set_battle_active
 from plugins.damage_types.generic import Generic
+from plugins.effects.aftertaste import Aftertaste
+from plugins.passives.hilander_critical_ferment import HilanderCriticalFerment
 from plugins.passives.mezzy_gluttonous_bulwark import MezzyGluttonousBulwark
 
 
@@ -152,6 +159,48 @@ async def test_hilander_critical_ferment_passive():
 
     # Should have gained crit bonuses
     assert len(hilander._active_effects) > initial_effects
+
+
+@pytest.mark.asyncio
+async def test_hilander_aftertaste_and_soft_cap(monkeypatch):
+    """Critical hits trigger Aftertaste and stacking slows after 20."""
+    registry = PassiveRegistry()
+
+    hilander = Stats(hp=1000, damage_type=Generic())
+    target = Stats(hp=1000, damage_type=Generic())
+    hilander.id = "hilander"
+    target.id = "target"
+    hilander.passives = ["hilander_critical_ferment"]
+
+    monkeypatch.setattr(random, "random", lambda: 0.99)
+    for _ in range(25):
+        await registry.trigger("hit_landed", hilander)
+
+    assert HilanderCriticalFerment.get_stacks(hilander) == 20
+
+    monkeypatch.setattr(Aftertaste, "rolls", lambda self: [self.base_pot])
+    damage_before = target.damage_taken
+    set_battle_active(True)
+    BUS.emit("critical_hit", hilander, target, 100, "attack")
+    await asyncio.sleep(0)
+    set_battle_active(False)
+
+    assert target.damage_taken > damage_before
+
+
+@pytest.mark.asyncio
+async def test_hilander_soft_cap_min_chance(monkeypatch):
+    """Soft cap retains a 1% minimum stacking chance."""
+    registry = PassiveRegistry()
+
+    hilander = Stats(hp=1000, damage_type=Generic())
+    hilander.passives = ["hilander_critical_ferment"]
+
+    monkeypatch.setattr(random, "random", lambda: 0.0)
+    for _ in range(60):
+        await registry.trigger("hit_landed", hilander)
+
+    assert HilanderCriticalFerment.get_stacks(hilander) == 60
 
 
 @pytest.mark.asyncio
