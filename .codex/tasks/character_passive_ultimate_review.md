@@ -53,6 +53,7 @@ This task list catalogs each playable character's listed passive ability and ult
 - **Ultimate – Random element**
 - **Tasks**:
   - [x] Confirm stack removal works for both crit rate and damage effects.
+  - [x] Gate Aftertaste triggers behind available Ferment stacks.
   - Decide on a fixed element if random damage type is not desired.
 
 ## Kboshi
