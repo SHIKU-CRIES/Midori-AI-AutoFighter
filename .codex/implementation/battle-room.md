@@ -4,7 +4,8 @@
 
 The room deep-copies the run's party for combat. When the fight ends, remaining
 HP and accumulated experience are synced back so level-ups and damage persist
-into subsequent rooms.
+into subsequent rooms. All summons and related tracking are cleared to prevent
+them from leaking into later encounters.
 
 Each strike rolls the attacker's `effect_hit_rate` against the target's `effect_resistance`. The difference is clamped to zero, jittered by ±10%, and even a failed roll has a 1% floor chance to attach a damage-type-specific DoT scaled to the damage dealt.
 
