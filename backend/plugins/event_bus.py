@@ -53,6 +53,7 @@ class _Bus:
         self._batched_events = defaultdict(list)
         self._batch_timer = None
         self._batch_interval = 0.016  # Batch events for one frame (16ms at 60fps)
+        self._dynamic_batch_interval = True  # Enable adaptive batching
 
     def accept(self, event: str, obj, func: Callable[..., Any]) -> None:
         # Use weak references for objects to prevent memory leaks
@@ -110,20 +111,76 @@ class _Bus:
         self._batched_events[event].append(args)
 
         if self._batch_timer is None:
-            # Schedule batch processing
-            self._batch_timer = asyncio.create_task(self._process_batches())
+            try:
+                # Check if we're in an async context
+                loop = asyncio.get_running_loop()
+                
+                # Adaptive batching: reduce interval under high load
+                if self._dynamic_batch_interval:
+                    total_queued = sum(len(events) for events in self._batched_events.values())
+                    if total_queued > 50:
+                        interval = max(0.005, self._batch_interval * 0.5)  # Faster processing under load
+                    elif total_queued > 100:
+                        interval = 0.001  # Very fast processing under very high load
+                    else:
+                        interval = self._batch_interval
+                else:
+                    interval = self._batch_interval
+
+                # Schedule batch processing
+                self._batch_timer = asyncio.create_task(self._process_batches_with_interval(interval))
+            except RuntimeError:
+                # No event loop running, fall back to immediate sync processing
+                self._process_batches_sync()
+
+    async def _process_batches_with_interval(self, interval: float):
+        """Process batched events with adaptive interval."""
+        await asyncio.sleep(interval)
+        await self._process_batches_internal()
 
     async def _process_batches(self):
-        """Process batched events after a short delay."""
+        """Process batched events with default interval."""
         await asyncio.sleep(self._batch_interval)
+        await self._process_batches_internal()
 
+    async def _process_batches_internal(self):
+        """Internal method to process batched events concurrently."""
+        # Collect all batched events and process them concurrently
+        all_events = []
         for event, args_list in self._batched_events.items():
-            if args_list:
-                # Process all batched events of this type to ensure logging/summary accuracy
-                # This preserves correctness for analytics at the cost of some throughput.
-                for args in args_list:
-                    await self.send_async(event, args)
+            for args in args_list:
+                all_events.append((event, args))
 
+        # Clear batches immediately to avoid interference with new batching
+        self._batched_events.clear()
+        self._batch_timer = None
+
+        if all_events:
+            # Process all events concurrently for much better performance
+            async def process_single_event(event_data):
+                event, args = event_data
+                try:
+                    await self.send_async(event, args)
+                except Exception as e:
+                    log.exception("Error processing batched event %s: %s", event, e)
+
+            # Use gather with limited concurrency to avoid overwhelming the event loop
+            batch_size = 100  # Process in chunks to manage memory and concurrency
+            for i in range(0, len(all_events), batch_size):
+                batch = all_events[i:i + batch_size]
+                await asyncio.gather(*[process_single_event(event_data) for event_data in batch], return_exceptions=True)
+
+    def _process_batches_sync(self):
+        """Fallback sync processing when no event loop is available."""
+        # Process all batched events synchronously
+        for event, args_list in self._batched_events.items():
+            for args in args_list:
+                try:
+                    self.send(event, args)
+                except Exception as e:
+                    log.exception("Error processing sync batched event %s: %s", event, e)
+        
+        # Clear batches
         self._batched_events.clear()
         self._batch_timer = None
 
@@ -209,7 +266,19 @@ class EventBus:
                     if len(call_args) < len(required):
                         call_args.extend([None] * (len(required) - len(call_args)))
 
-                callback(*call_args)
+                # Check if callback is async and handle appropriately
+                if inspect.iscoroutinefunction(callback):
+                    # For async callbacks from sync context, we need to schedule them
+                    try:
+                        loop = asyncio.get_running_loop()
+                        # Create a task for the async callback
+                        loop.create_task(callback(*call_args))
+                    except RuntimeError:
+                        # No event loop running, log warning and skip
+                        log.warning("Async callback %s called from sync context with no event loop", callback)
+                else:
+                    # Sync callback, call directly
+                    callback(*call_args)
             except Exception:
                 log.exception("Error in '%s' subscriber %s", event, callback)
 
@@ -219,8 +288,19 @@ class EventBus:
         bus.ignore(event, callback)
 
     def emit(self, event: str, *args: Any) -> None:
-        """Emit event synchronously. Use emit_async for better performance when possible."""
-        bus.send(event, args)
+        """Emit event. Prefers async emission when enabled for better performance."""
+        if self._prefer_async:
+            try:
+                # Check if we're in an async context
+                asyncio.get_running_loop()
+                # When async is preferred and event loop is available, use batching for better performance
+                bus.send_batched(event, args)
+            except RuntimeError:
+                # No event loop, fall back to sync emission
+                bus.send(event, args)
+        else:
+            # Traditional sync emission
+            bus.send(event, args)
 
     async def emit_async(self, event: str, *args: Any) -> None:
         """Async version of emit that executes callbacks concurrently"""
@@ -241,3 +321,11 @@ class EventBus:
     def set_async_preference(self, prefer_async: bool) -> None:
         """Set whether to prefer async emission when possible."""
         self._prefer_async = prefer_async
+
+    def set_dynamic_batching(self, enabled: bool) -> None:
+        """Enable or disable dynamic batching based on load."""
+        bus._dynamic_batch_interval = enabled
+
+    def set_batch_interval(self, interval: float) -> None:
+        """Set the default batch interval in seconds."""
+        bus._batch_interval = max(0.001, interval)  # Minimum 1ms

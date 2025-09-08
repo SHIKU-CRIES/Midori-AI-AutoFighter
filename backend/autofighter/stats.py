@@ -457,8 +457,8 @@ class Stats:
         amount = max(int(amount), 1)
         if critical and attacker is not None:
             log.info("Critical hit! %s -> %s for %s", attacker.id, self.id, amount)
-            # Emit critical hit event for battle logging
-            BUS.emit("critical_hit", attacker, self, amount, action_name or "attack")
+            # Emit critical hit event for battle logging - async for better performance
+            await BUS.emit_async("critical_hit", attacker, self, amount, action_name or "attack")
         original_amount = amount
         self.last_damage_taken = amount
         self.damage_taken += amount
@@ -468,18 +468,18 @@ class Stats:
             shield_absorbed = min(amount, self.shields)
             self.shields -= shield_absorbed
             amount -= shield_absorbed
-            # Emit shield absorbed event for battle logging
+            # Emit shield absorbed event for battle logging - async for better performance
             if shield_absorbed > 0:
-                BUS.emit("shield_absorbed", self, shield_absorbed, "shield")
+                await BUS.emit_async("shield_absorbed", self, shield_absorbed, "shield")
 
         # Apply remaining damage to HP
         old_hp = self.hp
         if amount > 0:
             self.hp = max(self.hp - amount, 0)
 
-        # Emit kill event if this damage killed the target
+        # Emit kill event if this damage killed the target - async for better performance
         if old_hp > 0 and self.hp <= 0 and attacker is not None:
-            BUS.emit("entity_killed", self, attacker, original_amount, "death", {"killer_id": getattr(attacker, "id", "unknown")})
+            await BUS.emit_async("entity_killed", self, attacker, original_amount, "death", {"killer_id": getattr(attacker, "id", "unknown")})
 
         # Trigger passive registry for damage taken events
         if original_amount > 0:

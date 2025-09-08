@@ -249,8 +249,8 @@ class DamageOverTime:
         if source_type is not dtype:
             dmg = source_type.on_party_dot_damage_taken(dmg, attacker, target)
 
-        # Emit DoT tick event before applying damage
-        BUS.emit("dot_tick", attacker, target, int(dmg), self.name, {
+        # Emit DoT tick event before applying damage - async for better performance
+        await BUS.emit_async("dot_tick", attacker, target, int(dmg), self.name, {
             "dot_id": self.id,
             "remaining_turns": self.turns - 1,
             "original_damage": self.damage
@@ -260,9 +260,9 @@ class DamageOverTime:
         target_hp_before = target.hp
         await target.apply_damage(int(dmg), attacker=attacker)
 
-        # If target died from this DOT, emit a DOT kill event
+        # If target died from this DOT, emit a DOT kill event - async for better performance
         if target_hp_before > 0 and target.hp <= 0:
-            BUS.emit("dot_kill", attacker, target, int(dmg), self.name, {
+            await BUS.emit_async("dot_kill", attacker, target, int(dmg), self.name, {
                 "dot_id": self.id,
                 "dot_name": self.name,
                 "final_damage": int(dmg)
@@ -295,8 +295,8 @@ class HealingOverTime:
         if source_type is not dtype:
             heal = source_type.on_party_hot_heal_received(heal, healer, target)
 
-        # Emit HoT tick event before applying healing
-        BUS.emit("hot_tick", healer, target, int(heal), self.name, {
+        # Emit HoT tick event before applying healing - async for better performance
+        await BUS.emit_async("hot_tick", healer, target, int(heal), self.name, {
             "hot_id": self.id,
             "remaining_turns": self.turns - 1,
             "original_healing": self.healing
@@ -342,8 +342,8 @@ class EffectManager:
         self.dots.append(effect)
         self.stats.dots.append(effect.id)
 
-        # Emit effect applied event
-        BUS.emit("effect_applied", effect.name, self.stats, {
+        # Emit effect applied event - batched for performance
+        BUS.emit_batched("effect_applied", effect.name, self.stats, {
             "effect_type": "dot",
             "effect_id": effect.id,
             "damage": effect.damage,
@@ -366,8 +366,8 @@ class EffectManager:
         self.hots.append(effect)
         self.stats.hots.append(effect.id)
 
-        # Emit effect applied event
-        BUS.emit("effect_applied", effect.name, self.stats, {
+        # Emit effect applied event - batched for performance
+        BUS.emit_batched("effect_applied", effect.name, self.stats, {
             "effect_type": "hot",
             "effect_id": effect.id,
             "healing": effect.healing,
@@ -382,8 +382,8 @@ class EffectManager:
         self.mods.append(effect)
         self.stats.mods.append(effect.id)
 
-        # Emit effect applied event
-        BUS.emit("effect_applied", effect.name, self.stats, {
+        # Emit effect applied event - batched for performance
+        BUS.emit_batched("effect_applied", effect.name, self.stats, {
             "effect_type": "stat_modifier",
             "effect_id": effect.id,
             "turns": effect.turns,
@@ -476,9 +476,9 @@ class EffectManager:
                         break
 
             for eff in expired:
-                # Emit effect expired event
+                # Emit effect expired event - async for better performance
                 from autofighter.stats import BUS
-                BUS.emit("effect_expired", eff.name, self.stats, {
+                await BUS.emit_async("effect_expired", eff.name, self.stats, {
                     "effect_type": "hot" if isinstance(eff, HealingOverTime) else "dot",
                     "effect_id": eff.id,
                     "expired_naturally": True
@@ -527,9 +527,9 @@ class EffectManager:
 
         # Clean up expired modifiers
         for mod in expired_mods:
-            # Emit effect expired event for stat modifiers
+            # Emit effect expired event for stat modifiers - async for better performance
             from autofighter.stats import BUS
-            BUS.emit("effect_expired", mod.name, self.stats, {
+            await BUS.emit_async("effect_expired", mod.name, self.stats, {
                 "effect_type": "stat_modifier",
                 "effect_id": mod.id,
                 "expired_naturally": True
