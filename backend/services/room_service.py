@@ -7,6 +7,7 @@ from typing import Any
 from battle_logging import get_current_run_logger
 from battle_logging import start_run_logging
 from game import _run_battle
+from game import battle_locks
 from game import battle_snapshots
 from game import battle_tasks
 from game import get_save_manager
@@ -159,47 +160,52 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
             "enrage": {"active": False, "stacks": 0},
             "rdr": party.rdr,
         }
-    if run_id in battle_tasks:
+    if run_id in battle_tasks and not battle_tasks[run_id].done():
         snap = battle_snapshots.get(run_id, {"result": "battle"})
         return snap
-    state["battle"] = True
-    await asyncio.to_thread(save_map, run_id, state)
-    room = BattleRoom(node)
-    foes = _build_foes(node, party)
-    for f in foes:
-        _scale_stats(f, node, room.strength)
-    combat_party = Party(
-        members=[copy.deepcopy(m) for m in party.members],
-        gold=party.gold,
-        relics=party.relics,
-        cards=party.cards,
-        rdr=party.rdr,
-    )
-    battle_snapshots[run_id] = {
-        "result": "battle",
-        "party": [_serialize(m) for m in combat_party.members],
-        "foes": [_serialize(f) for f in foes],
-        "party_summons": _collect_summons(combat_party.members),
-        "foe_summons": _collect_summons(foes),
-        "gold": party.gold,
-        "relics": party.relics,
-        "cards": party.cards,
-        "card_choices": [],
-        "relic_choices": [],
-        "enrage": {"active": False, "stacks": 0},
-        "rdr": party.rdr,
-    }
-    state["battle"] = False
-    await asyncio.to_thread(save_map, run_id, state)
+    lock = battle_locks.setdefault(run_id, asyncio.Lock())
+    async with lock:
+        if run_id in battle_tasks and not battle_tasks[run_id].done():
+            return battle_snapshots.get(run_id, {"result": "battle"})
+        state["battle"] = True
+        await asyncio.to_thread(save_map, run_id, state)
+        room = BattleRoom(node)
+        foes = _build_foes(node, party)
+        for f in foes:
+            _scale_stats(f, node, room.strength)
+        combat_party = Party(
+            members=[copy.deepcopy(m) for m in party.members],
+            gold=party.gold,
+            relics=party.relics,
+            cards=party.cards,
+            rdr=party.rdr,
+        )
+        battle_snapshots[run_id] = {
+            "result": "battle",
+            "party": [_serialize(m) for m in combat_party.members],
+            "foes": [_serialize(f) for f in foes],
+            "party_summons": _collect_summons(combat_party.members),
+            "foe_summons": _collect_summons(foes),
+            "gold": party.gold,
+            "relics": party.relics,
+            "cards": party.cards,
+            "card_choices": [],
+            "relic_choices": [],
+            "enrage": {"active": False, "stacks": 0},
+            "rdr": party.rdr,
+        }
+        state["battle"] = False
+        await asyncio.to_thread(save_map, run_id, state)
 
-    async def progress(snapshot: dict[str, dict | list]) -> None:
-        battle_snapshots[run_id] = snapshot
+        async def progress(snapshot: dict[str, dict | list]) -> None:
+            battle_snapshots[run_id] = snapshot
 
-    task = asyncio.create_task(
-        _run_battle(run_id, room, foes, party, data, state, rooms, progress)
-    )
-    battle_tasks[run_id] = task
-    return battle_snapshots[run_id]
+        task = asyncio.create_task(
+            _run_battle(run_id, room, foes, party, data, state, rooms, progress)
+        )
+        battle_tasks[run_id] = task
+        result = battle_snapshots[run_id]
+    return result
 
 
 async def shop_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
@@ -353,45 +359,52 @@ async def boss_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
             "relic_choices": [],
             "enrage": {"active": False, "stacks": 0},
         }
-    state["battle"] = True
-    await asyncio.to_thread(save_map, run_id, state)
-    room = BossRoom(node)
-    party = await asyncio.to_thread(load_party, run_id)
-    foe = _choose_foe(party)
-    _scale_stats(foe, node, room.strength)
-    foes = [foe]
-    combat_party = Party(
-        members=[copy.deepcopy(m) for m in party.members],
-        gold=party.gold,
-        relics=party.relics,
-        cards=party.cards,
-        rdr=party.rdr,
-    )
-    battle_snapshots[run_id] = {
-        "result": "boss",
-        "party": [_serialize(m) for m in combat_party.members],
-        "foes": [_serialize(f) for f in foes],
-        "party_summons": _collect_summons(combat_party.members),
-        "foe_summons": _collect_summons(foes),
-        "gold": party.gold,
-        "relics": party.relics,
-        "cards": party.cards,
-        "card_choices": [],
-        "relic_choices": [],
-        "enrage": {"active": False, "stacks": 0},
-        "rdr": party.rdr,
-    }
-    state["battle"] = False
-    await asyncio.to_thread(save_map, run_id, state)
+    if run_id in battle_tasks and not battle_tasks[run_id].done():
+        return battle_snapshots.get(run_id, {"result": "boss"})
+    lock = battle_locks.setdefault(run_id, asyncio.Lock())
+    async with lock:
+        if run_id in battle_tasks and not battle_tasks[run_id].done():
+            return battle_snapshots.get(run_id, {"result": "boss"})
+        state["battle"] = True
+        await asyncio.to_thread(save_map, run_id, state)
+        room = BossRoom(node)
+        party = await asyncio.to_thread(load_party, run_id)
+        foe = _choose_foe(party)
+        _scale_stats(foe, node, room.strength)
+        foes = [foe]
+        combat_party = Party(
+            members=[copy.deepcopy(m) for m in party.members],
+            gold=party.gold,
+            relics=party.relics,
+            cards=party.cards,
+            rdr=party.rdr,
+        )
+        battle_snapshots[run_id] = {
+            "result": "boss",
+            "party": [_serialize(m) for m in combat_party.members],
+            "foes": [_serialize(f) for f in foes],
+            "party_summons": _collect_summons(combat_party.members),
+            "foe_summons": _collect_summons(foes),
+            "gold": party.gold,
+            "relics": party.relics,
+            "cards": party.cards,
+            "card_choices": [],
+            "relic_choices": [],
+            "enrage": {"active": False, "stacks": 0},
+            "rdr": party.rdr,
+        }
+        state["battle"] = False
+        await asyncio.to_thread(save_map, run_id, state)
 
-    async def progress(snapshot: dict[str, dict | list]) -> None:
-        battle_snapshots[run_id] = snapshot
+        async def progress(snapshot: dict[str, dict | list]) -> None:
+            battle_snapshots[run_id] = snapshot
 
-    task = asyncio.create_task(
-        _run_battle(run_id, room, foes, party, data, state, rooms, progress)
-    )
-    battle_tasks[run_id] = task
-    return battle_snapshots[run_id]
+        task = asyncio.create_task(
+            _run_battle(run_id, room, foes, party, data, state, rooms, progress)
+        )
+        battle_tasks[run_id] = task
+        result = battle_snapshots[run_id]
+    return result
 
 
 async def room_action(run_id: str, room_id: str, action_data: dict[str, Any] | None = None) -> dict[str, Any]:

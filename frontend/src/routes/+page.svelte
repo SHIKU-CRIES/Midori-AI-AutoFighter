@@ -45,6 +45,8 @@
   let haltSync = false;
   // Preserve the last live battle snapshot (with statuses) for review UI
   let lastBattleSnapshot = null;
+  // Prevent overlapping room fetches
+  let enterRoomPending = false;
 
   // Normalize status fields so downstream components can rely on
   // `passives`, `dots`, and `hots` arrays of objects on each fighter.
@@ -663,12 +665,17 @@
   }
 
   async function enterRoom() {
-    stopBattlePoll();
+    if (enterRoomPending) return;
     if (haltSync) return;
     if (!runId) return;
+    enterRoomPending = true;
+    stopBattlePoll();
     // Ensure header reflects the room we are entering now
     currentRoomType = mapRooms?.[currentIndex]?.room_type || currentRoomType || nextRoom;
-    if (!currentRoomType) return;
+    if (!currentRoomType) {
+      enterRoomPending = false;
+      return;
+    }
     let endpoint = currentRoomType;
     if (endpoint.includes('battle')) {
       endpoint = currentRoomType.includes('boss') ? 'boss' : 'battle';
@@ -779,6 +786,8 @@
           error('Failed to enter room.', e);
         }
       }
+    } finally {
+      enterRoomPending = false;
     }
   }
 
