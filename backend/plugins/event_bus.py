@@ -1,6 +1,7 @@
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable
+import contextlib
 import inspect
 import logging
 import time
@@ -111,17 +112,17 @@ class _Bus:
         self._batched_events[event].append(args)
 
         if self._batch_timer is None:
-            try:
+            with contextlib.suppress(RuntimeError):
                 # Check if we're in an async context
-                loop = asyncio.get_running_loop()
-                
+                asyncio.get_running_loop()
+
                 # Adaptive batching: reduce interval under high load
                 if self._dynamic_batch_interval:
                     total_queued = sum(len(events) for events in self._batched_events.values())
-                    if total_queued > 50:
-                        interval = max(0.005, self._batch_interval * 0.5)  # Faster processing under load
-                    elif total_queued > 100:
+                    if total_queued > 100:
                         interval = 0.001  # Very fast processing under very high load
+                    elif total_queued > 50:
+                        interval = max(0.005, self._batch_interval * 0.5)  # Faster processing under load
                     else:
                         interval = self._batch_interval
                 else:
@@ -129,9 +130,10 @@ class _Bus:
 
                 # Schedule batch processing
                 self._batch_timer = asyncio.create_task(self._process_batches_with_interval(interval))
-            except RuntimeError:
-                # No event loop running, fall back to immediate sync processing
-                self._process_batches_sync()
+                return
+
+            log.debug("No running event loop; processing batched events synchronously")
+            self._process_batches_sync()
 
     async def _process_batches_with_interval(self, interval: float):
         """Process batched events with adaptive interval."""
@@ -172,17 +174,23 @@ class _Bus:
 
     def _process_batches_sync(self):
         """Fallback sync processing when no event loop is available."""
-        # Process all batched events synchronously
-        for event, args_list in self._batched_events.items():
-            for args in args_list:
-                try:
-                    self.send(event, args)
-                except Exception as e:
-                    log.exception("Error processing sync batched event %s: %s", event, e)
-        
-        # Clear batches
-        self._batched_events.clear()
-        self._batch_timer = None
+        # Mark processing to avoid re-entrant batch processing
+        self._batch_timer = True
+        try:
+            while self._batched_events:
+                # Take a snapshot to avoid RuntimeError if new events are added
+                events = list(self._batched_events.items())
+                # Clear the original dict; new events will repopulate it
+                self._batched_events.clear()
+                for event, args_list in events:
+                    for args in args_list:
+                        try:
+                            self.send(event, args)
+                        except Exception as e:
+                            log.exception("Error processing sync batched event %s: %s", event, e)
+        finally:
+            # Clear timer when all events have been processed
+            self._batch_timer = None
 
     async def send_async(self, event: str, args) -> None:
         """Async version of send that executes callbacks concurrently with error isolation."""
@@ -269,13 +277,18 @@ class EventBus:
                 # Check if callback is async and handle appropriately
                 if inspect.iscoroutinefunction(callback):
                     # For async callbacks from sync context, we need to schedule them
-                    try:
+                    loop = None
+                    with contextlib.suppress(RuntimeError):
                         loop = asyncio.get_running_loop()
+                    if loop is not None:
                         # Create a task for the async callback
                         loop.create_task(callback(*call_args))
-                    except RuntimeError:
+                    else:
                         # No event loop running, log warning and skip
-                        log.warning("Async callback %s called from sync context with no event loop", callback)
+                        log.warning(
+                            "Async callback %s called from sync context with no event loop",
+                            callback,
+                        )
                 else:
                     # Sync callback, call directly
                     callback(*call_args)
