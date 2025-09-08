@@ -9,9 +9,11 @@
   export let size = 'normal'; // 'normal' or 'small'
   export let sizePx = 0; // optional explicit pixel size override
 
+  // Image prioritization: summon_type first, then id as fallback
+  $: imageId = fighter?.summon_type || fighter?.id || '';
   $: elColor = getElementColor(fighter.element);
   // Make party (bottom) portraits larger for readability
-  $: portraitSize = sizePx ? `${sizePx}px` : (size === 'small' ? '48px' : (position === 'bottom' ? '256px' : '96px'));
+  $: portraitSize = sizePx ? `${sizePx}px` : (size === 'small' ? '48px' : (size === 'medium' ? '96px' : (position === 'bottom' ? '256px' : '96px')));
   
   // Element-specific glow effects for different damage types
   $: elementGlow = getElementGlow(fighter.element);
@@ -92,7 +94,7 @@
       <div 
         class="portrait-image"
         class:element-glow={!reducedMotion && !isDead && Boolean(fighter?.ultimate_ready)}
-        style="background-image: url({getCharacterImage(fighter?.id || fighter?.summon_type || '')})"
+        style="background-image: url({getCharacterImage(imageId)})"
       >
       {#if !reducedMotion && !isDead && fighter?.ultimate_ready}
         <div class="element-effect {elementGlow.effect}"></div>

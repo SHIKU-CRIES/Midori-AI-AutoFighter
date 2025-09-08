@@ -72,6 +72,9 @@ continue this sequence, and the total foe count never exceeds ten.
 Each foe defeated during a battle temporarily raises the party's rare drop rate
 by 55% for that room, increasing gold rewards and element-based item drops.
 
+Luna's foe variant is weighted to appear more often than other characters,
+including in boss encounters when she isn't already in the party.
+
 Foes also expose a `rank` field to describe encounter tier. Supported ranks are
 `normal`, `prime`, `glitched prime`, `boss`, and `glitched boss`. Battle and
 boss room responses include this field for every foe so the frontend can render
