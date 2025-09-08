@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import random
 from typing import TYPE_CHECKING
 from typing import ClassVar
+from weakref import WeakKeyDictionary
 
 from autofighter.stats import BUS
 from autofighter.stats import StatEffect
@@ -20,7 +21,7 @@ class HilanderCriticalFerment:
     name = "Critical Ferment"
     trigger = "hit_landed"  # Triggers when Hilander lands a hit
     stack_display = "pips"  # Unlimited stacks with numeric fallback past five
-    _subscribed: ClassVar[dict[int, bool]] = {}
+    _subscribed: ClassVar[WeakKeyDictionary["Stats", bool]] = WeakKeyDictionary()
 
     async def apply(self, target: "Stats") -> None:
         """Apply crit building mechanics for Hilander."""
@@ -56,15 +57,14 @@ class HilanderCriticalFerment:
         )
         target.add_effect(crit_damage_bonus)
 
-        entity_id = id(target)
-        if not self._subscribed.get(entity_id):
+        if not self._subscribed.get(target):
             def _crit(attacker, crit_target, damage, *_args) -> None:
                 if attacker is target:
                     self.on_critical_hit(attacker, crit_target, damage)
 
             BUS.subscribe("critical_hit", _crit)
             target._hilander_crit_cb = _crit
-            self._subscribed[entity_id] = True
+            self._subscribed[target] = True
     @classmethod
     def on_critical_hit(cls, attacker: "Stats", target: "Stats", damage: int) -> None:
         """Handle critical hit - unleash Aftertaste and consume one stack."""
