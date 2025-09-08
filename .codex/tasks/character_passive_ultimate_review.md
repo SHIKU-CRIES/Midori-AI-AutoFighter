@@ -52,7 +52,7 @@ This task list catalogs each playable character's listed passive ability and ult
   - **Actual**: `HilanderCriticalFerment` adds +5% crit rate and +10% crit damage per hit, drops stack gain odds past 20, and on crit triggers Aftertaste then removes highest stack.
 - **Ultimate – Random element**
 - **Tasks**:
-  - Confirm stack removal works for both crit rate and damage effects.
+  - [x] Confirm stack removal works for both crit rate and damage effects.
   - Decide on a fixed element if random damage type is not desired.
 
 ## Kboshi
