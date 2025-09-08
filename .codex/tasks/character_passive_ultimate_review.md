@@ -7,7 +7,7 @@ This task list catalogs each playable character's listed passive ability and ult
   - **Actual**: `AllyOverload` grants two attacks per turn, builds 10 charge per action with reduced gains past 120, and Overload quadruples attacks while applying damage bonuses and vulnerabilities. Effects rely on manual `_active_effects` management and lack full effect-system integration.
 - **Ultimate – Random element**: Damage type chosen randomly; ultimate depends on rolled element.
 - **Tasks**:
-  - Integrate Overload effect removal with the `EffectManager` instead of directly editing `_active_effects`.
+  - [x] Integrate Overload effect removal with the `EffectManager` instead of directly editing `_active_effects`.
   - Confirm random element persists across sessions or select a fixed element.
 
 ## Becca
@@ -52,7 +52,8 @@ This task list catalogs each playable character's listed passive ability and ult
   - **Actual**: `HilanderCriticalFerment` adds +5% crit rate and +10% crit damage per hit, drops stack gain odds past 20, and on crit triggers Aftertaste then removes highest stack.
 - **Ultimate – Random element**
 - **Tasks**:
-  - Confirm stack removal works for both crit rate and damage effects.
+  - [x] Confirm stack removal works for both crit rate and damage effects.
+  - [x] Gate Aftertaste triggers behind available Ferment stacks.
   - Decide on a fixed element if random damage type is not desired.
 
 ## Kboshi

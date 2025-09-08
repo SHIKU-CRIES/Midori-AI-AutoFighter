@@ -116,11 +116,8 @@ class AllyOverload:
         ]
 
         for effect_name in effects_to_remove:
-            # Find and remove effects (would need effect system integration)
-            target._active_effects = [
-                effect for effect in target._active_effects
-                if effect.name != effect_name
-            ]
+            # Use effect manager helper to remove by name
+            target.remove_effect_by_name(effect_name)
 
         # Reset to base twin dagger attacks
         target.actions_per_turn = 2
