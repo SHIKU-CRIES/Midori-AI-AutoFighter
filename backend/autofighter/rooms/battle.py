@@ -247,13 +247,13 @@ class BattleRoom(Room):
                     snapshots.setdefault(sid, []).append(snap)
             return snapshots
 
-        def _credit_if_dead(foe_obj) -> None:
+        async def _credit_if_dead(foe_obj) -> None:
             nonlocal exp_reward, temp_rdr
             try:
                 fid = getattr(foe_obj, "id", None)
                 if getattr(foe_obj, "hp", 1) <= 0 and fid and fid not in credited_foe_ids:
-                    # Emit kill event
-                    BUS.emit("entity_killed", foe_obj, None, 0, "death", {"victim_type": "foe", "killer_type": "party"})
+                    # Emit kill event - async for better performance
+                    await BUS.emit_async("entity_killed", foe_obj, None, 0, "death", {"victim_type": "foe", "killer_type": "party"})
 
                     exp_reward += foe_obj.level * 12 + 5 * self.node.index
                     temp_rdr += 0.55
@@ -363,8 +363,8 @@ class BattleRoom(Room):
                     await registry.trigger("turn_start", member)
                     # Also trigger the enhanced turn_start method with battle context
                     await registry.trigger_turn_start(member, turn=turn, party=combat_party.members, foes=foes, enrage_active=enrage_active)
-                    # Emit BUS event for relics that subscribe to turn_start
-                    BUS.emit("turn_start", member)
+                    # Emit BUS event for relics that subscribe to turn_start - async for better performance
+                    await BUS.emit_async("turn_start", member)
                     log.debug("%s turn start", member.id)
                     await member.maybe_regain(turn)
                     # If all foes died earlier in this round, stop taking actions
@@ -380,7 +380,7 @@ class BattleRoom(Room):
                     await member_effect.tick(tgt_mgr)
                     # Credit any foes that died due to DoT/HoT ticks
                     for f in foes:
-                        _credit_if_dead(f)
+                        await _credit_if_dead(f)
                     if member.hp <= 0:
                         await registry.trigger("turn_end", member, party=combat_party.members, foes=foes)
                         await asyncio.sleep(0.001)
@@ -488,7 +488,7 @@ class BattleRoom(Room):
                                                                 party=combat_party.members,
                                                                 foes=foes)
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
-                            _credit_if_dead(extra_foe)
+                            await _credit_if_dead(extra_foe)
                     await BUS.emit_async("action_used", member, tgt_foe, dmg)
                     # Trigger action_taken passives for the acting member
                     await registry.trigger("action_taken", member, target=tgt_foe, damage=dmg, party=combat_party.members, foes=foes)
@@ -563,7 +563,7 @@ class BattleRoom(Room):
                         )
                     await _pace(action_start)
                     if tgt_foe.hp <= 0:
-                        _credit_if_dead(tgt_foe)
+                        await _credit_if_dead(tgt_foe)
                         await asyncio.sleep(0.001)
                         if all(f.hp <= 0 for f in foes):
                             break
@@ -600,15 +600,15 @@ class BattleRoom(Room):
                     target_effect = party_effects[pidx]
                     foe_mgr = foe_effects[foe_idx]
                     await registry.trigger("turn_start", acting_foe)
-                    # Emit BUS event for relics that subscribe to turn_start
-                    BUS.emit("turn_start", acting_foe)
+                    # Emit BUS event for relics that subscribe to turn_start - async for better performance
+                    await BUS.emit_async("turn_start", acting_foe)
                     log.debug("%s turn start targeting %s", acting_foe.id, target.id)
                     await acting_foe.maybe_regain(turn)
                     dt = getattr(acting_foe, "damage_type", None)
                     await foe_mgr.tick(target_effect)
                     # Credit any foes that died from effects applied by foes (e.g., bleed)
                     for f in foes:
-                        _credit_if_dead(f)
+                        await _credit_if_dead(f)
                     if acting_foe.hp <= 0:
                         await registry.trigger("turn_end", acting_foe, party=combat_party.members, foes=foes)
                         await asyncio.sleep(0.001)
@@ -710,7 +710,7 @@ class BattleRoom(Room):
         # Emit battle_end for each foe to allow relics/effects to clean up.
         try:
             for foe_obj in foes:
-                BUS.emit("battle_end", foe_obj)
+                await BUS.emit_async("battle_end", foe_obj)
         except Exception:
             pass
 
@@ -852,7 +852,7 @@ class BattleRoom(Room):
         ]
         gold_reward = _calc_gold(self, temp_rdr)
         party.gold += gold_reward
-        BUS.emit("gold_earned", gold_reward)
+        BUS.emit_batched("gold_earned", gold_reward)
         item_base = 1 * temp_rdr
         base_int = int(item_base)
         item_count = max(1, base_int)

@@ -233,8 +233,8 @@ class SummonManager:
         # Add to tracking
         cls._active_summons[summoner_id].append(summon)
 
-        # Emit creation event
-        BUS.emit("summon_created", summoner, summon, source)
+        # Emit creation event - batched for performance
+        BUS.emit_batched("summon_created", summoner, summon, source)
 
         log.info(f"Created {summon_type} summon for {summoner_id} from {source}")
         return summon
@@ -380,7 +380,7 @@ class SummonManager:
         if summoner_id in cls._active_summons:
             if summon in cls._active_summons[summoner_id]:
                 cls._active_summons[summoner_id].remove(summon)
-                BUS.emit("summon_removed", summon, reason)
+                BUS.emit_batched("summon_removed", summon, reason)
                 log.debug(f"Removed summon {summon.id} due to {reason}")
                 return True
         return False
