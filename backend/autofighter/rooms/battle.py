@@ -759,6 +759,8 @@ class BattleRoom(Room):
         foes_data = [_serialize(f) for f in foes]
         party_summons = _collect_summons(party.members)
         foe_summons = _collect_summons(foes)
+        # Ensure summons and related tracking are cleared before exiting the battle
+        SummonManager.cleanup()
         if all(m.hp <= 0 for m in combat_party.members):
             loot = {
                 "gold": 0,

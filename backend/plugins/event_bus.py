@@ -113,8 +113,8 @@ class _Bus:
         if self._batch_timer is None:
             try:
                 # Check if we're in an async context
-                loop = asyncio.get_running_loop()
-                
+                asyncio.get_running_loop()
+
                 # Adaptive batching: reduce interval under high load
                 if self._dynamic_batch_interval:
                     total_queued = sum(len(events) for events in self._batched_events.values())
@@ -179,7 +179,7 @@ class _Bus:
                     self.send(event, args)
                 except Exception as e:
                     log.exception("Error processing sync batched event %s: %s", event, e)
-        
+
         # Clear batches
         self._batched_events.clear()
         self._batch_timer = None
