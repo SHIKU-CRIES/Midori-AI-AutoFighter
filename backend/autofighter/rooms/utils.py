@@ -443,7 +443,11 @@ def _choose_foe(party: Party) -> FoeBase:
             candidates.append(foe_cls)
     if not candidates:
         candidates = [foe_plugins.Slime]
-    foe_cls = random.choice(candidates)
+    weights = [
+        3 if getattr(cls, "id", None) == "luna" and "luna" not in party_ids else 1
+        for cls in candidates
+    ]
+    foe_cls = random.choices(candidates, weights=weights, k=1)[0]
     return foe_cls()
 
 
@@ -505,9 +509,23 @@ def _build_foes(node: MapNode, party: Party) -> list[FoeBase]:
     pool = list(unique_by_id.values())
     if not pool:
         pool = [foe_plugins.Slime]
+    weights = [
+        3 if getattr(cls, "id", None) == "luna" and "luna" not in party_ids else 1
+        for cls in pool
+    ]
 
     k = min(desired, len(pool))
-    chosen_classes = random.sample(pool, k=k)
+    chosen_classes: list[type[FoeBase]] = []
+    candidates = pool[:]
+    candidate_weights = weights[:]
+    for _ in range(k):
+        if not candidates:
+            break
+        cls = random.choices(candidates, weights=candidate_weights, k=1)[0]
+        chosen_classes.append(cls)
+        idx = candidates.index(cls)
+        candidates.pop(idx)
+        candidate_weights.pop(idx)
     foes = [cls() for cls in chosen_classes]
     for foe in foes:
         if "prime" in node.room_type:
