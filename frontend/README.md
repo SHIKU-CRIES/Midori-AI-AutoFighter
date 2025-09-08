@@ -10,6 +10,8 @@ bun install
 bun dev
 ```
 
+When running via Docker Compose, the `frontend/docker-entrypoint.sh` performs a one-time `bun run build` (if `build/` is missing) before starting the dev server, then waits 25 seconds to allow the backend container to finish booting. This avoids the first page load racing the backend.
+
 The development server runs at `http://localhost:59001` and displays a
 high‑contrast icon grid powered by `lucide-svelte`.
 
