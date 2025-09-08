@@ -11,6 +11,7 @@
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';
   import { Circle } from 'lucide-svelte';
+  import Spinner from './Spinner.svelte';
 
   export let party = [];
   export let foes = [];
@@ -198,12 +199,17 @@
                 source: 'passive',
                 stacks: 1,
                 max_stacks: 1,
+                display: 'spinner',
                 overcharged: false
               };
             }
             const stackData = passive.stacks;
             const count = typeof stackData === 'object' ? stackData.mitigation ?? 0 : stackData ?? 1;
             const overcharged = typeof stackData === 'object' && stackData.overcharged;
+            const max = passive.max_stacks ?? count ?? 1;
+            const display = passive.display ?? (
+              passive.max_stacks == null ? 'pips' : passive.max_stacks === 1 ? 'spinner' : 'number'
+            );
             return {
               name: passive.name || passive.id || 'Unknown',
               id: passive.id || passive.name || 'unknown',
@@ -211,7 +217,8 @@
               about: passive.description || 'Passive ability',
               source: 'passive',
               stacks: count,
-              max_stacks: passive.max_stacks ?? count ?? 1,
+              max_stacks: max,
+              display,
               overcharged
             };
           });
@@ -492,14 +499,25 @@
                   <div class="effect-name">
                     {formatEffect(effect)}
                     {#if activeTab === 'passives'}
-                      {#if effect.max_stacks && effect.max_stacks <= 5}
-                        <span class="pips">
-                          {#each Array(effect.max_stacks) as _, i}
-                            <Circle class={`pip-icon${i < effect.stacks ? ' filled' : ''}`} />
-                          {/each}
-                        </span>
-                      {:else if effect.stacks !== undefined && effect.max_stacks}
-                        <span class="pip-count">{effect.stacks}/{effect.max_stacks}</span>
+                      {#if effect.display === 'spinner'}
+                        <Spinner style="color: var(--el-color)" size="0.75rem" thickness="2px" />
+                      {:else if effect.display === 'pips'}
+                        {#if effect.stacks <= 5}
+                          <span class="pips">
+                            {#each Array(effect.stacks) as _, i (i)}
+                              <Circle
+                                class="pip-icon filled"
+                                stroke="none"
+                                fill="currentColor"
+                                aria-hidden="true"
+                              />
+                            {/each}
+                          </span>
+                        {:else}
+                          <span class="pip-count">{effect.stacks}</span>
+                        {/if}
+                      {:else if effect.display === 'number'}
+                        <span class="pip-count">{effect.max_stacks ? `${effect.stacks}/${effect.max_stacks}` : effect.stacks}</span>
                       {/if}
                     {/if}
                   </div>

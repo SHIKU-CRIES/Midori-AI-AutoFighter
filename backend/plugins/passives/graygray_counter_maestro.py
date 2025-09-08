@@ -17,6 +17,7 @@ class GraygrayCounterMaestro:
     name = "Counter Maestro"
     trigger = "damage_taken"  # Triggers when Graygray takes damage
     max_stacks = 50  # Soft cap - show counter attack stacks with diminished returns past 50
+    stack_display = "number"
 
     # Track successful counter attacks for +5% attack stacks
     _counter_stacks: ClassVar[dict[int, int]] = {}

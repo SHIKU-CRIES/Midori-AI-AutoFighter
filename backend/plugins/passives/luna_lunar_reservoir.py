@@ -16,6 +16,7 @@ class LunaLunarReservoir:
     name = "Lunar Reservoir"
     trigger = "action_taken"  # Triggers when Luna takes any action
     max_stacks = 200  # Show charge level 0-200
+    stack_display = "number"
 
     # Class-level tracking of charge points for each entity
     _charge_points: ClassVar[dict[int, int]] = {}
@@ -91,3 +92,8 @@ class LunaLunarReservoir:
     def get_stacks(cls, target: "Stats") -> int:
         """Return current charge points for UI display."""
         return cls._charge_points.get(id(target), 0)
+
+    @classmethod
+    def get_display(cls, target: "Stats") -> str:
+        """Display a spinner when charge is full and draining."""
+        return "spinner" if cls.get_charge(target) >= 200 else "number"

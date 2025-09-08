@@ -16,6 +16,7 @@ class LadyLightRadiantAegis:
     name = "Radiant Aegis"
     trigger = "action_taken"  # Triggers when Lady Light acts (heals)
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of attack bonuses from cleansing DoTs
     _attack_bonuses: ClassVar[dict[int, int]] = {}

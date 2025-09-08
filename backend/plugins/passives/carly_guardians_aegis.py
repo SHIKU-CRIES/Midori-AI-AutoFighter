@@ -17,6 +17,7 @@ class CarlyGuardiansAegis:
     name = "Guardian's Aegis"
     trigger = "turn_start"  # Triggers at start of turn for healing
     max_stacks = 50  # Soft cap - show mitigation stacks with diminished returns past 50
+    stack_display = "number"
 
     # Class-level tracking of mitigation stacks and converted defense stacks
     _mitigation_stacks: ClassVar[dict[int, int]] = {}

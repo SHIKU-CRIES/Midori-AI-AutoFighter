@@ -16,6 +16,7 @@ class MezzyGluttonousBulwark:
     name = "Gluttonous Bulwark"
     trigger = "turn_start"  # Triggers at start of Mezzy's turn
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of siphoned stats per ally
     _siphoned_stats: ClassVar[dict[int, dict[str, int]]] = {}

@@ -17,6 +17,7 @@ class LadyFireAndIceDualityEngine:
     name = "Duality Engine"
     trigger = "action_taken"  # Triggers when Lady Fire and Ice attacks
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of last element used and flux stacks
     _last_element: ClassVar[dict[int, str]] = {}

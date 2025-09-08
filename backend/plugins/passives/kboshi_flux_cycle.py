@@ -22,6 +22,7 @@ class KboshiFluxCycle:
     id = "kboshi_flux_cycle"
     name = "Flux Cycle"
     trigger = "turn_start"  # Triggers at start of Kboshi's turn
+    stack_display = "pips"
 
     # Track accumulated damage bonuses and HoT stacks per entity
     _damage_stacks: ClassVar[dict[int, int]] = {}

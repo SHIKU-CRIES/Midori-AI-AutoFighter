@@ -6,6 +6,7 @@
 <script>
   import { Diamond, Users, Settings, Swords, ArrowLeft, Package, Eye } from 'lucide-svelte';
   import { createEventDispatcher } from 'svelte';
+  import Spinner from './Spinner.svelte';
 
   export let battleActive = false;
   export let viewMode = 'main';
@@ -76,7 +77,7 @@
     {/if}
   </div>
   <div class="snapshot-panel" class:active={snapshotLoading}>
-    <div class="spinner"></div>
+    <Spinner style="color:#fff" size="1rem" thickness="2px" />
     <span>Syncing...</span>
   </div>
 </div>
@@ -89,6 +90,4 @@
   .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .snapshot-panel { display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.7rem; border-radius: 0; background: var(--glass-bg); box-shadow: var(--glass-shadow); border: var(--glass-border); backdrop-filter: var(--glass-filter); opacity: 0; transition: opacity 0.2s; }
   .snapshot-panel.active { opacity: 0.99; }
-  .spinner { width: 1rem; height: 1rem; border: 2px solid #fff; border-right-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
 </style>

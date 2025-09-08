@@ -1,5 +1,7 @@
 <script>
-  import { getCharacterImage, getElementColor, getElementIcon } from '../systems/assetLoader.js';
+  import { Circle as PipCircle } from 'lucide-svelte';
+  import Spinner from '../components/Spinner.svelte';
+  import { getCharacterImage, getElementColor } from '../systems/assetLoader.js';
 
   export let fighter = {};
   export let position = 'bottom'; // 'top' for foes, 'bottom' for party
@@ -16,6 +18,15 @@
 
   // Backend-driven choice: numeric actions or pips
   $: showNumericActions = String(fighter?.actions_display || '').toLowerCase() === 'number';
+
+  function getStackCount(p) {
+    const stacks = p?.stacks;
+    if (typeof stacks === 'object') {
+      if ('count' in stacks) return stacks.count;
+      return stacks.mitigation ?? 0;
+    }
+    return stacks ?? 0;
+  }
   
   function getElementGlow(element) {
     switch(element?.toLowerCase()) {
@@ -101,7 +112,7 @@
           {/each}
         </div>
       {/if}
-      <div 
+      <div
         class="ult-gauge"
         class:ult-ready={Boolean(fighter?.ultimate_ready)}
         style="--element-color: {elColor}; --p: {Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15))}"
@@ -115,6 +126,35 @@
           <div class="ult-glow"></div>
         {/if}
       </div>
+      {#if (fighter.passives || []).length}
+        <div class="passive-indicators" class:reduced={reducedMotion}>
+          {#each fighter.passives as p (p.id)}
+            {@const count = getStackCount(p)}
+            <div class="passive" class:pips-mode={(p.display === 'pips' && count <= 5)}>
+              {#if p.display === 'spinner'}
+                <Spinner style="color: var(--element-color)" size="0.75rem" thickness="2px" />
+              {:else if p.display === 'pips'}
+                {#if count <= 5}
+                  <div class="pips">
+                    {#each Array(count) as _, i (i)}
+                      <PipCircle
+                        class="pip-icon filled"
+                        stroke="none"
+                        fill="currentColor"
+                        aria-hidden="true"
+                      />
+                    {/each}
+                  </div>
+                {:else}
+                  <span class="count">{count}</span>
+                {/if}
+              {:else}
+                <span class="count">{p.max_stacks ? `${count}/${p.max_stacks}` : count}</span>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      {/if}
     </div>
   </div>
 </div>
@@ -304,6 +344,50 @@
     gap: 6px;
     pointer-events: none;
   }
+
+  .passive-indicators {
+    --pip-size: clamp(2px, calc(var(--portrait-size) * 0.07), 6px);
+    --pip-gap: clamp(1px, calc(var(--portrait-size) * 0.02), 3px);
+    display: flex;
+    gap: 2px;
+    pointer-events: none;
+  }
+  .passive {
+    background: var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
+    padding: 0 2px;
+    min-width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    line-height: 1;
+  }
+  .passive.pips-mode {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    min-width: 0;
+    height: auto;
+  }
+  .pips { display: flex; gap: var(--pip-gap); line-height: 0; }
+  :global(.pip-icon) {
+    width: var(--pip-size);
+    height: var(--pip-size);
+    display: block;
+    color: rgba(0, 0, 0, 0.55);
+    stroke: none;
+    fill: currentColor;
+    transition: color 0.2s;
+  }
+  :global(.pip-icon.filled) { color: var(--element-color); }
+  .passive-indicators.reduced :global(.pip-icon) { transition: none; }
+  .passive-indicators.reduced :global(.pip-icon.filled) { transform: none; }
+  .count { font-size: 0.6rem; line-height: 1; }
 
   .pip-row {
     display: flex;

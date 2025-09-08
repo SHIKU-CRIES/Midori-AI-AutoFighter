@@ -1,7 +1,5 @@
 <script>
   // Renders a fighter portrait with HP bar, element chip, and status icons.
-  import { Circle as PipCircle } from 'lucide-svelte';
-
   import { getCharacterImage, getElementColor, getElementIcon } from '../systems/assetLoader.js';
   import StatusIcons from './StatusIcons.svelte';
 
@@ -10,8 +8,13 @@
   // Optional rank identifier; reserved for future badge rendering
   // eslint-disable-next-line no-unused-vars
   export let rankTag = null;
-  function getStackCount(stacks) {
-    return typeof stacks === 'object' ? stacks.mitigation ?? 0 : stacks ?? 0;
+  function getStackCount(p) {
+    const stacks = p?.stacks;
+    if (typeof stacks === 'object') {
+      if ('count' in stacks) return stacks.count;
+      return stacks.mitigation ?? 0;
+    }
+    return stacks ?? 0;
   }
 
   function isOvercharged(stacks) {
@@ -20,7 +23,7 @@
 
   $: passiveTip = (fighter.passives || [])
     .map((p) => {
-      const count = getStackCount(p.stacks);
+      const count = getStackCount(p);
       const oc = isOvercharged(p.stacks);
       return `${p.id}${count > 1 ? ` x${count}` : ''}${oc ? ' (overcharged)' : ''}`;
     })
@@ -127,33 +130,6 @@
         aria-hidden="true"
       />
     </div>
-    {#if (fighter.passives || []).length}
-      <div class="passive-indicators" class:reduced={reducedMotion}>
-        {#each fighter.passives as p (p.id)}
-          {@const count = getStackCount(p.stacks)}
-          {@const oc = isOvercharged(p.stacks)}
-          {@const tip = `${p.id} ${count}${p.max_stacks ? `/${p.max_stacks}` : ''}${oc ? ' (overcharged)' : ''}`}
-          <div class="passive" class:pips-mode={(p.max_stacks && p.max_stacks <= 5)} aria-label={tip} title={tip}>
-            {#if p.max_stacks && p.max_stacks <= 5}
-            <div class="pips">
-                {#each Array(p.max_stacks) as _, i (i)}
-                  <PipCircle
-                    class={`pip-icon${i < count ? ' filled' : ''}`}
-                    stroke="none"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  />
-                {/each}
-              </div>
-            {:else if p.max_stacks}
-              <span class="count">{count > p.max_stacks ? `${count}+` : count}/{p.max_stacks}</span>
-            {:else}
-              <span class="count">{count}</span>
-            {/if}
-          </div>
-        {/each}
-      </div>
-    {/if}
   </div>
   <div class="hp-bar" class:reduced={reducedMotion}>
     {#if ohDispPct > 0}
@@ -288,54 +264,6 @@
   .element-chip.low-contrast .track { stroke: rgba(255, 255, 255, 0.25); }
   :global(.element-icon) { width: calc(var(--chip-size) * 0.5); height: calc(var(--chip-size) * 0.5); display: block; }
 
-  .passive-indicators {
-    position: absolute;
-    bottom: 2px;
-    right: calc(var(--chip-size) + 6px);
-    display: flex;
-    gap: 2px;
-    pointer-events: none;
-  }
-  .passive {
-    background: var(--glass-bg);
-    box-shadow: var(--glass-shadow);
-    border: var(--glass-border);
-    backdrop-filter: var(--glass-filter);
-    padding: 0 2px;
-    min-width: 12px;
-    height: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.6rem;
-    line-height: 1;
-  }
-  /* Pips layout: remove baseline gap and make compact */
-  .pips { display: flex; gap: var(--pip-gap); line-height: 0; }
-  :global(.pip-icon) {
-    width: var(--pip-size);
-    height: var(--pip-size);
-    display: block; /* avoid baseline/descender gap that looks like a bar */
-    color: rgba(0, 0, 0, 0.55);
-    stroke: none; /* fill the lucide circle */
-    fill: currentColor;
-    transition: color 0.2s;
-  }
-  :global(.pip-icon.filled) {
-    color: var(--el-color);
-    /* No scale to keep pips small and tidy */
-  }
-  /* When rendering pips, remove the glass background so no dark bar shows */
-  .passive.pips-mode {
-    background: transparent;
-    box-shadow: none;
-    border: none;
-    padding: 0;
-    min-width: 0;
-    height: auto;
-  }
-  .passive-indicators.reduced :global(.pip-icon) { transition: none; }
-  .passive-indicators.reduced :global(.pip-icon.filled) { transform: none; }
 
   /* Buff Bar (stained-glass style) */
   .buff-bar {
