@@ -5,11 +5,17 @@
 includes an `id`, optional `name`, `stacks`, `turns`, and `source` along
 with `damage` or `healing` values. `StatusIcons.svelte` and
 `FighterPortrait.svelte` consume these arrays to render icons with stack
-counts and tooltips showing effect details. Fighter portraits now also
-display passive stack indicators beside the element chip: passives with
-five or fewer maximum stacks render pips that fill as stacks accrue,
-larger finite stacks show `current/max`, and unlimited stacks display the
-raw count. These indicators respect Reduced Motion settings and expose
+counts and tooltips showing effect details. `FighterUIItem.svelte`
+renders passive stack indicators beside the element chip. Each passive
+descriptor exposes a `display` hint:
+
+- `spinner` passives show an animated spinner.
+- `pips` render up to five filled pips, switching to a numeric count when stacks exceed five.
+- `number` renders the stack count, or `count/max` when a maximum applies.
+
+CombatViewer lists passive effects and applies the same display hints within its status panels.
+
+These indicators respect Reduced Motion settings and expose
 tooltips for screen readers and mouse users. When a fighter's ultimate
 becomes ready, an element-colored pulse briefly radiates from the
 ultimate ring in `FighterPortrait`; this animation is skipped when

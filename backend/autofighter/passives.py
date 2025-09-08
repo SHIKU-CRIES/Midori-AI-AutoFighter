@@ -206,21 +206,47 @@ class PassiveRegistry:
         for pid, count in counts.items():
             cls = self._registry.get(pid)
             if cls is None:
-                info.append({"id": pid, "name": pid, "stacks": count, "max_stacks": count})
+                info.append(
+                    {
+                        "id": pid,
+                        "name": pid,
+                        "stacks": count,
+                        "max_stacks": None,
+                        "display": "spinner",
+                    }
+                )
                 continue
+
             stacks = count
             if hasattr(cls, "get_stacks"):
                 try:
                     stacks = cls.get_stacks(target)  # type: ignore[attr-defined]
                 except Exception:
                     stacks = count
-            max_stacks = getattr(cls, "max_stacks", stacks)
+
+            max_stacks = getattr(cls, "max_stacks", None)
+
+            display = getattr(cls, "stack_display", None)
+            if hasattr(cls, "get_display"):
+                try:
+                    display = cls.get_display(target)  # type: ignore[attr-defined]
+                except Exception:
+                    pass
+            if display is None:
+                if max_stacks == 1:
+                    display = "spinner"
+                elif max_stacks is None or max_stacks <= 5:
+                    display = "pips"
+                else:
+                    display = "number"
+
             info.append(
                 {
                     "id": pid,
                     "name": getattr(cls, "name", pid),
                     "stacks": stacks,
                     "max_stacks": max_stacks,
+                    "display": display,
                 }
             )
         return info

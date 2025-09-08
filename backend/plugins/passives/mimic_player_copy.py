@@ -17,6 +17,7 @@ class MimicPlayerCopy:
     name = "Player Copy"
     trigger = "battle_start"  # Triggers at start of battle to copy player
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of copied stats and passives
     _copied_stats: ClassVar[dict[int, dict]] = {}  # entity_id -> copied_stats

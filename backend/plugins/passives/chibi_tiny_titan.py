@@ -16,6 +16,7 @@ class ChibiTinyTitan:
     name = "Tiny Titan"
     trigger = "damage_taken"  # Triggers when Chibi takes damage to increase Vitality
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of accumulated Vitality bonuses
     _vitality_bonuses: ClassVar[dict[int, float]] = {}

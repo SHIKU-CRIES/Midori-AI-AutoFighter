@@ -14,6 +14,7 @@ class HilanderCriticalFerment:
     id = "hilander_critical_ferment"
     name = "Critical Ferment"
     trigger = "hit_landed"  # Triggers when Hilander lands a hit
+    stack_display = "pips"  # Unlimited stacks with numeric fallback past five
 
     async def apply(self, target: "Stats") -> None:
         """Apply crit building mechanics for Hilander."""

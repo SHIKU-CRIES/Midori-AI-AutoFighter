@@ -16,6 +16,7 @@ class LadyDarknessEclipsingVeil:
     name = "Eclipsing Veil"
     trigger = "turn_start"  # Triggers at start of turn for DoT management
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of attack bonuses from debuff resistance
     _attack_bonuses: ClassVar[dict[int, int]] = {}

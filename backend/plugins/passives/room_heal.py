@@ -8,6 +8,7 @@ class RoomHeal:
     name = "Room Heal"
     trigger = "battle_end"
     amount = 1
+    stack_display = "pips"
 
     async def apply(self, target, **kwargs) -> None:
         # Support monkeypatching: if class attribute differs from original default, use class attribute

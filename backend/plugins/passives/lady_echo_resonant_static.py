@@ -17,6 +17,7 @@ class LadyEchoResonantStatic:
     name = "Resonant Static"
     trigger = "hit_landed"  # Triggers when Lady Echo lands a hit
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of current target and consecutive hits
     _current_target: ClassVar[dict[int, int]] = {}  # entity_id -> target_id

@@ -18,6 +18,7 @@ class AdvancedCombatSynergy:
     name = "Advanced Combat Synergy"
     trigger = "hit_landed"  # Primary trigger
     max_stacks = 3
+    stack_display = "pips"
 
     # Class-level state for tracking synergy stacks per entity
     _synergy_stacks: ClassVar[dict[int, int]] = {}

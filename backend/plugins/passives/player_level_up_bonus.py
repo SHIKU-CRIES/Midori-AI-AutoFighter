@@ -15,6 +15,7 @@ class PlayerLevelUpBonus:
     name = "Enhanced Growth"
     trigger = "level_up"  # Triggers when Player levels up
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     async def apply(self, target: "Stats", new_level: int) -> None:
         """Apply enhanced level-up gains for Player (1.35x multiplier).

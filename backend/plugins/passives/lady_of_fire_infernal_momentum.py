@@ -16,6 +16,7 @@ class LadyOfFireInfernalMomentum:
     name = "Infernal Momentum"
     trigger = "damage_taken"  # Triggers when Lady of Fire takes damage
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     async def apply(
         self,

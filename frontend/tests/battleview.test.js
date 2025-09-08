@@ -6,6 +6,7 @@ const battleView = readFileSync(join(import.meta.dir, '../src/lib/BattleView.sve
 const enrageIndicator = readFileSync(join(import.meta.dir, '../src/lib/battle/EnrageIndicator.svelte'), 'utf8');
 const statusIcons = readFileSync(join(import.meta.dir, '../src/lib/battle/StatusIcons.svelte'), 'utf8');
 const fighterPortrait = readFileSync(join(import.meta.dir, '../src/lib/battle/FighterPortrait.svelte'), 'utf8');
+const fighterUIItem = readFileSync(join(import.meta.dir, '../src/lib/battle/FighterUIItem.svelte'), 'utf8');
 
 describe('BattleView enrage handling', () => {
   test('uses EnrageIndicator component', () => {
@@ -59,8 +60,14 @@ describe('BattleView layout and polling', () => {
   });
 
   test('displays passive stack indicators', () => {
-    expect(fighterPortrait).toContain('fighter.passives');
-    expect(fighterPortrait).toContain('passive-indicators');
+    expect(fighterUIItem).toContain('fighter.passives');
+    expect(fighterUIItem).toContain('passive-indicators');
+  });
+
+  test('supports spinner, pips, and numeric passive displays', () => {
+    expect(fighterUIItem).toContain("p.display === 'spinner'");
+    expect(fighterUIItem).toContain("p.display === 'pips'");
+    expect(fighterUIItem).toContain("p.display === 'number'");
   });
 
   test('uses normalized element for portraits', () => {

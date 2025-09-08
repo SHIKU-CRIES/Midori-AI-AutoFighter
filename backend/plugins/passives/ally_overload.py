@@ -16,6 +16,7 @@ class AllyOverload:
     name = "Overload"
     trigger = "action_taken"  # Triggers when Ally takes any action
     max_stacks = 120  # Soft cap - show charge level with diminished returns past 120
+    stack_display = "number"
 
     # Class-level tracking of overload charge and stance for each entity
     _overload_charge: ClassVar[dict[int, int]] = {}

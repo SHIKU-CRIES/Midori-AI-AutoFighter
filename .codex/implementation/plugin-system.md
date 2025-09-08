@@ -25,6 +25,10 @@ The following categories are bundled:
 - `plugin_type` – category string used by the loader when registering the class【F:plugins/plugin_loader.py†L67-L72】
 - `id` *(optional)* – unique identifier; defaults to the class name【F:plugins/plugin_loader.py†L70-L72】
 - Category-specific methods (`attack`, `apply`, `tick`, etc.) invoked by game systems
+- Passive plugins expose stack metadata with `stack_display`:
+  - `spinner` for single-stack or always-active effects (`max_stacks == 1`)
+  - `pips` for passives without a stack limit or with a `max_stacks` cap of five or fewer
+  - `number` for passives with a numeric `max_stacks` cap above five
 - During discovery the loader injects the event bus as `bus` on each class【F:plugins/plugin_loader.py†L67-L74】
 
 ## Event Bus Integration

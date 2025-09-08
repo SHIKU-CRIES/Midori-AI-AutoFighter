@@ -10,6 +10,7 @@ class AttackUp:
     name = "Attack Up"
     trigger = "battle_start"
     amount = 5
+    stack_display = "pips"
 
     async def apply(self, target, **kwargs) -> None:
         stack_index = kwargs.get('stack_index', 0)

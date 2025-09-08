@@ -19,6 +19,7 @@ class BeccaMenagerieBond:
     name = "Menagerie Bond"
     trigger = "action_taken"  # Triggers when Becca acts
     max_stacks = 1  # Only one instance per character
+    stack_display = "spinner"
 
     # Class-level tracking of summon state and spirit bonuses
     _summon_cooldown: ClassVar[dict[int, int]] = {}  # entity_id -> turns_remaining

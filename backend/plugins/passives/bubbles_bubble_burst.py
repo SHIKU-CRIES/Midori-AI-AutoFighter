@@ -20,6 +20,7 @@ class BubblesBubbleBurst:
     name = "Bubble Burst"
     trigger = "turn_start"  # Triggers at start of Bubbles' turn
     max_stacks = 20  # Soft cap - show attack buff stacks with diminished returns past 20
+    stack_display = "number"
 
     # Track bubble stacks per enemy target
     _bubble_stacks: ClassVar[dict[int, dict[int, int]]] = {}  # bubbles_id -> {target_id -> stacks}
