@@ -3,6 +3,7 @@ import random
 from typing import TYPE_CHECKING
 from typing import ClassVar
 from weakref import WeakKeyDictionary
+from weakref import ref
 
 from autofighter.stats import BUS
 from autofighter.stats import StatEffect
@@ -58,9 +59,15 @@ class HilanderCriticalFerment:
         target.add_effect(crit_damage_bonus)
 
         if not self._subscribed.get(target):
+            target_ref = ref(target)
+
             def _crit(attacker, crit_target, damage, *_args) -> None:
-                if attacker is target:
-                    self.on_critical_hit(attacker, crit_target, damage)
+                tgt = target_ref()
+                if tgt is None:
+                    BUS.unsubscribe("critical_hit", _crit)
+                    return
+                if attacker is tgt:
+                    self.on_critical_hit(tgt, crit_target, damage)
 
             BUS.subscribe("critical_hit", _crit)
             target._hilander_crit_cb = _crit
@@ -68,37 +75,45 @@ class HilanderCriticalFerment:
     @classmethod
     def on_critical_hit(cls, attacker: "Stats", target: "Stats", damage: int) -> None:
         """Handle critical hit - unleash Aftertaste and consume one stack."""
-        base = int(damage * 0.25)
-        if base > 0:
-            effect = Aftertaste(base_pot=base)
-            safe_async_task(effect.apply(attacker, target))
-
         ferment_effects = [
             effect
             for effect in attacker._active_effects
             if effect.name.startswith(f"{cls.id}_crit_stack")
         ]
+        if not ferment_effects:
+            return
 
-        if ferment_effects:
-            highest_stack = 0
+        base = int(damage * 0.25)
+        if base > 0:
+            effect = Aftertaste(base_pot=base)
+            safe_async_task(effect.apply(attacker, target))
 
-            for effect in ferment_effects:
-                try:
-                    parts = effect.name.rsplit("_", 3)
-                    stack_num = int(parts[2])
-                    if stack_num > highest_stack:
-                        highest_stack = stack_num
-                except (IndexError, ValueError):
-                    continue
+        highest_stack = 0
 
-            attacker._active_effects = [
-                effect
-                for effect in attacker._active_effects
-                if not (
-                    effect.name == f"{cls.id}_crit_stack_{highest_stack}_rate"
-                    or effect.name == f"{cls.id}_crit_stack_{highest_stack}_damage"
-                )
-            ]
+        for effect in ferment_effects:
+            try:
+                parts = effect.name.rsplit("_", 3)
+                stack_num = int(parts[2])
+                if stack_num > highest_stack:
+                    highest_stack = stack_num
+            except (IndexError, ValueError):
+                continue
+
+        attacker._active_effects = [
+            effect
+            for effect in attacker._active_effects
+            if not (
+                effect.name == f"{cls.id}_crit_stack_{highest_stack}_rate"
+                or effect.name == f"{cls.id}_crit_stack_{highest_stack}_damage"
+            )
+        ]
+
+        if cls.get_stacks(attacker) == 0:
+            cb = getattr(attacker, "_hilander_crit_cb", None)
+            if cb:
+                BUS.unsubscribe("critical_hit", cb)
+                delattr(attacker, "_hilander_crit_cb")
+            cls._subscribed.pop(attacker, None)
 
     @classmethod
     def get_stacks(cls, target: "Stats") -> int:
