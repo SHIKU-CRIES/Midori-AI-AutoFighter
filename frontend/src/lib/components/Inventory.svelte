@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { CreditCard, Gem, Hammer, Box } from 'lucide-svelte';
+  import { CreditCard, Gem, Hammer, Box, RotateCcw } from 'lucide-svelte';
   import { getCardCatalog, getRelicCatalog, getGacha } from '../systems/api.js';
   import { stackItems, formatName } from '../systems/craftingUtils.js';
   import CardArt from './CardArt.svelte';
@@ -35,6 +35,26 @@
     }
     metaReady = true;
   });
+
+  async function reloadInventory() {
+    try {
+      const [cardList, relicList, gacha] = await Promise.all([
+        getCardCatalog(),
+        getRelicCatalog(),
+        getGacha()
+      ]);
+      cardMeta = Object.fromEntries(cardList.map(c => [c.id, c]));
+      relicMeta = Object.fromEntries(relicList.map(r => [r.id, r]));
+      materials = stackItems(gacha?.items || {});
+      // Clean up selection if item no longer present
+      if (selectedItem) {
+        const id = selectedItem.id;
+        if (selectedItem.type === 'card' && !cardMeta[id]) selectedItem = null;
+        if (selectedItem.type === 'relic' && !relicMeta[id]) selectedItem = null;
+        if (selectedItem.type === 'material' && !(id in materials)) selectedItem = null;
+      }
+    } catch {}
+  }
 
   // Helper functions
   const count = (arr) => {
@@ -207,6 +227,12 @@
         Relics ({relicCount})
       </button>
     </div>
+    <div class="header-actions">
+      <button class="reload-btn" on:click={reloadInventory} title="Reload inventory">
+        <RotateCcw size={16} />
+        Reload
+      </button>
+    </div>
   </div>
 
   <div class="inventory-body">
@@ -348,6 +374,9 @@
   .inventory-header {
     padding: 1rem;
     border-bottom: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .tab-row {
@@ -388,6 +417,21 @@
     flex: 1;
     min-height: 0;
   }
+
+  .header-actions { display:flex; align-items:center; }
+  .reload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.55rem 0.8rem;
+    color: #fff;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .reload-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(120,180,255,0.5); }
+  .reload-btn:active { transform: translateY(1px); }
 
   .item-grid-container {
     flex: 1;

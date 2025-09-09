@@ -378,37 +378,52 @@
     padding: 0;
     min-width: 0;
     height: auto;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
-  /* Element-colored cube loader for spinner passives */
+  /* Element-colored stained-glass cube loader for spinner passives */
   .cube-loader {
-    --cube-size: clamp(8px, calc(var(--portrait-size) * 0.08), 18px);
-    --gap: 3px;
-    width: calc((var(--cube-size) * 2) + (var(--gap) * 2));
-    height: calc((var(--cube-size) * 2) + (var(--gap) * 2));
+    --cube-size: clamp(6px, calc(var(--portrait-size) * 0.065), 14px);
+    --orbit: calc(var(--cube-size) * 0.9); /* small radius, keep tight */
+    width: calc(var(--orbit) * 2 + var(--cube-size));
+    height: calc(var(--orbit) * 2 + var(--cube-size));
     position: relative;
-    transform: rotate(45deg);
     display: inline-block;
   }
   .cube-loader .cube {
     position: absolute;
+    top: 50%;
+    left: 50%;
     width: var(--cube-size);
     height: var(--cube-size);
-    margin: var(--gap);
-    background: var(--cube-color, var(--element-color, #6cf));
-    animation: cube-pulse 1.6s infinite ease-in-out;
-    border-radius: 2px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    margin-left: calc(var(--cube-size) / -2);
+    margin-top: calc(var(--cube-size) / -2);
+    border-radius: 6px; /* remove hard edges */
+    /* Soft stained-glass tint; no hard borders, no backdrop blur */
+    background:
+      radial-gradient(60% 60% at 30% 30%,
+        color-mix(in oklab, var(--cube-color, #6cf) 85%, white) 0%,
+        color-mix(in oklab, var(--cube-color, #6cf) 60%, black) 90%,
+        rgba(0,0,0,0) 100%),
+      radial-gradient(70% 70% at 70% 70%,
+        rgba(255,255,255,0.20) 0%,
+        rgba(255,255,255,0.00) 70%);
+    opacity: 0.9;
+    transform-origin: center;
+    animation: orbit-slow 24s linear infinite;
+    pointer-events: none;
   }
-  .cube-loader .cube:nth-child(1) { top: 0; left: 0; animation-delay: 0s; }
-  .cube-loader .cube:nth-child(2) { top: 0; left: calc(var(--cube-size)); animation-delay: 0.15s; }
-  .cube-loader .cube:nth-child(3) { top: calc(var(--cube-size)); left: 0; animation-delay: 0.30s; }
-  .cube-loader .cube:nth-child(4) { top: calc(var(--cube-size)); left: calc(var(--cube-size)); animation-delay: 0.45s; }
-  @keyframes cube-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.35); }
+  .cube-loader .cube:nth-child(1) { --angle: 0deg; }
+  .cube-loader .cube:nth-child(2) { --angle: 90deg; }
+  .cube-loader .cube:nth-child(3) { --angle: 180deg; }
+  .cube-loader .cube:nth-child(4) { --angle: 270deg; }
+  @keyframes orbit-slow {
+    from { transform: rotate(var(--angle)) translate(var(--orbit)) rotate(calc(-1 * var(--angle))); }
+    to   { transform: rotate(calc(var(--angle) + 360deg)) translate(var(--orbit)) rotate(calc(-1 * (var(--angle) + 360deg))); }
   }
   /* Respect Reduced Motion */
   :global(.reduced) .cube-loader .cube { animation: none; }
+  .passive-indicators.reduced .cube-loader .cube { animation: none; }
   .passive.number-mode {
     background: rgba(0,0,0,0.35);
     box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--element-color, #6cf) 60%, black);
