@@ -31,9 +31,13 @@
 
   // Starfield background tied to current preview element color
   function rand(min, max) { return Math.random() * (max - min) + min; }
-  function spawnStar(color) {
-    // Default to current starColor if none provided
-    const c = color || starColor || '#88a';
+  const starElements = ['fire','ice','lightning','light','dark','wind'];
+  function randomElementColor() {
+    const el = starElements[Math.floor(Math.random() * starElements.length)];
+    try { return getElementColor(el); } catch { return '#88a'; }
+  }
+  function spawnStar() {
+    const c = randomElementColor();
     return {
       left: Math.random() * 100,
       size: rand(3, 6),
@@ -43,10 +47,10 @@
       color: c
     };
   }
-  function makeStars(count, color) {
-    return Array.from({ length: count }, () => spawnStar(color));
+  function makeStars(count) {
+    return Array.from({ length: count }, () => spawnStar());
   }
-  let density = 140;
+  $: density = reducedMotion ? 60 : 240;
   let stars = [];
   $: currentElementName = (() => {
     const cur = roster.find(r => r.id === previewId);
@@ -65,10 +69,19 @@
   }
   let fadeTimer;
 
-  // Initialize stars once we have a color (delay spawn until element known)
-  $: if (stars.length === 0 && starColor) {
-    stars = makeStars(density, starColor);
+  // Initialize stars regardless of element; each star uses a random element color
+  $: if (stars.length === 0) {
+    stars = makeStars(density);
     fadePulse(260);
+  }
+
+  // Adjust star count when density changes
+  $: if (stars.length && stars.length !== density) {
+    if (density > stars.length) {
+      stars = stars.concat(makeStars(density - stars.length));
+    } else if (density < stars.length) {
+      stars = stars.slice(0, density);
+    }
   }
 
   // Gradual color transition: on change, slowly replace existing stars
@@ -96,7 +109,7 @@
       for (let k = 0; k < n; k++) {
         const idx = pool.pop();
         if (idx == null) break;
-        // Use the latest starColor at replacement time
+        // Replace with a fresh star using a random element color
         stars[idx] = spawnStar();
       }
       stars = stars.slice();
@@ -144,6 +157,7 @@
         .map((p) => ({
           id: p.id,
           name: p.name,
+          about: p.about,
           img: getCharacterImage(p.id, p.is_player) || getRandomFallback(),
           owned: p.owned,
           is_player: p.is_player,
@@ -268,6 +282,8 @@
   .pressure-inline { display:flex; align-items:center; gap:0.4rem; padding: 0.2rem 0.4rem; }
   .pressure-inline-label { color:#fff; opacity:0.85; font-size: 0.9rem; margin-right: 0.1rem; }
   .party-actions-inline .wide { flex: 1; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.5); color:#fff; padding: 0.45rem 0.8rem; }
+  /* Match Add/Remove party hover style for Start/Save/Cancel */
+  .party-actions-inline .wide:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
 
   /* Falling starfield */
   .stars { position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:-1; opacity: 0.55; transition: opacity 220ms ease; }

@@ -119,8 +119,10 @@
   $: previewChar = roster.find(r => r.id === previewId);
   $: isPlayer = !!previewChar?.is_player;
 
-  // Load upgrade data when character changes
-  $: if (previewChar && lastPreviewId !== previewId) {
+  // Load upgrade data when the previewed character changes (robust, independent of editor flow)
+  let lastUpgradeForId = null;
+  $: if (previewChar?.id && lastUpgradeForId !== previewChar.id && !loadingUpgrade) {
+    lastUpgradeForId = previewChar.id;
     loadUpgradeData();
   }
 
@@ -311,7 +313,6 @@
           aria-hidden="true" />
       </div>
       {#if sel.about}
-        <div class="inline-divider" aria-hidden="true"></div>
         <div class="char-about">{sel.about}</div>
         <div class="inline-divider" aria-hidden="true"></div>
       {/if}
@@ -377,7 +378,7 @@
           <!-- Upgrade button for spending 4-star items (always visible; disabled when unavailable) -->
           <div class="upgrade-section">
             <button class="upgrade-btn" on:click={handleUpgrade} disabled={!canUpgrade || loadingUpgrade}>
-              Upgrade (+1 Point Cap)
+              Upgrade
             </button>
             <p class="upgrade-hint">
               {#if loadingUpgrade}
@@ -450,15 +451,17 @@
   margin-top: 0.25rem;
 }
 button.confirm {
-  border: 1.5px solid #fff;
-  background: transparent;
+  background: rgba(0,0,0,0.5);
   color: #fff;
-  padding: 0.12rem 0.4rem;
+  border: 1px solid rgba(255,255,255,0.35);
+  padding: 0.45rem 0.8rem;
   align-self: flex-end;
   font-size: 0.95rem;
   min-height: 28px;
-  border-radius: 6px;
+  border-radius: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
+button.confirm:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
 .stats-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -499,22 +502,21 @@ button.confirm {
 }
 
 .upgrade-btn {
-  background: rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.5);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.30);
-  padding: 0.45rem 0.75rem;
-  border-radius: 6px;
-  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.35);
+  padding: 0.45rem 0.8rem;
+  border-radius: 0;
+  font-weight: 400;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  transition: background 0.15s ease, border-color 0.15s ease;
   align-self: flex-start;
 }
 
 .upgrade-btn:hover:not(:disabled) {
-  background: rgba(255,255,255,0.15);
-  border-color: rgba(255,255,255,0.45);
-  transform: translateY(-1px);
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.5);
 }
 
 .upgrade-btn:disabled {

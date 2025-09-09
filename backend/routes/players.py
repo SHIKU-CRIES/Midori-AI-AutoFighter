@@ -160,10 +160,16 @@ async def get_players() -> tuple[str, int, dict[str, str]]:
         await asyncio.to_thread(_apply_character_customization, inst, inst.id)
         await asyncio.to_thread(_apply_player_upgrades, inst)
         stats = _serialize_stats(inst)
+        # Prefer instance about; if it's the PlayerBase placeholder, fall back to class attribute
+        inst_about = getattr(inst, "about", "") or ""
+        if inst_about == "Player description placeholder":
+            inst_about = getattr(type(inst), "about", inst_about)
+
         roster.append(
             {
                 "id": inst.id,
                 "name": inst.name,
+                "about": inst_about,
                 "owned": inst.id in owned,
                 "is_player": inst.id == "player",
                 "element": inst.element_id,
