@@ -9,6 +9,9 @@
   export let size = 'normal'; // 'normal' or 'small'
   export let sizePx = 0; // optional explicit pixel size override
 
+  let prevElement = fighter.element;
+  let elementChanged = false;
+
   // Image prioritization: summon_type first, then id as fallback
   $: imageId = fighter?.summon_type || fighter?.id || '';
   $: elColor = getElementColor(fighter.element);
@@ -18,6 +21,13 @@
   
   // Element-specific glow effects for different damage types
   $: elementGlow = getElementGlow(fighter.element);
+
+  $: if (fighter.element !== prevElement) {
+    if (!reducedMotion) {
+      elementChanged = true;
+    }
+    prevElement = fighter.element;
+  }
 
   $: ultRatio = Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15));
   $: tiltAngle = Math.min(ultRatio, 0.98) / 0.98;
@@ -91,14 +101,24 @@
     const raw = String(fighter?.name || fighter?.id || '').trim();
     return raw.replace(/[_-]+/g, ' ');
   })();
+
+  function resetElementChange() {
+    elementChanged = false;
+  }
 </script>
 
-<div 
+<div
   class="modern-fighter-card {position} {size}"
   class:dead={isDead}
   style="--portrait-size: {portraitSize}; --element-color: {elColor}; --element-glow-color: {elementGlow.color}"
 >
-  <div class="fighter-portrait">
+  <div
+    class="element-wrapper"
+    class:element-change={elementChanged}
+    class:reduced={reducedMotion}
+    on:animationend={resetElementChange}
+  >
+    <div class="fighter-portrait">
       <div
         class="portrait-image"
         class:element-glow={!isDead && Boolean(fighter?.ultimate_ready)}
@@ -168,6 +188,7 @@
     {#if displayName}
       <div class="name-chip" aria-hidden="true">{displayName}</div>
     {/if}
+    </div>
   </div>
 </div>
 
@@ -179,6 +200,27 @@
     justify-content: center;
   }
 
+  .element-wrapper {
+    display: contents;
+  }
+
+  .element-change .fighter-portrait,
+  .element-change .ult-icon {
+    animation: element-change 0.4s ease;
+  }
+
+  .element-wrapper.reduced .fighter-portrait,
+  .element-wrapper.reduced .ult-icon {
+    animation: none;
+    transition: none;
+  }
+
+  @keyframes element-change {
+    0% { filter: brightness(1); transform: scale(1); }
+    50% { filter: brightness(1.4); transform: scale(1.05); }
+    100% { filter: brightness(1); transform: scale(1); }
+  }
+
   .fighter-portrait {
     position: relative;
     width: var(--portrait-size);
@@ -188,6 +230,7 @@
     background: var(--glass-bg);
     border: 2px solid var(--element-color, rgba(255, 255, 255, 0.3));
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.3s ease;
   }
 
   .portrait-image {
@@ -571,6 +614,7 @@
     pointer-events: none;
     /* Prevent the SVG from shrinking oddly */
     display: block;
+    transition: opacity 0.3s ease;
   }
   .ult-ready .ult-icon {
     filter: none;

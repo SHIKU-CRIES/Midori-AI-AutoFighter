@@ -74,6 +74,11 @@ describe('BattleView layout and polling', () => {
     expect(fighterUIItem).toContain('ult-icon');
   });
 
+  test('animates element changes', () => {
+    expect(fighterUIItem).toContain('element-change');
+    expect(fighterUIItem).toContain('@keyframes element-change');
+  });
+
   test('uses normalized element for portraits', () => {
     expect(fighterPortrait).toContain('getElementIcon(fighter.element)');
     expect(fighterPortrait).toContain('getElementColor(fighter.element)');
