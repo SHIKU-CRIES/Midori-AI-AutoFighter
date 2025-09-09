@@ -235,6 +235,11 @@ class MultiTriggerPassive:
 - **Trigger**: `hit_landed`
 - **Mechanic**: Element switching with bubble stacking and area damage
 
+#### Ixia - Tiny Titan
+- **ID**: `ixia_tiny_titan`
+- **Trigger**: `damage_taken`
+- **Mechanic**: Quadruples Vitality HP gain, converts 500% Vitality to attack, adds 0.01 Vitality on hit for mitigation, HoT, and defense penalty
+
 ### Characters without Passives (Available for Future Implementation)
 
 #### Carly
@@ -250,11 +255,6 @@ class MultiTriggerPassive:
 - **Damage Type**: Variable (Becca-specific)
 - **Passive Status**: *Not yet implemented*
 
-#### Chibi
-- **Character Type**: A
-- **Gacha Rarity**: 5
-- **Damage Type**: Variable (Chibi-specific)
-- **Passive Status**: *Not yet implemented*
 
 #### Mimic
 - **Character Type**: C
@@ -380,7 +380,6 @@ The following characters are fully functional but lack passive abilities, making
 
 #### Additional Candidates
 - **Becca**: Variable damage type for versatile passive options
-- **Chibi**: Character Type A for unique scaling passives
 - **Lady Darkness**: Dark damage type for shadow-based mechanics
 - **Lady Echo**: Lightning damage type for chain/echo effects
 - **Lady Light**: Light damage type for healing/protection passives
@@ -396,7 +395,7 @@ The following characters are fully functional but lack passive abilities, making
 
 #### Mechanic-Based Passives
 - **Defense Specialists** (Carly): Damage mitigation, counter-attacks
-- **Variable Types** (Becca, Chibi, Mimic): Adaptive abilities, form changes
+- **Variable Types** (Becca, Mimic): Adaptive abilities, form changes
 - **Dual Element** (Lady Fire and Ice): Element switching, temperature effects
 
 ### API Extensions

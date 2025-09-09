@@ -43,7 +43,7 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 - **Becca** (B, random) – builds high attack but takes more damage from lower defense.
 - **Bubbles** (A, random) – starts with a default item and applies `bubbles_bubble_burst`, switching elements each turn and bursting after three hits per foe.
 - **Carly** (B, Light) – Guardian's Aegis heals the most injured ally, converts attack growth into defense, builds mitigation stacks that can overcharge to add defense to attack while stacks decay each turn, and shares mitigation on ultimate.
-- **Chibi** (A, random) – gains four times the normal benefit from Vitality.
+- **Ixia** (A, Lightning) – gains four times the normal benefit from Vitality.
 - **Graygray** (B, random) – applies `graygray_counter_maestro`, counterattacking when hit and unleashing a max-HP burst every 50 stacks.
 - **Hilander** (A, random) – builds increased crit rate and crit damage, unleashing Aftertaste on crit; stack gain odds drop 5% per stack past 20, but never below 1%.
 - **Kboshi** (A, random) – randomly changes damage type; failed switches grant stacking bonuses. Switching elements consumes stacks and inflicts a brief mitigation debuff on all foes.

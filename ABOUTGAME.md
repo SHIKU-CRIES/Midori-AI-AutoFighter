@@ -159,7 +159,7 @@ The roster in `plugins/players/` currently includes and each entry lists its `Ch
 - Becca (B, random damage type)
 - Bubbles (A, random damage type)
 - Carly (B, Light) – Guardian's Aegis heals the most injured ally, converts attack growth into defense, builds mitigation stacks that can overcharge to add defense to attack while stacks decay each turn, and shares mitigation on ultimate
-- Chibi (A, Lightning)
+- Ixia (A, Lightning)
 - Graygray (B, random damage type) – retaliates with Counter Maestro after taking damage
 - Hilander (A, random damage type) – builds crit rate and damage, unleashing Aftertaste on crit; stack gain odds drop 5% per stack past 20, floored at 1%
 - Kboshi (A, random damage type)

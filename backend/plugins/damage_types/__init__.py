@@ -34,6 +34,8 @@ def get_damage_type(name: str) -> DamageTypeBase:
         return _load_cls("Generic")()
     if "kboshi" in lowered:
         return _load_cls("Dark")()
+    if "ixia" in lowered:
+        return _load_cls("Lightning")()
     matches = [dtype for dtype in ALL_DAMAGE_TYPES if dtype.lower() in lowered]
     if matches:
         return _load_cls(choice(matches))()

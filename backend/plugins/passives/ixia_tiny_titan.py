@@ -9,12 +9,12 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ChibiTinyTitan:
-    """Chibi's Tiny Titan passive - 4x Vitality HP gain and 500% Vitality to attack conversion."""
+class IxiaTinyTitan:
+    """Ixia's Tiny Titan passive - 4x Vitality HP gain and 500% Vitality to attack conversion."""
     plugin_type = "passive"
-    id = "chibi_tiny_titan"
+    id = "ixia_tiny_titan"
     name = "Tiny Titan"
-    trigger = "damage_taken"  # Triggers when Chibi takes damage to increase Vitality
+    trigger = "damage_taken"  # Triggers when Ixia takes damage to increase Vitality
     max_stacks = 1  # Only one instance per character
     stack_display = "spinner"
 
@@ -22,7 +22,7 @@ class ChibiTinyTitan:
     _vitality_bonuses: ClassVar[dict[int, float]] = {}
 
     async def apply(self, target: "Stats") -> None:
-        """Apply Chibi's Tiny Titan mechanics."""
+        """Apply Ixia's Tiny Titan mechanics."""
         entity_id = id(target)
 
         # Initialize vitality bonus tracking if not present

@@ -33,10 +33,10 @@ This task list catalogs each playable character's listed passive ability and ult
   - Verify mitigation stack decay and overcharge conversions.
   - Ensure ultimate cleans up Shadow Siphon and other DoTs as intended.
 
-## Chibi
+## Ixia
 - **Passive – Tiny Titan**: Gains four times Vitality benefits.
-  - **Actual**: `ChibiTinyTitan` multiplies stat bonuses from Vitality by four.
-- **Ultimate – Random element**
+  - **Actual**: `IxiaTinyTitan` multiplies stat bonuses from Vitality by four.
+- **Ultimate – Lightning**
 - **Tasks**:
   - Confirm Vitality multipliers apply after buffs and scale with level appropriately.
 

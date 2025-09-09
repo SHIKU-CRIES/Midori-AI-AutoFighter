@@ -50,7 +50,7 @@ def get_damage_type(name: str) -> DamageTypeBase:
 10. **Ally**: Random ultimate (no substring match)
 11. **Becca**: Random ultimate (no substring match)
 12. **Bubbles**: Random ultimate (no substring match)
-13. **Chibi**: Random ultimate (no substring match)
+13. **Ixia**: Random ultimate (no substring match)
 14. **Graygray**: Random ultimate (no substring match)
 15. **Hilander**: Random ultimate (no substring match)
 16. **Mezzy**: Random ultimate (no substring match)
@@ -133,7 +133,7 @@ Spot-checking reveals that all other character-specific passives are implemented
 - **Severity**: HIGH - unpredictable character mechanics
 
 ### 4. **8 Characters Have Random Ultimates**
-- **Characters**: Ally, Becca, Bubbles, Chibi, Graygray, Hilander, Mezzy, Mimic
+- **Characters**: Ally, Becca, Bubbles, Ixia, Graygray, Hilander, Mezzy, Mimic
 - **Issue**: `get_damage_type` falls back to `random_damage_type()` for unmatched names
 - **Impact**: These characters get random ultimates (Light/Dark/Wind/Lightning/Fire/Ice)
 - **Severity**: HIGH - completely unpredictable and inconsistent with character design
@@ -160,7 +160,7 @@ Spot-checking reveals that all other character-specific passives are implemented
 | Ally | Custom | Random | ❌ Unpredictable |
 | Becca | Custom | Random | ❌ Unpredictable |
 | Bubbles | Custom | Random | ❌ Unpredictable |
-| Chibi | Custom | Random | ❌ Unpredictable |
+| Ixia | Custom | Random | ❌ Unpredictable |
 | Graygray | Custom | Random | ❌ Unpredictable |
 | Hilander | Custom | Random | ❌ Unpredictable |
 | Mezzy | Custom | Random | ❌ Unpredictable |
