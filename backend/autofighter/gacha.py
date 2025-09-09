@@ -73,20 +73,101 @@ class GachaManager:
             # Check if banners already exist
             cur = conn.execute("SELECT COUNT(*) FROM banners")
             if cur.fetchone()[0] > 0:
+                # Update banner rotation if needed
+                self._update_banner_rotation()
                 return
 
-            # Create default banners
-            banners = [
-                Banner("standard", "Standard Warp", "standard", None, 0, 0, True),
-                Banner("custom1", "Featured Character I", "custom", "becca", current_time, current_time + 86400 * 3, True),  # 3 days
-                Banner("custom2", "Featured Character II", "custom", "ally", current_time + 86400 * 3, current_time + 86400 * 6, True),  # Next 3 days
-            ]
+            # Create default banners with rotation
+            self._create_banner_rotation(current_time)
 
+    def _create_banner_rotation(self, start_time: float) -> None:
+        """Create a rotating set of banners."""
+        # Get all available 5★ and 6★ characters for rotation
+        featured_pool = []
+        for name in getattr(player_plugins, "__all__", []):
+            cls = getattr(player_plugins, name)
+            rarity = getattr(cls, "gacha_rarity", 0)
+            cid = getattr(cls, "id", name)
+            if cid not in {"player", "luna", "mimic"} and rarity >= 5:
+                featured_pool.append(cid)
+
+        if not featured_pool:
+            featured_pool = ["becca", "ally"]  # Fallback
+
+        # Create 3-day rotating banners
+        banner_duration = 86400 * 3  # 3 days in seconds
+
+        banners = [
+            Banner("standard", "Standard Warp", "standard", None, 0, 0, True),
+        ]
+
+        # Create rotating custom banners
+        for i in range(2):  # Two custom banner slots
+            char_index = i % len(featured_pool)
+            banner_start = start_time + (i * banner_duration)
+            banner_end = banner_start + banner_duration
+
+            banners.append(Banner(
+                f"custom{i+1}",
+                f"Featured Character {['I', 'II'][i]}",
+                "custom",
+                featured_pool[char_index],
+                banner_start,
+                banner_end,
+                True
+            ))
+
+        with self.save.connection() as conn:
             for banner in banners:
                 conn.execute(
                     "INSERT INTO banners (id, name, banner_type, featured_character, start_time, end_time, active) VALUES (?, ?, ?, ?, ?, ?, ?)",
                     (banner.id, banner.name, banner.banner_type, banner.featured_character, banner.start_time, banner.end_time, 1 if banner.active else 0)
                 )
+
+    def _update_banner_rotation(self) -> None:
+        """Update banner rotation if banners have expired."""
+        current_time = time.time()
+
+        # Get all available characters for rotation
+        featured_pool = []
+        for name in getattr(player_plugins, "__all__", []):
+            cls = getattr(player_plugins, name)
+            rarity = getattr(cls, "gacha_rarity", 0)
+            cid = getattr(cls, "id", name)
+            if cid not in {"player", "luna", "mimic"} and rarity >= 5:
+                featured_pool.append(cid)
+
+        if not featured_pool:
+            return  # No characters to rotate
+
+        banner_duration = 86400 * 3  # 3 days
+
+        with self.save.connection() as conn:
+            # Check for expired custom banners
+            cur = conn.execute(
+                "SELECT id, featured_character, end_time FROM banners WHERE banner_type = 'custom' AND active = 1"
+            )
+            expired_banners = []
+
+            for row in cur.fetchall():
+                banner_id, featured_char, end_time = row
+                if current_time > end_time:
+                    expired_banners.append((banner_id, featured_char))
+
+            # Update expired banners with new characters
+            for banner_id, old_char in expired_banners:
+                # Get a different character from the pool
+                available_chars = [c for c in featured_pool if c != old_char]
+                if available_chars:
+                    import random
+                    new_char = random.choice(available_chars)
+                    new_start = current_time
+                    new_end = current_time + banner_duration
+
+                    conn.execute(
+                        "UPDATE banners SET featured_character = ?, start_time = ?, end_time = ? WHERE id = ?",
+                        (new_char, new_start, new_end, banner_id)
+                    )
 
     def get_banners(self) -> list[Banner]:
         """Get all available banners."""
@@ -323,6 +404,9 @@ class GachaManager:
         return results
 
     def get_state(self) -> dict[str, Any]:
+        # Check for banner rotation updates before returning state
+        self._update_banner_rotation()
+
         pity = self._get_pity()
         items = self._get_items()
         with self.save.connection() as conn:

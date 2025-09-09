@@ -72,6 +72,32 @@
   $: currentBanner = banners.find(b => b.id === activeTab) || { name: 'Standard Warp', banner_type: 'standard' };
   $: featuredChar = featuredCharacters.find(c => c.banner_id === activeTab);
   
+  // Banner timing helper
+  function getBannerTimeInfo(banner) {
+    if (banner.banner_type === 'standard') {
+      return { status: 'permanent', text: 'Permanent' };
+    }
+    
+    const now = Date.now() / 1000;
+    const timeLeft = banner.end_time - now;
+    
+    if (timeLeft <= 0) {
+      return { status: 'expired', text: 'Rotating Soon...' };
+    }
+    
+    const days = Math.floor(timeLeft / 86400);
+    const hours = Math.floor((timeLeft % 86400) / 3600);
+    
+    if (days > 0) {
+      return { status: 'active', text: `${days}d ${hours}h remaining` };
+    } else if (hours > 0) {
+      return { status: 'ending', text: `${hours}h remaining` };
+    } else {
+      const minutes = Math.floor((timeLeft % 3600) / 60);
+      return { status: 'ending', text: `${minutes}m remaining` };
+    }
+  }
+  
   // Get star color for rarity display
   function getStarColor(rarity) {
     switch (rarity) {
@@ -117,7 +143,15 @@
   <!-- Tab Content -->
   <div class="warp-content">
     <div class="banner-info">
-      <h3>{currentBanner.name}</h3>
+      <div class="banner-title">
+        <h3>{currentBanner.name}</h3>
+        {#if currentBanner.banner_type === 'custom'}
+          {@const timeInfo = getBannerTimeInfo(currentBanner)}
+          <div class="banner-timing" class:ending={timeInfo.status === 'ending'} class:expired={timeInfo.status === 'expired'}>
+            {timeInfo.text}
+          </div>
+        {/if}
+      </div>
       <div class="banner-stats">
         <div class="stat">
           <span class="stat-label">Pity:</span>
@@ -281,10 +315,39 @@
     margin-bottom: 1.5rem;
   }
 
+  .banner-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
   .banner-info h3 {
     color: #fff;
-    margin: 0 0 1rem 0;
+    margin: 0;
     font-size: 1.5rem;
+  }
+
+  .banner-timing {
+    color: rgba(120,180,255,0.9);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    background: rgba(120,180,255,0.2);
+    border: 1px solid rgba(120,180,255,0.3);
+    border-radius: 16px;
+  }
+
+  .banner-timing.ending {
+    color: rgba(255,165,0,0.9);
+    background: rgba(255,165,0,0.2);
+    border-color: rgba(255,165,0,0.3);
+  }
+
+  .banner-timing.expired {
+    color: rgba(255,100,100,0.9);
+    background: rgba(255,100,100,0.2);
+    border-color: rgba(255,100,100,0.3);
   }
 
   .banner-stats {
