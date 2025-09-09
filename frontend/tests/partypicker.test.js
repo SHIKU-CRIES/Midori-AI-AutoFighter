@@ -54,6 +54,14 @@ describe('PartyPicker component', () => {
     expect(content).toContain('on:click={() => (sortDir = sortDir === \'asc\' ? \'desc\' : \'asc\')}');
   });
 
+  test('roster uses transition group and fly animations', () => {
+    const content = readFileSync(join(import.meta.dir, '../src/lib/components/PartyRoster.svelte'), 'utf8');
+    expect(content).toContain('animate:flip');
+    expect(content).toContain('in:fly');
+    expect(content).toContain('out:fly');
+    expect(content).toContain('sparkleTrail');
+  });
+
   test('roster layout snapshot', () => {
     const content = readFileSync(join(import.meta.dir, '../src/lib/components/PartyRoster.svelte'), 'utf8');
     expect(content).toMatchSnapshot();
