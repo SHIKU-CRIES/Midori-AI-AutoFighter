@@ -317,14 +317,8 @@ class BattleRoom(Room):
             except Exception:
                 elapsed = 0.0
 
-            # Reduce wait time when there are many combatants to improve performance
-            total_combatants = len(combat_party.members) + len(foes)
-            if total_combatants > 8:
-                # Scale down wait time: 0.5s -> 0.1s for 8+ combatants
-                base_wait = max(0.1, 0.5 - (total_combatants - 8) * 0.05)
-            else:
-                base_wait = 0.5
-
+            # Enforce a minimum one-second delay between turns for pacing
+            base_wait = 1.0
             wait = base_wait - elapsed
             if wait > 0:
                 try:

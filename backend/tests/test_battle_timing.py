@@ -25,4 +25,4 @@ async def test_turn_pacing():
     await room.resolve(party, {})
     elapsed = time.perf_counter() - start
     rooms_module._choose_foe = original
-    assert elapsed >= 0.5
+    assert elapsed >= 1.0
