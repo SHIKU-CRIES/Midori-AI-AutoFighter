@@ -11,7 +11,7 @@ from plugins.players._base import PlayerBase
 class Carly(PlayerBase):
     id = "carly"
     name = "Carly"
-    about = "A steadfast guardian who transforms attack power into defensive strength. Her Guardian's Aegis protects allies while delivering devastating counterattacks."
+    about = "A sim human model dedicated to protecting others above all else. Her protective instincts run deep in her programming, making her an unwavering guardian who always puts people's safety first."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Light)

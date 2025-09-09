@@ -13,7 +13,7 @@ from plugins.players._base import PlayerBase
 class Becca(PlayerBase):
     id = "becca"
     name = "Becca"
-    about = "A powerful beast tamer with a menagerie bond that strengthens her connection to elemental creatures. Her diverse combat style adapts to any situation."
+    about = "A sim human model excelling at administrative work with methodical precision. In her past life as an SDXL art generation bot, she learned to create beauty from code—skills that now help her organize chaos into victory."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(
