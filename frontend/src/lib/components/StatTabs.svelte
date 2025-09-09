@@ -310,7 +310,11 @@
           style={`color: ${getElementColor((isPlayer && editorVals?.damageType) ? editorVals.damageType : sel.element)}`}
           aria-hidden="true" />
       </div>
-      <div class="buff-note">Global Buff: +{userBuffPercent}%</div>
+      {#if sel.about}
+        <div class="inline-divider" aria-hidden="true"></div>
+        <div class="char-about">{sel.about}</div>
+        <div class="inline-divider" aria-hidden="true"></div>
+      {/if}
       <div class="stats-list">
         {#if activeTab === 'Core'}
           <div>
@@ -326,6 +330,7 @@
           <div><span>EXP</span><span>{sel.stats.exp ?? sel.stats.xp ?? '-'}</span></div>
           <div><span>Vitality</span><span>{formatMult(sel.stats.vitality ?? sel.stats.vita, getBaseStat(sel, 'vitality'))}</span></div>
           <div><span>Regain</span><span>{formatStat(sel.stats.regain ?? sel.stats.regain_rate, getBaseStat(sel, 'regain'))}</span></div>
+          <div class="buff-note">Global Buff: +{userBuffPercent}%</div>
         {:else if activeTab === 'Offense'}
           <div><span>ATK</span><span>{formatStat(viewStats.atk, getBaseStat(sel, 'atk'))}</span></div>
           <div><span>CRIT Rate</span><span>{formatStat(viewStats.crit_rate, getBaseStat(sel, 'crit_rate'), '%')}</span></div>
@@ -421,6 +426,7 @@
 .char-level { font-size: 1rem; color: #ccc; }
 .type-icon { width: 24px; height: 24px; }
 .buff-note { font-size: 0.85rem; color: #ccc; margin-bottom: 0.3rem; }
+.char-about { margin: 0.25rem 0; font-style: italic; }
 .stats-list {
   display: flex;
   flex-direction: column;
