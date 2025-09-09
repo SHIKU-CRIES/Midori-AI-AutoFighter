@@ -106,6 +106,9 @@
   function onIntroEnd(e) {
     e.target.classList.remove('sparkle');
   }
+
+  // Count of currently selected characters (for divider placement)
+  $: selectedCount = roster.filter((c) => selected.includes(c.id)).length;
 </script>
 
 {#if compact}
@@ -145,14 +148,56 @@
       </button>
     </div>
   </div>
-  <div class="roster-list" animate:flip={{ duration: reducedMotion ? 0 : 300 }}>
-  {#each sortedRoster as char (selected.includes(char.id) ? `party-${char.id}` : `roster-${char.id}`)}
+  <div class="inline-divider" aria-hidden="true"></div>
+  <div class="roster-list">
+  {#if selectedCount > 0}
+    <div class="section-label">Party</div>
+    {#each roster.filter(c => selected.includes(c.id)).sort((a,b)=>{
+      const aKey = sortKey === 'element' ? a.element : (sortKey === 'id' ? String(a.id) : a.name);
+      const bKey = sortKey === 'element' ? b.element : (sortKey === 'id' ? String(b.id) : b.name);
+      return (sortDir === 'asc' ? 1 : -1) * (aKey > bKey ? 1 : (aKey < bKey ? -1 : 0));
+    }) as char (`party-${char.id}`)}
+      <button
+        type="button"
+        data-testid={`choice-${char.id}`}
+        class="char-row"
+        class:selected={selected.includes(char.id)}
+        class:reduced={reducedMotion}
+        animate:flip={{ duration: reducedMotion ? 0 : 300 }}
+        on:click={(e) => select(char.id, e)}
+        on:dblclick={() => toggle(char.id)}
+        on:pointerdown={(e) => onPointerDown(char.id, e)}
+        on:pointerup={onPointerUp}
+        on:pointerleave={onPointerUp}
+        on:introstart={(e) => onIntroStart(char.id, e)}
+        on:introend={onIntroEnd}
+        in:fly={{ x: -100, duration: reducedMotion ? 0 : 300 }}
+        out:fly={{ x: 100, duration: reducedMotion ? 0 : 300 }}
+        style={`border-color: ${getElementColor(char.element)}; --el-color: ${getElementColor(char.element)}; --sweep-delay: ${sweepDelay(char.id)}s; --sweep-duration: ${sweepDuration(char.id)}s;`}>
+        <img src={char.img} alt={char.name} class="row-img" />
+        <span class="row-name">{char.name}</span>
+        <svelte:component
+          this={getElementIcon(char.element)}
+          class="row-type"
+          style={`color: ${getElementColor(char.element)}`}
+          aria-hidden="true" />
+      </button>
+    {/each}
+    <div class="inline-divider" aria-hidden="true"></div>
+  {/if}
+  <div class="section-label">Roster</div>
+  {#each roster.filter(c => !selected.includes(c.id)).sort((a,b)=>{
+    const aKey = sortKey === 'element' ? a.element : (sortKey === 'id' ? String(a.id) : a.name);
+    const bKey = sortKey === 'element' ? b.element : (sortKey === 'id' ? String(b.id) : b.name);
+    return (sortDir === 'asc' ? 1 : -1) * (aKey > bKey ? 1 : (aKey < bKey ? -1 : 0));
+  }) as char (`roster-${char.id}`)}
     <button
       type="button"
       data-testid={`choice-${char.id}`}
       class="char-row"
       class:selected={selected.includes(char.id)}
       class:reduced={reducedMotion}
+      animate:flip={{ duration: reducedMotion ? 0 : 300 }}
       on:click={(e) => select(char.id, e)}
       on:dblclick={() => toggle(char.id)}
       on:pointerdown={(e) => onPointerDown(char.id, e)}
@@ -207,6 +252,13 @@
   cursor: pointer;
 }
 
+/* Theme the sort dropdown similar to element picker */
+.sort-controls label { color: #ddd; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; }
+.sort-controls select { background:#111; border:1px solid #555; color:#fff; padding:0.25rem 0.4rem; font-size:0.8rem; border-radius: 0; }
+.sort-controls select:focus { outline: none; border-color: rgba(120,180,255,0.6); box-shadow: 0 0 0 2px rgba(120,180,255,0.2); }
+.sort-dir { background:#111; border:1px solid #555; color:#fff; border-radius: 0; padding: 0.25rem 0.5rem; }
+.sort-dir:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+
 .roster-list {
   display: flex;
   flex-direction: column;
@@ -215,6 +267,18 @@
   height: 100%;
   overflow-y: auto;
   min-width: 0;
+}
+
+/* Inline divider for section separation */
+.inline-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); margin: 0.3rem 0; }
+
+.section-label {
+  color: #ddd;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+  padding: 0.1rem 0.35rem;
 }
 
 .char-row {

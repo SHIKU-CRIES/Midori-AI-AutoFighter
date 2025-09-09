@@ -2,7 +2,7 @@
   import { onMount, createEventDispatcher } from 'svelte';
   import { crossfade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
-  import jsfxr from 'jsfxr';
+  import { createDealSfx } from '../systems/sfx.js';
   import CurioChoice from './CurioChoice.svelte';
   import { getRewardArt } from '../systems/rewardLoader.js';
   import { getCharacterImage } from '../systems/assetLoader.js';
@@ -59,10 +59,7 @@
     if (isBatch) {
       stack = mapped;
       if (!reducedMotion) {
-        try {
-          dealSfx = new Audio(jsfxr([0,,0.05,,0.2,,0.1,0.4,,0.3,0.2,,,,,,,,1,,0.5]));
-          dealSfx.volume = 0.5;
-        } catch {}
+        dealSfx = createDealSfx();
       }
       dealNext();
     } else {

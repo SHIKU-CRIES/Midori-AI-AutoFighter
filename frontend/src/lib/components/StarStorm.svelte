@@ -94,7 +94,13 @@
   });
 </script>
 
-<div class="stars" aria-hidden="true" style={`opacity:${fading ? 0.25 : 0.55}`}>\n  {#each stars as s}\n    <span class="star" style={`--x:${s.left}%; --s:${s.size}px; --d:${s.duration}s; --delay:${s.delay}s; --dx:${s.drift}px; --c:${s.color};`}>\n      <span class="core"></span>\n    </span>\n  {/each}\n</div>
+<div class="stars" aria-hidden="true" style={`opacity:${fading ? 0.25 : 0.55}`}>
+  {#each stars as s}
+    <span class="star" style={`--x:${s.left}%; --s:${s.size}px; --d:${s.duration}s; --delay:${s.delay}s; --dx:${s.drift}px; --c:${s.color};`}>
+      <span class="core"></span>
+    </span>
+  {/each}
+</div>
 
 <style>
   .stars { position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:-1; opacity:0.55; transition: opacity 220ms ease; }

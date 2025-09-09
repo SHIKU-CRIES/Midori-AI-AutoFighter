@@ -3,7 +3,6 @@
   export let padding = '0.5rem';
   export let reducedMotion = false;
   export let starColor = '';
-  export let class = '';
   export let style = '';
 </script>
 
@@ -20,9 +19,11 @@
     padding: var(--padding);
     overflow-y: auto;
     overflow-x: hidden;
-    border: 2px solid #777;
-    background: rgba(0,0,0,0.65);
-    backdrop-filter: blur(4px);
+    /* Slightly lighten the stained-glass background for better readability */
+    background: linear-gradient(0deg, rgba(255,255,255,0.06), rgba(255,255,255,0.06)), var(--glass-bg);
+    box-shadow: var(--glass-shadow);
+    border: var(--glass-border);
+    backdrop-filter: var(--glass-filter);
   }
 
   /* Themed scrollbars for dark UI */
@@ -50,7 +51,7 @@
 
 <div
   {...$$restProps}
-  class={`panel ${class}`}
+  class={`panel ${$$props.class || ''}`}
   style={`--padding: ${padding}; ${style}`}
 >
   <StarStorm color={starColor} {reducedMotion} />

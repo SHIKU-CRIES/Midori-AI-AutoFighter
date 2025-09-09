@@ -2,14 +2,13 @@
   import { onMount } from 'svelte';
   import { createEventDispatcher } from 'svelte';
   import { getPlayers } from '../systems/api.js';
-  import { getCharacterImage, getHourlyBackground, getRandomFallback, getElementColor } from '../systems/assetLoader.js';
+  import { getCharacterImage, getRandomFallback, getElementColor } from '../systems/assetLoader.js';
   import MenuPanel from './MenuPanel.svelte';
   import PartyRoster from './PartyRoster.svelte';
   import PlayerPreview from './PlayerPreview.svelte';
   import StatTabs from './StatTabs.svelte';
   import { browser, dev } from '$app/environment';
 
-  let background = '';
   let roster = [];
   let userBuffPercent = 0;
 
@@ -37,7 +36,6 @@
   $: starColor = currentElementName ? (() => { try { return getElementColor(currentElementName); } catch { return ''; } })() : '';
 
   onMount(async () => {
-    background = getHourlyBackground();
     await refreshRoster();
   });
 
@@ -91,7 +89,7 @@
 {#if compact}
   <PartyRoster {roster} {selected} bind:previewId {compact} {reducedMotion} on:toggle={(e) => toggleMember(e.detail)} />
 {:else}
-  <MenuPanel style={`background-image: url(${background}); background-size: cover;`} {starColor} {reducedMotion}>
+  <MenuPanel {starColor} {reducedMotion}>
     <div class="full" data-testid="party-picker">
       <PartyRoster {roster} {selected} bind:previewId {reducedMotion} on:toggle={(e) => toggleMember(e.detail)} />
       <PlayerPreview {roster} {previewId} overrideElement={previewElementOverride} />
