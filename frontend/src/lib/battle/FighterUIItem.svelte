@@ -99,9 +99,10 @@
   style="--portrait-size: {portraitSize}; --element-color: {elColor}; --element-glow-color: {elementGlow.color}"
 >
   <div class="fighter-portrait">
-      <div 
+      <div
         class="portrait-image"
-        class:element-glow={!reducedMotion && !isDead && Boolean(fighter?.ultimate_ready)}
+        class:element-glow={!isDead && Boolean(fighter?.ultimate_ready)}
+        class:reduced={reducedMotion}
         style="background-image: url({getCharacterImage(imageId)})"
       >
       {#if !reducedMotion && !isDead && fighter?.ultimate_ready}
@@ -196,6 +197,14 @@
     background-position: center;
     position: relative;
     transition: all 0.3s ease;
+  }
+
+  .portrait-image.element-glow {
+    filter: drop-shadow(0 0 6px var(--element-glow-color));
+  }
+
+  .portrait-image.element-glow:not(.reduced) {
+    transition: filter 0.2s ease-in-out;
   }
 
   .element-effect {

@@ -18,12 +18,13 @@ CombatViewer lists passive effects and applies the same display hints within its
 These indicators respect Reduced Motion settings and expose
 tooltips for screen readers and mouse users. When a fighter's ultimate
 becomes ready, an element-colored pulse briefly radiates from the
-ultimate ring in `FighterPortrait`; this animation is skipped when
-Reduced Motion is enabled. The ultimate gauge in `FighterUIItem` now
-slides its fill and feathered edge with a 0.3s ease-out transition
-while charging. The fill also slowly tilts left and right, the sway
-intensifying up to a one-degree angle around 98% charge. Reduced Motion
-disables both the transition and the tilt.
+ultimate ring in `FighterPortrait`; portraits also gain a soft element
+halo around the artwork. Both effects are skipped when Reduced Motion is
+enabled. The ultimate gauge in `FighterUIItem` now slides its fill and
+feathered edge with a 0.3s ease-out transition while charging. The fill
+also slowly tilts left and right, the sway intensifying up to a
+one-degree angle around 98% charge. Reduced Motion disables both the
+transition and the tilt.
 
 ## Stained-Glass Palette
 
