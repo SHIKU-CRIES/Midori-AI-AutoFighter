@@ -318,8 +318,8 @@ class BattleRoom(Room):
             except Exception:
                 elapsed = 0.0
 
-            # Enforce a minimum one-second delay between turns for pacing
-            base_wait = 1.0
+            # Enforce a half-second delay after each action for pacing
+            base_wait = 0.5
             wait = base_wait - elapsed
             if wait > 0:
                 try:
@@ -676,6 +676,7 @@ class BattleRoom(Room):
                             _EXTRA_TURNS[id(acting_foe)] -= 1
                             await _pace(action_start)
                             continue
+                        await _pace(action_start)
                         await asyncio.sleep(0.001)
                         break
                     dmg = await target.apply_damage(acting_foe.atk, attacker=acting_foe)
