@@ -1,7 +1,7 @@
 <script>
   import { Circle as PipCircle } from 'lucide-svelte';
   import Spinner from '../components/Spinner.svelte';
-  import { getCharacterImage, getElementColor } from '../systems/assetLoader.js';
+  import { getCharacterImage, getElementColor, getElementIcon } from '../systems/assetLoader.js';
 
   export let fighter = {};
   export let position = 'bottom'; // 'top' for foes, 'bottom' for party
@@ -12,6 +12,7 @@
   // Image prioritization: summon_type first, then id as fallback
   $: imageId = fighter?.summon_type || fighter?.id || '';
   $: elColor = getElementColor(fighter.element);
+  $: elIcon = getElementIcon(fighter.element);
   // Make party (bottom) portraits larger for readability
   $: portraitSize = sizePx ? `${sizePx}px` : (size === 'small' ? '48px' : (size === 'medium' ? '96px' : (position === 'bottom' ? '256px' : '96px')));
   
@@ -148,9 +149,10 @@
         class="ult-gauge"
         class:ult-ready={Boolean(fighter?.ultimate_ready)}
         style="--element-color: {elColor}; --p: {Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15))}"
-        aria-label="Ultimate Gauge"
+      aria-label="Ultimate Gauge"
       >
         <div class="ult-fill"></div>
+        <svelte:component this={elIcon} class="ult-icon" aria-hidden="true" />
         {#if !fighter?.ultimate_ready}
           <div class="ult-pulse" style={`animation-duration: ${Math.max(0.4, 1.6 - 1.2 * Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15)))}s`}></div>
         {/if}
@@ -533,6 +535,23 @@
     height: calc(var(--p, 0) * 100%);
     /* Solid single-color fill based on the element color */
     background: color-mix(in oklab, var(--element-color, #6cf) 68%, black);
+    z-index: 0;
+  }
+  .ult-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    filter: grayscale(100%);
+    opacity: 0.5;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .ult-ready .ult-icon {
+    filter: none;
+    opacity: 1;
   }
   /* Breathing pulse while charging; speeds up as --p increases */
   .ult-pulse {
@@ -540,6 +559,7 @@
     inset: 0;
     border-radius: 50%;
     pointer-events: none;
+    z-index: 2;
     background: radial-gradient(circle,
       color-mix(in oklab, var(--element-color, #6cf) 30%, white) 0%,
       transparent 70%);
@@ -578,6 +598,7 @@
     background: radial-gradient(circle, color-mix(in oklab, var(--element-color, #6cf) 50%, white) 0%, transparent 70%);
     opacity: 0.22;
     animation: ult-pulse 1.4s ease-in-out infinite;
+    z-index: 3;
   }
   @keyframes ult-pulse {
     0%, 100% { transform: scale(1); opacity: 0.25; }

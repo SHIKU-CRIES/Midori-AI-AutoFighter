@@ -30,7 +30,7 @@ This document catalogs all discrepancies discovered between documented character
 
 ### 2. **8 Characters Have Completely Random Ultimates - HIGH SEVERITY**
 
-**Characters Affected**: Ally, Becca, Bubbles, Chibi, Graygray, Hilander, Mezzy, Mimic
+**Characters Affected**: Ally, Becca, Bubbles, Ixia, Graygray, Hilander, Mezzy, Mimic
 
 **Documented Behavior**: Each character should have unique "custom damage type" ultimates
 **Actual Behavior**: Characters get random ultimates each time they're instantiated
@@ -130,7 +130,7 @@ return _load_cls(choice(matches))()  # Random selection
 | Ally | Custom Ally | Random (6 types) | Major Design Flaw |
 | Becca | Custom Becca | Random (6 types) | Major Design Flaw |
 | Bubbles | Custom Bubbles | Random (6 types) | Major Design Flaw |
-| Chibi | Custom Chibi | Random (6 types) | Major Design Flaw |
+| Ixia | Custom Ixia | Random (6 types) | Major Design Flaw |
 | Graygray | Custom Graygray | Random (6 types) | Major Design Flaw |
 | Hilander | Custom Hilander | Random (6 types) | Major Design Flaw |
 | Mezzy | Custom Mezzy | Random (6 types) | Major Design Flaw |

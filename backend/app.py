@@ -37,6 +37,7 @@ from routes.performance import perf_bp as performance_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp
 from routes.ui import bp as ui_bp
+from routes.guidebook import bp as guidebook_bp
 
 configure_logging()
 
@@ -54,6 +55,7 @@ app.register_blueprint(config_bp)
 app.register_blueprint(catalog_bp)
 app.register_blueprint(ui_bp)
 app.register_blueprint(performance_bp, url_prefix='/performance')
+app.register_blueprint(guidebook_bp, url_prefix='/guidebook')
 
 BACKEND_FLAVOR = os.getenv("UV_EXTRA", "default")
 

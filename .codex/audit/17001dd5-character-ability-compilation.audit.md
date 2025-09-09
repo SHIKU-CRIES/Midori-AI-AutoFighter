@@ -141,13 +141,13 @@ This document provides a comprehensive listing of all playable characters in the
 - **Passive**: `becca_menagerie_bond` - Variable mechanics
 - **Special**: Uses "pips" actions display
 
-#### 15. **Chibi**
-- **ID**: `chibi`
+#### 15. **Ixia**
+- **ID**: `ixia`
 - **Character Type**: A (Masculine)
 - **Gacha Rarity**: 5★
-- **Damage Type**: Custom Chibi damage type
-- **Ultimate**: Via Chibi damage type (needs verification - custom type)
-- **Passive**: `chibi_tiny_titan` - Size-based mechanics
+- **Damage Type**: Lightning
+- **Ultimate**: Lightning ultimate (needs verification)
+- **Passive**: `ixia_tiny_titan` - Size-based mechanics
 - **Special**: Uses "pips" actions display
 
 #### 16. **Lady Fire and Ice**
@@ -219,7 +219,7 @@ This document provides a comprehensive listing of all playable characters in the
 3. `becca_menagerie_bond` - Variable/adaptive mechanics
 4. `bubbles_bubble_burst` - Element switching with bubbles
 5. `carly_guardians_aegis` - Defense-focused protection
-6. `chibi_tiny_titan` - Size-based mechanics
+6. `ixia_tiny_titan` - Size-based mechanics
 7. `graygray_counter_maestro` - Counter-attack stacking
 8. `hilander_critical_ferment` - Critical hit mechanics
 9. `kboshi_flux_cycle` - Element cycling mechanics
@@ -265,7 +265,7 @@ This document provides a comprehensive listing of all playable characters in the
 1. Ally damage type implementation
 2. Becca damage type implementation  
 3. Bubbles damage type implementation
-4. Chibi damage type implementation
+4. Ixia damage type implementation
 5. Graygray damage type implementation
 6. Hilander damage type implementation
 7. Kboshi damage type implementation

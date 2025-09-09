@@ -16,6 +16,10 @@
   let baseList = []; // enriched entries with stable keys
   let awaitingReroll = false;
   let soldKeys = new Set();
+  
+  // Animation state for reroll button
+  let rerollAnimationText = '';
+  let isAnimating = false;
   const keyOf = (item) => `${item?.type || 'item'}:${item?.id || ''}:${priceOf(item)}`;
   function buildBaseList(list) {
     const counts = Object.create(null);
@@ -38,15 +42,43 @@
     if (k) soldKeys.add(k);
     dispatch('buy', item);
   }
-  function reroll() {
+  
+  // Animate text appearing letter by letter with jumping effect
+  async function animateRerollText() {
+    const fullText = 'Rerolling...';
+    rerollAnimationText = '';
+    isAnimating = true;
+    
+    for (let i = 0; i < fullText.length; i++) {
+      rerollAnimationText += fullText[i];
+      // Wait between each letter (adjust timing as needed)
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
+    
+    isAnimating = false;
+  }
+  
+  async function reroll() {
+    if (awaitingReroll) return; // Prevent rapid-fire clicks
     awaitingReroll = true;
     soldKeys = new Set();
+    
+    // Start the text animation
+    await animateRerollText();
+    
+    // Add forced wait before sending request
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Now send the actual reroll request
     dispatch('reroll');
   }
   function close() {
     baseList = [];
     soldKeys = new Set();
     awaitingReroll = false;
+    rerollAnimationText = '';
+    isAnimating = false;
+    lastItemsSignature = '';
     dispatch('close');
   }
 
@@ -86,18 +118,42 @@
     return entry;
   }
 
+  // Track items to detect actual changes (not just re-enrichment)
+  let lastItemsSignature = '';
+  function getItemsSignature(itemsList) {
+    if (!Array.isArray(itemsList) || itemsList.length === 0) return '';
+    // Create a signature based on item IDs and prices to detect real changes
+    return itemsList.map(item => `${item?.type || 'item'}:${item?.id || ''}:${priceOf(item)}`).join('|');
+  }
+  
   // Initialize base list on first stock arrival; replace on reroll
   $: initBaseOnce();
-  $: if (awaitingReroll && Array.isArray(items) && items.length) {
-    baseList = buildBaseList(items);
-    soldKeys = new Set();
-    awaitingReroll = false;
+  $: {
+    // Handle new items arriving (could be from reroll or initial load)
+    if (Array.isArray(items) && items.length) {
+      const currentSignature = getItemsSignature(items);
+      
+      // If we're awaiting reroll and items have actually changed, complete the reroll
+      if (awaitingReroll && currentSignature !== lastItemsSignature && lastItemsSignature !== '') {
+        baseList = buildBaseList(items);
+        soldKeys = new Set();
+        awaitingReroll = false;
+        rerollAnimationText = '';
+        isAnimating = false;
+        lastItemsSignature = currentSignature;
+      }
+      // If not awaiting reroll, just update the base list normally
+      else if (!awaitingReroll) {
+        baseList = buildBaseList(items);
+        lastItemsSignature = currentSignature;
+      }
+    }
   }
-  // Keep metadata enrichment reactive for new catalogs
-  $: baseList = (baseList, cardMeta, relicMeta, baseList.map((e) => ({ ...enrich(e), key: e.key })));
+  // Keep metadata enrichment reactive for new catalogs - properly formed reactive statement
+  $: enrichedBaseList = baseList.map((e) => ({ ...enrich(e), key: e.key }));
   // Partition for layout
-  $: displayCards = baseList.filter(e => e?.type === 'card');
-  $: displayRelics = baseList.filter(e => e?.type === 'relic');
+  $: displayCards = enrichedBaseList.filter(e => e?.type === 'card');
+  $: displayRelics = enrichedBaseList.filter(e => e?.type === 'relic');
 </script>
 
 <MenuPanel data-testid="shop-menu" padding="0.6rem 0.6rem 0.8rem 0.6rem">
@@ -147,7 +203,17 @@
     </section>
   </div>
   <div class="actions">
-    <button class="action" on:click={reroll}>Reroll</button>
+    <button class="action" disabled={awaitingReroll} on:click={reroll}>
+      {#if awaitingReroll}
+        <span class="reroll-text">
+          {#each rerollAnimationText.split('') as char, i}
+            <span class="jump-letter" style="animation-delay: {i * 0.1}s">{char}</span>
+          {/each}
+        </span>
+      {:else}
+        Reroll
+      {/if}
+    </button>
     <button class="action" on:click={close}>Leave</button>
   </div>
   
@@ -188,6 +254,26 @@
 
   .actions { display:flex; gap:0.5rem; justify-content:flex-end; margin-top: 0.75rem; }
   .action { border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.5); color:#fff; padding: 0.35rem 0.7rem; }
+  .action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Reroll text animation */
+  .reroll-text {
+    display: inline-block;
+  }
+  
+  .jump-letter {
+    display: inline-block;
+    animation: letter-jump 0.6s ease-in-out;
+  }
+  
+  @keyframes letter-jump {
+    0%, 100% { 
+      transform: translateY(0); 
+    }
+    50% { 
+      transform: translateY(-8px); 
+    }
+  }
 
   @media (max-width: 920px) {
     .columns { grid-template-columns: 1fr; }

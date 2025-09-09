@@ -2,7 +2,7 @@
 
 The Svelte front page presents a high-contrast grid of icon buttons inspired by
 Arknights. Menu items include **Run**, **Map**, **Party**, **Edit**, **Pulls**,
-**Craft**, **Settings**, **Feedback**, and **Stats**, each showing a Lucide icon above a label.
+**Craft**, **Guidebook**, **Settings**, **Feedback**, and **Stats**, each showing a Lucide icon above a label.
 **Craft** opens a menu to upgrade items and toggle auto-crafting. **Feedback** launches a pre-filled GitHub issue using `FEEDBACK_URL`.
 **Settings** opens its own overlay within the viewport using the shared menu surface. Layout is
 determined by `layoutForWidth`:
@@ -14,7 +14,8 @@ determined by `layoutForWidth`:
 Choosing **Run** opens the PartyPicker overlay to review the lineup before a run.
 Selecting **Map** fetches the current run's layout and displays it in
 `MapDisplay`. **Edit** retrieves the player's configuration and launches the
-`PlayerEditor` for pronoun, damage-type, and stat tweaks. **Pulls** opens a
+`PlayerEditor` for pronoun, damage-type, and stat tweaks. **Guidebook** opens a
+reference overlay with tabs for Damage Types, Ults, UI, Shops, Mechs, and Passives sourced from backend endpoints. **Pulls** opens a
 gacha panel that shows the current pity counter and updates currency and
 results after invoking `/gacha/pull`.
 

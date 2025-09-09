@@ -2,9 +2,9 @@ from .ally import Ally
 from .becca import Becca
 from .bubbles import Bubbles
 from .carly import Carly
-from .chibi import Chibi
 from .graygray import Graygray
 from .hilander import Hilander
+from .ixia import Ixia
 from .kboshi import Kboshi
 from .lady_darkness import LadyDarkness
 from .lady_echo import LadyEcho
@@ -21,7 +21,7 @@ __all__ = [
     "Becca",
     "Bubbles",
     "Carly",
-    "Chibi",
+    "Ixia",
     "Graygray",
     "Hilander",
     "Kboshi",

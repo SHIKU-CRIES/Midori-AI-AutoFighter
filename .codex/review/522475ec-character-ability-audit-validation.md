@@ -69,7 +69,7 @@ def get_damage_type(name: str) -> DamageTypeBase:
 - ✅ Ally (no substring match)
 - ✅ Becca (no substring match)  
 - ✅ Bubbles (no substring match)
-- ✅ Chibi (no substring match)
+- ✅ Ixia (no substring match)
 - ✅ Graygray (no substring match)
 - ✅ Hilander (no substring match)
 - ✅ Mezzy (no substring match)

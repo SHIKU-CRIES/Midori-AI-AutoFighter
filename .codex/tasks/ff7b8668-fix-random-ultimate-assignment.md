@@ -12,7 +12,7 @@ The current random damage type assignment system is intentionally designed for g
 2. **Display**: Players can see what damage type their character instance has
 3. **Balance**: Gacha damage type assignment works as intended
 
-**Current System**: Characters like Ally, Becca, Bubbles, Chibi, Graygray, Hilander, Mezzy, Mimic call `get_damage_type("CharacterName")` which falls back to `random_damage_type()` when no specific mapping exists.
+**Current System**: Characters like Ally, Becca, Bubbles, Ixia, Graygray, Hilander, Mezzy, Mimic call `get_damage_type("CharacterName")` which falls back to `random_damage_type()` when no specific mapping exists.
 
 ## User Requirements (Clarified)
 
@@ -63,7 +63,7 @@ The current random damage type assignment system is intentionally designed for g
 | Ally | Random per instantiation | 5 |
 | Becca | Random per instantiation | 5 |
 | Bubbles | Random per instantiation | 5 |
-| Chibi | Random per instantiation | 5 |
+| Ixia | Lightning | 5 |
 | Graygray | Random per instantiation | 5 |
 | Hilander | Random per instantiation | 5 |
 | Mezzy | Random per instantiation | 5 |

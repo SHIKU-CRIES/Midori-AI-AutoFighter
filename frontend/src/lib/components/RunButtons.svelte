@@ -11,7 +11,7 @@
    * - Consider a contextual entry that jumps to the Party Picker with the
    *   player pre-selected once the per-character upgrade flow is ready.
    */
-  import { Play, Users, PackageOpen, Settings, MessageSquare, Package } from 'lucide-svelte';
+  import { Play, Users, PackageOpen, Settings, MessageSquare, Package, Book } from 'lucide-svelte';
 
   // Build the run menu items array. Handlers are functions for each action.
   export function buildRunMenu(handlers, battleActive) {
@@ -21,6 +21,7 @@
       // Player Editor removed from main menu per design
       { icon: PackageOpen, label: 'Warp', action: handlers.openPulls, disabled: battleActive },
       { icon: Package, label: 'Inventory', action: handlers.openInventory, disabled: false },
+      { icon: Book, label: 'Guidebook', action: handlers.openGuidebook, disabled: false },
       { icon: Settings, label: 'Settings', action: handlers.openSettings, disabled: false },
       { icon: MessageSquare, label: 'Feedback', action: handlers.openFeedback, disabled: false },
       // Inventory moved to in-run NavBar; remove from main menu
