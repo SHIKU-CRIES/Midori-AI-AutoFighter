@@ -346,6 +346,11 @@ class SummonManager:
         """
         cls.initialize()
 
+        # SAFEGUARD: Prevent summons from creating more summons to avoid infinite chains
+        if isinstance(summoner, Summon):
+            log.warning(f"Summon {getattr(summoner, 'id', 'unknown')} attempted to create another summon - blocked for safety")
+            return None
+
         summoner_id = getattr(summoner, 'id', str(id(summoner)))
 
         # Initialize tracking for this summoner if needed
