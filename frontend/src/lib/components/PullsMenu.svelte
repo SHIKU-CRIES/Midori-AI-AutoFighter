@@ -275,6 +275,9 @@
 </MenuPanel>
 
 <style>
+  .warp-menu {
+    --glass-border: 1.5px solid rgba(0,0,0,0.6);
+  }
   /* Header styling matching Guidebook/Inventory */
   .warp-header {
     display: flex;

@@ -363,6 +363,7 @@
 
 <style>
   .star-rail-inventory {
+    --glass-border: 1.5px solid rgba(0,0,0,0.6);
     display: flex;
     flex-direction: column;
     height: 100%;
