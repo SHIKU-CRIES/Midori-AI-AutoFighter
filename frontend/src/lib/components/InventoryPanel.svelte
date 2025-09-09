@@ -174,15 +174,17 @@
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 0.75rem;
-    align-items: stretch;
+    /* Tighter spacing to sit cards closer */
+    gap: 0.25rem;
+    align-items: start;
     justify-items: center;
   }
   .relics-grid {
     display: grid;
+    /* Match CardArt default width; add breathing room */
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 0.75rem;
-    align-items: stretch;
+    gap: 1.25rem;
+    align-items: start;
     justify-items: center;
   }
   /* Inventory is read-only; disable relic button clicks within this panel */

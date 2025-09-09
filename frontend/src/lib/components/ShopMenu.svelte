@@ -149,8 +149,9 @@
       }
     }
   }
-  // Keep metadata enrichment reactive for new catalogs - properly formed reactive statement
-  $: enrichedBaseList = baseList.map((e) => ({ ...enrich(e), key: e.key }));
+  // Keep metadata enrichment reactive. Also depend on catalog readiness so
+  // names/descriptions appear as soon as metadata loads, not only after reroll/leave.
+  $: enrichedBaseList = (void cardMeta, void relicMeta, baseList.map((e) => ({ ...enrich(e), key: e.key })));
   // Partition for layout
   $: displayCards = enrichedBaseList.filter(e => e?.type === 'card');
   $: displayRelics = enrichedBaseList.filter(e => e?.type === 'relic');

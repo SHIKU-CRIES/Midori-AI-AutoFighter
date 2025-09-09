@@ -452,8 +452,10 @@
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 0.75rem;
+    /* Tighter spacing so cards sit closer together */
+    gap: 0.25rem;
     align-items: start;
+    /* Center items so visuals and click targets align consistently */
     justify-items: center;
   }
   .card-cell {
@@ -480,8 +482,10 @@
   /* Relics tab: show CurioChoice with quantity */
   .relics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 0.75rem;
+    /* Match CardArt default width for relic tiles to avoid overflow */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    /* Give relic tiles a bit more breathing room */
+    gap: 1.25rem;
     align-items: start;
     justify-items: center;
   }
