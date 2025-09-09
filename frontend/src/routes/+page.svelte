@@ -487,6 +487,9 @@
 
   function startBattlePoll() {
     stopBattlePoll(); // Clear any existing timer
+    try {
+      if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) return;
+    } catch {}
     if (battleActive && !haltSync && runId) {
       pollBattle();
     }
@@ -494,6 +497,12 @@
 
   async function pollBattle() {
     if (!battleActive || haltSync || !runId) return;
+    try {
+      if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) {
+        stopBattlePoll();
+        return;
+      }
+    } catch {}
     try {
       const snap = mapStatuses(await roomAction("0", {"action": "snapshot"}));
       lastBattleSnapshot = snap || lastBattleSnapshot;
@@ -572,6 +581,12 @@
         return;
       }
     }
+    try {
+      if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) {
+        stopBattlePoll();
+        return;
+      }
+    } catch {}
     if (battleActive && !haltSync && runId) {
       battleTimer = setTimeout(pollBattle, 1000 / 60);
     }
@@ -587,15 +602,14 @@
   async function pollState() {
     // Don't poll if we're in battle, halted, in menu, or no runId
     if (battleActive || haltSync || !runId) return;
-    // Pause polling while rewards overlay is open
+    // Pause polling while Reward or Battle Review overlays are open
     try {
-      if (typeof window !== 'undefined' && window.afRewardOpen === true) return;
+      if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) {
+        stopStatePoll();
+        return;
+      }
     } catch {}
-    // Also pause polling while Battle Review overlay is open
-    try {
-      if (typeof window !== 'undefined' && window.afReviewOpen === true) return;
-    } catch {}
-    
+
     // Don't poll if we're in a menu/overlay (not 'main')
     try {
       const { get } = await import('svelte/store');
@@ -648,6 +662,12 @@
     }
 
     // Schedule next state poll if conditions are still met
+    try {
+      if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) {
+        stopStatePoll();
+        return;
+      }
+    } catch {}
     if (!battleActive && !haltSync && runId) {
       stateTimer = setTimeout(pollState, 5000); // Poll every 5 seconds
     }
@@ -742,7 +762,7 @@
         if (!currentRoomType) currentRoomType = mapRooms?.[currentIndex]?.room_type || (endpoint.includes('boss') ? 'battle-boss-floor' : 'battle-normal');
         battleActive = true;
         if (typeof window !== 'undefined') window.afBattleActive = true; // Update global state for ping indicator
-        pollBattle();
+        startBattlePoll();
       } else {
         battleActive = false;
         if (typeof window !== 'undefined') window.afBattleActive = false; // Update global state for ping indicator
@@ -1071,6 +1091,9 @@
 
   function startUIStatePoll() {
     stopUIStatePoll();
+    try {
+      if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) return;
+    } catch {}
     if (!haltSync) {
       pollUIState();
     }
@@ -1078,7 +1101,13 @@
 
   async function pollUIState() {
     if (haltSync) return;
-    
+    try {
+      if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) {
+        stopUIStatePoll();
+        return;
+      }
+    } catch {}
+
     // Don't poll if we're in a menu/overlay (not 'main') - same protection as old pollState
     try {
       const { get } = await import('svelte/store');
@@ -1134,6 +1163,9 @@
       
       // Continue polling (simplified - no complex battle state management)
       if (!haltSync && uiState.mode !== 'menu') {
+        try {
+          if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) return;
+        } catch {}
         uiStateTimer = setTimeout(pollUIState, 1000); // Poll every second
       }
       
@@ -1141,6 +1173,9 @@
       console.warn('UI state polling failed:', e);
       // Retry after delay
       if (!haltSync) {
+        try {
+          if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) return;
+        } catch {}
         uiStateTimer = setTimeout(pollUIState, 2000);
       }
     }

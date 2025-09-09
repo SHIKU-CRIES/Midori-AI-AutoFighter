@@ -6,6 +6,11 @@ no rewards or completion flags have arrived. After roughly three seconds of
 such stalled polling, the function stops the battle, records an error on the
 snapshot, and logs a warning so the reward overlay or reset flow can proceed.
 
+Battle snapshot polling halts any time the rewards or battle review overlays are
+visible. `window.afRewardOpen` and `window.afReviewOpen` flags stop the poller,
+clear its timer, and prevent rescheduling until the "Next Room" action closes
+the overlay and explicitly restarts polling via `startBattlePoll()`.
+
 If a snapshot includes an `error` field, polling halts immediately and the
 error state is surfaced without waiting for combat-over indicators.
 
@@ -20,8 +25,11 @@ another cycle. This prevents repeated error overlays once a run is gone.
 
 The general `pollState` routine uses the same detection. Errors mentioning
 "run ended" or returning a 404 now call `handleRunEnd()` and avoid scheduling
-another poll. Additionally, UI state polling no longer reschedules itself when
-`uiState.mode === 'menu'` to reduce network traffic while in the main menu.
+another poll. All pollers (`pollState`, `pollBattle`, and `pollUIState`) also
+check the overlay flags and refrain from starting or rescheduling while either
+overlay is active. Additionally, UI state polling no longer reschedules itself
+when `uiState.mode === 'menu'` to reduce network traffic while in the main
+menu.
 
 Additionally, ending a run from Settings now immediately sets a global
 `window.afHaltSync = true` flag and clears timers to prevent any further
