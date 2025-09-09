@@ -13,6 +13,7 @@ from plugins.players._base import PlayerBase
 class Mezzy(PlayerBase):
     id = "mezzy"
     name = "Mezzy"
+    about = "A voracious defender whose gluttonous bulwark devours enemy attacks to fuel her own power. She grows stronger by consuming damage."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(

@@ -13,6 +13,7 @@ from plugins.players._base import PlayerBase
 class Mimic(PlayerBase):
     id = "mimic"
     name = "Mimic"
+    about = "A mysterious shapeshifter who perfectly copies other fighters' abilities. Its player copy skill allows it to adapt to any combat situation."
     char_type: CharacterType = CharacterType.C
     gacha_rarity = 0
     damage_type: DamageTypeBase = field(

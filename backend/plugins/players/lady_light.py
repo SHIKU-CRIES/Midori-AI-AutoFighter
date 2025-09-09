@@ -11,6 +11,7 @@ from plugins.players._base import PlayerBase
 class LadyLight(PlayerBase):
     id = "lady_light"
     name = "LadyLight"
+    about = "A radiant healer whose light magic creates protective barriers and purifies the battlefield. Her radiant aegis shields allies from all harm."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Light)

@@ -13,6 +13,7 @@ from plugins.players._base import PlayerBase
 class Becca(PlayerBase):
     id = "becca"
     name = "Becca"
+    about = "A powerful beast tamer with a menagerie bond that strengthens her connection to elemental creatures. Her diverse combat style adapts to any situation."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(

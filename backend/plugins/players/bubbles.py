@@ -13,6 +13,7 @@ from plugins.players._base import PlayerBase
 class Bubbles(PlayerBase):
     id = "bubbles"
     name = "Bubbles"
+    about = "An enthusiastic aquatic fighter whose bubble burst abilities create devastating chain reactions across the battlefield."
     char_type: CharacterType = CharacterType.A
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(

@@ -11,6 +11,7 @@ from plugins.players._base import PlayerBase
 class Ixia(PlayerBase):
     id = "ixia"
     name = "Ixia"
+    about = "A tiny but mighty lightning-wielder whose size belies her incredible power. Her tiny titan abilities generate massive electrical storms."
     char_type: CharacterType = CharacterType.A
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(

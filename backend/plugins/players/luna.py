@@ -11,6 +11,7 @@ from plugins.players._base import PlayerBase
 class Luna(PlayerBase):
     id = "luna"
     name = "Luna"
+    about = "A mystical lunar mage who draws power from the moon's phases. Her lunar reservoir stores celestial energy for powerful magical attacks."
     ##
     char_type: CharacterType = CharacterType.B
     damage_type: DamageTypeBase = field(

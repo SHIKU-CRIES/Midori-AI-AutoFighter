@@ -11,6 +11,7 @@ from plugins.players._base import PlayerBase
 class LadyEcho(PlayerBase):
     id = "lady_echo"
     name = "LadyEcho"
+    about = "An electric virtuoso whose resonant static abilities create powerful lightning echoes that reverberate across the battlefield."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Lightning)

@@ -11,6 +11,7 @@ from plugins.players._base import PlayerBase
 class LadyDarkness(PlayerBase):
     id = "lady_darkness"
     name = "LadyDarkness"
+    about = "A mysterious sorceress who commands the shadows with her eclipsing veil. Her dark magic envelops enemies in an inescapable shroud of despair."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(default_factory=Dark)

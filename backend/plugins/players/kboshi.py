@@ -11,6 +11,7 @@ from plugins.players._base import PlayerBase
 class Kboshi(PlayerBase):
     id = "kboshi"
     name = "Kboshi"
+    about = "A master of dark energy whose flux cycle abilities harness the power of shadow and void. His energy manipulation creates devastating cyclical attacks."
     char_type: CharacterType = CharacterType.A
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(
