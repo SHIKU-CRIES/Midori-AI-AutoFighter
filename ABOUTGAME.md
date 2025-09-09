@@ -170,7 +170,6 @@ The roster in `plugins/players/` currently includes and each entry lists its `Ch
 - Lady of Fire (B, Fire)
 - Luna (B, Generic)
 - Mezzy (B, random damage type)
-- Mimic (C, random damage type)
 - Player (C, chosen damage type)
 
 Characters with a "random damage type" roll their element on first load and reuse that result in future sessions.

@@ -46,6 +46,9 @@ async def test_pull_requires_ticket(app_with_db):
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
     conn.execute(
+        "CREATE TABLE IF NOT EXISTS upgrade_items (id TEXT PRIMARY KEY, count INTEGER NOT NULL)"
+    )
+    conn.execute(
         "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
         ("ticket", 0)
     )
@@ -73,6 +76,9 @@ async def test_pull_five_star_duplicate(app_with_db):
 
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS owned_players (id TEXT PRIMARY KEY)"
+    )
     others = [cid for cid in FIVE_STAR if cid != char_id]
     for cid in others:
         conn.execute("INSERT OR IGNORE INTO owned_players (id) VALUES (?)", (cid,))

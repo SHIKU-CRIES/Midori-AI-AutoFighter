@@ -14,7 +14,7 @@ class Mimic(PlayerBase):
     id = "mimic"
     name = "Mimic"
     char_type: CharacterType = CharacterType.C
-    gacha_rarity = 5
+    gacha_rarity = 0
     damage_type: DamageTypeBase = field(
         default_factory=lambda: load_damage_type(choice(ALL_DAMAGE_TYPES))
     )
