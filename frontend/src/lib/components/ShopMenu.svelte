@@ -39,6 +39,7 @@
     dispatch('buy', item);
   }
   function reroll() {
+    if (awaitingReroll) return; // Prevent rapid-fire clicks
     awaitingReroll = true;
     soldKeys = new Set();
     dispatch('reroll');
@@ -93,11 +94,11 @@
     soldKeys = new Set();
     awaitingReroll = false;
   }
-  // Keep metadata enrichment reactive for new catalogs
-  $: baseList = (baseList, cardMeta, relicMeta, baseList.map((e) => ({ ...enrich(e), key: e.key })));
+  // Keep metadata enrichment reactive for new catalogs - properly formed reactive statement
+  $: enrichedBaseList = baseList.map((e) => ({ ...enrich(e), key: e.key }));
   // Partition for layout
-  $: displayCards = baseList.filter(e => e?.type === 'card');
-  $: displayRelics = baseList.filter(e => e?.type === 'relic');
+  $: displayCards = enrichedBaseList.filter(e => e?.type === 'card');
+  $: displayRelics = enrichedBaseList.filter(e => e?.type === 'relic');
 </script>
 
 <MenuPanel data-testid="shop-menu" padding="0.6rem 0.6rem 0.8rem 0.6rem">
@@ -147,7 +148,9 @@
     </section>
   </div>
   <div class="actions">
-    <button class="action" on:click={reroll}>Reroll</button>
+    <button class="action" disabled={awaitingReroll} on:click={reroll}>
+      {awaitingReroll ? 'Rerolling...' : 'Reroll'}
+    </button>
     <button class="action" on:click={close}>Leave</button>
   </div>
   
@@ -188,6 +191,7 @@
 
   .actions { display:flex; gap:0.5rem; justify-content:flex-end; margin-top: 0.75rem; }
   .action { border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.5); color:#fff; padding: 0.35rem 0.7rem; }
+  .action:disabled { opacity: 0.5; cursor: not-allowed; }
 
   @media (max-width: 920px) {
     .columns { grid-template-columns: 1fr; }
