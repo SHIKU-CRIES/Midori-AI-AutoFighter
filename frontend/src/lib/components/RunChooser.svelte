@@ -1,7 +1,9 @@
 <script>
   import { createEventDispatcher, onMount } from 'svelte';
+  import MenuPanel from './MenuPanel.svelte';
 
   export let runs = [];
+  export let reducedMotion = false;
   const dispatch = createEventDispatcher();
 
   let selected = 0;
@@ -25,7 +27,7 @@
   }
 </script>
 
-<div class="chooser">
+<MenuPanel class="chooser" padding="0.25rem" {reducedMotion}>
   {#if runs.length > 0}
     <div class="runs">
       {#each runs as r, i}
@@ -50,11 +52,11 @@
       <button class="icon-btn" on:click={startNew}>Start New</button>
     </div>
   {/if}
-  
-</div>
+
+</MenuPanel>
 
 <style>
-  .chooser { padding: 0.25rem; min-width: 520px; max-width: 90vw; }
+  .chooser { min-width: 520px; max-width: 90vw; }
   .runs { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.5rem; }
   .run-item { display: flex; gap: 0.5rem; align-items: center; background: rgba(255,255,255,0.06); padding: 0.35rem 0.5rem; }
   .summary { display: flex; flex-direction: column; gap: 0.15rem; }

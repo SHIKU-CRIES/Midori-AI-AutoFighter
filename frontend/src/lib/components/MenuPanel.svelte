@@ -1,13 +1,19 @@
 <script>
+  import StarStorm from './StarStorm.svelte';
   export let padding = '0.5rem';
+  export let reducedMotion = false;
+  export let starColor = '';
+  export let class = '';
+  export let style = '';
 </script>
 
 <style>
   .panel {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -42,6 +48,11 @@
   }
 </style>
 
-<div class="panel" style={`--padding: ${padding}`}> 
+<div
+  {...$$restProps}
+  class={`panel ${class}`}
+  style={`--padding: ${padding}; ${style}`}
+>
+  <StarStorm color={starColor} {reducedMotion} />
   <slot />
 </div>
