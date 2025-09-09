@@ -83,6 +83,12 @@
   }
 
   $: isDead = (fighter?.hp || 0) <= 0;
+  
+  // Display name for hover label
+  $: displayName = (() => {
+    const raw = String(fighter?.name || fighter?.id || '').trim();
+    return raw.replace(/[_-]+/g, ' ');
+  })();
 </script>
 
 <div 
@@ -153,6 +159,10 @@
         {/if}
       </div>
     </div>
+    <!-- Hover-only name chip (bottom-left) -->
+    {#if displayName}
+      <div class="name-chip" aria-hidden="true">{displayName}</div>
+    {/if}
   </div>
 </div>
 
@@ -608,5 +618,44 @@
   /* Responsive adjustments */
   @media (max-width: 600px) {
     /* No element indicator; overlay UI scales naturally */
+  }
+
+  /* Name chip styling — mirrors HP number backdrop aesthetics */
+  .name-chip {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    color: #fff;
+    font-weight: 800;
+    font-size: clamp(0.7rem, calc(var(--portrait-size) * 0.10), 1rem);
+    line-height: 1.05;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 120ms ease, transform 120ms ease;
+    z-index: 3;
+  }
+  .fighter-portrait:hover .name-chip { opacity: 1; transform: translateY(0); }
+  .dead .fighter-portrait:hover .name-chip { opacity: 0; }
+  /* Soft faded-edge backdrop behind the name chip (same as HP number style) */
+  .name-chip::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 12px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.50) 40%,
+      rgba(0, 0, 0, 0.30) 70%,
+      rgba(0, 0, 0, 0.00) 100%
+    );
+    filter: blur(4px);
+    box-shadow: 0 0 16px rgba(0,0,0,0.3);
+    z-index: -1;
+    pointer-events: none;
   }
 </style>

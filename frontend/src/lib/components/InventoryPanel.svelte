@@ -110,9 +110,7 @@
     <div class="cards-grid">
       {#each sortedCardIds as id}
         {#key id}
-          <div class="item">
-            <CardArt entry={{ id, name: cardName(id), stars: cardStars(id), about: (cardMeta[id]?.about || '') }} type="card" />
-          </div>
+          <CardArt entry={{ id, name: cardName(id), stars: cardStars(id), about: (cardMeta[id]?.about || '') }} type="card" />
         {/key}
       {/each}
     </div>
@@ -122,7 +120,7 @@
     <div class="relics-grid">
       {#each sortedRelicEntries as [id, qty]}
         {#key id}
-          <div class="item">
+          <div class="relic-cell">
             <CurioChoice entry={{ id, name: relicName(id), stars: relicStars(id), about: (relicMeta[id]?.about || '') }} />
             <span class="qty">x{qty}</span>
           </div>
@@ -187,9 +185,9 @@
     align-items: stretch;
     justify-items: center;
   }
-  .item { display:flex; flex-direction:column; align-items:center; font-size:0.75rem; }
-  /* Inventory is read-only */
-  .item :global(button) { pointer-events:none; }
+  /* Inventory is read-only; disable relic button clicks within this panel */
+  .relics-grid :global(.curio) { pointer-events: none; }
+  .relic-cell { display:flex; flex-direction:column; align-items:center; font-size:0.85rem; }
   .qty { margin-top: 0.25rem; opacity: 0.9; }
   .materials-section {
     display: grid;

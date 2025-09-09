@@ -238,40 +238,41 @@
   <div class="inventory-body">
     <!-- Left side: Item grid -->
     <div class="item-grid-container">
-      <div class="item-grid">
-        {#if activeTab === 'cards'}
+      {#if activeTab === 'cards'}
+        <div class="cards-grid">
           {#each sortedCards as [id, qty]}
             <button 
-              class="grid-item" 
+              class="card-cell" 
               class:selected={selectedItem?.id === id && selectedItem?.type === 'card'}
               on:click={() => selectItem(id, 'card', qty)}
+              aria-label={`Select card ${cardName(id)}`}
             >
-              <div class="item-icon">
-                <CardArt entry={{ id, name: cardName(id), stars: cardStars(id), about: cardDesc(id) }} type="card" compact={true} />
-              </div>
-              <div class="item-quantity">×{qty}</div>
-              <div class="item-stars" style="color: {getStarColor(cardStars(id))}">
-                {'★'.repeat(cardStars(id))}
-              </div>
+              <CardArt entry={{ id, name: cardName(id), stars: cardStars(id), about: cardDesc(id) }} type="card" />
+              {#if qty > 1}
+                <span class="qty-badge">×{qty}</span>
+              {/if}
             </button>
           {/each}
-        {:else if activeTab === 'relics'}
+        </div>
+      {:else if activeTab === 'relics'}
+        <div class="relics-grid">
           {#each sortedRelics as [id, qty]}
-            <button 
-              class="grid-item" 
+            <div 
+              class="relic-cell" 
               class:selected={selectedItem?.id === id && selectedItem?.type === 'relic'}
+              role="button"
+              tabindex="0"
               on:click={() => selectItem(id, 'relic', qty)}
+              on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectItem(id, 'relic', qty); } }}
+              aria-label={`Select relic ${relicName(id)}`}
             >
-              <div class="item-icon">
-                <CurioChoice entry={{ id, name: relicName(id), stars: relicStars(id), about: relicDesc(id) }} compact={true} />
-              </div>
-              <div class="item-quantity">×{qty}</div>
-              <div class="item-stars" style="color: {getStarColor(relicStars(id))}">
-                {'★'.repeat(relicStars(id))}
-              </div>
-            </button>
+              <CurioChoice entry={{ id, name: relicName(id), stars: relicStars(id), about: relicDesc(id) }} disabled={true} />
+              <span class="relic-qty">×{qty}</span>
+            </div>
           {/each}
-        {:else}
+        </div>
+      {:else}
+        <div class="item-grid">
           {#each materialEntries as [key, qty]}
             <button 
               class="grid-item material" 
@@ -285,8 +286,8 @@
               <div class="material-qty">×{qty}</div>
             </button>
           {/each}
-        {/if}
-      </div>
+        </div>
+      {/if}
     </div>
 
     <!-- Right side: Detail panel -->
@@ -446,6 +447,56 @@
     gap: 0.75rem;
     align-items: start;
   }
+
+  /* Cards tab: show full CardArt cards in a responsive grid */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+    justify-items: center;
+  }
+  .card-cell {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  .card-cell.selected { outline: 2px solid rgba(120,180,255,0.6); outline-offset: 2px; }
+  .qty-badge {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 0 0.35rem;
+    font-size: 0.8rem;
+    line-height: 1.1rem;
+    border-radius: 6px;
+  }
+
+  /* Relics tab: show CurioChoice with quantity */
+  .relics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+    justify-items: center;
+  }
+  .relic-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  .relic-cell.selected { outline: 2px solid rgba(120,180,255,0.6); outline-offset: 4px; }
+  .relic-qty { font-size: 0.85rem; opacity: 0.9; }
 
   .grid-item {
     background: rgba(255,255,255,0.05);
