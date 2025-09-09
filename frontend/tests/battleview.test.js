@@ -70,6 +70,10 @@ describe('BattleView layout and polling', () => {
     expect(fighterUIItem).toContain("p.display === 'number'");
   });
 
+  test('renders element icon within the ultimate gauge', () => {
+    expect(fighterUIItem).toContain('ult-icon');
+  });
+
   test('uses normalized element for portraits', () => {
     expect(fighterPortrait).toContain('getElementIcon(fighter.element)');
     expect(fighterPortrait).toContain('getElementColor(fighter.element)');
