@@ -10,6 +10,7 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Light(DamageTypeBase):
+    """Supportive element that heals allies and purges harmful effects."""
     id: str = "Light"
     weakness: str = "Dark"
     color: tuple[int, int, int] = (255, 255, 255)
@@ -31,6 +32,7 @@ class Light(DamageTypeBase):
         return True
 
     async def ultimate(self, actor, allies, enemies):
+        """Fully heal allies, cleanse their DoTs, and weaken enemies."""
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
         for ally in allies:
@@ -78,3 +80,10 @@ class Light(DamageTypeBase):
             mgr.add_modifier(mod)
         BUS.emit("light_ultimate", actor)
         return True
+
+    @classmethod
+    def get_ultimate_description(cls) -> str:
+        return (
+            "Removes all DoTs from allies—including Shadow Siphon—then heals them to full. "
+            "Enemies receive a 25% defense debuff for 10 turns and a 'light_ultimate' event is emitted."
+        )

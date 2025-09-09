@@ -7,11 +7,17 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Generic(DamageTypeBase):
+    """Neutral element with no strengths or weaknesses.
+
+    Serves as the baseline damage type focused on consistent damage without
+    side effects.
+    """
     id: str = "Generic"
     weakness: str = "none"
     color: tuple[int, int, int] = (255, 255, 255)
 
     async def ultimate(self, actor, allies, enemies):
+        """Split the user's attack into 64 rapid strikes on one target."""
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
 

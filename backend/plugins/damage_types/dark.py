@@ -10,6 +10,7 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Dark(DamageTypeBase):
+    """Selfish element that drains allies to fuel overwhelming strikes."""
     id: str = "Dark"
     weakness: str = "Light"
     color: tuple[int, int, int] = (145, 0, 145)
@@ -99,12 +100,7 @@ class Dark(DamageTypeBase):
         allies: list[Stats],
         enemies: list[Stats],
     ) -> bool:
-        """Strike six times, scaling with allied DoT stacks.
-
-        Damage is multiplied by ``ULT_PER_STACK`` for every DoT stack present on
-        the ``allies`` list (including the ``actor``). Each of the six hits
-        emits a ``damage`` event after applying damage.
-        """
+        """Strike a foe six times, scaling with allied DoT stacks."""
 
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
@@ -129,3 +125,11 @@ class Dark(DamageTypeBase):
 
     def create_dot(self, damage: float, source) -> DamageOverTime | None:
         return damage_effects.create_dot(self.id, damage, source)
+
+    @classmethod
+    def get_ultimate_description(cls) -> str:
+        return (
+            "Multiplies the user's attack by `ULT_PER_STACK` for each DoT stack on allied "
+            "targets, then deals that damage to one enemy six times, emitting a 'damage' "
+            "event after each hit."
+        )

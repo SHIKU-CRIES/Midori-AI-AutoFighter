@@ -12,6 +12,11 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Fire(DamageTypeBase):
+    """Aggressive element that amplifies damage as the user weakens.
+
+    Fire attacks scale with missing HP and often inflict burning damage over
+    time at the cost of self-inflicted drain.
+    """
     id: str = "Fire"
     weakness: str = "Ice"
     color: tuple[int, int, int] = (255, 0, 0)
@@ -36,6 +41,7 @@ class Fire(DamageTypeBase):
         return dmg
 
     async def ultimate(self, actor: Stats, allies: list[Stats], enemies: list[Stats]) -> bool:
+        """Blast all foes for the caster's attack and try to ignite them."""
         await super().ultimate(actor, allies, enemies)
         base = getattr(actor, "atk", 0)
         living = [foe for foe in enemies if getattr(foe, "hp", 0) > 0]
@@ -70,3 +76,11 @@ class Fire(DamageTypeBase):
 
     def _on_battle_end(self, *_: object) -> None:
         self._drain_stacks = 0
+
+    @classmethod
+    def get_ultimate_description(cls) -> str:
+        return (
+            "Deals the user's attack as damage to every living enemy and rolls "
+            "Blazing Torment on each. Every use adds a drain stack that burns "
+            "the caster for 5% of max HP per stack at the start of their turns."
+        )
