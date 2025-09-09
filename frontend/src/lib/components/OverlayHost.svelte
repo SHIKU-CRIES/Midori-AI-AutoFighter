@@ -16,6 +16,7 @@
   import CharacterEditor from './CharacterEditor.svelte';
   import Inventory from './Inventory.svelte';
   import SettingsMenu from './SettingsMenu.svelte';
+  import Guidebook from './Guidebook.svelte';
   import RunChooser from './RunChooser.svelte';
   import ShopMenu from './ShopMenu.svelte';
   import RestRoom from './RestRoom.svelte';
@@ -263,6 +264,12 @@
       on:save={(e) => dispatch('saveSettings', e.detail)}
       on:endRun={() => dispatch('endRun')}
     />
+  </PopupWindow>
+{/if}
+
+{#if $overlayView === 'guidebook'}
+  <PopupWindow title="Guidebook" maxWidth="1200px" maxHeight="90vh" zIndex={1300} on:close={() => dispatch('back')}>
+    <Guidebook />
   </PopupWindow>
 {/if}
 

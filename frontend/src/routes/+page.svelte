@@ -1052,7 +1052,8 @@
       openPulls,
       openFeedback,
       openInventory,
-      openSettings: () => openOverlay('settings')
+      openSettings: () => openOverlay('settings'),
+      openGuidebook: () => openOverlay('guidebook')
     },
     battleActive
   );

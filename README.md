@@ -1,6 +1,7 @@
 # Midori AI AutoFighter
 
 A web-based auto-battler game featuring strategic party management, elemental combat, and character progression.
+Now includes an in-game Guidebook (Damage Types, Ults, Shops, Mechs, Passives) accessible from the main menu.
 
 ## Quick Start with Docker Compose (Recommended)
 
