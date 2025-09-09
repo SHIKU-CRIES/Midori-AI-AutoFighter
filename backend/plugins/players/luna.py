@@ -11,7 +11,7 @@ from plugins.players._base import PlayerBase
 class Luna(PlayerBase):
     id = "luna"
     name = "Luna"
-    ## 
+    ##
     char_type: CharacterType = CharacterType.B
     damage_type: DamageTypeBase = field(
         default_factory=lambda: get_damage_type("Luna")
