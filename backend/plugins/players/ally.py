@@ -13,7 +13,7 @@ from plugins.players._base import PlayerBase
 class Ally(PlayerBase):
     id = "ally"
     name = "Ally"
-    about = "A versatile support fighter who excels at overloading enemy systems. Known for her tactical adaptability and elemental mastery."
+    about = "A versatile support fighter whose tactical brilliance shines through her overload capabilities, systematically dismantling enemy defenses through strategic elemental manipulation. Known for her uncanny adaptability, Ally reads the battlefield like a chess master, identifying weak points in enemy formations and exploiting them with perfectly timed elemental strikes. Her mastery spans all damage types, allowing her to adapt her combat style to counter any opponent. In combat, she excels at overloading enemy systems—disrupting their magical circuits, overwhelming their defenses, and creating cascade failures that turn their own power against them."
     char_type: CharacterType = CharacterType.B
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(

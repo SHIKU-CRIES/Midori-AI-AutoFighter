@@ -13,7 +13,7 @@ from plugins.players._base import PlayerBase
 class Hilander(PlayerBase):
     id = "hilander"
     name = "Hilander"
-    about = "A passionate brewmaster whose critical ferment techniques create explosive combinations. His alchemical prowess turns the tide of battle through strategic enhancement."
+    about = "A passionate brewmaster whose alchemical expertise extends far beyond tavern walls into the heat of battle. His critical ferment techniques create explosive combinations by treating combat like a complex brewing process—mixing elements, timing reactions, and achieving the perfect catalyst moment for devastating results. Hilander approaches each fight with the same methodical passion he brings to crafting the perfect ale, understanding that the right combination of pressure, timing, and elemental ingredients can create effects far greater than the sum of their parts. His battlefield brewery turns every engagement into an opportunity to perfect his most volatile recipes."
     char_type: CharacterType = CharacterType.A
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(
