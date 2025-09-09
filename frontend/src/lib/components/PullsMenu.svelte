@@ -8,6 +8,7 @@
   import { openOverlay } from '../systems/OverlayController.js';
   
   const dispatch = createEventDispatcher();
+  export let reducedMotion = false;
   
   // State management
   let activeTab = 'standard';
@@ -148,7 +149,7 @@
   }
 </script>
 
-<MenuPanel data-testid="pulls-menu" class="warp-menu">
+<MenuPanel data-testid="pulls-menu" class="warp-menu" {reducedMotion}>
   <!-- Header with tabs (matching Guidebook/Inventory styling) -->
   <div class="warp-header">
     <div class="tab-row">
