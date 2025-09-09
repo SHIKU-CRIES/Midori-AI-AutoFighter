@@ -3,6 +3,8 @@
   export let padding = '0.5rem';
   export let reducedMotion = false;
   export let starColor = '';
+  export let class = '';
+  export let style = '';
 </script>
 
 <style>
@@ -46,7 +48,11 @@
   }
 </style>
 
-<div class="panel" style={`--padding: ${padding}`}>
+<div
+  {...$$restProps}
+  class={`panel ${class}`}
+  style={`--padding: ${padding}; ${style}`}
+>
   <StarStorm color={starColor} {reducedMotion} />
   <slot />
 </div>
