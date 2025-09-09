@@ -78,6 +78,7 @@
     awaitingReroll = false;
     rerollAnimationText = '';
     isAnimating = false;
+    lastItemsSignature = '';
     dispatch('close');
   }
 
@@ -117,14 +118,36 @@
     return entry;
   }
 
+  // Track items to detect actual changes (not just re-enrichment)
+  let lastItemsSignature = '';
+  function getItemsSignature(itemsList) {
+    if (!Array.isArray(itemsList) || itemsList.length === 0) return '';
+    // Create a signature based on item IDs and prices to detect real changes
+    return itemsList.map(item => `${item?.type || 'item'}:${item?.id || ''}:${priceOf(item)}`).join('|');
+  }
+  
   // Initialize base list on first stock arrival; replace on reroll
   $: initBaseOnce();
-  $: if (awaitingReroll && Array.isArray(items) && items.length) {
-    baseList = buildBaseList(items);
-    soldKeys = new Set();
-    awaitingReroll = false;
-    rerollAnimationText = '';
-    isAnimating = false;
+  $: {
+    // Handle new items arriving (could be from reroll or initial load)
+    if (Array.isArray(items) && items.length) {
+      const currentSignature = getItemsSignature(items);
+      
+      // If we're awaiting reroll and items have actually changed, complete the reroll
+      if (awaitingReroll && currentSignature !== lastItemsSignature && lastItemsSignature !== '') {
+        baseList = buildBaseList(items);
+        soldKeys = new Set();
+        awaitingReroll = false;
+        rerollAnimationText = '';
+        isAnimating = false;
+        lastItemsSignature = currentSignature;
+      }
+      // If not awaiting reroll, just update the base list normally
+      else if (!awaitingReroll) {
+        baseList = buildBaseList(items);
+        lastItemsSignature = currentSignature;
+      }
+    }
   }
   // Keep metadata enrichment reactive for new catalogs - properly formed reactive statement
   $: enrichedBaseList = baseList.map((e) => ({ ...enrich(e), key: e.key }));
