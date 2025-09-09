@@ -1,6 +1,8 @@
 <script>
   import { getElementIcon, getElementColor } from '../systems/assetLoader.js';
   import { createEventDispatcher } from 'svelte';
+  import { fly } from 'svelte/transition';
+  import { flip } from 'svelte/animate';
 
   /**
    * Displays the available roster and handles character selection.
@@ -94,6 +96,16 @@
     // Slow sweep: between 10s and 16s
     return (10 + r * 6).toFixed(2);
   }
+
+  function onIntroStart(id, e) {
+    if (!reducedMotion && selected.includes(id)) {
+      e.target.classList.add('sparkle');
+    }
+  }
+
+  function onIntroEnd(e) {
+    e.target.classList.remove('sparkle');
+  }
 </script>
 
 {#if compact}
@@ -133,8 +145,8 @@
       </button>
     </div>
   </div>
-  <div class="roster-list">
-  {#each sortedRoster as char}
+  <div class="roster-list" animate:flip={{ duration: reducedMotion ? 0 : 300 }}>
+  {#each sortedRoster as char (selected.includes(char.id) ? `party-${char.id}` : `roster-${char.id}`)}
     <button
       type="button"
       data-testid={`choice-${char.id}`}
@@ -146,7 +158,11 @@
       on:pointerdown={(e) => onPointerDown(char.id, e)}
       on:pointerup={onPointerUp}
       on:pointerleave={onPointerUp}
-      style={`border-color: ${getElementColor(char.element)}; --el-color: ${getElementColor(char.element)}; --sweep-delay: ${sweepDelay(char.id)}s; --sweep-duration: ${sweepDuration(char.id)}s;`}> 
+      on:introstart={(e) => onIntroStart(char.id, e)}
+      on:introend={onIntroEnd}
+      in:fly={{ x: -100, duration: reducedMotion ? 0 : 300 }}
+      out:fly={{ x: 100, duration: reducedMotion ? 0 : 300 }}
+      style={`border-color: ${getElementColor(char.element)}; --el-color: ${getElementColor(char.element)}; --sweep-delay: ${sweepDelay(char.id)}s; --sweep-duration: ${sweepDuration(char.id)}s;`}>
       <img src={char.img} alt={char.name} class="row-img" />
       <span class="row-name">{char.name}</span>
       <svelte:component
@@ -259,6 +275,24 @@
 .char-row.selected.reduced::before {
   animation: none;
   opacity: 0.45; /* keep visible but calmer with reduced motion */
+}
+
+/* Sparkle trail when moving into party */
+.char-row.sparkle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 50%, var(--el-color) 40%, transparent 60%),
+    radial-gradient(circle at 60% 30%, var(--el-color) 40%, transparent 60%),
+    radial-gradient(circle at 80% 70%, var(--el-color) 40%, transparent 60%);
+  opacity: 0.8;
+  animation: sparkleTrail 400ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes sparkleTrail {
+  from { transform: translateX(-20px); opacity: 0.8; }
+  to { transform: translateX(0); opacity: 0; }
 }
 
 @keyframes af-elm-sweep {

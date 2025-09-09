@@ -20,6 +20,10 @@ Implementation details:
   members (`X / 5`) and provides sorting controls for name, element, or id with
   an ascending/descending toggle. Selected members are always grouped at the
   top and sorted within their section.
+- `PartyRoster.svelte` wraps roster rows in a flip transition group so items
+  slide smoothly when their order changes. Choosing a character slides it out
+  and back in from the left with an element‑colored sparkle trail that is
+  skipped entirely when Reduced Motion is enabled.
 - `PartyPicker.svelte` propagates `reducedMotion` to the roster so the effect
   can be disabled via Settings.
 - `StatTabs.svelte` uses flexible sizing so the panel fills its side.
