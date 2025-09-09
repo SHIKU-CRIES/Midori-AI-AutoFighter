@@ -149,14 +149,18 @@ class _Bus:
         """Internal method to process batched events concurrently."""
         # Collect all batched events and process them concurrently
         all_events = []
-        for event, args_list in self._batched_events.items():
+
+        # Snapshot current batches to avoid mutation during async yield
+        events_snapshot = list(self._batched_events.items())
+
+        # Clear batches immediately so new events can be scheduled separately
+        self._batched_events.clear()
+        self._batch_timer = None
+
+        for event, args_list in events_snapshot:
             for args in args_list:
                 all_events.append((event, args))
                 await asyncio.sleep(0.002)
-
-        # Clear batches immediately to avoid interference with new batching
-        self._batched_events.clear()
-        self._batch_timer = None
 
         if all_events:
             # Process all events concurrently for much better performance
