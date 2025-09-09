@@ -14,6 +14,24 @@ from autofighter.stats import Stats
 class TestEventBusPerformance:
     """Test event bus performance under heavy load scenarios."""
 
+    @pytest.mark.asyncio
+    async def test_async_event_yield(self):
+        """Ensure async emissions yield at least 2ms per event."""
+        async def handler(*args):
+            return None
+
+        BUS.subscribe("yield_test", handler)
+
+        try:
+            event_count = 5
+            start = time.perf_counter()
+            for _ in range(event_count):
+                await BUS.emit_async("yield_test", "data")
+            elapsed = time.perf_counter() - start
+            assert elapsed >= event_count * 0.002
+        finally:
+            BUS.unsubscribe("yield_test", handler)
+
     def test_sync_emit_with_100_subscribers(self):
         """Test synchronous event emission with 100 subscribers to measure blocking."""
         # Setup: Create 100 mock subscribers that simulate processing time

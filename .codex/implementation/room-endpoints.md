@@ -28,7 +28,7 @@ echoed in responses for parity across room types.
 - `POST /rooms/<run_id>/battle` – validates the next map node is a battle,
   spawns a random player plugin not in the party as the foe, scales all stats by
   floor, room index, loop, and Pressure, triggers passives, and exchanges attacks
-  with the party. The async loop sleeps briefly between turns. Responses include
+  with the party. The async loop sleeps for 0.002 s between turns. Responses include
   full stats for both sides plus up to three unused `card_choices` of the appropriate
   star rank and the party's full `cards` list. See `battle-endpoint-payload.md` for
   payload details. The map pointer is not advanced until the client calls

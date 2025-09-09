@@ -1,6 +1,6 @@
 # Battle Endpoint Payload
 
-`POST /rooms/<run_id>/battle` resolves the next battle node. Fights are fully automated, looping until one side falls, and the backend echoes any provided `action` string. Each round triggers passives and processes damage or healing over time effects before exchanging attacks, pausing briefly between turns to keep the loop async-friendly.
+`POST /rooms/<run_id>/battle` resolves the next battle node. Fights are fully automated, looping until one side falls, and the backend echoes any provided `action` string. Each round triggers passives and processes damage or healing over time effects before exchanging attacks, pausing for 0.002 s between turns to keep the loop async-friendly.
 
 ## Request
 - `action` (string, optional)
