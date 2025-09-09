@@ -440,10 +440,11 @@ async def test_summon_inheritance_with_effects(monkeypatch):
     assert summon._base_mitigation == 1.0  # 50% of base 2.0 (ignores +1.0 effect)
     assert summon._base_vitality == 0.75  # 50% of base 1.5 (ignores +0.5 effect)
 
-    # Runtime stats should match base stats since summon has no effects
-    assert summon.defense == 50
-    assert summon.mitigation == 1.0
-    assert summon.vitality == 0.75
+    # Runtime stats should include inherited beneficial effects
+    # The summon inherits the beneficial StatEffect, which adds +25 defense, +0.5 mitigation, +0.25 vitality
+    assert summon.defense == 75  # 50 base + 25 inherited effect (50% of +50)
+    assert summon.mitigation == 1.5  # 1.0 base + 0.5 inherited effect (50% of +1.0)
+    assert summon.vitality == 1.0  # 0.75 base + 0.25 inherited effect (50% of +0.5)
 
 
 @pytest.mark.asyncio
@@ -507,12 +508,21 @@ async def test_summon_inherits_beneficial_effects(monkeypatch):
 
     # Verify summon inherited beneficial StatEffect
     summon_effects = summon.get_active_effects()
-    assert len(summon_effects) == 1
-    inherited_effect = summon_effects[0]
-    assert inherited_effect.name == "summon_test_buff"
-    assert inherited_effect.stat_modifiers["atk"] == 25  # 50% of 50
-    assert inherited_effect.stat_modifiers["defense"] == 12.5  # 50% of 25
-    assert inherited_effect.duration == 5  # Same duration
+    assert len(summon_effects) == 2  # One from StatEffect inheritance, one from StatModifier application
+    
+    # Find the inherited StatEffect (from summoner's StatEffect)
+    stat_effect = next((e for e in summon_effects if e.name == "summon_test_buff"), None)
+    assert stat_effect is not None
+    assert stat_effect.stat_modifiers["atk"] == 25  # 50% of 50
+    assert stat_effect.stat_modifiers["defense"] == 12.5  # 50% of 25
+    assert stat_effect.duration == 5  # Same duration
+    
+    # Find the StatEffect created by the applied StatModifier
+    modifier_effect = next((e for e in summon_effects if e.name == "summon_test_stat_buff_id"), None)
+    assert modifier_effect is not None
+    assert modifier_effect.stat_modifiers["crit_rate"] == 0.05  # 50% of 0.1
+    assert modifier_effect.stat_modifiers["crit_damage"] == 0.25  # scaled multiplier bonus
+    assert modifier_effect.duration == 4  # Same duration
 
     # Verify summon has effect manager
     assert hasattr(summon, 'effect_manager')

@@ -169,6 +169,7 @@ class Summon(Stats):
             for mod in effect_mgr.mods:
                 if cls._is_beneficial_stat_modifier(mod):
                     scaled_mod = cls._scale_stat_modifier(mod, summon, stat_multiplier)
+                    scaled_mod.apply()  # Apply the modifier to ensure it affects the summon's stats
                     summon.effect_manager.add_modifier(scaled_mod)
                     log.debug(f"Shared beneficial StatModifier '{mod.name}' to summon {summon.id}")
 
