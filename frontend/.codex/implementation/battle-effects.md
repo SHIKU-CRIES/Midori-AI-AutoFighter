@@ -26,6 +26,11 @@ also slowly tilts left and right, the sway intensifying up to a
 one-degree angle around 98% charge. Reduced Motion disables both the
 transition and the tilt.
 
+When a fighter's element changes mid-battle, the portrait outline and
+ultimate icon briefly flash using the `element-change` animation. The
+update transitions the element color and icon smoothly and is skipped
+when Reduced Motion is enabled.
+
 HP bars for party members, foes, and their summons animate their fill widths
 and overheal overlays with short transitions. When Reduced Motion is enabled,
 these transitions are removed for instant updates.
