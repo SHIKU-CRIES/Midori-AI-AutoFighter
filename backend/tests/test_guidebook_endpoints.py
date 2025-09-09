@@ -74,10 +74,10 @@ async def test_stats_endpoint(app_with_db):
     assert 'level_info' in data
     assert 'common_passives' in data
     assert isinstance(data['stats'], list)
-    
+
     # Verify we have all expected stats
     stat_names = [stat['name'] for stat in data['stats']]
-    expected_stats = ['Health Points (HP)', 'Attack (ATK)', 'Defense (DEF)', 
+    expected_stats = ['Health Points (HP)', 'Attack (ATK)', 'Defense (DEF)',
                      'Critical Rate', 'Critical Damage', 'Vitality']
     for expected in expected_stats:
         assert expected in stat_names

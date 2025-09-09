@@ -25,10 +25,13 @@ async def damage_types() -> tuple[str, int, dict[str, Any]]:
         "Lightning": "Strikes multiple targets and applies random elemental DoTs. Ultimate adds Aftertaste effect. Weak to Wind.",
         "Wind": "Hits spread to all enemies after first target. Applies Gale Erosion DoT. Ultimate pulls and detonates enemy DoTs. Weak to Fire.",
         "Light": "Provides healing and regeneration to allies. Direct healing for low-HP allies instead of attacking. Weak to Dark.",
-        "Dark": "Applies Shadow Siphon to party members, draining HP to boost own attack and defense. Strong single-target damage. Weak to Light."
+        "Dark": "Applies Shadow Siphon to party members, draining HP to boost own attack and defense. Strong single-target damage. Weak to Light.",
+        "Generic": "Multi-hit ultimate that deals 64 precise strikes. Used as fallback when no specific damage type is available. No elemental weaknesses."
     }
 
-    for name in ALL_DAMAGE_TYPES:
+    # Process all official types plus Generic
+    all_types = list(ALL_DAMAGE_TYPES) + ["Generic"]
+    for name in all_types:
         inst = load_damage_type(name)
         cls = type(inst)
         desc = enhanced_descriptions.get(name, getattr(cls, "__doc__", None))
@@ -40,7 +43,7 @@ async def damage_types() -> tuple[str, int, dict[str, Any]]:
 
         # Calculate what this type is strong against
         strong_against = None
-        for other_name in ALL_DAMAGE_TYPES:
+        for other_name in all_types:
             other_inst = load_damage_type(other_name)
             if getattr(other_inst, "weakness", None) == name:
                 strong_against = other_name
@@ -106,7 +109,7 @@ async def passives() -> tuple[str, int, dict[str, Any]]:
         "graygray_counter_maestro": "Graygray's unique passive that excels at counter-attacking enemies.",
         "hilander_critical_ferment": "Hilander's unique passive that builds up critical hit potential over time.",
         "ixia_tiny_titan": "Ixia's unique passive that provides increasing power despite small stature.",
-        "kboshi_flux_cycle": "Kboshi's unique passive that cycles through different elemental flux states.",
+        "kboshi_flux_cycle": "Kboshi's unique passive that randomly switches between damage types (80% chance). When switch fails, gains +20% damage and HoT stacks. Successful switches apply mitigation debuffs to enemies.",
         "lady_darkness_eclipsing_veil": "Lady Darkness's unique passive that shrouds the battlefield in shadow.",
         "lady_echo_resonant_static": "Lady Echo's unique passive that creates resonant static effects.",
         "lady_fire_and_ice_duality_engine": "Lady Fire and Ice's unique passive that balances opposing elements.",
@@ -193,10 +196,123 @@ async def mechs() -> tuple[str, int, dict[str, Any]]:
         {"name": "DoTs & HoTs", "description": "Damage/Healing over time effects stack and interact with some elements."},
         {"name": "Enrage", "description": "Foes may gain enrage increasing difficulty as rooms progress."},
         {"name": "Elemental Resistances", "description": "Each damage type has a weakness: Fire→Ice, Ice→Lightning, Lightning→Wind, Wind→Fire, Light↔Dark."},
-        {"name": "Vitality Scaling", "description": "Healing scales with both healer and target vitality. DoTs use vitality for damage calculations."},
+        {"name": "Vitality Scaling", "description": "Vitality has three main effects: (1) Healing scales with both healer and target vitality, (2) Higher vitality reduces damage taken, (3) Experience gain is multiplied by vitality."},
         {"name": "Level Benefits", "description": "Global level increases base stats: +10 max HP, +5 attack, +3 defense per level."},
     ]
     return jsonify({"mechanics": mechanics}), 200
+
+
+@bp.get("/effects")
+async def effects() -> tuple[str, int, dict[str, Any]]:
+    """Get information about combat effects, buffs, and DoTs."""
+    # Combat effects
+    combat_effects = [
+        {
+            "name": "Aftertaste",
+            "type": "Combat Effect",
+            "description": "Deals a hit with random damage type (10% to 150% damage). Triggered by Lightning ultimate.",
+            "trigger": "Lightning Ultimate"
+        },
+        {
+            "name": "Critical Boost",
+            "type": "Buff",
+            "description": "+0.5% crit rate and +5% crit damage per stack. Removed when taking damage.",
+            "trigger": "Various sources"
+        }
+    ]
+
+    # DoT effects (damage over time)
+    dot_effects = [
+        {
+            "name": "Blazing Torment",
+            "type": "DoT",
+            "description": "Fire-based damage over time effect that deals burning damage each turn.",
+            "element": "Fire"
+        },
+        {
+            "name": "Frozen Wound",
+            "type": "DoT",
+            "description": "Ice-based DoT that reduces enemy actions and can cause missed turns.",
+            "element": "Ice"
+        },
+        {
+            "name": "Gale Erosion",
+            "type": "DoT",
+            "description": "Wind-based DoT that continuously erodes enemy defenses.",
+            "element": "Wind"
+        },
+        {
+            "name": "Shadow Siphon",
+            "type": "DoT",
+            "description": "Dark-based effect that drains HP from targets while boosting caster's stats.",
+            "element": "Dark"
+        },
+        {
+            "name": "Charged Decay",
+            "type": "DoT",
+            "description": "Lightning-based DoT that builds electrical charge for additional effects.",
+            "element": "Lightning"
+        },
+        {
+            "name": "Celestial Atrophy",
+            "type": "DoT",
+            "description": "Light-based DoT that weakens enemies while providing healing feedback.",
+            "element": "Light"
+        },
+        {
+            "name": "Poison",
+            "type": "DoT",
+            "description": "Generic poison effect that deals continuous damage over time.",
+            "element": "Neutral"
+        },
+        {
+            "name": "Bleed",
+            "type": "DoT",
+            "description": "Physical bleeding effect that causes ongoing health loss.",
+            "element": "Physical"
+        },
+        {
+            "name": "Twilight Decay",
+            "type": "DoT",
+            "description": "Reduces target's vitality by 0.5 while dealing damage over time.",
+            "element": "Dark"
+        },
+        {
+            "name": "Impact Echo",
+            "type": "DoT",
+            "description": "Residual damage effect that echoes previous impacts.",
+            "element": "Physical"
+        },
+        {
+            "name": "Cold Wound",
+            "type": "DoT",
+            "description": "Ice-based DoT that slows enemies and deals frost damage.",
+            "element": "Ice"
+        },
+        {
+            "name": "Abyssal Corruption",
+            "type": "DoT",
+            "description": "Dark corruption that spreads and intensifies over time.",
+            "element": "Dark"
+        },
+        {
+            "name": "Abyssal Weakness",
+            "type": "Debuff",
+            "description": "Reduces target's resistance to dark-based effects.",
+            "element": "Dark"
+        }
+    ]
+
+    return jsonify({
+        "combat_effects": combat_effects,
+        "dot_effects": dot_effects,
+        "categories": {
+            "combat_effects": "Special effects triggered during combat",
+            "dot_effects": "Damage over time and debuff effects",
+            "buffs": "Temporary stat boosts and beneficial effects",
+            "debuffs": "Negative effects that weaken enemies"
+        }
+    }), 200
 
 
 @bp.get("/stats")
@@ -235,7 +351,7 @@ async def stats() -> tuple[str, int, dict[str, Any]]:
         },
         {
             "name": "Vitality",
-            "description": "Multiplier for healing effects. Both healer and target vitality affect healing: healing × healer_vitality × target_vitality.",
+            "description": "Multiplier with three effects: (1) Healing scales with both healer and target vitality: healing × healer_vitality × target_vitality. (2) Higher vitality reduces damage taken in combat. (3) Experience gain is multiplied by vitality.",
             "base_value": "1.0x",
             "scaling": "Affected by cards and relics"
         },

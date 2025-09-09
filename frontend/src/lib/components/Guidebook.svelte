@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { Zap, Sparkles, LayoutPanelTop, ShoppingCart, Cog, ScrollText, TrendingUp, Search, RotateCcw } from 'lucide-svelte';
+  import { Zap, Sparkles, LayoutPanelTop, ShoppingCart, Cog, ScrollText, TrendingUp, Search, RotateCcw, Flame } from 'lucide-svelte';
   import { httpGet } from '$lib/systems/httpClient.js';
 
   // State management with localStorage persistence
@@ -16,6 +16,7 @@
   let shopInfo = null;
   let mechs = [];
   let stats = null;
+  let effects = null;
 
   async function loadStats() {
     const data = await httpGet('/guidebook/stats', { cache: 'no-store' }, true);
@@ -45,6 +46,10 @@
     const data = await httpGet('/guidebook/mechs', { cache: 'no-store' }, true);
     mechs = data?.mechanics || [];
   }
+  async function loadEffects() {
+    const data = await httpGet('/guidebook/effects', { cache: 'no-store' }, true);
+    effects = data || null;
+  }
 
   async function ensureTabLoaded(key) {
     if (key === 'stats' && !stats) await loadStats();
@@ -54,13 +59,14 @@
     if (key === 'shops' && !shopInfo) await loadShops();
     if (key === 'mechs' && mechs.length === 0) await loadMechs();
     if (key === 'passives' && passives.length === 0) await loadPassives();
+    if (key === 'effects' && !effects) await loadEffects();
   }
 
   // Load and save tab state from localStorage
   function loadTabState() {
     try {
       const saved = localStorage.getItem('guidebook-active-tab');
-      if (saved && ['stats', 'damage', 'ults', 'ui', 'shops', 'mechs', 'passives'].includes(saved)) {
+      if (saved && ['stats', 'damage', 'ults', 'ui', 'shops', 'mechs', 'passives', 'effects'].includes(saved)) {
         activeTab = saved;
       }
     } catch {}
@@ -111,6 +117,27 @@
         if (item.name?.toLowerCase().includes(query) || 
             item.description?.toLowerCase().includes(query)) {
           filteredResults.push({...item, type: 'stat', tab: 'stats'});
+        }
+      });
+    }
+
+    // Search effects
+    if (effects?.combat_effects) {
+      effects.combat_effects.forEach(item => {
+        if (item.name?.toLowerCase().includes(query) || 
+            item.description?.toLowerCase().includes(query) ||
+            item.type?.toLowerCase().includes(query)) {
+          filteredResults.push({...item, type: 'effect', tab: 'effects'});
+        }
+      });
+    }
+    if (effects?.dot_effects) {
+      effects.dot_effects.forEach(item => {
+        if (item.name?.toLowerCase().includes(query) || 
+            item.description?.toLowerCase().includes(query) ||
+            item.type?.toLowerCase().includes(query) ||
+            item.element?.toLowerCase().includes(query)) {
+          filteredResults.push({...item, type: 'effect', tab: 'effects'});
         }
       });
     }
@@ -184,6 +211,15 @@
       >
         <svelte:component this={ScrollText} class="tab-icon" size={18} />
         Passives
+      </button>
+      <button 
+        class="tab" 
+        class:active={activeTab === 'effects'}
+        on:click={() => switchTab('effects')}
+        title="Combat Effects & DoTs"
+      >
+        <svelte:component this={Flame} class="tab-icon" size={18} />
+        Effects
       </button>
       <button 
         class="tab" 
@@ -396,6 +432,57 @@
                 </div>
               {/each}
             </div>
+          </div>
+        {:else if activeTab === 'effects'}
+          <div class="effects-panel">
+            {#if effects}
+              <div class="effects-info">
+                <h3>Combat Effects & Status Effects</h3>
+                <p>Various effects that can be applied during combat, including buffs, debuffs, and damage over time effects.</p>
+              </div>
+              
+              {#if effects.combat_effects && effects.combat_effects.length > 0}
+                <div class="effects-section">
+                  <h4>Combat Effects</h4>
+                  <div class="effects-grid">
+                    {#each effects.combat_effects as effect}
+                      <div class="effect-card">
+                        <div class="effect-header">
+                          <h5 class="effect-name">{effect.name}</h5>
+                          <span class="effect-type">{effect.type}</span>
+                        </div>
+                        <p class="effect-desc">{effect.description}</p>
+                        {#if effect.trigger}
+                          <div class="effect-trigger">Trigger: {effect.trigger}</div>
+                        {/if}
+                      </div>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+              
+              {#if effects.dot_effects && effects.dot_effects.length > 0}
+                <div class="effects-section">
+                  <h4>Damage Over Time & Debuffs</h4>
+                  <div class="effects-grid">
+                    {#each effects.dot_effects as dot}
+                      <div class="effect-card">
+                        <div class="effect-header">
+                          <h5 class="effect-name">{dot.name}</h5>
+                          <span class="effect-type">{dot.type}</span>
+                          {#if dot.element}
+                            <span class="effect-element">{dot.element}</span>
+                          {/if}
+                        </div>
+                        <p class="effect-desc">{dot.description}</p>
+                      </div>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+            {:else}
+              <div class="loading">Loading effects...</div>
+            {/if}
           </div>
         {:else if activeTab === 'mechs'}
           <div class="mechanics-panel">
@@ -996,9 +1083,125 @@
       min-width: 150px;
     }
     
-    .stats-grid, .elements-grid, .ultimates-grid, .passives-grid, .mechanics-grid, .ui-grid, .pricing-grid {
+    .stats-grid, .elements-grid, .ultimates-grid, .passives-grid, .effects-grid, .mechanics-grid, .ui-grid, .pricing-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  /* Effects Panel Styles */
+  .effects-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .effects-info {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .effects-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+    font-size: 1.5rem;
+  }
+
+  .effects-info p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .effects-section {
+    margin: 1rem 0;
+  }
+
+  .effects-section h4 {
+    margin: 0 0 1rem 0;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .effects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .effect-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+  }
+
+  .effect-card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+  }
+
+  .effect-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .effect-name {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .effect-type {
+    background: rgba(100,100,255,0.3);
+    color: #a0a0ff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(100,100,255,0.4);
+  }
+
+  .effect-element {
+    background: rgba(255,180,0,0.3);
+    color: #ffcc66;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(255,180,0,0.4);
+  }
+
+  .effect-desc {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    font-size: 0.95rem;
+  }
+
+  .effect-trigger {
+    margin-top: 0.5rem;
+    color: var(--text-color);
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0,255,100,0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(0,255,100,0.2);
   }
 </style>
 
