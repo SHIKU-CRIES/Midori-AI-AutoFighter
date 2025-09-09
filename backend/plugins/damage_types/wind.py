@@ -11,6 +11,7 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Wind(DamageTypeBase):
+    """Agile element that strikes in flurries and erodes defenses."""
     id: str = "Wind"
     weakness: str = "Lightning"
     color: tuple[int, int, int] = (0, 255, 0)
@@ -26,6 +27,7 @@ class Wind(DamageTypeBase):
         return damage_effects.create_dot(self.id, damage, source)
 
     async def ultimate(self, actor, allies, enemies):
+        """Distribute attack across rapid hits on all foes."""
         # Consume ultimate; bail if not ready
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
@@ -101,3 +103,12 @@ class Wind(DamageTypeBase):
         except Exception:
             pass
         return True
+
+    @classmethod
+    def get_ultimate_description(cls) -> str:
+        return (
+            "Temporarily boosts the user's effect hit rate, then splits their attack "
+            "into repeated strikes distributed across all living enemies. The number "
+            "of hits derives from `wind_ultimate_hits` or `ultimate_hits` allowing "
+            "relics and cards to modify it."
+        )

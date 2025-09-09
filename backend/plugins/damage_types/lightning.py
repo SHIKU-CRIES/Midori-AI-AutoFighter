@@ -10,6 +10,7 @@ from plugins.damage_types._base import DamageTypeBase
 
 @dataclass
 class Lightning(DamageTypeBase):
+    """Volatile element that detonates DoTs and spreads random shocks."""
     id: str = "Lightning"
     weakness: str = "Wind"
     color: tuple[int, int, int] = (255, 255, 0)
@@ -31,6 +32,7 @@ class Lightning(DamageTypeBase):
                 )
 
     async def ultimate(self, actor, allies, enemies) -> bool:
+        """Zap all foes, seed random DoTs, and build Aftertaste stacks."""
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
 
@@ -79,3 +81,11 @@ class Lightning(DamageTypeBase):
             BUS.subscribe("battle_end", _clear)
             actor._lightning_aftertaste_handler = _hit
         return True
+
+    @classmethod
+    def get_ultimate_description(cls) -> str:
+        return (
+            "Deals the user's attack as damage to every enemy, then applies ten random "
+            "DoT effects from all elements to each target. Each use grants an Aftertaste "
+            "stack that later echoes extra hits based on the accumulated stacks."
+        )
