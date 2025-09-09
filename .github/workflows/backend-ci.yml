@@ -1,7 +1,7 @@
 name: Backend CI
 
 on:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   backend:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v3
+      - uses: astral-sh/setup-uv@v6.6.0
         with:
           python-version: '3.12'
       
