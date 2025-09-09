@@ -4,7 +4,7 @@
    - Rest-node pulls share the same pity counters and currency as main-menu pulls.
    - Players may pull as much as they want during a rest and immediately add new characters before leaving.
    - Each character is classified as Type A (Masculine), Type B (Feminine), or Type C (Androgynous).
-   - Seed the pool with existing player plugins such as Ally, Becca, Bubbles, Carly, Chibi, Graygray, Hilander, Kboshi, Lady Darkness, Lady Echo, Lady Fire and Ice, Lady Light, Luna, Mezzy, and Mimic.
+   - Seed the pool with existing player plugins such as Ally, Becca, Bubbles, Carly, Ixia, Graygray, Hilander, Kboshi, Lady Darkness, Lady Echo, Lady Fire and Ice, Lady Light, Luna, Mezzy, and Mimic.
 2. Pull options: spend for exactly 1, 5, or 10 pulls; players cannot choose other batch sizes.
    - Play a pre-made video keyed to the highest rarity obtained (1★–6★); videos are skippable or fast-forwardable.
    - Base odds heavily favor ≥2★ rewards (~99%), with 5★ and 6★ odds rising as pity grows.

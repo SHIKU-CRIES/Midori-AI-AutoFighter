@@ -8,12 +8,12 @@ from plugins.players._base import PlayerBase
 
 
 @dataclass
-class Chibi(PlayerBase):
-    id = "chibi"
-    name = "Chibi"
+class Ixia(PlayerBase):
+    id = "ixia"
+    name = "Ixia"
     char_type: CharacterType = CharacterType.A
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(
-        default_factory=lambda: get_damage_type("Chibi")
+        default_factory=lambda: get_damage_type("Ixia")
     )
-    passives: list[str] = field(default_factory=lambda: ["chibi_tiny_titan"])
+    passives: list[str] = field(default_factory=lambda: ["ixia_tiny_titan"])

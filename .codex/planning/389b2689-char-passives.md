@@ -39,9 +39,9 @@ forcing them to target her. When she uses her ultimate, she grants all
 allies mitigation equal to half of her own and reduces her mitigation by
 the same amount.
 
-## Chibi
-Tiny Titan – Chibi gains four times the normal HP from Vitality and
-converts 500% of current Vitality into attack. Each time Chibi is hit,
+## Ixia
+Tiny Titan – Ixia gains four times the normal HP from Vitality and
+converts 500% of current Vitality into attack. Each time Ixia is hit,
 Vitality increases by 0.01 for the rest of the battle, encouraging a
 bruiser playstyle. This Vitality bonus also reduces incoming damage
 slightly and grants a minor HoT each turn while active.
