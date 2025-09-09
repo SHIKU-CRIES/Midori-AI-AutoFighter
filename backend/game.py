@@ -4,6 +4,7 @@ import asyncio
 import base64
 from collections.abc import Awaitable
 from collections.abc import Callable
+import gc
 import hashlib
 import json
 import logging
@@ -72,6 +73,49 @@ def get_fernet() -> Fernet:
 battle_tasks: dict[str, asyncio.Task] = {}
 battle_snapshots: dict[str, dict[str, Any]] = {}
 battle_locks: dict[str, asyncio.Lock] = {}
+
+
+async def cleanup_battle_state() -> None:
+    """Remove completed battle tasks and associated state."""
+
+    completed = [run_id for run_id, task in battle_tasks.items() if task.done()]
+
+    tasks_removed = 0
+    snapshots_removed = 0
+    locks_removed = 0
+
+    for run_id in completed:
+        if battle_tasks.pop(run_id, None) is not None:
+            tasks_removed += 1
+        if battle_snapshots.pop(run_id, None) is not None:
+            snapshots_removed += 1
+        if battle_locks.pop(run_id, None) is not None:
+            locks_removed += 1
+
+    removed_total = tasks_removed + snapshots_removed + locks_removed
+    if removed_total:
+        message = (
+            "Removed %d tasks, %d snapshots, %d locks",
+            tasks_removed,
+            snapshots_removed,
+            locks_removed,
+        )
+        if removed_total > 10:
+            log.warning(*message)
+        else:
+            log.info(*message)
+
+    gc.collect()
+
+
+def get_battle_state_sizes() -> dict[str, int]:
+    """Return the current sizes of battle state dictionaries."""
+
+    return {
+        "tasks": len(battle_tasks),
+        "snapshots": len(battle_snapshots),
+        "locks": len(battle_locks),
+    }
 
 def _describe_passives(obj: Stats | list[str]) -> list[dict[str, Any]]:
     registry = PassiveRegistry()

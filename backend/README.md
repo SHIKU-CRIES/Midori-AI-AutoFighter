@@ -46,6 +46,10 @@ The backend uses a queued, buffered logging pipeline:
 - Records land in a rotating log file at `logs/backend.log`.
 - A `RichHandler` remains attached for colorful console output.
 
+## Performance and Memory Metrics
+
+`GET /performance/metrics` exposes the sizes of the in-memory battle tracking structures (`battle_tasks`, `battle_snapshots`, and `battle_locks`) along with current process memory usage (via `psutil` if installed or `tracemalloc` otherwise). Operators can trigger manual cleanup of completed battles with `POST /performance/gc`, which purges stale state and runs garbage collection.
+
 The root endpoint returns a simple status payload including the configured flavor. Set `UV_EXTRA` (default `"default"`) to label this instance. Additional routes support
 starting runs with a seeded 45-room map, updating the party, retrieving floor
 maps, listing available player characters, returning room background images,
