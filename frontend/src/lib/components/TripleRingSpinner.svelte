@@ -53,6 +53,9 @@
     transform-origin: center;
     animation: spin var(--duration) linear infinite;
   }
+  .r2::before {
+    animation-direction: reverse;
+  }
   @keyframes spin {
     from { transform: rotate(0deg) translateX(var(--orbit)); }
     to { transform: rotate(360deg) translateX(var(--orbit)); }
