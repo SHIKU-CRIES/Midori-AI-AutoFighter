@@ -23,7 +23,10 @@ from plugins.damage_types import random_damage_type
 from plugins.damage_types._base import DamageTypeBase
 
 if TYPE_CHECKING:
+    from autofighter.effects import HealingOverTime
+    from autofighter.effects import StatModifier
     from autofighter.party import Party
+    from autofighter.stats import StatEffect
 
 log = logging.getLogger(__name__)
 
@@ -117,9 +120,162 @@ class Summon(Stats):
             safe_passives = ['critical_boost', 'elemental_affinity']  # Add more as needed
             summon.passives = [p for p in summoner.passives if any(sp in p for sp in safe_passives)]
 
+        # Share beneficial effects (buffs and HOTs) from summoner but not debuffs or DOTs
+        cls._share_beneficial_effects(summoner, summon, stat_multiplier)
+
         log.debug(f"Created {summon_type} summon for {summoner.id} with {stat_multiplier*100}% stats")
 
         return summon
+
+    @classmethod
+    def _share_beneficial_effects(
+        cls,
+        summoner: Stats,
+        summon: "Summon",
+        stat_multiplier: float
+    ) -> None:
+        """Share beneficial effects (buffs and HOTs) from summoner to summon.
+
+        Args:
+            summoner: The entity creating the summon
+            summon: The newly created summon
+            stat_multiplier: Multiplier to apply to effect strength
+        """
+        # Copy beneficial StatEffects from summoner's active effects
+        if hasattr(summoner, '_active_effects') and summoner._active_effects:
+            for effect in summoner._active_effects:
+                if cls._is_beneficial_stat_effect(effect):
+                    # Create a scaled copy of the effect for the summon
+                    scaled_effect = cls._scale_stat_effect(effect, stat_multiplier)
+                    summon.add_effect(scaled_effect)
+                    log.debug(f"Shared beneficial StatEffect '{effect.name}' to summon {summon.id}")
+
+        # Copy HOTs and beneficial StatModifiers from effect manager if available
+        if hasattr(summoner, 'effect_manager') and summoner.effect_manager:
+            effect_mgr = summoner.effect_manager
+
+            # Ensure summon has an effect manager
+            if not hasattr(summon, 'effect_manager') or not summon.effect_manager:
+                from autofighter.effects import EffectManager
+                summon.effect_manager = EffectManager(summon)
+
+            # Copy all HOTs (healing over time effects are inherently beneficial)
+            for hot in effect_mgr.hots:
+                scaled_hot = cls._scale_hot_effect(hot, stat_multiplier)
+                summon.effect_manager.add_hot(scaled_hot)
+                log.debug(f"Shared HOT '{hot.name}' to summon {summon.id}")
+
+            # Copy beneficial StatModifiers (buffs)
+            for mod in effect_mgr.mods:
+                if cls._is_beneficial_stat_modifier(mod):
+                    scaled_mod = cls._scale_stat_modifier(mod, summon, stat_multiplier)
+                    summon.effect_manager.add_modifier(scaled_mod)
+                    log.debug(f"Shared beneficial StatModifier '{mod.name}' to summon {summon.id}")
+
+    @classmethod
+    def _is_beneficial_stat_effect(cls, effect: "StatEffect") -> bool:
+        """Check if a StatEffect is beneficial (positive modifiers)."""
+        if not effect.stat_modifiers:
+            return False
+
+        # Consider an effect beneficial if most of its modifiers are positive
+        # Some stats like "damage_taken" would be beneficial if negative, but those are rare
+        positive_count = 0
+        total_count = 0
+
+        for stat_name, value in effect.stat_modifiers.items():
+            total_count += 1
+            # Most stats are beneficial when positive
+            if value > 0:
+                positive_count += 1
+            # Special case: damage_taken is beneficial when negative
+            elif stat_name in ['damage_taken'] and value < 0:
+                positive_count += 1
+
+        return positive_count > total_count / 2
+
+    @classmethod
+    def _is_beneficial_stat_modifier(cls, modifier: "StatModifier") -> bool:
+        """Check if a StatModifier is beneficial."""
+        beneficial = False
+
+        # Check deltas (additive modifiers)
+        if modifier.deltas:
+            for stat_name, value in modifier.deltas.items():
+                if value > 0:
+                    beneficial = True
+                elif stat_name in ['damage_taken'] and value < 0:
+                    beneficial = True
+
+        # Check multipliers (multiplicative modifiers > 1.0 are beneficial)
+        if modifier.multipliers:
+            for stat_name, value in modifier.multipliers.items():
+                if value > 1.0:
+                    beneficial = True
+                elif stat_name in ['damage_taken'] and value < 1.0:
+                    beneficial = True
+
+        return beneficial
+
+    @classmethod
+    def _scale_stat_effect(cls, effect: "StatEffect", multiplier: float) -> "StatEffect":
+        """Create a scaled copy of a StatEffect."""
+        from autofighter.stats import StatEffect
+
+        scaled_modifiers = {}
+        for stat_name, value in effect.stat_modifiers.items():
+            scaled_modifiers[stat_name] = value * multiplier
+
+        return StatEffect(
+            name=f"summon_{effect.name}",
+            stat_modifiers=scaled_modifiers,
+            duration=effect.duration,
+            source=f"inherited_from_{effect.source}"
+        )
+
+    @classmethod
+    def _scale_hot_effect(cls, hot: "HealingOverTime", multiplier: float) -> "HealingOverTime":
+        """Create a scaled copy of a HealingOverTime effect."""
+        from autofighter.effects import HealingOverTime
+
+        return HealingOverTime(
+            name=f"summon_{hot.name}",
+            healing=int(hot.healing * multiplier),
+            turns=hot.turns,
+            id=f"summon_{hot.id}",
+            source=hot.source
+        )
+
+    @classmethod
+    def _scale_stat_modifier(cls, modifier: "StatModifier", summon: "Summon", multiplier: float) -> "StatModifier":
+        """Create a scaled copy of a StatModifier for the summon."""
+        from autofighter.effects import StatModifier
+
+        scaled_deltas = None
+        scaled_multipliers = None
+
+        if modifier.deltas:
+            scaled_deltas = {k: v * multiplier for k, v in modifier.deltas.items()}
+
+        if modifier.multipliers:
+            # For multipliers, scale the "bonus" part: if mult=1.5, bonus=0.5, scaled_bonus=0.5*mult, new_mult=1+scaled_bonus
+            scaled_multipliers = {}
+            for k, v in modifier.multipliers.items():
+                bonus = v - 1.0
+                scaled_bonus = bonus * multiplier
+                scaled_multipliers[k] = 1.0 + scaled_bonus
+
+        scaled_mod = StatModifier(
+            stats=summon,  # Use the summon as the stats object
+            name=f"summon_{modifier.name}",
+            turns=modifier.turns,
+            id=f"summon_{modifier.id}",
+            deltas=scaled_deltas,
+            multipliers=scaled_multipliers,
+            bypass_diminishing=modifier.bypass_diminishing
+        )
+
+        return scaled_mod
 
     def tick_turn(self) -> bool:
         """Process a turn for this summon. Returns False if summon should be removed."""
