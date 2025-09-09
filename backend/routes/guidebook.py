@@ -101,19 +101,19 @@ async def passives() -> tuple[str, int, dict[str, Any]]:
     enhanced_descriptions = {
         "room_heal": "Heal for 1 HP at the end of each battle. Each stack provides additional healing.",
         "attack_up": "Gain +5 attack at the start of each battle. Each stack provides additional attack bonus.",
-        "ally_overload": "Ally's unique passive that builds up power over multiple turns for devastating attacks.",
-        "advanced_combat_synergy": "Provides synergy bonuses when using specific ability combinations.",
-        "becca_menagerie_bond": "Becca's unique passive that strengthens bonds with summoned creatures.",
-        "bubbles_bubble_burst": "Bubbles' unique passive that creates protective bubble effects.",
-        "carly_guardians_aegis": "Carly's unique passive that provides protective aegis effects for the party.",
-        "graygray_counter_maestro": "Graygray's unique passive that excels at counter-attacking enemies.",
-        "hilander_critical_ferment": "Hilander's unique passive that builds up critical hit potential over time.",
-        "ixia_tiny_titan": "Ixia's unique passive that provides increasing power despite small stature.",
+        "ally_overload": "Ally's twin dagger system with overload mechanics. Grants 2 attacks per turn, builds charge (10 per action), and can activate Overload stance at 100+ charge for 4 attacks, +30% damage, but +40% damage taken and blocked healing.",
+        "advanced_combat_synergy": "Complex passive with conditional triggers: ATK bonus to allies when hitting targets below 50% HP, damage scaling with living allies (3+), and builds stacks for persistent buffs (+3 ATK, +1% crit rate per stack).",
+        "becca_menagerie_bond": "Becca's jellyfish summoning system. Can summon different jellyfish types (healing, electric, poison, shielding) on cooldown. Builds spirit stacks from summons that provide increasing ATK bonuses.",
+        "bubbles_bubble_burst": "Bubbles' protective bubble mechanics that create defensive effects and can burst for area damage.",
+        "carly_guardians_aegis": "Carly's aegis system that provides protective effects for the entire party.",
+        "graygray_counter_maestro": "Graygray's counter-attack specialization that excels at retaliating against enemy attacks.",
+        "hilander_critical_ferment": "Hilander's critical hit system that builds up critical potential over time through fermentation mechanics.",
+        "ixia_tiny_titan": "Ixia's power scaling system that provides increasing effectiveness despite small stature.",
         "kboshi_flux_cycle": "Kboshi's unique passive that randomly switches between damage types (80% chance). When switch fails, gains +20% damage and HoT stacks. Successful switches apply mitigation debuffs to enemies.",
-        "lady_darkness_eclipsing_veil": "Lady Darkness's unique passive that shrouds the battlefield in shadow.",
-        "lady_echo_resonant_static": "Lady Echo's unique passive that creates resonant static effects.",
-        "lady_fire_and_ice_duality_engine": "Lady Fire and Ice's unique passive that balances opposing elements.",
-        "lady_light_radiant_aegis": "Lady Light's unique passive that provides radiant protection."
+        "lady_darkness_eclipsing_veil": "Lady Darkness's shadow manipulation that shrouds the battlefield in darkness.",
+        "lady_echo_resonant_static": "Lady Echo's sound-based effects that create resonant static interference.",
+        "lady_fire_and_ice_duality_engine": "Lady Fire and Ice's elemental balance system that manages opposing fire and ice elements.",
+        "lady_light_radiant_aegis": "Lady Light's radiant protection system that provides light-based defensive benefits."
     }
 
     for pid, cls in sorted(registry.items()):
@@ -195,9 +195,9 @@ async def mechs() -> tuple[str, int, dict[str, Any]]:
         {"name": "Ultimate Charge", "description": "Gain charge during combat; spend it to use your damage type's ultimate."},
         {"name": "DoTs & HoTs", "description": "Damage/Healing over time effects stack and interact with some elements."},
         {"name": "Enrage", "description": "Foes may gain enrage increasing difficulty as rooms progress."},
-        {"name": "Elemental Resistances", "description": "Each damage type has a weakness: Fire→Ice, Ice→Lightning, Lightning→Wind, Wind→Fire, Light↔Dark."},
-        {"name": "Vitality Scaling", "description": "Vitality has three main effects: (1) Healing scales with both healer and target vitality, (2) Higher vitality reduces damage taken, (3) Experience gain is multiplied by vitality."},
-        {"name": "Level Benefits", "description": "Global level increases base stats: +10 max HP, +5 attack, +3 defense per level."},
+        {"name": "Elemental Resistances", "description": "Each damage type has a weakness: Fire→Ice, Ice→Lightning, Lightning→Wind, Wind→Fire, Light↔Dark. Generic has no weaknesses."},
+        {"name": "Vitality Scaling", "description": "Vitality has four main effects: (1) Healing scales with both healer and target vitality, (2) Higher vitality reduces damage taken, (3) Experience gain is multiplied by vitality, (4) Higher vitality increases damage dealt."},
+        {"name": "Level Benefits", "description": "Global level increases base stats through two systems: (1) Fixed gains: +10 max HP, +5 attack, +3 defense per level, and (2) Percentage scaling: 0.3% to 0.8% increase to ALL stats per level."},
     ]
     return jsonify({"mechanics": mechanics}), 200
 
@@ -210,8 +210,8 @@ async def effects() -> tuple[str, int, dict[str, Any]]:
         {
             "name": "Aftertaste",
             "type": "Combat Effect",
-            "description": "Deals a hit with random damage type (10% to 150% damage). Triggered by Lightning ultimate.",
-            "trigger": "Lightning Ultimate"
+            "description": "Deals a hit with random damage type (10% to 150% damage). Can be triggered by various sources including relics and abilities when hitting targets with damage.",
+            "trigger": "Various sources"
         },
         {
             "name": "Critical Boost",
@@ -351,7 +351,7 @@ async def stats() -> tuple[str, int, dict[str, Any]]:
         },
         {
             "name": "Vitality",
-            "description": "Multiplier with three effects: (1) Healing scales with both healer and target vitality: healing × healer_vitality × target_vitality. (2) Higher vitality reduces damage taken in combat. (3) Experience gain is multiplied by vitality.",
+            "description": "Multiplier with four effects: (1) Healing scales with both healer and target vitality: healing × healer_vitality × target_vitality. (2) Higher vitality reduces damage taken in combat. (3) Experience gain is multiplied by vitality. (4) Higher vitality increases damage dealt.",
             "base_value": "1.0x",
             "scaling": "Affected by cards and relics"
         },
@@ -400,7 +400,7 @@ async def stats() -> tuple[str, int, dict[str, Any]]:
         "common_passives": common_passives,
         "level_info": {
             "description": "Your global level increases all base stats and unlocks new content.",
-            "benefits": "Each level grants: +10 max HP, +5 attack, +3 defense",
+            "benefits": "Each level grants: (1) Fixed gains: +10 max HP, +5 attack, +3 defense, and (2) Percentage scaling: 0.3% to 0.8% increase to ALL stats",
             "experience": "Gain XP by winning battles and completing runs"
         }
     }), 200
