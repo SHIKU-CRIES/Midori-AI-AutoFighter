@@ -39,18 +39,37 @@
   }
   
   async function pull(count) {
+    // Optimistic UI: lower visible tickets immediately for snappier feedback
+    const prevTickets = Number(items?.ticket || 0);
+    if (prevTickets >= count) {
+      items = { ...items, ticket: prevTickets - count };
+    }
+
     loading = true;
     try {
       const data = await pullGacha(count, activeTab);
-      pity = data.pity;
-      items = data.items;
-      banners = data.banners || [];
-      featuredCharacters = data.featured_characters || [];
-      const results = data.results || [];
+      pity = Number(data?.pity || 0);
+      // Force new object to ensure reactivity even if server omits zero-count keys
+      items = { ...(data?.items || {}) };
+      banners = data?.banners || [];
+      featuredCharacters = data?.featured_characters || [];
+      const results = data?.results || [];
       if (results.length) {
         openOverlay('pull-results', { results });
       }
+      // Force-refresh from backend to ensure ticket count is authoritative
+      try {
+        const fresh = await getGacha();
+        pity = Number(fresh?.pity || pity);
+        items = { ...(fresh?.items || items) };
+        banners = fresh?.banners || banners;
+        featuredCharacters = fresh?.featured_characters || featuredCharacters;
+      } catch {}
     } catch (err) {
+      // Revert optimistic change on failure
+      if (prevTickets >= count) {
+        items = { ...items, ticket: prevTickets };
+      }
       if (dev || !browser) {
         const { error } = await import('$lib/systems/logger.js');
         error('pull failed', err);

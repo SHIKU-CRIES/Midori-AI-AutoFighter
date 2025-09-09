@@ -339,12 +339,31 @@ class GachaManager:
         if not banner:
             raise ValueError("banner not available")
 
+        # Ensure tickets are decremented atomically in the database to avoid
+        # any chance of stale in-memory state during multi-pull operations.
+        with self.save.connection() as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS upgrade_items (id TEXT PRIMARY KEY, count INTEGER NOT NULL)"
+            )
+            cur = conn.execute(
+                "SELECT count FROM upgrade_items WHERE id = ?", ("ticket",)
+            )
+            row = cur.fetchone()
+            current = int(row[0]) if row else 0
+            if current < count:
+                raise PermissionError("insufficient tickets")
+            new_count = current - count
+            # Upsert the new ticket count (0 removes later via cleanup)
+            conn.execute(
+                "INSERT OR REPLACE INTO upgrade_items (id, count) VALUES (?, ?)",
+                ("ticket", new_count),
+            )
+
         results: list[PullResult] = []
         pity = self._get_pity()
+        # Re-load items after atomic decrement so downstream logic persists the
+        # updated ticket count alongside new rewards.
         items = self._get_items()
-        if items.get("ticket", 0) < count:
-            raise PermissionError("insufficient tickets")
-        items["ticket"] = items.get("ticket", 0) - count
         owned = self._get_owned()
 
         for _ in range(count):

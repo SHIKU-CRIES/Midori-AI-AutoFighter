@@ -18,8 +18,10 @@
 <style>
   .triple-ring-spinner {
     position: relative;
-    width: var(--spinner-size, clamp(14px, calc(var(--portrait-size) * 0.18), 32px));
-    height: var(--spinner-size, clamp(14px, calc(var(--portrait-size) * 0.18), 32px));
+    /* Resolve to pixels to ensure correct orbital radii */
+    --spinner-size: var(--spinner-size, clamp(14px, calc(var(--portrait-size) * 0.18), 32px));
+    width: var(--spinner-size);
+    height: var(--spinner-size);
   }
   .ring {
     position: absolute;
@@ -30,29 +32,30 @@
     opacity: 0.6;
     animation: pulse calc(var(--duration) * 2) ease-in-out infinite;
   }
-  .r1 { --ring-size: 100%; animation-delay: 0s; }
-  .r2 { --ring-size: 66%; animation-delay: calc(var(--duration) / 3); }
-  .r3 { --ring-size: 33%; animation-delay: calc(var(--duration) * 2 / 3); }
+  /* Define absolute ring sizes and their orbit radii in px */
+  .r1 { --ring-size-px: var(--spinner-size); --orbit: calc(var(--spinner-size) / 2); animation-delay: 0s; }
+  .r2 { --ring-size-px: calc(var(--spinner-size) * 0.66); --orbit: calc(var(--spinner-size) * 0.66 / 2); animation-delay: calc(var(--duration) / 3); }
+  .r3 { --ring-size-px: calc(var(--spinner-size) * 0.33); --orbit: calc(var(--spinner-size) * 0.33 / 2); animation-delay: calc(var(--duration) * 2 / 3); }
   .ring {
-    width: var(--ring-size);
-    height: var(--ring-size);
-    margin: calc(var(--ring-size) / -2);
+    width: var(--ring-size-px);
+    height: var(--ring-size-px);
+    margin: calc(var(--ring-size-px) / -2);
   }
   .ring::before {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
-    width: calc(var(--ring-size) * 0.15);
-    height: calc(var(--ring-size) * 0.15);
+    width: calc(var(--ring-size-px) * 0.15);
+    height: calc(var(--ring-size-px) * 0.15);
     border-radius: 50%;
     background: var(--spinner-color, currentColor);
     transform-origin: center;
     animation: spin var(--duration) linear infinite;
   }
   @keyframes spin {
-    from { transform: rotate(0deg) translateX(calc(var(--ring-size) / 2)); }
-    to { transform: rotate(360deg) translateX(calc(var(--ring-size) / 2)); }
+    from { transform: rotate(0deg) translateX(var(--orbit)); }
+    to { transform: rotate(360deg) translateX(var(--orbit)); }
   }
   @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 0.6; }
