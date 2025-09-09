@@ -9,6 +9,9 @@ Provides a simple publish/subscribe bus so plugins can communicate without engin
 
 Subscriber errors are caught and logged so one misbehaving plugin does not crash others.
 
+## Async Yielding
+All backend event emissions include a small asynchronous yield after each callback and batch item. This `await asyncio.sleep(0.002)` pause (2 ms) ensures the event loop stays responsive by allowing other tasks to run between bus items.
+
 ## Events
 The core combat engine emits a few global events that plugins may subscribe to:
 

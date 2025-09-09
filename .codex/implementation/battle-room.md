@@ -1,6 +1,6 @@
 # Battle Rooms
 
-`BattleRoom` resolves turn-based encounters against scaled foes drawn from player plugins you haven't selected. Passives fire on room entry, battle start, and at the beginning and end of each turn. Combat continues until either every party member or the foe is defeated. All damage, healing, and regeneration helpers are awaitable, and each turn is padded to last at least 0.5 s to keep updates visible. The `EffectManager` applies damage-over-time and healing-over-time ticks on each combatant before actions take place, and the async loop yields control back to the event loop between steps so DoTs and HoTs remain non-blocking.
+`BattleRoom` resolves turn-based encounters against scaled foes drawn from player plugins you haven't selected. Passives fire on room entry, battle start, and at the beginning and end of each turn. Combat continues until either every party member or the foe is defeated. All damage, healing, and regeneration helpers are awaitable, and each turn is padded to last at least 0.5 s to keep updates visible. The `EffectManager` applies damage-over-time and healing-over-time ticks on each combatant before actions take place, and the async loop yields with `await asyncio.sleep(0.002)` between steps so DoTs and HoTs remain non-blocking.
 
 The room deep-copies the run's party for combat. When the fight ends, remaining
 HP and accumulated experience are synced back so level-ups and damage persist

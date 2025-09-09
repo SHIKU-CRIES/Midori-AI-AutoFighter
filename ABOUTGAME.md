@@ -61,9 +61,9 @@ This ensures players experience all available rewards in the proper sequence wit
 
 The Svelte frontend targets three breakpoints:
 
-- **Desktop** – displays the party picker, player editor, and icon-based floor map around the active menu so most information is visible at once.
-- **Tablet** – shows two panels side by side when space permits.
-- **Phone** – focuses on a single menu at a time for clarity on small screens.
+- **Desktop** - displays the party picker, player editor, and icon-based floor map around the active menu so most information is visible at once.
+- **Tablet** - shows two panels side by side when space permits.
+- **Phone** - focuses on a single menu at a time for clarity on small screens.
 
 The interface adapts automatically based on viewport width.
 
@@ -80,13 +80,13 @@ All LLM operations are asynchronous and won't block the game interface. Models a
 
 ### Loot and Rare Drop Rate
 
-Battles award gold, relic choices, upgrade items, and occasionally pull tickets. Gold equals a base value of 5/20/200 for normal, boss, and floor-boss rooms, multiplied by the loop, a random range, and the party's rare drop rate (`rdr`). Relics drop with `10% × rdr` odds in normal fights or `50% × rdr` in boss rooms. Upgrade items use the foe's element, cap at 4★, and their quantity scales with `rdr`—fractions have a matching chance to grant an extra item. Each battle also rolls a `10% × rdr` chance for a pull ticket. `rdr` improves drop quantity and odds and can even upgrade relic or card star ranks with lucky rolls at extreme values: climbing from 3★ to 4★ requires 1000% `rdr`, while 5★ demands a colossal 1,000,000%.
+Battles award gold, relic choices, upgrade items, and occasionally pull tickets. Gold equals a base value of 5/20/200 for normal, boss, and floor-boss rooms, multiplied by the loop, a random range, and the party's rare drop rate (`rdr`). Relics drop with `10% x rdr` odds in normal fights or `50% x rdr` in boss rooms. Upgrade items use the foe's element, cap at 4★, and their quantity scales with `rdr`-fractions have a matching chance to grant an extra item. Each battle also rolls a `10% x rdr` chance for a pull ticket. `rdr` improves drop quantity and odds and can even upgrade relic or card star ranks with lucky rolls at extreme values: climbing from 3★ to 4★ requires 1000% `rdr`, while 5★ demands a colossal 1,000,000%.
 
 Each foe defeated during a battle temporarily grants +55% `rdr` for that room, raising gold payouts and damage-type item drops.
 
 ### Plugins
 
-The game auto-discovers classes under `plugins/` and `mods/` by `plugin_type` and wires them to a shared event bus. See `.codex/implementation/plugin-system.md` for loader details and examples. Player and foe plugins also expose `prompt` and `about` strings with placeholder text for future character customization.
+The game auto-discovers classes under `plugins/` and `mods/` by `plugin_type` and wires them to a shared event bus. The bus yields 0.002 s after each emission to keep the async loop responsive. See `.codex/implementation/plugin-system.md` for loader details and examples. Player and foe plugins also expose `prompt` and `about` strings with placeholder text for future character customization.
 
 Luna's foe form is weighted to appear more frequently and may even show up as a boss when she isn't in the player's party.
 
@@ -104,12 +104,12 @@ View grouped stats and status effects. The display refreshes every few frames an
 
 Elemental damage types hook into attacks. The `plugins/damage_effects.py` module maps each element to its DoT and HoT factories so plugins can request effects without importing one another:
 
-- **[Fire](backend/plugins/damage_types/fire.py)** – Damage scales with missing HP and applies [Blazing Torment](backend/plugins/dots/blazing_torment.py), a stackable DoT that ticks again when the target acts. Its ultimate scorches all foes, dealing attack damage and inflicting Blazing Torment on each, but every use adds a self-burn stack that drains the caster each turn until battle end.
-- **[Lightning](backend/plugins/damage_types/lightning.py)** – Pops every active DoT on hit, dealing 25% of each effect's damage immediately, and applies [Charged Decay](backend/plugins/dots/charged_decay.py), which stuns on its final tick. Its ultimate scatters ten random DoTs and permanently grants +1 Aftertaste hit per attack until battle end.
-- **[Ice](backend/plugins/damage_types/ice.py)** – Inflicts [Frozen Wound](backend/plugins/dots/frozen_wound.py), which lowers the victim's actions per turn and adds a 1% miss chance per stack. Some skills use [Cold Wound](backend/plugins/dots/cold_wound.py) with a five-stack limit. Ultimate strikes all foes six times, increasing damage 30% per target.
-- **[Wind](backend/plugins/damage_types/wind.py)** – After the first hit, repeats the strike on each remaining foe and rolls [Gale Erosion](backend/plugins/dots/gale_erosion.py) on every target, shaving Mitigation each tick. Ultimate: strikes every living foe 25 times with a boosted effect hit rate, greatly increasing Gale Erosion application.
-- **[Light](backend/plugins/damage_types/light.py)** – Creates [Celestial Atrophy](backend/plugins/dots/celestial_atrophy.py) and grants allies [Radiant Regeneration](backend/plugins/hots/radiant_regeneration.py) every action. If an ally falls below 25% HP, the attack is replaced with a direct heal.
-- **[Dark](backend/plugins/damage_types/dark.py)** – Spreads [Abyssal Corruption](backend/plugins/dots/abyssal_corruption.py) and adds a permanent [Shadow Siphon](backend/plugins/dots/shadow_siphon.py) to each party member every turn, draining 5% max HP per tick while feeding attack and defense back to the caster.
+- **[Fire](backend/plugins/damage_types/fire.py)** - Damage scales with missing HP and applies [Blazing Torment](backend/plugins/dots/blazing_torment.py), a stackable DoT that ticks again when the target acts. Its ultimate scorches all foes, dealing attack damage and inflicting Blazing Torment on each, but every use adds a self-burn stack that drains the caster each turn until battle end.
+- **[Lightning](backend/plugins/damage_types/lightning.py)** - Pops every active DoT on hit, dealing 25% of each effect's damage immediately, and applies [Charged Decay](backend/plugins/dots/charged_decay.py), which stuns on its final tick. Its ultimate scatters ten random DoTs and permanently grants +1 Aftertaste hit per attack until battle end.
+- **[Ice](backend/plugins/damage_types/ice.py)** - Inflicts [Frozen Wound](backend/plugins/dots/frozen_wound.py), which lowers the victim's actions per turn and adds a 1% miss chance per stack. Some skills use [Cold Wound](backend/plugins/dots/cold_wound.py) with a five-stack limit. Ultimate strikes all foes six times, increasing damage 30% per target.
+- **[Wind](backend/plugins/damage_types/wind.py)** - After the first hit, repeats the strike on each remaining foe and rolls [Gale Erosion](backend/plugins/dots/gale_erosion.py) on every target, shaving Mitigation each tick. Ultimate: strikes every living foe 25 times with a boosted effect hit rate, greatly increasing Gale Erosion application.
+- **[Light](backend/plugins/damage_types/light.py)** - Creates [Celestial Atrophy](backend/plugins/dots/celestial_atrophy.py) and grants allies [Radiant Regeneration](backend/plugins/hots/radiant_regeneration.py) every action. If an ally falls below 25% HP, the attack is replaced with a direct heal.
+- **[Dark](backend/plugins/damage_types/dark.py)** - Spreads [Abyssal Corruption](backend/plugins/dots/abyssal_corruption.py) and adds a permanent [Shadow Siphon](backend/plugins/dots/shadow_siphon.py) to each party member every turn, draining 5% max HP per tick while feeding attack and defense back to the caster.
 
 DoT and HoT plugins manage ongoing damage or recovery. Effect hit rate that greatly exceeds a target's resistance can apply multiple DoT stacks in a single attack by looping in 100% hit chunks and subtracting resistance each time. Supported DoTs include [Bleed](backend/plugins/dots/bleed.py), [Poison](backend/plugins/dots/poison.py), [Celestial Atrophy](backend/plugins/dots/celestial_atrophy.py), [Abyssal Corruption](backend/plugins/dots/abyssal_corruption.py), [Abyssal Weakness](backend/plugins/dots/abyssal_weakness.py), [Gale Erosion](backend/plugins/dots/gale_erosion.py), [Charged Decay](backend/plugins/dots/charged_decay.py), [Frozen Wound](backend/plugins/dots/frozen_wound.py), [Blazing Torment](backend/plugins/dots/blazing_torment.py), [Cold Wound](backend/plugins/dots/cold_wound.py), [Twilight Decay](backend/plugins/dots/twilight_decay.py), [Impact Echo](backend/plugins/dots/impact_echo.py), and [Shadow Siphon](backend/plugins/dots/shadow_siphon.py). HoTs cover [Regeneration](backend/plugins/hots/regeneration.py), [Player Echo](backend/plugins/hots/player_echo.py), [Player Heal](backend/plugins/hots/player_heal.py), and [Radiant Regeneration](backend/plugins/hots/radiant_regeneration.py). Foes regenerate at one hundredth the player rate to prevent drawn-out encounters.
 
@@ -123,9 +123,9 @@ Base battles spawn one foe plus one more for every five Pressure, up to ten. Par
 
 5★ cards such as Phantom Ally, Temporal Shield, and Reality Split introduce summoned allies, turn-based damage reduction, and afterimage attacks that echo damage across all foes.
 
-Parties also track a rare drop rate (`rdr`) that boosts relic drops, gold rewards, upgrade item counts, and pull ticket chances. At extreme values it can roll to raise relic and card star ranks (3★→4★ at 1000% `rdr`, 4★→5★ at 1,000,000%), but even huge `rdr` never guarantees success. The 3★ Greed Engine relic raises `rdr` while draining HP each turn. Each slain foe grants a temporary +55% `rdr` bonus for the remainder of the battle, further increasing gold and element upgrade drops.
+Parties also track a rare drop rate (`rdr`) that boosts relic drops, gold rewards, upgrade item counts, and pull ticket chances. At extreme values it can roll to raise relic and card star ranks (3★->4★ at 1000% `rdr`, 4★->5★ at 1,000,000%), but even huge `rdr` never guarantees success. The 3★ Greed Engine relic raises `rdr` while draining HP each turn. Each slain foe grants a temporary +55% `rdr` bonus for the remainder of the battle, further increasing gold and element upgrade drops.
 
-Defeated foes grant experience to every party member. Characters below level 1000 receive a 10× boost to experience gained so early levels advance quickly. Level-ups apply immediately and sync back to the run along with remaining HP.
+Defeated foes grant experience to every party member. Characters below level 1000 receive a 10x boost to experience gained so early levels advance quickly. Level-ups apply immediately and sync back to the run along with remaining HP.
 
 ### Rest Room
 
@@ -153,15 +153,15 @@ Across the broader interface, aim for a stained-glass aesthetic. Bar graphs and 
 
 ## Playable Characters
 
-The roster in `plugins/players/` currently includes and each entry lists its `CharacterType`. All players start with 1000 HP, 100 attack, 50 defense, a 5% crit rate, 2× crit damage, 1% effect hit rate, 100 mitigation, 0 dodge, and 1 in all other stats. Listed damage types use the classic naming from the Pygame version:
+The roster in `plugins/players/` currently includes and each entry lists its `CharacterType`. All players start with 1000 HP, 100 attack, 50 defense, a 5% crit rate, 2x crit damage, 1% effect hit rate, 100 mitigation, 0 dodge, and 1 in all other stats. Listed damage types use the classic naming from the Pygame version:
 
 - Ally (B, random damage type)
 - Becca (B, random damage type)
 - Bubbles (A, random damage type)
-- Carly (B, Light) – Guardian's Aegis heals the most injured ally, converts attack growth into defense, builds mitigation stacks that can overcharge to add defense to attack while stacks decay each turn, and shares mitigation on ultimate
+- Carly (B, Light) - Guardian's Aegis heals the most injured ally, converts attack growth into defense, builds mitigation stacks that can overcharge to add defense to attack while stacks decay each turn, and shares mitigation on ultimate
 - Chibi (A, Lightning)
-- Graygray (B, random damage type) – retaliates with Counter Maestro after taking damage
-- Hilander (A, random damage type) – builds crit rate and damage, unleashing Aftertaste on crit; stack gain odds drop 5% per stack past 20, floored at 1%
+- Graygray (B, random damage type) - retaliates with Counter Maestro after taking damage
+- Hilander (A, random damage type) - builds crit rate and damage, unleashing Aftertaste on crit; stack gain odds drop 5% per stack past 20, floored at 1%
 - Kboshi (A, random damage type)
 - Lady Darkness (B, Dark)
 - Lady Echo (B, Lightning)

@@ -152,6 +152,7 @@ class _Bus:
         for event, args_list in self._batched_events.items():
             for args in args_list:
                 all_events.append((event, args))
+                await asyncio.sleep(0.002)
 
         # Clear batches immediately to avoid interference with new batching
         self._batched_events.clear()
@@ -165,12 +166,17 @@ class _Bus:
                     await self.send_async(event, args)
                 except Exception as e:
                     log.exception("Error processing batched event %s: %s", event, e)
+                await asyncio.sleep(0.002)
 
             # Use gather with limited concurrency to avoid overwhelming the event loop
             batch_size = 100  # Process in chunks to manage memory and concurrency
             for i in range(0, len(all_events), batch_size):
                 batch = all_events[i:i + batch_size]
-                await asyncio.gather(*[process_single_event(event_data) for event_data in batch], return_exceptions=True)
+                await asyncio.gather(
+                    *[process_single_event(event_data) for event_data in batch],
+                    return_exceptions=True,
+                )
+                await asyncio.sleep(0.002)
 
     def _process_batches_sync(self):
         """Fallback sync processing when no event loop is available."""
@@ -216,6 +222,7 @@ class _Bus:
                     # Run sync functions in thread pool to avoid blocking
                     loop = asyncio.get_event_loop()
                     await loop.run_in_executor(None, lambda: func(*args))
+                await asyncio.sleep(0.002)
                 return True
             except Exception as e:
                 log.exception("Error in async event callback for %s: %s", event, e)

@@ -33,6 +33,7 @@ The following categories are bundled:
 
 ## Event Bus Integration
 `PluginLoader` assigns an `EventBus` instance to each plugin, letting them emit and subscribe to events without relying on a global messenger【F:plugins/event_bus.py†L13-L41】【F:plugins/plugin_loader.py†L67-L74】
+All emissions sleep for 0.002 s after each callback to keep the loop fair.
 
 ## Adding New Plugin Types
 1. Create a new subfolder under `plugins/` for the category.
