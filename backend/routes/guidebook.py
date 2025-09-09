@@ -11,7 +11,6 @@ from autofighter.rooms.shop import REROLL_COST
 from plugins.damage_types import ALL_DAMAGE_TYPES
 from plugins.damage_types import load_damage_type
 
-
 bp = Blueprint("guidebook", __name__, url_prefix="/guidebook")
 
 

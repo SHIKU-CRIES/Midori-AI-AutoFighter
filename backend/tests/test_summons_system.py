@@ -509,14 +509,14 @@ async def test_summon_inherits_beneficial_effects(monkeypatch):
     # Verify summon inherited beneficial StatEffect
     summon_effects = summon.get_active_effects()
     assert len(summon_effects) == 2  # One from StatEffect inheritance, one from StatModifier application
-    
+
     # Find the inherited StatEffect (from summoner's StatEffect)
     stat_effect = next((e for e in summon_effects if e.name == "summon_test_buff"), None)
     assert stat_effect is not None
     assert stat_effect.stat_modifiers["atk"] == 25  # 50% of 50
     assert stat_effect.stat_modifiers["defense"] == 12.5  # 50% of 25
     assert stat_effect.duration == 5  # Same duration
-    
+
     # Find the StatEffect created by the applied StatModifier
     modifier_effect = next((e for e in summon_effects if e.name == "summon_test_stat_buff_id"), None)
     assert modifier_effect is not None

@@ -33,11 +33,11 @@ from routes.assets import bp as assets_bp
 from routes.catalog import bp as catalog_bp
 from routes.config import bp as config_bp
 from routes.gacha import bp as gacha_bp
+from routes.guidebook import bp as guidebook_bp
 from routes.performance import perf_bp as performance_bp
 from routes.players import bp as players_bp
 from routes.rewards import bp as rewards_bp
 from routes.ui import bp as ui_bp
-from routes.guidebook import bp as guidebook_bp
 
 configure_logging()
 
