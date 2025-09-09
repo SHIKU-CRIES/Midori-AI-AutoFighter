@@ -101,7 +101,7 @@
     }
   }
 
-  // Handle spending 4-star items to increase point cap
+  // Handle spending 4-star items to increase point cap (new button flow)
   async function handleUpgrade() {
     if (!previewChar || !canUpgrade) return;
     
@@ -369,15 +369,21 @@
             on:change={(e) => { editorVals = e.detail; editorConfigs.set(previewId, { ...editorVals }); if (sel.is_player) { try { dispatch('preview-element', { element: editorVals.damageType }); } catch {} } dispatch('editor-change', { id: previewId, config: editorVals }); scheduleSave(); }}
           />
           
-          <!-- Upgrade button for spending 4-star items -->
-          {#if canUpgrade && !loadingUpgrade}
-            <div class="upgrade-section">
-              <button class="upgrade-btn" on:click={handleUpgrade}>
-                ⭐ Upgrade (+1 Point Cap)
-              </button>
-              <p class="upgrade-hint">Spend 1x 4★ damage item to increase allocation cap</p>
-            </div>
-          {/if}
+          <!-- Upgrade button for spending 4-star items (always visible; disabled when unavailable) -->
+          <div class="upgrade-section">
+            <button class="upgrade-btn" on:click={handleUpgrade} disabled={!canUpgrade || loadingUpgrade}>
+              Upgrade (+1 Point Cap)
+            </button>
+            <p class="upgrade-hint">
+              {#if loadingUpgrade}
+                Checking materials...
+              {:else if !canUpgrade}
+                Need 1× 4★ {isPlayer ? 'any element' : (sel.element || '').toLowerCase()} item
+              {:else}
+                Spend 1× 4★ damage item to increase allocation cap
+              {/if}
+            </p>
+          </div>
           
           {#if upgradeMessage}
             <div class="upgrade-message" class:success={upgradeMessage.includes('successful')}>
@@ -470,12 +476,8 @@ button.confirm {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
   margin: 0 0 0.35rem 0;
 }
-.hello-anchor {
-  position: absolute;
-  top: 50%;
-  left: 1rem;   /* align with stats-panel side padding */
-  right: 1rem;  /* align with stats-panel side padding */
-}
+/* Inline container flows naturally below stats */
+.hello-anchor { margin-top: 0.5rem; }
 
 /* Inline container occupying 50% of the stats panel width */
 .editor-wrap { width: 100%; }
@@ -491,21 +493,28 @@ button.confirm {
 }
 
 .upgrade-btn {
-  background: linear-gradient(135deg, #ffd700, #ffaa00);
-  color: #000;
-  border: none;
-  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.30);
+  padding: 0.45rem 0.75rem;
   border-radius: 6px;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
   align-self: flex-start;
 }
 
-.upgrade-btn:hover {
+.upgrade-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.45);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+}
+
+.upgrade-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .upgrade-hint {
