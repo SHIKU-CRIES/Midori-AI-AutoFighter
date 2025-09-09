@@ -78,7 +78,37 @@ async def test_stats_endpoint(app_with_db):
     # Verify we have all expected stats
     stat_names = [stat['name'] for stat in data['stats']]
     expected_stats = ['Health Points (HP)', 'Attack (ATK)', 'Defense (DEF)',
-                     'Critical Rate', 'Critical Damage', 'Vitality']
+                     'Critical Rate', 'Critical Damage', 'Vitality',
+                     'Effect Hit Rate', 'Effect Resistance', 'Dodge Rate', 'Mitigation']
     for expected in expected_stats:
         assert expected in stat_names
+
+
+@pytest.mark.asyncio
+async def test_effects_endpoint(app_with_db):
+    app, _ = app_with_db
+    client = app.test_client()
+    resp = await client.get('/guidebook/effects')
+    assert resp.status_code == 200
+    data = await resp.get_json()
+    assert 'combat_effects' in data
+    assert 'dot_effects' in data
+    assert 'categories' in data
+    assert isinstance(data['combat_effects'], list)
+    assert isinstance(data['dot_effects'], list)
+
+
+@pytest.mark.asyncio
+async def test_ultimates_endpoint(app_with_db):
+    app, _ = app_with_db
+    client = app.test_client()
+    resp = await client.get('/guidebook/ultimates')
+    assert resp.status_code == 200
+    data = await resp.get_json()
+    assert 'ultimates' in data
+    assert isinstance(data['ultimates'], list)
+    
+    # Verify Generic type is included
+    ultimate_ids = [ult['id'] for ult in data['ultimates']]
+    assert 'Generic' in ultimate_ids
 

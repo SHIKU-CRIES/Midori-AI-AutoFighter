@@ -18,28 +18,26 @@ bp = Blueprint("guidebook", __name__, url_prefix="/guidebook")
 async def damage_types() -> tuple[str, int, dict[str, Any]]:
     entries: list[dict[str, Any]] = []
 
-    # Enhanced descriptions for each damage type
-    enhanced_descriptions = {
-        "Fire": "Damage increases based on missing health. Burns enemies with damage-over-time effects. Weak to Ice.",
-        "Ice": "Applies Frozen Wound stacks that reduce enemy actions and cause missed turns. Weak to Lightning.",
-        "Lightning": "Strikes multiple targets and applies random elemental DoTs. Ultimate adds Aftertaste effect. Weak to Wind.",
-        "Wind": "Hits spread to all enemies after first target. Applies Gale Erosion DoT. Ultimate pulls and detonates enemy DoTs. Weak to Fire.",
-        "Light": "Provides healing and regeneration to allies. Direct healing for low-HP allies instead of attacking. Weak to Dark.",
-        "Dark": "Applies Shadow Siphon to party members, draining HP to boost own attack and defense. Strong single-target damage. Weak to Light.",
-        "Generic": "Multi-hit ultimate that deals 64 precise strikes. Used as fallback when no specific damage type is available. No elemental weaknesses."
-    }
-
     # Process all official types plus Generic
     all_types = list(ALL_DAMAGE_TYPES) + ["Generic"]
     for name in all_types:
         inst = load_damage_type(name)
         cls = type(inst)
-        desc = enhanced_descriptions.get(name, getattr(cls, "__doc__", None))
+
+        # Try to get description from the plugin itself
+        desc = None
+        if hasattr(cls, "get_description"):
+            desc = cls.get_description()
+        elif hasattr(cls, "__doc__") and cls.__doc__:
+            desc = cls.__doc__.strip()
+
+        # Fallback to analyzing the plugin's behavior
         if not desc:
-            # Provide a concise fallback description
             weakness = getattr(inst, "weakness", None)
-            tail = f" Weak to {weakness}." if weakness else ""
-            desc = f"Elemental damage type.{tail}"
+            if weakness and weakness != "none":
+                desc = f"Elemental damage type. Weak to {weakness}."
+            else:
+                desc = "Elemental damage type."
 
         # Calculate what this type is strong against
         strong_against = None
@@ -66,28 +64,28 @@ async def damage_types() -> tuple[str, int, dict[str, Any]]:
 @bp.get("/ultimates")
 async def ultimates() -> tuple[str, int, dict[str, Any]]:
     info: list[dict[str, Any]] = []
-    for name in ALL_DAMAGE_TYPES:
+
+    # Include Generic type in ultimates
+    all_types = list(ALL_DAMAGE_TYPES) + ["Generic"]
+
+    for name in all_types:
         inst = load_damage_type(name)
         cls = type(inst)
+
         # Try to extract docstring from ultimate implementation
-        doc = getattr(cls.ultimate, "__doc__", None)  # type: ignore[attr-defined]
+        doc = None
+        if hasattr(cls.ultimate, "__doc__") and cls.ultimate.__doc__:
+            doc = cls.ultimate.__doc__.strip()
+        elif hasattr(cls, "get_ultimate_description"):
+            doc = cls.get_ultimate_description()
+        elif hasattr(cls, "__doc__") and cls.__doc__:
+            # Use class docstring if available
+            doc = cls.__doc__.strip()
+
+        # Fallback descriptions based on damage type if no docstring
         if not doc:
-            # Provide specific fallbacks for known types
-            lowers = name.lower()
-            if lowers == "lightning":
-                doc = "AoE strike; applies random elemental DoTs; adds Aftertaste on hit."
-            elif lowers == "light":
-                doc = "Heal allies based on missing HP; reduce enemy defenses briefly."
-            elif lowers == "dark":
-                doc = "Multi-hit dark barrage scaling with DoT stacks; strong single-target damage."
-            elif lowers == "wind":
-                doc = "Rapid multi-hit across enemies; spreads on-hit interactions."
-            elif lowers == "fire":
-                doc = "AoE damage and inflict burns; gains temporary drain stacks on use."
-            elif lowers == "ice":
-                doc = "Strike all foes six times, increasing damage per target."
-            else:
-                doc = f"{name} ultimate ability."
+            doc = f"{name} ultimate ability."
+
         info.append({"id": getattr(inst, "id", name), "description": str(doc).strip()})
     return jsonify({"ultimates": info}), 200
 
@@ -97,37 +95,24 @@ async def passives() -> tuple[str, int, dict[str, Any]]:
     registry = discover_passives()
     items: list[dict[str, Any]] = []
 
-    # Enhanced descriptions for common passives
-    enhanced_descriptions = {
-        "room_heal": "Heal for 1 HP at the end of each battle. Each stack provides additional healing.",
-        "attack_up": "Gain +5 attack at the start of each battle. Each stack provides additional attack bonus.",
-        "ally_overload": "Ally's twin dagger system with overload mechanics. Grants 2 attacks per turn, builds charge (10 per action), and can activate Overload stance at 100+ charge for 4 attacks, +30% damage, but +40% damage taken and blocked healing.",
-        "advanced_combat_synergy": "Complex passive with conditional triggers: ATK bonus to allies when hitting targets below 50% HP, damage scaling with living allies (3+), and builds stacks for persistent buffs (+3 ATK, +1% crit rate per stack).",
-        "becca_menagerie_bond": "Becca's jellyfish summoning system. Can summon different jellyfish types (healing, electric, poison, shielding) on cooldown. Builds spirit stacks from summons that provide increasing ATK bonuses.",
-        "bubbles_bubble_burst": "Bubbles' protective bubble mechanics that create defensive effects and can burst for area damage.",
-        "carly_guardians_aegis": "Carly's aegis system that provides protective effects for the entire party.",
-        "graygray_counter_maestro": "Graygray's counter-attack specialization that excels at retaliating against enemy attacks.",
-        "hilander_critical_ferment": "Hilander's critical hit system that builds up critical potential over time through fermentation mechanics.",
-        "ixia_tiny_titan": "Ixia's power scaling system that provides increasing effectiveness despite small stature.",
-        "kboshi_flux_cycle": "Kboshi's unique passive that randomly switches between damage types (80% chance). When switch fails, gains +20% damage and HoT stacks. Successful switches apply mitigation debuffs to enemies.",
-        "lady_darkness_eclipsing_veil": "Lady Darkness's shadow manipulation that shrouds the battlefield in darkness.",
-        "lady_echo_resonant_static": "Lady Echo's sound-based effects that create resonant static interference.",
-        "lady_fire_and_ice_duality_engine": "Lady Fire and Ice's elemental balance system that manages opposing fire and ice elements.",
-        "lady_light_radiant_aegis": "Lady Light's radiant protection system that provides light-based defensive benefits."
-    }
-
     for pid, cls in sorted(registry.items()):
         name = getattr(cls, "name", pid)
         trigger = getattr(cls, "trigger", None)
 
-        # Use enhanced description if available, otherwise try class docstring
-        desc = enhanced_descriptions.get(pid, getattr(cls, "__doc__", ""))
+        # Try to get description from the plugin itself
+        desc = None
+        if hasattr(cls, "get_description"):
+            desc = cls.get_description()
+        elif hasattr(cls, "__doc__") and cls.__doc__:
+            desc = cls.__doc__.strip()
+
+        # Fallback to creating description from metadata
         if not desc:
-            # Create a basic description based on the passive name
-            if "passive" in name.lower():
-                desc = "Unique character ability that provides special effects."
+            # Create a basic description based on the passive metadata
+            if trigger:
+                desc = f"Passive ability that triggers on {trigger}."
             else:
-                desc = f"Passive ability: {name}. Triggers on {trigger or 'specific conditions'}."
+                desc = f"Passive ability: {name}."
 
         # Get additional metadata if available
         amount = getattr(cls, "amount", None)
@@ -196,8 +181,8 @@ async def mechs() -> tuple[str, int, dict[str, Any]]:
         {"name": "DoTs & HoTs", "description": "Damage/Healing over time effects stack and interact with some elements."},
         {"name": "Enrage", "description": "Foes may gain enrage increasing difficulty as rooms progress."},
         {"name": "Elemental Resistances", "description": "Each damage type has a weakness: Fire→Ice, Ice→Lightning, Lightning→Wind, Wind→Fire, Light↔Dark. Generic has no weaknesses."},
-        {"name": "Vitality Scaling", "description": "Vitality has four main effects: (1) Healing scales with both healer and target vitality, (2) Higher vitality reduces damage taken, (3) Experience gain is multiplied by vitality, (4) Higher vitality increases damage dealt."},
-        {"name": "Level Benefits", "description": "Global level increases base stats through two systems: (1) Fixed gains: +10 max HP, +5 attack, +3 defense per level, and (2) Percentage scaling: 0.3% to 0.8% increase to ALL stats per level."},
+        {"name": "Vitality Scaling", "description": "Affects healing, damage dealt, damage reduction, and experience gain."},
+        {"name": "Level Benefits", "description": "In-run leveling grants fixed stats (+10 HP, +5 ATK, +3 DEF) plus 0.3%-0.8% boost to ALL stats per level. Global user level provides persistent stat scaling across runs."},
     ]
     return jsonify({"mechanics": mechanics}), 200
 
@@ -205,103 +190,99 @@ async def mechs() -> tuple[str, int, dict[str, Any]]:
 @bp.get("/effects")
 async def effects() -> tuple[str, int, dict[str, Any]]:
     """Get information about combat effects, buffs, and DoTs."""
-    # Combat effects
-    combat_effects = [
-        {
+
+    # Load combat effects from plugins/effects/
+    combat_effects = []
+    try:
+        from plugins.effects.aftertaste import Aftertaste
+        combat_effects.append({
             "name": "Aftertaste",
             "type": "Combat Effect",
-            "description": "Deals a hit with random damage type (10% to 150% damage). Can be triggered by various sources including relics and abilities when hitting targets with damage.",
-            "trigger": "Various sources"
-        },
-        {
+            "description": Aftertaste.get_description(),
+            "trigger": "Various sources (relics, abilities) when hitting targets with damage"
+        })
+    except ImportError:
+        pass
+
+    try:
+        from plugins.effects.critical_boost import CriticalBoost
+        combat_effects.append({
             "name": "Critical Boost",
             "type": "Buff",
-            "description": "+0.5% crit rate and +5% crit damage per stack. Removed when taking damage.",
+            "description": CriticalBoost.get_description(),
             "trigger": "Various sources"
-        }
-    ]
+        })
+    except ImportError:
+        pass
 
-    # DoT effects (damage over time)
-    dot_effects = [
-        {
-            "name": "Blazing Torment",
-            "type": "DoT",
-            "description": "Fire-based damage over time effect that deals burning damage each turn.",
-            "element": "Fire"
-        },
-        {
-            "name": "Frozen Wound",
-            "type": "DoT",
-            "description": "Ice-based DoT that reduces enemy actions and can cause missed turns.",
-            "element": "Ice"
-        },
-        {
-            "name": "Gale Erosion",
-            "type": "DoT",
-            "description": "Wind-based DoT that continuously erodes enemy defenses.",
-            "element": "Wind"
-        },
-        {
-            "name": "Shadow Siphon",
-            "type": "DoT",
-            "description": "Dark-based effect that drains HP from targets while boosting caster's stats.",
-            "element": "Dark"
-        },
-        {
-            "name": "Charged Decay",
-            "type": "DoT",
-            "description": "Lightning-based DoT that builds electrical charge for additional effects.",
-            "element": "Lightning"
-        },
-        {
-            "name": "Celestial Atrophy",
-            "type": "DoT",
-            "description": "Light-based DoT that weakens enemies while providing healing feedback.",
-            "element": "Light"
-        },
-        {
-            "name": "Poison",
-            "type": "DoT",
-            "description": "Generic poison effect that deals continuous damage over time.",
-            "element": "Neutral"
-        },
-        {
-            "name": "Bleed",
-            "type": "DoT",
-            "description": "Physical bleeding effect that causes ongoing health loss.",
-            "element": "Physical"
-        },
-        {
-            "name": "Twilight Decay",
-            "type": "DoT",
-            "description": "Reduces target's vitality by 0.5 while dealing damage over time.",
-            "element": "Dark"
-        },
-        {
-            "name": "Impact Echo",
-            "type": "DoT",
-            "description": "Residual damage effect that echoes previous impacts.",
-            "element": "Physical"
-        },
-        {
-            "name": "Cold Wound",
-            "type": "DoT",
-            "description": "Ice-based DoT that slows enemies and deals frost damage.",
-            "element": "Ice"
-        },
-        {
-            "name": "Abyssal Corruption",
-            "type": "DoT",
-            "description": "Dark corruption that spreads and intensifies over time.",
-            "element": "Dark"
-        },
-        {
-            "name": "Abyssal Weakness",
-            "type": "Debuff",
-            "description": "Reduces target's resistance to dark-based effects.",
-            "element": "Dark"
-        }
-    ]
+    # Load DoT effects from plugins/dots/
+    import importlib
+    import os
+    dot_effects = []
+
+    dots_dir = "plugins/dots"
+    if os.path.exists(dots_dir):
+        for filename in os.listdir(dots_dir):
+            if filename.endswith(".py") and not filename.startswith("_") and filename != "__init__.py":
+                module_name = filename[:-3]  # Remove .py extension
+                try:
+                    module = importlib.import_module(f"plugins.dots.{module_name}")
+                    # Find the main class in the module
+                    for attr_name in dir(module):
+                        attr = getattr(module, attr_name)
+                        if (isinstance(attr, type) and
+                            hasattr(attr, "plugin_type") and
+                            attr.plugin_type == "dot" and
+                            hasattr(attr, "id")):
+
+                            # Get description from docstring or create one
+                            desc = getattr(attr, "__doc__", None)
+                            if not desc:
+                                # Try to infer element from ID
+                                dot_id = getattr(attr, "id", module_name)
+                                if "blazing" in dot_id or "fire" in dot_id:
+                                    element = "Fire"
+                                elif "frozen" in dot_id or "cold" in dot_id or "ice" in dot_id:
+                                    element = "Ice"
+                                elif "gale" in dot_id or "wind" in dot_id:
+                                    element = "Wind"
+                                elif "shadow" in dot_id or "dark" in dot_id or "abyssal" in dot_id:
+                                    element = "Dark"
+                                elif "charged" in dot_id or "lightning" in dot_id:
+                                    element = "Lightning"
+                                elif "celestial" in dot_id or "light" in dot_id:
+                                    element = "Light"
+                                else:
+                                    element = "Physical"
+                                desc = f"{element}-based damage over time effect."
+
+                            # Determine element from ID
+                            dot_id = getattr(attr, "id", module_name)
+                            element = "Physical"  # default
+                            if any(x in dot_id for x in ["blazing", "fire"]):
+                                element = "Fire"
+                            elif any(x in dot_id for x in ["frozen", "cold", "ice"]):
+                                element = "Ice"
+                            elif any(x in dot_id for x in ["gale", "wind"]):
+                                element = "Wind"
+                            elif any(x in dot_id for x in ["shadow", "dark", "abyssal"]):
+                                element = "Dark"
+                            elif any(x in dot_id for x in ["charged", "lightning"]):
+                                element = "Lightning"
+                            elif any(x in dot_id for x in ["celestial", "light"]):
+                                element = "Light"
+                            elif "poison" in dot_id:
+                                element = "Neutral"
+
+                            dot_effects.append({
+                                "name": attr_name.replace("_", " ").title(),
+                                "type": "DoT" if "weakness" not in dot_id else "Debuff",
+                                "description": desc.strip() if desc else f"Damage over time effect: {attr_name}",
+                                "element": element
+                            })
+                            break
+                except ImportError:
+                    continue
 
     return jsonify({
         "combat_effects": combat_effects,
@@ -351,7 +332,7 @@ async def stats() -> tuple[str, int, dict[str, Any]]:
         },
         {
             "name": "Vitality",
-            "description": "Multiplier with four effects: (1) Healing scales with both healer and target vitality: healing × healer_vitality × target_vitality. (2) Higher vitality reduces damage taken in combat. (3) Experience gain is multiplied by vitality. (4) Higher vitality increases damage dealt.",
+            "description": "Affects healing, damage, damage reduction, and experience gain.",
             "base_value": "1.0x",
             "scaling": "Affected by cards and relics"
         },
@@ -399,8 +380,9 @@ async def stats() -> tuple[str, int, dict[str, Any]]:
         "stats": stats_info,
         "common_passives": common_passives,
         "level_info": {
-            "description": "Your global level increases all base stats and unlocks new content.",
-            "benefits": "Each level grants: (1) Fixed gains: +10 max HP, +5 attack, +3 defense, and (2) Percentage scaling: 0.3% to 0.8% increase to ALL stats",
-            "experience": "Gain XP by winning battles and completing runs"
+            "description": "Multiple level systems provide character progression.",
+            "in_run_leveling": "Characters gain EXP in runs and level up for fixed stat gains (+10 HP, +5 ATK, +3 DEF) plus 0.3%-0.8% boost to ALL stats",
+            "global_user_level": "Persistent level across runs that provides permanent stat scaling to all characters",
+            "experience": "Gain XP by winning battles and completing runs. Vitality multiplies EXP gain."
         }
     }), 200
