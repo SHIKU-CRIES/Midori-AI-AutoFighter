@@ -1,16 +1,20 @@
-"""
-Battle logging system for structured battle logs.
+"""Battle logging system for structured battle logs.
 
 Creates organized folder structure:
 /backend/logs/runs/{run_id}/battles/{battle_index}/raw/
 /backend/logs/runs/{run_id}/battles/{battle_index}/summary/
 """
+import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
 import json
 import logging
+from logging.handlers import MemoryHandler
+from logging.handlers import QueueHandler
+from logging.handlers import QueueListener
 from pathlib import Path
+import queue
 import threading
 from typing import Any
 from typing import Dict
@@ -18,6 +22,47 @@ from typing import List
 from typing import Optional
 
 from autofighter.stats import BUS
+
+
+class TimedMemoryHandler(MemoryHandler):
+    """Memory handler that flushes to a target on a timed interval."""
+
+    def __init__(self, target: logging.Handler, flush_interval: float = 15.0, capacity: int = 1024):
+        super().__init__(capacity=capacity, target=target)
+        self.flush_interval = flush_interval
+        self._timer = threading.Timer(self.flush_interval, self.flush)
+        self._timer.daemon = True
+        self._timer.start()
+
+    def flush(self):
+        self.acquire()
+        try:
+            super().flush()
+            if not self._closed:
+                self._timer.cancel()
+                self._timer = threading.Timer(self.flush_interval, self.flush)
+                self._timer.daemon = True
+                self._timer.start()
+        finally:
+            self.release()
+
+    def close(self):
+        self._timer.cancel()
+        self.acquire()
+        try:
+            super().flush()
+        finally:
+            self.release()
+        super().close()
+
+
+class AsyncQueueListener(QueueListener):
+    """QueueListener that runs its worker thread as a daemon."""
+
+    def start(self) -> None:  # type: ignore[override]
+        thread = threading.Thread(target=self._monitor, daemon=True)
+        thread.start()
+        self._thread = thread
 
 
 @dataclass
@@ -110,21 +155,27 @@ class BattleLogger:
         self.raw_path.mkdir(parents=True, exist_ok=True)
         self.summary_path.mkdir(parents=True, exist_ok=True)
 
-        # Set up raw logging
+        # Set up raw logging with queue and memory buffering
         self.raw_logger = logging.getLogger(f"battle_{run_id}_{battle_index}")
         self.raw_logger.setLevel(logging.DEBUG)
 
-        # Remove any existing handlers to prevent duplication
         self.raw_logger.handlers.clear()
 
-        # Raw log file handler
-        raw_handler = logging.FileHandler(self.raw_path / "battle.log")
-        raw_handler.setFormatter(
+        self._log_queue = queue.SimpleQueue()
+        self._file_handler = logging.FileHandler(self.raw_path / "battle.log")
+        self._file_handler.setFormatter(
             logging.Formatter("%(asctime)s %(levelname)s: %(message)s")
         )
-        self.raw_logger.addHandler(raw_handler)
+        self._memory_handler = TimedMemoryHandler(
+            target=self._file_handler,
+            flush_interval=15,
+        )
+        self._listener = AsyncQueueListener(self._log_queue, self._memory_handler)
+        self._listener.start()
 
-        # Don't propagate to root logger to avoid duplication
+        queue_handler = QueueHandler(self._log_queue)
+        self.raw_logger.addHandler(queue_handler)
+
         self.raw_logger.propagate = False
 
         # Event tracking
@@ -761,10 +812,26 @@ class BattleLogger:
             self._unsubscribe_from_events()
             self._active = False
 
-            # Close raw log handlers
-            for handler in self.raw_logger.handlers:
-                handler.close()
-            self.raw_logger.handlers.clear()
+        async def _flush_async() -> None:
+            await asyncio.to_thread(self._shutdown_handlers)
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            asyncio.run(_flush_async())
+        else:
+            loop.create_task(_flush_async())
+
+    def _shutdown_handlers(self) -> None:
+        """Flush and close logging handlers."""
+        self._listener.stop()
+        self._memory_handler.flush()
+        self._memory_handler.close()
+        self._file_handler.flush()
+        self._file_handler.close()
+        for handler in self.raw_logger.handlers:
+            handler.close()
+        self.raw_logger.handlers.clear()
 
     def _write_human_summary(self):
         """Write a human-readable summary."""
