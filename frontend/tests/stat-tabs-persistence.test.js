@@ -15,8 +15,11 @@ describe('StatTabs editor persistence', () => {
     expect(content).toContain('const cached = editorConfigs.get(previewChar.id)');
   });
 
-  test('shows global buff note', () => {
+  test('shows global buff note after Regain row', () => {
     expect(content).toContain('export let userBuffPercent = 0');
     expect(content).toContain('Global Buff: +{userBuffPercent}%');
+    const regainIndex = content.indexOf('<div><span>Regain</span>');
+    const buffIndex = content.indexOf('Global Buff: +{userBuffPercent}%');
+    expect(regainIndex).toBeLessThan(buffIndex);
   });
 });
