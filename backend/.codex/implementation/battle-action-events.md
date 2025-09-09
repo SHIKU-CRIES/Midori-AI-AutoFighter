@@ -14,3 +14,9 @@ Damage type ultimates now consume charge via `use_ultimate()` and are invoked by
 `rooms/battle.py` when `ultimate_ready` is set.  Damage type plugins may add
 additional effects in their `ultimate` methods or respond to the
 `ultimate_used` event.
+
+## Pacing
+
+Each action calls the internal `_pace` helper, which yields for roughly half a
+second based on the time spent executing the move. This per-actor pacing keeps
+combat readable while avoiding full-turn delays.
