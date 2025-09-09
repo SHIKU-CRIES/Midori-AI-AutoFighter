@@ -19,8 +19,6 @@
   // Element-specific glow effects for different damage types
   $: elementGlow = getElementGlow(fighter.element);
 
-  // Old action pips display removed; no numeric/pip actions overlay.
-
   function getStackCount(p) {
     const stacks = p?.stacks;
     if (typeof stacks === 'object') {
@@ -509,6 +507,9 @@
     background: rgba(0,0,0,0.35);
     overflow: hidden;
     border: 2px solid color-mix(in oklab, var(--element-color, #6cf) 60%, black);
+    /* Ensure children (icon) are perfectly centered regardless of SVG internals */
+    display: grid;
+    place-items: center;
   }
   /* Soft faded-edge backdrop around the ult gauge */
   .ult-gauge::before {
@@ -535,19 +536,21 @@
     height: calc(var(--p, 0) * 100%);
     /* Solid single-color fill based on the element color */
     background: color-mix(in oklab, var(--element-color, #6cf) 68%, black);
+    /* Make the rising fill see-through so the portrait/icon shows */
+    opacity: 0.55;
     z-index: 0;
   }
   .ult-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    /* Centered by the parent grid; keep relative for stacking */
+    position: relative;
     width: 60%;
     height: 60%;
     filter: grayscale(100%);
     opacity: 0.5;
     z-index: 1;
     pointer-events: none;
+    /* Prevent the SVG from shrinking oddly */
+    display: block;
   }
   .ult-ready .ult-icon {
     filter: none;
@@ -587,7 +590,7 @@
       rgba(0,0,0,0) 100%
     );
     filter: blur(3px);
-    opacity: 0.75;
+    opacity: 0.45;
     pointer-events: none;
   }
   .ult-ready .ult-fill { filter: drop-shadow(0 0 8px var(--element-color)); }
