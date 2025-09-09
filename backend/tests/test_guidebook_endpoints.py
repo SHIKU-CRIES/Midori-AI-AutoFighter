@@ -107,7 +107,7 @@ async def test_ultimates_endpoint(app_with_db):
     data = await resp.get_json()
     assert 'ultimates' in data
     assert isinstance(data['ultimates'], list)
-    
+
     # Verify Generic type is included
     ultimate_ids = [ult['id'] for ult in data['ultimates']]
     assert 'Generic' in ultimate_ids
