@@ -18,6 +18,29 @@
   export let reducedMotion = false;
   const dispatch = createEventDispatcher();
 
+  let sortKey = 'name';
+  let sortDir = 'asc';
+  $: sortedRoster = (() => {
+    const compare = (a, b) => {
+      let res = 0;
+      if (sortKey === 'element') {
+        res = a.element.localeCompare(b.element);
+      } else if (sortKey === 'id') {
+        res = String(a.id).localeCompare(String(b.id));
+      } else {
+        res = a.name.localeCompare(b.name);
+      }
+      return sortDir === 'asc' ? res : -res;
+    };
+    const selectedChars = roster
+      .filter((c) => selected.includes(c.id))
+      .sort(compare);
+    const unselectedChars = roster
+      .filter((c) => !selected.includes(c.id))
+      .sort(compare);
+    return [...selectedChars, ...unselectedChars];
+  })();
+
   function select(id, e) {
     // Suppress the single-click select if a long-press just toggled
     if (suppressClick) {
@@ -89,8 +112,29 @@
   {/each}
 </div>
 {:else}
-<div class="roster-list">
-  {#each roster as char}
+<div class="roster-container">
+  <div class="roster-header">
+    <span>{selected.length} / 5 party members</span>
+    <div class="sort-controls">
+      <label>
+        Sort:
+        <select bind:value={sortKey}>
+          <option value="name">Name</option>
+          <option value="element">Element</option>
+          <option value="id">ID</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        class="sort-dir"
+        on:click={() => (sortDir = sortDir === 'asc' ? 'desc' : 'asc')}
+        aria-label="Toggle sort direction">
+        {sortDir === 'asc' ? '↑' : '↓'}
+      </button>
+    </div>
+  </div>
+  <div class="roster-list">
+  {#each sortedRoster as char}
     <button
       type="button"
       data-testid={`choice-${char.id}`}
@@ -112,10 +156,41 @@
         aria-hidden="true" />
     </button>
   {/each}
+  </div>
 </div>
 {/if}
 
 <style>
+.roster-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0.4rem;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.sort-dir {
+  background: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 0.25rem;
+  cursor: pointer;
+}
+
 .roster-list {
   display: flex;
   flex-direction: column;
