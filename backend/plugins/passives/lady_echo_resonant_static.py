@@ -108,3 +108,10 @@ class LadyEchoResonantStatic:
     def get_party_crit_stacks(cls, attacker: "Stats") -> int:
         """Get current party crit rate stacks."""
         return cls._party_crit_stacks.get(id(attacker), 0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Chain lightning hits deal +10% damage per DoT on the target. "
+            "Consecutive hits on the same foe grant the party +2% crit rate per stack, up to 20%."
+        )

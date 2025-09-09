@@ -123,3 +123,11 @@ class HilanderCriticalFerment:
             for effect in getattr(target, "_active_effects", [])
             if effect.name.startswith(f"{cls.id}_crit_stack_") and effect.name.endswith("_rate")
         )
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Each hit grants +5% crit rate and +10% crit damage. "
+            "Beyond 20 stacks, stack gain odds drop 5% per extra stack (min 1%). "
+            "A critical hit triggers Aftertaste and consumes one stack."
+        )

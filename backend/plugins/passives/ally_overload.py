@@ -165,3 +165,11 @@ class AllyOverload:
     def get_stacks(cls, target: "Stats") -> int:
         """Return current overload charge for UI display."""
         return cls._overload_charge.get(id(target), 0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Twin daggers grant two attacks per action and build 10 charge, decaying by 5 when inactive. "
+            "At 100 charge, Overload activates: attack count doubles again, damage +30%, and damage taken +40%, "
+            "draining 20 charge per turn. Charge gain halves above 120."
+        )

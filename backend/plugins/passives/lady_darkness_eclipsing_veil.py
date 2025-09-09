@@ -78,3 +78,10 @@ class LadyDarknessEclipsingVeil:
     def get_attack_bonus(cls, target: "Stats") -> int:
         """Get current attack bonus from debuff resistances."""
         return cls._attack_bonuses.get(id(target), 0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Extends DoTs by one turn and siphons 1% of each DoT tick as healing. "
+            "Resisting a debuff grants +5% attack, stacking indefinitely."
+        )

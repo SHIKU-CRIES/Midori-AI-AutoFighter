@@ -259,3 +259,10 @@ class BeccaMenagerieBond:
     def get_cooldown(cls, target: "Stats") -> int:
         """Get remaining summon cooldown."""
         return cls._summon_cooldown.get(id(target), 0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Spend 10% current HP to summon a jellyfish. "
+            "Each former jellyfish leaves a spirit granting +5% attack and defense per stack."
+        )

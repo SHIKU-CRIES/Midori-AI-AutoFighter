@@ -126,3 +126,11 @@ class MezzyGluttonousBulwark:
                     source=f"{self.id}_gain",
                 )
                 mezzy.add_effect(mezzy_buff)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Reduces damage taken by 20% and increases max HP by 10%. "
+            "Siphons 1% of attack, defense, and max HP from allies above 20% of her max HP each turn, "
+            "returning half when they fall below. Also grants 50% debuff resistance."
+        )

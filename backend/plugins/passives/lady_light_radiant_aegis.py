@@ -86,3 +86,10 @@ class LadyLightRadiantAegis:
     def get_attack_bonus(cls, target: "Stats") -> int:
         """Get current attack bonus from DoT cleanses."""
         return cls._attack_bonuses.get(id(target), 0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "HoTs grant shields equal to 50% of the heal and +5% effect resistance for one turn. "
+            "Cleansing a DoT heals 5% of max HP and gives Lady Light +2% attack per cleanse."
+        )
