@@ -20,3 +20,10 @@ class AttackUp:
             source=self.id,
         )
         target.add_effect(effect)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            f"Grants +{cls.amount} attack at battle start. "
+            f"Stacks display as {cls.stack_display}."
+        )

@@ -124,3 +124,11 @@ class KboshiFluxCycle:
     def get_stacks(cls, target: "Stats") -> int:
         """Return current damage bonus stacks."""
         return cls.get_damage_stacks(target)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "80% chance each turn to switch to a new element. "
+            "Failing to switch grants a 20% attack bonus and a small HoT for that turn; "
+            "switching clears stacks and applies -2% mitigation to foes per stack."
+        )

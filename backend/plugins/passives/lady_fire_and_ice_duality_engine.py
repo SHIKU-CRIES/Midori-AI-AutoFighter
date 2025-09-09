@@ -129,3 +129,10 @@ class LadyFireAndIceDualityEngine:
     def get_last_element(cls, target: "Stats") -> str:
         """Get last element used by an entity."""
         return cls._last_element.get(id(target), None)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Alternating fire and ice attacks builds Flux stacks, boosting burn and chill potency by 5% each. "
+            "Using the same element twice consumes stacks to heal allies for 10 HP per stack over 3 turns and reduce foe mitigation by 2% per stack."
+        )

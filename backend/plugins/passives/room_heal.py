@@ -14,3 +14,10 @@ class RoomHeal:
         # Support monkeypatching: if class attribute differs from original default, use class attribute
         heal_amount = type(self).amount if type(self).amount != 1 else self.amount
         await target.apply_healing(heal_amount)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            f"Heals {cls.amount} HP after each battle. "
+            f"Stacks display as {cls.stack_display}."
+        )

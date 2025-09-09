@@ -197,3 +197,11 @@ class CarlyGuardiansAegis:
             "mitigation": cls._mitigation_stacks.get(entity_id, 0),
             "overcharged": cls._overcharged.get(entity_id, False),
         }
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Heals the most injured ally for 10% of Carly's defense each turn. "
+            "Attack gains convert into defense stacks up to 50. "
+            "Taking hits builds mitigation stacks that can overcharge and share defense."
+        )

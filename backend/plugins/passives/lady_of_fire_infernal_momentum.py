@@ -68,3 +68,10 @@ class LadyOfFireInfernalMomentum:
             source=self.id,
         )
         target.add_effect(hot_effect)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Doubles the Fire missing HP damage bonus to 60%. "
+            "Taking damage burns attackers for 25% of damage dealt and self-inflicted Fire damage grants a HoT worth 50% of that damage for two turns."
+        )

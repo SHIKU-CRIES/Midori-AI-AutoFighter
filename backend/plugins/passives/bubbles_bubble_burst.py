@@ -111,3 +111,11 @@ class BubblesBubbleBurst:
     def get_attack_buff_stacks(cls, target: "Stats") -> int:
         """Get current number of permanent attack buffs from bubble bursts."""
         return cls.get_stacks(target)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Changes element randomly each turn. Hitting a foe adds a bubble; "
+            "at 3 stacks bubbles burst for area damage and give +10% attack "
+            "per burst (+5% after 20 stacks)."
+        )

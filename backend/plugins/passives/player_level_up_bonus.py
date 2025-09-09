@@ -43,3 +43,7 @@ class PlayerLevelUpBonus:
             source=self.id,
         )
         target.add_effect(level_up_bonus)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return "Increases all level-up stat gains by 35%, enhancing growth to 1.35× the base amount."

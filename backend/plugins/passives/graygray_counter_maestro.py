@@ -100,3 +100,11 @@ class GraygrayCounterMaestro:
     def get_stacks(cls, target: "Stats") -> int:
         """Return current counter stacks for UI display."""
         return cls._counter_stacks.get(id(target), 0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Counterattacks whenever hit, dealing 50% of damage received. "
+            "Each counter grants +5% attack up to 50 stacks, then +2.5% beyond, "
+            "and provides 10% mitigation for one turn. At 50 stacks, unleashes a burst for max HP damage."
+        )

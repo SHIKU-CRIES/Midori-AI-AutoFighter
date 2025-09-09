@@ -97,3 +97,10 @@ class LunaLunarReservoir:
     def get_display(cls, target: "Stats") -> str:
         """Display a spinner when charge is full and draining."""
         return "spinner" if cls.get_charge(target) >= 200 else "number"
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Gains 1 charge per action; attack count scales from 2 up to 32 at 85+ charge. "
+            "Charge beyond 200 grants 0.025% dodge per point and drains 50 charge each turn."
+        )

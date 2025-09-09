@@ -156,3 +156,9 @@ class MimicPlayerCopy:
     def get_copied_passive(cls, target: "Stats") -> str:
         """Get the passive copied from player."""
         return cls._copied_passive.get(id(target), None)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Copies the player's stats at battle start with a 25% reduction and copies the player's passive at half strength while blocking other buffs."
+        )

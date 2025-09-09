@@ -84,3 +84,11 @@ class AdvancedCombatSynergy:
     def get_stacks(cls, target) -> int:
         """Return current synergy stacks for display purposes."""
         return cls._synergy_stacks.get(id(target), 0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Grants allies +10 attack for 3 turns when hitting a foe below 50% HP. "
+            "If 3+ allies are alive at turn start, gains +5 attack per ally for that turn. "
+            "Each action builds up to 3 stacks, adding +3 attack and +1% crit rate per stack."
+        )

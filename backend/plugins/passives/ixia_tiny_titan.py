@@ -106,3 +106,11 @@ class IxiaTinyTitan:
     def get_vitality_bonus(cls, target: "Stats") -> float:
         """Get current Vitality bonus for an entity."""
         return cls._vitality_bonuses.get(id(target), 0.0)
+
+    @classmethod
+    def get_description(cls) -> str:
+        return (
+            "Taking damage increases Vitality by 0.01 permanently. "
+            "Each 0.01 Vitality grants 4x HP gain, converts 500% of Vitality to attack, "
+            "adds 5% mitigation, and reduces defense by 25."
+        )
