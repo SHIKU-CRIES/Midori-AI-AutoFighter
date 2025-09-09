@@ -25,6 +25,10 @@ while charging. The fill also slowly tilts left and right, the sway
 intensifying up to a one-degree angle around 98% charge. Reduced Motion
 disables both the transition and the tilt.
 
+HP bars for party members, foes, and their summons animate their fill widths
+and overheal overlays with short transitions. When Reduced Motion is enabled,
+these transitions are removed for instant updates.
+
 ## Stained-Glass Palette
 
 Effect indicators and bar graphs should reflect the project's stained-glass
