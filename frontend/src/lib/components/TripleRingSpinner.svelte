@@ -19,9 +19,9 @@
   .triple-ring-spinner {
     position: relative;
     /* Resolve to pixels to ensure correct orbital radii */
-    --spinner-size: var(--spinner-size, clamp(14px, calc(var(--portrait-size) * 0.18), 32px));
-    width: var(--spinner-size);
-    height: var(--spinner-size);
+    --size: var(--spinner-size, clamp(14px, calc(var(--portrait-size, 96px) * 0.18), 32px));
+    width: var(--size);
+    height: var(--size);
   }
   .ring {
     position: absolute;
@@ -33,9 +33,9 @@
     animation: pulse calc(var(--duration) * 2) ease-in-out infinite;
   }
   /* Define absolute ring sizes and their orbit radii in px */
-  .r1 { --ring-size-px: var(--spinner-size); --orbit: calc(var(--spinner-size) / 2); animation-delay: 0s; }
-  .r2 { --ring-size-px: calc(var(--spinner-size) * 0.66); --orbit: calc(var(--spinner-size) * 0.66 / 2); animation-delay: calc(var(--duration) / 3); }
-  .r3 { --ring-size-px: calc(var(--spinner-size) * 0.33); --orbit: calc(var(--spinner-size) * 0.33 / 2); animation-delay: calc(var(--duration) * 2 / 3); }
+  .r1 { --ring-size-px: var(--size); --orbit: calc(var(--size) / 2); animation-delay: 0s; }
+  .r2 { --ring-size-px: calc(var(--size) * 0.66); --orbit: calc(var(--size) * 0.66 / 2); animation-delay: calc(var(--duration) / 3); }
+  .r3 { --ring-size-px: calc(var(--size) * 0.33); --orbit: calc(var(--size) * 0.33 / 2); animation-delay: calc(var(--duration) * 2 / 3); }
   .ring {
     width: var(--ring-size-px);
     height: var(--ring-size-px);
