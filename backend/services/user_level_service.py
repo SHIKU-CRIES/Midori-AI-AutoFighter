@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from autofighter.party import Party
+from autofighter.stats import apply_status_hooks
+
 
 def user_exp_to_level(level: int) -> int:
     base = 100
@@ -58,3 +61,8 @@ def gain_user_exp(amount: int) -> dict[str, int]:
             ("user_exp", str(exp)),
         )
     return {"level": level, "exp": exp, "next_level_exp": next_exp}
+
+
+def apply_user_level_to_party(party: Party) -> None:
+    for member in party.members:
+        apply_status_hooks(member)
