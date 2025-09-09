@@ -1,6 +1,6 @@
 <script>
   import { Circle as PipCircle } from 'lucide-svelte';
-  import Spinner from '../components/Spinner.svelte';
+  import TripleRingSpinner from '../components/TripleRingSpinner.svelte';
   import { getCharacterImage, getElementColor, getElementIcon } from '../systems/assetLoader.js';
 
   export let fighter = {};
@@ -138,13 +138,7 @@
             {@const count = getStackCount(p)}
             <div class="passive" class:pips-mode={(p.display === 'pips' && count <= 5)} class:spinner-mode={(p.display === 'spinner')} class:number-mode={(p.display !== 'spinner' && !(p.display === 'pips' && count <= 5))}>
               {#if p.display === 'spinner'}
-                <!-- Element-colored cube loader replacing spinner -->
-                <div class="cube-loader" style={`--cube-color: ${elColor}` } aria-hidden="true">
-                  <div class="cube"></div>
-                  <div class="cube"></div>
-                  <div class="cube"></div>
-                  <div class="cube"></div>
-                </div>
+                <TripleRingSpinner color={elColor} duration="1.5s" {reducedMotion} />
               {:else if p.display === 'pips'}
                 {#if count <= 5}
                   <div class="pips">
@@ -447,49 +441,6 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
-  /* Element-colored stained-glass cube loader for spinner passives */
-  .cube-loader {
-    --cube-size: clamp(6px, calc(var(--portrait-size) * 0.065), 14px);
-    --orbit: calc(var(--cube-size) * 0.9); /* small radius, keep tight */
-    width: calc(var(--orbit) * 2 + var(--cube-size));
-    height: calc(var(--orbit) * 2 + var(--cube-size));
-    position: relative;
-    display: inline-block;
-  }
-  .cube-loader .cube {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: var(--cube-size);
-    height: var(--cube-size);
-    margin-left: calc(var(--cube-size) / -2);
-    margin-top: calc(var(--cube-size) / -2);
-    border-radius: 6px; /* remove hard edges */
-    /* Soft stained-glass tint; no hard borders, no backdrop blur */
-    background:
-      radial-gradient(60% 60% at 30% 30%,
-        color-mix(in oklab, var(--cube-color, #6cf) 85%, white) 0%,
-        color-mix(in oklab, var(--cube-color, #6cf) 60%, black) 90%,
-        rgba(0,0,0,0) 100%),
-      radial-gradient(70% 70% at 70% 70%,
-        rgba(255,255,255,0.20) 0%,
-        rgba(255,255,255,0.00) 70%);
-    opacity: 0.9;
-    transform-origin: center;
-    animation: orbit-slow 24s linear infinite;
-    pointer-events: none;
-  }
-  .cube-loader .cube:nth-child(1) { --angle: 0deg; }
-  .cube-loader .cube:nth-child(2) { --angle: 90deg; }
-  .cube-loader .cube:nth-child(3) { --angle: 180deg; }
-  .cube-loader .cube:nth-child(4) { --angle: 270deg; }
-  @keyframes orbit-slow {
-    from { transform: rotate(var(--angle)) translate(var(--orbit)) rotate(calc(-1 * var(--angle))); }
-    to   { transform: rotate(calc(var(--angle) + 360deg)) translate(var(--orbit)) rotate(calc(-1 * (var(--angle) + 360deg))); }
-  }
-  /* Respect Reduced Motion */
-  :global(.reduced) .cube-loader .cube { animation: none; }
-  .passive-indicators.reduced .cube-loader .cube { animation: none; }
   .passive.number-mode {
     background: rgba(0,0,0,0.35);
     box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--element-color, #6cf) 60%, black);
