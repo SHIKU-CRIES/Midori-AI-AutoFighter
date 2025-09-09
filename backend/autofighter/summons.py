@@ -69,7 +69,7 @@ class Summon(Stats):
         # Calculate base stats at specified multiplier
         base_hp = int(summoner.max_hp * stat_multiplier)
         base_atk = int(summoner.atk * stat_multiplier)
-        base_def = int(summoner.defense * stat_multiplier)
+        base_def = int(summoner._base_defense * stat_multiplier)
 
         # Determine damage type - high chance to match summoner, otherwise random
         if override_damage_type:
@@ -108,8 +108,8 @@ class Summon(Stats):
         summon._base_crit_damage = summoner.crit_damage * stat_multiplier
         summon._base_effect_hit_rate = summoner.effect_hit_rate * stat_multiplier
         summon._base_effect_resistance = summoner.effect_resistance * stat_multiplier
-        summon._base_mitigation = summoner.mitigation * stat_multiplier
-        summon._base_vitality = summoner.vitality * stat_multiplier
+        summon._base_mitigation = summoner._base_mitigation * stat_multiplier
+        summon._base_vitality = summoner._base_vitality * stat_multiplier
 
         # Copy summoner's passives at reduced effectiveness if applicable
         if hasattr(summoner, 'passives') and summoner.passives:

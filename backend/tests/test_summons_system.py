@@ -394,3 +394,53 @@ async def test_summon_defeat_cleanup(monkeypatch):
 
     # Summons should be cleaned up
     assert len(SummonManager.get_summons("test_summoner")) == 0
+
+
+@pytest.mark.asyncio
+async def test_summon_inheritance_with_effects(monkeypatch):
+    """Test that summons inherit base stats, not runtime stats affected by temporary effects."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    # Create summoner with specific base stats
+    summoner = Ally()
+    summoner.id = "test_summoner"
+    summoner._base_defense = 100
+    summoner._base_mitigation = 2.0
+    summoner._base_vitality = 1.5
+
+    # Add a temporary effect that boosts stats
+    from autofighter.stats import StatEffect
+    boost_effect = StatEffect(
+        name="test_boost",
+        stat_modifiers={
+            "defense": 50,       # +50 defense
+            "mitigation": 1.0,   # +1.0 mitigation
+            "vitality": 0.5      # +0.5 vitality
+        },
+        duration=5,
+        source="test_card"
+    )
+    summoner.add_effect(boost_effect)
+
+    # Verify effect is applied to runtime stats
+    assert summoner.defense == 150  # 100 base + 50 effect
+    assert summoner.mitigation == 3.0  # 2.0 base + 1.0 effect
+    assert summoner.vitality == 2.0  # 1.5 base + 0.5 effect
+
+    # Create summon with 50% stat inheritance
+    summon = Summon.create_from_summoner(
+        summoner=summoner,
+        summon_type="test",
+        source="test_source",
+        stat_multiplier=0.5
+    )
+
+    # Summon should inherit from BASE stats only, ignoring temporary effects
+    assert summon._base_defense == 50  # 50% of base 100 (ignores +50 effect)
+    assert summon._base_mitigation == 1.0  # 50% of base 2.0 (ignores +1.0 effect)
+    assert summon._base_vitality == 0.75  # 50% of base 1.5 (ignores +0.5 effect)
+
+    # Runtime stats should match base stats since summon has no effects
+    assert summon.defense == 50
+    assert summon.mitigation == 1.0
+    assert summon.vitality == 0.75
