@@ -13,6 +13,7 @@ from plugins.players._base import PlayerBase
 class Mimic(PlayerBase):
     id = "mimic"
     name = "Mimic"
+    about = "A mysterious shapeshifter whose true form remains unknown, existing as a perfect reflection of whatever combat style it encounters. Its player copy ability allows it to flawlessly replicate not just the appearance but the entire fighting methodology of any opponent, creating an unsettling mirror match where enemies face their own techniques turned against them. Mimic doesn't just adapt to combat situations—it becomes them, transforming into the ideal counter for whatever challenge it faces. This ultimate adaptability makes it both invaluable as an ally and terrifying as an opponent, as it can become anyone's perfect equal or superior."
     char_type: CharacterType = CharacterType.C
     gacha_rarity = 0
     damage_type: DamageTypeBase = field(

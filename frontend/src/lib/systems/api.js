@@ -38,8 +38,8 @@ export async function getGacha() {
   return httpGet('/gacha', { cache: 'no-store' });
 }
 
-export async function pullGacha(count = 1) {
-  return httpPost('/gacha/pull', { count });
+export async function pullGacha(count = 1, bannerId = "standard") {
+  return httpPost('/gacha/pull', { count, banner_id: bannerId });
 }
 
 // Player customization (pronouns, damage_type, hp, attack, defense, crit_rate, crit_damage)

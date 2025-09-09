@@ -13,6 +13,7 @@ from plugins.players._base import PlayerBase
 class Bubbles(PlayerBase):
     id = "bubbles"
     name = "Bubbles"
+    about = "An enthusiastic aquatic fighter whose bubbly personality masks a devastating combat style built around explosive chain reactions. His bubble burst abilities create cascading detonations that spread across the battlefield like underwater fireworks—each burst triggering additional explosions in a symphony of aquatic destruction. With boundless energy and an infectious optimism, Bubbles approaches every battle like a game, but his seemingly playful attacks pack tremendous force. His mastery of pressure dynamics allows him to create bubble formations that can both shield allies and devastate enemies when they inevitably pop."
     char_type: CharacterType = CharacterType.A
     gacha_rarity = 5
     damage_type: DamageTypeBase = field(
