@@ -19,6 +19,9 @@
   // Element-specific glow effects for different damage types
   $: elementGlow = getElementGlow(fighter.element);
 
+  $: ultRatio = Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15));
+  $: tiltAngle = Math.min(ultRatio, 0.98) / 0.98;
+
   function getStackCount(p) {
     const stacks = p?.stacks;
     if (typeof stacks === 'object') {
@@ -146,13 +149,14 @@
       <div
         class="ult-gauge"
         class:ult-ready={Boolean(fighter?.ultimate_ready)}
-        style="--element-color: {elColor}; --p: {Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15))}"
+        class:reduced={reducedMotion}
+        style="--element-color: {elColor}; --p: {ultRatio}; --tilt: {tiltAngle}deg"
       aria-label="Ultimate Gauge"
       >
         <div class="ult-fill"></div>
         <svelte:component this={elIcon} class="ult-icon" aria-hidden="true" />
         {#if !fighter?.ultimate_ready}
-          <div class="ult-pulse" style={`animation-duration: ${Math.max(0.4, 1.6 - 1.2 * Math.max(0, Math.min(1, Number(fighter?.ultimate_charge || 0) / 15)))}s`}></div>
+          <div class="ult-pulse" style={`animation-duration: ${Math.max(0.4, 1.6 - 1.2 * ultRatio)}s`}></div>
         {/if}
         {#if fighter?.ultimate_ready}
           <div class="ult-glow"></div>
@@ -539,6 +543,13 @@
     /* Make the rising fill see-through so the portrait/icon shows */
     opacity: 0.55;
     z-index: 0;
+    transform-origin: bottom center;
+    animation: ult-tilt 10s ease-in-out infinite;
+    transition: height 0.3s ease-out;
+  }
+  @keyframes ult-tilt {
+    0%, 100% { transform: rotate(calc(var(--tilt, 0deg) * -1)); }
+    50% { transform: rotate(var(--tilt, 0deg)); }
   }
   .ult-icon {
     /* Centered by the parent grid; keep relative for stacking */
@@ -592,6 +603,12 @@
     filter: blur(3px);
     opacity: 0.45;
     pointer-events: none;
+    transition: bottom 0.3s ease-out;
+  }
+  .ult-gauge.reduced .ult-fill,
+  .ult-gauge.reduced:not(.ult-ready)::after {
+    transition: none;
+    animation: none;
   }
   .ult-ready .ult-fill { filter: drop-shadow(0 0 8px var(--element-color)); }
   .ult-glow {
