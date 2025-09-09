@@ -66,12 +66,13 @@ async def test_party_validation(app_with_db):
 
     conn = sqlcipher3.connect(db_path)
     conn.execute("PRAGMA key = 'testkey'")
-    extra = [(pid,) for pid in ["ally", "becca", "carly", "mimic"]]
+    conn.execute("CREATE TABLE IF NOT EXISTS owned_players (id TEXT PRIMARY KEY)")
+    extra = [(pid,) for pid in ["ally", "becca", "carly", "graygray"]]
     conn.executemany("INSERT INTO owned_players (id) VALUES (?)", extra)
     resp = await client.post(
         "/run/start",
         json={
-            "party": ["player", "luna", "ally", "becca", "carly", "mimic"],
+            "party": ["player", "luna", "ally", "becca", "carly", "graygray"],
         },
     )
     assert resp.status_code == 400

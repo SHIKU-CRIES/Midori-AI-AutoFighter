@@ -17,7 +17,7 @@ def _build_pools() -> tuple[list[str], list[str]]:
         cls = getattr(player_plugins, name)
         rarity = getattr(cls, "gacha_rarity", 0)
         cid = getattr(cls, "id", name)
-        if cid in {"player", "luna"}:
+        if cid in {"player", "luna", "mimic"}:
             continue
         if rarity == 5:
             five.append(cid)

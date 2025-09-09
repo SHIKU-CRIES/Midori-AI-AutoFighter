@@ -54,7 +54,6 @@ Passives generally shouldn't be capped unless a designer explicitly specifies a 
 - **Lady of Fire** (B, Fire) – baseline fighter themed around fire.
 - **Luna** (B, Generic) – applies `luna_passive`.
 - **Mezzy** (B, random) – raises Max HP, takes less damage, and siphons stats from healthy allies each turn.
-- **Mimic** (C, random) – copies the player then lowers its stats by 25% on spawn.
 - **Player** (C, chosen) – avatar representing the user and may select any non-Generic damage type.
 
 Characters marked as "random" roll one of the six elements when first loaded
