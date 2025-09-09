@@ -283,7 +283,7 @@
           
           <!-- HP bar on top -->
           <div class="foe-hp-bar" style={`width: ${getFoeSizePx(foeCount)}px`}>
-            <div class="hp-bar-container">
+            <div class="hp-bar-container" class:reduced={reducedMotion}>
               {#if Number(foe?.shields || 0) > 0 && Number(foe?.max_hp || 0) > 0}
                 <div
                   class="overheal-fill"
@@ -314,7 +314,7 @@
                 >
                   <!-- Summon HP bar -->
                   <div class="summon-hp-bar">
-                    <div class="hp-bar-container">
+                    <div class="hp-bar-container" class:reduced={reducedMotion}>
                       {#if Number(summon?.shields || 0) > 0 && Number(summon?.max_hp || 0) > 0}
                         <div
                           class="overheal-fill"
@@ -353,7 +353,7 @@
         
         <!-- HP bar under the photo -->
         <div class="party-hp-bar">
-          <div class="hp-bar-container">
+          <div class="hp-bar-container" class:reduced={reducedMotion}>
             {#if Number(member?.shields || 0) > 0 && Number(member?.max_hp || 0) > 0}
               <div
                 class="overheal-fill"
@@ -389,7 +389,7 @@
               >
                 <!-- Summon HP bar -->
                 <div class="summon-hp-bar">
-                  <div class="hp-bar-container">
+                  <div class="hp-bar-container" class:reduced={reducedMotion}>
                     {#if Number(summon?.shields || 0) > 0 && Number(summon?.max_hp || 0) > 0}
                       <div
                         class="overheal-fill"
@@ -533,6 +533,14 @@
     transition: width 0.3s linear;
     pointer-events: none;
     z-index: 0; /* below main HP fill */
+  }
+
+  .hp-bar-container.reduced .hp-bar-fill {
+    transition: none;
+  }
+
+  .hp-bar-container.reduced .overheal-fill {
+    transition: none;
   }
 
   .hp-text {
