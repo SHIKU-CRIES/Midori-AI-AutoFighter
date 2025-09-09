@@ -142,7 +142,7 @@ Total Events: 45
 
 ## Implementation Notes
 
-- Uses thread-safe logging to handle concurrent battle events
+- Uses an async-friendly queue and timed memory buffer so log writes happen off the event loop and flush to disk roughly every 15 seconds or when a battle ends
 - Automatically creates directory structure as needed
 - Integrates with existing event bus system
 - Does not interfere with existing logging to `backend.log`
