@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import traceback
@@ -13,6 +14,7 @@ from game import _run_battle  # noqa: F401
 from game import _scale_stats  # noqa: F401
 from game import battle_snapshots  # noqa: F401
 from game import battle_tasks  # noqa: F401
+from game import cleanup_battle_state
 from game import get_fernet  # noqa: F401
 from game import get_save_manager  # noqa: F401
 from game import load_map  # noqa: F401
@@ -85,6 +87,17 @@ async def handle_exception(e: Exception):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
+
+
+async def _cleanup_loop() -> None:
+    while True:
+        await asyncio.sleep(300)
+        await cleanup_battle_state()
+
+
+@app.before_serving
+async def start_background_tasks() -> None:
+    asyncio.create_task(_cleanup_loop())
 
 
 if __name__ == "__main__":
