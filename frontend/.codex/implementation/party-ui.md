@@ -16,6 +16,10 @@ Implementation details:
   `--el-5darker`, and `--el-5lighter` for a smooth gradient. The animated
   background is applied via `::before` and transitions opacity on selection to
   avoid abrupt starts.
+- `PartyRoster.svelte` adds a header showing the number of selected party
+  members (`X / 5`) and provides sorting controls for name, element, or id with
+  an ascending/descending toggle. Selected members are always grouped at the
+  top and sorted within their section.
 - `PartyPicker.svelte` propagates `reducedMotion` to the roster so the effect
   can be disabled via Settings.
 - `StatTabs.svelte` uses flexible sizing so the panel fills its side.

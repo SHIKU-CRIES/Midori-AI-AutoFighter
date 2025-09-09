@@ -2,7 +2,8 @@
 
 exports[`PartyPicker component roster layout snapshot 1`] = `
 "<script>
-  import { getElementIcon, getElementColor } from './assetLoader.js';
+  import { getElementIcon, getElementColor } from '../systems/assetLoader.js';
+  import { createEventDispatcher } from 'svelte';
 
   /**
    * Displays the available roster and handles character selection.
@@ -17,9 +18,84 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
   export let selected = [];
   export let previewId;
   export let compact = false;
+  export let reducedMotion = false;
+  const dispatch = createEventDispatcher();
 
-  function select(id) {
+  let sortKey = 'name';
+  let sortDir = 'asc';
+  $: sortedRoster = (() => {
+    const compare = (a, b) => {
+      let res = 0;
+      if (sortKey === 'element') {
+        res = a.element.localeCompare(b.element);
+      } else if (sortKey === 'id') {
+        res = String(a.id).localeCompare(String(b.id));
+      } else {
+        res = a.name.localeCompare(b.name);
+      }
+      return sortDir === 'asc' ? res : -res;
+    };
+    const selectedChars = roster
+      .filter((c) => selected.includes(c.id))
+      .sort(compare);
+    const unselectedChars = roster
+      .filter((c) => !selected.includes(c.id))
+      .sort(compare);
+    return [...selectedChars, ...unselectedChars];
+  })();
+
+  function select(id, e) {
+    // Suppress the single-click select if a long-press just toggled
+    if (suppressClick) {
+      suppressClick = false;
+      e && e.stopPropagation();
+      e && e.preventDefault();
+      return;
+    }
     previewId = id;
+  }
+
+  function toggle(id) {
+    dispatch('toggle', id);
+  }
+
+  // Long-press detection
+  let longTimer = null;
+  let longTriggered = false;
+  let suppressClick = false;
+  function onPointerDown(id, e) {
+    longTriggered = false;
+    clearTimeout(longTimer);
+    longTimer = setTimeout(() => {
+      longTriggered = true;
+      suppressClick = true;
+      toggle(id);
+    }, 500);
+  }
+  function onPointerUp() {
+    clearTimeout(longTimer);
+  }
+
+  // Deterministic pseudo-random from an id string
+  function hashId(id) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < String(id).length; i++) {
+      h ^= String(id).charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0) / 0xffffffff;
+  }
+
+  function sweepDelay(id) {
+    const r = hashId(id);
+    // Delay between -2s and 0s for staggered start
+    return -(r * 2).toFixed(2);
+  }
+
+  function sweepDuration(id) {
+    const r = hashId(id * 7 + 'af');
+    // Slow sweep: between 10s and 16s
+    return (10 + r * 6).toFixed(2);
   }
 </script>
 
@@ -29,21 +105,51 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
     <button
       data-testid={\`choice-\${char.id}\`}
       class="char-btn"
-      on:click={() => select(char.id)}>
+      on:click={(e) => select(char.id, e)}
+      on:dblclick={() => toggle(char.id)}
+      on:pointerdown={(e) => onPointerDown(char.id, e)}
+      on:pointerup={onPointerUp}
+      on:pointerleave={onPointerUp}>
       <img src={char.img} alt={char.name} class="compact-img" />
     </button>
   {/each}
 </div>
 {:else}
-<div class="roster-list">
-  {#each roster as char}
+<div class="roster-container">
+  <div class="roster-header">
+    <span>{selected.length} / 5 party members</span>
+    <div class="sort-controls">
+      <label>
+        Sort:
+        <select bind:value={sortKey}>
+          <option value="name">Name</option>
+          <option value="element">Element</option>
+          <option value="id">ID</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        class="sort-dir"
+        on:click={() => (sortDir = sortDir === 'asc' ? 'desc' : 'asc')}
+        aria-label="Toggle sort direction">
+        {sortDir === 'asc' ? '↑' : '↓'}
+      </button>
+    </div>
+  </div>
+  <div class="roster-list">
+  {#each sortedRoster as char}
     <button
       type="button"
       data-testid={\`choice-\${char.id}\`}
       class="char-row"
       class:selected={selected.includes(char.id)}
-      on:click={() => select(char.id)}
-      style={\`border-color: \${getElementColor(char.element)}\`}> 
+      class:reduced={reducedMotion}
+      on:click={(e) => select(char.id, e)}
+      on:dblclick={() => toggle(char.id)}
+      on:pointerdown={(e) => onPointerDown(char.id, e)}
+      on:pointerup={onPointerUp}
+      on:pointerleave={onPointerUp}
+      style={\`border-color: \${getElementColor(char.element)}; --el-color: \${getElementColor(char.element)}; --sweep-delay: \${sweepDelay(char.id)}s; --sweep-duration: \${sweepDuration(char.id)}s;\`}> 
       <img src={char.img} alt={char.name} class="row-img" />
       <span class="row-name">{char.name}</span>
       <svelte:component
@@ -53,10 +159,41 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
         aria-hidden="true" />
     </button>
   {/each}
+  </div>
 </div>
 {/if}
 
 <style>
+.roster-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0.4rem;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.sort-dir {
+  background: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0 0.25rem;
+  cursor: pointer;
+}
+
 .roster-list {
   display: flex;
   flex-direction: column;
@@ -64,8 +201,6 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
   padding: 0.4rem;
   height: 100%;
   overflow-y: auto;
-  border-right: 2px solid #444;
-  border-left: 2px solid #444;
   min-width: 0;
 }
 
@@ -79,11 +214,65 @@ exports[`PartyPicker component roster layout snapshot 1`] = `
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+  z-index: 0; /* establish stacking context */
+  /* Derived element colors for the sweep effect */
+  --el-dark: color-mix(in srgb, var(--el-color) 20%, black 80%);
+  --el-5darker: color-mix(in srgb, var(--el-color) 95%, black 5%);
+  --el-5lighter: color-mix(in srgb, var(--el-color) 95%, white 5%);
 }
 .char-row:hover { background: rgba(20,20,20,0.8); }
 .char-row.selected {
   border-color: #ffd700;
   box-shadow: 0 0 8px rgba(255,215,0,0.5);
+}
+/* Animated element-color sweep base (paused by default) */
+.char-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Dark edges use a darkened version of the element color.
+     At 5% and 95%, slightly shift (±5%) to smooth the transition. */
+  background: linear-gradient(
+    90deg,
+    var(--el-dark) 0%,
+    var(--el-5darker) 25%,
+    var(--el-color) 50%,
+    var(--el-5lighter) 75%,
+    var(--el-dark) 100%
+  );
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  opacity: 0; /* hidden by default */
+  filter: brightness(1.0); /* base tone under soft-light */
+  mix-blend-mode: soft-light; /* subtle color without crushing contrast */
+  animation: af-elm-sweep var(--sweep-duration, 12s) linear infinite;
+  animation-play-state: paused; /* pause until selected */
+  pointer-events: none;
+  z-index: 0; /* sit beneath content */
+  transition: opacity 280ms ease; /* fade-in when selected */
+}
+
+.char-row.selected::before {
+  opacity: 0.82; /* brighter to make selection obvious */
+  animation-play-state: running; /* start from beginning smoothly */
+}
+
+.char-row.selected.reduced::before {
+  animation: none;
+  opacity: 0.45; /* keep visible but calmer with reduced motion */
+}
+
+@keyframes af-elm-sweep {
+  0% { background-position: -100% 0; }
+  100% { background-position: 100% 0; }
+}
+
+/* Ensure content renders above the animated sweep */
+.row-img, .row-name, .row-type {
+  position: relative;
+  z-index: 1;
 }
 .row-img {
   width: 40px;
