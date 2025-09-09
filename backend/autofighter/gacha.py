@@ -424,6 +424,6 @@ class GachaManager:
             "pity": pity,
             "items": items,
             "players": players,
-            "banners": [{"id": b.id, "name": b.name, "banner_type": b.banner_type, "featured_character": b.featured_character} for b in banners],
+            "banners": [{"id": b.id, "name": b.name, "banner_type": b.banner_type, "featured_character": b.featured_character, "start_time": b.start_time, "end_time": b.end_time} for b in banners],
             "featured_characters": featured_characters,
         }

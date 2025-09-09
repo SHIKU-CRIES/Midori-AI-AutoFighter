@@ -17,7 +17,7 @@ export async function getApiBase() {
     // Keep checking until the dev server exposes /api-base
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     let attempt = 0;
-    // eslint-disable-next-line no-constant-condition
+     
     while (true) {
       try {
         const res = await fetch('/api-base', { cache: 'no-store' });

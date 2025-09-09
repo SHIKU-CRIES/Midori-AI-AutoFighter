@@ -109,6 +109,24 @@
       default: return '#808080'; // Gray
     }
   }
+
+  // Get character image path
+  function getCharacterImage(characterId) {
+    try {
+      // Try to load the character image
+      return `/src/lib/assets/characters/${characterId}.png`;
+    } catch {
+      // Fallback to folder-based approach for characters with multiple images
+      return `/src/lib/assets/characters/${characterId}/${characterId}.png`;
+    }
+  }
+
+  // Handle image loading errors
+  function handleImageError(event) {
+    // Hide the image and show the fallback icon
+    event.target.style.display = 'none';
+    event.target.nextElementSibling.style.display = 'flex';
+  }
 </script>
 
 <MenuPanel data-testid="pulls-menu" class="warp-menu">
@@ -174,7 +192,13 @@
         </div>
         <div class="char-info">
           <div class="char-avatar">
-            <svelte:component this={Users} size={48} />
+            <img 
+              src={getCharacterImage(featuredChar.id)} 
+              alt={featuredChar.name}
+              on:error={handleImageError}
+              class="char-image"
+            />
+            <svelte:component this={Users} size={48} class="char-fallback" />
           </div>
           <div class="char-details">
             <h5>{featuredChar.name}</h5>
@@ -416,6 +440,23 @@
     border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.2);
     color: rgba(255,255,255,0.7);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .char-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .char-fallback {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .char-details {
