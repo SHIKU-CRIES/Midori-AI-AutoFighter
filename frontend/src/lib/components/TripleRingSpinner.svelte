@@ -19,9 +19,11 @@
   .triple-ring-spinner {
     position: relative;
     /* Resolve to pixels to ensure correct orbital radii */
-    --size: var(--spinner-size, clamp(14px, calc(var(--portrait-size, 96px) * 0.18), 32px));
+    /* Slightly smaller default size and a gentle upward nudge */
+    --size: var(--spinner-size, clamp(14px, calc(var(--portrait-size, 96px) * 0.16), 30px));
     width: var(--size);
     height: var(--size);
+    transform: translateY(-6px);
   }
   .ring {
     position: absolute;
