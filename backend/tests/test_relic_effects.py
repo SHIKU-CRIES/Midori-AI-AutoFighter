@@ -175,8 +175,14 @@ def test_shiny_pebble_first_hit_mitigation():
     party.members.append(ally)
     award_relic(party, "shiny_pebble")
     apply_relics(party)
+    events: list[tuple] = []
+    BUS.subscribe("relic_effect", lambda *a: events.append(a))
     BUS.emit("damage_taken", ally, enemy, 10)
     assert isclose(ally.mitigation, 103)
+    assert events[0][0] == "shiny_pebble"
+    assert events[0][2] == "mitigation_burst"
+    assert events[0][3] == 3
+    assert isclose(events[0][4]["mitigation_multiplier"], 1.03)
     BUS.emit("turn_start")
     assert isclose(ally.mitigation, 100)
 
@@ -190,8 +196,14 @@ def test_shiny_pebble_stacks():
     award_relic(party, "shiny_pebble")
     award_relic(party, "shiny_pebble")
     apply_relics(party)
+    events: list[tuple] = []
+    BUS.subscribe("relic_effect", lambda *a: events.append(a))
     BUS.emit("damage_taken", ally, enemy, 10)
-    assert isclose(ally.mitigation, 112.36, rel_tol=1e-4)
+    assert isclose(ally.mitigation, 106)
+    assert events[0][0] == "shiny_pebble"
+    assert events[0][2] == "mitigation_burst"
+    assert events[0][3] == 6
+    assert isclose(events[0][4]["mitigation_multiplier"], 1.06)
     BUS.emit("turn_start")
     assert isclose(ally.mitigation, 100)
 
