@@ -202,6 +202,7 @@ async def test_iron_guard_defense_buff():
 @pytest.mark.asyncio
 async def test_swift_footwork_first_action(monkeypatch):
     member = Stats()
+    member.action_points = 1
     party = Party(members=[member])
     award_card(party, "swift_footwork")
     await cards_module.apply_cards(party)
@@ -215,9 +216,16 @@ async def test_swift_footwork_first_action(monkeypatch):
 
     BUS.subscribe("card_effect", _listener)
     BUS.emit("battle_start")
+    member.action_points -= 1
     BUS.emit("action_used", member, None, 10)
+    await asyncio.sleep(0.05)
+    assert member.action_points == 1
+    member.action_points -= 1
+    BUS.emit("action_used", member, None, 10)
+    await asyncio.sleep(0.05)
     BUS.unsubscribe("card_effect", _listener)
-    assert "free_action" in events
+    assert member.action_points == 0
+    assert events.count("free_action") == 1
 
 
 @pytest.mark.asyncio
