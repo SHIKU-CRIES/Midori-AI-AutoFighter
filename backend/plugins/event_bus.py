@@ -95,7 +95,19 @@ class _Bus:
                 else:
                     obj = obj_ref
 
-                func(*args)
+                if inspect.iscoroutinefunction(func):
+                    loop = None
+                    with contextlib.suppress(RuntimeError):
+                        loop = asyncio.get_running_loop()
+                    if loop is not None:
+                        loop.create_task(func(*args))
+                    else:
+                        log.warning(
+                            "Async callback %s called from sync context with no event loop",
+                            func,
+                        )
+                else:
+                    func(*args)
             except Exception as e:
                 errors += 1
                 log.exception("Error in sync event callback for %s: %s", event, e)
@@ -224,7 +236,7 @@ class _Bus:
                     await func(*args)
                 else:
                     # Run sync functions in thread pool to avoid blocking
-                    loop = asyncio.get_event_loop()
+                    loop = asyncio.get_running_loop()
                     await loop.run_in_executor(None, lambda: func(*args))
                 await asyncio.sleep(0.002)
                 return True
@@ -264,47 +276,48 @@ class EventBus:
         self._performance_monitoring = True
 
     def subscribe(self, event: str, callback: Callable[..., Any]) -> None:
-        def wrapper(*args: Any) -> None:
-            try:
-                # Adaptively match subscriber signatures:
-                # - Trim extra args when subscriber expects fewer
-                # - Pad with None for required positional params when caller sent fewer
-                sig = inspect.signature(callback)
-                params = [p for p in sig.parameters.values()
-                          if p.kind in (inspect.Parameter.POSITIONAL_ONLY,
-                                        inspect.Parameter.POSITIONAL_OR_KEYWORD)]
-                accepts_varargs = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values())
+        def _prepare_args(args: Any) -> list[Any]:
+            sig = inspect.signature(callback)
+            params = [
+                p
+                for p in sig.parameters.values()
+                if p.kind
+                in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                )
+            ]
+            accepts_varargs = any(
+                p.kind == inspect.Parameter.VAR_POSITIONAL for p in sig.parameters.values()
+            )
 
-                call_args = list(args)
-                if not accepts_varargs:
-                    # Trim to max positional params supported
-                    if len(call_args) > len(params):
-                        call_args = call_args[: len(params)]
-                    # Pad to required positional count with None
-                    required = [p for p in params if p.default is inspect.Parameter.empty]
-                    if len(call_args) < len(required):
-                        call_args.extend([None] * (len(required) - len(call_args)))
+            call_args = list(args)
+            if not accepts_varargs:
+                if len(call_args) > len(params):
+                    call_args = call_args[: len(params)]
+                required = [
+                    p for p in params if p.default is inspect.Parameter.empty
+                ]
+                if len(call_args) < len(required):
+                    call_args.extend([None] * (len(required) - len(call_args)))
 
-                # Check if callback is async and handle appropriately
-                if inspect.iscoroutinefunction(callback):
-                    # For async callbacks from sync context, we need to schedule them
-                    loop = None
-                    with contextlib.suppress(RuntimeError):
-                        loop = asyncio.get_running_loop()
-                    if loop is not None:
-                        # Create a task for the async callback
-                        loop.create_task(callback(*call_args))
-                    else:
-                        # No event loop running, log warning and skip
-                        log.warning(
-                            "Async callback %s called from sync context with no event loop",
-                            callback,
-                        )
-                else:
-                    # Sync callback, call directly
+            return call_args
+
+        if inspect.iscoroutinefunction(callback):
+            async def wrapper(*args: Any) -> None:
+                try:
+                    call_args = _prepare_args(args)
+                    await callback(*call_args)
+                except Exception:
+                    log.exception("Error in '%s' subscriber %s", event, callback)
+
+        else:
+            def wrapper(*args: Any) -> None:
+                try:
+                    call_args = _prepare_args(args)
                     callback(*call_args)
-            except Exception:
-                log.exception("Error in '%s' subscriber %s", event, callback)
+                except Exception:
+                    log.exception("Error in '%s' subscriber %s", event, callback)
 
         bus.accept(event, callback, wrapper)
 

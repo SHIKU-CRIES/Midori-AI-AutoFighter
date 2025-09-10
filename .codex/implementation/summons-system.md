@@ -6,14 +6,14 @@ The Midori AI AutoFighter now has a unified summons system that provides a consi
 
 ### Core Components
 
-#### `Summon` Class
+#### `Summon` Class (`autofighter.summons.base`)
 - Inherits from `Stats` for full integration with the game's stat system
 - Supports configurable stat inheritance (default 50% of summoner's stats)
 - Automatic damage type inheritance with 70% chance to match summoner's element
 - Turn-based expiration system for temporary summons
 - Unique ID generation based on summoner and summon type
 
-#### `SummonManager` Class
+#### `SummonManager` Class (`autofighter.summons.manager`)
 - Centralized tracking and lifecycle management of all summons
 - Event-driven cleanup (battle end, summoner defeat, turn expiration)
 - Configurable summon limits per summoner
@@ -47,7 +47,7 @@ The Midori AI AutoFighter now has a unified summons system that provides a consi
 ### Creating a Simple Summon
 
 ```python
-from autofighter.summons import SummonManager
+from autofighter.summons.manager import SummonManager
 
 # Create a summon with default settings (50% stats, random type, permanent)
 summon = SummonManager.create_summon(

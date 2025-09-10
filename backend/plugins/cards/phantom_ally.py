@@ -3,7 +3,7 @@ from dataclasses import field
 import random
 
 from autofighter.stats import BUS
-from autofighter.summons import SummonManager
+from autofighter.summons.manager import SummonManager
 from plugins.cards._base import CardBase
 
 
