@@ -41,25 +41,8 @@
     height: var(--ring-size-px);
     margin: calc(var(--ring-size-px) / -2);
   }
-  .ring::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: calc(var(--ring-size-px) * 0.15);
-    height: calc(var(--ring-size-px) * 0.15);
-    border-radius: 50%;
-    background: var(--spinner-color, currentColor);
-    transform-origin: center;
-    animation: spin var(--duration) linear infinite;
-  }
-  .r2::before {
-    animation-direction: reverse;
-  }
-  @keyframes spin {
-    from { transform: rotate(0deg) translateX(var(--orbit)); }
-    to { transform: rotate(360deg) translateX(var(--orbit)); }
-  }
+  /* Remove orbiting dots/orbs */
+  .ring::before { content: none; display: none; }
   @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 0.6; }
     50% { transform: scale(1.2); opacity: 1; }
