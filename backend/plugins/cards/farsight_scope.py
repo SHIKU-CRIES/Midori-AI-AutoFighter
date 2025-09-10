@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from dataclasses import field
+import logging
 
+from autofighter.effects import EffectManager
+from autofighter.effects import create_stat_buff
 from autofighter.stats import BUS
 from plugins.cards._base import CardBase
 
@@ -17,20 +20,52 @@ class FarsightScope(CardBase):
         await super().apply(party)
 
         def _before_attack(attacker, target):
-            # Check if attacker is one of our party members
             if attacker in party.members:
-                # Check if target is under 50% HP
-                target_hp = getattr(target, 'hp', 0)
-                target_max_hp = getattr(target, 'max_hp', 1)
+                target_hp = getattr(target, "hp", 0)
+                target_max_hp = getattr(target, "max_hp", 1)
                 if target_hp / target_max_hp < 0.50:
-                    # Apply temporary +6% crit rate for this attack (theoretical implementation)
-                    import logging
                     log = logging.getLogger(__name__)
-                    log.debug("Farsight Scope low HP bonus: +6%% crit rate vs low HP enemy")
-                    BUS.emit("card_effect", self.id, attacker, "low_hp_crit_bonus", 6, {
-                        "crit_rate_bonus": 6,
-                        "target_hp_percentage": (target_hp / target_max_hp) * 100,
-                        "trigger_threshold": 50
-                    })
+
+                    effect_manager = getattr(attacker, "effect_manager", None)
+                    if effect_manager is None:
+                        effect_manager = EffectManager(attacker)
+                        attacker.effect_manager = effect_manager
+
+                    crit_mod = create_stat_buff(
+                        attacker,
+                        name=f"{self.id}_low_hp_crit",
+                        turns=1,
+                        crit_rate=0.06,
+                    )
+                    effect_manager.add_modifier(crit_mod)
+
+                    log.debug(
+                        "Farsight Scope low HP bonus: %s gains +6%% crit rate vs %s",
+                        getattr(attacker, "id", "attacker"),
+                        getattr(target, "id", "target"),
+                    )
+                    BUS.emit(
+                        "card_effect",
+                        self.id,
+                        attacker,
+                        "low_hp_crit_bonus",
+                        6,
+                        {
+                            "crit_rate_bonus": 6,
+                            "target_hp_percentage": (target_hp / target_max_hp) * 100,
+                            "trigger_threshold": 50,
+                        },
+                    )
+
+                    def _remove_bonus(actor, *_args):
+                        if actor is attacker:
+                            crit_mod.remove()
+                            log.debug(
+                                "Farsight Scope crit bonus removed from %s",
+                                getattr(attacker, "id", "attacker"),
+                            )
+                            BUS.unsubscribe("action_used", _remove_bonus)
+
+                    BUS.subscribe("action_used", _remove_bonus)
 
         BUS.subscribe("before_attack", _before_attack)
