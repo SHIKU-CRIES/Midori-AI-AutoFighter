@@ -96,6 +96,20 @@ def test_guardian_charm_targets_lowest_hp():
     assert high.defense == 50
 
 
+def test_guardian_charm_stacks():
+    party = Party()
+    low = PlayerBase()
+    high = PlayerBase()
+    low.hp = low.max_hp = 50
+    high.hp = high.max_hp = 100
+    party.members.extend([low, high])
+    award_relic(party, "guardian_charm")
+    award_relic(party, "guardian_charm")
+    apply_relics(party)
+    assert low.defense == int(50 * (1 + 0.2 * 2))
+    assert high.defense == 50
+
+
 def test_herbal_charm_heals_each_turn():
     event_bus_module.bus._subs.clear()
     party = Party()
