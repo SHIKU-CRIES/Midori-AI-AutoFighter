@@ -27,11 +27,24 @@ class GuidingCompass(CardBase):
                 extra_xp = 10  # Small extra XP amount
                 for member in party.members:
                     import logging
+
                     log = logging.getLogger(__name__)
-                    log.debug("Guiding Compass first battle bonus: +%d XP to %s", extra_xp, member.id)
-                    BUS.emit("card_effect", self.id, member, "first_battle_xp", extra_xp, {
-                        "bonus_xp": extra_xp,
-                        "trigger_event": "first_battle"
-                    })
+                    log.debug(
+                        "Guiding Compass first battle bonus: +%d XP to %s",
+                        extra_xp,
+                        member.id,
+                    )
+                    member.exp += extra_xp
+                    BUS.emit(
+                        "card_effect",
+                        self.id,
+                        member,
+                        "first_battle_xp",
+                        extra_xp,
+                        {
+                            "bonus_xp": extra_xp,
+                            "trigger_event": "first_battle",
+                        },
+                    )
 
         BUS.subscribe("battle_start", _on_battle_start)
