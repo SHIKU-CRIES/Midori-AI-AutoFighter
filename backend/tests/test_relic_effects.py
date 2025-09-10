@@ -210,15 +210,36 @@ def test_shiny_pebble_stacks():
     assert isclose(ally.mitigation, 100)
 
 
-def test_threadbare_cloak_shield_stacks():
+def test_threadbare_cloak_shield_scales_with_stacks():
     party = Party()
     a = PlayerBase()
     a.hp = a.max_hp = 100
     party.members.append(a)
-    award_relic(party, "threadbare_cloak")
+
     award_relic(party, "threadbare_cloak")
     apply_relics(party)
-    assert a.hp == 100 + int(100 * 0.03) * 2
+    assert a.hp == 100 + int(100 * 0.03)
+
+    award_relic(party, "threadbare_cloak")
+    apply_relics(party)
+    assert a.hp == 100 + int(100 * 0.03 * 2)
+
+
+def test_threadbare_cloak_applies_each_battle():
+    event_bus_module.bus._subs.clear()
+    party = Party()
+    a = PlayerBase()
+    a.hp = a.max_hp = 100
+    party.members.append(a)
+
+    award_relic(party, "threadbare_cloak")
+    apply_relics(party)
+    assert a.hp == 100 + int(100 * 0.03)
+
+    BUS.emit("battle_end", a)
+    a.hp = a.max_hp = 100
+    apply_relics(party)
+    assert a.hp == 100 + int(100 * 0.03)
 
 
 def test_lucky_button_missed_crit():
