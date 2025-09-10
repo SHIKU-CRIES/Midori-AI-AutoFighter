@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field
 
+from autofighter.stats import BUS
 from plugins.cards._base import CardBase
 
 
@@ -10,3 +11,29 @@ class LightweightBoots(CardBase):
     name: str = "Lightweight Boots"
     stars: int = 1
     effects: dict[str, float] = field(default_factory=lambda: {"dodge_odds": 0.03})
+    about: str = "+3% Dodge Odds; On successful dodge, heal 2% HP to the dodging unit"
+
+    async def apply(self, party) -> None:  # type: ignore[override]
+        await super().apply(party)
+
+        def _on_dodge(dodger, attacker, original_damage):
+            # Check if dodger is one of our party members
+            if dodger in party.members:
+                # Heal 2% HP
+                max_hp = getattr(dodger, 'max_hp', 1)
+                heal_amount = int(max_hp * 0.02)
+                if heal_amount > 0:
+                    import asyncio
+                    import logging
+                    log = logging.getLogger(__name__)
+                    try:
+                        asyncio.create_task(dodger.apply_healing(heal_amount, source_type="dodge_heal", source_name="lightweight_boots"))
+                        log.debug("Lightweight Boots dodge heal: +%d HP to %s", heal_amount, dodger.id)
+                        BUS.emit("card_effect", self.id, dodger, "dodge_heal", heal_amount, {
+                            "heal_amount": heal_amount,
+                            "trigger_event": "dodge"
+                        })
+                    except Exception as e:
+                        log.warning("Error applying Lightweight Boots dodge heal: %s", e)
+
+        BUS.subscribe("dodge", _on_dodge)
