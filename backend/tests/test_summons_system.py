@@ -314,6 +314,31 @@ async def test_becca_jellyfish_replacement_creates_spirit(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_spirit_spawn_on_summon_defeat(monkeypatch):
+    """Becca gains a spirit stack when her jellyfish is defeated."""
+    monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)
+
+    SummonManager.cleanup()
+
+    becca = Becca()
+    becca.id = "becca"
+    becca.hp = 100
+    becca._base_max_hp = 100
+
+    passive = BeccaMenagerieBond()
+
+    await passive.summon_jellyfish(becca, "electric")
+    assert passive.get_spirit_stacks(becca) == 0
+
+    summon = SummonManager.get_summons("becca")[0]
+    summon.hp = 0
+    await SummonManager._on_entity_killed(summon)
+
+    assert SummonManager.get_summons("becca") == []
+    assert passive.get_spirit_stacks(becca) == 1
+
+
+@pytest.mark.asyncio
 async def test_damage_type_inheritance(monkeypatch):
     """Test that summons inherit damage types correctly."""
     monkeypatch.setattr(torch_checker, "is_torch_available", lambda: False)

@@ -120,6 +120,22 @@ class PassiveRegistry:
                 for _ in range(stacks):
                     await passive_instance.on_defeat(target)
 
+    async def trigger_summon_defeat(self, target, **kwargs) -> None:
+        """Trigger summon defeat events for relevant passives."""
+        counts = Counter(target.passives)
+        for pid, count in counts.items():
+            cls = self._registry.get(pid)
+            if cls is None:
+                continue
+            passive_instance = cls()
+            if hasattr(passive_instance, "on_summon_defeat"):
+                stacks = min(count, getattr(cls, "max_stacks", count))
+                for _ in range(stacks):
+                    try:
+                        await passive_instance.on_summon_defeat(target, **kwargs)
+                    except TypeError:
+                        await passive_instance.on_summon_defeat(target)
+
     async def trigger_hit_landed(self, attacker, target, damage: int = 0, action_type: str = "attack", **kwargs) -> None:
         """Trigger passives when a hit successfully lands."""
         counts = Counter(attacker.passives)
@@ -250,3 +266,5 @@ class PassiveRegistry:
                 }
             )
         return info
+
+
