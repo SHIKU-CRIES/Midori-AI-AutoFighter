@@ -16,7 +16,7 @@ class AdvancedCombatSynergy:
     plugin_type = "passive"
     id = "advanced_combat_synergy"
     name = "Advanced Combat Synergy"
-    trigger = "hit_landed"  # Primary trigger
+    trigger = ["hit_landed", "turn_start", "action_taken"]  # React to multiple events
     max_stacks = 3
     stack_display = "pips"
 
@@ -24,10 +24,13 @@ class AdvancedCombatSynergy:
     _synergy_stacks: ClassVar[dict[int, int]] = {}
 
     async def apply(self, target, **kwargs) -> None:
-        """Handle hit_landed trigger with conditional logic."""
-        hit_target = kwargs.get('hit_target')
-        damage = kwargs.get('damage', 0)
-        party = kwargs.get('party', [])
+        """Handle event-based logic; currently only acts on hit_landed."""
+        if kwargs.get("event") != "hit_landed":
+            return
+
+        hit_target = kwargs.get("hit_target")
+        damage = kwargs.get("damage", 0)
+        party = kwargs.get("party", [])
 
         if hit_target and damage > 0:
             # Conditional trigger: only activate if target is below 50% HP
