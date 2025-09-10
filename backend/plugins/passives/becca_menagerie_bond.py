@@ -157,11 +157,10 @@ class BeccaMenagerieBond:
         current_summons = SummonManager.get_summons(target_id)
         jellyfish_summons = [s for s in current_summons if s.summon_source == self.id]
 
-        # If we have viable jellyfish and we're not changing type, skip summoning
-        if (not decision['should_resummon'] and
-            jellyfish_type == self._last_summon.get(entity_id) and
-            jellyfish_summons):
-            return False
+        # If a healthy jellyfish exists and no type change is requested, skip summoning
+        if jellyfish_summons and not decision["should_resummon"]:
+            if jellyfish_type is None or jellyfish_type == self._last_summon.get(entity_id):
+                return False
 
         # Pay HP cost using proper damage system
         target.hp -= hp_cost
