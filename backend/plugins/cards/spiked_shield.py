@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 from dataclasses import field
+import logging
 
 from autofighter.stats import BUS
 from plugins.cards._base import CardBase
+from plugins.cards._base import safe_async_task
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -16,25 +20,51 @@ class SpikedShield(CardBase):
     async def apply(self, party) -> None:  # type: ignore[override]
         await super().apply(party)
 
-        def _on_mitigation_triggered(target, original_damage, mitigated_damage):
-            # Check if target is one of our party members and mitigation actually reduced damage
-            if target in party.members and mitigated_damage < original_damage:
-                # Deal retaliatory damage (3% of attack)
-                attacker_stat = getattr(target, 'atk', 0)
-                if attacker_stat == 0:
-                    attacker_stat = getattr(target, 'attack', 0)
-                retaliation_damage = int(attacker_stat * 0.03)
+        def _on_mitigation_triggered(target, original_damage, mitigated_damage, attacker=None):
+            if (
+                attacker is not None
+                and target in party.members
+                and mitigated_damage < original_damage
+            ):
+                atk_stat = getattr(target, "atk", 0)
+                if atk_stat == 0:
+                    atk_stat = getattr(target, "attack", 0)
+                retaliation_damage = int(atk_stat * 0.03)
 
                 if retaliation_damage > 0:
-                    # Find the original attacker (this would need to be passed in the event)
-                    import logging
-                    log = logging.getLogger(__name__)
-                    log.debug("Spiked Shield retaliation: %d damage from %s", retaliation_damage, target.id)
-                    BUS.emit("card_effect", self.id, target, "retaliation_damage", retaliation_damage, {
-                        "retaliation_damage": retaliation_damage,
-                        "damage_mitigated": original_damage - mitigated_damage,
-                        "trigger_event": "mitigation"
-                    })
-                    # Note: Actual retaliation damage would need to be applied to the original attacker
+                    async def _retaliate():
+                        try:
+                            dealt = await attacker.apply_damage(
+                                retaliation_damage,
+                                attacker=target,
+                                action_name="Spiked Shield Retaliation",
+                            )
+                        except Exception as e:  # pragma: no cover - defensive
+                            log.warning(
+                                "Error applying Spiked Shield retaliation damage: %s",
+                                e,
+                            )
+                            return
+                        log.debug(
+                            "Spiked Shield retaliation: %d damage from %s to %s",
+                            dealt,
+                            target.id,
+                            getattr(attacker, "id", "unknown"),
+                        )
+                        BUS.emit(
+                            "card_effect",
+                            self.id,
+                            target,
+                            "retaliation_damage",
+                            dealt,
+                            {
+                                "retaliation_damage": dealt,
+                                "damage_mitigated": original_damage - mitigated_damage,
+                                "trigger_event": "mitigation",
+                                "retaliation_target": getattr(attacker, "id", "unknown"),
+                            },
+                        )
+
+                    safe_async_task(_retaliate())
 
         BUS.subscribe("mitigation_triggered", _on_mitigation_triggered)
