@@ -28,7 +28,7 @@ class BulwarkTotem(CardBase):
                         if member != target and getattr(member, 'hp', 0) > 10:  # Must have reasonable HP
                             card_holder = member
                             break
-                    
+
                     if card_holder:
                         # Redirect 5% of damage to the card holder (tiny soak)
                         redirect_amount = max(1, int(damage * 0.05))
@@ -37,7 +37,7 @@ class BulwarkTotem(CardBase):
                         if hp_to_restore > 0:
                             target.hp += hp_to_restore
                             card_holder.hp = max(1, card_holder.hp - redirect_amount)
-                            
+
                             import logging
                             log = logging.getLogger(__name__)
                             log.debug("Bulwark Totem damage soak: %d damage soaked by %s for %s", redirect_amount, card_holder.id, target.id)

@@ -25,7 +25,7 @@ class CalmBeads(CardBase):
                     # Check if the effect name suggests it's a debuff/DoT
                     effect_lower = effect_name.lower()
                     is_debuff = any(keyword in effect_lower for keyword in
-                                   ['bleed', 'poison', 'burn', 'freeze', 'stun', 'silence', 'slow', 
+                                   ['bleed', 'poison', 'burn', 'freeze', 'stun', 'silence', 'slow',
                                     'weakness', 'curse', 'dot', 'debuff'])
 
                     if is_debuff:

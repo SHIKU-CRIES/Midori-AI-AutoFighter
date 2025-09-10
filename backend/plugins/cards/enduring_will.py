@@ -51,19 +51,20 @@ class EnduringWill(CardBase):
                     mitigation_bonus_pending = False
                     for member in party.members:
                         # Apply +0.002 mitigation (0.2% - small bonus appropriate for 1-star card)
-                        from autofighter.effects import EffectManager, create_stat_buff
+                        from autofighter.effects import EffectManager
+                        from autofighter.effects import create_stat_buff
                         mgr = getattr(member, "effect_manager", None)
                         if mgr is None:
                             mgr = EffectManager(member)
                             member.effect_manager = mgr
-                        
+
                         # Create temporary mitigation buff for this battle
                         mod = create_stat_buff(
-                            member, name=f"{self.id}_mitigation_bonus", turns=20, 
+                            member, name=f"{self.id}_mitigation_bonus", turns=20,
                             mitigation_mult=1.002  # +0.2% mitigation
                         )
                         mgr.add_modifier(mod)
-                        
+
                         import logging
                         log = logging.getLogger(__name__)
                         log.debug("Enduring Will mitigation bonus: +0.002 mitigation to %s", member.id)
