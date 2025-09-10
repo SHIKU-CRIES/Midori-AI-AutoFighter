@@ -6,6 +6,7 @@ from autofighter.cards import apply_cards
 from autofighter.cards import award_card
 from autofighter.party import Party
 from autofighter.stats import BUS
+from plugins.foes._base import FoeBase
 from plugins.players._base import PlayerBase
 
 
@@ -27,7 +28,7 @@ def test_guardian_shard_applies_bonus_after_no_deaths():
     BUS.emit("battle_start", ally1)
     BUS.emit("battle_start", ally2)
     loop.run_until_complete(asyncio.sleep(0))
-    BUS.emit("battle_end", ally1)
+    BUS.emit("battle_end", FoeBase())
     loop.run_until_complete(asyncio.sleep(0))
 
     pre = ally1.mitigation
@@ -36,7 +37,7 @@ def test_guardian_shard_applies_bonus_after_no_deaths():
     loop.run_until_complete(asyncio.sleep(0))
     assert ally1.mitigation == pytest.approx(pre + 1)
 
-    BUS.emit("battle_end", ally1)
+    BUS.emit("battle_end", FoeBase())
     loop.run_until_complete(asyncio.sleep(0))
     assert ally1.mitigation == pytest.approx(pre)
 
@@ -54,7 +55,7 @@ def test_guardian_shard_no_bonus_after_death():
     BUS.emit("battle_start", ally2)
     BUS.emit("death", ally1)
     loop.run_until_complete(asyncio.sleep(0))
-    BUS.emit("battle_end", ally1)
+    BUS.emit("battle_end", FoeBase())
     loop.run_until_complete(asyncio.sleep(0))
 
     pre = ally1.mitigation
