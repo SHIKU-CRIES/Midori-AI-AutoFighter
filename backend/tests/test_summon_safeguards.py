@@ -10,8 +10,8 @@ import pytest
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import llms.torch_checker as torch_checker
 
-from autofighter.summons import Summon
-from autofighter.summons import SummonManager
+from autofighter.summons.base import Summon
+from autofighter.summons.manager import SummonManager
 from plugins.players.ally import Ally
 
 

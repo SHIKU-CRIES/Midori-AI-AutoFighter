@@ -26,7 +26,7 @@ from autofighter.rooms import _build_foes
 from autofighter.rooms import _choose_foe
 from autofighter.rooms import _scale_stats
 from autofighter.rooms import _serialize
-from autofighter.summons import SummonManager
+from autofighter.summons.manager import SummonManager
 from plugins.damage_types import load_damage_type
 
 

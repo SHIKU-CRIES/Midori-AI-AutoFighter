@@ -25,8 +25,8 @@ from autofighter.effects import create_stat_buff
 from autofighter.mapgen import MapNode
 from autofighter.relics import apply_relics
 from autofighter.relics import relic_choices
-from autofighter.summons import Summon
-from autofighter.summons import SummonManager
+from autofighter.summons.base import Summon
+from autofighter.summons.manager import SummonManager
 from plugins.damage_types import ALL_DAMAGE_TYPES
 
 from ..party import Party

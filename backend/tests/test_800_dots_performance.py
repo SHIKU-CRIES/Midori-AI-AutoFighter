@@ -7,11 +7,14 @@ This will help identify async blocking issues.
 import asyncio
 import time
 
+import pytest
+
 from autofighter.effects import DamageOverTime
 from autofighter.effects import EffectManager
 from autofighter.stats import Stats
 
 
+@pytest.mark.asyncio
 async def test_many_dots_performance():
     """Test performance with many DOT effects."""
 

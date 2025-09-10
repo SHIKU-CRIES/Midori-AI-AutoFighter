@@ -3,8 +3,8 @@
 from llms import torch_checker
 import pytest
 
-from autofighter.summons import Summon
-from autofighter.summons import SummonManager
+from autofighter.summons.base import Summon
+from autofighter.summons.manager import SummonManager
 from plugins.players.ally import Ally
 
 

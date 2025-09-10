@@ -1,16 +1,48 @@
 # Event Bus Wrapper
 
-Provides a simple publish/subscribe bus so plugins can communicate without engine-specific dependencies.
+A lightweight publish/subscribe system so plugins can communicate without
+engine‑specific dependencies. It supports both synchronous and asynchronous
+callbacks and provides performance instrumentation.
 
 ## Usage
-- `subscribe(event: str, callback: Callable)` – register a function to run when an event is emitted.
-- `unsubscribe(event: str, callback: Callable)` – stop receiving a previously subscribed event.
-- `emit(event: str, *args)` – broadcast an event with optional arguments.
+- `subscribe(event: str, callback: Callable)` – register a callback for an
+  event. Callback may be sync or async.
+- `unsubscribe(event: str, callback: Callable)` – remove a previously
+  registered callback.
+- `emit(event: str, *args)` – broadcast an event. When an event loop is
+  running and async dispatch is preferred, emissions are batched for better
+  throughput; otherwise callbacks run synchronously.
+- `emit_async(event: str, *args)` – await completion of all callbacks. This
+  calls the internal `send_async` implementation which awaits coroutine
+  callbacks directly and offloads sync ones to a thread pool.
 
-Subscriber errors are caught and logged so one misbehaving plugin does not crash others.
+Subscriber errors are caught and logged so one misbehaving plugin does not
+crash others.
 
-## Async Yielding
-All backend event emissions include a small asynchronous yield after each callback and batch item. This `await asyncio.sleep(0.002)` pause (2 ms) ensures the event loop stays responsive by allowing other tasks to run between bus items.
+## Asynchronous dispatch
+`EventBus.subscribe` detects coroutine functions and registers an async‑aware
+wrapper. When events are emitted:
+
+- `send_async` awaits coroutine callbacks directly and uses
+  `loop.run_in_executor` only for synchronous functions. This avoids the
+  thread‑pool hop for async subscribers.
+- The synchronous `send` path schedules coroutine subscribers with
+  `create_task` if a loop is running. If no loop is present, the bus logs a
+  warning and the coroutine is not executed.
+
+When writing coroutine callbacks, avoid long blocking operations. Offload any
+CPU‑bound or blocking work to your own executor to keep the event loop
+responsive.
+
+## Batching and adaptive intervals
+High‑frequency events (e.g. `damage_dealt`, `damage_taken`, `hit_landed`,
+`heal_received`) are batched. Events collected within a frame (default
+`16 ms`) are processed together to reduce overhead. The batch interval can be
+adaptive—when load is low, batches are processed more quickly; during heavy
+load, the interval grows to maintain responsiveness.
+
+Each callback and batch item yields `await asyncio.sleep(0.002)` to give other
+tasks a chance to run.
 
 ## Events
 The core combat engine emits a few global events that plugins may subscribe to:
@@ -19,6 +51,6 @@ The core combat engine emits a few global events that plugins may subscribe to:
 - `damage_taken(target, attacker, amount)`
 - `heal(healer, target, amount)`
 - `heal_received(target, healer, amount)`
-- `hit_landed(attacker, target, amount, source_type="attack", source_name=None)` - emitted when a successful hit occurs
+- `hit_landed(attacker, target, amount, source_type="attack", source_name=None)` – emitted when a successful hit occurs
 
 Plugins can define additional event names as needed.

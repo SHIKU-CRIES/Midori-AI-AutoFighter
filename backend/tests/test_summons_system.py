@@ -12,8 +12,8 @@ import llms.torch_checker as torch_checker
 
 from autofighter.party import Party
 from autofighter.stats import BUS
-from autofighter.summons import Summon
-from autofighter.summons import SummonManager
+from autofighter.summons.base import Summon
+from autofighter.summons.manager import SummonManager
 from plugins.cards.phantom_ally import PhantomAlly
 from plugins.damage_types.lightning import Lightning
 from plugins.foes._base import FoeBase
