@@ -21,6 +21,7 @@ class PocketManual(RelicBase):
         super().apply(party)
 
         counts: dict[int, int] = {}
+        stacks = party.relics.count(self.id)
 
         def _hit(attacker, target, amount, source_type="attack", source_name=None) -> None:
             # Only trigger if the attacker is a party member
@@ -30,7 +31,7 @@ class PocketManual(RelicBase):
             pid = id(attacker)
             counts[pid] = counts.get(pid, 0) + 1
             if counts[pid] % 10 == 0:
-                base = int(amount * 0.03)
+                base = int(amount * 0.03 * stacks)
                 if base > 0:
                     # Emit relic effect event
                     BUS.emit("relic_effect", "pocket_manual", attacker, "trigger_aftertaste", base, {
@@ -48,7 +49,12 @@ class PocketManual(RelicBase):
         if stacks == 1:
             return "+3% damage; every 10th hit triggers an additional Aftertaste hit dealing +3% of the original damage."
         else:
-            # Stacks are multiplicative: each copy compounds the effect
+            # Stacks are multiplicative for the main effect and per-stack Aftertaste triggers
             total_dmg_mult = (1.03 ** stacks - 1) * 100
-            aftertaste_dmg = 3 * stacks  # This part still stacks additively for the special effect
-            return f"+{total_dmg_mult:.1f}% damage ({stacks} stacks, multiplicative); every 10th hit triggers an additional Aftertaste hit dealing +{aftertaste_dmg}% of the original damage."
+            aftertaste_dmg = 3 * stacks
+            hit_word = "hit" if stacks == 1 else "hits"
+            return (
+                f"+{total_dmg_mult:.1f}% damage ({stacks} stacks, multiplicative); "
+                f"every 10th hit triggers {stacks} additional Aftertaste {hit_word} "
+                f"each dealing +{aftertaste_dmg}% of the original damage."
+            )

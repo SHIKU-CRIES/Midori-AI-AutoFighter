@@ -89,16 +89,16 @@
 <div class="layout">
   {#if isBatch}
     <div class="stack" aria-hidden={stack.length === 0}>
-      {#each stack as r, i (r.id)}
-        <div class="card" style={`--i: ${i}`} out:send={{ key: r.id }}>
+      {#each stack as r, i (`${r.id}-${i}`)}
+        <div class="card" style={`--i: ${i}`} out:send={{ key: `${r.id}-${i}` }}>
           <CurioChoice entry={r} disabled={true} />
         </div>
       {/each}
     </div>
   {/if}
   <div class="choices">
-    {#each visible as r (r.id)}
-      <div class="card" in:receive={{ key: r.id }}>
+    {#each visible as r, i (`${r.id}-${i}`)}
+      <div class="card" in:receive={{ key: `${r.id}-${i}` }}>
         <CurioChoice entry={r} disabled={true} />
       </div>
     {/each}

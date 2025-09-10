@@ -1,11 +1,14 @@
 import asyncio
 from math import isclose
 
+import pytest
+
 from autofighter.party import Party
 from autofighter.relics import apply_relics
 from autofighter.relics import award_relic
 from autofighter.stats import BUS
 from autofighter.stats import Stats
+from plugins.effects.aftertaste import Aftertaste
 import plugins.event_bus as event_bus_module
 from plugins.players._base import PlayerBase
 
@@ -63,7 +66,8 @@ def test_lucky_button_stacks():
     assert isclose(party.members[0].crit_rate, 0.1 * 1.03 * 1.03)
 
 
-def test_vengeful_pendant_reflects():
+@pytest.mark.parametrize("copies", [1, 2, 3])
+def test_vengeful_pendant_reflects(copies: int) -> None:
     event_bus_module.bus._subs.clear()
     party = Party()
     ally = PlayerBase()
@@ -73,27 +77,11 @@ def test_vengeful_pendant_reflects():
     ally.hp = 100
     enemy.hp = 100
     party.members.append(ally)
-    award_relic(party, "vengeful_pendant")
+    for _ in range(copies):
+        award_relic(party, "vengeful_pendant")
     apply_relics(party)
     BUS.emit("damage_taken", ally, enemy, 20)
-    assert enemy.hp == 100 - int(20 * 0.15)
-
-
-def test_vengeful_pendant_stacks():
-    event_bus_module.bus._subs.clear()
-    party = Party()
-    ally = PlayerBase()
-    enemy = PlayerBase()
-    ally.id = "ally"
-    enemy.id = "enemy"
-    ally.hp = 100
-    enemy.hp = 100
-    party.members.append(ally)
-    award_relic(party, "vengeful_pendant")
-    award_relic(party, "vengeful_pendant")
-    apply_relics(party)
-    BUS.emit("damage_taken", ally, enemy, 20)
-    assert enemy.hp == 100 - int(20 * 0.15 * 2)
+    assert enemy.hp == 100 - int(20 * 0.15 * copies)
 
 
 def test_guardian_charm_targets_lowest_hp():
@@ -106,6 +94,20 @@ def test_guardian_charm_targets_lowest_hp():
     award_relic(party, "guardian_charm")
     apply_relics(party)
     assert low.defense == int(50 * 1.2)
+    assert high.defense == 50
+
+
+def test_guardian_charm_stacks():
+    party = Party()
+    low = PlayerBase()
+    high = PlayerBase()
+    low.hp = low.max_hp = 50
+    high.hp = high.max_hp = 100
+    party.members.extend([low, high])
+    award_relic(party, "guardian_charm")
+    award_relic(party, "guardian_charm")
+    apply_relics(party)
+    assert low.defense == int(50 * (1 + 0.2 * 2))
     assert high.defense == 50
 
 
@@ -175,8 +177,14 @@ def test_shiny_pebble_first_hit_mitigation():
     party.members.append(ally)
     award_relic(party, "shiny_pebble")
     apply_relics(party)
+    events: list[tuple] = []
+    BUS.subscribe("relic_effect", lambda *a: events.append(a))
     BUS.emit("damage_taken", ally, enemy, 10)
     assert isclose(ally.mitigation, 103)
+    assert events[0][0] == "shiny_pebble"
+    assert events[0][2] == "mitigation_burst"
+    assert events[0][3] == 3
+    assert isclose(events[0][4]["mitigation_multiplier"], 1.03)
     BUS.emit("turn_start")
     assert isclose(ally.mitigation, 100)
 
@@ -190,21 +198,48 @@ def test_shiny_pebble_stacks():
     award_relic(party, "shiny_pebble")
     award_relic(party, "shiny_pebble")
     apply_relics(party)
+    events: list[tuple] = []
+    BUS.subscribe("relic_effect", lambda *a: events.append(a))
     BUS.emit("damage_taken", ally, enemy, 10)
-    assert isclose(ally.mitigation, 112.36, rel_tol=1e-4)
+    assert isclose(ally.mitigation, 106)
+    assert events[0][0] == "shiny_pebble"
+    assert events[0][2] == "mitigation_burst"
+    assert events[0][3] == 6
+    assert isclose(events[0][4]["mitigation_multiplier"], 1.06)
     BUS.emit("turn_start")
     assert isclose(ally.mitigation, 100)
 
 
-def test_threadbare_cloak_shield_stacks():
+def test_threadbare_cloak_shield_scales_with_stacks():
     party = Party()
     a = PlayerBase()
     a.hp = a.max_hp = 100
     party.members.append(a)
-    award_relic(party, "threadbare_cloak")
+
     award_relic(party, "threadbare_cloak")
     apply_relics(party)
-    assert a.hp == 100 + int(100 * 0.03) * 2
+    assert a.hp == 100 + int(100 * 0.03)
+
+    award_relic(party, "threadbare_cloak")
+    apply_relics(party)
+    assert a.hp == 100 + int(100 * 0.03 * 2)
+
+
+def test_threadbare_cloak_applies_each_battle():
+    event_bus_module.bus._subs.clear()
+    party = Party()
+    a = PlayerBase()
+    a.hp = a.max_hp = 100
+    party.members.append(a)
+
+    award_relic(party, "threadbare_cloak")
+    apply_relics(party)
+    assert a.hp == 100 + int(100 * 0.03)
+
+    BUS.emit("battle_end", a)
+    a.hp = a.max_hp = 100
+    apply_relics(party)
+    assert a.hp == 100 + int(100 * 0.03)
 
 
 def test_lucky_button_missed_crit():
@@ -253,15 +288,24 @@ def test_wooden_idol_resist_buff():
     assert isclose(a.effect_resistance, 1.03)
 
 
-def test_pocket_manual_tenth_hit():
+def test_pocket_manual_tenth_hit(monkeypatch):
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
     b = PlayerBase()
-    b.hp = 100
+    b.hp = b._base_max_hp = 100
     party.members.append(a)
     award_relic(party, "pocket_manual")
     apply_relics(party)
+
+    monkeypatch.setattr(Aftertaste, "rolls", lambda self: [self.base_pot])
+
+    async def fake_apply_damage(self, amount, attacker=None):
+        self.hp -= amount
+        return amount
+
+    monkeypatch.setattr(Stats, "apply_damage", fake_apply_damage, raising=False)
+
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     for _ in range(9):
@@ -270,7 +314,38 @@ def test_pocket_manual_tenth_hit():
     assert b.hp == 100
     BUS.emit("hit_landed", a, b, 100)
     loop.run_until_complete(asyncio.sleep(0))
-    assert b.hp == 99
+    assert b.hp == 100 - int(100 * 0.03)
+
+
+def test_pocket_manual_tenth_hit_stacks(monkeypatch):
+    event_bus_module.bus._subs.clear()
+    party = Party()
+    a = PlayerBase()
+    b = PlayerBase()
+    b.hp = b._base_max_hp = 100
+    party.members.append(a)
+    award_relic(party, "pocket_manual")
+    award_relic(party, "pocket_manual")
+    apply_relics(party)
+
+    monkeypatch.setattr(Aftertaste, "rolls", lambda self: [self.base_pot])
+
+    async def fake_apply_damage(self, amount, attacker=None):
+        self.hp -= amount
+        return amount
+
+    monkeypatch.setattr(Stats, "apply_damage", fake_apply_damage, raising=False)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    for _ in range(9):
+        BUS.emit("hit_landed", a, b, 100)
+        loop.run_until_complete(asyncio.sleep(0))
+    assert b.hp == 100
+    BUS.emit("hit_landed", a, b, 100)
+    loop.run_until_complete(asyncio.sleep(0))
+    stacks = party.relics.count("pocket_manual")
+    assert b.hp == 100 - int(100 * 0.03 * stacks) * stacks
 
 
 def test_arcane_flask_shields():

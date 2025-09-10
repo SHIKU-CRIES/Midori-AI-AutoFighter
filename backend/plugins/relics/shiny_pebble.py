@@ -31,7 +31,7 @@ class ShinyPebble(RelicBase):
                     return
                 state["triggered"].add(id(target))
                 stacks = party.relics.count(self.id)
-                mit_mult = (1 + 0.03 * stacks) ** stacks
+                mit_mult = 1 + 0.03 * stacks
                 mod = create_stat_buff(
                     target,
                     name=f"{self.id}_{id(target)}",
@@ -42,14 +42,21 @@ class ShinyPebble(RelicBase):
                 state["active"][id(target)] = (target, mod)
 
                 # Track mitigation burst application
-                BUS.emit("relic_effect", "shiny_pebble", target, "mitigation_burst", int((mit_mult - 1) * 100), {
-                    "target": getattr(target, 'id', str(target)),
-                    "mitigation_multiplier": mit_mult,
-                    "base_mitigation": target.mitigation,
-                    "duration_turns": 1,
-                    "trigger": "first_hit",
-                    "stacks": stacks
-                })
+                BUS.emit(
+                    "relic_effect",
+                    "shiny_pebble",
+                    target,
+                    "mitigation_burst",
+                    int((mit_mult - 1) * 100),
+                    {
+                        "target": getattr(target, 'id', str(target)),
+                        "mitigation_multiplier": mit_mult,
+                        "base_mitigation": target.mitigation,
+                        "duration_turns": 1,
+                        "trigger": "first_hit",
+                        "stacks": stacks,
+                    },
+                )
 
             def _reset(*_) -> None:
                 for key, (member, mod) in list(state["active"].items()):
@@ -69,9 +76,9 @@ class ShinyPebble(RelicBase):
                 "+3% DEF. The first time each ally is hit, they gain +3% mitigation for one turn."
             )
         else:
-            # Stacks are multiplicative: each copy compounds the effect
+            # Defense stacks multiplicatively; mitigation adds linearly per stack
             total_def_mult = (1.03 ** stacks - 1) * 100
-            mit = 3 * stacks  # This part still stacks additively for the special effect
+            mit = 3 * stacks  # +3% mitigation for each stack
             return (
                 f"+{total_def_mult:.1f}% DEF ({stacks} stacks, multiplicative). "
                 f"The first time each ally is hit, they gain +{mit}% mitigation for one turn."

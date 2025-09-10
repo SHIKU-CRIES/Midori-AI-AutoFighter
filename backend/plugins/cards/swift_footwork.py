@@ -24,9 +24,14 @@ class SwiftFootwork(CardBase):
             used.clear()
 
         def _action_used(actor, *_args) -> None:
-            pid = id(actor)
-            if actor not in party.members or pid in used:
+            if actor not in party.members:
                 return
+
+            pid = id(actor)
+            if pid in used:
+                return
+
+            actor.action_points += 1
             used.add(pid)
             BUS.emit("card_effect", self.id, actor, "free_action", 0, {})
 

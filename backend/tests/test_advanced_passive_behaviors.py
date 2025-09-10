@@ -97,10 +97,11 @@ class TestAdvancedPassiveBehaviors:
         turn_start_member.id = "turn_start_member"
         turn_start_member.passives = ["advanced_combat_synergy"]
 
-        # Manually trigger the on_turn_start method to test the logic
-        passive_cls = registry._registry["advanced_combat_synergy"]
-        passive_instance = passive_cls()
-        await passive_instance.on_turn_start(turn_start_member, party=party)
+        await registry.trigger_turn_start(
+            turn_start_member,
+            party=party,
+            turn=1,
+        )
 
         effects = turn_start_member.get_active_effects()
         synergy_effects = [e for e in effects if e.name == "advanced_combat_synergy_synergy_damage"]
@@ -133,13 +134,16 @@ class TestAdvancedPassiveBehaviors:
         action_member.id = "action_member"
         action_member.passives = ["advanced_combat_synergy"]
 
-        # Manually test the on_action_taken method for stack building
         passive_cls = registry._registry["advanced_combat_synergy"]
-        passive_instance = passive_cls()
 
-        # Take multiple actions to build stacks
+        # Take multiple actions to build stacks using the registry trigger
         for i in range(3):
-            await passive_instance.on_action_taken(action_member, hit_target=target_foe, party=party)
+            await registry.trigger(
+                "action_taken",
+                action_member,
+                hit_target=target_foe,
+                party=party,
+            )
 
             # Check that stacks increased by checking the actual class from registry
             stacks = passive_cls.get_stacks(action_member)
@@ -147,7 +151,9 @@ class TestAdvancedPassiveBehaviors:
 
             # Check that persistent effect updated
             effects = action_member.get_active_effects()
-            persistent_effects = [e for e in effects if e.name == "advanced_combat_synergy_persistent_buff"]
+            persistent_effects = [
+                e for e in effects if e.name == "advanced_combat_synergy_persistent_buff"
+            ]
             assert len(persistent_effects) == 1
 
             expected_atk = (i + 1) * 3
@@ -165,13 +171,16 @@ class TestAdvancedPassiveBehaviors:
         limit_member.id = "limit_member"
         limit_member.passives = ["advanced_combat_synergy"]
 
-        # Manually test the on_action_taken method for max stacks
         passive_cls = registry._registry["advanced_combat_synergy"]
-        passive_instance = passive_cls()
 
         # Take more actions than max_stacks
         for _ in range(5):  # More than max_stacks of 3
-            await passive_instance.on_action_taken(limit_member, hit_target=target_foe, party=party)
+            await registry.trigger(
+                "action_taken",
+                limit_member,
+                hit_target=target_foe,
+                party=party,
+            )
 
         # Stacks should be capped at max_stacks, check using registry class
         stacks = passive_cls.get_stacks(limit_member)

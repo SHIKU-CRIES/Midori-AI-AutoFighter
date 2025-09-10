@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from dataclasses import field
 
+from autofighter.stats import BUS
 from plugins.relics._base import RelicBase
 from plugins.relics._base import safe_async_task
 
@@ -18,10 +19,23 @@ class ThreadbareCloak(RelicBase):
     def apply(self, party) -> None:
         super().apply(party)
 
+        applied = getattr(party, "_threadbare_cloak_stacks", 0)
+        stacks = party.relics.count(self.id)
+        additional = stacks - applied
+        if additional <= 0:
+            return
+
         for member in party.members:
             member.enable_overheal()  # Enable shields for this member
-            shield = int(member.max_hp * 0.03)
+            shield = int(member.max_hp * 0.03 * additional)
             safe_async_task(member.apply_healing(shield))
+
+        party._threadbare_cloak_stacks = stacks
+
+        def _reset(*_: object) -> None:
+            party._threadbare_cloak_stacks = 0
+
+        BUS.subscribe("battle_end", _reset)
 
     def describe(self, stacks: int) -> str:
         pct = 3 * stacks

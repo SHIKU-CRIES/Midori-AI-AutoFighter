@@ -9,6 +9,10 @@ passive abilities:
 - `extra_turn` – grants an immediate extra action to the recipient.  The battle
   loop tracks pending turns so effects like **SwiftFootwork** or **EchoBell** can
   schedule additional moves without creating infinite loops.
+- `summon_created` – emitted when a summon enters play.
+- `summon_removed` – emitted when a summon leaves play for any reason.
+- `summon_defeated` – emitted after a summon is killed and removed, allowing
+  passives like **Menagerie Bond** to respond.
 
 Damage type ultimates now consume charge via `use_ultimate()` and are invoked by
 `rooms/battle.py` when `ultimate_ready` is set.  Damage type plugins may add

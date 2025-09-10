@@ -297,7 +297,8 @@ class SummonManager:
 
     # Class-level tracking of all active summons
     _active_summons: ClassVar[Dict[str, List[Summon]]] = {}
-    _summon_limits: ClassVar[Dict[str, int]] = {}  # summoner_id -> max_summons
+    _summon_limits: ClassVar[Dict[str, int]] = {}
+    _summoner_refs: ClassVar[Dict[str, Stats]] = {}
     _initialized: ClassVar[bool] = False
 
     @classmethod
@@ -312,6 +313,7 @@ class SummonManager:
         BUS.subscribe("turn_start", cls._on_turn_start)
         BUS.subscribe("turn_end", cls._on_turn_end)
         BUS.subscribe("entity_defeat", cls._on_entity_defeat)
+        BUS.subscribe("entity_killed", cls._on_entity_killed)
 
         cls._initialized = True
         log.debug("SummonManager initialized")
@@ -358,6 +360,7 @@ class SummonManager:
         if summoner_id not in cls._active_summons:
             cls._active_summons[summoner_id] = []
             cls._summon_limits[summoner_id] = max_summons
+        cls._summoner_refs[summoner_id] = summoner
 
         # Check summon limit
         if len(cls._active_summons[summoner_id]) >= max_summons:
@@ -543,6 +546,10 @@ class SummonManager:
             if summon in cls._active_summons[summoner_id]:
                 cls._active_summons[summoner_id].remove(summon)
                 BUS.emit_batched("summon_removed", summon, reason)
+                if not cls._active_summons[summoner_id]:
+                    del cls._active_summons[summoner_id]
+                    cls._summon_limits.pop(summoner_id, None)
+                    cls._summoner_refs.pop(summoner_id, None)
                 log.debug(f"Removed summon {summon.id} due to {reason}")
                 return True
         return False
@@ -613,6 +620,24 @@ class SummonManager:
             log.debug(f"Removed {removed} summons due to summoner defeat")
 
     @classmethod
+    async def _on_entity_killed(cls, victim, *args, **kwargs):
+        """Handle summon defeat and emit event."""
+        if isinstance(victim, Summon):
+            summoner = cls._summoner_refs.get(victim.summoner_id)
+            cls.remove_summon(victim, "defeated")
+            if summoner is not None:
+                await BUS.emit_async("summon_defeated", summoner, victim)
+                if "becca_menagerie_bond" in getattr(summoner, "passives", []):
+                    try:
+                        from plugins.passives.becca_menagerie_bond import (
+                            BeccaMenagerieBond,
+                        )
+
+                        await BeccaMenagerieBond().on_summon_defeat(summoner)
+                    except Exception as e:
+                        log.warning("Error triggering summon_defeat passives: %s", e)
+
+    @classmethod
     def add_summons_to_party(cls, party: "Party") -> int:
         """Add all active summons to a party for battle. Returns number added."""
         added = 0
@@ -639,6 +664,7 @@ class SummonManager:
         """Clean up all summons and reset manager."""
         cls._active_summons.clear()
         cls._summon_limits.clear()
+        cls._summoner_refs.clear()
         log.debug("SummonManager cleaned up")
 
     @classmethod
@@ -646,6 +672,7 @@ class SummonManager:
         """Reset all summon tracking - clears both dictionaries."""
         cls._active_summons.clear()
         cls._summon_limits.clear()
+        cls._summoner_refs.clear()
         log.debug("SummonManager reset - all tracking cleared")
 
     @classmethod
@@ -658,8 +685,8 @@ class SummonManager:
         ]
         for summoner_id in empty_summoners:
             del cls._active_summons[summoner_id]
-            # Also remove from limits if no summons remain
             cls._summon_limits.pop(summoner_id, None)
+            cls._summoner_refs.pop(summoner_id, None)
 
         if empty_summoners:
             log.debug(f"Cleaned up {len(empty_summoners)} empty summon entries")

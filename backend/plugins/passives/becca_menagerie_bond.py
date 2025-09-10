@@ -222,7 +222,7 @@ class BeccaMenagerieBond:
     async def _create_spirit(self, target: "Stats") -> None:
         """Create a spirit from the previous summon."""
         entity_id = id(target)
-        self._spirit_stacks[entity_id] += 1
+        self._spirit_stacks[entity_id] = self._spirit_stacks.get(entity_id, 0) + 1
 
     async def on_summon_defeat(self, target: "Stats") -> None:
         """Handle summon defeat - still creates a spirit."""
