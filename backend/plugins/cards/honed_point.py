@@ -22,7 +22,7 @@ class HonedPoint(CardBase):
 
         marked_enemies: dict[int, set[int]] = {}
 
-        def _on_damage_dealt(attacker, target, damage, damage_type, source, source_action, action_name):
+        def _on_damage_dealt(attacker, target, damage, _damage_type, source, source_action, action_name):
             if attacker in party.members and action_name == "attack":
                 attacker_id = id(attacker)
                 target_id = id(target)
@@ -39,7 +39,6 @@ class HonedPoint(CardBase):
                             target.apply_damage(
                                 bonus_damage,
                                 attacker,
-                                source_type=damage_type,
                                 action_name="honed_point_bonus",
                             )
                         )
