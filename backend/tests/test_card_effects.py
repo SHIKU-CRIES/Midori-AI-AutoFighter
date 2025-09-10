@@ -3,6 +3,8 @@ from unittest.mock import patch
 
 from autofighter.cards import apply_cards
 from autofighter.cards import award_card
+from autofighter.effects import DamageOverTime
+from autofighter.effects import EffectManager
 from autofighter.party import Party
 from autofighter.stats import BUS
 from plugins.players._base import PlayerBase
@@ -75,3 +77,43 @@ def test_arcane_repeater_repeats_attack():
         loop.run_until_complete(asyncio.sleep(0))
     expected = dmg + int(dmg * 0.5)
     assert foe.hp == 1000 - expected
+
+
+def test_mindful_tassel_boosts_first_debuff():
+    loop = setup_event_loop()
+    party = Party()
+    ally = PlayerBase()
+    foe = PlayerBase()
+    party.members.append(ally)
+    award_card(party, "mindful_tassel")
+    loop.run_until_complete(apply_cards(party))
+
+    BUS.emit("battle_start", ally)
+    BUS.emit("battle_start", foe)
+    loop.run_until_complete(asyncio.sleep(0))
+
+    mgr = EffectManager(foe)
+    foe.effect_manager = mgr
+    bleed = DamageOverTime(
+        name="Bleed",
+        damage=100,
+        turns=10,
+        id="bleed",
+        source=ally,
+    )
+    mgr.add_dot(bleed)
+    loop.run_until_complete(asyncio.sleep(0))
+    assert bleed.damage == 105
+    assert bleed.turns == 11
+
+    poison = DamageOverTime(
+        name="Poison",
+        damage=100,
+        turns=10,
+        id="poison",
+        source=ally,
+    )
+    mgr.add_dot(poison)
+    loop.run_until_complete(asyncio.sleep(0))
+    assert poison.damage == 100
+    assert poison.turns == 10
