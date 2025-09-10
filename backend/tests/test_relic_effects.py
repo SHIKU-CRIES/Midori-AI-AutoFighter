@@ -8,6 +8,7 @@ from autofighter.relics import apply_relics
 from autofighter.relics import award_relic
 from autofighter.stats import BUS
 from autofighter.stats import Stats
+from plugins.effects.aftertaste import Aftertaste
 import plugins.event_bus as event_bus_module
 from plugins.players._base import PlayerBase
 
@@ -266,15 +267,24 @@ def test_wooden_idol_resist_buff():
     assert isclose(a.effect_resistance, 1.03)
 
 
-def test_pocket_manual_tenth_hit():
+def test_pocket_manual_tenth_hit(monkeypatch):
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
     b = PlayerBase()
-    b.hp = 100
+    b.hp = b._base_max_hp = 100
     party.members.append(a)
     award_relic(party, "pocket_manual")
     apply_relics(party)
+
+    monkeypatch.setattr(Aftertaste, "rolls", lambda self: [self.base_pot])
+
+    async def fake_apply_damage(self, amount, attacker=None):
+        self.hp -= amount
+        return amount
+
+    monkeypatch.setattr(Stats, "apply_damage", fake_apply_damage, raising=False)
+
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     for _ in range(9):
@@ -283,7 +293,38 @@ def test_pocket_manual_tenth_hit():
     assert b.hp == 100
     BUS.emit("hit_landed", a, b, 100)
     loop.run_until_complete(asyncio.sleep(0))
-    assert b.hp == 99
+    assert b.hp == 100 - int(100 * 0.03)
+
+
+def test_pocket_manual_tenth_hit_stacks(monkeypatch):
+    event_bus_module.bus._subs.clear()
+    party = Party()
+    a = PlayerBase()
+    b = PlayerBase()
+    b.hp = b._base_max_hp = 100
+    party.members.append(a)
+    award_relic(party, "pocket_manual")
+    award_relic(party, "pocket_manual")
+    apply_relics(party)
+
+    monkeypatch.setattr(Aftertaste, "rolls", lambda self: [self.base_pot])
+
+    async def fake_apply_damage(self, amount, attacker=None):
+        self.hp -= amount
+        return amount
+
+    monkeypatch.setattr(Stats, "apply_damage", fake_apply_damage, raising=False)
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    for _ in range(9):
+        BUS.emit("hit_landed", a, b, 100)
+        loop.run_until_complete(asyncio.sleep(0))
+    assert b.hp == 100
+    BUS.emit("hit_landed", a, b, 100)
+    loop.run_until_complete(asyncio.sleep(0))
+    stacks = party.relics.count("pocket_manual")
+    assert b.hp == 100 - int(100 * 0.03 * stacks) * stacks
 
 
 def test_arcane_flask_shields():
