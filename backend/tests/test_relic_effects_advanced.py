@@ -170,8 +170,8 @@ def test_stellar_compass_crit_bonus():
     party.members.append(a)
     award_relic(party, "stellar_compass")
     apply_relics(party)
-    BUS.emit("crit_hit", a, None, 0)
-    assert a.atk == int(100 * 1.015)
+    BUS.emit("critical_hit", a, None, 0, "attack")
+    assert a.atk == int(100 * (1 + 0.015))
     BUS.emit("gold_earned", 100)
     assert party.gold == int(100 * 0.015)
 
@@ -185,10 +185,30 @@ def test_stellar_compass_stacks():
     award_relic(party, "stellar_compass")
     award_relic(party, "stellar_compass")
     apply_relics(party)
-    BUS.emit("crit_hit", a, None, 0)
-    assert a.atk == int(100 * (1.015 ** 2))
+    BUS.emit("critical_hit", a, None, 0, "attack")
+    assert a.atk == int(100 * (1 + 0.015 * 2))
     BUS.emit("gold_earned", 100)
     assert party.gold == int(100 * 0.03)
+
+
+def test_stellar_compass_multiple_crits():
+    event_bus_module.bus._subs.clear()
+    party = Party()
+    a = PlayerBase()
+    a.atk = 100
+    party.members.append(a)
+    award_relic(party, "stellar_compass")
+    apply_relics(party)
+
+    BUS.emit("critical_hit", a, None, 0, "attack")
+    BUS.emit("gold_earned", 100)
+    assert a.atk == int(100 * (1 + 0.015))
+    assert party.gold == int(100 * 0.015)
+
+    BUS.emit("critical_hit", a, None, 0, "attack")
+    BUS.emit("gold_earned", 100)
+    assert a.atk == int(100 * (1 + 0.015 * 2))
+    assert party.gold == int(100 * 0.015) + int(100 * 0.03)
 
 
 def test_echoing_drum_repeats_attack():
