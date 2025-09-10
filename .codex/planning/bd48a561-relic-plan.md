@@ -10,7 +10,7 @@ Parent: [Web Game Plan](8a7d9c1e-web-game-plan.md)
 - *Critical Boost* grants +0.5% Crit Rate and +5% Crit Damage per stack but vanishes when the unit is hit.
 
 ## 1★ Relics
- - [ ] **Rusty Buckle** – At the start of combat, the ally with the lowest Max HP gains a self-inflicted bleed for 1% of their Max HP plus 1% per stack. Every 10% HP lost triggers 5 hits of Aftertaste to all foes, each hit equal to 0.5% of the total HP lost. Each additional copy adds 3 hits.
+ - [ ] **Rusty Buckle** – At the start of each turn, all allies bleed for 5% of their Max HP per stack. After the party loses HP equal to its total Max HP (threshold rises by 50% per additional stack), unleash 5 hits of Aftertaste at random foes, plus 3 hits per extra stack. Each hit deals 0.5% of the cumulative HP lost.
  - [x] **Threadbare Cloak** – Allies start battle with a shield equal to 3% Max HP; each copy adds another 3%.
  - [x] **Lucky Button** – +3% Crit Rate; missed crits add +3% Crit Rate next turn.
  - [x] **Bent Dagger** – +3% ATK; whenever a foe dies, gain +1% ATK for the rest of combat per stack.
