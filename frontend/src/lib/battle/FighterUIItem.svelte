@@ -141,15 +141,16 @@
                 <TripleRingSpinner color={elColor} duration="1.5s" {reducedMotion} />
               {:else if p.display === 'pips'}
                 {#if count <= 5}
-                  <div class="pips">
-                    {#each Array(count) as _, i (i)}
-                      <PipCircle
-                        class="pip-icon filled"
-                        stroke="none"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      />
-                    {/each}
+                  <div class="pips planet-mode" style="--spinner-size: clamp(14px, calc(var(--portrait-size) * 0.18), 32px);">
+                    <div class="mini-rings">
+                      <TripleRingSpinner color={elColor} duration="1.5s" {reducedMotion} />
+                    </div>
+                    <div class="orbit">
+                      {#each Array(count) as _, i (i)}
+                        {@const ring = i % 3}
+                        <span class="planet" style={`--i:${i}; --n:${count}; --f:${ring===0?1:(ring===1?0.66:0.33)};`}></span>
+                      {/each}
+                    </div>
                   </div>
                 {:else}
                   <span class="count">{count}</span>
@@ -452,6 +453,36 @@
     height: unset;
   }
   .pips { display: flex; gap: var(--pip-gap); line-height: 0; }
+  /* Planet-style pips on rings */
+  .planet-mode {
+    position: relative;
+    width: var(--spinner-size);
+    height: var(--spinner-size);
+    display: grid;
+    place-items: center;
+    --ring-stroke: 1px;
+  }
+  .planet-mode .mini-rings { position: absolute; inset: 0; }
+  /* Hide built-in spinner planets so we can render our own */
+  .planet-mode :global(.triple-ring-spinner .ring::before) { display: none; }
+  .planet-mode .orbit {
+    position: absolute;
+    inset: 0;
+  }
+  .planet-mode .planet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(var(--spinner-size) * 0.15);
+    height: calc(var(--spinner-size) * 0.15);
+    margin: calc(var(--spinner-size) * -0.075);
+    border-radius: 50%;
+    background: var(--element-color);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--element-color) 70%, transparent);
+    transform: rotate(calc(var(--i) * (360deg / var(--n)))) translateX(calc(var(--spinner-size) * var(--f) / 2 - var(--ring-stroke))) rotate(0deg);
+    transform-origin: center;
+  }
+  .passive-indicators.reduced .planet-mode .planet { box-shadow: none; }
   :global(.pip-icon) {
     width: var(--pip-size);
     height: var(--pip-size);
