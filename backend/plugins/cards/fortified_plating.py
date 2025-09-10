@@ -19,7 +19,7 @@ class FortifiedPlating(CardBase):
         # Track which members have used their first hit reduction this turn
         first_hit_used = set()
 
-        def _before_damage(target, attacker, damage):
+        def _on_damage_taken(target, attacker, damage):
             # Check if target is one of our party members
             if target in party.members:
                 target_id = id(target)
@@ -27,19 +27,21 @@ class FortifiedPlating(CardBase):
                     # Use the first hit reduction
                     first_hit_used.add(target_id)
                     damage_reduction = int(damage * 0.06)
-                    import logging
-                    log = logging.getLogger(__name__)
-                    log.debug("Fortified Plating first hit reduction: -%d damage", damage_reduction)
-                    BUS.emit("card_effect", self.id, target, "first_hit_reduction", damage_reduction, {
-                        "damage_reduction": damage_reduction,
-                        "reduction_percentage": 6,
-                        "trigger_event": "first_hit_per_turn"
-                    })
-                    # Note: Actual damage reduction would need to be implemented in the damage system
+                    if damage_reduction > 0:
+                        # Add back the damage reduction to HP to simulate reduced damage
+                        target.hp = min(target.hp + damage_reduction, getattr(target, 'max_hp', 1000))
+                        import logging
+                        log = logging.getLogger(__name__)
+                        log.debug("Fortified Plating first hit reduction: +%d HP restored to %s", damage_reduction, target.id)
+                        BUS.emit("card_effect", self.id, target, "first_hit_reduction", damage_reduction, {
+                            "damage_reduction": damage_reduction,
+                            "reduction_percentage": 6,
+                            "trigger_event": "first_hit_per_turn"
+                        })
 
         def _on_turn_start():
             # Reset first hit usage at the start of each turn
             first_hit_used.clear()
 
-        BUS.subscribe("before_damage", _before_damage)
+        BUS.subscribe("damage_taken", _on_damage_taken)
         BUS.subscribe("turn_start", _on_turn_start)

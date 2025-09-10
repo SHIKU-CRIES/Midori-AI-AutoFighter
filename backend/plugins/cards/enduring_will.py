@@ -11,7 +11,7 @@ class EnduringWill(CardBase):
     name: str = "Enduring Will"
     stars: int = 1
     effects: dict[str, float] = field(default_factory=lambda: {"mitigation": 0.03, "vitality": 0.03})
-    about: str = "+3% Mitigation & +3% Vitality; If no allies die during combat, grant +1 mitigation next battle"
+    about: str = "+3% Mitigation & +3% Vitality; If no allies die during combat, grant +0.2% mitigation next battle"
 
     async def apply(self, party) -> None:  # type: ignore[override]
         await super().apply(party)
@@ -50,12 +50,25 @@ class EnduringWill(CardBase):
                 if mitigation_bonus_pending:
                     mitigation_bonus_pending = False
                     for member in party.members:
-                        # Apply +1 mitigation (theoretical implementation)
+                        # Apply +0.002 mitigation (0.2% - small bonus appropriate for 1-star card)
+                        from autofighter.effects import EffectManager, create_stat_buff
+                        mgr = getattr(member, "effect_manager", None)
+                        if mgr is None:
+                            mgr = EffectManager(member)
+                            member.effect_manager = mgr
+                        
+                        # Create temporary mitigation buff for this battle
+                        mod = create_stat_buff(
+                            member, name=f"{self.id}_mitigation_bonus", turns=20, 
+                            mitigation_mult=1.002  # +0.2% mitigation
+                        )
+                        mgr.add_modifier(mod)
+                        
                         import logging
                         log = logging.getLogger(__name__)
-                        log.debug("Enduring Will mitigation bonus: +1 mitigation to %s", member.id)
-                        BUS.emit("card_effect", self.id, member, "mitigation_bonus", 1, {
-                            "mitigation_bonus": 1,
+                        log.debug("Enduring Will mitigation bonus: +0.002 mitigation to %s", member.id)
+                        BUS.emit("card_effect", self.id, member, "mitigation_bonus", 0.002, {
+                            "mitigation_bonus": 0.002,
                             "trigger_event": "battle_start"
                         })
 

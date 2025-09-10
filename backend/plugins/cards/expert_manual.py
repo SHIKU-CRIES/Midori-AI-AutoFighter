@@ -19,15 +19,16 @@ class ExpertManual(CardBase):
 
         extra_xp_used = set()
 
-        def _on_kill(killer, target):
+        def _on_kill(target, killer, damage, death_type, details):
             # Check if killer is one of our party members
             if killer in party.members:
                 killer_id = id(killer)
                 # 5% chance to give extra XP, once per battle
                 if killer_id not in extra_xp_used and random.random() < 0.05:
                     extra_xp_used.add(killer_id)
-                    # Grant small extra XP (theoretical implementation)
+                    # Grant small extra XP
                     extra_xp = 5  # Small extra XP amount
+                    killer.exp += extra_xp
                     import logging
                     log = logging.getLogger(__name__)
                     log.debug("Expert Manual bonus XP: +%d XP to %s", extra_xp, killer.id)
@@ -42,5 +43,5 @@ class ExpertManual(CardBase):
             if target in party.members:
                 extra_xp_used.clear()
 
-        BUS.subscribe("kill", _on_kill)
+        BUS.subscribe("entity_killed", _on_kill)
         BUS.subscribe("battle_start", _on_battle_start)

@@ -16,25 +16,24 @@ class AdamantineBand(CardBase):
     async def apply(self, party) -> None:  # type: ignore[override]
         await super().apply(party)
 
-        def _before_damage(target, attacker, damage):
+        def _on_damage_taken(target, attacker, damage):
             # Check if target is one of our party members
             if target in party.members:
                 current_hp = getattr(target, 'hp', 0)
-                # Check if this damage would be lethal (reduce below 1 HP)
-                if current_hp - damage < 1:
-                    # Reduce damage by 10%
+                # Check if this damage would be lethal (reduce to 0 HP or below)
+                if current_hp <= damage and current_hp > 0:
+                    # Reduce damage by 10% - we'll modify target's HP to simulate the reduction
                     damage_reduction = int(damage * 0.10)
-                    # This is a theoretical implementation - the actual damage system would need
-                    # to support damage modification before application
-                    import logging
-                    log = logging.getLogger(__name__)
-                    log.debug("Adamantine Band lethal protection: -%d damage reduction for %s", damage_reduction, target.id)
-                    BUS.emit("card_effect", self.id, target, "lethal_protection", damage_reduction, {
-                        "damage_reduction": damage_reduction,
-                        "original_damage": damage,
-                        "trigger_event": "lethal_damage"
-                    })
-                    # Note: Actual damage reduction would need to be implemented in the damage system
+                    # Add back the damage reduction to HP to simulate reduced damage
+                    if damage_reduction > 0:
+                        target.hp = min(target.hp + damage_reduction, getattr(target, 'max_hp', 1000))
+                        import logging
+                        log = logging.getLogger(__name__)
+                        log.debug("Adamantine Band lethal protection: +%d HP restored to %s", damage_reduction, target.id)
+                        BUS.emit("card_effect", self.id, target, "lethal_protection", damage_reduction, {
+                            "damage_reduction": damage_reduction,
+                            "original_damage": damage,
+                            "trigger_event": "lethal_damage"
+                        })
 
-        # This would need a pre-damage hook in the actual system
-        BUS.subscribe("before_damage", _before_damage)
+        BUS.subscribe("damage_taken", _on_damage_taken)

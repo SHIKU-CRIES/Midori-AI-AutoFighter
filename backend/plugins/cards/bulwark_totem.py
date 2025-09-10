@@ -16,28 +16,36 @@ class BulwarkTotem(CardBase):
     async def apply(self, party) -> None:  # type: ignore[override]
         await super().apply(party)
 
-        def _before_fatal_damage(target, attacker, damage):
-            # Check if target is one of our party members and damage would be fatal
+        def _on_damage_taken(target, attacker, damage):
+            # Check if target is one of our party members and damage is potentially fatal
             if target in party.members:
                 current_hp = getattr(target, 'hp', 0)
-                if current_hp <= damage:  # Would be fatal
-                    # Find another party member to redirect some damage to
-                    other_members = [m for m in party.members if m != target and getattr(m, 'hp', 0) > 1]
-                    if other_members:
-                        # Choose the member with highest HP to redirect to
-                        redirect_target = max(other_members, key=lambda m: getattr(m, 'hp', 0))
-                        # Redirect 10% of fatal damage (tiny soak)
-                        redirect_amount = int(damage * 0.10)
-                        if redirect_amount > 0:
+                # If target is very low on HP (below 20%), try to soak some damage
+                if current_hp <= getattr(target, 'max_hp', 1000) * 0.20:
+                    # Find the card holder (member with this card equipped)
+                    card_holder = None
+                    for member in party.members:
+                        if member != target and getattr(member, 'hp', 0) > 10:  # Must have reasonable HP
+                            card_holder = member
+                            break
+                    
+                    if card_holder:
+                        # Redirect 5% of damage to the card holder (tiny soak)
+                        redirect_amount = max(1, int(damage * 0.05))
+                        # Give some HP back to target, take it from card holder
+                        hp_to_restore = min(redirect_amount, target.hp)
+                        if hp_to_restore > 0:
+                            target.hp += hp_to_restore
+                            card_holder.hp = max(1, card_holder.hp - redirect_amount)
+                            
                             import logging
                             log = logging.getLogger(__name__)
-                            log.debug("Bulwark Totem damage redirect: %d damage from %s to %s", redirect_amount, target.id, redirect_target.id)
-                            BUS.emit("card_effect", self.id, target, "damage_redirect", redirect_amount, {
-                                "redirect_amount": redirect_amount,
-                                "redirect_target": getattr(redirect_target, 'id', 'unknown'),
-                                "original_damage": damage,
-                                "trigger_event": "fatal_damage"
+                            log.debug("Bulwark Totem damage soak: %d damage soaked by %s for %s", redirect_amount, card_holder.id, target.id)
+                            BUS.emit("card_effect", self.id, target, "damage_soak", redirect_amount, {
+                                "soak_amount": redirect_amount,
+                                "soaker": getattr(card_holder, 'id', 'unknown'),
+                                "protected": getattr(target, 'id', 'unknown'),
+                                "trigger_event": "damage_soak"
                             })
-                            # Note: Actual damage redirection would need to be implemented in the damage system
 
-        BUS.subscribe("before_damage", _before_fatal_damage)
+        BUS.subscribe("damage_taken", _on_damage_taken)
