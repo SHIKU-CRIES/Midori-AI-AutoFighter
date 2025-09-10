@@ -31,10 +31,12 @@ class GuardianShard(CardBase):
         def _on_battle_end(target):
             nonlocal mitigation_bonus_pending, active_members
 
+            if target is None:
+                return
             if (
-                target is not None
-                and target is not party
+                target is not party
                 and target not in party.members
+                and getattr(target, "plugin_type", None) != "foe"
             ):
                 return
 
