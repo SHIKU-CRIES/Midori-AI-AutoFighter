@@ -20,7 +20,7 @@ class TravelersCharm(RelicBase):
     def apply(self, party) -> None:
         super().apply(party)
 
-        pending: dict[int, tuple[int, int]] = {}
+        pending: dict[int, tuple[float, float]] = {}
         active: dict[int, tuple[PlayerBase, object]] = {}
 
         def _hit(target, attacker, amount) -> None:
@@ -28,24 +28,31 @@ class TravelersCharm(RelicBase):
                 return
             pid = id(target)
             stacks = party.relics.count(self.id)
-            bdef = int(target.defense * 0.25 * stacks)
-            bmit = 10 * stacks
-            pd, pm = pending.get(pid, (0, 0))
-            pending[pid] = (pd + bdef, pm + bmit)
+            d_pct = 0.25 * stacks
+            m_pct = 0.10 * stacks
+            pd, pm = pending.get(pid, (0.0, 0.0))
+            pending[pid] = (pd + d_pct, pm + m_pct)
 
             # Track hit reaction
-            BUS.emit("relic_effect", "travelers_charm", target, "hit_reaction", amount, {
-                "target": getattr(target, 'id', str(target)),
-                "attacker": getattr(attacker, 'id', str(attacker)),
-                "pending_defense_bonus": bdef,
-                "pending_mitigation_bonus": bmit,
-                "stacks": stacks,
-                "triggers_next_turn": True
-            })
+            BUS.emit(
+                "relic_effect",
+                "travelers_charm",
+                target,
+                "hit_reaction",
+                amount,
+                {
+                    "target": getattr(target, "id", str(target)),
+                    "attacker": getattr(attacker, "id", str(attacker)),
+                    "pending_defense_pct": d_pct * 100,
+                    "pending_mitigation_pct": m_pct * 100,
+                    "stacks": stacks,
+                    "triggers_next_turn": True,
+                },
+            )
 
         def _turn_start() -> None:
             applied_count = 0
-            for pid, (bdef, bmit) in list(pending.items()):
+            for pid, (d_pct, m_pct) in list(pending.items()):
                 member = next((m for m in party.members if id(m) == pid), None)
                 if member is None:
                     continue
@@ -53,21 +60,30 @@ class TravelersCharm(RelicBase):
                     member,
                     name=f"{self.id}_{pid}",
                     turns=1,
-                    defense=bdef,
-                    mitigation=bmit,
+                    defense_mult=1 + d_pct,
+                    mitigation_mult=1 + m_pct,
                 )
                 member.effect_manager.add_modifier(mod)
                 active[pid] = (member, mod)
                 applied_count += 1
 
                 # Track buff application
-                BUS.emit("relic_effect", "travelers_charm", member, "defensive_buff_applied", bdef + bmit, {
-                    "ally": getattr(member, 'id', str(member)),
-                    "defense_bonus": bdef,
-                    "mitigation_bonus": bmit,
-                    "duration_turns": 1,
-                    "triggered_by": "previous_hits"
-                })
+                BUS.emit(
+                    "relic_effect",
+                    "travelers_charm",
+                    member,
+                    "defensive_buff_applied",
+                    int((d_pct + m_pct) * 100),
+                    {
+                        "ally": getattr(member, "id", str(member)),
+                        "defense_multiplier": 1 + d_pct,
+                        "mitigation_multiplier": 1 + m_pct,
+                        "defense_bonus_pct": d_pct * 100,
+                        "mitigation_bonus_pct": m_pct * 100,
+                        "duration_turns": 1,
+                        "triggered_by": "previous_hits",
+                    },
+                )
 
             pending.clear()
 
