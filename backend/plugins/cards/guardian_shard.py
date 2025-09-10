@@ -28,8 +28,17 @@ class GuardianShard(CardBase):
             if target in party.members:
                 battle_deaths += 1
 
-        def _on_battle_end():
+        def _on_battle_end(target):
             nonlocal mitigation_bonus_pending, active_members
+
+            if target is None:
+                return
+            if (
+                target is not party
+                and target not in party.members
+                and getattr(target, "plugin_type", None) != "foe"
+            ):
+                return
 
             # Remove any active mitigation buffs
             for member in active_members:
