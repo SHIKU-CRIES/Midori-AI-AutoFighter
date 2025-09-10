@@ -6,6 +6,7 @@ from plugins.effects.aftertaste import Aftertaste
 from plugins.event_bus import EventBus
 from plugins.foes._base import FoeBase
 from plugins.players._base import PlayerBase
+from plugins.relics._base import safe_async_task
 from plugins.relics.rusty_buckle import RustyBuckle
 
 
@@ -59,7 +60,9 @@ def test_aftertaste_triggers_on_cumulative_loss(monkeypatch, bus):
         return []
 
     monkeypatch.setattr(Aftertaste, "apply", fake_apply)
-    bus.emit("damage_taken", party.members[0], None, 1900)
+    safe_async_task(party.members[0].apply_damage(950))
+    assert hits == 0
+    safe_async_task(party.members[1].apply_damage(950))
     assert hits == 5
 
 
@@ -83,7 +86,9 @@ def test_stacks_increase_threshold(monkeypatch, bus):
         return []
 
     monkeypatch.setattr(Aftertaste, "apply", fake_apply)
-    bus.emit("damage_taken", party.members[0], None, 2899)
+    safe_async_task(party.members[0].apply_damage(900))
+    safe_async_task(party.members[0].apply_healing(900))
+    safe_async_task(party.members[0].apply_damage(1000))
     assert hits == 0
-    bus.emit("damage_taken", party.members[0], None, 1)
-    assert hits == 5
+    safe_async_task(party.members[1].apply_damage(900))
+    assert hits == 8

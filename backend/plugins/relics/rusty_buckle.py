@@ -30,6 +30,7 @@ class RustyBuckle(RelicBase):
             "party_max_hp": sum(ally.max_hp for ally in party.members),
             "hp_lost": 0,
             "triggers": 0,
+            "prev_hp": {ally: ally.hp for ally in party.members},
         }
 
         def _turn_start(entity) -> None:
@@ -59,10 +60,13 @@ class RustyBuckle(RelicBase):
 
                 safe_async_task(entity.apply_damage(dmg, attacker=entity))
 
-        def _damage(target, attacker, amount) -> None:
+        def _damage(target, attacker, _original) -> None:
             if target not in party.members:
                 return
-            state["hp_lost"] += amount
+            prev = state["prev_hp"].get(target, target.hp)
+            lost = max(prev - target.hp, 0)
+            state["prev_hp"][target] = target.hp
+            state["hp_lost"] += lost
             party_max_hp = state["party_max_hp"]
             triggers = state["triggers"]
             threshold = party_max_hp * (1 + 0.5 * (stacks - 1))
@@ -94,6 +98,12 @@ class RustyBuckle(RelicBase):
 
         BUS.subscribe("turn_start", _turn_start)
         BUS.subscribe("damage_taken", _damage)
+
+        def _heal(target, healer, _amount) -> None:
+            if target in party.members:
+                state["prev_hp"][target] = target.hp
+
+        BUS.subscribe("heal_received", _heal)
 
     def describe(self, stacks: int) -> str:
         bleed = 5 * stacks
