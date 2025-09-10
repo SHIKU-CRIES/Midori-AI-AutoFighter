@@ -22,16 +22,28 @@ class GuardianCharm(RelicBase):
         if not party.members:
             return
         member = min(party.members, key=lambda m: m.hp)
+        stacks = party.relics.count(self.id)
+        defense_pct = 20 * stacks
 
         # Emit relic effect event for defense boost
-        BUS.emit("relic_effect", "guardian_charm", member, "defense_boost", 20, {
-            "target_selection": "lowest_hp",
-            "defense_percentage": 20,
-            "target_hp": member.hp,
-            "target_max_hp": member.max_hp
-        })
+        BUS.emit(
+            "relic_effect",
+            "guardian_charm",
+            member,
+            "defense_boost",
+            defense_pct,
+            {
+                "target_selection": "lowest_hp",
+                "defense_percentage": defense_pct,
+                "target_hp": member.hp,
+                "target_max_hp": member.max_hp,
+                "stacks": stacks,
+            },
+        )
 
-        mod = create_stat_buff(member, name=self.id, defense_mult=1.2, turns=9999)
+        mod = create_stat_buff(
+            member, name=self.id, defense_mult=1 + 0.2 * stacks, turns=9999
+        )
         member.effect_manager.add_modifier(mod)
 
     def describe(self, stacks: int) -> str:
