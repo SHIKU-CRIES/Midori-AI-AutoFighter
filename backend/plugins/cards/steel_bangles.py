@@ -43,15 +43,30 @@ class SteelBangles(CardBase):
                 attacker_id = id(attacker)
                 if attacker_id in damage_reduced_targets:
                     reduction = damage_reduced_targets.pop(attacker_id)
-                    damage_reduction = int(damage * reduction)
+                    reduced_damage = int(damage * (1 - reduction))
+                    damage_reduction = damage - reduced_damage
+
                     import logging
                     log = logging.getLogger(__name__)
-                    log.debug("Steel Bangles reducing attack damage by %d", damage_reduction)
-                    # Note: Actual damage reduction would need to be implemented in the damage system
-                    BUS.emit("card_effect", self.id, attacker, "damage_reduced", damage_reduction, {
-                        "damage_reduction": damage_reduction,
-                        "original_damage": damage
-                    })
+                    log.debug(
+                        "Steel Bangles reducing attack damage from %d to %d",
+                        damage,
+                        reduced_damage,
+                    )
+                    BUS.emit(
+                        "card_effect",
+                        self.id,
+                        attacker,
+                        "damage_reduced",
+                        damage_reduction,
+                        {
+                            "damage_reduction": damage_reduction,
+                            "original_damage": damage,
+                        },
+                    )
+                    return reduced_damage
+
+            return damage
 
         BUS.subscribe("damage_dealt", _on_damage_dealt)
         BUS.subscribe("before_damage", _on_before_damage)
