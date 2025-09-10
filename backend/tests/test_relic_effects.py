@@ -1,6 +1,8 @@
 import asyncio
 from math import isclose
 
+import pytest
+
 from autofighter.party import Party
 from autofighter.relics import apply_relics
 from autofighter.relics import award_relic
@@ -63,7 +65,8 @@ def test_lucky_button_stacks():
     assert isclose(party.members[0].crit_rate, 0.1 * 1.03 * 1.03)
 
 
-def test_vengeful_pendant_reflects():
+@pytest.mark.parametrize("copies", [1, 2, 3])
+def test_vengeful_pendant_reflects(copies: int) -> None:
     event_bus_module.bus._subs.clear()
     party = Party()
     ally = PlayerBase()
@@ -73,27 +76,11 @@ def test_vengeful_pendant_reflects():
     ally.hp = 100
     enemy.hp = 100
     party.members.append(ally)
-    award_relic(party, "vengeful_pendant")
+    for _ in range(copies):
+        award_relic(party, "vengeful_pendant")
     apply_relics(party)
     BUS.emit("damage_taken", ally, enemy, 20)
-    assert enemy.hp == 100 - int(20 * 0.15)
-
-
-def test_vengeful_pendant_stacks():
-    event_bus_module.bus._subs.clear()
-    party = Party()
-    ally = PlayerBase()
-    enemy = PlayerBase()
-    ally.id = "ally"
-    enemy.id = "enemy"
-    ally.hp = 100
-    enemy.hp = 100
-    party.members.append(ally)
-    award_relic(party, "vengeful_pendant")
-    award_relic(party, "vengeful_pendant")
-    apply_relics(party)
-    BUS.emit("damage_taken", ally, enemy, 20)
-    assert enemy.hp == 100 - int(20 * 0.15 * 2)
+    assert enemy.hp == 100 - int(20 * 0.15 * copies)
 
 
 def test_guardian_charm_targets_lowest_hp():
