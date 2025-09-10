@@ -1,3 +1,6 @@
+import sys
+import types
+
 import pytest
 
 from autofighter.party import Party
@@ -6,26 +9,47 @@ from plugins.effects.aftertaste import Aftertaste
 from plugins.event_bus import EventBus
 from plugins.foes._base import FoeBase
 from plugins.players._base import PlayerBase
-from plugins.relics._base import safe_async_task
+import plugins.relics.rusty_buckle as rb
 from plugins.relics.rusty_buckle import RustyBuckle
 
 
 @pytest.fixture
 def bus(monkeypatch):
     bus = EventBus()
+    bus._prefer_async = False
     monkeypatch.setattr(stats, "BUS", bus)
-    import plugins.relics.rusty_buckle as rb
     monkeypatch.setattr(rb, "BUS", bus)
+    llms = types.ModuleType("llms")
+    torch_checker = types.ModuleType("llms.torch_checker")
+    torch_checker.is_torch_available = lambda: False
+    llms.torch_checker = torch_checker
+    monkeypatch.setitem(sys.modules, "llms", llms)
+    monkeypatch.setitem(sys.modules, "llms.torch_checker", torch_checker)
+
+    def simple_damage(self, amount, attacker=None, **kwargs):
+        self.hp = max(self.hp - int(amount), 0)
+        bus.emit("damage_taken", self, attacker, amount)
+        return int(amount)
+
+    def simple_heal(self, amount, healer=None):
+        self.hp = min(self.hp + int(amount), self.max_hp)
+        bus.emit("heal_received", self, healer, amount)
+        return int(amount)
+
+    monkeypatch.setattr(PlayerBase, "apply_damage", simple_damage)
+    monkeypatch.setattr(PlayerBase, "apply_healing", simple_heal)
+
     stats.set_battle_active(True)
     yield bus
     stats.set_battle_active(False)
 
 
 def test_all_allies_bleed_each_turn(bus):
-    party = Party(
-        members=[PlayerBase(max_hp=1000, hp=1000), PlayerBase(max_hp=800, hp=800)],
-        relics=["rusty_buckle"],
-    )
+    first = PlayerBase()
+    second = PlayerBase()
+    second._base_max_hp = 800
+    second.hp = 800
+    party = Party(members=[first, second], relics=["rusty_buckle"])
     relic = RustyBuckle()
     relic.apply(party)
     foe = FoeBase()
@@ -41,10 +65,7 @@ def test_all_allies_bleed_each_turn(bus):
 
 
 def test_aftertaste_triggers_on_cumulative_loss(monkeypatch, bus):
-    party = Party(
-        members=[PlayerBase(max_hp=1000, hp=1000), PlayerBase(max_hp=1000, hp=1000)],
-        relics=["rusty_buckle"],
-    )
+    party = Party(members=[PlayerBase(), PlayerBase()], relics=["rusty_buckle"])
     relic = RustyBuckle()
     relic.apply(party)
     foe = FoeBase()
@@ -60,17 +81,20 @@ def test_aftertaste_triggers_on_cumulative_loss(monkeypatch, bus):
         return []
 
     monkeypatch.setattr(Aftertaste, "apply", fake_apply)
-    safe_async_task(party.members[0].apply_damage(950))
+    party.members[0].apply_damage(1000)
     assert hits == 0
-    safe_async_task(party.members[1].apply_damage(950))
+    party.members[1].apply_damage(1000)
     assert hits == 5
 
 
 def test_stacks_increase_threshold(monkeypatch, bus):
-    party = Party(
-        members=[PlayerBase(max_hp=1000, hp=1000), PlayerBase(max_hp=1000, hp=1000)],
-        relics=["rusty_buckle", "rusty_buckle"],
-    )
+    first = PlayerBase()
+    second = PlayerBase()
+    first._base_max_hp = 500
+    first.hp = 500
+    second._base_max_hp = 500
+    second.hp = 500
+    party = Party(members=[first, second], relics=["rusty_buckle", "rusty_buckle"])
     relic = RustyBuckle()
     relic.apply(party)
     foe = FoeBase()
@@ -86,9 +110,15 @@ def test_stacks_increase_threshold(monkeypatch, bus):
         return []
 
     monkeypatch.setattr(Aftertaste, "apply", fake_apply)
-    safe_async_task(party.members[0].apply_damage(900))
-    safe_async_task(party.members[0].apply_healing(900))
-    safe_async_task(party.members[0].apply_damage(1000))
+    party.members[0].apply_damage(500)
+    party.members[0].apply_healing(500)
+    party.members[0].apply_damage(500)
     assert hits == 0
-    safe_async_task(party.members[1].apply_damage(900))
+    party.members[1].apply_damage(500)
     assert hits == 8
+
+
+def test_apply_no_type_error(bus):
+    party = Party(members=[PlayerBase(), PlayerBase()], relics=["rusty_buckle"])
+    relic = RustyBuckle()
+    relic.apply(party)

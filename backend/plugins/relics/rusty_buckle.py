@@ -30,7 +30,7 @@ class RustyBuckle(RelicBase):
             "party_max_hp": sum(ally.max_hp for ally in party.members),
             "hp_lost": 0,
             "triggers": 0,
-            "prev_hp": {ally: ally.hp for ally in party.members},
+            "prev_hp": {id(ally): ally.hp for ally in party.members},
         }
 
         def _turn_start(entity) -> None:
@@ -63,9 +63,10 @@ class RustyBuckle(RelicBase):
         def _damage(target, attacker, _original) -> None:
             if target not in party.members:
                 return
-            prev = state["prev_hp"].get(target, target.hp)
+            target_id = id(target)
+            prev = state["prev_hp"].get(target_id, target.hp)
             lost = max(prev - target.hp, 0)
-            state["prev_hp"][target] = target.hp
+            state["prev_hp"][target_id] = target.hp
             state["hp_lost"] += lost
             party_max_hp = state["party_max_hp"]
             triggers = state["triggers"]
@@ -101,7 +102,7 @@ class RustyBuckle(RelicBase):
 
         def _heal(target, healer, _amount) -> None:
             if target in party.members:
-                state["prev_hp"][target] = target.hp
+                state["prev_hp"][id(target)] = target.hp
 
         BUS.subscribe("heal_received", _heal)
 
