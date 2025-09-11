@@ -23,6 +23,20 @@ class DamageTypeBase:
     color: tuple[int, int, int] = (255, 255, 255)
     aggro: float = 0.1
 
+    def apply_aggro(self, stats: "Stats") -> None:
+        """Apply this damage type's aggro to ``stats``."""
+        try:
+            stats.aggro_modifier += float(self.aggro)
+        except Exception:
+            pass
+
+    def remove_aggro(self, stats: "Stats") -> None:
+        """Remove this damage type's aggro from ``stats``."""
+        try:
+            stats.aggro_modifier -= float(self.aggro)
+        except Exception:
+            pass
+
     def is_weak(self, type_check: str) -> bool:
         return type_check == self.weakness
 
