@@ -135,7 +135,7 @@
   </div>
   <div class="party">
     {#each party as member}
-      <div class="member" title={member}>
+      <div class="member" title={member.id}>
         {#if activeId === member.id}
           <div class="arrow arrow-party"></div>
         {/if}
