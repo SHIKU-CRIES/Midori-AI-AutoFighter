@@ -91,6 +91,28 @@
   $: reviewOpen = Boolean(roomData && (roomData.result === 'battle' || roomData.result === 'boss') && !battleActive);
 
   let lastMusicKey = '';
+
+  // Compute a global accent color from the user's global level and
+  // use it as the outline for the full WebUI. This keeps a consistent
+  // visual theme tied to progression.
+  function levelToAccent(level) {
+    try {
+      const lv = Math.max(1, Number(level) || 1);
+      const hue = (lv * 12) % 360; // cycle hues as level increases
+      return `hsl(${hue} 85% 55%)`;
+    } catch {
+      return '#8ac';
+    }
+  }
+  $: accentColor = levelToAccent(userState?.level || 1);
+  $: levelProgress = (() => {
+    const exp = Number(userState?.exp || 0);
+    const next = Number(userState?.next_level_exp || 0) || 0;
+    if (next <= 0) return 0;
+    const p = Math.max(0, Math.min(1, exp / next));
+    return p;
+  })();
+  $: viewportStyle = `--bg: url(${background || randomBg}); --accent: ${accentColor}; --level-progress: ${levelProgress}`;
   $: {
     // Change music per room type and battle index (new fights) and
     // rerun when party/foe combatants change to trigger character themes.
@@ -128,7 +150,10 @@
     --ui-top-offset: calc(1.2rem + 2.9rem + 1.2rem);
     width: 100%;
     height: 100%;
-    border: 2px solid #fff;
+    border: 2px solid var(--accent, #fff);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent, #8ac) 30%, transparent),
+      0 0 32px 0 color-mix(in srgb, var(--accent, #8ac) 18%, transparent) inset;
     box-sizing: border-box;
     background: #000;
     display: flex;
@@ -139,6 +164,26 @@
     background-size: cover;
     background-position: center;
     overflow: hidden;
+    position: relative;
+  }
+  /* Progress outline driven by global user level EXP */
+  .viewport::before {
+    content: '';
+    position: absolute;
+    inset: -2px; /* extend slightly to avoid clipping */
+    padding: 2px; /* outline thickness */
+    border-radius: 0;
+    background:
+      conic-gradient(
+        var(--accent, #8ac) 0 calc(var(--level-progress, 0) * 1turn),
+        rgba(255,255,255,0.12) 0 1turn
+      );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude; /* standard property */
+    pointer-events: none;
   }
   .placeholder {
     color: #ddd;
@@ -197,7 +242,7 @@
 </style>
 
 <div class="viewport-wrap">
-  <div class="viewport" style={`--bg: url(${background || randomBg})`}>
+  <div class="viewport" style={viewportStyle}>
     <NavBar
       {battleActive}
       viewMode={$overlayView}
