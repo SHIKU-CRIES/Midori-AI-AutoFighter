@@ -104,10 +104,8 @@ class Wind(DamageTypeBase):
                     f_mgr.maybe_inflict_dot(actor, dmg)
                 except Exception:
                     pass
-                # Yield briefly to keep event loop responsive during large hit counts
-                # Reduce frequency of yields for better performance with many hits
-                if i % 5 == 0:  # Only yield every 5 hits instead of every hit
-                    await asyncio.sleep(0)
+                # Yield briefly each hit to keep the event loop responsive
+                await asyncio.sleep(0.002)
 
         # Clean up the temporary buff immediately after the sequence
         try:
