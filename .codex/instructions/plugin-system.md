@@ -73,3 +73,12 @@ Log messages are captured by the backend's buffered logger and written to `backe
 3. Implement any category-specific methods such as `attack`, `apply`, or `tick`.
 4. Use `self.bus` to emit or subscribe to events after the loader injects the event bus.
 5. Run `uv run pytest` to confirm the module imports cleanly—broken plugins are logged and skipped during discovery.
+
+## Event Bus vs Passive Registry
+
+The plugin ecosystem offers two primary coordination patterns:
+
+- **Event bus** – A global asynchronous channel that batches messages and inserts brief sleeps between dispatch cycles to keep the event loop responsive. This decouples producers and consumers at the cost of global state and scheduling overhead.
+- **Passive registry** – Each entity creates its own dispatcher that iterates over its equipped passives.
+
+To align the registry with loop‑responsiveness guidelines, plan to insert a small delay such as `await asyncio.sleep(0.002)` inside long-running registry loops. This mirrors the event bus’s cooperative scheduling while retaining per-entity isolation.
