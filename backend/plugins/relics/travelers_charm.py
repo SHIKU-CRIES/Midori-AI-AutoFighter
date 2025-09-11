@@ -96,9 +96,22 @@ class TravelersCharm(RelicBase):
                     member.mods.remove(mod.id)
             active.clear()
 
+        def _on_turn_start(*_):
+            _turn_start()
+
+        def _on_turn_end(*_):
+            _turn_end()
+
+        def _on_battle_end(entity) -> None:
+            BUS.unsubscribe("damage_taken", _hit)
+            BUS.unsubscribe("turn_start", _on_turn_start)
+            BUS.unsubscribe("turn_end", _on_turn_end)
+            BUS.unsubscribe("battle_end", _on_battle_end)
+
         BUS.subscribe("damage_taken", _hit)
-        BUS.subscribe("turn_start", lambda *_: _turn_start())
-        BUS.subscribe("turn_end", lambda *_: _turn_end())
+        BUS.subscribe("turn_start", _on_turn_start)
+        BUS.subscribe("turn_end", _on_turn_end)
+        BUS.subscribe("battle_end", _on_battle_end)
 
     def describe(self, stacks: int) -> str:
         d = 25 * stacks
