@@ -309,6 +309,11 @@ def load_party(run_id: str) -> Party:
     level_map: dict[str, int] = data.get("level", {})
     exp_mult_map: dict[str, float] = data.get("exp_multiplier", {})
     members: list[PlayerBase] = []
+    # Freeze-in user level captured at run start (default 1 for legacy runs)
+    try:
+        run_user_level = int(data.get("user_level", 1) or 1)
+    except Exception:
+        run_user_level = 1
     for pid in data.get("members", []):
         for name in player_plugins.__all__:
             cls = getattr(player_plugins, name)
@@ -339,6 +344,22 @@ def load_party(run_id: str) -> Party:
                     inst.exp_multiplier = float(
                         exp_mult_map.get(pid, inst.exp_multiplier)
                     )
+                except Exception:
+                    pass
+                # Apply the run-frozen user level buff to base stats exactly once per load
+                try:
+                    mult = 1.0 + float(run_user_level) * 0.01
+                    inst._base_max_hp = int(inst._base_max_hp * mult)
+                    inst._base_atk = int(inst._base_atk * mult)
+                    inst._base_defense = int(inst._base_defense * mult)
+                    inst._base_crit_rate *= mult
+                    inst._base_crit_damage *= mult
+                    inst._base_effect_hit_rate *= mult
+                    inst._base_mitigation *= mult
+                    inst._base_regain = int(inst._base_regain * mult)
+                    inst._base_dodge_odds *= mult
+                    inst._base_effect_resistance *= mult
+                    inst._base_vitality *= mult
                 except Exception:
                     pass
                 apply_status_hooks(inst)

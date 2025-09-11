@@ -20,6 +20,7 @@ from game import save_map
 
 from autofighter.mapgen import MapGenerator
 from plugins import players as player_plugins
+from services.user_level_service import get_user_level
 
 
 async def start_run(
@@ -110,6 +111,8 @@ async def start_run(
                             "exp": dict.fromkeys(members, 0),
                             "level": dict.fromkeys(members, 1),
                             "rdr": 1.0,
+                            # Freeze the user level for the duration of this run
+                            "user_level": int(get_user_level()),
                             "player": snapshot,
                         }
                     ),

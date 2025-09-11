@@ -13,7 +13,6 @@ from battle_logging import end_battle_logging
 
 # Import battle logging
 from battle_logging import start_battle_logging
-from services.user_level_service import apply_user_level_to_party
 from services.user_level_service import gain_user_exp
 from services.user_level_service import get_user_level
 
@@ -791,7 +790,7 @@ class BattleRoom(Room):
             try:
                 level = get_user_level()
                 gain_user_exp(int(exp_reward / max(1, level)))
-                apply_user_level_to_party(party)
+                # Do not reapply global level buffs mid-run; buffs are fixed at run start.
             except Exception:
                 pass
         party_data = [_serialize(p) for p in party.members]
