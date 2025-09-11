@@ -398,11 +398,18 @@ class BattleRoom(Room):
                     # If all foes died earlier in this round, stop taking actions
                     if not any(f.hp > 0 for f in foes):
                         break
-                    alive_foe_idxs = [i for i, f in enumerate(foes) if f.hp > 0]
-                    if not alive_foe_idxs:
+                    alive_targets = [
+                        (i, f) for i, f in enumerate(foes) if f.hp > 0
+                    ]
+                    if not alive_targets:
                         break
-                    tgt_idx = random.choice(alive_foe_idxs)
-                    tgt_foe = foes[tgt_idx]
+                    weights = [max(f.aggro, 0.0) for _, f in alive_targets]
+                    if sum(weights) > 0:
+                        tgt_idx, tgt_foe = random.choices(
+                            alive_targets, weights=weights
+                        )[0]
+                    else:
+                        tgt_idx, tgt_foe = random.choice(alive_targets)
                     tgt_mgr = foe_effects[tgt_idx]
                     dt = getattr(member, "damage_type", None)
                     await member_effect.tick(tgt_mgr)
@@ -623,10 +630,13 @@ class BattleRoom(Room):
                     ]
                     if not alive_targets:
                         break
-                    pidx, target = random.choices(
-                        alive_targets,
-                        weights=[m.defense * m.mitigation for _, m in alive_targets],
-                    )[0]
+                    weights = [max(m.aggro, 0.0) for _, m in alive_targets]
+                    if sum(weights) > 0:
+                        pidx, target = random.choices(
+                            alive_targets, weights=weights
+                        )[0]
+                    else:
+                        pidx, target = random.choice(alive_targets)
                     target_effect = party_effects[pidx]
                     foe_mgr = foe_effects[foe_idx]
                     await registry.trigger("turn_start", acting_foe)

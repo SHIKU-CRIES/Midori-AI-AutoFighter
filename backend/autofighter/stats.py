@@ -105,7 +105,8 @@ class Stats:
     damage_dealt: int = 0
     kills: int = 0
     last_damage_taken: int = 0
-    aggro: float = 0.1
+    base_aggro: float = 0.1
+    aggro_modifier: float = 0.0
 
     # Ultimate system
     ultimate_charge: int = 0
@@ -156,6 +157,15 @@ class Stats:
 
         # Set hp to match max_hp at start
         self.hp = self.max_hp
+
+        dt = getattr(self, "damage_type", None)
+        try:
+            if hasattr(dt, "apply_aggro"):
+                dt.apply_aggro(self)
+            else:
+                self.aggro_modifier += float(getattr(dt, "aggro", 0.0))
+        except Exception:
+            pass
 
     # Runtime stat properties (base stats + effects)
     @property
@@ -228,6 +238,21 @@ class Stats:
         except Exception:
             pass
 
+    @property
+    def aggro(self) -> float:
+        """Calculate current aggro score."""
+        defense_term = 0.0
+        try:
+            defense_term = (self.defense - self._base_defense) / self._base_defense
+        except Exception:
+            defense_term = 0.0
+        modifier = (
+            self.aggro_modifier
+            + self._calculate_stat_modifier("aggro_modifier")
+            + float(getattr(getattr(self, "damage_type", None), "aggro", 0.0))
+        )
+        return self.base_aggro * (1 + modifier + defense_term)
+
     def _calculate_stat_modifier(self, stat_name: str) -> Union[int, float]:
         """Calculate the total modifier for a stat from all active effects."""
         total: float = 0.0
@@ -256,6 +281,26 @@ class Stats:
         """Modify a base stat (use only for permanent changes like leveling)."""
         current = self.get_base_stat(stat_name)
         self.set_base_stat(stat_name, current + amount)
+
+    def change_damage_type(self, new_type: DamageTypeBase) -> None:
+        """Change damage type and update aggro modifiers."""
+        try:
+            old = getattr(self, "damage_type", None)
+            if old is not None:
+                if hasattr(old, "remove_aggro"):
+                    old.remove_aggro(self)
+                else:
+                    self.aggro_modifier -= float(getattr(old, "aggro", 0.0))
+        except Exception:
+            pass
+        self.damage_type = new_type
+        try:
+            if hasattr(new_type, "apply_aggro"):
+                new_type.apply_aggro(self)
+            else:
+                self.aggro_modifier += float(getattr(new_type, "aggro", 0.0))
+        except Exception:
+            pass
 
     # Effect management methods
     def add_effect(self, effect: StatEffect) -> None:
