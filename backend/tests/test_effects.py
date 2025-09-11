@@ -8,7 +8,7 @@ from plugins.event_bus import EventBus
 
 
 def test_dot_applies_with_hit_rate():
-    attacker = Stats(damage_type=Fire()
+    attacker = Stats(damage_type=Fire())
     attacker.set_base_stat('atk', 50)
     attacker.set_base_stat('effect_hit_rate', 2.0)
     target = Stats(effect_resistance=0.0)
@@ -18,7 +18,7 @@ def test_dot_applies_with_hit_rate():
 
 
 def test_blazing_torment_stacks():
-    attacker = Stats(damage_type=Fire()
+    attacker = Stats(damage_type=Fire())
     attacker.set_base_stat('atk', 50)
     attacker.set_base_stat('effect_hit_rate', 2.0)
     target = Stats(effect_resistance=0.0)
@@ -29,7 +29,7 @@ def test_blazing_torment_stacks():
 
 
 def test_high_hit_rate_applies_multiple_stacks(monkeypatch):
-    attacker = Stats(damage_type=Fire()
+    attacker = Stats(damage_type=Fire())
     attacker.set_base_stat('atk', 50)
     attacker.set_base_stat('effect_hit_rate', 3.5)
     target = Stats(effect_resistance=0.1)
@@ -52,7 +52,7 @@ async def test_damage_and_heal_events():
 
     bus.subscribe("damage_taken", _dmg)
     bus.subscribe("heal_received", _heal)
-    attacker = Stats(damage_type=Fire()
+    attacker = Stats(damage_type=Fire())
     attacker.set_base_stat('atk', 10)
     target = Stats(hp=50)
     target.set_base_stat('max_hp', 100)

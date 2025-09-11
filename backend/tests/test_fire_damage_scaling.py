@@ -6,7 +6,7 @@ from plugins.damage_types.fire import Fire
 
 @pytest.mark.asyncio
 async def test_fire_damage_increases_as_hp_drops():
-    attacker = Stats(damage_type=Fire()
+    attacker = Stats(damage_type=Fire())
     attacker.set_base_stat('defense', 0)
     target_full = Stats()
     target_full.set_base_stat('defense', 0)

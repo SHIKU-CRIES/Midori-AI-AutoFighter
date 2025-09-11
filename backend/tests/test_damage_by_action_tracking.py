@@ -91,7 +91,7 @@ async def test_foe_damage_by_action_tracking():
     # Create a foe that can deal damage
     foe = Slime()
     foe.id = "test_foe"
-    foe.set_base_stat('atk', 50  # Ensure foe can deal damage)
+    foe.set_base_stat('atk', 50)  # Ensure foe can deal damage
 
     party = Party(members=[player])
 
