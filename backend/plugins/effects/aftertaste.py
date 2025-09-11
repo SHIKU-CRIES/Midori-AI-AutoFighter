@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -94,4 +95,5 @@ class Aftertaste:
 
             dmg = await target.apply_damage(amount, temp_attacker, action_name="Aftertaste")
             results.append(dmg)
+            await asyncio.sleep(0.002)
         return results
