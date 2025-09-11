@@ -1,0 +1,9 @@
+[test]
+preload = ["./test-setup.js"]
+
+[test.env]
+NODE_ENV = "test"
+
+# Module aliases for SvelteKit modules during testing
+[module]
+"$app/environment" = "./src/lib/mocks/app-environment.js"

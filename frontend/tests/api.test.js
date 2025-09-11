@@ -94,7 +94,7 @@ describe('api calls', () => {
   test('pullGacha posts count', async () => {
     const fetchMock = mock(async (url, options) => {
       const body = JSON.parse(options.body);
-      expect(body).toEqual({ count: 5 });
+      expect(body).toEqual({ count: 5, banner_id: "standard" });
       return { ok: true, status: 200, json: async () => ({ results: [], pity: 0 }) };
     });
     global.fetch = fetchMock;
