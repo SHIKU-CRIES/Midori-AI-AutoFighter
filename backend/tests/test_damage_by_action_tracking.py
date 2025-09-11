@@ -82,7 +82,10 @@ async def test_foe_damage_by_action_tracking():
     room = BattleRoom(node)
 
     # Create a weak player so foe can attack
-    player = Stats(hp=1000, max_hp=1000, atk=1, defense=0)
+    player = Stats(hp=1000)
+    player.set_base_stat('max_hp', 1000)
+    player.set_base_stat('atk', 1)
+    player.set_base_stat('defense', 0)
     player.id = "weak_player"
 
     # Create a foe that can deal damage

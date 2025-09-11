@@ -17,7 +17,8 @@ from plugins.dots.frozen_wound import FrozenWound
     ],
 )
 async def test_frozen_wound_miss_chance(stacks, roll, expect_miss, monkeypatch):
-    actor = Stats(atk=10)
+    actor = Stats()
+    actor.set_base_stat('atk', 10)
     target = Stats(hp=100)
     actor.id = "actor"
     target.id = "target"

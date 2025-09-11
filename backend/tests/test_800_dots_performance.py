@@ -19,7 +19,11 @@ async def test_many_dots_performance():
     """Test performance with many DOT effects."""
 
     # Create a test character with many DOTs
-    target = Stats(hp=10000, max_hp=10000, defense=1, mitigation=1, vitality=1)
+    target = Stats(hp=10000)
+    target.set_base_stat('max_hp', 10000)
+    target.set_base_stat('defense', 1)
+    target.set_base_stat('mitigation', 1)
+    target.set_base_stat('vitality', 1)
     target.id = "test_target"
 
     # Create effect manager

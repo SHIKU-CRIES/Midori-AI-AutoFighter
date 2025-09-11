@@ -59,7 +59,10 @@ async def test_level_up_persists_hp(monkeypatch):
 
 
 def test_gain_exp_and_level_up(monkeypatch):
-    stats = Stats(hp=100, max_hp=100, atk=10, defense=5)
+    stats = Stats(hp=100)
+    stats.set_base_stat('max_hp', 100)
+    stats.set_base_stat('atk', 10)
+    stats.set_base_stat('defense', 5)
     monkeypatch.setattr(random, "uniform", lambda a, b: 0)
     stats.gain_exp(100)
     assert stats.level == 4

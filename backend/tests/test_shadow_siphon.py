@@ -9,7 +9,9 @@ from plugins.damage_types.dark import Dark
 @pytest.mark.asyncio
 async def test_shadow_siphon_applies_temporary_stat_buff():
     dark = Dark()
-    actor = Stats(atk=100, defense=100, damage_type=dark)
+    actor = Stats(damage_type=dark)
+    actor.set_base_stat('atk', 100)
+    actor.set_base_stat('defense', 100)
     ally = Stats()
     actor.id = "actor"
     ally.id = "ally"

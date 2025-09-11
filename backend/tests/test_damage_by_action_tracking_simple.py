@@ -55,7 +55,7 @@ async def test_damage_action_names_preserved():
     # Create entities
     attacker = Carly()
     attacker.id = "test_attacker"
-    target = Stats(hp=1000, max_hp=1000, defense=0)
+    target = Stats(hp=1000)
     target.id = "test_target"
 
     # Set up logging
