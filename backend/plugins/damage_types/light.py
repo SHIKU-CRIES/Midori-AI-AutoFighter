@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 
 from autofighter.effects import DamageOverTime
@@ -25,10 +26,15 @@ class Light(DamageTypeBase):
                 hot = damage_effects.create_hot(self.id, actor)
                 if hot is not None:
                     mgr.add_hot(hot)
+            await asyncio.sleep(0.002)
+
         for ally in allies:
             if ally.hp > 0 and ally.hp / ally.max_hp < 0.25:
                 await ally.apply_healing(actor.atk, healer=actor)
+                await asyncio.sleep(0.002)
                 return False
+            await asyncio.sleep(0.002)
+
         return True
 
     async def ultimate(self, actor, allies, enemies):
@@ -37,6 +43,7 @@ class Light(DamageTypeBase):
             return False
         for ally in allies:
             if ally.hp <= 0:
+                await asyncio.sleep(0.002)
                 continue
             mgr = getattr(ally, "effect_manager", None)
             if mgr is None:
@@ -64,8 +71,11 @@ class Light(DamageTypeBase):
             missing = ally.max_hp - ally.hp
             if missing > 0:
                 await ally.apply_healing(missing, healer=actor, source_type="ultimate", source_name="Light Ultimate")
+            await asyncio.sleep(0.002)
+
         for enemy in enemies:
             if enemy.hp <= 0:
+                await asyncio.sleep(0.002)
                 continue
             mgr = getattr(enemy, "effect_manager", None)
             if mgr is None:
@@ -78,6 +88,8 @@ class Light(DamageTypeBase):
                 defense_mult=0.75,
             )
             mgr.add_modifier(mod)
+            await asyncio.sleep(0.002)
+
         BUS.emit("light_ultimate", actor)
         return True
 
