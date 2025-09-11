@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 
 from autofighter.effects import DamageOverTime
@@ -120,6 +121,7 @@ class Dark(DamageTypeBase):
         target = enemies[0]
         for _ in range(6):
             dealt = await target.apply_damage(dmg, attacker=actor, action_name="Dark Ultimate")
+            await asyncio.sleep(0.002)
             await BUS.emit_async("damage", actor, target, dealt)
         return True
 
