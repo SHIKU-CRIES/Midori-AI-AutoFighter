@@ -16,8 +16,11 @@ callbacks and provides performance instrumentation.
   calls the internal `send_async` implementation which awaits coroutine
   callbacks directly and offloads sync ones to a thread pool.
 
-Subscriber errors are caught and logged so one misbehaving plugin does not
-crash others.
+Battle-scoped plugins like cards and relics should unsubscribe their handlers
+(e.g., on `battle_end`) to avoid lingering listeners across encounters.
+
+Subscriber errors are caught and logged so one misbehaving plugin does not crash
+others.
 
 ## Asynchronous dispatch
 `EventBus.subscribe` detects coroutine functions and registers an async‑aware
