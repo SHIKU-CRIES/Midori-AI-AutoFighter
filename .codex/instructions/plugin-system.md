@@ -79,6 +79,6 @@ Log messages are captured by the backend's buffered logger and written to `backe
 The plugin ecosystem offers two primary coordination patterns:
 
 - **Event bus** – A global asynchronous channel that batches messages and inserts brief sleeps between dispatch cycles to keep the event loop responsive. This decouples producers and consumers at the cost of global state and scheduling overhead.
-- **Passive registry** – Each entity creates its own dispatcher that iterates over its equipped passives. It performs no automatic yielding, so tight loops can monopolize the loop.
+- **Passive registry** – Each entity creates its own dispatcher that iterates over its equipped passives.
 
 To align the registry with loop‑responsiveness guidelines, plan to insert a small delay such as `await asyncio.sleep(0.002)` inside long-running registry loops. This mirrors the event bus’s cooperative scheduling while retaining per-entity isolation.
