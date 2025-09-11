@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 from dataclasses import field
 import random
@@ -44,6 +45,7 @@ class Overclock(CardBase):
                     dmg,
                     {"target": getattr(target, "id", str(target)), "damage": dmg},
                 )
+                await asyncio.sleep(0.002)
 
         def _battle_start(entity: Stats) -> None:
             if entity in party.members:
