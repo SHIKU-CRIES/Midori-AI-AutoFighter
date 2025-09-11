@@ -21,6 +21,7 @@ class DamageTypeBase:
     id: str = "Generic"
     weakness: str = "none"
     color: tuple[int, int, int] = (255, 255, 255)
+    aggro: float = 0.1
 
     def is_weak(self, type_check: str) -> bool:
         return type_check == self.weakness
