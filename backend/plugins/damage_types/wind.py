@@ -132,7 +132,7 @@ class Wind(DamageTypeBase):
         actor_damage_type = getattr(actor, "damage_type", None)
         if not isinstance(actor_damage_type, Wind):
             return
-            
+
         # Determine actor type and add to appropriate registry
         actor_type = getattr(actor, "plugin_type", None)
         if actor_type == "player":
