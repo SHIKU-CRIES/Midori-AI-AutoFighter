@@ -57,6 +57,7 @@ class Fire(DamageTypeBase):
                 mgr.maybe_inflict_dot(actor, dealt)
             except Exception:
                 pass
+            await asyncio.sleep(0.002)
         return True
 
     def _on_ultimate_used(self, user: Stats) -> None:
