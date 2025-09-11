@@ -43,6 +43,7 @@ class Lightning(DamageTypeBase):
         for enemy in enemies:
             if base_damage > 0:
                 await enemy.apply_damage(base_damage, attacker=actor, action_name="Lightning Ultimate")
+                await asyncio.sleep(0.002)
 
             # Apply random DoTs to each enemy
             mgr = getattr(enemy, "effect_manager", None)
@@ -53,6 +54,7 @@ class Lightning(DamageTypeBase):
                     effect = damage_effects.create_dot(random.choice(types), dmg, actor)
                     if effect is not None:
                         mgr.add_dot(effect)
+                    await asyncio.sleep(0.002)
 
         # Set up aftertaste stacks
         stacks = getattr(actor, "_lightning_aftertaste_stacks", 0) + 1
