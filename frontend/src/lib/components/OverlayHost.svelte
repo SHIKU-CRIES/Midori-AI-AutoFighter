@@ -33,9 +33,9 @@
   export let roomData = null;
   export let battleSnapshot = null;
   export let editorState = {};
-  export let sfxVolume = 50;
-  export let musicVolume = 50;
-  export let voiceVolume = 50;
+  export let sfxVolume = 5;
+  export let musicVolume = 5;
+  export let voiceVolume = 5;
   export let framerate = 60;
   export let reducedMotion = false;
   export let selectedParty = [];
@@ -215,9 +215,9 @@
   </OverlaySurface>
 {/if}
 
-{#if $overlayView === 'pull-results'}
+  {#if $overlayView === 'pull-results'}
   <OverlaySurface zIndex={1400}>
-    <PullResultsOverlay results={$overlayData.results || []} on:close={() => dispatch('back')} />
+    <PullResultsOverlay {sfxVolume} results={$overlayData.results || []} on:close={() => dispatch('back')} />
   </OverlaySurface>
 {/if}
 

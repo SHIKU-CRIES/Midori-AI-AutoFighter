@@ -13,9 +13,9 @@ import {
 export async function loadInitialState() {
   const saved = loadSettings();
   const settings = {
-    sfxVolume: saved.sfxVolume ?? 50,
-    musicVolume: saved.musicVolume ?? 50,
-    voiceVolume: saved.voiceVolume ?? 50,
+    sfxVolume: saved.sfxVolume ?? 5,
+    musicVolume: saved.musicVolume ?? 5,
+    voiceVolume: saved.voiceVolume ?? 5,
     framerate: saved.framerate !== undefined ? Number(saved.framerate) : 60,
     autocraft: true,
     reducedMotion: saved.reducedMotion ?? false,
@@ -149,7 +149,7 @@ function hasAudio() {
 }
 
 let gameAudio;
-let currentMusicVolume = 50;
+let currentMusicVolume = 5;
 let currentPlaylist = [];
 // Keep unshuffled source so repeated calls with the same playlist don't restart
 let originalPlaylist = [];
@@ -170,7 +170,7 @@ const DEFAULT_FADE_IN_MS = 650;
 let nextFadeInMs = 0;
 
 let voiceAudio;
-let currentVoiceVolume = 50;
+let currentVoiceVolume = 5;
 
 function _musicLog(event, payload = {}) {
   try {

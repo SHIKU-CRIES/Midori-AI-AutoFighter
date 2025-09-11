@@ -44,9 +44,9 @@
   let randomBg = '';
   let roster = [];
   let userState = { level: 1, exp: 0, next_level_exp: 100 };
-  let sfxVolume = 50;
-  let musicVolume = 50;
-  let voiceVolume = 50;
+  let sfxVolume = 5;
+  let musicVolume = 5;
+  let voiceVolume = 5;
   let framerate = 60;
   let reducedMotion = false;
   let selectedParty = [];

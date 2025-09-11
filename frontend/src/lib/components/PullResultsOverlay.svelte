@@ -9,6 +9,7 @@
   import { formatName } from '../systems/craftingUtils.js';
 
   export let results = [];
+  export let sfxVolume = 5;
   export let reducedMotion = false;
 
   const dispatch = createEventDispatcher();
@@ -59,7 +60,7 @@
     if (isBatch) {
       stack = mapped;
       if (!reducedMotion) {
-        dealSfx = createDealSfx();
+        dealSfx = createDealSfx(sfxVolume);
       }
       dealNext();
     } else {

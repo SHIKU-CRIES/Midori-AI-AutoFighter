@@ -17,9 +17,9 @@
   import { saveSettings, clearSettings, clearAllClientData } from '../systems/settingsStorage.js';
 
   const dispatch = createEventDispatcher();
-  export let sfxVolume = 50;
-  export let musicVolume = 50;
-  export let voiceVolume = 50;
+  export let sfxVolume = 5;
+  export let musicVolume = 5;
+  export let voiceVolume = 5;
   export let framerate = 60;
   export let reducedMotion = false;
   export let lrmModel = '';
@@ -194,9 +194,9 @@
       // Always clear client state and reload, even if backend wipe fails
       clearSettings();
       await clearAllClientData();
-      sfxVolume = 50;
-      musicVolume = 50;
-      voiceVolume = 50;
+      sfxVolume = 5;
+      musicVolume = 5;
+      voiceVolume = 5;
       framerate = 60;
       reducedMotion = false;
       runId = '';
