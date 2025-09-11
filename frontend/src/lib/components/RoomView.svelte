@@ -136,7 +136,7 @@
   <div class="party">
     {#each party as member}
       <div class="member" title={member}>
-        {#if activeId === member}
+        {#if activeId === member.id}
           <div class="arrow arrow-party"></div>
         {/if}
         <div class="ult"></div>
