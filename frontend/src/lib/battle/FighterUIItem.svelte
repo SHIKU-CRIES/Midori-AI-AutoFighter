@@ -255,10 +255,12 @@
 
   /* Element-specific visual effects */
   .fire-glow {
-    background: radial-gradient(circle at 50% 80%, 
-      rgba(255, 68, 68, 0.3) 0%,
-      rgba(255, 140, 0, 0.2) 40%,
-      transparent 70%);
+    background: radial-gradient(
+      circle at 50% 80%,
+      rgba(255, 59, 48, 0.35) 0%,      /* iOS red */
+      rgba(255, 59, 48, 0.18) 40%,
+      transparent 70%
+    );
     animation: fire-flicker 2s ease-in-out infinite alternate;
   }
 

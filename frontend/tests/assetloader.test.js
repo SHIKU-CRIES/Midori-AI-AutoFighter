@@ -31,7 +31,7 @@ if (typeof import.meta.glob !== 'function') {
     });
 
     test('provides damage type color and icon', () => {
-      expect(getElementColor('fire')).toBe('#e25822');
+      expect(getElementColor('fire')).toBe('#ff3b30');
       const icon = getElementIcon('light');
       expect(icon).toBeTruthy();
     });

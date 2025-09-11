@@ -81,7 +81,8 @@ const ELEMENT_ICONS = {
 };
 
 const ELEMENT_COLORS = {
-  fire: '#e25822',
+  // Fire closer to a vivid red for better readability
+  fire: '#ff3b30',
   ice: '#82caff',
   lightning: '#ffd700',
   light: '#ffff99',
