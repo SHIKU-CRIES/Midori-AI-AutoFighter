@@ -57,8 +57,7 @@ class Generic(DamageTypeBase):
                 party=allies,
                 foes=enemies,
             )
-            if i % 5 == 0:
-                await asyncio.sleep(0)
+            await asyncio.sleep(0.002)
         return True
 
     @classmethod
