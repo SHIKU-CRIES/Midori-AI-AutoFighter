@@ -28,3 +28,10 @@ class Ice(DamageTypeBase):
                 await foe.apply_damage(dmg, attacker=user, action_name="Ice Ultimate")
                 bonus += 0.3
         return True
+
+    @classmethod
+    def get_ultimate_description(cls) -> str:
+        return (
+            "Strikes all foes six times in succession. Each hit within a wave "
+            "deals 30% more damage than the previous target."
+        )

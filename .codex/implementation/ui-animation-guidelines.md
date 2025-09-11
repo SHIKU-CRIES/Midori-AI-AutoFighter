@@ -4,6 +4,8 @@
 - Honor the user's `prefers-reduced-motion` setting by disabling or simplifying nonessential animations.
 - Provide alternative cues (e.g., opacity changes or instant transitions) when motion is reduced.
 - Keep critical feedback visible even when animations are removed.
+- Turn indicators like the active-fighter arrow should fall back to a static
+  pointer when motion is reduced.
 
 ## Easing Presets
 - Use consistent easing functions to maintain a cohesive feel:
@@ -11,6 +13,8 @@
   - `ease-out` for entering elements.
   - `ease-in` for exiting elements.
 - Keep durations between 150ms and 300ms unless a longer effect improves clarity.
+- The active-fighter arrow uses a subtle 500ms bounce to draw attention to the
+  acting combatant.
 
 ## Sound Cues
 - Pair major animations with subtle sound effects to reinforce feedback.

@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from typing import ClassVar
 
 from autofighter.effects import DamageOverTime
 from autofighter.effects import EffectManager
@@ -15,6 +16,7 @@ class Wind(DamageTypeBase):
     id: str = "Wind"
     weakness: str = "Lightning"
     color: tuple[int, int, int] = (0, 255, 0)
+    _players: ClassVar[list] = []
 
     # Previous implementation scattered DoTs after an ultimate by moving
     # existing effects. The new design: when Wind uses its ultimate, strike

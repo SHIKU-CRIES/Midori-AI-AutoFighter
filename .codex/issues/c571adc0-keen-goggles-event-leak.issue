@@ -1,0 +1,10 @@
+Issue: `KeenGoggles` card subscribes to BUS events without unregistering, leading to duplicate crit stack handlers.
+
+Details:
+- `backend/plugins/cards/keen_goggles.py` subscribes to `effect_applied` and `action_taken` but never removes these listeners.
+- Multiple applications of the card would continually grow `crit_stacks` callbacks per player.
+- Residual subscriptions could act on outdated party members, misapplying buffs.
+
+Location: `backend/plugins/cards/keen_goggles.py` lines 18-73.
+
+Recommended fix: Unsubscribe from BUS events on battle end or card removal to avoid stacking listeners.

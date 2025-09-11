@@ -1,0 +1,9 @@
+Issue: ThickSkin card subscribes to BUS events without cleanup.
+
+Details:
+- `backend/plugins/cards/thick_skin.py` adds an `effect_applied` listener in `apply`.
+- There is no unsubscribe on battle end, so handlers linger between battles.
+
+Location: `backend/plugins/cards/thick_skin.py` line 42.
+
+Recommended fix: remove the listener when the card is deactivated or battle ends.

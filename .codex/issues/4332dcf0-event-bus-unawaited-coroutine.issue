@@ -1,0 +1,10 @@
+Issue: `send_batched` constructs `_process_batches_with_interval` coroutine before ensuring an event loop, leading to unawaited coroutine warnings when no loop is running.
+Context: During tests, calling `send_batched` outside an async loop triggers `RuntimeWarning: coroutine '_Bus._process_batches_with_interval' was never awaited`.
+
+Details:
+- `backend/plugins/event_bus.py` line 144 calls `asyncio.create_task(self._process_batches_with_interval(interval))` inside a try block.
+- If `create_task` raises due to missing loop, the coroutine instance is left pending and never awaited.
+
+Location: `backend/plugins/event_bus.py` lines 127-148.
+
+Recommended fix: Obtain the loop first and use `loop.create_task(...)` only when available, or construct the coroutine inside the `try` block after verifying the loop to avoid unawaited coroutine warnings.

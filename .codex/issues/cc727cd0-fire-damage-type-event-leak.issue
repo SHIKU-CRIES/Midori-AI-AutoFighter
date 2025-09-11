@@ -1,0 +1,10 @@
+Issue: `Fire` damage type registers global BUS listeners in `__post_init__` but never unregisters them, causing handler buildup.
+
+Details:
+- `backend/plugins/damage_types/fire.py` subscribes to `ultimate_used`, `turn_start`, and `battle_end` in `__post_init__`.
+- Creating multiple Fire instances (e.g., across battles or actors) accumulates `_on_ultimate_used`, `_on_turn_start`, and `_on_battle_end` handlers.
+- While `_on_battle_end` resets internal state, it does not remove the subscriptions, allowing callbacks on destroyed objects.
+
+Location: `backend/plugins/damage_types/fire.py` lines 26-29.
+
+Recommended fix: Unsubscribe from BUS events when the instance is disposed or after battle end to prevent listener leaks.

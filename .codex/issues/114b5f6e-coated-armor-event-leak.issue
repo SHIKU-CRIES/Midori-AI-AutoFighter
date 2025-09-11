@@ -1,0 +1,10 @@
+Issue: Coated Armor subscribes to the `mitigation_triggered` BUS event without unsubscribing, leaving handlers active across battles.
+Context: `CoatedArmor.apply` registers `_on_mitigation_triggered` but provides no cleanup in later phases.
+
+Details:
+- `backend/plugins/cards/coated_armor.py` lines 16-40 define the subscription.
+- Re-applying the card or starting new battles can accumulate multiple listeners.
+
+Location: `backend/plugins/cards/coated_armor.py` lines 16-40.
+
+Recommended fix: Implement a `remove` or `reset` method that calls `BUS.unsubscribe("mitigation_triggered", _on_mitigation_triggered)` when the card is unequipped or battle ends.

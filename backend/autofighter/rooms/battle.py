@@ -309,6 +309,7 @@ class BattleRoom(Room):
                     "foe_summons": _collect_summons(foes),
                     "enrage": {"active": False, "stacks": 0, "turns": 0},
                     "rdr": temp_rdr,
+                    "active_id": None,
                 }
             )
         # Helper to pace actions: dynamic pacing based on combatant count
@@ -459,6 +460,7 @@ class BattleRoom(Room):
                                         "turns": enrage_stacks,
                                     },
                                     "rdr": temp_rdr,
+                                    "active_id": member.id,
                                 }
                             )
                         await _pace(action_start)
@@ -586,6 +588,7 @@ class BattleRoom(Room):
                                 "foe_summons": _collect_summons(foes),
                                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                                 "rdr": temp_rdr,
+                                "active_id": member.id,
                             }
                         )
                     await _pace(action_start)
@@ -676,6 +679,31 @@ class BattleRoom(Room):
                             _EXTRA_TURNS[id(acting_foe)] -= 1
                             await _pace(action_start)
                             continue
+                        if progress is not None:
+                            await progress(
+                                {
+                                    "result": "battle",
+                                    "party": [
+                                        _serialize(m)
+                                        for m in combat_party.members
+                                        if not isinstance(m, Summon)
+                                    ],
+                                    "foes": [
+                                        _serialize(f)
+                                        for f in foes
+                                        if not isinstance(f, Summon)
+                                    ],
+                                    "party_summons": _collect_summons(combat_party.members),
+                                    "foe_summons": _collect_summons(foes),
+                                    "enrage": {
+                                        "active": enrage_active,
+                                        "stacks": enrage_stacks,
+                                        "turns": enrage_stacks,
+                                    },
+                                    "rdr": temp_rdr,
+                                    "active_id": acting_foe.id,
+                                }
+                            )
                         await _pace(action_start)
                         await asyncio.sleep(0.001)
                         break
@@ -715,6 +743,31 @@ class BattleRoom(Room):
                         await _pace(action_start)
                         await asyncio.sleep(0.001)
                         continue
+                    if progress is not None:
+                        await progress(
+                            {
+                                "result": "battle",
+                                "party": [
+                                    _serialize(m)
+                                    for m in combat_party.members
+                                    if not isinstance(m, Summon)
+                                ],
+                                "foes": [
+                                    _serialize(f)
+                                    for f in foes
+                                    if not isinstance(f, Summon)
+                                ],
+                                "party_summons": _collect_summons(combat_party.members),
+                                "foe_summons": _collect_summons(foes),
+                                "enrage": {
+                                    "active": enrage_active,
+                                    "stacks": enrage_stacks,
+                                    "turns": enrage_stacks,
+                                },
+                                "rdr": temp_rdr,
+                                "active_id": acting_foe.id,
+                            }
+                        )
                     await _pace(action_start)
                     await asyncio.sleep(0.001)
                     break
@@ -739,6 +792,7 @@ class BattleRoom(Room):
                         "foe_summons": _collect_summons(foes),
                         "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                         "rdr": temp_rdr,
+                        "active_id": None,
                         "ended": True,
                     }
                 )

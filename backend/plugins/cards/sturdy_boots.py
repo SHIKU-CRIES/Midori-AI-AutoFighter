@@ -10,3 +10,4 @@ class SturdyBoots(CardBase):
     name: str = "Sturdy Boots"
     stars: int = 1
     effects: dict[str, float] = field(default_factory=lambda: {"dodge_odds": 0.03, "defense": 0.03})
+    about: str = "+3% Dodge Odds; +3% Defense"

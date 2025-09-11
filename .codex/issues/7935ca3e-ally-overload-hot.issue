@@ -1,0 +1,10 @@
+Issue: AllyOverload passive does not properly block HoT ticks as described.
+
+Details:
+- Planning doc states that during Overload stance, Ally cannot receive HoT ticks and maximum recoverable HP is capped at 20%.
+- Implementation in `backend/plugins/passives/ally_overload.py` attempts to block HoTs by applying `effect_resistance` +1.0, which only resists debuffs and does not prevent beneficial HoTs.
+- As a result, HoTs may still apply despite the passive's description.
+
+Location: `backend/plugins/passives/ally_overload.py` lines 55-71.
+
+Recommended fix: Introduce a proper mechanism to suppress or remove HoT effects when Overload activates rather than relying on `effect_resistance`.

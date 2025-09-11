@@ -1,0 +1,10 @@
+Issue: `LuckyButton` relic subscribes to events without cleanup, risking duplicate handlers across battles.
+
+Details:
+- `backend/plugins/relics/lucky_button.py` registers `_crit_missed`, `_turn_start`, and `_turn_end` listeners but never unsubscribes them.
+- If `apply` is called multiple times (e.g., when rebuilding party state), additional subscriptions accumulate and may trigger repeatedly.
+- Persistent listeners may retain references to party members longer than intended.
+
+Location: `backend/plugins/relics/lucky_button.py` lines 20-62.
+
+Recommended fix: Unsubscribe from BUS events on battle end or when relic is removed to prevent handler duplication and stale references.

@@ -1,0 +1,9 @@
+Issue: EnduringCharm card registers BUS listeners but never removes them.
+
+Details:
+- `backend/plugins/cards/enduring_charm.py` subscribes to `turn_start` and `damage_taken` in `apply`.
+- No corresponding unsubscribe on battle end, so handlers persist across battles and may stack.
+
+Location: `backend/plugins/cards/enduring_charm.py` lines 68-70.
+
+Recommended fix: unsubscribe from BUS during cleanup (e.g., on battle_end) to prevent listener leaks.

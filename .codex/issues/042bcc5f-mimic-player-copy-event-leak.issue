@@ -1,0 +1,9 @@
+Issue: MimicPlayerCopy passive never removes BUS subscription.
+
+Details:
+- `backend/plugins/passives/mimic_player_copy.py` subscribes to `effect_applied` during `apply`.
+- No `unsubscribe` on battle end or cleanup, so the listener persists even after passive is removed.
+
+Location: `backend/plugins/passives/mimic_player_copy.py` line 48.
+
+Recommended fix: unsubscribe from `effect_applied` when the passive is cleared or at battle end.

@@ -2,6 +2,7 @@
   export let result = '';
   export let foes = [];
   export let party = [];
+  export let activeId = null;
 </script>
 
 <style>
@@ -73,12 +74,61 @@
       aspect-ratio: auto;
     }
   }
+
+  .arrow {
+    position: absolute;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+  }
+
+  .arrow-party {
+    bottom: 100%;
+    border-bottom: 6px solid #fff;
+    animation: bounce-up 0.5s ease-in-out infinite;
+  }
+
+  .arrow-foe {
+    top: 100%;
+    border-top: 6px solid #fff;
+    animation: bounce-down 0.5s ease-in-out infinite;
+  }
+
+  @keyframes bounce-up {
+    0%, 100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(-4px);
+    }
+  }
+
+  @keyframes bounce-down {
+    0%, 100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(4px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arrow-party,
+    .arrow-foe {
+      animation: none;
+    }
+  }
 </style>
 
 <div class="room">
   <div class="foes">
     {#each foes as foe}
       <div class="foe" title={foe.id}>
+        {#if activeId === foe.id}
+          <div class="arrow arrow-foe"></div>
+        {/if}
         <div class="bar" style={`width:${foe.hp}%`}></div>
       </div>
     {/each}
@@ -86,6 +136,9 @@
   <div class="party">
     {#each party as member}
       <div class="member" title={member}>
+        {#if activeId === member}
+          <div class="arrow arrow-party"></div>
+        {/if}
         <div class="ult"></div>
       </div>
     {/each}

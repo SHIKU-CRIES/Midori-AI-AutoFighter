@@ -1,0 +1,14 @@
+Issue: Event bus batching inserts 2ms sleeps per event, causing cumulative delays under load.
+Context: Sleeps were added to give breathing room while batching issues are investigated, but they currently accumulate latency.
+
+Comment: Stakeholder request is for roughly 0.5s between actors' turns; current per-event sleeps do not ensure this pacing and instead introduce unpredictable delays.
+
+Details:
+- `backend/plugins/event_bus.py` awaits `asyncio.sleep(0.002)` repeatedly while processing batched events.
+- Large batches (e.g., 100 events) incur at least 200ms of artificial delay before callbacks run.
+- High-frequency events like damage ticks may lag, impacting real-time responsiveness.
+
+Location: `backend/plugins/event_bus.py` lines 175,185,195,241.
+
+Context: 2ms sleeps were introduced intentionally to provide breathing room while batching logic is refined, but they compound delay under load.
+Recommended fix: replace fixed sleeps with cooperative scheduling (e.g., `await asyncio.sleep(0)`) and handle turn pacing explicitly (e.g., schedule 0.5s gaps) rather than via per-event delays.

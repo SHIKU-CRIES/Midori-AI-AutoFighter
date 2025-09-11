@@ -1,0 +1,10 @@
+Issue: Arcane Flask subscribes to `ultimate_used` events but never unsubscribes, allowing shield triggers to persist after the relic is removed or between battles.
+Context: `ArcaneFlask.apply` registers `_ultimate` to the BUS without corresponding cleanup.
+
+Details:
+- `backend/plugins/relics/arcane_flask.py` lines 19-38 attach the handler.
+- Subsequent applications stack duplicate listeners, compounding shield grants.
+
+Location: `backend/plugins/relics/arcane_flask.py` lines 19-38.
+
+Recommended fix: Add teardown logic (e.g., `remove` method) that calls `BUS.unsubscribe("ultimate_used", _ultimate)` when the relic is unequipped or battle ends.
