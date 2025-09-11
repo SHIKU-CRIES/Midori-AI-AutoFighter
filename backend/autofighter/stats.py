@@ -105,6 +105,7 @@ class Stats:
     damage_dealt: int = 0
     kills: int = 0
     last_damage_taken: int = 0
+    aggro: float = 0.1
 
     # Ultimate system
     ultimate_charge: int = 0
