@@ -44,6 +44,12 @@ class Wind(DamageTypeBase):
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
 
+        actor_type = getattr(actor, "plugin_type", None)
+        if actor_type == "player" and actor not in Wind._players:
+            Wind._players.append(actor)
+        elif actor_type == "foe" and actor not in Wind._foes:
+            Wind._foes.append(actor)
+
         # Ensure the actor has an EffectManager so temporary buffs apply cleanly
         a_mgr = getattr(actor, "effect_manager", None)
         if a_mgr is None:
