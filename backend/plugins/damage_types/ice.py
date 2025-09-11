@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import dataclass
 
 from autofighter.effects import DamageOverTime
@@ -26,7 +27,9 @@ class Ice(DamageTypeBase):
             for foe in foes:
                 dmg = int(base * bonus)
                 await foe.apply_damage(dmg, attacker=user, action_name="Ice Ultimate")
+                await asyncio.sleep(0.002)
                 bonus += 0.3
+            await asyncio.sleep(0.002)
         return True
 
     @classmethod
