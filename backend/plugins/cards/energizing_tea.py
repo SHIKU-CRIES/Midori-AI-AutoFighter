@@ -29,10 +29,25 @@ class EnergizingTea(CardBase):
                     import logging
                     log = logging.getLogger(__name__)
                     log.debug("Energizing Tea bonus ultimate charge: +1 charge to %s", member.id)
-                    BUS.emit("card_effect", self.id, member, "charge_bonus", 1, {
-                        "charge_bonus": 1,
-                        "trigger_event": "battle_start"
-                    })
+                    BUS.emit(
+                        "card_effect",
+                        self.id,
+                        member,
+                        "charge_bonus",
+                        1,
+                        {
+                            "charge_bonus": 1,
+                            "trigger_event": "battle_start",
+                        },
+                    )
+
+                BUS.unsubscribe("battle_start", _on_battle_start)
+                BUS.unsubscribe("battle_end", _on_battle_end)
+
+        def _on_battle_end(entity) -> None:
+            BUS.unsubscribe("battle_start", _on_battle_start)
+            BUS.unsubscribe("battle_end", _on_battle_end)
 
         BUS.subscribe("battle_start", _on_battle_start)
+        BUS.subscribe("battle_end", _on_battle_end)
 
