@@ -273,6 +273,7 @@ async def player_stats() -> tuple[str, int, dict[str, object]]:
             "damage_taken": player.damage_taken,
             "damage_dealt": player.damage_dealt,
             "kills": player.kills,
+            "aggro": player.aggro,
         },
         "status": {
             "passives": player.passives,
