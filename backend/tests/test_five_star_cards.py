@@ -55,7 +55,7 @@ async def test_temporal_shield_damage_reduction(monkeypatch):
     await member.effect_manager.cleanup(member)
     monkeypatch.setattr(random, "random", lambda: 0.6)
     BUS.emit("turn_start")
-    assert member.set_base_stat('mitigation', = base_mit)
+    assert member.mitigation == base_mit
 
 
 @pytest.mark.asyncio

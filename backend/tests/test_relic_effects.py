@@ -35,7 +35,7 @@ def test_bent_dagger_kill_trigger():
     apply_relics(party)
     enemy.hp = 0
     BUS.emit("damage_taken", enemy, member, 10)
-    assert member.set_base_stat('atk', = int(100 * 1.03 * 1.01))
+    assert member.atk == int(100 * 1.03 * 1.01)
 
 
 def test_bent_dagger_kill_trigger_stacks():
@@ -52,7 +52,7 @@ def test_bent_dagger_kill_trigger_stacks():
     enemy.hp = 0
     BUS.emit("damage_taken", enemy, member, 10)
     expected = int(100 * 1.03 * 1.03 * 1.01 * 1.01)
-    assert member.set_base_stat('atk', = expected)
+    assert member.atk == expected
 
 
 def test_lucky_button_stacks():
@@ -93,8 +93,8 @@ def test_guardian_charm_targets_lowest_hp():
     party.members.extend([low, high])
     award_relic(party, "guardian_charm")
     apply_relics(party)
-    assert low.set_base_stat('defense', = int(50 * 1.2))
-    assert high.set_base_stat('defense', = 50)
+    assert low.defense == int(50 * 1.2)
+    assert high.defense == 50
 
 
 def test_guardian_charm_stacks():
@@ -107,8 +107,8 @@ def test_guardian_charm_stacks():
     award_relic(party, "guardian_charm")
     award_relic(party, "guardian_charm")
     apply_relics(party)
-    assert low.set_base_stat('defense', = int(50 * (1 + 0.2 * 2)))
-    assert high.set_base_stat('defense', = 50)
+    assert low.defense == int(50 * (1 + 0.2 * 2))
+    assert high.defense == 50
 
 
 def test_herbal_charm_heals_each_turn():
@@ -150,7 +150,7 @@ def test_tattered_flag_buffs_survivors_on_death():
     apply_relics(party)
     victim.hp = 0
     BUS.emit("damage_taken", victim, survivor, 10)
-    assert survivor.set_base_stat('atk', = int(100 * 1.03))
+    assert survivor.atk == int(100 * 1.03)
 
 
 def test_tattered_flag_stacks():
@@ -166,7 +166,7 @@ def test_tattered_flag_stacks():
     apply_relics(party)
     victim.hp = 0
     BUS.emit("damage_taken", victim, survivor, 10)
-    assert survivor.set_base_stat('atk', = int(100 * 1.03 * 1.03))
+    assert survivor.atk == int(100 * 1.03 * 1.03)
 
 
 def test_shiny_pebble_first_hit_mitigation():

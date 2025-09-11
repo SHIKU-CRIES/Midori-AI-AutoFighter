@@ -44,9 +44,9 @@ async def test_summon_creation_basic(monkeypatch):
     )
 
     # Verify stat inheritance
-    assert summon.set_base_stat('atk', = 50  # 50% of 100)
-    assert summon.set_base_stat('max_hp', = 100  # 50% of 200)
-    assert summon.set_base_stat('defense', = 25  # 50% of 50)
+    assert summon.atk == 50  # 50% of 100
+    assert summon.max_hp == 100  # 50% of 200
+    assert summon.defense == 25  # 50% of 50
     assert summon.summoner_id == "test_summoner"
     assert summon.summon_type == "test"
     assert summon.summon_source == "test_source"
@@ -448,9 +448,9 @@ async def test_summon_inheritance_with_effects(monkeypatch):
     summoner.add_effect(boost_effect)
 
     # Verify effect is applied to runtime stats
-    assert summoner.set_base_stat('defense', = 150  # 100 base + 50 effect)
-    assert summoner.set_base_stat('mitigation', = 3.0  # 2.0 base + 1.0 effect)
-    assert summoner.set_base_stat('vitality', = 2.0  # 1.5 base + 0.5 effect)
+    assert summoner.defense == 150  # 100 base + 50 effect
+    assert summoner.mitigation == 3.0  # 2.0 base + 1.0 effect
+    assert summoner.vitality == 2.0  # 1.5 base + 0.5 effect
 
     # Create summon with 50% stat inheritance
     summon = Summon.create_from_summoner(
@@ -467,9 +467,9 @@ async def test_summon_inheritance_with_effects(monkeypatch):
 
     # Runtime stats should include inherited beneficial effects
     # The summon inherits the beneficial StatEffect, which adds +25 defense, +0.5 mitigation, +0.25 vitality
-    assert summon.set_base_stat('defense', = 75  # 50 base + 25 inherited effect (50% of +50))
-    assert summon.set_base_stat('mitigation', = 1.5  # 1.0 base + 0.5 inherited effect (50% of +1.0))
-    assert summon.set_base_stat('vitality', = 1.0  # 0.75 base + 0.25 inherited effect (50% of +0.5))
+    assert summon.defense == 75  # 50 base + 25 inherited effect (50% of +50)
+    assert summon.mitigation == 1.5  # 1.0 base + 0.5 inherited effect (50% of +1.0)
+    assert summon.vitality == 1.0  # 0.75 base + 0.25 inherited effect (50% of +0.5)
 
 
 @pytest.mark.asyncio

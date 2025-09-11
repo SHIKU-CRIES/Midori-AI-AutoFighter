@@ -17,11 +17,11 @@ async def test_celestial_atrophy_stacks_and_cleans_up():
     manager.add_dot(dot)
 
     await manager.tick()
-    assert target.set_base_stat('atk', = 9)
+    assert target.atk == 9
 
     await manager.tick()
-    assert target.set_base_stat('atk', = 8)
+    assert target.atk == 8
 
     await manager.tick()
-    assert target.set_base_stat('atk', = 10)
+    assert target.atk == 10
     assert not target.mods

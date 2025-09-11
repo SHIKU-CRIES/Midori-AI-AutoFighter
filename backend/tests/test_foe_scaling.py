@@ -17,6 +17,6 @@ def test_level_up_increases_mitigation_and_vitality(monkeypatch):
     monkeypatch.setattr(Stats, "_on_level_up", stub)
     foe._on_level_up()
     assert called
-    assert foe.set_base_stat('mitigation', = pytest.approx(base_mitigation + 0.0001))
-    assert foe.set_base_stat('vitality', = pytest.approx(base_vitality + 0.0001))
+    assert foe.mitigation == pytest.approx(base_mitigation + 0.0001)
+    assert foe.vitality == pytest.approx(base_vitality + 0.0001)
 

@@ -31,8 +31,8 @@ async def test_shadow_siphon_applies_temporary_stat_buff():
     mod.tick()
     actor.effect_manager.mods.remove(mod)
 
-    assert actor.set_base_stat('atk', = 100)
-    assert actor.set_base_stat('defense', = 100)
+    assert actor.atk == 100
+    assert actor.defense == 100
     assert not actor.effect_manager.mods
 
 

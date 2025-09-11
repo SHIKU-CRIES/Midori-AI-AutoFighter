@@ -14,9 +14,9 @@ def test_base_stats_initialization():
     assert stats.get_base_stat("defense") == 200
 
     # Check that runtime stats match base stats initially
-    assert stats.set_base_stat('max_hp', = 1000)
-    assert stats.set_base_stat('atk', = 200)
-    assert stats.set_base_stat('defense', = 200)
+    assert stats.max_hp == 1000
+    assert stats.atk == 200
+    assert stats.defense == 200
 
 
 def test_stat_effects():
@@ -36,8 +36,8 @@ def test_stat_effects():
     stats.add_effect(attack_effect)
 
     # Runtime stats should be modified
-    assert stats.set_base_stat('atk', = base_atk + 50)
-    assert stats.set_base_stat('defense', = base_defense - 10)
+    assert stats.atk == base_atk + 50
+    assert stats.defense == base_defense - 10
 
     # Base stats should remain unchanged
     assert stats.get_base_stat("atk") == base_atk
@@ -60,15 +60,15 @@ def test_effect_removal():
     stats.add_effect(effect)
 
     # Verify effect is applied
-    assert stats.set_base_stat('atk', = original_atk + 100)
-    assert stats.set_base_stat('defense', = original_defense + 50)
+    assert stats.atk == original_atk + 100
+    assert stats.defense == original_defense + 50
 
     # Remove effect
     stats.remove_effect_by_name("temporary_boost")
 
     # Runtime stats should return to original values
-    assert stats.set_base_stat('atk', = original_atk)
-    assert stats.set_base_stat('defense', = original_defense)
+    assert stats.atk == original_atk
+    assert stats.defense == original_defense
 
 
 def test_multiple_effects():
@@ -93,7 +93,7 @@ def test_multiple_effects():
     stats.add_effect(effect2)
 
     # Effects should stack
-    assert stats.set_base_stat('atk', = original_atk + 20 + 30)
+    assert stats.atk == original_atk + 20 + 30
 
 
 def test_effect_replacement():
@@ -109,7 +109,7 @@ def test_effect_replacement():
         source="weapon"
     )
     stats.add_effect(effect1)
-    assert stats.set_base_stat('atk', = original_atk + 20)
+    assert stats.atk == original_atk + 20
 
     # Add effect with same name but different value
     effect2 = StatEffect(
@@ -120,7 +120,7 @@ def test_effect_replacement():
     stats.add_effect(effect2)
 
     # Should replace, not stack
-    assert stats.set_base_stat('atk', = original_atk + 50)
+    assert stats.atk == original_atk + 50
 
 
 def test_remove_by_source():
@@ -144,8 +144,8 @@ def test_remove_by_source():
     assert removed_count == 2
 
     # Only relic effect should remain
-    assert stats.set_base_stat('atk', = original_atk + 5)
-    assert stats.set_base_stat('defense', = original_defense)
+    assert stats.atk == original_atk + 5
+    assert stats.defense == original_defense
 
 
 def test_temporary_effects():
@@ -162,15 +162,15 @@ def test_temporary_effects():
         source="buff"
     )
     stats.add_effect(temp_effect)
-    assert stats.set_base_stat('atk', = original_atk + 25)
+    assert stats.atk == original_atk + 25
 
     # Tick once
     stats.tick_effects()
-    assert stats.set_base_stat('atk', = original_atk + 25  # Still active)
+    assert stats.atk == original_atk + 25  # Still active
 
     # Tick again
     stats.tick_effects()
-    assert stats.set_base_stat('atk', = original_atk  # Should be expired and removed)
+    assert stats.atk == original_atk  # Should be expired and removed
 
 
 def test_base_stat_modification():
@@ -185,5 +185,5 @@ def test_base_stat_modification():
 
     # Both base and runtime should change
     assert stats.get_base_stat("atk") == original_base_atk + 10
-    assert stats.set_base_stat('atk', = original_runtime_atk + 10)
+    assert stats.atk == original_runtime_atk + 10
 

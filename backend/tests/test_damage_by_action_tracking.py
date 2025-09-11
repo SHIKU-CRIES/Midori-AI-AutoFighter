@@ -34,7 +34,7 @@ async def test_party_damage_by_action_tracking():
     # Create a party member with known damage type
     player = Carly()  # Light damage type
     player.id = "test_player"
-    player.set_base_stat('atk', 100  # Ensure we can deal damage)
+    player.set_base_stat('atk', 100)  # Ensure we can deal damage
 
     # Create a weak foe so battle ends quickly
     foe = Slime()
