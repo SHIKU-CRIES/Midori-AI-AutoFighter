@@ -141,7 +141,7 @@ class TestBuffScalingIntegration:
         create_stat_buff(low_hp_stats, max_hp=100, turns=1, name="hp_buff_low")
 
         # Should get the full 100 HP buff
-        assert low_hp_stats.max_hp == 400 + 100
+        assert low_hp_stats.set_base_stat('max_hp', = 400 + 100)
 
         # Character with high HP should get reduced buff effectiveness
         high_hp_stats = Stats()
@@ -160,7 +160,7 @@ class TestBuffScalingIntegration:
         low_atk_stats = Stats()
         low_atk_stats.set_base_stat('atk', 50)
         create_stat_buff(low_atk_stats, atk=50, turns=1, name="atk_buff_low")
-        assert low_atk_stats.atk == 50 + 50
+        assert low_atk_stats.set_base_stat('atk', = 50 + 50)
 
         # Character with high ATK gets reduced effectiveness
         high_atk_stats = Stats()
@@ -237,7 +237,7 @@ class TestEdgeCases:
 
         # Zero buff should work fine
         create_stat_buff(stats, atk=0, turns=1, name="zero_buff")
-        assert stats.atk == 200  # No change
+        assert stats.set_base_stat('atk', = 200  # No change)
 
     def test_very_small_buffs(self):
         """Test that very small buffs still work correctly."""

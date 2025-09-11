@@ -26,7 +26,7 @@ async def test_passive_trigger_and_stack():
     player = Player()
     player.passives = ["attack_up"] * 5
     await registry.trigger("battle_start", player)
-    assert player.atk == 100 + 5 * 5
+    assert player.set_base_stat('atk', = 100 + 5 * 5)
 
 
 @pytest.mark.asyncio

@@ -22,7 +22,7 @@ def test_honed_point_bonus_damage_once():
 
     attacker._base_atk = 100
     target._base_defense = 0
-    target.mitigation = 1
+    target.set_base_stat('mitigation', 1)
     target._base_vitality = 1
 
     party.members.append(attacker)

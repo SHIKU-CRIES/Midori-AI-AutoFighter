@@ -133,5 +133,5 @@ async def test_player_editor_snapshot_during_run(app_with_db):
     party = app_module.load_party(run_id)
     player = next(m for m in party.members if m.id == "player")
     assert player.element_id == "Fire"
-    assert player.atk == 100
-    assert player.max_hp == 1100
+    assert player.set_base_stat('atk', = 100)
+    assert player.set_base_stat('max_hp', = 1100)

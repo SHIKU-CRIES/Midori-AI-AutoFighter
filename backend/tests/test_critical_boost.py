@@ -13,8 +13,8 @@ def test_critical_boost_stacking():
     boost = CriticalBoost()
     boost.apply(stats)
     boost.apply(stats)
-    assert stats.crit_rate == pytest.approx(0.05 + 0.005 * 2)
-    assert stats.crit_damage == pytest.approx(2.0 + 0.05 * 2)
+    assert stats.set_base_stat('crit_rate', = pytest.approx(0.05 + 0.005 * 2))
+    assert stats.set_base_stat('crit_damage', = pytest.approx(2.0 + 0.05 * 2))
     BUS.unsubscribe("damage_taken", boost._on_damage_taken)
 
 
@@ -25,8 +25,8 @@ async def test_critical_boost_resets_on_hit():
     boost.apply(stats)
     boost.apply(stats)
     await stats.apply_damage(10)
-    assert stats.crit_rate == pytest.approx(0.05)
-    assert stats.crit_damage == pytest.approx(2.0)
+    assert stats.set_base_stat('crit_rate', = pytest.approx(0.05))
+    assert stats.set_base_stat('crit_damage', = pytest.approx(2.0))
     assert boost.stacks == 0
 
 

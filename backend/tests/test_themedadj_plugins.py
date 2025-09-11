@@ -15,8 +15,8 @@ def test_themed_adjectives_import_and_decorate() -> None:
     target = Stats()
     Atrocious().apply(target)
 
-    assert target.atk == 220
-    assert target.max_hp == 1900
+    assert target.set_base_stat('atk', = 220)
+    assert target.set_base_stat('max_hp', = 1900)
     assert hasattr(target, "_pending_mods")
     mod = target._pending_mods[0]
     assert mod.multipliers["atk"] == 1.1

@@ -155,10 +155,10 @@ async def test_critical_focus_grants_boost():
     base_rate = member.crit_rate
     base_dmg = member.crit_damage
     BUS.emit("turn_start")
-    assert member.crit_rate == pytest.approx(base_rate + 0.005)
-    assert member.crit_damage == pytest.approx(base_dmg + 0.05)
+    assert member.set_base_stat('crit_rate', = pytest.approx(base_rate + 0.005))
+    assert member.set_base_stat('crit_damage', = pytest.approx(base_dmg + 0.05))
     BUS.emit("damage_taken", member, None, 10)
-    assert member.crit_rate == pytest.approx(base_rate)
+    assert member.set_base_stat('crit_rate', = pytest.approx(base_rate))
 
 
 @pytest.mark.asyncio
@@ -181,7 +181,7 @@ async def test_critical_transfer_moves_stacks():
     a.use_ultimate()
     await asyncio.sleep(0)
     assert getattr(a, "_critical_boost").stacks == 3
-    assert a.atk == int(base_atk * 1.12)
+    assert a.set_base_stat('atk', = int(base_atk * 1.12))
 
 
 @pytest.mark.asyncio
@@ -195,8 +195,8 @@ async def test_iron_guard_defense_buff():
     base_a = a.defense
     base_b = b.defense
     BUS.emit("damage_taken", a, b, 10)
-    assert a.defense == base_a + 20
-    assert b.defense == base_b + 20
+    assert a.set_base_stat('defense', = base_a + 20)
+    assert b.set_base_stat('defense', = base_b + 20)
 
 
 @pytest.mark.asyncio
@@ -248,13 +248,13 @@ async def test_vital_surge_low_hp_bonus():
     award_card(party, "vital_surge")
     await cards_module.apply_cards(party)
     await asyncio.sleep(0)
-    assert member.max_hp == int(1000 * 1.55)
+    assert member.set_base_stat('max_hp', = int(1000 * 1.55))
     member.hp = int(member.max_hp * 0.4)
     BUS.emit("turn_start")
-    assert member.atk == int(200 * 1.55)
+    assert member.set_base_stat('atk', = int(200 * 1.55))
     member.hp = member.max_hp
     BUS.emit("heal_received", member, member, 100)
-    assert member.atk == 200
+    assert member.set_base_stat('atk', = 200)
 
 
 @pytest.mark.asyncio
@@ -270,7 +270,7 @@ async def test_elemental_spark_selects_ally(monkeypatch):
 
     monkeypatch.setattr(random, "choice", lambda seq: seq[0])
     BUS.emit("battle_start")
-    assert member.effect_hit_rate == pytest.approx(base + 0.05)
+    assert member.set_base_stat('effect_hit_rate', = pytest.approx(base + 0.05))
     BUS.emit("battle_end")
     await asyncio.sleep(0)
-    assert member.effect_hit_rate == pytest.approx(base)
+    assert member.set_base_stat('effect_hit_rate', = pytest.approx(base))

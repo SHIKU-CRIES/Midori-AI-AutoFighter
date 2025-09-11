@@ -35,11 +35,11 @@ def test_guardian_shard_applies_bonus_after_no_deaths():
     BUS.emit("battle_start", ally1)
     BUS.emit("battle_start", ally2)
     loop.run_until_complete(asyncio.sleep(0))
-    assert ally1.mitigation == pytest.approx(pre + 1)
+    assert ally1.set_base_stat('mitigation', = pytest.approx(pre + 1))
 
     BUS.emit("battle_end", FoeBase())
     loop.run_until_complete(asyncio.sleep(0))
-    assert ally1.mitigation == pytest.approx(pre)
+    assert ally1.set_base_stat('mitigation', = pytest.approx(pre))
 
 
 def test_guardian_shard_no_bonus_after_death():
@@ -62,4 +62,4 @@ def test_guardian_shard_no_bonus_after_death():
     BUS.emit("battle_start", ally1)
     BUS.emit("battle_start", ally2)
     loop.run_until_complete(asyncio.sleep(0))
-    assert ally1.mitigation == pytest.approx(pre)
+    assert ally1.set_base_stat('mitigation', = pytest.approx(pre))

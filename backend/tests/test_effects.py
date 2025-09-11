@@ -115,10 +115,10 @@ async def test_stat_modifier_applies_and_expires():
         defense_mult=2,
     )
     manager.add_modifier(mod)
-    assert stats.atk == 15
-    assert stats.defense == 40
+    assert stats.set_base_stat('atk', = 15)
+    assert stats.set_base_stat('defense', = 40)
     await manager.tick()
-    assert stats.atk == 10
-    assert stats.defense == 20
+    assert stats.set_base_stat('atk', = 10)
+    assert stats.set_base_stat('defense', = 20)
     assert not stats.mods
 

@@ -29,8 +29,8 @@ async def test_frost_sigil_applies_chill(monkeypatch):
     party = Party()
     a = PlayerBase()
     b = PlayerBase()
-    b.hp = b.max_hp = 100
-    a.atk = 100
+    b.hp = b.set_base_stat('max_hp', 100)
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "frost_sigil")
     apply_relics(party)
@@ -55,8 +55,8 @@ async def test_frost_sigil_stacks(monkeypatch):
     party = Party()
     a = PlayerBase()
     b = PlayerBase()
-    b.hp = b.max_hp = 100
-    a.atk = 100
+    b.hp = b.set_base_stat('max_hp', 100)
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "frost_sigil")
     award_relic(party, "frost_sigil")
@@ -95,7 +95,7 @@ def test_killer_instinct_grants_extra_turn():
     BUS.emit("damage_taken", b, a, 10)
     BUS.emit("turn_end")
     assert turns == [a]
-    assert a.atk == base
+    assert a.set_base_stat('atk', = base)
 
 
 def test_travelers_charm_buff():
@@ -103,18 +103,18 @@ def test_travelers_charm_buff():
     party = Party()
     a = PlayerBase()
     attacker = PlayerBase()
-    a.defense = 100
-    a.mitigation = 100
+    a.set_base_stat('defense', 100)
+    a.set_base_stat('mitigation', 100)
     party.members.append(a)
     award_relic(party, "travelers_charm")
     apply_relics(party)
     BUS.emit("damage_taken", a, attacker, 10)
     BUS.emit("turn_start")
-    assert a.defense == 100 + int(100 * 0.25)
-    assert a.mitigation == 110
+    assert a.set_base_stat('defense', = 100 + int(100 * 0.25))
+    assert a.set_base_stat('mitigation', = 110)
     BUS.emit("turn_end")
-    assert a.defense == 100
-    assert a.mitigation == 100
+    assert a.set_base_stat('defense', = 100)
+    assert a.set_base_stat('mitigation', = 100)
 
 
 def test_timekeepers_hourglass_extra_turn():
@@ -137,7 +137,7 @@ def test_greed_engine_drains_and_rewards():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.hp = a.max_hp = 200
+    a.hp = a.set_base_stat('max_hp', 200)
     party.members.append(a)
     award_relic(party, "greed_engine")
     apply_relics(party)
@@ -151,7 +151,7 @@ def test_greed_engine_stacks():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.hp = a.max_hp = 200
+    a.hp = a.set_base_stat('max_hp', 200)
     party.members.append(a)
     award_relic(party, "greed_engine")
     award_relic(party, "greed_engine")
@@ -166,12 +166,12 @@ def test_stellar_compass_crit_bonus():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.atk = 100
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "stellar_compass")
     apply_relics(party)
     BUS.emit("critical_hit", a, None, 0, "attack")
-    assert a.atk == int(100 * (1 + 0.015))
+    assert a.set_base_stat('atk', = int(100 * (1 + 0.015)))
     BUS.emit("gold_earned", 100)
     assert party.gold == int(100 * 0.015)
 
@@ -180,13 +180,13 @@ def test_stellar_compass_stacks():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.atk = 100
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "stellar_compass")
     award_relic(party, "stellar_compass")
     apply_relics(party)
     BUS.emit("critical_hit", a, None, 0, "attack")
-    assert a.atk == int(100 * (1 + 0.015 * 2))
+    assert a.set_base_stat('atk', = int(100 * (1 + 0.015 * 2)))
     BUS.emit("gold_earned", 100)
     assert party.gold == int(100 * 0.03)
 
@@ -195,19 +195,19 @@ def test_stellar_compass_multiple_crits():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.atk = 100
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "stellar_compass")
     apply_relics(party)
 
     BUS.emit("critical_hit", a, None, 0, "attack")
     BUS.emit("gold_earned", 100)
-    assert a.atk == int(100 * (1 + 0.015))
+    assert a.set_base_stat('atk', = int(100 * (1 + 0.015)))
     assert party.gold == int(100 * 0.015)
 
     BUS.emit("critical_hit", a, None, 0, "attack")
     BUS.emit("gold_earned", 100)
-    assert a.atk == int(100 * (1 + 0.015 * 2))
+    assert a.set_base_stat('atk', = int(100 * (1 + 0.015 * 2)))
     assert party.gold == int(100 * 0.015) + int(100 * 0.03)
 
 

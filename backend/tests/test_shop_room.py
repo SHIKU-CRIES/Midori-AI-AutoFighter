@@ -21,22 +21,22 @@ async def test_shop_generate_buy_reroll():
 
     p1 = PlayerBase()
     p1.id = "p1"
-    p1.max_hp = 200
+    p1.set_base_stat('max_hp', 200)
     p1.hp = 50
 
     p2 = PlayerBase()
     p2.id = "p2"
-    p2.max_hp = 600
+    p2.set_base_stat('max_hp', 600)
     p2.hp = 100
 
     p3 = PlayerBase()
     p3.id = "p3"
-    p3.max_hp = 50
+    p3.set_base_stat('max_hp', 50)
     p3.hp = 25
 
     p4 = PlayerBase()
     p4.id = "p4"
-    p4.max_hp = 150
+    p4.set_base_stat('max_hp', 150)
     p4.hp = 150
 
     party = Party(members=[p1, p2, p3, p4], gold=100)
@@ -70,7 +70,7 @@ async def test_shop_cost_scales_with_pressure():
 
     p = PlayerBase()
     p.id = "p"
-    p.max_hp = 100
+    p.set_base_stat('max_hp', 100)
     p.hp = 100
 
     party = Party(members=[p], gold=5000)

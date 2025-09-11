@@ -23,17 +23,17 @@ def test_complete_stats_system():
     print('1. Testing base Stats class:')
     stats = Stats()
     assert stats.get_base_stat("atk") == 200, "Base atk should be 200"
-    assert stats.atk == 200, "Runtime atk should equal base initially"
+    assert stats.set_base_stat('atk', = 200, "Runtime atk should equal base initially")
 
     # Add effect
     effect = StatEffect('sword', {'atk': 25}, source='equipment')
     stats.add_effect(effect)
     assert stats.get_base_stat("atk") == 200, "Base atk should remain 200"
-    assert stats.atk == 225, "Runtime atk should be base + effect"
+    assert stats.set_base_stat('atk', = 225, "Runtime atk should be base + effect")
 
     # Remove effect
     stats.remove_effect_by_name('sword')
-    assert stats.atk == 200, "Runtime atk should return to base after removal"
+    assert stats.set_base_stat('atk', = 200, "Runtime atk should return to base after removal")
     print('   ✓ Base vs runtime stats working correctly\n')
 
     # Test 2: PlayerBase functionality
@@ -44,13 +44,13 @@ def test_complete_stats_system():
     original_base = player.get_base_stat('atk')
     player.modify_base_stat('atk', 10)
     assert player.get_base_stat('atk') == original_base + 10, "Base stat should be permanently modified"
-    assert player.atk == original_base + 10, "Runtime should reflect base change"
+    assert player.set_base_stat('atk', = original_base + 10, "Runtime should reflect base change")
 
     # Test temporary effect
     buff = StatEffect('battle_buff', {'atk': 15, 'max_hp': 50}, duration=3, source='spell')
     player.add_effect(buff)
     expected_atk = original_base + 10 + 15
-    assert player.atk == expected_atk, f"Runtime atk should be {expected_atk}"
+    assert player.set_base_stat('atk', = expected_atk, f"Runtime atk should be {expected_atk}")
     assert player.get_base_stat('atk') == original_base + 10, "Base should not change from temporary effects"
     print('   ✓ Permanent vs temporary modifications working correctly\n')
 
