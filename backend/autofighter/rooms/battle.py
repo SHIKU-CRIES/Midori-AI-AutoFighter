@@ -255,6 +255,38 @@ class BattleRoom(Room):
                     snapshots.setdefault(sid, []).append(snap)
             return snapshots
 
+        def _queue_snapshot() -> list[dict[str, Any]]:
+            ordered = sorted(
+                [
+                    c
+                    for c in combat_party.members + foes
+                    if not isinstance(c, Summon)
+                ],
+                key=lambda c: getattr(c, "action_value", 0.0),
+            )
+            extras: list[dict[str, Any]] = []
+            for ent in ordered:
+                turns = _EXTRA_TURNS.get(id(ent), 0)
+                for _ in range(turns):
+                    extras.append(
+                        {
+                            "id": getattr(ent, "id", ""),
+                            "action_gauge": getattr(ent, "action_gauge", 0),
+                            "action_value": getattr(ent, "action_value", 0.0),
+                            "base_action_value": getattr(ent, "base_action_value", 0.0),
+                            "bonus": True,
+                        }
+                    )
+            return extras + [
+                {
+                    "id": getattr(c, "id", ""),
+                    "action_gauge": getattr(c, "action_gauge", 0),
+                    "action_value": getattr(c, "action_value", 0.0),
+                    "base_action_value": getattr(c, "base_action_value", 0.0),
+                }
+                for c in ordered
+            ]
+
         def _abort(other_id: str) -> None:
             msg = "concurrent battle detected"
             snap = {
@@ -312,6 +344,7 @@ class BattleRoom(Room):
                     "foe_summons": _collect_summons(foes),
                     "enrage": {"active": False, "stacks": 0, "turns": 0},
                     "rdr": temp_rdr,
+                    "action_queue": _queue_snapshot(),
                     "active_id": None,
                 }
             )
@@ -476,6 +509,7 @@ class BattleRoom(Room):
                                         "turns": enrage_stacks,
                                     },
                                     "rdr": temp_rdr,
+                                    "action_queue": _queue_snapshot(),
                                     "active_id": member.id,
                                 }
                             )
@@ -617,6 +651,7 @@ class BattleRoom(Room):
                                 "foe_summons": _collect_summons(foes),
                                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                                 "rdr": temp_rdr,
+                                "action_queue": _queue_snapshot(),
                                 "active_id": member.id,
                             }
                         )
@@ -733,6 +768,7 @@ class BattleRoom(Room):
                                         "turns": enrage_stacks,
                                     },
                                     "rdr": temp_rdr,
+                                    "action_queue": _queue_snapshot(),
                                     "active_id": acting_foe.id,
                                 }
                             )
@@ -809,6 +845,7 @@ class BattleRoom(Room):
                                     "turns": enrage_stacks,
                                 },
                                 "rdr": temp_rdr,
+                                "action_queue": _queue_snapshot(),
                                 "active_id": acting_foe.id,
                             }
                         )
@@ -836,6 +873,7 @@ class BattleRoom(Room):
                         "foe_summons": _collect_summons(foes),
                         "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                         "rdr": temp_rdr,
+                        "action_queue": _queue_snapshot(),
                         "active_id": None,
                         "ended": True,
                     }
@@ -921,6 +959,7 @@ class BattleRoom(Room):
                 "exp_reward": exp_reward,
                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                 "rdr": temp_rdr,
+                "action_queue": _queue_snapshot(),
                 "ended": True,
             }
         # Pick cards with per-item star rolls; ensure unique choices not already owned
@@ -1033,7 +1072,8 @@ class BattleRoom(Room):
             "battle_index": getattr(battle_logger, "battle_index", 0),
             "exp_reward": exp_reward,
             "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
-                "rdr": party.rdr,
+            "rdr": party.rdr,
+            "action_queue": _queue_snapshot(),
         }
 
 
