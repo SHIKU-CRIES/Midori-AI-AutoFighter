@@ -173,7 +173,7 @@ class _Bus:
         for event, args_list in events_snapshot:
             for args in args_list:
                 all_events.append((event, args))
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.002)  # 2ms yield to avoid busy loop
 
         if all_events:
             # Process all events concurrently for much better performance
@@ -183,7 +183,7 @@ class _Bus:
                     await self.send_async(event, args)
                 except Exception as e:
                     log.exception("Error processing batched event %s: %s", event, e)
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.002)  # Maintain 2ms cooperative delay
 
             # Use gather with limited concurrency to avoid overwhelming the event loop
             batch_size = 100  # Process in chunks to manage memory and concurrency
@@ -193,7 +193,7 @@ class _Bus:
                     *[process_single_event(event_data) for event_data in batch],
                     return_exceptions=True,
                 )
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.002)  # Allow other tasks between batches
 
     def _process_batches_sync(self):
         """Fallback sync processing when no event loop is available."""
@@ -239,7 +239,7 @@ class _Bus:
                     # Run sync functions in thread pool to avoid blocking
                     loop = asyncio.get_running_loop()
                     await loop.run_in_executor(None, lambda: func(*args))
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.002)  # Cooperative 2ms delay per repo rules
                 return True
             except Exception as e:
                 log.exception("Error in async event callback for %s: %s", event, e)

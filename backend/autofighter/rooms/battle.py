@@ -44,6 +44,9 @@ log = logging.getLogger(__name__)
 ENRAGE_TURNS_NORMAL = 100
 ENRAGE_TURNS_BOSS = 500
 
+# Explicit pacing between combat actions (seconds)
+TURN_PACING = 0.5
+
 _EXTRA_TURNS: dict[int, int] = {}
 
 
@@ -320,7 +323,7 @@ class BattleRoom(Room):
                 elapsed = 0.0
 
             # Enforce a half-second delay after each action for pacing
-            base_wait = 0.5
+            base_wait = TURN_PACING
             wait = base_wait - elapsed
             if wait > 0:
                 try:
