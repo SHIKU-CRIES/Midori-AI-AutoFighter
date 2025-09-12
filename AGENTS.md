@@ -70,4 +70,4 @@ For every task stub, prefix the request with the responsible role (e.g., ‘Task
 You must refer to the relevant mode guide in `.codex/modes/` before starting work, and follow the documentation structure and conventions described there. For service-specific details, see the `.codex/instructions/` folder of the service you are working on. Each service may provide additional rules in its own `AGENTS.md`—start here, then check the service directory for any extra requirements.
 
 ### Documentation sync
-When adding or modifying player or foe plugins, update both `README.md` and `.codex/implementation/player-foe-reference.md` so the roster and enemy details stay accurate.
+When adding or modifying player or foe plugins, update `.codex/implementation/player-foe-reference.md` so the roster and enemy details stay accurate.
