@@ -50,6 +50,8 @@ class PassiveRegistry:
             `**kwargs` (e.g., the target of an action). This prevents the
             "multiple values for argument 'target'" error.
         """
+        if event == "battle_start" and hasattr(owner, "_recalculate_passive_aggro"):
+            owner._recalculate_passive_aggro()
         counts = Counter(owner.passives)
         for pid, count in counts.items():
             cls = self._registry.get(pid)

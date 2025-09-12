@@ -19,6 +19,26 @@ class CarlyGuardiansAegis:
     max_stacks = 50  # Soft cap - show mitigation stacks with diminished returns past 50
     stack_display = "number"
 
+    _aggro_targets: ClassVar[set[int]] = set()
+
+    def apply_aggro(self, target: "Stats") -> None:
+        if id(target) in self._aggro_targets:
+            return
+        effect = StatEffect(
+            name=f"{self.id}_aggro_bonus",
+            stat_modifiers={"aggro_modifier": 499.0},
+            duration=-1,
+            source=self.id,
+        )
+        target.add_effect(effect)
+        self._aggro_targets.add(id(target))
+
+    def remove_aggro(self, target: "Stats") -> None:
+        if id(target) not in self._aggro_targets:
+            return
+        target.remove_effect_by_name(f"{self.id}_aggro_bonus")
+        self._aggro_targets.discard(id(target))
+
     # Class-level tracking of mitigation stacks and converted defense stacks
     _mitigation_stacks: ClassVar[dict[int, int]] = {}
     _attack_baseline: ClassVar[dict[int, int]] = {}
