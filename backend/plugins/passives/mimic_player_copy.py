@@ -45,7 +45,14 @@ class MimicPlayerCopy:
                 target.remove_effect_by_name(effect.name)
 
         # Subscribe to effect application events to block future buffs
-        BUS.subscribe("effect_applied", self._on_effect_applied)
+        effect_listener = self._on_effect_applied
+        BUS.subscribe("effect_applied", effect_listener)
+
+        def _on_battle_end(entity) -> None:
+            BUS.unsubscribe("effect_applied", effect_listener)
+            BUS.unsubscribe("battle_end", _on_battle_end)
+
+        BUS.subscribe("battle_end", _on_battle_end)
 
         # Apply 25% debuff to all copied stats
         copied_stats = self._copied_stats.get(entity_id, {})

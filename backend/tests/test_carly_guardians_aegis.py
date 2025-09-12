@@ -64,3 +64,12 @@ async def test_ultimate_distributes_mitigation():
     reduction = [e for e in carly.get_active_effects() if e.name == "carly_guardians_aegis_mitigation_reduction"]
     assert reduction
     assert reduction[0].stat_modifiers["mitigation"] == pytest.approx(-0.5)
+
+
+@pytest.mark.asyncio
+async def test_carly_aegis_aggro_increase():
+    registry = PassiveRegistry()
+    carly = Stats()
+    carly.passives = ["carly_guardians_aegis"]
+    await registry.trigger("battle_start", carly)
+    assert carly.aggro == pytest.approx(carly.base_aggro * 500)

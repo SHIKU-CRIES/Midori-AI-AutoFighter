@@ -14,7 +14,11 @@ from autofighter.stats import Stats
 @pytest.mark.asyncio
 async def test_small_dot_count_still_logs_individually():
     """Verify that small numbers of DOTs still log individually for debugging."""
-    target = Stats(hp=1000, max_hp=1000, defense=1, mitigation=1, vitality=1)
+    target = Stats(hp=1000)
+    target.set_base_stat('max_hp', 1000)
+    target.set_base_stat('defense', 1)
+    target.set_base_stat('mitigation', 1)
+    target.set_base_stat('vitality', 1)
     target.id = "test_small"
     manager = EffectManager(target)
 
@@ -32,7 +36,11 @@ async def test_small_dot_count_still_logs_individually():
 @pytest.mark.asyncio
 async def test_large_dot_count_uses_batch_processing():
     """Verify that large numbers of DOTs use optimized batch processing."""
-    target = Stats(hp=5000, max_hp=5000, defense=1, mitigation=1, vitality=1)
+    target = Stats(hp=5000)
+    target.set_base_stat('max_hp', 5000)
+    target.set_base_stat('defense', 1)
+    target.set_base_stat('mitigation', 1)
+    target.set_base_stat('vitality', 1)
     target.id = "test_large"
     manager = EffectManager(target)
 
@@ -53,7 +61,11 @@ async def test_large_dot_count_uses_batch_processing():
 @pytest.mark.asyncio
 async def test_mixed_dots_and_hots():
     """Verify that mixed DOTs and HOTs work correctly with optimizations."""
-    target = Stats(hp=1000, max_hp=2000, defense=1, mitigation=1, vitality=1)
+    target = Stats(hp=1000)
+    target.set_base_stat('max_hp', 2000)
+    target.set_base_stat('defense', 1)
+    target.set_base_stat('mitigation', 1)
+    target.set_base_stat('vitality', 1)
     target.id = "test_mixed"
     manager = EffectManager(target)
 
@@ -78,7 +90,11 @@ async def test_mixed_dots_and_hots():
 @pytest.mark.asyncio
 async def test_dot_expiration_with_optimizations():
     """Verify that DOT expiration works correctly with batch processing."""
-    target = Stats(hp=1000, max_hp=1000, defense=1, mitigation=1, vitality=1)
+    target = Stats(hp=1000)
+    target.set_base_stat('max_hp', 1000)
+    target.set_base_stat('defense', 1)
+    target.set_base_stat('mitigation', 1)
+    target.set_base_stat('vitality', 1)
     target.id = "test_expiration"
     manager = EffectManager(target)
 

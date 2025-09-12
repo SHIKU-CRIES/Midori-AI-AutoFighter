@@ -16,8 +16,11 @@ callbacks and provides performance instrumentation.
   calls the internal `send_async` implementation which awaits coroutine
   callbacks directly and offloads sync ones to a thread pool.
 
-Subscriber errors are caught and logged so one misbehaving plugin does not
-crash others.
+Battle-scoped plugins like cards and relics should unsubscribe their handlers
+(e.g., on `battle_end`) to avoid lingering listeners across encounters.
+
+Subscriber errors are caught and logged so one misbehaving plugin does not crash
+others.
 
 ## Asynchronous dispatch
 `EventBus.subscribe` detects coroutine functions and registers an async‑aware
@@ -41,8 +44,10 @@ High‑frequency events (e.g. `damage_dealt`, `damage_taken`, `hit_landed`,
 adaptive—when load is low, batches are processed more quickly; during heavy
 load, the interval grows to maintain responsiveness.
 
-Each callback and batch item yields `await asyncio.sleep(0.002)` to give other
-tasks a chance to run.
+Each callback and batch item yields `await asyncio.sleep(0.002)` per repository
+guidelines, giving other tasks a brief chance to run without relying on these
+micro-delays for gameplay pacing. Turn pacing is handled explicitly elsewhere
+with scheduled half-second waits plus an additional half-second gap between turns.
 
 ## Events
 The core combat engine emits a few global events that plugins may subscribe to:

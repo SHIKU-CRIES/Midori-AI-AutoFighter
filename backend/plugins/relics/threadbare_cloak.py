@@ -34,6 +34,7 @@ class ThreadbareCloak(RelicBase):
 
         def _reset(*_: object) -> None:
             party._threadbare_cloak_stacks = 0
+            BUS.unsubscribe("battle_end", _reset)
 
         BUS.subscribe("battle_end", _reset)
 

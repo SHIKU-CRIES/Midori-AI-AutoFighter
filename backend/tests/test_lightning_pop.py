@@ -11,9 +11,14 @@ from plugins.damage_types.lightning import Lightning
 @pytest.mark.asyncio
 async def test_lightning_pop_damage_and_stacks():
     lightning = Lightning()
-    attacker = Stats(atk=0, damage_type=lightning)
+    attacker = Stats(damage_type=lightning)
+    attacker.set_base_stat('atk', 0)
     attacker.id = "attacker"
-    target = Stats(hp=100, max_hp=100, defense=1, mitigation=1.0, vitality=1.0)
+    target = Stats(hp=100)
+    target.set_base_stat('max_hp', 100)
+    target.set_base_stat('defense', 1)
+    target.set_base_stat('mitigation', 1.0)
+    target.set_base_stat('vitality', 1.0)
     target.id = "target"
     target.effect_manager = EffectManager(target)
 
@@ -27,7 +32,11 @@ async def test_lightning_pop_damage_and_stacks():
 
     base = await target.apply_damage(0, attacker=attacker)
     await asyncio.sleep(0)
-    dummy = Stats(hp=start_hp, max_hp=start_hp, defense=1, mitigation=1.0, vitality=1.0)
+    dummy = Stats(hp=start_hp)
+    dummy.set_base_stat('max_hp', start_hp)
+    dummy.set_base_stat('defense', 1)
+    dummy.set_base_stat('mitigation', 1.0)
+    dummy.set_base_stat('vitality', 1.0)
     dummy.id = "dummy"
     dmg1 = await dummy.apply_damage(int(dot1.damage * 0.25), attacker=attacker)
     dummy.hp = start_hp

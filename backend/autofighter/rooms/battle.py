@@ -43,6 +43,9 @@ log = logging.getLogger(__name__)
 ENRAGE_TURNS_NORMAL = 100
 ENRAGE_TURNS_BOSS = 500
 
+# Explicit pacing between combat actions (seconds)
+TURN_PACING = 0.5
+
 _EXTRA_TURNS: dict[int, int] = {}
 
 
@@ -308,6 +311,7 @@ class BattleRoom(Room):
                     "foe_summons": _collect_summons(foes),
                     "enrage": {"active": False, "stacks": 0, "turns": 0},
                     "rdr": temp_rdr,
+                    "active_id": None,
                 }
             )
         # Helper to pace actions: dynamic pacing based on combatant count
@@ -318,13 +322,19 @@ class BattleRoom(Room):
                 elapsed = 0.0
 
             # Enforce a half-second delay after each action for pacing
-            base_wait = 0.5
+            base_wait = TURN_PACING
             wait = base_wait - elapsed
             if wait > 0:
                 try:
                     await asyncio.sleep(wait)
                 except Exception:
                     pass
+
+            # Always pause an additional half-second between turns
+            try:
+                await asyncio.sleep(TURN_PACING)
+            except Exception:
+                pass
 
         while any(f.hp > 0 for f in foes) and any(
             m.hp > 0 for m in combat_party.members
@@ -396,11 +406,18 @@ class BattleRoom(Room):
                     # If all foes died earlier in this round, stop taking actions
                     if not any(f.hp > 0 for f in foes):
                         break
-                    alive_foe_idxs = [i for i, f in enumerate(foes) if f.hp > 0]
-                    if not alive_foe_idxs:
+                    alive_targets = [
+                        (i, f) for i, f in enumerate(foes) if f.hp > 0
+                    ]
+                    if not alive_targets:
                         break
-                    tgt_idx = random.choice(alive_foe_idxs)
-                    tgt_foe = foes[tgt_idx]
+                    weights = [max(f.aggro, 0.0) for _, f in alive_targets]
+                    if sum(weights) > 0:
+                        tgt_idx, tgt_foe = random.choices(
+                            alive_targets, weights=weights
+                        )[0]
+                    else:
+                        tgt_idx, tgt_foe = random.choice(alive_targets)
                     tgt_mgr = foe_effects[tgt_idx]
                     dt = getattr(member, "damage_type", None)
                     await member_effect.tick(tgt_mgr)
@@ -458,6 +475,7 @@ class BattleRoom(Room):
                                         "turns": enrage_stacks,
                                     },
                                     "rdr": temp_rdr,
+                                    "active_id": member.id,
                                 }
                             )
                         await _pace(action_start)
@@ -585,6 +603,7 @@ class BattleRoom(Room):
                                 "foe_summons": _collect_summons(foes),
                                 "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                                 "rdr": temp_rdr,
+                                "active_id": member.id,
                             }
                         )
                     await _pace(action_start)
@@ -619,10 +638,13 @@ class BattleRoom(Room):
                     ]
                     if not alive_targets:
                         break
-                    pidx, target = random.choices(
-                        alive_targets,
-                        weights=[m.defense * m.mitigation for _, m in alive_targets],
-                    )[0]
+                    weights = [max(m.aggro, 0.0) for _, m in alive_targets]
+                    if sum(weights) > 0:
+                        pidx, target = random.choices(
+                            alive_targets, weights=weights
+                        )[0]
+                    else:
+                        pidx, target = random.choice(alive_targets)
                     target_effect = party_effects[pidx]
                     foe_mgr = foe_effects[foe_idx]
                     await registry.trigger("turn_start", acting_foe)
@@ -675,6 +697,31 @@ class BattleRoom(Room):
                             _EXTRA_TURNS[id(acting_foe)] -= 1
                             await _pace(action_start)
                             continue
+                        if progress is not None:
+                            await progress(
+                                {
+                                    "result": "battle",
+                                    "party": [
+                                        _serialize(m)
+                                        for m in combat_party.members
+                                        if not isinstance(m, Summon)
+                                    ],
+                                    "foes": [
+                                        _serialize(f)
+                                        for f in foes
+                                        if not isinstance(f, Summon)
+                                    ],
+                                    "party_summons": _collect_summons(combat_party.members),
+                                    "foe_summons": _collect_summons(foes),
+                                    "enrage": {
+                                        "active": enrage_active,
+                                        "stacks": enrage_stacks,
+                                        "turns": enrage_stacks,
+                                    },
+                                    "rdr": temp_rdr,
+                                    "active_id": acting_foe.id,
+                                }
+                            )
                         await _pace(action_start)
                         await asyncio.sleep(0.001)
                         break
@@ -714,6 +761,31 @@ class BattleRoom(Room):
                         await _pace(action_start)
                         await asyncio.sleep(0.001)
                         continue
+                    if progress is not None:
+                        await progress(
+                            {
+                                "result": "battle",
+                                "party": [
+                                    _serialize(m)
+                                    for m in combat_party.members
+                                    if not isinstance(m, Summon)
+                                ],
+                                "foes": [
+                                    _serialize(f)
+                                    for f in foes
+                                    if not isinstance(f, Summon)
+                                ],
+                                "party_summons": _collect_summons(combat_party.members),
+                                "foe_summons": _collect_summons(foes),
+                                "enrage": {
+                                    "active": enrage_active,
+                                    "stacks": enrage_stacks,
+                                    "turns": enrage_stacks,
+                                },
+                                "rdr": temp_rdr,
+                                "active_id": acting_foe.id,
+                            }
+                        )
                     await _pace(action_start)
                     await asyncio.sleep(0.001)
                     break
@@ -738,6 +810,7 @@ class BattleRoom(Room):
                         "foe_summons": _collect_summons(foes),
                         "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
                         "rdr": temp_rdr,
+                        "active_id": None,
                         "ended": True,
                     }
                 )

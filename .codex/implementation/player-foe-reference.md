@@ -29,8 +29,8 @@ The LLM system is fully optional - players and foes function normally without LL
 All legacy characters from the Pygame version have been ported as plugins.
 Each entry notes the character's `CharacterType` and starting damage type.
 Players currently share placeholder stats of 1000 HP, 100 attack, 50 defense,
-5% crit rate, 2× crit damage, 1% effect hit, 100 mitigation, 0 dodge, and 1
-for remaining values.
+5% crit rate, 2× crit damage, 1% effect hit, 100 mitigation, 0 dodge, 0.1 aggro,
+and 1 for remaining values. Aggro defaults to `0.1` for both players and foes.
 
 Player plugins also include a `gacha_rarity` field so the gacha system can
 automatically discover 5★ and 6★ recruits.

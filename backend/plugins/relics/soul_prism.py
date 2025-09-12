@@ -82,6 +82,8 @@ class SoulPrism(RelicBase):
                     "buff_percentage": buff * 100
                 })
 
+            BUS.unsubscribe("battle_end", _battle_end)
+
         BUS.subscribe("battle_end", _battle_end)
 
     def describe(self, stacks: int) -> str:

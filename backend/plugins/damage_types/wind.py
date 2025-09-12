@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from typing import ClassVar
 
 from autofighter.effects import DamageOverTime
 from autofighter.effects import EffectManager
@@ -15,6 +16,17 @@ class Wind(DamageTypeBase):
     id: str = "Wind"
     weakness: str = "Lightning"
     color: tuple[int, int, int] = (0, 255, 0)
+    _players: ClassVar[list] = []
+    _foes: ClassVar[list] = []
+    _pending: ClassVar[list] = []
+    _initialized: ClassVar[bool] = False
+
+    def __post_init__(self) -> None:
+        # Ensure we only subscribe once at the class level
+        if not Wind._initialized:
+            BUS.subscribe("battle_start", Wind._on_battle_start)
+            BUS.subscribe("battle_end", Wind._on_battle_end)
+            Wind._initialized = True
 
     # Previous implementation scattered DoTs after an ultimate by moving
     # existing effects. The new design: when Wind uses its ultimate, strike
@@ -31,6 +43,12 @@ class Wind(DamageTypeBase):
         # Consume ultimate; bail if not ready
         if not getattr(actor, "use_ultimate", lambda: False)():
             return False
+
+        actor_type = getattr(actor, "plugin_type", None)
+        if actor_type == "player" and actor not in Wind._players:
+            Wind._players.append(actor)
+        elif actor_type == "foe" and actor not in Wind._foes:
+            Wind._foes.append(actor)
 
         # Ensure the actor has an EffectManager so temporary buffs apply cleanly
         a_mgr = getattr(actor, "effect_manager", None)
@@ -92,10 +110,8 @@ class Wind(DamageTypeBase):
                     f_mgr.maybe_inflict_dot(actor, dmg)
                 except Exception:
                     pass
-                # Yield briefly to keep event loop responsive during large hit counts
-                # Reduce frequency of yields for better performance with many hits
-                if i % 5 == 0:  # Only yield every 5 hits instead of every hit
-                    await asyncio.sleep(0)
+                # Yield briefly each hit to keep the event loop responsive
+                await asyncio.sleep(0.002)
 
         # Clean up the temporary buff immediately after the sequence
         try:
@@ -112,3 +128,27 @@ class Wind(DamageTypeBase):
             "of hits derives from `wind_ultimate_hits` or `ultimate_hits` allowing "
             "relics and cards to modify it."
         )
+
+    @classmethod
+    def _on_battle_start(cls, actor) -> None:
+        """Register actors into appropriate lists when battle starts."""
+        # Only register actors with Wind damage type
+        actor_damage_type = getattr(actor, "damage_type", None)
+        if not isinstance(actor_damage_type, Wind):
+            return
+
+        # Determine actor type and add to appropriate registry
+        actor_type = getattr(actor, "plugin_type", None)
+        if actor_type == "player":
+            if actor not in cls._players:
+                cls._players.append(actor)
+        elif actor_type == "foe":
+            if actor not in cls._foes:
+                cls._foes.append(actor)
+
+    @classmethod
+    def _on_battle_end(cls, *_: object) -> None:
+        """Clear all registries when battle ends."""
+        cls._players.clear()
+        cls._foes.clear()
+        cls._pending.clear()

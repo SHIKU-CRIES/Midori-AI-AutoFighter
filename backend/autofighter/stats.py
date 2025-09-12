@@ -38,6 +38,47 @@ class StatEffect:
             self.duration -= 1
 
 
+class _PassiveList(list):
+    """List subclass that triggers passive aggro recalculation on modification."""
+
+    def __init__(self, owner: "Stats", iterable: Optional[list[str]] = None):
+        super().__init__(iterable or [])
+        self._owner = owner
+
+    def _update(self) -> None:
+        if hasattr(self._owner, "_recalculate_passive_aggro"):
+            self._owner._recalculate_passive_aggro()
+
+    def append(self, item):  # type: ignore[override]
+        super().append(item)
+        self._update()
+
+    def extend(self, iterable):  # type: ignore[override]
+        super().extend(iterable)
+        self._update()
+
+    def remove(self, item):  # type: ignore[override]
+        super().remove(item)
+        self._update()
+
+    def clear(self):  # type: ignore[override]
+        super().clear()
+        self._update()
+
+    def pop(self, index=-1):  # type: ignore[override]
+        value = super().pop(index)
+        self._update()
+        return value
+
+    def __setitem__(self, index, value):  # type: ignore[override]
+        super().__setitem__(index, value)
+        self._update()
+
+    def __delitem__(self, index):  # type: ignore[override]
+        super().__delitem__(index)
+        self._update()
+
+
 def set_enrage_percent(value: float) -> None:
     """Set global enrage percent (e.g., 0.15 for +15% damage taken, -15% healing).
 
@@ -105,6 +146,8 @@ class Stats:
     damage_dealt: int = 0
     kills: int = 0
     last_damage_taken: int = 0
+    base_aggro: float = 0.1
+    aggro_modifier: float = 0.0
 
     # Ultimate system
     ultimate_charge: int = 0
@@ -119,6 +162,7 @@ class Stats:
     dots: list[str] = field(default_factory=list)
     hots: list[str] = field(default_factory=list)
     mods: list[str] = field(default_factory=list)
+    _aggro_passives: list[str] = field(default_factory=list, init=False)
 
     # Effects system
     _active_effects: list[StatEffect] = field(default_factory=list, init=False)
@@ -155,6 +199,27 @@ class Stats:
 
         # Set hp to match max_hp at start
         self.hp = self.max_hp
+
+        dt = getattr(self, "damage_type", None)
+        try:
+            if hasattr(dt, "apply_aggro"):
+                dt.apply_aggro(self)
+            else:
+                self.aggro_modifier += float(getattr(dt, "aggro", 0.0))
+        except Exception:
+            pass
+
+        if not isinstance(self.passives, _PassiveList):
+            object.__setattr__(self, "passives", _PassiveList(self, self.passives))
+        self._recalculate_passive_aggro()
+
+    def __setattr__(self, name, value):
+        if name == "passives" and not isinstance(value, _PassiveList):
+            object.__setattr__(self, name, _PassiveList(self, value))
+            if "_aggro_passives" in self.__dict__:
+                self._recalculate_passive_aggro()
+        else:
+            object.__setattr__(self, name, value)
 
     # Runtime stat properties (base stats + effects)
     @property
@@ -227,6 +292,20 @@ class Stats:
         except Exception:
             pass
 
+    @property
+    def aggro(self) -> float:
+        """Calculate current aggro score."""
+        defense_term = 0.0
+        try:
+            defense_term = (self.defense - self._base_defense) / self._base_defense
+        except Exception:
+            defense_term = 0.0
+        modifier = (
+            self.aggro_modifier
+            + self._calculate_stat_modifier("aggro_modifier")
+        )
+        return self.base_aggro * (1 + modifier + defense_term)
+
     def _calculate_stat_modifier(self, stat_name: str) -> Union[int, float]:
         """Calculate the total modifier for a stat from all active effects."""
         total: float = 0.0
@@ -255,6 +334,66 @@ class Stats:
         """Modify a base stat (use only for permanent changes like leveling)."""
         current = self.get_base_stat(stat_name)
         self.set_base_stat(stat_name, current + amount)
+
+    def change_damage_type(self, new_type: DamageTypeBase) -> None:
+        """Change damage type and update aggro modifiers."""
+        try:
+            old = getattr(self, "damage_type", None)
+            if old is not None:
+                if hasattr(old, "remove_aggro"):
+                    old.remove_aggro(self)
+                else:
+                    self.aggro_modifier -= float(getattr(old, "aggro", 0.0))
+        except Exception:
+            pass
+        self.damage_type = new_type
+        try:
+            if hasattr(new_type, "apply_aggro"):
+                new_type.apply_aggro(self)
+            else:
+                self.aggro_modifier += float(getattr(new_type, "aggro", 0.0))
+        except Exception:
+            pass
+
+    def _recalculate_passive_aggro(self) -> None:
+        try:
+            from autofighter.passives import discover
+
+            registry = discover()
+        except Exception:
+            return
+
+        for pid in list(self._aggro_passives):
+            cls = registry.get(pid)
+            if cls is None:
+                continue
+            instance = cls()
+            try:
+                if hasattr(instance, "remove_aggro"):
+                    instance.remove_aggro(self)
+                else:
+                    self.aggro_modifier -= float(getattr(instance, "aggro", 0.0))
+            except Exception:
+                pass
+        self._aggro_passives.clear()
+
+        for pid in self.passives:
+            cls = registry.get(pid)
+            if cls is None:
+                continue
+            instance = cls()
+            applied = False
+            try:
+                if hasattr(instance, "apply_aggro"):
+                    instance.apply_aggro(self)
+                    applied = True
+                elif hasattr(instance, "aggro"):
+                    self.aggro_modifier += float(getattr(instance, "aggro", 0.0))
+                    applied = True
+            except Exception:
+                continue
+            if applied:
+                self._aggro_passives.append(pid)
 
     # Effect management methods
     def add_effect(self, effect: StatEffect) -> None:

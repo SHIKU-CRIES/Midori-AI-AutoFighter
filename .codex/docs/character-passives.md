@@ -213,7 +213,7 @@ class MultiTriggerPassive:
 #### Ally - Overload
 - **ID**: `ally_overload`
 - **Trigger**: `action_taken`
-- **Mechanic**: Twin daggers (2 attacks) scaling to Overload mode (4 attacks)
+- **Mechanic**: Twin daggers (2 attacks) scaling to Overload mode (4 attacks); Overload clears existing HoTs, blocks new HoTs, and caps recoverable HP at 20%
 
 #### Hilander - Critical Ferment
 - **ID**: `hilander_critical_ferment`

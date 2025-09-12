@@ -21,6 +21,7 @@ detail pane.
 - Thick Skin – +3% Bleed Resist; When afflicted by Bleed, 50% chance to reduce its duration by 1
 - Balanced Diet – +3% HP & +3% DEF; When healed, grant the healed unit +2% DEF for 1 turn
 - Lightweight Boots – +3% Dodge Odds; On successful dodge, heal 2% HP to the dodging unit
+- Sturdy Boots – +3% Dodge Odds & +3% DEF; Provides flat defensive bonuses with no secondary effect
 - Expert Manual – +3% EXP Gain; 5% chance to give a small extra XP on a kill once per battle
 - Steel Bangles – +3% Mitigation; On attack hit, 5% chance to reduce the target's next attack damage by 3%
 - Enduring Charm – +3% Vitality; When below 30% HP, gain +3% Vitality for 2 turns

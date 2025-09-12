@@ -30,11 +30,17 @@ async def test_wind_player_hits_all_foes(monkeypatch):
         pressure=0,
     )
     room = BattleRoom(node)
-    player = Stats(atk=1000, effect_hit_rate=2.0, damage_type=Wind())
+    player = Stats(damage_type=Wind())
+    player.set_base_stat('atk', 1000)
+    player.set_base_stat('effect_hit_rate', 2.0)
     player.id = "p1"
-    foe1 = Stats(hp=3, max_hp=3, defense=0)
+    foe1 = Stats(hp=3)
+    foe1.set_base_stat('max_hp', 3)
+    foe1.set_base_stat('defense', 0)
     foe1.id = "f1"
-    foe2 = Stats(hp=3, max_hp=3, defense=0)
+    foe2 = Stats(hp=3)
+    foe2.set_base_stat('max_hp', 3)
+    foe2.set_base_stat('defense', 0)
     foe2.id = "f2"
     party = Party(members=[player])
     random.seed(0)
@@ -63,33 +69,25 @@ async def test_wind_foe_hits_all_party_members(monkeypatch):
         pressure=0,
     )
     room = BattleRoom(node)
-    player1 = Stats(
-        hp=200,
-        max_hp=200,
-        atk=0,
-        defense=10,
-        mitigation=1.0,
-        effect_resistance=0.0,
-    )
+    player1 = Stats(hp=200)
+    player1.set_base_stat('max_hp', 200)
+    player1.set_base_stat('atk', 0)
+    player1.set_base_stat('defense', 10)
+    player1.set_base_stat('mitigation', 1.0)
+    player1.set_base_stat('effect_resistance', 0.0)
     player1.id = "p1"
-    player2 = Stats(
-        hp=200,
-        max_hp=200,
-        atk=1000,
-        defense=1,
-        mitigation=1.0,
-        effect_resistance=0.0,
-    )
+    player2 = Stats(hp=200)
+    player2.set_base_stat('max_hp', 200)
+    player2.set_base_stat('atk', 1000)
+    player2.set_base_stat('defense', 1)
+    player2.set_base_stat('mitigation', 1.0)
+    player2.set_base_stat('effect_resistance', 0.0)
     player2.id = "p2"
     party = Party(members=[player1, player2])
-    foe = Stats(
-        hp=3,
-        max_hp=3,
-        atk=5,
-        defense=0,
-        damage_type=Wind(),
-        effect_hit_rate=2.0,
-    )
+    foe = Stats(hp=3, damage_type=Wind())
+    foe.set_base_stat('max_hp', 3)
+    foe.set_base_stat('atk', 5)
+    foe.set_base_stat('defense', 0)
     foe.id = "f1"
     random.seed(0)
     await room.resolve(party, {}, foe=foe)

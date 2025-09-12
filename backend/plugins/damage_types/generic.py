@@ -57,6 +57,12 @@ class Generic(DamageTypeBase):
                 party=allies,
                 foes=enemies,
             )
-            if i % 5 == 0:
-                await asyncio.sleep(0)
+            await asyncio.sleep(0.002)
         return True
+
+    @classmethod
+    def get_ultimate_description(cls) -> str:
+        return (
+            "Splits the user's attack into 64 rapid strikes on a single target, "
+            "counting each hit as a separate action."
+        )

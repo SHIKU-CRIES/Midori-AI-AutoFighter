@@ -8,6 +8,9 @@ to be added without touching core modules. Awarding the same relic multiple time
 Each relic plugin exposes an `about` string and a `describe(stacks)` method so the
 UI can show stack-aware, number-rich descriptions.
 
+Plugins that subscribe to `BUS` events must unregister their handlers on
+`battle_end` to avoid lingering callbacks between encounters.
+
 ## Testing
 - `uv run pytest backend/tests/test_relic_awards.py`
 - `uv run pytest backend/tests/test_relic_effects.py`

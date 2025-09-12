@@ -20,3 +20,7 @@ healing effects, removing and restoring stats once turns reach zero.
 Player customization applies a long-lived `StatModifier` rather than modifying
 baseline stats. The customization parameters are persisted separately so the
 effect can be recreated when loading a run.
+
+Effects can also adjust `aggro_modifier` to influence target selection. The
+final `aggro` value is computed from `base_aggro`, the accumulated
+`aggro_modifier`, and current defense.

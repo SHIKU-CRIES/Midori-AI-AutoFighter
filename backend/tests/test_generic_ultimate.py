@@ -29,7 +29,7 @@ async def test_generic_ultimate_hits_and_passive_triggers():
     target = Stats()
     target.id = "target"
     target._base_defense = 0
-    target.dodge_odds = 0
+    target.set_base_stat('dodge_odds', 0)
 
     actor.ultimate_charge = 15
     actor.ultimate_ready = True

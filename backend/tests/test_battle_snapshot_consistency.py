@@ -40,7 +40,7 @@ async def test_foe_element_stable_across_snapshots(app_with_db, monkeypatch):
     def choose_foe(_party):
         foe = DummyFoe()
         foe.damage_type = elements.pop(0)
-        foe.hp = foe.max_hp = 1
+        foe.hp = foe.set_base_stat('max_hp', 1)
         return foe
 
     import autofighter.rooms.utils as rooms_module

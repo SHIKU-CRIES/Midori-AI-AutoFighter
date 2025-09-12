@@ -8,7 +8,7 @@ The `Stats` dataclass stores core attributes for both players and foes:
 - **Core:** `hp`, `max_hp`, `exp`, `level`, `exp_multiplier`, `actions_per_turn`
 - **Offense:** `atk`, `crit_rate`, `crit_damage`, `effect_hit_rate`, `damage_type`
 - **Defense:** `defense`, `mitigation`, `regain`, `dodge_odds`, `effect_resistance`
-- **Vitality & Advanced:** `vitality`, `action_points`, `damage_taken`, `damage_dealt`, `kills`
+- **Vitality & Advanced:** `vitality`, `action_points`, `damage_taken`, `damage_dealt`, `kills`, `aggro`
 - **Status Lists:** `passives`, `dots`, `hots`, `relics`
 - **Party:** `gold`, `rdr` – run-wide currency and rare drop rate multiplier applied to gold, upgrade item counts, relic odds, pull ticket chances, and (at extreme values) can roll to raise relic and card star ranks
 - **Ultimate:** `ultimate_charge`, `ultimate_ready` – charge builds with actions to power character ultimates. Ice characters gain additional charge whenever an ally acts via `handle_ally_action`.

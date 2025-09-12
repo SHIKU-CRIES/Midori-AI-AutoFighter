@@ -57,6 +57,7 @@ class Fire(DamageTypeBase):
                 mgr.maybe_inflict_dot(actor, dealt)
             except Exception:
                 pass
+            await asyncio.sleep(0.002)
         return True
 
     def _on_ultimate_used(self, user: Stats) -> None:
@@ -76,6 +77,9 @@ class Fire(DamageTypeBase):
 
     def _on_battle_end(self, *_: object) -> None:
         self._drain_stacks = 0
+        BUS.unsubscribe("ultimate_used", self._on_ultimate_used)
+        BUS.unsubscribe("turn_start", self._on_turn_start)
+        BUS.unsubscribe("battle_end", self._on_battle_end)
 
     @classmethod
     def get_ultimate_description(cls) -> str:

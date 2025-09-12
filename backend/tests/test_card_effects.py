@@ -21,8 +21,8 @@ def test_overclock_double_action():
     party = Party()
     ally = PlayerBase()
     foe = PlayerBase()
-    ally.atk = 100
-    foe.hp = foe.max_hp = 1000
+    ally.set_base_stat('atk', 100)
+    foe.hp = foe.set_base_stat('max_hp', 1000)
     party.members.append(ally)
     award_card(party, "overclock")
     loop.run_until_complete(apply_cards(party))
@@ -38,7 +38,7 @@ def test_iron_resolve_revives_and_cooldown():
     party = Party()
     ally = PlayerBase()
     enemy = PlayerBase()
-    ally.hp = ally.max_hp = 100
+    ally.hp = ally.set_base_stat('max_hp', 100)
     party.members.append(ally)
     loop = setup_event_loop()
     award_card(party, "iron_resolve")
@@ -65,8 +65,8 @@ def test_arcane_repeater_repeats_attack():
     party = Party()
     ally = PlayerBase()
     foe = PlayerBase()
-    ally.atk = 100
-    foe.hp = foe.max_hp = 1000
+    ally.set_base_stat('atk', 100)
+    foe.hp = foe.set_base_stat('max_hp', 1000)
     party.members.append(ally)
     award_card(party, "arcane_repeater")
     loop.run_until_complete(apply_cards(party))

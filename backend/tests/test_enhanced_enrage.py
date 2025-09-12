@@ -7,11 +7,11 @@ class MockStats:
     def __init__(self):
         self.id = "test_foe"
         self.hp = 1000
-        self.max_hp = 1000
-        self.atk = 100
-        self.defense = 50
-        self.vitality = 1.0
-        self.mitigation = 1.0
+        self.set_base_stat('max_hp', 1000)
+        self.set_base_stat('atk', 100)
+        self.set_base_stat('defense', 50)
+        self.set_base_stat('vitality', 1.0)
+        self.set_base_stat('mitigation', 1.0)
         self.passives = []
 
     async def apply_damage(self, amount, **kwargs):

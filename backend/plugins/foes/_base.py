@@ -104,6 +104,8 @@ class FoeBase(Stats):
                 CharacterType.C: "neutral",
             }.get(self.char_type)
 
+        super().__post_init__()
+
         # Use centralized torch checker instead of individual import attempts
         from llms.torch_checker import is_torch_available
 

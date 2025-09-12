@@ -87,7 +87,7 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
                         rdr=party.rdr,
                     )
 
-                    async def progress(snapshot: dict[str, dict | list]) -> None:
+                    async def progress(snapshot: dict[str, Any]) -> None:
                         battle_snapshots[run_id] = snapshot
 
                     task = asyncio.create_task(
@@ -197,7 +197,7 @@ async def battle_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
         state["battle"] = False
         await asyncio.to_thread(save_map, run_id, state)
 
-        async def progress(snapshot: dict[str, dict | list]) -> None:
+        async def progress(snapshot: dict[str, Any]) -> None:
             battle_snapshots[run_id] = snapshot
 
         task = asyncio.create_task(
@@ -396,7 +396,7 @@ async def boss_room(run_id: str, data: dict[str, Any]) -> dict[str, Any]:
         state["battle"] = False
         await asyncio.to_thread(save_map, run_id, state)
 
-        async def progress(snapshot: dict[str, dict | list]) -> None:
+        async def progress(snapshot: dict[str, Any]) -> None:
             battle_snapshots[run_id] = snapshot
 
         task = asyncio.create_task(

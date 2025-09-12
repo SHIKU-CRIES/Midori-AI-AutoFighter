@@ -273,7 +273,7 @@
       <AboutGamePanel {userState} />
     {/if}
     {#if runId && roomData && !(((roomData.result === 'battle') || (roomData.result === 'boss')) && !battleActive)}
-      <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} />
+      <RoomView result={roomData.result} foes={roomData.foes} party={roomData.party} activeId={roomData.active_id} />
     {:else if runId}
       <div class="placeholder">Awaiting next room...</div>
     {/if}
