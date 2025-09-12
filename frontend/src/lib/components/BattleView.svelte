@@ -455,7 +455,7 @@
     gap: 1rem;
   }
 
-  .modern-battle-field > * {
+  .modern-battle-field > *:not(.action-queue) {
     position: relative;
     z-index: 1;
   }

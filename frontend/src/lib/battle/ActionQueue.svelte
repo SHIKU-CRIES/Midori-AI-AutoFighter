@@ -33,10 +33,16 @@
 
 <style>
   .action-queue {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
+    flex-direction: column;
     gap: 0.25rem;
     justify-content: center;
-    align-items: flex-end;
+    align-items: center;
+    z-index: 2;
   }
   .entry {
     position: relative;
