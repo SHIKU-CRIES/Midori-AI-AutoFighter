@@ -38,6 +38,47 @@ class StatEffect:
             self.duration -= 1
 
 
+class _PassiveList(list):
+    """List subclass that triggers passive aggro recalculation on modification."""
+
+    def __init__(self, owner: "Stats", iterable: Optional[list[str]] = None):
+        super().__init__(iterable or [])
+        self._owner = owner
+
+    def _update(self) -> None:
+        if hasattr(self._owner, "_recalculate_passive_aggro"):
+            self._owner._recalculate_passive_aggro()
+
+    def append(self, item):  # type: ignore[override]
+        super().append(item)
+        self._update()
+
+    def extend(self, iterable):  # type: ignore[override]
+        super().extend(iterable)
+        self._update()
+
+    def remove(self, item):  # type: ignore[override]
+        super().remove(item)
+        self._update()
+
+    def clear(self):  # type: ignore[override]
+        super().clear()
+        self._update()
+
+    def pop(self, index=-1):  # type: ignore[override]
+        value = super().pop(index)
+        self._update()
+        return value
+
+    def __setitem__(self, index, value):  # type: ignore[override]
+        super().__setitem__(index, value)
+        self._update()
+
+    def __delitem__(self, index):  # type: ignore[override]
+        super().__delitem__(index)
+        self._update()
+
+
 def set_enrage_percent(value: float) -> None:
     """Set global enrage percent (e.g., 0.15 for +15% damage taken, -15% healing).
 
@@ -121,6 +162,7 @@ class Stats:
     dots: list[str] = field(default_factory=list)
     hots: list[str] = field(default_factory=list)
     mods: list[str] = field(default_factory=list)
+    _aggro_passives: list[str] = field(default_factory=list, init=False)
 
     # Effects system
     _active_effects: list[StatEffect] = field(default_factory=list, init=False)
@@ -166,6 +208,18 @@ class Stats:
                 self.aggro_modifier += float(getattr(dt, "aggro", 0.0))
         except Exception:
             pass
+
+        if not isinstance(self.passives, _PassiveList):
+            object.__setattr__(self, "passives", _PassiveList(self, self.passives))
+        self._recalculate_passive_aggro()
+
+    def __setattr__(self, name, value):
+        if name == "passives" and not isinstance(value, _PassiveList):
+            object.__setattr__(self, name, _PassiveList(self, value))
+            if "_aggro_passives" in self.__dict__:
+                self._recalculate_passive_aggro()
+        else:
+            object.__setattr__(self, name, value)
 
     # Runtime stat properties (base stats + effects)
     @property
@@ -300,6 +354,46 @@ class Stats:
                 self.aggro_modifier += float(getattr(new_type, "aggro", 0.0))
         except Exception:
             pass
+
+    def _recalculate_passive_aggro(self) -> None:
+        try:
+            from autofighter.passives import discover
+
+            registry = discover()
+        except Exception:
+            return
+
+        for pid in list(self._aggro_passives):
+            cls = registry.get(pid)
+            if cls is None:
+                continue
+            instance = cls()
+            try:
+                if hasattr(instance, "remove_aggro"):
+                    instance.remove_aggro(self)
+                else:
+                    self.aggro_modifier -= float(getattr(instance, "aggro", 0.0))
+            except Exception:
+                pass
+        self._aggro_passives.clear()
+
+        for pid in self.passives:
+            cls = registry.get(pid)
+            if cls is None:
+                continue
+            instance = cls()
+            applied = False
+            try:
+                if hasattr(instance, "apply_aggro"):
+                    instance.apply_aggro(self)
+                    applied = True
+                elif hasattr(instance, "aggro"):
+                    self.aggro_modifier += float(getattr(instance, "aggro", 0.0))
+                    applied = True
+            except Exception:
+                continue
+            if applied:
+                self._aggro_passives.append(pid)
 
     # Effect management methods
     def add_effect(self, effect: StatEffect) -> None:
