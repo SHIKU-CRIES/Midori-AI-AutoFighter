@@ -30,7 +30,14 @@ class TimekeepersHourglass(RelicBase):
                 for member in party.members:
                     BUS.emit("extra_turn", member)
 
+        def _battle_end(_entity) -> None:
+            BUS.unsubscribe("turn_start", _turn_start)
+            BUS.unsubscribe("battle_end", _battle_end)
+            if hasattr(party, "_t_hourglass_applied"):
+                delattr(party, "_t_hourglass_applied")
+
         BUS.subscribe("turn_start", _turn_start)
+        BUS.subscribe("battle_end", _battle_end)
 
     def describe(self, stacks: int) -> str:
         pct = 10 + 1 * (stacks - 1)
