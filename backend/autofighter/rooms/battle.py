@@ -29,6 +29,7 @@ from autofighter.summons.manager import SummonManager
 from plugins.damage_types import ALL_DAMAGE_TYPES
 
 from ..party import Party
+from ..action_queue import ActionQueue
 from ..passives import PassiveRegistry
 from ..stats import BUS
 from ..stats import Stats
@@ -207,6 +208,16 @@ class BattleRoom(Room):
             member.effect_manager = mgr
             party_effects.append(mgr)
 
+        # Initialize a visual action queue for UI snapshots (mid-left action bar)
+        try:
+            q_entities = [
+                e for e in list(combat_party.members) + list(foes)
+                if not isinstance(e, Summon)
+            ]
+            _visual_queue = ActionQueue(q_entities)
+        except Exception:
+            _visual_queue = None
+
         # Start battle logging once before emitting any events so participants are captured
         battle_logger = start_battle_logging()
         try:
@@ -286,6 +297,15 @@ class BattleRoom(Room):
                 }
                 for c in ordered
             ]
+
+        def _advance_queue(actor: Stats) -> None:
+            """Advance the visual action queue using the provided actor."""
+            try:
+                if _visual_queue is None:
+                    return
+                _visual_queue.advance_with_actor(actor)
+            except Exception:
+                pass
 
         def _abort(other_id: str) -> None:
             msg = "concurrent battle detected"
@@ -634,6 +654,7 @@ class BattleRoom(Room):
                         await asyncio.sleep(0.001)
                         continue
                     if progress is not None:
+                        _advance_queue(member)
                         await progress(
                             {
                                 "result": "battle",
@@ -747,6 +768,7 @@ class BattleRoom(Room):
                             await _pace(action_start)
                             continue
                         if progress is not None:
+                            _advance_queue(acting_foe)
                             await progress(
                                 {
                                     "result": "battle",
@@ -824,6 +846,7 @@ class BattleRoom(Room):
                         await asyncio.sleep(0.001)
                         continue
                     if progress is not None:
+                        _advance_queue(acting_foe)
                         await progress(
                             {
                                 "result": "battle",

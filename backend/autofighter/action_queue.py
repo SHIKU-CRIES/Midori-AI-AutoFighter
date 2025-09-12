@@ -74,3 +74,25 @@ class ActionQueue:
             }
             for c in ordered
         ]
+
+    def advance_with_actor(self, actor: Stats) -> None:
+        """Advance the queue math using the provided actor.
+
+        This mirrors ``next_actor`` time advancement but does not select the
+        actor by min action value. It allows external battle loops to drive the
+        visual/action gauge independently while preserving consistent queue
+        dynamics for snapshots.
+        """
+        if actor not in self.combatants:
+            return
+        try:
+            spent = getattr(actor, "action_value", getattr(actor, "base_action_value", GAUGE_START))
+            for c in self.combatants:
+                c.action_value = max(0.0, getattr(c, "action_value", 0.0) - spent)
+            actor.action_value = getattr(actor, "base_action_value", GAUGE_START)
+            # Rotate actor to end to reflect moving to the back of the line
+            idx = self.combatants.index(actor)
+            self.combatants.append(self.combatants.pop(idx))
+        except Exception:
+            # Best-effort; never let UI queue progression break battle logic
+            pass

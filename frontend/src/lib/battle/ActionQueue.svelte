@@ -15,13 +15,13 @@
   </script>
 
 <div class="action-queue" data-testid="action-queue">
-  {#each queue as entry, i (i)}
+  {#each queue as entry, i (entry.bonus ? `b-${entry.id}-${i}` : entry.id)}
     {@const fighter = findCombatant(entry.id)}
     <div
       class="entry"
       class:active={i === activeIndex}
       class:bonus={entry.bonus}
-      animate:flip={{ duration: reducedMotion ? 0 : 200 }}
+      animate:flip={{ duration: reducedMotion ? 0 : 220 }}
     >
       <img src={getCharacterImage(fighter.summon_type || fighter.id)} alt="" class="portrait" />
       {#if showActionValues}
@@ -48,6 +48,7 @@
     position: relative;
     width: 40px;
     height: 40px;
+    will-change: transform;
   }
     .entry.active {
       outline: 2px solid #fff;
