@@ -57,9 +57,19 @@ class LuckyButton(RelicBase):
                 effect._on_damage_taken(member)
                 del active[pid]
 
+        def _battle_end(entity) -> None:
+            if entity in party.members:
+                BUS.unsubscribe("crit_missed", _crit_missed)
+                BUS.unsubscribe("turn_start", _turn_start)
+                BUS.unsubscribe("turn_end", _turn_end)
+                BUS.unsubscribe("battle_end", _battle_end)
+                pending.clear()
+                active.clear()
+
         BUS.subscribe("crit_missed", _crit_missed)
         BUS.subscribe("turn_start", _turn_start)
         BUS.subscribe("turn_end", _turn_end)
+        BUS.subscribe("battle_end", _battle_end)
 
     def describe(self, stacks: int) -> str:
         if stacks == 1:
