@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from typing import ClassVar
 from typing import Optional
+from weakref import WeakSet
 
 from autofighter.stats import StatEffect
 
@@ -19,10 +20,10 @@ class CarlyGuardiansAegis:
     max_stacks = 50  # Soft cap - show mitigation stacks with diminished returns past 50
     stack_display = "number"
 
-    _aggro_targets: ClassVar[set[int]] = set()
+    _aggro_targets: ClassVar[WeakSet["Stats"]] = WeakSet()
 
     def apply_aggro(self, target: "Stats") -> None:
-        if id(target) in self._aggro_targets:
+        if target in self._aggro_targets:
             return
         effect = StatEffect(
             name=f"{self.id}_aggro_bonus",
@@ -31,13 +32,13 @@ class CarlyGuardiansAegis:
             source=self.id,
         )
         target.add_effect(effect)
-        self._aggro_targets.add(id(target))
+        self._aggro_targets.add(target)
 
     def remove_aggro(self, target: "Stats") -> None:
-        if id(target) not in self._aggro_targets:
+        if target not in self._aggro_targets:
             return
         target.remove_effect_by_name(f"{self.id}_aggro_bonus")
-        self._aggro_targets.discard(id(target))
+        self._aggro_targets.discard(target)
 
     # Class-level tracking of mitigation stacks and converted defense stacks
     _mitigation_stacks: ClassVar[dict[int, int]] = {}
