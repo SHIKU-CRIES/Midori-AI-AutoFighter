@@ -331,6 +331,12 @@ class BattleRoom(Room):
                 except Exception:
                     pass
 
+            # Always pause an additional half-second between turns
+            try:
+                await asyncio.sleep(TURN_PACING)
+            except Exception:
+                pass
+
         while any(f.hp > 0 for f in foes) and any(
             m.hp > 0 for m in combat_party.members
         ):

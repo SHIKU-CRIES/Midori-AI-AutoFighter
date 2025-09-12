@@ -47,7 +47,7 @@ load, the interval grows to maintain responsiveness.
 Each callback and batch item yields `await asyncio.sleep(0.002)` per repository
 guidelines, giving other tasks a brief chance to run without relying on these
 micro-delays for gameplay pacing. Turn pacing is handled explicitly elsewhere
-with scheduled half-second waits.
+with scheduled half-second waits plus an additional half-second gap between turns.
 
 ## Events
 The core combat engine emits a few global events that plugins may subscribe to:
