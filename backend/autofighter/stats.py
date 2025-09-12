@@ -46,8 +46,23 @@ class _PassiveList(list):
         self._owner = owner
 
     def _update(self) -> None:
-        if hasattr(self._owner, "_recalculate_passive_aggro"):
+        """Notify owner to recalc aggro when safe.
+
+        During deepcopy of Player/Stats instances, attributes may be set
+        before runtime-only fields (like `_aggro_passives`) exist. Guard
+        against triggering recalculation until the owner is fully
+        initialized to avoid AttributeError.
+        """
+        if not hasattr(self._owner, "_recalculate_passive_aggro"):
+            return
+        if not hasattr(self._owner, "_aggro_passives"):
+            # Owner not fully initialized yet; skip until later
+            return
+        try:
             self._owner._recalculate_passive_aggro()
+        except Exception:
+            # Never let aggro recompute break list operations
+            pass
 
     def append(self, item):  # type: ignore[override]
         super().append(item)
@@ -356,6 +371,9 @@ class Stats:
             pass
 
     def _recalculate_passive_aggro(self) -> None:
+        # Ensure tracking container exists even during partial construction
+        if not hasattr(self, "_aggro_passives"):
+            object.__setattr__(self, "_aggro_passives", [])
         try:
             from autofighter.passives import discover
 
