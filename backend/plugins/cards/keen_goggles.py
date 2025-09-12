@@ -71,3 +71,10 @@ class KeenGoggles(CardBase):
 
         BUS.subscribe("effect_applied", _on_effect_applied)
         BUS.subscribe("action_taken", _on_action_taken)
+
+        def _cleanup(*_: object) -> None:
+            BUS.unsubscribe("effect_applied", _on_effect_applied)
+            BUS.unsubscribe("action_taken", _on_action_taken)
+            BUS.unsubscribe("battle_end", _cleanup)
+
+        BUS.subscribe("battle_end", _cleanup)

@@ -37,6 +37,12 @@ class ArcaneFlask(RelicBase):
 
         BUS.subscribe("ultimate_used", _ultimate)
 
+        def _cleanup(*_: object) -> None:
+            BUS.unsubscribe("ultimate_used", _ultimate)
+            BUS.unsubscribe("battle_end", _cleanup)
+
+        BUS.subscribe("battle_end", _cleanup)
+
     def describe(self, stacks: int) -> str:
         pct = 20 * stacks
         return f"After an Ultimate, grant a shield equal to {pct}% Max HP."

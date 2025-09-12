@@ -1,9 +1,0 @@
-Issue: SoulPrism relic's BUS subscription persists without removal.
-
-Details:
-- `backend/plugins/relics/soul_prism.py` subscribes to `battle_end` to revive allies.
-- Lacks an unsubscribe, so multiple applications can stack or persist beyond intended scope.
-
-Location: `backend/plugins/relics/soul_prism.py` line 85.
-
-Recommended fix: call `BUS.unsubscribe` during cleanup or after battle to prevent duplicate revival handlers.
