@@ -17,3 +17,5 @@ Associate each action with a duration and make the battle loop wait for animatio
 - Multi-target actions scale their wait time appropriately.
 - Tests validate that action timing is enforced.
 - Documentation notes the timing system and any guidelines.
+
+ready for review

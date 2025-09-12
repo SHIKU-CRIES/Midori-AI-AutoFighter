@@ -38,6 +38,7 @@
   export let voiceVolume = 5;
   export let framerate = 60;
   export let reducedMotion = false;
+  export let showActionValues = false;
   export let selectedParty = [];
   export let battleActive = false;
   export let backendFlavor = '';
@@ -259,6 +260,7 @@
       {voiceVolume}
       {framerate}
       {reducedMotion}
+      {showActionValues}
       {runId}
       {backendFlavor}
       on:save={(e) => dispatch('saveSettings', e.detail)}
@@ -356,6 +358,7 @@
       {selectedParty}
       enrage={roomData?.enrage}
       reducedMotion={reducedMotion}
+      showActionValues={showActionValues}
       active={battleActive}
       showHud={true}
       showFoes={true}

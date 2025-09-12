@@ -57,6 +57,20 @@ This ensures players experience all available rewards in the proper sequence wit
 
 ## Game Features
 
+### Action Queue and Turn Order
+
+Combatants take turns based on an action gauge system. Each fighter starts with
+10,000 gauge points and spends them according to speed; lower action values act
+first. After acting, the combatant's gauge resets to its base and it moves to
+the back of the queue. The turn order is displayed in battle as a row of
+portraits; the active fighter is highlighted and slides to the end after its
+turn. Players can anticipate upcoming moves, and enabling **Show Action Values**
+in the options menu reveals each portrait's numeric gauge for debugging.
+
+Animation timing follows each action's duration plus a small pacing buffer.
+Players may tweak pacing in the options menu and enable a debug overlay to show
+raw action values.
+
 ### Responsive Layout
 
 The Svelte frontend targets three breakpoints:

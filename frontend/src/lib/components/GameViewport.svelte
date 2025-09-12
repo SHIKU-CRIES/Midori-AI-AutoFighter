@@ -46,9 +46,10 @@
   let userState = { level: 1, exp: 0, next_level_exp: 100 };
   let sfxVolume = 5;
   let musicVolume = 5;
-  let voiceVolume = 5;
-  let framerate = 60;
-  let reducedMotion = false;
+    let voiceVolume = 5;
+    let framerate = 60;
+    let reducedMotion = false;
+    let showActionValues = false;
   let selectedParty = [];
   let snapshotLoading = false;
 
@@ -59,8 +60,8 @@
       randomBg = getHourlyBackground();
     }
     const init = await loadInitialState();
-    ({ sfxVolume, musicVolume, voiceVolume, framerate, reducedMotion } =
-      init.settings);
+      ({ sfxVolume, musicVolume, voiceVolume, framerate, reducedMotion, showActionValues } =
+        init.settings);
     roster = init.roster;
     userState = init.user;
     // Ensure music starts after first user gesture if autoplay was blocked
@@ -288,6 +289,7 @@
         {voiceVolume}
         {framerate}
         {reducedMotion}
+        {showActionValues}
         {selectedParty}
         {battleActive}
         {backendFlavor}
@@ -303,7 +305,7 @@
       on:editorChange={(e) => dispatch('editorChange', e.detail)}
       on:loadRun={(e) => dispatch('loadRun', e.detail)}
       on:startNewRun={() => dispatch('startNewRun')}
-      on:saveSettings={(e) => ({ sfxVolume, musicVolume, voiceVolume, framerate, reducedMotion } = e.detail)}
+      on:saveSettings={(e) => ({ sfxVolume, musicVolume, voiceVolume, framerate, reducedMotion, showActionValues } = e.detail)}
       on:endRun={() => dispatch('endRun')}
       on:shopBuy={(e) => dispatch('shopBuy', e.detail)}
       on:shopReroll={() => dispatch('shopReroll')}

@@ -7,6 +7,53 @@ HP and accumulated experience are synced back so level-ups and damage persist
 into subsequent rooms. All summons and related tracking are cleared to prevent
 them from leaking into later encounters.
 
+## Action Queue Flow
+
+Turn order is governed by an Action Gauge system. Each combatant starts the
+battle with an ``action_gauge`` of ``10,000``.  A combatant's base
+``action_value`` is calculated as ``10,000 / SPD``.
+
+1. Build a queue sorted by each combatant's current ``action_value``.
+2. The fighter with the lowest value acts first.
+3. After the actor's turn completes, subtract the amount spent from every other
+   combatant's ``action_value``.
+4. Reset the actor's ``action_value`` to its stored base value and reinsert it
+   at the end of the queue.
+
+This loop repeats until either the party or all foes fall. The queue state is
+exposed for the frontend to visualize upcoming turns.
+
+The battle UI displays the queue as a horizontal strip of combatant portraits.
+The active fighter is outlined, and when its turn ends the portrait slides to
+the back of the line. Enabling the **Show Action Values** setting reveals each
+fighter's current ``action_value`` beneath their portrait for debugging turn
+order.
+
+### Queue Manipulation
+
+Some skills grant an immediate extra turn.  When this happens the backend marks
+the triggering combatant for a bonus action and the snapshot inserts an extra
+portrait at the front of the queue.  The bonus portrait is dimmed in the UI so
+players can anticipate the upcoming repeat action without confusing it for the
+currently active fighter.  After the bonus turn resolves, the queue resumes
+normal sequencing without advancing other gauges.
+
+[Action Animation Timers task](../tasks/cbd1caee-action-animation-timers.md)
+tracks upcoming work on per-action delays and animation hooks.
+
+### Timing and Animation
+
+Each action reports an ``animation_duration`` in seconds. The battle loop waits
+for that duration plus ``TURN_PACING`` (0.5 s) before progressing so long
+animations do not clip subsequent turns.
+
+For example, a skill with a 1.2 s animation blocks the queue for roughly
+1.7 s (``1.2 + TURN_PACING``) before the next combatant acts.
+
+Developers can preview numeric action values by enabling the debug toggle
+documented in [Action Value Display instructions](../instructions/action-value-display.md).
+Adjust global pacing in the [options menu](../instructions/options-menu.md).
+
 Each strike rolls the attacker's `effect_hit_rate` against the target's `effect_resistance`. The difference is clamped to zero, jittered by ±10%, and even a failed roll has a 1% floor chance to attach a damage-type-specific DoT scaled to the damage dealt.
 
 During the foe's turn, a target is chosen from living party members with a probability weight of `defense × mitigation`, making sturdier allies more likely to draw aggro.

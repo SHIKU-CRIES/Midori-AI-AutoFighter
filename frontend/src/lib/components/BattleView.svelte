@@ -8,6 +8,7 @@
   import BattleLog from '../battle/BattleLog.svelte';
   import BattleEffects from '../effects/BattleEffects.svelte';
   import StatusIcons from '../battle/StatusIcons.svelte';
+  import ActionQueue from '../battle/ActionQueue.svelte';
 
   export let runId = '';
   export let framerate = 60;
@@ -17,9 +18,15 @@
   export let active = true;
   export let showHud = true;
   export let showFoes = true;
+  export let showActionValues = false;
 
   let foes = [];
+  let queue = [];
+  let serverShowActionValues = false;
+  let combatants = [];
+  $: combatants = [...(party || []), ...(foes || [])];
   $: foeCount = (foes || []).length;
+  $: displayActionValues = Boolean(showActionValues || serverShowActionValues);
   function getFoeSizePx(count) {
     const c = Math.max(1, Number(count || 0));
     if (c <= 1) return 384;
@@ -224,6 +231,13 @@
         if (differs(enrichedFoes, foes)) foes = enrichedFoes;
       }
 
+      if (Array.isArray(snap.queue || snap.action_queue)) {
+        queue = snap.queue || snap.action_queue;
+      }
+      if ("show_action_values" in snap) {
+        serverShowActionValues = Boolean(snap.show_action_values);
+      }
+
       if (Array.isArray(snap.log)) logs = snap.log;
       else if (Array.isArray(snap.logs)) logs = snap.logs;
     } catch (e) {
@@ -267,7 +281,13 @@
 >
   <EnrageIndicator active={Boolean(enrage?.active)} {reducedMotion} enrageData={enrage} />
   <BattleEffects cue={effectCue} />
-  
+  <ActionQueue
+    {queue}
+    {combatants}
+    {reducedMotion}
+    showActionValues={displayActionValues}
+  />
+
   <!-- Foes at the top -->
   {#if showFoes}
     <div class="foe-row">

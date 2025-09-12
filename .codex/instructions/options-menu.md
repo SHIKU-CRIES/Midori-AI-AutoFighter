@@ -30,6 +30,15 @@ The Options submenu lets players adjust audio levels, system behaviour, and game
   - Toggle that slows animation effects for accessibility.
   - Label: `Reduced Motion`
   - Tooltip: `Slow down battle animations.`
+- **Show Action Values**
+  - Toggle that reveals numeric action values in the turn order UI.
+  - Label: `Show Action Values`
+  - Tooltip: `Display numeric action values in battle.`
+
+- **Animation Speed**
+  - Slider that scales the global `TURN_PACING` for all actions.
+  - Label: `Animation Speed`
+  - Tooltip: `Adjust battle animation pacing.`
 
 - **Wipe Save Data**
   - Button that clears all save records after confirmation.
@@ -66,3 +75,4 @@ The Options submenu lets players adjust audio levels, system behaviour, and game
 
 - Each control must include its Lucide icon, visible label, and hover tooltip.
 - Changes take effect immediately and should persist between sessions.
+- For turn order debugging, enable [Action Value Display](action-value-display.md).

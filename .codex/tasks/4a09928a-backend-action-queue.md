@@ -20,3 +20,6 @@ Introduce an Action Gauge–based turn system in the backend battle loop.
 - Snapshot or endpoint returns queue data for all combatants.
 - Tests cover basic speed and turn order scenarios.
 - Documentation describes Action Queue behavior.
+
+ready for review
+
