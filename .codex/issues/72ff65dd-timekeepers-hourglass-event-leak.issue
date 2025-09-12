@@ -1,9 +1,0 @@
-Issue: TimekeepersHourglass relic adds BUS listener without cleanup.
-
-Details:
-- `backend/plugins/relics/timekeepers_hourglass.py` subscribes to `turn_start` in `apply`.
-- No corresponding unsubscribe, so extra-turn logic may trigger even after relic removal or across battles.
-
-Location: `backend/plugins/relics/timekeepers_hourglass.py` line 33.
-
-Recommended fix: unsubscribe on battle end or when the relic is unequipped to avoid stale callbacks.
