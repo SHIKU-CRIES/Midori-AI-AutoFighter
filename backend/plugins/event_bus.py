@@ -124,10 +124,12 @@ class _Bus:
         self._batched_events[event].append(args)
 
         if self._batch_timer is None:
-            with contextlib.suppress(RuntimeError):
-                # Check if we're in an async context
-                asyncio.get_running_loop()
-
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                log.debug("No running event loop; processing batched events synchronously")
+                self._process_batches_sync()
+            else:
                 # Adaptive batching: reduce interval under high load
                 if self._dynamic_batch_interval:
                     total_queued = sum(len(events) for events in self._batched_events.values())
@@ -141,11 +143,10 @@ class _Bus:
                     interval = self._batch_interval
 
                 # Schedule batch processing
-                self._batch_timer = asyncio.create_task(self._process_batches_with_interval(interval))
+                self._batch_timer = loop.create_task(
+                    self._process_batches_with_interval(interval)
+                )
                 return
-
-            log.debug("No running event loop; processing batched events synchronously")
-            self._process_batches_sync()
 
     async def _process_batches_with_interval(self, interval: float):
         """Process batched events with adaptive interval."""
