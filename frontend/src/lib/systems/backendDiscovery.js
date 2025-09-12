@@ -1,4 +1,12 @@
-import { browser } from '$app/environment';
+// Handle test environment where $app/environment is not available
+let browser;
+try {
+  const appEnv = await import('$app/environment');
+  browser = appEnv.browser;
+} catch {
+  // In test environment, assume we're not in a browser
+  browser = false;
+}
 
 let cached = null;
 

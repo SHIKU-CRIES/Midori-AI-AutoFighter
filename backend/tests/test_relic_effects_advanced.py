@@ -29,8 +29,8 @@ async def test_frost_sigil_applies_chill(monkeypatch):
     party = Party()
     a = PlayerBase()
     b = PlayerBase()
-    b.hp = b.max_hp = 100
-    a.atk = 100
+    b.hp = b.set_base_stat('max_hp', 100)
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "frost_sigil")
     apply_relics(party)
@@ -55,8 +55,8 @@ async def test_frost_sigil_stacks(monkeypatch):
     party = Party()
     a = PlayerBase()
     b = PlayerBase()
-    b.hp = b.max_hp = 100
-    a.atk = 100
+    b.hp = b.set_base_stat('max_hp', 100)
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "frost_sigil")
     award_relic(party, "frost_sigil")
@@ -103,8 +103,8 @@ def test_travelers_charm_buff():
     party = Party()
     a = PlayerBase()
     attacker = PlayerBase()
-    a.defense = 100
-    a.mitigation = 100
+    a.set_base_stat('defense', 100)
+    a.set_base_stat('mitigation', 100)
     party.members.append(a)
     award_relic(party, "travelers_charm")
     apply_relics(party)
@@ -137,7 +137,7 @@ def test_greed_engine_drains_and_rewards():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.hp = a.max_hp = 200
+    a.hp = a.set_base_stat('max_hp', 200)
     party.members.append(a)
     award_relic(party, "greed_engine")
     apply_relics(party)
@@ -151,7 +151,7 @@ def test_greed_engine_stacks():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.hp = a.max_hp = 200
+    a.hp = a.set_base_stat('max_hp', 200)
     party.members.append(a)
     award_relic(party, "greed_engine")
     award_relic(party, "greed_engine")
@@ -166,7 +166,7 @@ def test_stellar_compass_crit_bonus():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.atk = 100
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "stellar_compass")
     apply_relics(party)
@@ -180,7 +180,7 @@ def test_stellar_compass_stacks():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.atk = 100
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "stellar_compass")
     award_relic(party, "stellar_compass")
@@ -195,7 +195,7 @@ def test_stellar_compass_multiple_crits():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.atk = 100
+    a.set_base_stat('atk', 100)
     party.members.append(a)
     award_relic(party, "stellar_compass")
     apply_relics(party)

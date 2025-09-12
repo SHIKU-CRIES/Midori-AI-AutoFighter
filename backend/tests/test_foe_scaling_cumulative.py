@@ -15,15 +15,15 @@ def test_foe_scaling_cumulative_rooms():
     """Test that foe scaling uses cumulative room progression across floors."""
     # Create test foes with identical base stats
     foe1 = FoeBase()
-    foe1.atk = 100
-    foe1.defense = 50
-    foe1.max_hp = 1000
+    foe1.set_base_stat('atk', 100)
+    foe1.set_base_stat('defense', 50)
+    foe1.set_base_stat('max_hp', 1000)
     foe1.hp = 1000
 
     foe2 = FoeBase()
-    foe2.atk = 100
-    foe2.defense = 50
-    foe2.max_hp = 1000
+    foe2.set_base_stat('atk', 100)
+    foe2.set_base_stat('defense', 50)
+    foe2.set_base_stat('max_hp', 1000)
     foe2.hp = 1000
 
     # Room 1 Floor 1 (cumulative room 1)
@@ -51,15 +51,15 @@ def test_foe_scaling_cumulative_rooms():
 def test_foe_scaling_room_progression_within_floor():
     """Test that rooms within a floor still progress correctly."""
     foe1 = FoeBase()
-    foe1.atk = 100
-    foe1.defense = 50
-    foe1.max_hp = 1000
+    foe1.set_base_stat('atk', 100)
+    foe1.set_base_stat('defense', 50)
+    foe1.set_base_stat('max_hp', 1000)
     foe1.hp = 1000
 
     foe2 = FoeBase()
-    foe2.atk = 100
-    foe2.defense = 50
-    foe2.max_hp = 1000
+    foe2.set_base_stat('atk', 100)
+    foe2.set_base_stat('defense', 50)
+    foe2.set_base_stat('max_hp', 1000)
     foe2.hp = 1000
 
     # Room 5 Floor 1
@@ -81,15 +81,15 @@ def test_foe_scaling_room_progression_within_floor():
 def test_foe_level_cumulative_progression():
     """Foe level should never decrease across floor transitions."""
     foe1 = FoeBase()
-    foe1.atk = 100
-    foe1.defense = 50
-    foe1.max_hp = 1000
+    foe1.set_base_stat('atk', 100)
+    foe1.set_base_stat('defense', 50)
+    foe1.set_base_stat('max_hp', 1000)
     foe1.hp = 1000
 
     foe2 = FoeBase()
-    foe2.atk = 100
-    foe2.defense = 50
-    foe2.max_hp = 1000
+    foe2.set_base_stat('atk', 100)
+    foe2.set_base_stat('defense', 50)
+    foe2.set_base_stat('max_hp', 1000)
     foe2.hp = 1000
 
     node1 = MapNode(room_id=45, room_type="battle-normal", floor=1, index=45, loop=1, pressure=0)

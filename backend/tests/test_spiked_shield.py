@@ -19,8 +19,8 @@ def test_spiked_shield_retaliates_damage(monkeypatch):
     party = Party()
     defender = PlayerBase()
     attacker = PlayerBase()
-    defender.atk = 100
-    attacker.hp = attacker.max_hp = 1000
+    defender.set_base_stat('atk', 100)
+    attacker.hp = attacker.set_base_stat('max_hp', 1000)
     party.members.append(defender)
     award_card(party, "spiked_shield")
     loop.run_until_complete(apply_cards(party))

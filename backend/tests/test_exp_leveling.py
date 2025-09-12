@@ -15,7 +15,7 @@ async def test_battle_room_awards_exp(monkeypatch):
     node = MapNode(room_id=0, room_type="battle", floor=1, index=2, loop=1, pressure=0)
     room = BattleRoom(node)
     player = player_mod.Player()
-    player.atk = 1000
+    player.set_base_stat('atk', 1000)
     player.exp = 0
     party = Party(members=[player])
 
@@ -40,7 +40,7 @@ async def test_level_up_persists_hp(monkeypatch):
     node = MapNode(room_id=0, room_type="battle", floor=1, index=2, loop=1, pressure=0)
     room = BattleRoom(node)
     player = player_mod.Player()
-    player.atk = 1000
+    player.set_base_stat('atk', 1000)
     player.hp = 500
     party = Party(members=[player])
 
@@ -59,7 +59,10 @@ async def test_level_up_persists_hp(monkeypatch):
 
 
 def test_gain_exp_and_level_up(monkeypatch):
-    stats = Stats(hp=100, max_hp=100, atk=10, defense=5)
+    stats = Stats(hp=100)
+    stats.set_base_stat('max_hp', 100)
+    stats.set_base_stat('atk', 10)
+    stats.set_base_stat('defense', 5)
     monkeypatch.setattr(random, "uniform", lambda a, b: 0)
     stats.gain_exp(100)
     assert stats.level == 4

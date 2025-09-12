@@ -28,8 +28,8 @@ def test_bent_dagger_kill_trigger():
     party = Party()
     member = PlayerBase()
     enemy = PlayerBase()
-    member.atk = 100
-    enemy.hp = enemy.max_hp = 10
+    member.set_base_stat('atk', 100)
+    enemy.hp = enemy.set_base_stat('max_hp', 10)
     party.members.append(member)
     award_relic(party, "bent_dagger")
     apply_relics(party)
@@ -43,8 +43,8 @@ def test_bent_dagger_kill_trigger_stacks():
     party = Party()
     member = PlayerBase()
     enemy = PlayerBase()
-    member.atk = 100
-    enemy.hp = enemy.max_hp = 10
+    member.set_base_stat('atk', 100)
+    enemy.hp = enemy.set_base_stat('max_hp', 10)
     party.members.append(member)
     award_relic(party, "bent_dagger")
     award_relic(party, "bent_dagger")
@@ -58,7 +58,7 @@ def test_bent_dagger_kill_trigger_stacks():
 def test_lucky_button_stacks():
     party = Party()
     member = PlayerBase()
-    member.crit_rate = 0.1
+    member.set_base_stat('crit_rate', 0.1)
     party.members.append(member)
     award_relic(party, "lucky_button")
     award_relic(party, "lucky_button")
@@ -88,8 +88,8 @@ def test_guardian_charm_targets_lowest_hp():
     party = Party()
     low = PlayerBase()
     high = PlayerBase()
-    low.hp = low.max_hp = 50
-    high.hp = high.max_hp = 100
+    low.hp = low.set_base_stat('max_hp', 50)
+    high.hp = high.set_base_stat('max_hp', 100)
     party.members.extend([low, high])
     award_relic(party, "guardian_charm")
     apply_relics(party)
@@ -101,8 +101,8 @@ def test_guardian_charm_stacks():
     party = Party()
     low = PlayerBase()
     high = PlayerBase()
-    low.hp = low.max_hp = 50
-    high.hp = high.max_hp = 100
+    low.hp = low.set_base_stat('max_hp', 50)
+    high.hp = high.set_base_stat('max_hp', 100)
     party.members.extend([low, high])
     award_relic(party, "guardian_charm")
     award_relic(party, "guardian_charm")
@@ -116,7 +116,7 @@ def test_herbal_charm_heals_each_turn():
     party = Party()
     member = PlayerBase()
     member.hp = 50
-    member.max_hp = 100
+    member.set_base_stat('max_hp', 100)
     party.members.append(member)
     award_relic(party, "herbal_charm")
     apply_relics(party)
@@ -129,7 +129,7 @@ def test_herbal_charm_stacks():
     party = Party()
     member = PlayerBase()
     member.hp = 50
-    member.max_hp = 100
+    member.set_base_stat('max_hp', 100)
     party.members.append(member)
     award_relic(party, "herbal_charm")
     award_relic(party, "herbal_charm")
@@ -143,8 +143,8 @@ def test_tattered_flag_buffs_survivors_on_death():
     party = Party()
     survivor = PlayerBase()
     victim = PlayerBase()
-    survivor.atk = 100
-    victim.hp = victim.max_hp = 10
+    survivor.set_base_stat('atk', 100)
+    victim.hp = victim.set_base_stat('max_hp', 10)
     party.members.extend([survivor, victim])
     award_relic(party, "tattered_flag")
     apply_relics(party)
@@ -158,8 +158,8 @@ def test_tattered_flag_stacks():
     party = Party()
     survivor = PlayerBase()
     victim = PlayerBase()
-    survivor.atk = 100
-    victim.hp = victim.max_hp = 10
+    survivor.set_base_stat('atk', 100)
+    victim.hp = victim.set_base_stat('max_hp', 10)
     party.members.extend([survivor, victim])
     award_relic(party, "tattered_flag")
     award_relic(party, "tattered_flag")
@@ -213,7 +213,7 @@ def test_shiny_pebble_stacks():
 def test_threadbare_cloak_shield_scales_with_stacks():
     party = Party()
     a = PlayerBase()
-    a.hp = a.max_hp = 100
+    a.hp = a.set_base_stat('max_hp', 100)
     party.members.append(a)
 
     award_relic(party, "threadbare_cloak")
@@ -229,7 +229,7 @@ def test_threadbare_cloak_applies_each_battle():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.hp = a.max_hp = 100
+    a.hp = a.set_base_stat('max_hp', 100)
     party.members.append(a)
 
     award_relic(party, "threadbare_cloak")
@@ -237,7 +237,7 @@ def test_threadbare_cloak_applies_each_battle():
     assert a.hp == 100 + int(100 * 0.03)
 
     BUS.emit("battle_end", a)
-    a.hp = a.max_hp = 100
+    a.hp = a.set_base_stat('max_hp', 100)
     apply_relics(party)
     assert a.hp == 100 + int(100 * 0.03)
 
@@ -246,8 +246,8 @@ def test_lucky_button_missed_crit():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.crit_rate = 0.1
-    a.crit_damage = 2.0
+    a.set_base_stat('crit_rate', 0.1)
+    a.set_base_stat('crit_damage', 2.0)
     party.members.append(a)
     award_relic(party, "lucky_button")
     apply_relics(party)
@@ -277,7 +277,7 @@ def test_wooden_idol_resist_buff():
     event_bus_module.bus._subs.clear()
     party = Party()
     a = PlayerBase()
-    a.effect_resistance = 1.0
+    a.set_base_stat('effect_resistance', 1.0)
     party.members.append(a)
     award_relic(party, "wooden_idol")
     apply_relics(party)
