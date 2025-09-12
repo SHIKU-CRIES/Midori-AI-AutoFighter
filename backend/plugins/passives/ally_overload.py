@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import Callable
 from typing import ClassVar
 
 from autofighter.stats import StatEffect
@@ -21,6 +22,7 @@ class AllyOverload:
     # Class-level tracking of overload charge and stance for each entity
     _overload_charge: ClassVar[dict[int, int]] = {}
     _overload_active: ClassVar[dict[int, bool]] = {}
+    _add_hot_backup: ClassVar[dict[int, Callable]] = {}
 
     async def apply(self, target: "Stats") -> None:
         """Apply Ally's twin dagger and overload mechanics."""
@@ -83,14 +85,17 @@ class AllyOverload:
         )
         target.add_effect(damage_vulnerability)
 
-        # Block HoT ticks (would need integration with effect system)
-        hot_block = StatEffect(
-            name=f"{self.id}_hot_block",
-            stat_modifiers={"effect_resistance": 1.0},  # 100% resistance to beneficial effects
-            duration=-1,  # Active while Overload is on
-            source=self.id,
-        )
-        target.add_effect(hot_block)
+        # Remove existing HoTs and block new applications while Overload is active
+        em = getattr(target, "effect_manager", None)
+        if em is not None:
+            em.hots.clear()
+            target.hots.clear()
+
+            def _block_hot(self_em, *_: object, **__: object) -> None:
+                return None
+
+            self._add_hot_backup[entity_id] = em.add_hot
+            em.add_hot = _block_hot.__get__(em, type(em))
 
         # Cap recoverable HP at 20% of normal
         max_recoverable_hp = int(target.max_hp * 0.2)
@@ -111,13 +116,17 @@ class AllyOverload:
         effects_to_remove = [
             f"{self.id}_damage_bonus",
             f"{self.id}_damage_vulnerability",
-            f"{self.id}_hot_block",
-            f"{self.id}_hp_cap"
+            f"{self.id}_hp_cap",
         ]
 
         for effect_name in effects_to_remove:
             # Use effect manager helper to remove by name
             target.remove_effect_by_name(effect_name)
+
+        em = getattr(target, "effect_manager", None)
+        original = self._add_hot_backup.pop(entity_id, None)
+        if em is not None and original is not None:
+            em.add_hot = original
 
         # Reset to base twin dagger attacks
         target.actions_per_turn = 2
