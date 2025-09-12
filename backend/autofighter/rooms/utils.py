@@ -12,6 +12,7 @@ from plugins.foes._base import FoeBase
 from ..mapgen import MapNode
 from ..party import Party
 from ..passives import PassiveRegistry
+from ..stats import GAUGE_START
 from ..stats import Stats
 
 # Action caps for foes to prevent runaway turn economy
@@ -270,6 +271,10 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "effect_resistance": 0.0,
             "shields": 0,
             "overheal_enabled": False,
+            "spd": 10,
+            "action_gauge": GAUGE_START,
+            "action_value": 0.0,
+            "base_action_value": 0.0,
             "rank": "normal",
         }
 
@@ -312,6 +317,10 @@ def _serialize(obj: Stats) -> dict[str, Any]:
             "effect_resistance": float(getattr(obj, "effect_resistance", 0.0) or 0.0),
             "shields": int(getattr(obj, "shields", 0) or 0),
             "overheal_enabled": bool(getattr(obj, "overheal_enabled", False)),
+            "spd": int(getattr(obj, "spd", 10) or 10),
+            "action_gauge": int(getattr(obj, "action_gauge", GAUGE_START) or GAUGE_START),
+            "action_value": float(getattr(obj, "action_value", 0.0) or 0.0),
+            "base_action_value": float(getattr(obj, "base_action_value", 0.0) or 0.0),
             "rank": getattr(obj, "rank", "normal"),
         }
 

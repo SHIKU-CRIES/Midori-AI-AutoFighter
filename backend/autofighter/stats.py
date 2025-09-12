@@ -19,6 +19,9 @@ log = logging.getLogger(__name__)
 _ENRAGE_PERCENT: float = 0.0
 _BATTLE_ACTIVE: bool = False
 
+# Starting value for action gauges.
+GAUGE_START: int = 10_000
+
 
 @dataclass
 class StatEffect:
@@ -151,6 +154,7 @@ class Stats:
     _base_dodge_odds: float = field(default=0.05, init=False)
     _base_effect_resistance: float = field(default=0.05, init=False)
     _base_vitality: float = field(default=1.0, init=False)
+    _base_spd: int = field(default=10, init=False)
 
     # Damage type and other permanent attributes
     damage_type: DamageTypeBase = field(default_factory=Generic)
@@ -163,6 +167,15 @@ class Stats:
     last_damage_taken: int = 0
     base_aggro: float = 0.1
     aggro_modifier: float = 0.0
+
+    # Action queue
+    action_gauge: int = GAUGE_START
+    action_value: float = 0.0
+    base_action_value: float = field(default=0.0, init=False)
+
+    # Animation timing
+    animation_duration: float = 0.0
+    animation_per_target: float = 0.0
 
     # Ultimate system
     ultimate_charge: int = 0
@@ -183,7 +196,11 @@ class Stats:
     _active_effects: list[StatEffect] = field(default_factory=list, init=False)
 
     level_up_gains: dict[str, float] = field(
-        default_factory=lambda: {"max_hp": 10.0, "atk": 5.0, "defense": 3.0}
+        default_factory=lambda: {
+            "max_hp": 10.0,
+            "atk": 5.0,
+            "defense": 3.0,
+        }
     )
 
     def __post_init__(self):
@@ -211,6 +228,8 @@ class Stats:
             self._base_effect_resistance = 0.05
         if not hasattr(self, '_base_vitality'):
             self._base_vitality = 1.0
+        if not hasattr(self, '_base_spd'):
+            self._base_spd = 10
 
         # Set hp to match max_hp at start
         self.hp = self.max_hp
@@ -304,6 +323,18 @@ class Stats:
     def vitality(self, value: float) -> None:  # type: ignore[override]
         try:
             self._base_vitality = float(value)
+        except Exception:
+            pass
+
+    @property
+    def spd(self) -> int:
+        """Calculate runtime speed (base + effects)."""
+        return int(max(1, self._base_spd + self._calculate_stat_modifier('spd')))
+
+    @spd.setter
+    def spd(self, value: int) -> None:  # type: ignore[override]
+        try:
+            self._base_spd = int(value)
         except Exception:
             pass
 
@@ -726,6 +757,14 @@ class Stats:
     def effective_hp(self) -> int:
         """Get total effective HP (actual HP + shields)."""
         return self.hp + self.shields
+
+
+def calc_animation_time(actor: "Stats", targets: int) -> float:
+    """Compute total animation wait time for an action."""
+
+    base = getattr(actor, "animation_duration", 0.0)
+    per = getattr(actor, "animation_per_target", 0.0)
+    return base + per * max(targets - 1, 0)
 
 
 StatusHook = Callable[["Stats"], None]

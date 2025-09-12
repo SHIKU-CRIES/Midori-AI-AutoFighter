@@ -22,6 +22,7 @@
   export let voiceVolume = 5;
   export let framerate = 60;
   export let reducedMotion = false;
+  export let showActionValues = false;
   export let lrmModel = '';
   export let runId = '';
   export let backendFlavor = typeof window !== 'undefined' ? window.backendFlavor || '' : '';
@@ -83,14 +84,16 @@
       musicVolume,
       voiceVolume,
       framerate: Number(framerate),
-      reducedMotion
+      reducedMotion,
+      showActionValues
     });
     dispatch('save', {
       sfxVolume,
       musicVolume,
       voiceVolume,
       framerate: Number(framerate),
-      reducedMotion
+      reducedMotion,
+      showActionValues
     });
     saveStatus = 'Saved';
     clearTimeout(resetTimeout);
@@ -324,6 +327,10 @@
     </div>
   {:else if activeTab === 'gameplay'}
     <div class="panel">
+      <div class="control" title="Display numeric action values in the turn order.">
+        <label>Show Action Values</label>
+        <input type="checkbox" bind:checked={showActionValues} on:change={scheduleSave} />
+      </div>
       <div class="control" title="End the current run.">
         <Power />
         <label>End Run</label>

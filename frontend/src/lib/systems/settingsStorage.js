@@ -8,6 +8,7 @@ export function loadSettings() {
     if (data.framerate !== undefined) data.framerate = Number(data.framerate);
     if (data.reducedMotion !== undefined) data.reducedMotion = Boolean(data.reducedMotion);
     if (data.lrmModel !== undefined) data.lrmModel = String(data.lrmModel);
+    if (data.showActionValues !== undefined) data.showActionValues = Boolean(data.showActionValues);
     return data;
   } catch {
     return {};

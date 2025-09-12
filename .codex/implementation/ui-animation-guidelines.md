@@ -16,6 +16,11 @@
 - The active-fighter arrow uses a subtle 500ms bounce to draw attention to the
   acting combatant.
 
+## Action Timing
+- Backend actions expose `animation_duration` and `animation_per_target` fields.
+- Total wait time is `animation_duration + animation_per_target * (targets - 1)`.
+- The battle loop emits `animation_start` and `animation_end` events and waits for this duration before the next turn.
+
 ## Sound Cues
 - Pair major animations with subtle sound effects to reinforce feedback.
 - Respect global sound settings and provide a non-audio fallback.

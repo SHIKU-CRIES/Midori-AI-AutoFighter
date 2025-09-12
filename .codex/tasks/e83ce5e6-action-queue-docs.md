@@ -15,3 +15,5 @@ Provide comprehensive documentation for the Action Queue and action timing featu
 - Documentation clearly explains Action Gauge, AV, turn order, and animation waits.
 - Player-facing docs mention queue visuals and settings options.
 - Instruction files guide developers on configuration and implementation details.
+
+ready for review

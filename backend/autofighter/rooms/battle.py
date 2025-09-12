@@ -32,6 +32,7 @@ from ..party import Party
 from ..passives import PassiveRegistry
 from ..stats import BUS
 from ..stats import Stats
+from ..stats import calc_animation_time
 from ..stats import set_enrage_percent
 from . import Room
 from .utils import _build_foes
@@ -494,6 +495,7 @@ class BattleRoom(Room):
                                                         party=combat_party.members,
                                                         foes=foes)
                     tgt_mgr.maybe_inflict_dot(member, dmg)
+                    targets_hit = 1
                     if getattr(member.damage_type, "id", "").lower() == "wind":
                         # Compute dynamic scaling based on number of living targets.
                         # Example mapping from N targets -> scale = 1 / (2N):
@@ -512,6 +514,7 @@ class BattleRoom(Room):
                             extra_dmg = await extra_foe.apply_damage(
                                 scaled_atk, attacker=member, action_name="Wind Spread"
                             )
+                            targets_hit += 1
                             if extra_dmg <= 0:
                                 log.info(
                                     "%s's attack was dodged by %s",
@@ -534,6 +537,17 @@ class BattleRoom(Room):
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                             await _credit_if_dead(extra_foe)
                     await BUS.emit_async("action_used", member, tgt_foe, dmg)
+                    duration = calc_animation_time(member, targets_hit)
+                    if duration > 0:
+                        await BUS.emit_async(
+                            "animation_start", member, targets_hit, duration
+                        )
+                        try:
+                            await asyncio.sleep(duration)
+                        finally:
+                            await BUS.emit_async(
+                                "animation_end", member, targets_hit, duration
+                            )
                     # Trigger action_taken passives for the acting member
                     await registry.trigger("action_taken", member, target=tgt_foe, damage=dmg, party=combat_party.members, foes=foes)
                     # Sync any new summons into party/foes so they can act this round
@@ -733,7 +747,19 @@ class BattleRoom(Room):
                         damage_type = getattr(acting_foe.damage_type, 'id', 'generic') if hasattr(acting_foe, 'damage_type') else 'generic'
                         await BUS.emit_async("hit_landed", acting_foe, target, dmg, "attack", f"foe_{damage_type}_attack")
                     target_effect.maybe_inflict_dot(acting_foe, dmg)
+                    targets_hit = 1
                     await BUS.emit_async("action_used", acting_foe, target, dmg)
+                    duration = calc_animation_time(acting_foe, targets_hit)
+                    if duration > 0:
+                        await BUS.emit_async(
+                            "animation_start", acting_foe, targets_hit, duration
+                        )
+                        try:
+                            await asyncio.sleep(duration)
+                        finally:
+                            await BUS.emit_async(
+                                "animation_end", acting_foe, targets_hit, duration
+                            )
                     # Trigger action_taken passives for the acting foe
                     await registry.trigger("action_taken", acting_foe)
                     # Sync any new summons created by foes

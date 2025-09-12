@@ -19,6 +19,7 @@ export async function loadInitialState() {
     framerate: saved.framerate !== undefined ? Number(saved.framerate) : 60,
     autocraft: true,
     reducedMotion: saved.reducedMotion ?? false,
+    showActionValues: saved.showActionValues ?? false,
   };
   let roster = [];
   let user = { level: 1, exp: 0, next_level_exp: 100 };

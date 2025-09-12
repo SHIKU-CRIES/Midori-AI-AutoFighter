@@ -21,3 +21,5 @@ Visualize turn order with portraits and optional Action Value numbers.
 - Animations respect reduced-motion settings.
 - Tests demonstrate queue rendering and toggle behavior.
 - Documentation reflects the new queue and options.
+
+ready for review
