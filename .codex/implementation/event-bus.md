@@ -44,8 +44,8 @@ High‑frequency events (e.g. `damage_dealt`, `damage_taken`, `hit_landed`,
 adaptive—when load is low, batches are processed more quickly; during heavy
 load, the interval grows to maintain responsiveness.
 
-Each callback and batch item yields `await asyncio.sleep(0.002)` to give other
-tasks a chance to run.
+Each callback and batch item yields `await asyncio.sleep(0)` to cooperatively
+schedule other tasks without incurring artificial delays.
 
 ## Events
 The core combat engine emits a few global events that plugins may subscribe to:
