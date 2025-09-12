@@ -1,9 +1,0 @@
-Issue: SteelBangles card subscribes to BUS but lacks unsubscription.
-
-Details:
-- `backend/plugins/cards/steel_bangles.py` registers a `damage_dealt` listener in `apply`.
-- No cleanup on battle end, causing callbacks to persist and stack if multiple battles occur.
-
-Location: `backend/plugins/cards/steel_bangles.py` line 51.
-
-Recommended fix: remove listener on battle_end or card removal to avoid memory/logic leaks.
