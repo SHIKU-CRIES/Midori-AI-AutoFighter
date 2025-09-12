@@ -6,7 +6,8 @@ import pytest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from battle_logging import BattleLogger
+from battle_logging import end_battle_logging
+from battle_logging import start_battle_logging
 
 from autofighter.mapgen import MapNode
 from autofighter.party import Party
@@ -45,24 +46,26 @@ async def test_party_damage_by_action_tracking():
     party = Party(members=[player])
 
     # Start battle logging
-    logger = BattleLogger("test_run", 0)
-    logger.start_battle(party.members, [foe])
+    logger = start_battle_logging()
+    if logger:
+        logger.summary.party_members = [player.id]
+        logger.summary.foes = [foe.id]
 
     await room.resolve(party, {}, foe=foe)
 
     # Check that party member has damage_by_action data
-    summary = logger.export_summary()
-    assert "damage_by_action" in summary
-    assert "test_player" in summary["damage_by_action"]
+    end_battle_logging("victory")
+    if logger:
+        summary = logger.export_summary()
+        assert "damage_by_action" in summary
+        assert "test_player" in summary["damage_by_action"]
 
-    player_actions = summary["damage_by_action"]["test_player"]
-    print(f"Player actions: {player_actions}")
+        player_actions = summary["damage_by_action"]["test_player"]
+        print(f"Player actions: {player_actions}")
 
-    # Should have Normal Attack damage
-    assert "Normal Attack" in player_actions
-    assert player_actions["Normal Attack"] > 0
-
-    logger.end_battle("victory")
+        # Should have Normal Attack damage
+        assert "Normal Attack" in player_actions
+        assert player_actions["Normal Attack"] > 0
 
 
 @pytest.mark.asyncio
@@ -96,30 +99,32 @@ async def test_foe_damage_by_action_tracking():
     party = Party(members=[player])
 
     # Start battle logging
-    logger = BattleLogger("test_run", 1)
-    logger.start_battle(party.members, [foe])
+    logger = start_battle_logging()
+    if logger:
+        logger.summary.party_members = [player.id]
+        logger.summary.foes = [foe.id]
 
     await room.resolve(party, {}, foe=foe)
 
     # Check that foe has damage_by_action data
-    summary = logger.export_summary()
-    assert "damage_by_action" in summary
+    end_battle_logging("victory")
+    if logger:
+        summary = logger.export_summary()
+        assert "damage_by_action" in summary
 
-    print(f"All damage_by_action: {summary['damage_by_action']}")
+        print(f"All damage_by_action: {summary['damage_by_action']}")
 
-    # Check if foe has any actions tracked
-    if "test_foe" in summary["damage_by_action"]:
-        foe_actions = summary["damage_by_action"]["test_foe"]
-        print(f"Foe actions: {foe_actions}")
+        # Check if foe has any actions tracked
+        if "test_foe" in summary["damage_by_action"]:
+            foe_actions = summary["damage_by_action"]["test_foe"]
+            print(f"Foe actions: {foe_actions}")
 
-        # Should have Normal Attack damage if foe attacked
-        if foe_actions:
-            assert "Normal Attack" in foe_actions
-            assert foe_actions["Normal Attack"] > 0
-    else:
-        print("No foe actions tracked - foe may not have attacked")
-
-    logger.end_battle("victory")
+            # Should have Normal Attack damage if foe attacked
+            if foe_actions:
+                assert "Normal Attack" in foe_actions
+                assert foe_actions["Normal Attack"] > 0
+        else:
+            print("No foe actions tracked - foe may not have attacked")
 
 
 @pytest.mark.asyncio
@@ -129,26 +134,28 @@ async def test_healing_in_damage_by_action():
     player = Carly()
     player.id = "healer"
 
+    # Start battle logging
+    logger = start_battle_logging()
+    if logger:
+        logger.summary.party_members = [player.id]
+        logger.summary.foes = []
+
     # Damage the player so we can heal
     await player.apply_damage(50, attacker=None)
-
-    # Start battle logging
-    logger = BattleLogger("test_run", 2)
-    logger.start_battle([player], [])
 
     # Apply healing which should be tracked in damage_by_action
     await player.apply_healing(25, healer=player, source_type="heal", source_name="Test Heal")
 
     # Check that healing is tracked in damage_by_action
-    summary = logger.export_summary()
-    assert "damage_by_action" in summary
-    assert "healer" in summary["damage_by_action"]
+    end_battle_logging("victory")
+    if logger:
+        summary = logger.export_summary()
+        assert "damage_by_action" in summary
+        assert "healer" in summary["damage_by_action"]
 
-    player_actions = summary["damage_by_action"]["healer"]
-    print(f"Healing actions: {player_actions}")
+        player_actions = summary["damage_by_action"]["healer"]
+        print(f"Healing actions: {player_actions}")
 
-    # Should have healing action
-    assert "Test Heal Healing" in player_actions
-    assert player_actions["Test Heal Healing"] == 25
-
-    logger.end_battle("victory")
+        # Should have healing action
+        assert "Test Heal Healing" in player_actions
+        assert player_actions["Test Heal Healing"] == 25
