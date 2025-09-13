@@ -28,8 +28,8 @@ from autofighter.summons.base import Summon
 from autofighter.summons.manager import SummonManager
 from plugins.damage_types import ALL_DAMAGE_TYPES
 
-from ..party import Party
 from ..action_queue import ActionQueue
+from ..party import Party
 from ..passives import PassiveRegistry
 from ..stats import BUS
 from ..stats import Stats
@@ -1097,6 +1097,7 @@ class BattleRoom(Room):
             "enrage": {"active": enrage_active, "stacks": enrage_stacks, "turns": enrage_stacks},
             "rdr": party.rdr,
             "action_queue": _queue_snapshot(),
+            "ended": True,
         }
 
 
