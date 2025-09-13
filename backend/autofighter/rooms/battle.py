@@ -348,6 +348,13 @@ class BattleRoom(Room):
             except Exception:
                 # Never let EXP crediting break battle flow
                 pass
+
+        def _remove_dead_foes() -> None:
+            for i in range(len(foes) - 1, -1, -1):
+                if getattr(foes[i], "hp", 1) <= 0:
+                    foes.pop(i)
+                    foe_effects.pop(i)
+                    enrage_mods.pop(i)
         turn = 0
         temp_rdr = party.rdr
         if progress is not None:
@@ -478,6 +485,9 @@ class BattleRoom(Room):
                     # Credit any foes that died due to DoT/HoT ticks
                     for f in foes:
                         await _credit_if_dead(f)
+                    _remove_dead_foes()
+                    if not foes:
+                        break
                     if member.hp <= 0:
                         await registry.trigger("turn_end", member, party=combat_party.members, foes=foes)
                         await asyncio.sleep(0.001)
@@ -590,6 +600,11 @@ class BattleRoom(Room):
                                                                 foes=foes)
                             foe_effects[extra_idx].maybe_inflict_dot(member, extra_dmg)
                             await _credit_if_dead(extra_foe)
+                            _remove_dead_foes()
+                            if not foes:
+                                break
+                        if not foes:
+                            break
                     await BUS.emit_async("action_used", member, tgt_foe, dmg)
                     duration = calc_animation_time(member, targets_hit)
                     if duration > 0:
@@ -679,19 +694,23 @@ class BattleRoom(Room):
                     await _pace(action_start)
                     if tgt_foe.hp <= 0:
                         await _credit_if_dead(tgt_foe)
+                        _remove_dead_foes()
                         await asyncio.sleep(0.001)
-                        if all(f.hp <= 0 for f in foes):
+                        if not foes:
                             break
                         await asyncio.sleep(0.001)
                         continue
                     await asyncio.sleep(0.001)
                     break
             # End of party member loop
+            if not foes:
+                break
             # If party wiped during this round, stop taking actions
             if not any(m.hp > 0 for m in combat_party.members):
                 break
             # Foes: each living foe takes exactly one action per round
-            for foe_idx, acting_foe in enumerate(foes):
+            # Iterate over a snapshot to avoid mutating while iterating
+            for foe_idx, acting_foe in enumerate(list(foes)):
                 safety = 0
                 while True:
                     safety += 1
@@ -737,6 +756,9 @@ class BattleRoom(Room):
                     # Credit any foes that died from effects applied by foes (e.g., bleed)
                     for f in foes:
                         await _credit_if_dead(f)
+                    # Deferring foe removal until after the loop preserves turn order
+                    if all(f.hp <= 0 for f in foes):
+                        break
                     if acting_foe.hp <= 0:
                         await registry.trigger("turn_end", acting_foe, party=combat_party.members, foes=foes)
                         await asyncio.sleep(0.001)
@@ -875,6 +897,9 @@ class BattleRoom(Room):
                     await _pace(action_start)
                     await asyncio.sleep(0.001)
                     break
+            _remove_dead_foes()
+            if not foes:
+                break
         # Signal completion as soon as the loop ends to help UIs stop polling
         # immediately, even before rewards are fully computed.
         if progress is not None:
