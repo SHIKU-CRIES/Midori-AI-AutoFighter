@@ -52,11 +52,13 @@
   }
   .entry {
     position: relative;
-    width: 48px;
-    height: 64px;
+    width: 160px;
+    height: 90px; /* 16:9 */
     will-change: transform;
     border: 2px solid var(--element-color);
-  }
+    border-radius: 8px;
+    overflow: hidden;
+    }
   .entry.bonus {
     opacity: 0.6;
   }
@@ -68,10 +70,9 @@
   }
   .av {
     position: absolute;
-    bottom: -0.6rem;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.6rem;
+    bottom: 4px;
+    right: 4px;
+    font-size: 0.75rem;
     background: rgba(0,0,0,0.35);
     box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--element-color) 60%, black);
     border-radius: 6px;
