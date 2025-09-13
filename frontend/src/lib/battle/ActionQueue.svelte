@@ -11,27 +11,29 @@
       return combatants.find((c) => c.id === id) || { id };
     }
 
-    $: activeIndex = queue.findIndex((e) => !e.bonus);
+    $: displayQueue = queue.filter((e) => {
+      const fighter = findCombatant(e.id);
+      return fighter.hp >= 1;
+    });
+    $: activeIndex = displayQueue.findIndex((e) => !e.bonus);
   </script>
 
 <div class="action-queue" data-testid="action-queue">
-  {#each queue as entry, i (entry.bonus ? `b-${entry.id}-${i}` : entry.id)}
+  {#each displayQueue as entry, i (entry.bonus ? `b-${entry.id}-${i}` : entry.id)}
     {@const fighter = findCombatant(entry.id)}
-    {#if fighter.hp >= 1}
-      {@const elColor = getElementColor(fighter.element)}
-      <div
-        class="entry"
-        class:active={i === activeIndex}
-        class:bonus={entry.bonus}
-        style="--element-color: {elColor}"
-        animate:flip={{ duration: reducedMotion ? 0 : 220 }}
-      >
-        <img src={getCharacterImage(fighter.summon_type || fighter.id)} alt="" class="portrait" />
-        {#if showActionValues}
-          <div class="av">{Math.round(entry.action_value)}</div>
-        {/if}
-      </div>
-    {/if} <!-- filter out defeated fighters so revived ones return -->
+    {@const elColor = getElementColor(fighter.element)}
+    <div
+      class="entry"
+      class:active={i === activeIndex}
+      class:bonus={entry.bonus}
+      style="--element-color: {elColor}"
+      animate:flip={{ duration: reducedMotion ? 0 : 220 }}
+    >
+      <img src={getCharacterImage(fighter.summon_type || fighter.id)} alt="" class="portrait" />
+      {#if showActionValues}
+        <div class="av">{Math.round(entry.action_value)}</div>
+      {/if}
+    </div>
   {/each}
 </div>
 
