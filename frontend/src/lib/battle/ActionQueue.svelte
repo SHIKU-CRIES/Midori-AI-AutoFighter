@@ -1,5 +1,5 @@
 <script>
-  import { getCharacterImage } from '../systems/assetLoader.js';
+  import { getCharacterImage, getElementColor } from '../systems/assetLoader.js';
   import { flip } from 'svelte/animate';
 
   export let queue = [];
@@ -11,16 +11,22 @@
       return combatants.find((c) => c.id === id) || { id };
     }
 
-    $: activeIndex = queue.findIndex((e) => !e.bonus);
+    $: displayQueue = queue.filter((e) => {
+      const fighter = findCombatant(e.id);
+      return fighter.hp >= 1;
+    });
+    $: activeIndex = displayQueue.findIndex((e) => !e.bonus);
   </script>
 
 <div class="action-queue" data-testid="action-queue">
-  {#each queue as entry, i (entry.bonus ? `b-${entry.id}-${i}` : entry.id)}
+  {#each displayQueue as entry, i (entry.bonus ? `b-${entry.id}-${i}` : entry.id)}
     {@const fighter = findCombatant(entry.id)}
+    {@const elColor = getElementColor(fighter.element)}
     <div
       class="entry"
       class:active={i === activeIndex}
       class:bonus={entry.bonus}
+      style="--element-color: {elColor}"
       animate:flip={{ duration: reducedMotion ? 0 : 220 }}
     >
       <img src={getCharacterImage(fighter.summon_type || fighter.id)} alt="" class="portrait" />
@@ -39,27 +45,26 @@
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
     justify-content: center;
     align-items: center;
     z-index: 2;
   }
   .entry {
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 64px;
     will-change: transform;
+    border: 2px solid var(--element-color);
   }
-    .entry.active {
-      outline: 2px solid #fff;
-    }
-    .entry.bonus {
-      opacity: 0.6;
-    }
+  .entry.bonus {
+    opacity: 0.6;
+  }
   .portrait {
     width: 100%;
     height: 100%;
     display: block;
+    object-fit: cover;
   }
   .av {
     position: absolute;
@@ -67,5 +72,10 @@
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.6rem;
+    background: rgba(0,0,0,0.35);
+    box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--element-color) 60%, black);
+    border-radius: 6px;
+    padding: 0 6px;
+    color: var(--element-color);
   }
 </style>
