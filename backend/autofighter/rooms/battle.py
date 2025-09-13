@@ -709,7 +709,8 @@ class BattleRoom(Room):
             if not any(m.hp > 0 for m in combat_party.members):
                 break
             # Foes: each living foe takes exactly one action per round
-            for foe_idx, acting_foe in enumerate(foes):
+            # Iterate over a snapshot to avoid mutating while iterating
+            for foe_idx, acting_foe in enumerate(list(foes)):
                 safety = 0
                 while True:
                     safety += 1
@@ -755,8 +756,8 @@ class BattleRoom(Room):
                     # Credit any foes that died from effects applied by foes (e.g., bleed)
                     for f in foes:
                         await _credit_if_dead(f)
-                    _remove_dead_foes()
-                    if not foes:
+                    # Deferring foe removal until after the loop preserves turn order
+                    if all(f.hp <= 0 for f in foes):
                         break
                     if acting_foe.hp <= 0:
                         await registry.trigger("turn_end", acting_foe, party=combat_party.members, foes=foes)
@@ -896,6 +897,7 @@ class BattleRoom(Room):
                     await _pace(action_start)
                     await asyncio.sleep(0.001)
                     break
+            _remove_dead_foes()
             if not foes:
                 break
         # Signal completion as soon as the loop ends to help UIs stop polling
