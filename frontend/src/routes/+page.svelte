@@ -575,11 +575,12 @@
         stalledTicks = 0;
       }
     } catch (err) {
-      // Treat 404 snapshot as transient (e.g., not in battle yet); don't end the run.
-      if (err?.message?.includes('run ended')) {
+      // Treat snapshot errors as transient unless run is confirmed ended.
+      if (err?.status === 404 || String(err?.message || '').toLowerCase().includes('run ended')) {
         handleRunEnd();
         return;
       }
+      console.warn('Battle polling failed:', err?.message || err);
     }
     try {
       if (typeof window !== 'undefined' && (window.afRewardOpen === true || window.afReviewOpen === true)) {
@@ -924,6 +925,7 @@
     try {
       const hasLoot = Boolean((roomData?.loot?.gold || 0) > 0 || (roomData?.loot?.items || []).length > 0);
       if (roomData?.awaiting_loot || hasLoot) {
+        stopBattlePoll();
         try { await acknowledgeLoot(runId); } catch { /* ignore if already acknowledged */ }
       }
     } catch { /* no-op */ }
@@ -1029,7 +1031,14 @@
 
   async function handleLootAcknowledge() {
     if (!runId) return;
-    await acknowledgeLoot(runId);
+    stopBattlePoll();
+    try {
+      await acknowledgeLoot(runId);
+    } catch (e) {
+      console.warn('Loot acknowledgement failed:', e?.message || e);
+      startStatePoll();
+      return;
+    }
     await handleNextRoom();
   }
 

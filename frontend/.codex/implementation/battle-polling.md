@@ -18,18 +18,17 @@ Snapshots reporting `result: 'defeat'` are treated as complete even if an
 `ended` flag is missing. The poller stops immediately and the defeat overlay
 is shown.
 
-Network failures now cause `handleRunEnd` when the backend reports the run has
-ended. `pollBattle` watches for thrown errors whose message contains
-"run ended" or whose status code is `404` and stops polling without queuing
-another cycle. This prevents repeated error overlays once a run is gone.
+Unexpected network errors are logged and retried. `handleRunEnd()` now fires
+only when `pollBattle` or `pollState` receive an error with a `404` status or a
+message containing `"run ended"`; other errors allow the poll to continue.
+`handleLootAcknowledge` and `handleNextRoom` call `stopBattlePoll()` before
+acknowledging loot to prevent lingering timers from racing ahead and flagging
+the run as ended.
 
-The general `pollState` routine uses the same detection. Errors mentioning
-"run ended" or returning a 404 now call `handleRunEnd()` and avoid scheduling
-another poll. All pollers (`pollState`, `pollBattle`, and `pollUIState`) also
-check the overlay flags and refrain from starting or rescheduling while either
-overlay is active. Additionally, UI state polling no longer reschedules itself
-when `uiState.mode === 'menu'` to reduce network traffic while in the main
-menu.
+All pollers (`pollState`, `pollBattle`, and `pollUIState`) also check the
+overlay flags and refrain from starting or rescheduling while either overlay is
+active. Additionally, UI state polling no longer reschedules itself when
+`uiState.mode === 'menu'` to reduce network traffic while in the main menu.
 
 Additionally, ending a run from Settings now immediately sets a global
 `window.afHaltSync = true` flag and clears timers to prevent any further

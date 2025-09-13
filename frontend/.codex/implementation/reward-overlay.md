@@ -8,3 +8,7 @@ Assets are resolved by star folder and id through `rewardLoader.js`.
 Ambient effects from `EnrageIndicator.svelte` continue to render while the
 rewards overlay is shown and fade out gracefully, so the transition from
 combat to rewards remains smooth.
+
+`handleLootAcknowledge()` now stops any active battle polling timers before
+calling the backend so lingering snapshot requests cannot mark the run as ended
+mid‑acknowledgement.
